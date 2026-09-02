@@ -15,37 +15,93 @@
 package org.shanoir.ng.processing.dto.mapper;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.mapstruct.*;
-import org.shanoir.ng.dataset.dto.DatasetWithProcessingsDTO;
-import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
-import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
 
-@Mapper(componentModel = "spring", uses = { DatasetMapper.class })
-@DecoratedWith(DatasetProcessingDecorator.class)
+@Mapper(componentModel = "spring", config = DatasetProcessingMappingConfig.class)
 public interface DatasetProcessingMapper {
 
-    /**
-     * Map a @DatasetMetadata to a @DatasetMetadataDTO.
-     *
-     * @param processing
-     *            dataset.
-     * @return dataset DTO.
-     */
-    DatasetProcessingDTO datasetProcessingToDatasetProcessingDTO(DatasetProcessing processing);
+    ////// Entity to DTO
+
+    @Named("id")
+    default Long processingToLongId(DatasetProcessing processing) {
+        if (processing == null) {
+            return null;
+        }
+        return processing.getId();
+    }
+
+    @Named("id")
+    default List<Long> processingListToLongIds(List<DatasetProcessing> processings) {
+        if (processings == null) {
+            return null;
+        }
+        return processings.stream().filter(Objects::nonNull).map(DatasetProcessing::getId).collect(Collectors.toList());
+    }
+
+    @Named("idOnly")
+    default DatasetProcessingDTO processingToId(DatasetProcessing processing) {
+        if (processing == null) {
+            return null;
+        }
+        DatasetProcessingDTO dto = new DatasetProcessingDTO();
+        dto.setId(processing.getId());
+        return dto;
+    }
+
+    @Named("idOnly")
+    default List<DatasetProcessingDTO> processingListToIds(List<DatasetProcessing> processings) {
+        if (processings == null) {
+            return null;
+        }
+        return processings.stream().filter(Objects::nonNull).map(proc -> {
+            DatasetProcessingDTO dto = new DatasetProcessingDTO();
+            dto.setId(proc.getId());
+            return dto;
+        }).collect(Collectors.toList());
+    }
+
+    //Single entity
 
     /**
-     * Map list of @DatasetProcessing to list of @DatasetProcessingDTO with or without inputs
-     *
-     * @param datasetProcessings processings
-     *            list of dataset processings.
-     * @param withInputs inclusion boolean
-     * @return list of dataset processings DTO.
+     * Some context of usage :
      */
-    List<DatasetProcessingDTO> datasetProcessingsToDatasetProcessingDTOs(List<DatasetProcessing> datasetProcessings, @Context boolean withInputs);
+    @Named("nullRelations")
+    @InheritConfiguration(name = "processingToProcessingDTOWithNullRelationsPrototype")
+    DatasetProcessingDTO processingToProcessingDTOWithNullRelations(DatasetProcessing processing);
 
-    @Mappings({ @Mapping(target = "source", ignore = true), @Mapping(target = "copies", ignore = true) })
-    DatasetWithProcessingsDTO datasetToDatasetWithProcessingsDTO(Dataset dataset);
+    /**
+     * Some context of usage :
+     */
+    @Named("withInputIds")
+    @Mapping(target = "inputDatasets", source = "inputDatasets", qualifiedByName = "id")
+    @Mapping(target = "outputDatasets", expression = "java(null)")
+    DatasetProcessingDTO processingToProcessingDTOWithInputIds(DatasetProcessing processing);
+
+    /**
+     * Some context of usage :
+     */
+    @Named("withOutputIds")
+    @Mapping(target = "inputDatasets", expression = "java(null)")
+    @Mapping(target = "outputDatasets", source = "outputDatasets", qualifiedByName = "id")
+    DatasetProcessingDTO processingToProcessingWithOutputIdsDTO(DatasetProcessing processing);
+
+    /**
+     * Some context of usage :
+     */
+    @Named("idRelations")
+    @InheritConfiguration(name = "processingToProcessingDTOWithIdRelationsPrototype")
+    DatasetProcessingDTO processingToProcessingDTOWithIdRelations(DatasetProcessing processing);
+
+    //Entity list
+
+    /**
+     * Some context of usage :
+     */
+    @IterableMapping(qualifiedByName = "nullRelations")
+    List<DatasetProcessingDTO> processingListToProcessingDTOListWithNullRelations(List<DatasetProcessing> processings);
 }

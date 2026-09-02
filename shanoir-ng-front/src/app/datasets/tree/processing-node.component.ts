@@ -11,18 +11,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
 
-import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
-import { TreeService } from 'src/app/studies/study/tree.service';
+import { TreeNodeAbstractComponent } from '@app/shared/components/tree/tree-node.abstract.component';
+import { TreeService } from '@app/studies/study/tree.service';
 
+import { DropdownMenuComponent } from '../../shared/components/dropdown-menu/dropdown-menu.component';
+import { MenuItemComponent } from '../../shared/components/dropdown-menu/menu-item/menu-item.component';
+import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
 import { DatasetNode, ProcessingNode, UNLOADED } from '../../tree/tree.model';
 import { DatasetProcessing } from '../shared/dataset-processing.model';
 import { DatasetProcessingService } from "../shared/dataset-processing.service";
-import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
-import { DropdownMenuComponent } from '../../shared/components/dropdown-menu/dropdown-menu.component';
-import { MenuItemComponent } from '../../shared/components/dropdown-menu/menu-item/menu-item.component';
 
 import { SimpleDatasetNodeComponent } from './simple-dataset-node.component';
 
@@ -30,6 +30,7 @@ import { SimpleDatasetNodeComponent } from './simple-dataset-node.component';
 @Component({
     selector: 'processing-node',
     templateUrl: 'processing-node.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [TreeNodeComponent, DropdownMenuComponent, MenuItemComponent, SimpleDatasetNodeComponent]
 })
 

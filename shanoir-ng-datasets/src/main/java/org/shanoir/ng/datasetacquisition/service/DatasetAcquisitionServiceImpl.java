@@ -15,15 +15,7 @@
 package org.shanoir.ng.datasetacquisition.service;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -36,8 +28,6 @@ import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository
 import org.shanoir.ng.dicom.web.SeriesInstanceUIDHandler;
 import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
 import org.shanoir.ng.dicom.web.service.DICOMWebService;
-import org.shanoir.ng.examination.model.Examination;
-import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
@@ -54,6 +44,7 @@ import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.util.Pair;
@@ -70,9 +61,6 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
     private DatasetAcquisitionRepository repository;
 
     @Autowired
-    private ExaminationRepository examRepository;
-
-    @Autowired
     private SecurityService securityService;
 
     @Autowired
@@ -82,6 +70,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
     private SolrService solrService;
 
     @Autowired
+    @Lazy
     private DatasetService datasetService;
 
     @Autowired
@@ -119,16 +108,6 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
     @Override
     public List<DatasetAcquisition> findByDatasetId(Long[] datasetIds) {
         return repository.findDistinctByDatasetsIdIn(datasetIds);
-    }
-
-    @Override
-    public List<DatasetAcquisition> findByExamination(Long examinationId) {
-        Optional<Examination> exam = examRepository.findByIdWithEagerAcquisitions(examinationId);
-        if (exam.isPresent()) {
-            return exam.get().getDatasetAcquisitions();
-        } else {
-            return Collections.emptyList();
-        }
     }
 
     @Override
@@ -170,6 +149,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
     @Override
     public DatasetAcquisition findById(Long id) {
         return repository.findById(id).orElse(null);
+
     }
 
     @Override
@@ -238,7 +218,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
         return acq;
     }
 
-    @Override
+    @Transactional
     public Iterable<DatasetAcquisition> update(List<DatasetAcquisition> entities) {
         List<Long> ids = new ArrayList<>();
         for (DatasetAcquisition acq : entities) {
@@ -324,7 +304,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
     @Override
     @Transactional
     public void deleteById(Long id, ShanoirEvent event) throws ShanoirException, SolrServerException, IOException, RestServiceException {
-        final DatasetAcquisition acquisition = repository.findById(id).orElse(null);
+        final DatasetAcquisition acquisition = repository.findByIdWithDatasets(id).orElse(null);
         if (acquisition == null) {
             throw new EntityNotFoundException("Cannot find entity with id = " + id);
         }
@@ -354,7 +334,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
      * @throws RestServiceException
      */
     public void deleteByIdCascade(Long id, ShanoirEvent event) throws ShanoirException, SolrServerException, IOException, RestServiceException {
-        final DatasetAcquisition entity = repository.findById(id).orElse(null);
+        final DatasetAcquisition entity = repository.findByIdWithDatasets(id).orElse(null);
         if (entity == null) {
             throw new EntityNotFoundException("Cannot find entity with id = " + id);
         }

@@ -29,12 +29,10 @@ import org.dcm4che3.data.Tag;
 import org.dcm4che3.io.DicomInputStream;
 import org.shanoir.ng.anonymization.uid.generation.UIDGeneration;
 import org.shanoir.ng.download.AcquisitionAttributes;
-import org.shanoir.ng.download.ExaminationAttributes;
 import org.shanoir.ng.importer.dto.Dataset;
 import org.shanoir.ng.importer.dto.DatasetFile;
 import org.shanoir.ng.importer.dto.ExpressionFormat;
 import org.shanoir.ng.importer.dto.Serie;
-import org.shanoir.ng.importer.dto.Study;
 import org.shanoir.ng.shared.dateTime.DateTimeUtils;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.slf4j.Logger;
@@ -44,7 +42,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 @Service
-public class DicomProcessing {
+public final class DicomProcessing {
 
     private static final Logger LOG = LoggerFactory.getLogger(DicomProcessing.class);
 
@@ -52,6 +50,8 @@ public class DicomProcessing {
 
     @Autowired
     private static WADOURLHandler wadoURLHandler;
+
+    private DicomProcessing() { }
 
     public static int countUniqueInstances(Serie serie, Boolean isEnhancedMR) throws IOException {
         Set<String> instanceUIDs = new HashSet<>();
@@ -129,26 +129,6 @@ public class DicomProcessing {
             }
             return datasetAttributes;
         }
-    }
-
-    public ExaminationAttributes<String> getDicomExaminationAttributes(Study study, Boolean isEnhanced) throws ShanoirException {
-        ExaminationAttributes<String> attributes = new ExaminationAttributes<>(wadoURLHandler);
-        if (study != null) {
-            for (Serie serie : study.getSeries()) {
-                attributes.addAcquisitionAttributes(serie.getSeriesInstanceUID(), getDicomAcquisitionAttributes(serie));
-            }
-        }
-        return attributes;
-    }
-
-    public static ExaminationAttributes<String> getDicomExaminationAttributes(Study study) throws ShanoirException {
-        ExaminationAttributes<String> attributes = new ExaminationAttributes<>(wadoURLHandler);
-        if (study != null) {
-            for (Serie serie : study.getSeries()) {
-                attributes.addAcquisitionAttributes(serie.getSeriesInstanceUID(), getDicomAcquisitionAttributes(serie));
-            }
-        }
-        return attributes;
     }
 
     public static AcquisitionAttributes<String> getDicomAcquisitionAttributes(Serie serie) throws ShanoirException {

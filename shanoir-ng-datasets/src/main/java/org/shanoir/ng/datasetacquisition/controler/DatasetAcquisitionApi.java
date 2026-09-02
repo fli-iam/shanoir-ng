@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
-import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDatasetsDTO;
+import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionWithDatasetsDTO;
 import org.shanoir.ng.datasetacquisition.dto.ExaminationDatasetAcquisitionDTO;
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.shared.exception.RestServiceException;
@@ -72,7 +72,7 @@ public interface DatasetAcquisitionApi {
     @RequestMapping(value = "/datasetacquisition/byStudyCard/{studyCardId}", produces = {"application/json"}, method = RequestMethod.GET)
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetAcquisitionDTOList(returnObject.getBody(), 'CAN_SEE_ALL')")
-    ResponseEntity<List<DatasetAcquisitionDatasetsDTO>> findByStudyCard(
+    ResponseEntity<List<DatasetAcquisitionWithDatasetsDTO>> findByStudyCard(
             @Parameter(description = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId);
 
     @Operation(summary = "", description = "Deletes a datasetAcquisition")
@@ -148,7 +148,7 @@ public interface DatasetAcquisitionApi {
     @RequestMapping(value = "/datasetacquisition/byDatasetIds", produces = {"application/json"}, method = RequestMethod.POST)
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetAcquisitionDTOList(returnObject.getBody(), 'CAN_SEE_ALL')")
-    ResponseEntity<List<DatasetAcquisitionDatasetsDTO>> findDatasetAcquisitionByDatasetIds(
+    ResponseEntity<List<DatasetAcquisitionWithDatasetsDTO>> findDatasetAcquisitionByDatasetIds(
             @Parameter(description = "ids of the datasets", required = true) @RequestBody Long[] datasetIds);
 
     @Operation(summary = "", description = "Returns the dataset acquisitions that the deletion of the given datasets would leave empty, and that may then be removed")

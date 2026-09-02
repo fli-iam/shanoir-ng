@@ -13,13 +13,13 @@
  */
 
 import { NgClass } from '@angular/common';
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 
-import { ExaminationComponent } from 'src/app/examinations/examination/examination.component';
-import { DatepickerComponent } from 'src/app/shared/date-picker/date-picker.component';
-import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
+import { ExaminationComponent } from '@app/examinations/examination/examination.component';
+import { DatepickerComponent } from '@app/shared/date-picker/date-picker.component';
+import { MassDownloadService } from '@app/shared/mass-download/mass-download.service';
 
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
 import { CenterService } from '../../../centers/shared/center.service';
@@ -42,12 +42,12 @@ import { ExtraDataService } from '../../extraData/extraData/shared/extradata.ser
 import { PhysiologicalDataFormComponent } from '../../extraData/physiologicalData/add/physiologicalData-form.component';
 import { PhysiologicalDataFile } from '../../extraData/physiologicalData/shared/physiologicalDataFile.model';
 import * as PreclinicalUtils from '../../utils/preclinical.utils';
-import { AnimalExaminationService } from '../shared/animal-examination.service';
 
 @Component({
     selector: 'examination-preclinical-form',
     templateUrl: 'animal-examination-form.component.html',
     styleUrls: ['animal-examination.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [FormsModule, ReactiveFormsModule, NgClass, FormFooterComponent, RouterLink, SelectBoxComponent, DatepickerComponent, ExaminationAnestheticFormComponent, PhysiologicalDataFormComponent, BloodGasDataFormComponent, LocalDateFormatPipe]
 })
 export class AnimalExaminationFormComponent extends ExaminationComponent {
@@ -70,7 +70,6 @@ export class AnimalExaminationFormComponent extends ExaminationComponent {
             studyRightsService: StudyRightsService,
             breadcrumbsService: BreadcrumbsService,
             downloadService: MassDownloadService,
-            private animalExaminationService: AnimalExaminationService,
             private examAnestheticService: ExaminationAnestheticService,
             private extradatasService: ExtraDataService,
             private animalSubjectService: AnimalSubjectService,

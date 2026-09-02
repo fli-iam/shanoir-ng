@@ -17,14 +17,18 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <form animate.leave="slide-up" class="access-request">
         <ul>
             <li>
+                <label>Status</label>
+                <span class="right-col status">{{ request.status | accessRequestStatusLabel }}</span>
+            </li>
+            <li>
                 <label i18n="access request|user label@@user">User</label>
                 <span class="right-col">
                     @if (isAdmin()) {
-                        <a [routerLink]="['/user/details/', request.user.id]">
-                            {{ request.user.username }}
+                        <a [routerLink]="['/user/details/', request.user?.id]">
+                            {{ request.user?.username }}
                         </a>
                     } @else {
-                        <span>{{ request.user.username }}</span>
+                        <span>{{ request.user?.username }}</span>
                     }
                 </span>
             </li>
@@ -40,6 +44,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <label i18n="access request|motivation label@@motivation" class="required-label">Motivation</label>
                 <span class="right-col">
                     {{ request.motivation }}
+                </span>
+            </li>
+            <li>
+                <label class="required-label">Expiration Date</label>
+                <span class="right-col">
+                    <datepicker [(ngModel)]="request.expirationDate" required [ngModelOptions]="{ standalone: true }"></datepicker>
                 </span>
             </li>
         </ul>
@@ -81,13 +91,21 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     }
                 </span>
             </li>
-            @if (request.user.accountRequestInfo?.studyName) {
+            @if (request.studyName) {
                 <li>
                     <label i18n="access request|study label@@study">Study</label>
                     <span class="right-col">
                         <a [routerLink]="['/study/details/', request.studyId]">
-                            {{ request.user.accountRequestInfo.studyName }}
+                            {{ request.studyName }}
                         </a>
+                    </span>
+                </li>
+            }
+            @if (request.expirationDate) {
+                <li>
+                    <label>Expiration date for this study</label>
+                    <span class="right-col">
+                        <datepicker [(ngModel)]="request.expirationDate" [ngModelOptions]="{ standalone: true }"></datepicker>
                     </span>
                 </li>
             }

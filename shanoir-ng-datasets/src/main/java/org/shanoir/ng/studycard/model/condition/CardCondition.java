@@ -14,8 +14,10 @@
 
 package org.shanoir.ng.studycard.model.condition;
 
+import java.math.BigDecimal;
 import java.util.List;
 
+import jakarta.persistence.*;
 import org.hibernate.annotations.Check;
 import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
@@ -28,13 +30,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.DiscriminatorColumn;
-import jakarta.persistence.DiscriminatorType;
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Inheritance;
-import jakarta.persistence.InheritanceType;
 import jakarta.validation.constraints.NotNull;
 
 @Entity
@@ -58,7 +53,7 @@ public abstract class CardCondition extends AbstractEntity {
 
     public static final String LIST_SEPERATOR = ",";
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @Column(name = "value")
     private List<String> values;
 
@@ -116,6 +111,42 @@ public abstract class CardCondition extends AbstractEntity {
         } else {
             throw new IllegalArgumentException("Cannot use this method for non-numerical operations (" + operation + ")");
         }
+    }
+
+    private static final List<Operation> NEGATIVE_NUMERICAL_OPERATIONS = List.of(Operation.NOT_EQUALS);
+
+    /**
+     * Same combinator semantics as {@link #textualCompare(Operation, String)}, but for the
+     * numerical operators (EQUALS, NOT_EQUALS, SMALLER_THAN, BIGGER_THAN): positive operators
+     * (EQUALS, SMALLER_THAN, BIGGER_THAN) succeed if original matches ANY (= at least one)
+     * candidate (OR), while NOT_EQUALS succeeds only if original matches NONE of the candidates.
+     */
+    protected boolean numericalCompare(Operation operation, String original) {
+        BigDecimal originalValue;
+        try {
+            originalValue = new BigDecimal(original);
+        } catch (NumberFormatException e) {
+            LOG.error("Error in studycard processing: field value \"{}\" is not numerical.", original);
+            return false;
+        }
+        boolean negative = NEGATIVE_NUMERICAL_OPERATIONS.contains(operation);
+        for (String candidate : getValues()) {
+            boolean singleMatch;
+            try {
+                singleMatch = numericalCompare(operation, originalValue.compareTo(new BigDecimal(candidate)));
+            } catch (NumberFormatException e) {
+                LOG.error("Error in studycard processing: condition value \"{}\" is not numerical.", candidate);
+                singleMatch = false;
+            }
+            if (negative) {
+                if (!singleMatch) {
+                    return false;
+                }
+            } else if (singleMatch) {
+                return true; // OR: any positive match is enough
+            }
+        }
+        return negative;
     }
 
     private static final List<Operation> NEGATIVE_TEXTUAL_OPERATIONS = List.of(

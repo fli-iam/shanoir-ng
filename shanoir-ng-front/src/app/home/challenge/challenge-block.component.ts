@@ -12,25 +12,26 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
-import { TaskState } from 'src/app/async-tasks/task.model';
+import { TaskState } from '@app/async-tasks/task.model';
+import { StudyLight } from '@app/studies/shared/study.dto';
 
-import { Study } from '../../studies/shared/study.model';
-import { StudyService } from '../../studies/shared/study.service';
 import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
+import { StudyService } from '../../studies/shared/study.service';
 
 @Component({
     selector: 'challenge-block',
     templateUrl: 'challenge-block.component.html',
     styleUrls: ['challenge-block.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [LoadingBarComponent, RouterLink]
 })
 
 export class ChallengeBlockComponent {
 
-    @Input() challengeStudy: Study;
+    @Input() challengeStudy: StudyLight;
     protected downloadState: TaskState = new TaskState();
 
     constructor(

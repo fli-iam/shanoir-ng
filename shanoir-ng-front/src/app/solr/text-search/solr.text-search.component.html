@@ -17,6 +17,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         type="text"
         placeholder="search in Shanoir ..."
         [(ngModel)]="searchText"
+        [ngModelOptions]="{ standalone: true }"
         (ngModelChange)="inputTextChange()"
         (change)="onChangeSearch()"
         (keyup)="type.emit()"
