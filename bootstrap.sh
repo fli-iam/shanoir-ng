@@ -32,6 +32,7 @@ Options:
 --no-build	skip the build stage
 --no-keycloak do not run Keycloak (used if Keycloak is external)
 --no-dcm4chee do not run dcm4chee (used if dcm4chee is external)
+--no-infra do not run infra-service (solr, rabbitmq, bids-validator)
 --native	build & run the microservices as a native image (paketo/buildpacks),
 		via the docker-compose-dev-native.yml overlay, instead of the regular JVM jar.
 		The regular (non-native) JVM images are still built and used once
@@ -79,6 +80,7 @@ build=1
 deploy=1
 keycloak=1
 dcm4chee=1
+infra=1
 clean=
 force=
 native=
@@ -90,6 +92,7 @@ while [ $# -ne 0 ] ; do
 		--no-build)	build=		;;
 		--no-keycloak)	keycloak=		;;
 		--no-dcm4chee)	dcm4chee=		;;
+		--no-infra)  infra=		;;
 		--no-deploy)	deploy=		;;
 		--native)	native=1	;;
 		*)		die "unknown option '$1'"
@@ -124,37 +127,9 @@ if [ -n "$build" ] ; then
 		${build_sql_init_mode:+-e SPRING_SQL_INIT_MODE="$build_sql_init_mode"} \
 		-w /src "$DEV_IMG" sh -c 'cd shanoir-ng-parent && mvn clean install -DskipTests'
 
-  # Always build base images, users included
+  # Always build base images
 	step "build all base docker images"
   docker compose -f docker-compose-dev.yml build
-
-	# Build the native images (paketo/buildpacks), if requested;
-	# build-image requires a Docker engine to run and produce the native image.
-	# Mounting the host-docker inside the image resulted in permissions denied
-	# or clean cache problems with the re-execution of the script, so we do it locally
-	if [ -n "$native" ]; then
-    step "Compile Shanoir native images locally"
-    command -v mvn >/dev/null 2>&1 \
-        || die "mvn not found on PATH: --native builds the 'users' native image locally (see comment above); install a local Maven + matching JDK, or drop --native"
-    m2repo="$PWD/tmp/home/.m2/repository"
-    MAVEN_OPTS="-Dmaven.repo.local=$m2repo" \
-        mvn -f ./shanoir-ng-users/pom.xml \
-        -Pnative spring-boot:build-image \
-        -DskipTests
-	fi
-
-	# Build the (remaining) docker images
-	#
-	# When --native is set, the merged config points 'users' at the
-	# natively-built image rather than a build context, so `docker compose
-	# build` has nothing to do for it there -- it's built separately below.
-	# We additionally still build the regular (non-native) JVM images
-	# via compose_files_base, because it's needed to run the
-	# SHANOIR_MIGRATION=init oneshot step (see the deploy loop below): the
-	# native image has no /bin/entrypoint wrapper to do that itself.
-	if [ -n "$native" ] ; then
-		docker compose -f docker-compose-dev.yml -f docker-compose-dev-native.yml build users-native
-	fi
 
 fi
 if [ -n "$deploy" ] ; then
@@ -218,26 +193,39 @@ if [ -n "$deploy" ] ; then
 	fi
 	
 	# 4. infrastructure services
-	step "start: infrastructure services"
-	for infra_ms in rabbitmq solr
-	do
-		step "start: $infra_ms infrastructure microservice"
-		docker compose -f docker-compose-dev.yml up -d "$infra_ms"
-	done
+	if [ -n "$infra" ] ; then
+	  step "start: infrastructure services"
+	  for infra_ms in rabbitmq solr bids-validator
+	  do
+		  step "start: $infra_ms infrastructure microservice"
+		  docker compose -f docker-compose-dev.yml up -d "$infra_ms"
+	  done
+  fi
 	
 	# 5. Shanoir microservices
 	step "start: shanoir microservices"
 	for ms in users studies datasets import preclinical nifti-conversion
 	do
-		if [ -n "$native" ] && [ "$ms" = "users" ] ; then
-			step "init: $ms microservice (via non-native image)"
-			docker compose -f docker-compose-dev.yml run --rm -e SHANOIR_MIGRATION=init "$ms"
-			step "start: $ms microservice (native)"
-			docker compose -f docker-compose-dev.yml -f docker-compose-dev-native.yml up -d users-native
-			continue
-		fi
 		step "init: $ms microservice"
 		docker compose -f docker-compose-dev.yml run --rm -e SHANOIR_MIGRATION=init "$ms"
+		if [ -n "$native" ] && [ "$ms" = "users" ] ; then
+			# Build the native images (paketo/buildpacks), if requested;
+	    # build-image requires a Docker engine to run and produce the native image.
+	    # Mounting the host-docker inside the image resulted in permissions denied
+	    # or clean cache problems with the re-execution of the script, so we do it locally
+      step "Compile Shanoir native images locally"
+      command -v mvn >/dev/null 2>&1 \
+          || die "mvn not found on PATH: --native builds the 'users' native image locally (see comment above); install a local Maven + matching JDK, or drop --native"
+        m2repo="$PWD/tmp/home/.m2/repository"
+        MAVEN_OPTS="-Dmaven.repo.local=$m2repo" \
+            mvn -f ./shanoir-ng-users/pom.xml \
+            -Pnative spring-boot:build-image \
+            -DskipTests
+			docker compose -f docker-compose-dev.yml -f docker-compose-dev-native.yml build users
+			step "start: $ms microservice (native)"
+			docker compose -f docker-compose-dev.yml -f docker-compose-dev-native.yml up -d users
+			continue
+		fi
 		step "start: $ms microservice"
 		docker compose -f docker-compose-dev.yml up -d "$ms"
 	done
