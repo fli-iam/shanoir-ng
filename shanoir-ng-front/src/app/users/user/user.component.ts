@@ -16,7 +16,7 @@ import {
     AbstractControl, FormsModule, ReactiveFormsModule, UntypedFormControl, UntypedFormGroup, ValidationErrors,
     ValidatorFn, Validators
 } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 
 import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
 import { StudyUser } from '@app/studies/shared/study-user.model';
@@ -42,7 +42,7 @@ import { UserService } from '../shared/user.service';
     templateUrl: 'user.component.html',
     styleUrls: ['user.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, DatepickerComponent, CheckboxComponent, AccountRequestInfoComponent, LocalDateFormatPipe]
+    imports: [FormsModule, ReactiveFormsModule, RouterLink, FormFooterComponent, DatepickerComponent, CheckboxComponent, AccountRequestInfoComponent, LocalDateFormatPipe]
 })
 
 export class UserComponent extends EntityComponent<User> {
