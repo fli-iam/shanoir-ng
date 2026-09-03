@@ -20,6 +20,8 @@ import org.shanoir.ng.shared.email.EmailDatasetsImported;
 import org.shanoir.ng.shared.email.EmailStudy;
 import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
 import org.shanoir.ng.shared.email.StudyInvitationEmail;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.study.rights.command.StudyUserCommand;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -36,16 +38,18 @@ import org.springframework.context.annotation.ImportRuntimeHints;
 
 @Configuration
 @RegisterReflectionForBinding({
+        ContentTypeDelegatingMessageConverter.class,
         EmailBase.class,
         EmailDatasetsImported.class,
         EmailDatasetImportFailed.class,
         EmailStudy.class,
         EmailStudyUsersAdded.class,
-        StudyInvitationEmail.class,
+        JacksonJsonMessageConverter.class,
         RabbitTemplate.class,
+        ShanoirEvent.class,
         SimpleMessageConverter.class,
-        ContentTypeDelegatingMessageConverter.class,
-        JacksonJsonMessageConverter.class
+        StudyInvitationEmail.class,
+        StudyUserCommand.class
 })
 @ImportRuntimeHints(NativeImageHintsConfiguration.RabbitMQHints.class)
 public class NativeImageHintsConfiguration {

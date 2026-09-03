@@ -1,12 +1,9 @@
 [
     {
-        "name": "org.springframework.hateoas.RepresentationModel"
+        "name": "org.shanoir.ng.shared.hateoas.Link"
     },
     {
-        "name": "org.springframework.hateoas.Link"
-    },
-    {
-        "name": "org.springframework.hateoas.Links"
+        "name": "org.shanoir.ng.shared.hateoas.Links"
     },
     {
         "name": "java.util.Date"
