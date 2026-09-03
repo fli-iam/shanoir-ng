@@ -99,7 +99,15 @@ public class RabbitMQUserService {
                 StudyUserInterface studyUser = command.getStudyUser();
                 if (studyUser.getExpirationDate() != null) {
                     User user = userService.findById(studyUser.getUserId());
-                    if (user != null && studyUser.getExpirationDate().isAfter(user.getExpirationDate())) {
+                    if (user == null) {
+                        LOG.error("User in StudyUserCommand(s) not found.");
+                        continue;
+                    }
+                    if (user.getExpirationDate() == null) {
+                        LOG.error("User found with ExpirationDate == null.");
+                        continue;
+                    }
+                    if (studyUser.getExpirationDate().isAfter(user.getExpirationDate())) {
                         user.setExpirationDate(studyUser.getExpirationDate());
                         try {
                             userService.update(user);
