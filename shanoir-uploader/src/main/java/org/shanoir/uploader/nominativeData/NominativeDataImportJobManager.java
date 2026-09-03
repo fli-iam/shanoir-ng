@@ -16,8 +16,6 @@ package org.shanoir.uploader.nominativeData;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
@@ -96,22 +94,13 @@ public class NominativeDataImportJobManager {
         }
     }
 
-    /**
-     * Writes the import job to a temp file next to the target, then atomically moves it into place.
-     * Made to avoid parsing failure on the next readImportJob() call if an event (crash, forced kill, sleep/shutdown)
-     * left it truncated/corrupted.
-     */
     public void writeImportJob(ImportJobBase importJob) {
         ReentrantLock lock = getLock();
         lock.lock();
-        File tmpFile = new File(this.nominativeDataJobFile.getParentFile(), this.nominativeDataJobFile.getName() + ".tmp");
         try {
-            objectMapper.writerWithDefaultPrettyPrinter().writeValue(tmpFile, importJob);
-            Files.move(tmpFile.toPath(), this.nominativeDataJobFile.toPath(),
-                    StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+            objectMapper.writerWithDefaultPrettyPrinter().writeValue(this.nominativeDataJobFile, importJob);
         } catch (IOException e) {
             LOG.error("Error during import-job.json writing: {}", e.getMessage(), e);
-            tmpFile.delete();
         } finally {
             lock.unlock();
         }
