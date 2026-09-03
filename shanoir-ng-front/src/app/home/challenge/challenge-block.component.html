@@ -13,7 +13,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 @if (challengeStudy) {
-    <table>
+    <table class="link" [routerLink]="'/study/details/' + challengeStudy.id">
         <tr>
             <td class="left-cell">
                 <div class="block-title">
@@ -33,13 +33,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     </div>
                     @for (filePath of challengeStudy['protocolFilePaths']; track filePath) {
                         <li>
-                            <i class="fas fa-download" (click)="downloadFile(filePath)"></i>
-                            <span (click)="downloadFile(filePath)">{{ filePath }}</span>
+                            <i class="fas fa-download" (click)="$event.stopPropagation(); downloadFile(filePath)"></i>
+                            <span (click)="$event.stopPropagation(); downloadFile(filePath)">{{ filePath }}</span>
                         </li>
                     }
                     <li class="study">
-                        <i class="fa-regular fa-folder-open" [routerLink]="'/study/details/' + challengeStudy.id"></i>
-                        <span [routerLink]="'/study/details/' + challengeStudy.id">Explore the study</span>
+                        <i class="fa-regular fa-folder-open" [routerLink]="'/study/details/' + challengeStudy.id" (click)="$event.stopPropagation()"></i>
+                        <span [routerLink]="'/study/details/' + challengeStudy.id" (click)="$event.stopPropagation()">Explore the study</span>
                     </li>
                 </ul>
             </td>
