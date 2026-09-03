@@ -66,6 +66,7 @@ export class Study extends Entity {
     @Field() sponsor: string = null;
     @Field() principalInvestigator: string = null;
     @Field() scientificAdvisor: string = null;
+    @Field() subjectNamePattern: string = null;
     accessRequestedByCurrentUser: boolean = false;
     locked: boolean = false; // current user has no access
 

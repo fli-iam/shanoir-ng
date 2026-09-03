@@ -43,6 +43,7 @@ import { SubjectService } from '../../subjects/shared/subject.service';
 import { User } from '../../users/shared/user.model';
 import { UserService } from '../../users/shared/user.service';
 import { capitalsAndUnderscoresToDisplayable } from '../../utils/app.utils';
+import { escapeRegex, matchPatternSuffix, splitTopLevelAlternation, unescapeRegex } from '../../utils/regex-example.util';
 import { SuperPromise } from "../../utils/super-promise";
 import { StudyCenter } from '../shared/study-center.model';
 import { StudyUserRight } from '../shared/study-user-right.enum';
@@ -102,6 +103,166 @@ export class StudyComponent extends EntityComponent<Study> {
     protected userExpiration: Date;
     protected userExpirationColor: string;
     public openPrefix: boolean = false;
+    public useSubjectNamePattern: boolean = false;
+    public namePrefixOption: string = 'study_name';
+    public customNamePrefixes: string[] = [''];
+    public separator: string = '-';
+    public idLength: number = 4;
+    public idType: 'string' | 'numeric' = 'string';
+
+    addCustomNamePrefix() {
+        this.customNamePrefixes.push('');
+        this.onPatternFieldChange();
+    }
+
+    removeCustomNamePrefix(index: number) {
+        this.customNamePrefixes.splice(index, 1);
+        this.onPatternFieldChange();
+    }
+
+    /**
+     * Keeps study.subjectNamePattern (the regex actually persisted) in sync with the
+     * pattern-builder UI fields. Called from every control in the "Subject Name Pattern"
+     * fieldset on change. Those fields modify study.subjectNamePattern directly, 
+     * the "subjectNamePattern" control has to be updated and marked dirty by hand here, 
+     * otherwise the reactive form never notices the change and the  Update button stays disabled.
+     */
+    onPatternFieldChange() {
+        if (!this.study) return;
+        this.study.subjectNamePattern = this.useSubjectNamePattern ? this.buildSubjectNamePatternRegex() : null;
+        const control = this.form?.get('subjectNamePattern');
+        if (control) {
+            control.setValue(this.study.subjectNamePattern);
+            control.markAsDirty();
+            control.updateValueAndValidity();
+        }
+    }
+
+    /**
+     * Reconstructs the pattern-builder fields (namePrefixOption, customNamePrefixes, separator,
+     * idLength, idType) from a persisted subjectNamePattern regex, so the "Subject Name Pattern"
+     * fieldset reflects what's actually saved instead of resetting to its default values every
+     * time the study entity is (re)loaded (e.g. right after Update). The center-prefix segment
+     * doesn't need decomposing: it's already re-derived live from study.studyCenterList by
+     * buildCenterPrefixSegment(), so it's only stripped off here, not parsed.
+     */
+    private parseSubjectNamePatternIntoFields(pattern: string): void {
+        this.namePrefixOption = 'study_name';
+        this.customNamePrefixes = [''];
+        this.separator = '-';
+        this.idLength = 4;
+        this.idType = 'string';
+        if (!pattern) return;
+
+        const suffixMatch = matchPatternSuffix(pattern);
+        if (!suffixMatch) return;
+
+        this.separator = suffixMatch.separator;
+        this.idType = /[A-Za-z]/.test(suffixMatch.charClass) ? 'string' : 'numeric';
+        this.idLength = suffixMatch.length || 4;
+
+        // fullMatch.length is used to know how many characters to remove
+        // to isolate the prefix + center prefix (if exists)
+        let front = pattern.slice(1, pattern.length - suffixMatch.fullMatch.length);
+        const expectedCenterSegment = this.buildCenterPrefixSegment();
+        if (expectedCenterSegment && front.endsWith(expectedCenterSegment)) {
+            front = front.slice(0, front.length - expectedCenterSegment.length);
+        }
+
+        if (front.startsWith('(') && front.endsWith(')')) {
+            const alternatives = splitTopLevelAlternation(front.slice(1, -1)).map(a => unescapeRegex(a));
+            this.namePrefixOption = 'custom_name';
+            this.customNamePrefixes = alternatives.length ? alternatives : [''];
+        } else {
+            const literal = unescapeRegex(front);
+            if (literal && literal !== this.study?.name) {
+                this.namePrefixOption = 'custom_name';
+                this.customNamePrefixes = [literal];
+            }
+        }
+    }
+
+    onIdLengthChange(value: string) {
+        this.idLength = +value;
+        this.onPatternFieldChange();
+    }
+
+    /**
+     * Distinct, non-empty "Subject prefix" values configured per-center in the Centers tab
+     * (StudyCenter.subjectNamePrefix). When at least one exists, it's inserted into the
+     * subject name pattern between the "Subject name prefix" and the identifier.
+     */
+    private getDistinctCenterPrefixes(): string[] {
+        const prefixes = (this.study?.studyCenterList ?? [])
+            .map(studyCenter => studyCenter.subjectNamePrefix)
+            .filter(prefix => prefix?.length > 0);
+        return Array.from(new Set(prefixes));
+    }
+
+    /**
+     * The "(separator + centerPrefix)" segment of the pattern. Made optional as a whole
+     * when at least one center has no prefix configured yet, 
+     * so subjects for those centers aren't blocked - and so we never end up
+     * with a duplicated separator when the center prefix is skipped.
+     */
+    private buildCenterPrefixSegment(): string {
+        const centerPrefixes = this.getDistinctCenterPrefixes();
+        if (!centerPrefixes.length) return '';
+        const someCenterHasNoPrefix = this.study.studyCenterList.some(studyCenter => !studyCenter.subjectNamePrefix?.length);
+        const alternation = '(' + centerPrefixes.map(prefix => escapeRegex(prefix)).join('|') + ')';
+        const unit = escapeRegex(this.separator) + alternation;
+        return someCenterHasNoPrefix ? '(' + unit + ')?' : unit;
+    }
+
+    private buildSubjectNamePatternRegex(): string {
+        const prefixes = this.namePrefixOption == 'custom_name'
+            ? this.customNamePrefixes.filter(prefix => prefix?.length > 0)
+            : [this.study?.name];
+        if (!prefixes.length) return null;
+        const escapedPrefixes = prefixes.map(prefix => escapeRegex(prefix));
+        const prefixPart = escapedPrefixes.length == 1 ? escapedPrefixes[0] : '(' + escapedPrefixes.join('|') + ')';
+        const charClass = this.idType == 'numeric' ? '[0-9]' : '[A-Za-z0-9]';
+        return '^' + prefixPart + this.buildCenterPrefixSegment() + escapeRegex(this.separator) + charClass + '{' + this.idLength + '}$';
+    }
+
+    /**
+     * The center prefix example values used in the preview, picked once at random and kept
+     * stable across re-renders. Re-rolled only if the previous pick is no longer a valid option
+     * (e.g if removed).
+     */
+    private previewCenterPrefix: string = null;
+
+    private getPreviewCenterPrefix(centerPrefixes: string[]): string {
+        if (!centerPrefixes.length) {
+            this.previewCenterPrefix = null;
+        } else if (!this.previewCenterPrefix || !centerPrefixes.includes(this.previewCenterPrefix)) {
+            this.previewCenterPrefix = centerPrefixes[Math.floor(Math.random() * centerPrefixes.length)];
+        }
+        return this.previewCenterPrefix;
+    }
+
+    /**
+     * The "Subject name prefix" value currently in effect: the study name, or (if "Custom
+     * name(s)" is selected) the first configured custom prefix. Shared between the pattern
+     * preview and the Centers tab's per-center prefix preview, so both stay consistent.
+     */
+    get exampleSubjectNamePrefix(): string {
+        if (this.namePrefixOption == 'custom_name') {
+            const prefixes = this.customNamePrefixes.filter(prefix => prefix?.length > 0);
+            return prefixes[0] || 'CustomPrefix';
+        }
+        return this.study?.name || 'StudyName';
+    }
+
+    get subjectNamePatternPreview(): string {
+        const examplePrefix = this.exampleSubjectNamePrefix;
+        const sampleChars = this.idType == 'numeric' ? '84271937' : 'A8f2K5qZ';
+        const sample = sampleChars.substring(0, this.idLength).padEnd(this.idLength, this.idType == 'numeric' ? '0' : 'x');
+        const centerPrefixes = this.getDistinctCenterPrefixes();
+        const previewCenterPrefix = this.getPreviewCenterPrefix(centerPrefixes);
+        const centerPrefixExample = previewCenterPrefix ? this.separator + previewCenterPrefix : '';
+        return examplePrefix + centerPrefixExample + this.separator + sample;
+    }
 
     centerOptions: Option<IdName>[];
     profileOptions: Option<Profile>[];
@@ -162,6 +323,8 @@ export class StudyComponent extends EntityComponent<Study> {
     public set entity(study: Study) {
         super.entity = study;
         this.updateSubjectTagsInUse();
+        this.useSubjectNamePattern = !!study?.subjectNamePattern;
+        this.parseSubjectNamePatternIntoFields(study?.subjectNamePattern);
         this.computeExpirationDate(study);
     }
 
@@ -308,7 +471,8 @@ export class StudyComponent extends EntityComponent<Study> {
             'inclusionRateUnit': [this.study.inclusionRateUnit],
             'sponsor': [this.study.sponsor, [Validators.minLength(2), Validators.maxLength(200)]],
             'principalInvestigator': [this.study.principalInvestigator, [Validators.minLength(2), Validators.maxLength(200)]],
-            'scientificAdvisor': [this.study.scientificAdvisor, [Validators.minLength(2), Validators.maxLength(200)]]
+            'scientificAdvisor': [this.study.scientificAdvisor, [Validators.minLength(2), Validators.maxLength(200)]],
+            'subjectNamePattern': [this.study.subjectNamePattern]
         });
 
         formGroup.setValidators(this.inclusionRatePairValidator.bind(this));
@@ -481,11 +645,13 @@ export class StudyComponent extends EntityComponent<Study> {
         studyCenterListControl.setValue([...this.study.studyCenterList]);
         studyCenterListControl.markAsDirty();
         studyCenterListControl.updateValueAndValidity();
+        this.onPatternFieldChange();
     }
 
     onPrefixChange() {
         this.form.get('studyCenterList').markAsDirty();
         this.form.get('studyCenterList').updateValueAndValidity();
+        this.onPatternFieldChange();
     }
 
     private validateCenter = (): ValidationErrors | null => {
@@ -503,6 +669,7 @@ export class StudyComponent extends EntityComponent<Study> {
         studyCenterListControl.setValue([...this.study.studyCenterList]);
         studyCenterListControl.markAsDirty();
         studyCenterListControl.updateValueAndValidity();
+        this.onPatternFieldChange();
     }
 
     isMe(user: User): boolean {

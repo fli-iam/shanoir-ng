@@ -240,10 +240,26 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                                 Name must contain more than one character
                                             </label>
                                         }
+                                        @if (hasError('name', ['subjectNamePattern'])) {
+                                            <label
+                                                animate.enter="slide-down-error"
+                                                animate.leave="slide-up-error"
+                                                class="form-validation-alert"
+                                                i18n="Subject detail|Name pattern error@@subjectDetailNamePatternError">
+                                                Common name does not respect the pattern defined for the selected study
+                                            </label>
+                                        }
                                     }
                                 }
                             </span>
                         </li>
+                        @if (mode == 'create' && subject.study?.subjectNamePattern) {
+                            <li class="info">
+                                <span class="icon"><i class="fas fa-info-circle"></i></span>
+                                This study requires subject common names to match the following example: 
+                                <code>{{ subjectNamePatternPreview }}</code>
+                            </li>
+                        }
                         @if (subjectNamePrefix && !subject.name?.startsWith(subjectNamePrefix) && mode != 'view') {
                             <li class="info">
                                 <span class="icon"><i class="fas fa-info-circle"></i></span>

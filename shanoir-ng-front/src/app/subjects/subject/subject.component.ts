@@ -36,6 +36,7 @@ import { SubjectService } from '../shared/subject.service';
 import { Tag } from "../../tags/tag.model";
 import { dateDisplay } from "../../shared/./localLanguage/localDate.abstract";
 import { isDarkColor } from "../../utils/app.utils";
+import { regexExample } from "../../utils/regex-example.util";
 import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
 import { CheckboxComponent } from '../../shared/checkbox/checkbox.component';
 import { TagInputComponent } from '../../tags/tag.input.component';
@@ -175,7 +176,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
         const subjectForm = this.formBuilder.group({
             'imagedObjectCategory': [this.subject.imagedObjectCategory, [Validators.required]],
             'isAlreadyAnonymized': [this.subject.isAlreadyAnonymized],
-            'name': [this.subject.name, this.nameValidators.concat([this.forbiddenNameValidator([this.subjectNamePrefix]), this.notEmptyValidator()]), this.mode == 'create' ? this.uniqueSubjectNameValidatorOnName : null],
+            'name': [this.subject.name, this.nameValidators.concat([this.forbiddenNameValidator([this.subjectNamePrefix]), this.notEmptyValidator(), this.subjectNamePatternValidator()]), this.mode == 'create' ? this.uniqueSubjectNameValidatorOnName : null],
             'firstName': [this.firstName],
             'lastName': [this.lastName],
             'birthDate': [this.subject.birthDate],
@@ -230,6 +231,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
             this.studyService.getTagsFromStudyId(this.subject.study.id).then(tags => {
                 this.subject.study.tags = tags ? tags : [];
             })
+            this.form.get('name')?.updateValueAndValidity({ onlySelf: true, emitEvent: false });
         });
     }
 
@@ -239,6 +241,22 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
                 return { 'subjectNamePrefix': true };
             }
             return null;
+        };
+    }
+
+    get subjectNamePatternPreview(): string {
+        return regexExample(this.subject?.study?.subjectNamePattern);
+    }
+
+    private subjectNamePatternValidator(): ValidatorFn {
+        return (c: AbstractControl): Record<string, boolean> | null => {
+            const pattern = this.subject?.study?.subjectNamePattern;
+            if (!pattern || !c.value) return null;
+            try {
+                return new RegExp(pattern).test(c.value) ? null : { 'subjectNamePattern': true };
+            } catch {
+                return null;
+            }
         };
     }
 
