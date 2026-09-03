@@ -139,8 +139,12 @@ if [ -n "$deploy" ] ; then
 	if [ -n "$clean" ] ; then
 		# full clean (--clean)
 		# -> destroy all external volumes
-		step "clean"
-		docker compose -f docker-compose-dev.yml down -v
+		step "Full clean"
+		if [ -n "$native" ]; then
+      docker compose -f docker-compose-dev.yml -f docker-compose-dev-native.yml down -v
+    else
+      docker compose -f docker-compose-dev.yml down -v
+    fi
 	else
 		# overwrite (--force)
 		# -> just remove all existing containers
@@ -151,7 +155,11 @@ if [ -n "$deploy" ] ; then
 		# - 'docker compose logs' may display old logs if the container
 		#   is not destroyed
 		step "stop shanoir"
-		docker compose -f docker-compose-dev.yml down
+		if [ -n "$native" ]; then
+      docker compose -f docker-compose-dev.yml -f docker-compose-dev-native.yml down
+    else
+      docker compose -f docker-compose-dev.yml down
+    fi
 	fi
 
 	#
@@ -192,7 +200,7 @@ if [ -n "$deploy" ] ; then
 		done
 	fi
 	
-	# 4. infrastructure services
+	# 4. infrastructure services: others
 	if [ -n "$infra" ] ; then
 	  step "start: infrastructure services"
 	  for infra_ms in rabbitmq solr bids-validator
@@ -221,16 +229,26 @@ if [ -n "$deploy" ] ; then
             mvn -f ./shanoir-ng-users/pom.xml \
             -Pnative spring-boot:build-image \
             -DskipTests
+      step "Build users-native, use referenced image from local Docker"
 			docker compose -f docker-compose-dev.yml -f docker-compose-dev-native.yml build users
 			step "start: $ms microservice (native)"
 			docker compose -f docker-compose-dev.yml -f docker-compose-dev-native.yml up -d users
 			continue
 		fi
-		step "start: $ms microservice"
-		docker compose -f docker-compose-dev.yml up -d "$ms"
+		  step "start: $ms microservice"
+		if [ -n "$native" ]; then
+		  docker compose -f docker-compose-dev.yml -f docker-compose-dev-native.yml up -d "$ms"
+    else
+		  docker compose -f docker-compose-dev.yml up -d "$ms"
+		fi
 	done
 
 	# 6. nginx
 	step "start: nginx"
-	docker compose -f docker-compose-dev.yml up -d nginx
+  if [ -n "$native" ]; then
+  	docker compose -f docker-compose-dev.yml -f docker-compose-dev-native.yml up -d nginx
+  else
+  	docker compose -f docker-compose-dev.yml up -d nginx
+  fi
+
 fi
