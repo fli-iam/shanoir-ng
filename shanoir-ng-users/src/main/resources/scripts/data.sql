@@ -23,6 +23,6 @@ INSERT INTO role VALUES
 -- security. The first login can be carried out via the keycloak admin console
 -- (either by setting a password for the user or by impersonating the user).
 INSERT INTO users (id, account_request_demand, account_request_info_id, can_access_to_dicom_association, creation_date, email, expiration_date, extension_date, extension_motivation, extension_request_demand, first_name, first_expiration_notification_sent, second_expiration_notification_sent, last_name, username, role_id) VALUES
-	(1, 0, null, 0, NOW(), 'admin@invalid', null, null, null, 0, 'Dummy', 0, 0, 'Admin', 'dummy-admin', 1),
-	(2, 0, null, 0, NOW(), 'user@invalid', null, null, null, 0, 'Dummy', 0, 0, 'User', 'dummy-user', 2),
-	(3, 0, null, 0, NOW(), 'expert@invalid', null, null, null, 0, 'Dummy', 0, 0, 'Expert', 'dummy-expert', 3);
+	(1, 0, null, 0, NOW(), 'admin@invalid', DATE_ADD(NOW(), INTERVAL '1' YEAR), null, null, 0, 'Dummy', 0, 0, 'Admin', 'dummy-admin', 1),
+	(2, 0, null, 0, NOW(), 'user@invalid', DATE_ADD(NOW(), INTERVAL '1' YEAR), null, null, 0, 'Dummy', 0, 0, 'User', 'dummy-user', 2),
+	(3, 0, null, 0, NOW(), 'expert@invalid', DATE_ADD(NOW(), INTERVAL '1' YEAR), null, null, 0, 'Dummy', 0, 0, 'Expert', 'dummy-expert', 3);
