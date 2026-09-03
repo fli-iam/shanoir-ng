@@ -15,8 +15,11 @@
 import { HttpResponse } from '@angular/common/http';
 import { Pipe, PipeTransform } from '@angular/core';
 
-import { environment } from '../../environments/environment';
+import { environment } from '@env/environment';
 
+// Emails
+export const SHANOIR_DPO_EMAIL = environment.dpoMail;
+export const SHANOIR_CONTACT_EMAIL = environment.contactMail;
 
 // Base urls
 const url = window.location;
@@ -40,7 +43,9 @@ export const BACKEND_API_USER_ACCESS_REQUEST: string = BACKEND_API_USERS_MS_URL 
 export const BACKEND_API_USER_ACCESS_REQUEST_BY_USER: string = BACKEND_API_USERS_MS_URL + '/accessrequest/byUser';
 export const BACKEND_API_USER_ACCESS_REQUEST_BY_ADMIN: string = BACKEND_API_USERS_MS_URL + '/accessrequest/byAdmin';
 export const BACKEND_API_ACCESS_REQUEST_RESOLVE: string = BACKEND_API_USERS_MS_URL + '/accessrequest/resolve/';
+export const BACKEND_API_ACCESS_REQUEST_EXTENSION: string = BACKEND_API_USERS_MS_URL + '/accessrequest/extension';
 export const BACKEND_API_USER_PUBLIC_COUNT: string = BACKEND_API_USER_URL + BACKEND_API_COUNT_ENDPOINT;
+export const BACKEND_API_MASS_EMAIL_URL: string = BACKEND_API_USERS_MS_URL + '/massemail';
 
 // ShanoirEvents http api
 export const BACKEND_API_EVENTS_COUNT_DAYS_PARAM: string = '30';
@@ -65,6 +70,7 @@ export const BACKEND_API_STUDY_RIGHTS: string = BACKEND_API_STUDY_URL + '/rights
 export const BACKEND_API_STUDY_HAS_ONE_STUDY_TO_IMPORT: string = BACKEND_API_STUDY_URL + '/hasOneStudy';
 export const BACKEND_API_STUDY_PUBLIC_STUDIES_URL: string = BACKEND_API_STUDY_URL + '/public';
 export const BACKEND_API_STUDY_PUBLIC_STUDIES_DATA_URL: string = BACKEND_API_STUDY_PUBLIC_STUDIES_URL + '/data';
+export const BACKEND_API_STUDY_EXPIRED_STUDIES_DATA_URL: string = BACKEND_API_STUDY_URL + '/expired';
 export const BACKEND_API_STUDY_PUBLIC_STUDIES_CONNECTED_URL: string = BACKEND_API_STUDY_PUBLIC_STUDIES_URL + '/connected';
 export const BACKEND_API_STUDY_COPY_DATASETS: string = BACKEND_API_STUDY_URL + '/copyDatasets';
 export const BACKEND_API_STUDY_FILES: string = BACKEND_API_STUDY_URL + '/files';
@@ -333,7 +339,7 @@ function deepEquals(x, y) {
         }
         return true;
     }
-};
+}
 
 export function objectsEqual(value1, value2) {
     if (value1 === value2) return true;
@@ -356,7 +362,7 @@ export function isDarkColor(colorInp: string): boolean {
 }
 
 export function getSizeStr(size: number): string {
-    if (size == null || size == undefined){
+    if (size == null) {
         return "";
     }
     const base: number = 1024;

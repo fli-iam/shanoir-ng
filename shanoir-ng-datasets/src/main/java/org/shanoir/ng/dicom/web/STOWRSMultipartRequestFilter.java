@@ -22,9 +22,11 @@ import org.dcm4che3.data.Tag;
 import org.dcm4che3.io.DicomInputStream;
 import org.shanoir.ng.importer.service.DicomImporterService;
 import org.shanoir.ng.importer.service.DicomSEGAndSRImporterService;
+import org.shanoir.ng.shared.exception.RestServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -38,6 +40,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * The STOWRSMultipartRequestFilter handles a HTTP-POST request of
@@ -99,9 +102,11 @@ public class STOWRSMultipartRequestFilter extends GenericFilterBean {
     private static final String DICOM_MODALITY_NM = "NM";
 
     @Autowired
+    @Lazy
     private DicomSEGAndSRImporterService dicomSEGAndSRImporterService;
 
     @Autowired
+    @Lazy
     private DicomImporterService dicomImporterService;
 
     @Override
@@ -126,6 +131,9 @@ public class STOWRSMultipartRequestFilter extends GenericFilterBean {
                         throw new IOException("STOWRSMultipartRequestFilter: exception sending DICOM file to Shanoir (STOW-RS).");
                     }
                 }
+            } catch (RestServiceException e) {
+                LOG.error(e.getErrorModel().getMessage(), e);
+                ((HttpServletResponse) response).sendError(e.getErrorModel().getCode(), e.getErrorModel().getMessage());
             } catch (Exception e) {
                 LOG.error(e.getMessage(), e);
                 throw new IOException("STOWRSMultipartRequestFilter: exception sending DICOM file to Shanoir (STOW-RS).");
@@ -150,7 +158,7 @@ public class STOWRSMultipartRequestFilter extends GenericFilterBean {
                     || DICOM_MODALITY_CT.equals(modality)
                     || DICOM_MODALITY_PT.equals(modality)
                     || DICOM_MODALITY_NM.equals(modality)) {
-                if (!dicomImporterService.importDicom(metaInformationAttributes, datasetAttributes, modality)) {
+                if (!dicomImporterService.importDicom(metaInformationAttributes, datasetAttributes)) {
                     LOG.error("Error during import of DICOM MR/CT/PT/NM.");
                     throw new ServletException("Error during import of DICOM MR/CT/PT/NM.");
                 }

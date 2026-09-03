@@ -15,28 +15,19 @@
 package org.shanoir.ng.datasetacquisition.service;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
 import org.shanoir.ng.dicom.web.SeriesInstanceUIDHandler;
 import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
 import org.shanoir.ng.dicom.web.service.DICOMWebService;
-import org.shanoir.ng.examination.model.Examination;
-import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
@@ -53,6 +44,7 @@ import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.util.Pair;
@@ -69,9 +61,6 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
     private DatasetAcquisitionRepository repository;
 
     @Autowired
-    private ExaminationRepository examRepository;
-
-    @Autowired
     private SecurityService securityService;
 
     @Autowired
@@ -81,6 +70,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
     private SolrService solrService;
 
     @Autowired
+    @Lazy
     private DatasetService datasetService;
 
     @Autowired
@@ -97,6 +87,9 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 
     @Autowired
     private StorageService storageService;
+
+    @Autowired
+    private DatasetRepository datasetRepository;
 
     private static final Logger LOG = LoggerFactory.getLogger(DatasetAcquisitionServiceImpl.class);
 
@@ -118,16 +111,6 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
     }
 
     @Override
-    public List<DatasetAcquisition> findByExamination(Long examinationId) {
-        Optional<Examination> exam = examRepository.findByIdWithEagerAcquisitions(examinationId);
-        if (exam.isPresent()) {
-            return exam.get().getDatasetAcquisitions();
-        } else {
-            return Collections.emptyList();
-        }
-    }
-
-    @Override
     public Optional<DatasetAcquisition> findByExaminationAndSeriesInstanceUIDWithDatasets(Long examinationId, String seriesInstanceUID) {
         return repository.findByExaminationAndSeriesInstanceUIDWithDatasets(examinationId, seriesInstanceUID);
     }
@@ -141,6 +124,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
         to.setSortingIndex(from.getSortingIndex());
         to.setStudyCard(from.getStudyCard());
         to.setAcquisitionStartTime(from.getAcquisitionStartTime()); // immutable
+        to.setQualityTag(from.getQualityTag());
         // Update extra data paths => delete files not present in the new list anymore
         if (to.getExtraDataFilePathList() != null) {
             for (String filePath : to.getExtraDataFilePathList()) {
@@ -165,6 +149,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
     @Override
     public DatasetAcquisition findById(Long id) {
         return repository.findById(id).orElse(null);
+
     }
 
     @Override
@@ -233,7 +218,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
         return acq;
     }
 
-    @Override
+    @Transactional
     public Iterable<DatasetAcquisition> update(List<DatasetAcquisition> entities) {
         List<Long> ids = new ArrayList<>();
         for (DatasetAcquisition acq : entities) {
@@ -301,6 +286,9 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
                 }
                 if (!datasetIds.isEmpty()) solrService.deleteFromIndex(datasetIds);
             }
+            // the acquisition itself only goes once its datasets are gone, this method being
+            // called asynchronously by the acquisition deletion, its caller can not do it
+            repository.deleteById(entity.getId());
         }
     }
 
@@ -316,7 +304,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
     @Override
     @Transactional
     public void deleteById(Long id, ShanoirEvent event) throws ShanoirException, SolrServerException, IOException, RestServiceException {
-        final DatasetAcquisition acquisition = repository.findById(id).orElse(null);
+        final DatasetAcquisition acquisition = repository.findByIdWithDatasets(id).orElse(null);
         if (acquisition == null) {
             throw new EntityNotFoundException("Cannot find entity with id = " + id);
         }
@@ -346,7 +334,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
      * @throws RestServiceException
      */
     public void deleteByIdCascade(Long id, ShanoirEvent event) throws ShanoirException, SolrServerException, IOException, RestServiceException {
-        final DatasetAcquisition entity = repository.findById(id).orElse(null);
+        final DatasetAcquisition entity = repository.findByIdWithDatasets(id).orElse(null);
         if (entity == null) {
             throw new EntityNotFoundException("Cannot find entity with id = " + id);
         }
@@ -356,8 +344,113 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
         }
         delete(entity, event);
 
+        shanoirEventService.publishEvent(new ShanoirEvent(
+                ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT,
+                id.toString(),
+                KeycloakUtil.getTokenUserId(),
+                "Dataset acquisition " + id + " deleted.",
+                ShanoirEvent.SUCCESS,
+                1f,
+                entity.getExamination().getStudyId()));
+    }
+
+    @Override
+    public boolean isEmptyAndRemovable(Long id) throws EntityNotFoundException {
+        final DatasetAcquisition entity = repository.findById(id).orElse(null);
+        if (entity == null) {
+            throw new EntityNotFoundException("Cannot find entity with id = " + id);
+        }
+        return datasetRepository.countByDatasetAcquisitionId(id) == 0 && isRemovable(entity);
+    }
+
+    /**
+     * An emptied acquisition may only be removed automatically when it does not carry any data
+     * of its own: extra-data files are uploaded on the acquisition itself and would be lost,
+     * and a copy keeps a reference to the acquisition it was copied from.
+     *
+     * @param entity the acquisition
+     * @return true when nothing but datasets is attached to this acquisition
+     */
+    private boolean isRemovable(DatasetAcquisition entity) {
+        if (!CollectionUtils.isEmpty(entity.getExtraDataFilePathList())) {
+            return false;
+        }
+        return CollectionUtils.isEmpty(repository.findBySourceId(entity.getId()));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<DatasetAcquisition> findAcquisitionsLeftEmptyBy(List<Long> datasetIds) {
+        if (CollectionUtils.isEmpty(datasetIds)) {
+            return Collections.emptyList();
+        }
+        // number of datasets about to be deleted, per acquisition
+        Map<Long, Integer> deletedCountByAcquisitionId = new HashMap<>();
+        for (Dataset dataset : datasetRepository.findAllById(datasetIds)) {
+            if (dataset.getDatasetAcquisition() != null) {
+                deletedCountByAcquisitionId.merge(dataset.getDatasetAcquisition().getId(), 1, Integer::sum);
+            }
+        }
+        List<DatasetAcquisition> leftEmpty = new ArrayList<>();
+        for (Map.Entry<Long, Integer> deletedCount : deletedCountByAcquisitionId.entrySet()) {
+            Long acquisitionId = deletedCount.getKey();
+            // the acquisition is left empty when all the datasets it holds are being deleted
+            if (datasetRepository.countByDatasetAcquisitionId(acquisitionId) == deletedCount.getValue()) {
+                repository.findById(acquisitionId).filter(this::isRemovable).ifPresent(leftEmpty::add);
+            }
+        }
+        return leftEmpty;
+    }
+
+    @Override
+    public List<DatasetAcquisition> findEmptyAcquisitions(Long studyId) {
+        List<DatasetAcquisition> empty = studyId != null ? repository.findEmptyByStudyId(studyId) : repository.findEmpty();
+        return empty.stream().filter(this::isRemovable).toList();
+    }
+
+    /**
+     * Deletes an acquisition that does not hold any dataset anymore. Contrary to
+     * {@link #deleteById(Long, ShanoirEvent)} this does not reject the series from the pacs:
+     * every dataset of the acquisition has already been deleted one by one, and each of those
+     * deletions rejected its own files, so nothing is left in the pacs to reject here.
+     */
+    @Override
+    @Transactional
+    public void deleteEmptyAcquisition(Long id) throws EntityNotFoundException, RestServiceException {
+        final DatasetAcquisition entity = repository.findById(id).orElse(null);
+        if (entity == null) {
+            throw new EntityNotFoundException("Cannot find entity with id = " + id);
+        }
+        if (datasetRepository.countByDatasetAcquisitionId(id) != 0) {
+            throw new RestServiceException(
+                    new ErrorModel(
+                            HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                            "This datasetAcquisition still holds datasets, it can not be removed as an empty one."
+                    ));
+        }
+        if (!isRemovable(entity)) {
+            throw new RestServiceException(
+                    new ErrorModel(
+                            HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                            "This datasetAcquisition holds extra data or has been copied, it can not be removed automatically."
+                    ));
+        }
+        Long studyId = entity.getExamination() != null ? entity.getExamination().getStudyId() : null;
+        try {
+            storageService.deleteDirectoryAcquisitionExtraData(id);
+        } catch (StorageException e) {
+            LOG.warn("Could not delete extra-data directory for dataset acquisition {}", id, e);
+        }
         repository.deleteById(id);
-        shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, entity.getExamination().getStudyId()));
+        LOG.info("Empty dataset acquisition with id {} has been removed", id);
+        shanoirEventService.publishEvent(new ShanoirEvent(
+                ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT,
+                id.toString(),
+                KeycloakUtil.getTokenUserId(),
+                "Dataset acquisition " + id + " deleted, it did not hold any dataset anymore.",
+                ShanoirEvent.SUCCESS,
+                1f,
+                studyId));
     }
 
     @Override

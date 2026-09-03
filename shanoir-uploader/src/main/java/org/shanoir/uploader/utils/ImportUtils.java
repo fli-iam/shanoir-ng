@@ -21,12 +21,11 @@ import org.shanoir.ng.importer.dicom.DicomDirGeneratorService;
 import org.shanoir.ng.importer.dicom.DicomDirToModelService;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.dicom.SeriesNumberOrAcquisitionTimeOrDescriptionSorter;
-import org.shanoir.ng.importer.model.ImportJob;
+import org.shanoir.ng.importer.model.ImportJobBase;
 import org.shanoir.ng.importer.model.Instance;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.PseudonymusHashValues;
 import org.shanoir.ng.importer.model.Serie;
-import org.shanoir.ng.importer.model.Subject;
 import org.shanoir.ng.shared.dicom.EquipmentDicom;
 import org.shanoir.ng.shared.dicom.InstitutionDicom;
 import org.shanoir.uploader.ShUpConfig;
@@ -47,9 +46,8 @@ import org.shanoir.uploader.model.rest.ManufacturerModel;
 import org.shanoir.uploader.model.rest.Sex;
 import org.shanoir.uploader.model.rest.Study;
 import org.shanoir.uploader.model.rest.StudyCard;
+import org.shanoir.uploader.model.rest.Subject;
 import org.shanoir.uploader.model.rest.SubjectType;
-import org.shanoir.uploader.nominativeData.NominativeDataUploadJobManager;
-import org.shanoir.uploader.upload.UploadJobManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -95,18 +93,18 @@ public class ImportUtils {
         return uploadFolder;
     }
 
-    public static ImportJob readImportJob(File uploadFolder) throws StreamReadException, DatabindException, IOException {
+    public static ImportJobBase readImportJob(File uploadFolder) throws StreamReadException, DatabindException, IOException {
         File importJobJsonFile = new File(uploadFolder.getAbsolutePath() + File.separator + ShUpConfig.IMPORT_JOB_JSON);
         if (importJobJsonFile.exists()) {
-            ImportJob importJob = objectMapper.readValue(importJobJsonFile, ImportJob.class);
+            ImportJobBase importJob = objectMapper.readValue(importJobJsonFile, ImportJobBase.class);
             return importJob;
         } else {
             throw new IOException(ShUpConfig.IMPORT_JOB_JSON + " missing in folder: " + uploadFolder.getAbsolutePath());
         }
     }
 
-    public static ImportJob createNewImportJob(Patient patient, org.shanoir.ng.importer.model.Study study) {
-        ImportJob importJob = new ImportJob();
+    public static ImportJobBase createNewImportJob(Patient patient, org.shanoir.ng.importer.model.Study study) {
+        ImportJobBase importJob = new ImportJobBase();
         importJob.setFromShanoirUploader(true);
         // create new patient here, that tree remains untouched
         Patient newPatientForJob = new Patient();
@@ -124,55 +122,8 @@ public class ImportUtils {
         newStudyForJob.setStudyInstanceUID(study.getStudyInstanceUID());
         newStudyForJob.setStudyDescription(study.getStudyDescription());
         importJob.setStudy(newStudyForJob);
-        importJob.setSelectedSeries(new ArrayList<Serie>());
+        importJob.setSeries(new ArrayList<Serie>());
         return importJob;
-    }
-
-    // The following 3 methods are used to retrieve informations from the xml files
-    // used previously to store upload jobs informations.
-    // These are supposed to be deleted in the future.
-
-    public static String getUploadStateFromUploadJob(File folder) throws IOException {
-        final File uploadJobFile = new File(folder.getAbsolutePath() + File.separator + ShUpConfig.UPLOAD_JOB_XML);
-        if (uploadJobFile.exists()) {
-            UploadJobManager uploadJobManager = new UploadJobManager(uploadJobFile);
-            return uploadJobManager.readUploadJob().getUploadState().toString();
-        }
-        return null;
-    }
-
-    public static String getUploadPercentageFromNominativeDataJob(String filepath) {
-        final File nominativeDataJobFile = new File(filepath + File.separator + ShUpConfig.NOMINATIVE_DATA_JOB_XML);
-        if (nominativeDataJobFile.exists()) {
-            NominativeDataUploadJobManager nominativeDataJobManager = new NominativeDataUploadJobManager(nominativeDataJobFile);
-            return nominativeDataJobManager.readUploadDataJob().getUploadPercentage();
-        }
-        return null;
-    }
-
-    public static Patient getPatientFromNominativeDataJob(String filepath) {
-        final File nominativeDataJobFile = new File(filepath + File.separator + ShUpConfig.NOMINATIVE_DATA_JOB_XML);
-        Patient patient = new Patient();
-        if (nominativeDataJobFile.exists()) {
-            NominativeDataUploadJobManager nominativeDataJobManager = new NominativeDataUploadJobManager(nominativeDataJobFile);
-            //the whole name retrieved from xml file is put in patient firstname as it is just to display it in ui
-            patient.setPatientFirstName(nominativeDataJobManager.readUploadDataJob().getPatientName());
-            patient.setPatientLastName("");
-            patient.setPatientID(nominativeDataJobManager.readUploadDataJob().getIPP());
-            return patient;
-        }
-        return patient;
-    }
-
-    public static org.shanoir.ng.importer.model.Study getStudyFromNominativeDataJob(String filepath) {
-        final File nominativeDataJobFile = new File(filepath + File.separator + ShUpConfig.NOMINATIVE_DATA_JOB_XML);
-        org.shanoir.ng.importer.model.Study study = new org.shanoir.ng.importer.model.Study();
-        if (nominativeDataJobFile.exists()) {
-            NominativeDataUploadJobManager nominativeDataJobManager = new NominativeDataUploadJobManager(nominativeDataJobFile);
-            study.setStudyDate(Util.convertStringToLocalDate(nominativeDataJobManager.readUploadDataJob().getStudyDate()));
-            return study;
-        }
-        return study;
     }
 
     /**
@@ -191,7 +142,7 @@ public class ImportUtils {
      * @throws DatabindException
      * @throws StreamReadException
      */
-    public static ImportJob prepareImportJob(ImportJob importJob, String subjectName, Long subjectId, Long examinationId, String studyInstanceUID, Study study, StudyCard studyCard, AcquisitionEquipment equipment) {
+    public static ImportJobBase prepareImportJob(ImportJobBase importJob, Subject subjectREST, Long examinationId, String studyInstanceUID, Study study, StudyCard studyCard, AcquisitionEquipment equipment) {
         // Handle study and study card
         importJob.setStudyId(study.getId());
         importJob.setStudyName(study.getName());
@@ -206,28 +157,15 @@ public class ImportUtils {
         importJob.setExaminationId(examinationId);
         importJob.setStudyInstanceUID(studyInstanceUID);
 
-        /**
-         * @todo: refactor to remove patients list from import job.
-         * for the moment, to finish the first refactor, keep the
-         * current structure required by the server: patients -
-         * patient - subject - study - series (selected)
-         */
-        List<Patient> patients = new ArrayList<>();
-        // handle patient and subject
-        Patient patient = new Patient();
-        patient.setPatientID(importJob.getSubject().getIdentifier());
+        // Handle subject
+        importJob.setSubjectName(subjectREST.getName());
         org.shanoir.ng.importer.model.Subject subject = new org.shanoir.ng.importer.model.Subject();
-        subject.setId(subjectId);
-        subject.setName(subjectName);
-        importJob.setSubjectName(subjectName);
-        patient.setSubject(subject);
-        patients.add(patient);
-        // handle study dicom == examination in Shanoir
-        List<org.shanoir.ng.importer.model.Study> studiesImportJob = new ArrayList<org.shanoir.ng.importer.model.Study>();
-        org.shanoir.ng.importer.model.Study studyImportJob = new org.shanoir.ng.importer.model.Study();
-        // handle series for study now coming from job itself
-        final List<Serie> series = new ArrayList<>(importJob.getSelectedSeries());
-        for (Serie serie : series) {
+        subject.setId(subjectREST.getId());
+        subject.setName(subjectREST.getName());
+        subject.setIdentifier(subjectREST.getIdentifier());
+        importJob.setSubject(subject);
+
+        for (Serie serie : importJob.getSeries()) {
             List<Instance> instances = serie.getInstances();
             if (instances == null || instances.isEmpty()) {
                 serie.setIgnored(true);
@@ -253,11 +191,8 @@ public class ImportUtils {
         // We sort again here, even if the QueryPACSService or the DicomDirToModelService sort already
         // The user select after both components in the tree GUI of ShanoirUploader, where a linked list
         // is used, therefore as the user can click and series on his behalf, we sort again here.
-        series.sort(new SeriesNumberOrAcquisitionTimeOrDescriptionSorter());
-        studyImportJob.setSeries(series);
-        studiesImportJob.add(studyImportJob);
-        patient.setStudies(studiesImportJob);
-        importJob.setPatients(patients);
+        importJob.getSeries().sort(new SeriesNumberOrAcquisitionTimeOrDescriptionSorter());
+
         return importJob;
     }
 
@@ -341,7 +276,7 @@ public class ImportUtils {
         return allFileNames;
     }
 
-    public static org.shanoir.uploader.model.rest.Subject manageSubject(org.shanoir.uploader.model.rest.Subject subjectREST, Subject subject, String subjectName, ImagedObjectCategory category, String languageHemDom, String manualHemDom, SubjectType subjectType, boolean existingSubjectInStudy, boolean isPhysicallyInvolved, String studyIdentifier, Study study, AcquisitionEquipment equipment) {
+    public static Subject manageSubject(Subject subjectREST, org.shanoir.ng.importer.model.Subject subject, String subjectName, ImagedObjectCategory category, String languageHemDom, String manualHemDom, SubjectType subjectType, boolean existingSubjectInStudy, boolean isPhysicallyInvolved, String studyIdentifier, Study study, AcquisitionEquipment equipment) {
         if (subjectREST == null) {
             try {
                 subjectREST = fillSubjectREST(study, subject, subjectName, category, languageHemDom, manualHemDom, studyIdentifier, subjectType, isPhysicallyInvolved);
@@ -354,7 +289,7 @@ public class ImportUtils {
             if (subjectREST == null) {
                 return null;
             } else {
-                logger.info("Subject created on server: " + subjectREST.toString());
+                logger.info("Subject created on server: {} ({})", subjectREST.toString(), subjectREST.getId());
             }
         } else {
             logger.info("Subject used on server with Id: {}, Name: {}", subjectREST.getId(), subjectREST.getName());
@@ -362,9 +297,9 @@ public class ImportUtils {
         return subjectREST;
     }
 
-    public static org.shanoir.uploader.model.rest.Subject fillSubjectREST(final Study study, Subject subject, String subjectName, ImagedObjectCategory category, String languageHemDom, String manualHemDom,
+    public static Subject fillSubjectREST(final Study study, org.shanoir.ng.importer.model.Subject subject, String subjectName, ImagedObjectCategory category, String languageHemDom, String manualHemDom,
             String studyIdentifier, SubjectType subjectType, boolean physicallyInvolved) throws ParseException {
-        org.shanoir.uploader.model.rest.Subject subjectREST = new org.shanoir.uploader.model.rest.Subject();
+        Subject subjectREST = new Subject();
         subjectREST.setStudy(new IdName(study.getId(), study.getName()));
         subjectREST.setIdentifier(subject.getIdentifier());
         subjectREST.setBirthDate(subject.getBirthDate());
@@ -416,6 +351,11 @@ public class ImportUtils {
             logger.info("Examination created on server with ID: " + examinationREST.getId());
             return examinationREST;
         }
+    }
+
+    public static void deleteExamination(Long examinationId) throws Exception {
+        ShUpOnloadConfig.getShanoirUploaderServiceClient().deleteExamination(examinationId);
+        logger.info("Examination deleted on server with ID: " + examinationId);
     }
 
     /**
@@ -566,13 +506,13 @@ public class ImportUtils {
         return null;
     }
 
-    public static Subject createSubjectFromPatient(Patient patient, Pseudonymizer pseudonymizer, IdentifierCalculator identifierCalculator) throws PseudonymusException, UnsupportedEncodingException, NoSuchAlgorithmException {
+    public static org.shanoir.ng.importer.model.Subject createSubjectFromPatient(Patient patient, Pseudonymizer pseudonymizer, IdentifierCalculator identifierCalculator) throws PseudonymusException, UnsupportedEncodingException, NoSuchAlgorithmException {
         // E.g. phantom images: set to 01.01.this-year
         if (patient.getPatientBirthDate() == null) {
             LocalDate firstDayOfOngoingYear = LocalDate.of(LocalDate.now().getYear(), 1, 1);
             patient.setPatientBirthDate(firstDayOfOngoingYear);
         } // if present: we need to use original patient birth date for hash calculation
-        Subject subject = new Subject();
+        org.shanoir.ng.importer.model.Subject subject = new org.shanoir.ng.importer.model.Subject();
         String identifier;
         // OFSEP mode
         if (ShUpConfig.isModePseudonymus()) {

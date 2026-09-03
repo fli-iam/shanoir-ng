@@ -15,7 +15,7 @@ import { Directive, Input, OnDestroy, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject, Subscription } from 'rxjs';
 
-import { TreeService } from 'src/app/studies/study/tree.service';
+import { TreeService } from '@app/studies/study/tree.service';
 
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
 import { capitalizeFirstLetter } from '../../../utils/app.utils';
@@ -45,7 +45,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnInit, O
     protected consoleService: ConsoleService;
     protected breadcrumbsService: BreadcrumbsService;
     public windowService: WindowService;
-    private treeService: TreeService;
+    protected treeService: TreeService;
     public onDelete: Subject<{entity: Entity, error?: ShanoirError}> =  new Subject();
     public onAdd: Subject<any> =  new Subject<any>();
     protected subscriptions: Subscription[] = [];

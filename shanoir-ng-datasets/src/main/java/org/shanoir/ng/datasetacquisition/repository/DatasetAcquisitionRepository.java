@@ -17,6 +17,7 @@ package org.shanoir.ng.datasetacquisition.repository;
 import java.util.List;
 import java.util.Optional;
 
+import org.hibernate.Hibernate;
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionForRightsProjection;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.springframework.data.domain.Page;
@@ -25,6 +26,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Repository for dataset acquisition.
@@ -43,6 +45,8 @@ public interface DatasetAcquisitionRepository extends PagingAndSortingRepository
     boolean existsByStudyCard_Id(Long studyCardId);
 
     List<DatasetAcquisition> findBySourceId(Long sourceId);
+
+    List<DatasetAcquisition> findByExaminationId(Long examinationId);
 
     DatasetAcquisition findBySourceIdAndExaminationStudy_Id(Long sourceId, Long studyId);
 
@@ -75,6 +79,13 @@ public interface DatasetAcquisitionRepository extends PagingAndSortingRepository
             + "WHERE da.id = :id")
     Optional<DatasetAcquisition> findByIdWithDatasets(Long id);
 
+    @Query("SELECT da FROM DatasetAcquisition da WHERE da.datasets IS EMPTY")
+    List<DatasetAcquisition> findEmpty();
+
+    @Query("SELECT da FROM DatasetAcquisition da "
+            + "WHERE da.datasets IS EMPTY AND da.examination.study.id = :studyId")
+    List<DatasetAcquisition> findEmptyByStudyId(@Param("studyId") Long studyId);
+
     /**
      * Get the acquisitions having id greather than param
      *
@@ -87,4 +98,47 @@ public interface DatasetAcquisitionRepository extends PagingAndSortingRepository
             + "WHERE acq.examination_id = ?1 "
             + "AND acq.id IN (?2)", nativeQuery = true)
     List<Long> findIdsFromIdsListWithExamId(Long examId, List<Long> acqIdList);
+
+    @Query("SELECT da FROM DatasetAcquisition da "
+            + "LEFT JOIN FETCH da.datasets "
+            + "WHERE da.examination.id = :examinationId "
+            + "ORDER BY COALESCE(da.sortingIndex, 0)")
+    List<DatasetAcquisition> findByExaminationIdWithDatasets(Long examinationId);
+
+    @Query("SELECT da FROM DatasetAcquisition da "
+            + "LEFT JOIN FETCH da.datasets "
+            + "WHERE da.id IN :ids")
+    List<DatasetAcquisition> findByIdsWithDatasets(List<Long> ids);
+
+    @Query("SELECT da FROM DatasetAcquisition da "
+            + "LEFT JOIN FETCH da.datasets as ds "
+            + "LEFT JOIN FETCH ds.datasetExpressions "
+            + "WHERE da.id IN :ids")
+    List<DatasetAcquisition> findByIdsWithDatasetExpressions(List<Long> ids);
+
+    @Transactional(readOnly = true)
+    default Optional<DatasetAcquisition> findByIdWithDatasetsAndDatasetFiles(Long id) {
+        Optional<DatasetAcquisition> acquisition = findByIdWithDatasets(id);
+        acquisition.ifPresent(acq ->
+                acq.getDatasets().forEach(ds -> {
+                    Hibernate.initialize(ds.getDatasetExpressions());
+                    ds.getDatasetExpressions().forEach(de ->
+                            Hibernate.initialize(de.getDatasetFiles()));
+                })
+        );
+        return acquisition;
+    }
+
+    @Transactional(readOnly = true)
+    default List<DatasetAcquisition> findByExaminationIdWithDatasetsAndDatasetFiles(Long id) {
+        List<DatasetAcquisition> acquisitions = findByExaminationIdWithDatasets(id);
+        acquisitions.forEach(acq ->
+                acq.getDatasets().forEach(ds -> {
+                    Hibernate.initialize(ds.getDatasetExpressions());
+                    ds.getDatasetExpressions().forEach(de ->
+                            Hibernate.initialize(de.getDatasetFiles()));
+                })
+        );
+        return acquisitions;
+    }
 }

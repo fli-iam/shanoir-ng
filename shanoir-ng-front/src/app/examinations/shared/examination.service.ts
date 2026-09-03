@@ -15,8 +15,8 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, firstValueFrom } from 'rxjs';
 
-import { TaskState } from 'src/app/async-tasks/task.model';
-import { SingleDownloadService } from 'src/app/shared/mass-download/single-download.service';
+import { TaskState } from '@app/async-tasks/task.model';
+import { SingleDownloadService } from '@app/shared/mass-download/single-download.service';
 
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import { Page, Pageable } from '../../shared/components/table/pageable.model';

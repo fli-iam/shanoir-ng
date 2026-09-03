@@ -12,9 +12,9 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
 
 import { EntityListComponent } from '../../shared/components/entity/entity-list.component.abstract';
 import { Page, Pageable } from '../../shared/components/table/pageable.model';
@@ -31,6 +31,7 @@ import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 @Component({
     selector: 'dataset-list',
     templateUrl: 'dataset-list.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [TableComponent]
 })
 
@@ -53,6 +54,20 @@ export class DatasetListComponent extends EntityListComponent<Dataset>{
 
     getService(): EntityService<Dataset> {
         return this.datasetService;
+    }
+
+    /**
+     * Goes through the dataset service so that the deletion of the last dataset of an acquisition
+     * offers to remove that acquisition too, like everywhere else datasets are deleted.
+     */
+    protected override openDeleteConfirmDialog = (entity: Dataset) => {
+        this.datasetService.deleteWithConfirmDialog(this.ROUTING_NAME, entity).then(deleted => {
+            if (deleted) {
+                this.onDelete.next({entity: entity});
+                setTimeout(() => this.table.refresh(), 1000);
+                this.treeService.updateTree();
+            }
+        });
     }
 
     getPage(pageable: Pageable): Promise<Page<Dataset>> {

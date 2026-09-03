@@ -12,14 +12,14 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { DatePipe } from '@angular/common';
 
-import { Reference } from 'src/app/preclinical/reference/shared/reference.model';
-import { ReferenceService } from 'src/app/preclinical/reference/shared/reference.service';
-import { Frequency } from 'src/app/preclinical/shared/enum/frequency';
+import { Reference } from '@app/preclinical/reference/shared/reference.model';
+import { ReferenceService } from '@app/preclinical/reference/shared/reference.service';
+import { Frequency } from '@app/preclinical/shared/enum/frequency';
 
 import { EntityService } from '../../../../shared/components/entity/entity.abstract.service';
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
@@ -34,6 +34,7 @@ import { DatepickerComponent } from '../../../../shared/date-picker/date-picker.
 @Component({
     selector: 'subject-pathology',
     templateUrl: 'subject-therapy.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, SelectBoxComponent, DatepickerComponent, DatePipe]
 })
 export class SubjectTherapyComponent extends EntityComponent<SubjectTherapy> {

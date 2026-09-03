@@ -23,7 +23,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 rowRoute: rowRoute ? rowRoute(item) : null,
                 possibleValues:
                     page?._savedContentRendering && page?._savedContentRendering[itemIndex]
-                        ? page._savedContentRendering[itemIndex][colIndex]?.possibleValues
+                        ? $safeNavigationMigration(page._savedContentRendering[itemIndex][colIndex]?.possibleValues)
                         : null,
                 cellValue: getCellValue(item, col),
                 cellGraphics: getCellGraphics(item, col),
@@ -135,17 +135,17 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     }
                     <!-- editable boolean -->
                     @if (vars.boolean && editMode && vars.editable) {
-                        <checkbox [ngModel]="vars.cellValue" (ngModelChange)="onFieldEdit(item, col, $event)"></checkbox>
+                        <checkbox [ngModel]="vars.cellValue" [ngModelOptions]="{ standalone: true }" (ngModelChange)="onFieldEdit(item, col, $event)"></checkbox>
                     }
                     <!-- editable text / number -->
                     @if (editMode && vars.editable && (isColumnText(col) || isColumnNumber(col)) && !vars.possibleValues) {
-                        <input type="text" [ngModel]="getFieldRawValue(item, col['field'])" (ngModelChange)="onFieldEdit(item, col, $event)" />
+                        <input type="text" [ngModel]="getFieldRawValue(item, col['field'])" [ngModelOptions]="{ standalone: true }" (ngModelChange)="onFieldEdit(item, col, $event)" />
                     }
                     <!-- editable with dropdown -->
                     @if (editMode && vars.editable && (isColumnText(col) || isColumnNumber(col)) && vars.possibleValues) {
                         <!-- single -->
                         @if (!col.multi) {
-                            <select [ngModel]="getFieldRawValue(item, col['field'])" (ngModelChange)="onFieldEdit(item, col, $event)">
+                            <select [ngModel]="getFieldRawValue(item, col['field'])" [ngModelOptions]="{ standalone: true }" (ngModelChange)="onFieldEdit(item, col, $event)">
                                 @for (possibleValue of vars.possibleValues; track possibleValue) {
                                     <option [value]="possibleValue.value">{{ possibleValue.label }}</option>
                                 }
@@ -155,6 +155,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         @if (col.multi) {
                             <multi-select
                                 [ngModel]="getFieldRawValue(item, col['field'])"
+                                [ngModelOptions]="{ standalone: true }"
                                 (ngModelChange)="onFieldEdit(item, col, $event)"
                                 [options]="vars.possibleValues"></multi-select>
                         }
@@ -173,8 +174,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <!-- display a progress bar -->
                     @if (col.type == 'progress') {
                         <progress-bar
-                            [progress]="vars.render?.progress != undefined ? vars.render?.progress : vars.render"
-                            width="100"
+                            [progress]="vars.render?.progress != undefined ? $safeNavigationMigration(vars.render?.progress) : vars.render"
+                            [width]="100"
                             [warning]="vars.render?.status == 5 || vars.render?.status == 3"></progress-bar>
                     }
                     @if (colIndex < columnDefs.length - 1) {
@@ -386,17 +387,18 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         }
                         <span>
                             Page size :
-                            <input class="max-results" [(ngModel)]="maxResultsField" (change)="updateMaxResults()" type="text" />
+                            <input class="max-results" [(ngModel)]="maxResultsField" [ngModelOptions]="{ standalone: true }" (change)="updateMaxResults()" type="text" />
                         </span>
                         <span>
                             Go to :
                             <input
                                 class="max-results"
                                 [(ngModel)]="pageNumber"
+                                [ngModelOptions]="{ standalone: true }"
                                 (keyup.enter)="jumpToPage(pageNumber)"
                                 type="number"
                                 [min]="0"
-                                [max]="page?.totalPages" />
+                                [max]="$safeNavigationMigration(page?.totalPages)" />
                         </span>
                         <span (click)="settingsOpened = true" class="clickable" title="Columns settings">
                             <i class="fas fa-cog"></i>
@@ -474,9 +476,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <tr>
                                 <td>{{ col.headerName }}</td>
                                 <td>
-                                    <checkbox [(ngModel)]="col.hidden" [inverse]="true" (ngModelChange)="saveSettings()"></checkbox>
+                                    <checkbox [(ngModel)]="col.hidden" [ngModelOptions]="{ standalone: true }" [inverse]="true" (ngModelChange)="saveSettings()"></checkbox>
                                 </td>
-                                <td><input type="text" [(ngModel)]="col.width" (change)="saveSettings()" /></td>
+                                <td><input type="text" [(ngModel)]="col.width" [ngModelOptions]="{ standalone: true }" (change)="saveSettings()" /></td>
                             </tr>
                         }
                     </table>

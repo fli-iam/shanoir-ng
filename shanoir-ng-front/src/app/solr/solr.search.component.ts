@@ -12,16 +12,18 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Clipboard } from '@angular/cdk/clipboard';
-import { formatDate } from '@angular/common';
-import { AfterContentInit, AfterViewChecked, Component, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import { Component, AfterViewChecked, AfterContentInit, ViewChild, ViewChildren, QueryList, ChangeDetectionStrategy } from '@angular/core';
+import { HttpParams } from '@angular/common/http';
 import { UntypedFormBuilder, UntypedFormGroup, ValidationErrors, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { formatDate } from '@angular/common';
 import { Subscription } from 'rxjs';
 
 import { environment } from "../../environments/environment";
 import { TaskState } from '../async-tasks/task.model';
 import { BreadcrumbsService } from '../breadcrumbs/breadcrumbs.service';
 import { DatasetAcquisition } from '../dataset-acquisitions/shared/dataset-acquisition.model';
+import { ExaminationDatasetAcquisitionDTO } from '../dataset-acquisitions/shared/dataset-acquisition.dto';
 import { DatasetAcquisitionService } from '../dataset-acquisitions/shared/dataset-acquisition.service';
 import { DatasetService } from '../datasets/shared/dataset.service';
 import { dateDisplay } from "../shared/./localLanguage/localDate.abstract";
@@ -48,13 +50,14 @@ import { SolrRangeCriterionComponent } from './criteria/solr.range-criterion.com
 import { SolrTextSearchComponent } from './text-search/solr.text-search.component';
 import { SolrTextSearchModeComponent } from './text-search/solr.text-search-mode.component';
 
-const TextualFacetNames: string[] = ['studyName', 'subjectName', 'subjectType', 'acquisitionEquipmentName', 'examinationComment', 'datasetName', 'datasetType', 'datasetNature', 'tags', 'processed', 'dataReuseAgreement'];
+const TextualFacetNames: string[] = ['studyName', 'subjectName', 'subjectType', 'acquisitionEquipmentName', 'examinationComment', 'datasetName', 'datasetType', 'datasetNature', 'tags', 'processed', 'dataReuseAgreement', 'qualityTag'];
 export type TextualFacet = typeof TextualFacetNames[number];
 @Component({
     selector: 'solr-search',
     templateUrl: 'solr.search.component.html',
     styleUrls: ['solr.search.component.css'],
-    imports: [FormsModule, ReactiveFormsModule, SolrPagingCriterionComponent, DatepickerComponent, SolrRangeCriterionComponent, SolrTextSearchComponent, 
+    changeDetection: ChangeDetectionStrategy.Eager,
+    imports: [FormsModule, ReactiveFormsModule, SolrPagingCriterionComponent, DatepickerComponent, SolrRangeCriterionComponent, SolrTextSearchComponent,
         SolrTextSearchModeComponent, LoadingBarComponent, TableComponent]
 })
 
@@ -410,32 +413,41 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     }
 
     protected openDeleteConfirmDialog = (solrDocument: SolrDocument) => {
-        this.confirmDialogService
+
+        const datasetId: number = parseInt(solrDocument.datasetId);
+        this.datasetAcquisitionService.getEmptiedByDatasets([datasetId])
+            .catch(() => [] as ExaminationDatasetAcquisitionDTO[])
+            .then(emptied => this.confirmDialogService
             .confirm(
                 'Delete dataset',
                 'Are you sure you want to delete the dataset "'
                     + solrDocument.datasetName
                     + '" with id n° ' + solrDocument.datasetId + ' ?'
+                    + (emptied.length > 0 ? this.datasetAcquisitionService.getEmptiedByDatasetsMessage(emptied) : '')
             ).then(res => {
                 if (res) {
-                    this.datasetService.delete(parseInt(solrDocument.datasetId)).then(() => {
-                        this.selectedDatasetIds.delete(parseInt(solrDocument.datasetId));
+                    this.datasetService.delete(datasetId, new HttpParams().set('deleteEmptyAcquisitions', emptied.length > 0)).then(() => {
+                        this.selectedDatasetIds.delete(datasetId);
                         this.table.refresh().then(() => {
                             this.consoleService.log('info', 'Dataset n°' + solrDocument.datasetId + 'was sucessfully deleted');
                         });
                     });
                 }
-            })
+            }))
     }
 
     protected openDeleteSelectedConfirmDialog = () => {
-        this.confirmDialogService
+        const datasetIds: number[] = [...this.selectedDatasetIds];
+        this.datasetAcquisitionService.getEmptiedByDatasets(datasetIds)
+            .catch(() => [] as ExaminationDatasetAcquisitionDTO[])
+            .then(emptied => this.confirmDialogService
             .confirm(
                 'Delete dataset',
                 'Are you sure you want to delete ' + this.selectedDatasetIds.size + ' dataset(s) ?'
+                    + (emptied.length > 0 ? this.datasetAcquisitionService.getEmptiedByDatasetsMessage(emptied) : '')
             ).then(res => {
                 if (res) {
-                    this.datasetService.deleteAll([...this.selectedDatasetIds]).then(() => {
+                    this.datasetService.deleteAll(datasetIds, emptied.length > 0).then(() => {
                         this.selectedDatasetIds = new Set();
                         if (this.tab == 'selected') this.selectionTable.refresh();
                         this.table.refresh().then(() => {
@@ -456,7 +468,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
                         } else throw Error(reason);
                     });
                 }
-            });
+            }));
     }
 
     protected openApplyStudyCard = () => {
@@ -494,6 +506,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
             {headerName: "Tags", field: "tags", cellRenderer: (params: any) => {
                     return params?.data?.tags ? params.data.tags.join(', ') : '';
                 }},
+            {headerName: "Quality tag", field: "qualityTag"},
             {headerName: "Modality", field: "datasetType"},
             {headerName: "Nature", field: "datasetNature"},
             {headerName: "Series date", field: "datasetCreationDate", type: "date", hidden: true},
@@ -526,7 +539,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
             {headerName: "Pixel", field: "pixelBandwidth"},
             {headerName: "Mag. strength", field: "magneticFieldStrength"},
             {headerName: "View DICOM", type: "button", awesome: "fa-solid fa-up-right-from-square",
-              condition: item => (!item.processed && (item.datasetType.includes("MR") || item.datasetType.includes("Pet") || item.datasetType.includes("Ct"))),
+              condition: item => (this.hasDownloadRight(item.studyId) && !item.processed && (item.datasetType.includes("MR") || item.datasetType.includes("Pet") || item.datasetType.includes("Ct"))),
               action: item => {
                 window.open(environment.viewerUrl + '/viewer?StudyInstanceUIDs=1.4.9.12.34.1.8527.' + item.examinationId, '_blank');
               }

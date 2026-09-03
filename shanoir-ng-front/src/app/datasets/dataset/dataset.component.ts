@@ -12,19 +12,20 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { UntypedFormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
-import { TaskState } from 'src/app/async-tasks/task.model';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
-import { Selection } from 'src/app/studies/study/tree.service';
+import { TaskState } from '@app/async-tasks/task.model';
+import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
+import { MassDownloadService } from '@app/shared/mass-download/mass-download.service';
+import { Selection } from '@app/studies/study/tree.service';
 
 import { DicomArchiveService } from '../../import/shared/dicom-archive.service';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
+import { DatasetAcquisition } from '../../dataset-acquisitions/shared/dataset-acquisition.model';
 import { Dataset, DatasetMetadata } from '../shared/dataset.model';
 import { DatasetService } from '../shared/dataset.service';
 import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
@@ -34,6 +35,7 @@ import { MrDataset } from './mr/dataset.mr.model';
 import { CommonDatasetComponent } from './common/dataset.common.component';
 import { MrDatasetComponent } from './mr/dataset.mr.component';
 import { EegDatasetComponent } from './eeg/dataset.eeg.component';
+import { EegDataset } from './eeg/dataset.eeg.model';
 
 
 
@@ -41,6 +43,7 @@ import { EegDatasetComponent } from './eeg/dataset.eeg.component';
     selector: 'dataset-detail',
     templateUrl: 'dataset.component.html',
     styleUrls: ['dataset.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, CommonDatasetComponent, MrDatasetComponent, EegDatasetComponent, PapayaComponent]
 })
 
@@ -52,6 +55,7 @@ export class DatasetComponent extends EntityComponent<Dataset> {
     public downloadState: TaskState = new TaskState();
     isMRS: boolean = false; // MR Spectroscopy
     papayaLoadCallback: () => Promise<any[]>;
+    private removedAcquisitionIds: number[] = [];
 
     constructor(
             private datasetService: DatasetService,
@@ -60,6 +64,31 @@ export class DatasetComponent extends EntityComponent<Dataset> {
             private studyRightsService: StudyRightsService,
             private downloadService: MassDownloadService) {
         super(route);
+        this.subscriptions.push(
+            this.datasetService.onAcquisitionsRemoved.subscribe(ids => this.removedAcquisitionIds = ids));
+    }
+
+    override goToParent(): void {
+        if (!this.goToExaminationOfRemovedAcquisition()) super.goToParent();
+    }
+
+    override goBack(): void {
+        if (!this.goToExaminationOfRemovedAcquisition()) super.goBack();
+    }
+
+    /**
+     * Deleting the last dataset of an acquisition removes that acquisition too, so its page does
+     * not exist anymore : the examination is then where to go once the dataset is deleted.
+     *
+     * @return true when the acquisition was removed and the examination reached
+     */
+    private goToExaminationOfRemovedAcquisition(): boolean {
+        const acquisition: DatasetAcquisition = this.dataset?.datasetAcquisition;
+        if (acquisition?.examination?.id && this.removedAcquisitionIds.includes(acquisition.id)) {
+            this.router.navigate(['/examination/details/' + acquisition.examination.id]);
+            return true;
+        }
+        return false;
     }
 
     protected getRoutingName(): string {
@@ -172,4 +201,11 @@ export class DatasetComponent extends EntityComponent<Dataset> {
         this.router.navigate(['/solr-search']);
     }
 
+    get mrDataset(): MrDataset | null {
+        return this.dataset.type === 'Mr' ? this.dataset as MrDataset : null;
+    }
+
+    get eegDataset(): EegDataset | null {
+        return this.dataset.type === 'Eeg' ? this.dataset as EegDataset : null;
+    }
 }

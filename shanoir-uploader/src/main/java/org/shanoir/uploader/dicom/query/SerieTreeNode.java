@@ -20,15 +20,11 @@ import java.util.List;
 
 import javax.swing.tree.TreeNode;
 
+import org.apache.commons.lang3.StringUtils;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.shared.dicom.EquipmentDicom;
 import org.shanoir.ng.shared.dicom.InstitutionDicom;
 import org.shanoir.uploader.dicom.DicomTreeNode;
-
-import jakarta.xml.bind.annotation.XmlElement;
-import jakarta.xml.bind.annotation.XmlElementWrapper;
-import jakarta.xml.bind.annotation.XmlTransient;
-import jakarta.xml.bind.annotation.XmlType;
 
 /**
  * SerieTreeNode, wraps a Serie in model of ms-import, but implements the interface for the JTree,
@@ -46,7 +42,6 @@ import jakarta.xml.bind.annotation.XmlType;
  * @author mkain
  *
  */
-@XmlType(propOrder = {"id", "modality", "protocol", "description", "seriesDate", "seriesNumber", "imagesCount", "selected", "fileNames"})
 public class SerieTreeNode implements DicomTreeNode {
 
     private StudyTreeNode parent;
@@ -55,7 +50,6 @@ public class SerieTreeNode implements DicomTreeNode {
 
     private List<String> fileNames;
 
-    // constructor for JAXB
     public SerieTreeNode() {
         this.serie = new Serie();
     }
@@ -82,7 +76,6 @@ public class SerieTreeNode implements DicomTreeNode {
         return this.serie;
     }
 
-    @XmlElement
     public String getId() {
         return this.serie.getSeriesInstanceUID();
     }
@@ -91,7 +84,6 @@ public class SerieTreeNode implements DicomTreeNode {
         this.serie.setSeriesInstanceUID(seriesInstanceUID);
     }
 
-    @XmlElement
     public String getModality() {
         return this.serie.getModality();
     }
@@ -100,7 +92,6 @@ public class SerieTreeNode implements DicomTreeNode {
         this.serie.setModality(modality);
     }
 
-    @XmlElement
     public String getProtocol() {
         return this.serie.getProtocolName();
     }
@@ -109,7 +100,6 @@ public class SerieTreeNode implements DicomTreeNode {
         this.serie.setProtocolName(protocolName);
     }
 
-    @XmlElement
     public String getDescription() {
         return this.serie.getSeriesDescription();
     }
@@ -118,7 +108,6 @@ public class SerieTreeNode implements DicomTreeNode {
         this.serie.setSeriesDescription(seriesDescription);
     }
 
-    @XmlElement
     public String getSeriesDate() {
         if (this.serie.getSeriesDate() != null) {
             return this.serie.getSeriesDate().toString();
@@ -126,7 +115,6 @@ public class SerieTreeNode implements DicomTreeNode {
         return "";
     }
 
-    @XmlElement
     public String getSeriesNumber() {
         return this.serie.getSeriesNumber();
     }
@@ -135,7 +123,6 @@ public class SerieTreeNode implements DicomTreeNode {
         this.serie.setSeriesNumber(seriesNumber);
     }
 
-    @XmlElement
     public String getImagesCount() {
         if (this.serie.getImagesNumber() != null) {
             return this.serie.getImagesNumber().toString();
@@ -165,48 +152,56 @@ public class SerieTreeNode implements DicomTreeNode {
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.shanoir.dicom.model.DicomTreeNode#getDisplayString()
-     */
-    @XmlTransient
     public String getDisplayString() {
-        String result = "";
+        StringBuilder result = new StringBuilder();
+
         final String seriesNumber = this.serie.getSeriesNumber();
-        if (seriesNumber != null && !seriesNumber.isEmpty()) {
-            result += seriesNumber + " ";
+        if (StringUtils.isNotEmpty(seriesNumber)) {
+            result.append(seriesNumber).append(" ");
         }
+
         final String modality = this.serie.getModality();
-        if (modality != null && !"".equals(modality)) {
-            result += "[" + modality + "] ";
+        if (StringUtils.isNotEmpty(modality)) {
+            result.append("[").append(modality).append("] ");
         }
+
         final String description = this.serie.getSeriesDescription();
-        final String id = this.serie.getSeriesInstanceUID();
-        if (description != null && !"".equals(description)) {
-            result += description;
-        } else if (id != null && !id.equals("")) {
-            result += id;
+        if (StringUtils.isNotEmpty(description)) {
+            result.append(description);
         }
-        Integer numberOfSeriesRelatedInstances = this.serie.getNumberOfSeriesRelatedInstances();
-        if (numberOfSeriesRelatedInstances != 0) {
-            result += " (" + numberOfSeriesRelatedInstances + ")";
+
+        final Integer numberOfSeriesRelatedInstances = this.serie.getNumberOfSeriesRelatedInstances();
+        if (numberOfSeriesRelatedInstances != null && numberOfSeriesRelatedInstances != 0) {
+            result.append(" (").append(numberOfSeriesRelatedInstances).append(")");
         }
-        EquipmentDicom equipment = this.serie.getEquipment();
-        if (equipment != null) {
-            String stationName = equipment.getStationName();
-            if (stationName != null && !"".equals(stationName)) {
-                result += " [ " + stationName + " , ";
+
+        String stationName = null;
+        final EquipmentDicom equipment = this.serie.getEquipment();
+        if (equipment != null && StringUtils.isNotEmpty(equipment.getStationName())) {
+            stationName = equipment.getStationName();
+        }
+
+        String institutionName = null;
+        final InstitutionDicom institution = this.serie.getInstitution();
+        if (institution != null && StringUtils.isNotEmpty(institution.getInstitutionName())) {
+            institutionName = institution.getInstitutionName();
+        }
+
+        if (institutionName != null || stationName != null) {
+            result.append(" [");
+            if (institutionName != null) {
+                result.append(institutionName);
             }
-        }
-        InstitutionDicom institution = this.serie.getInstitution();
-        if (institution != null) {
-            String institutionName = institution.getInstitutionName();
-            if (institutionName != null && !"".equals(institutionName)) {
-                result += institutionName + " ] ";
+            if (institutionName != null && stationName != null) {
+                result.append(", ");
             }
+            if (stationName != null) {
+                result.append(stationName);
+            }
+            result.append("]");
         }
-        return result;
+
+        return result.toString().trim();
     }
 
     /**
@@ -214,12 +209,10 @@ public class SerieTreeNode implements DicomTreeNode {
      *
      * @return the type
      */
-    @XmlTransient
     public String getType() {
         return "Serie";
     }
 
-    @XmlTransient
     public boolean isMultiFrame() {
         return this.serie.getIsMultiFrame();
     }
@@ -300,8 +293,6 @@ public class SerieTreeNode implements DicomTreeNode {
         return this.parent;
     }
 
-    @XmlElementWrapper(name = "fileNames")
-    @XmlElement(name = "fileName")
     public List<String> getFileNames() {
         return fileNames;
     }

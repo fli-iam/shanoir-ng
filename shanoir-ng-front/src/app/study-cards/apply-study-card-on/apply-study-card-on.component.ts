@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -40,6 +40,7 @@ export type Status = 'default' | 'loading' | 'done' | 'error';
     selector: 'apply-study-card-on',
     templateUrl: 'apply-study-card-on.component.html',
     styleUrls: ['apply-study-card-on.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [SelectBoxComponent, FormsModule, TableComponent, AcquisitionEquipmentPipe]
 })
 export class ApplyStudyCardOnComponent implements OnInit {

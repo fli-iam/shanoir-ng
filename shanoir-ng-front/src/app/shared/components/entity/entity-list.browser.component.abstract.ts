@@ -24,7 +24,7 @@ import { Entity } from "./entity.abstract";
 @Directive()
 export abstract class BrowserPaginEntityListComponent<T extends Entity> extends EntityListComponent<T> implements OnInit {
 
-    protected entitiesPromise: Promise<void>;
+    protected entitiesPromise: Promise<T[]>;
     protected browserPaging: BrowserPaging<T>;
 
     ngOnInit() {
@@ -32,9 +32,10 @@ export abstract class BrowserPaginEntityListComponent<T extends Entity> extends 
         this.loadEntities();
     }
     
-    private loadEntities(eager: boolean = false): Promise<void> {
+    private loadEntities(eager: boolean = false): Promise<T[]> {
         this.entitiesPromise = this.getEntities(eager).then((entities) => {
             this.browserPaging = new BrowserPaging(entities, this.columnDefs)
+            return entities;
         });
         return this.entitiesPromise;
     }

@@ -32,6 +32,7 @@ import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionForRights;
 import org.shanoir.ng.datasetacquisition.dto.ExaminationDatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
+import org.shanoir.ng.dicom.web.SeriesInstanceUIDHandler;
 import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
 import org.shanoir.ng.examination.dto.ExaminationDTO;
 import org.shanoir.ng.examination.dto.ExaminationForRightsDTO;
@@ -45,7 +46,6 @@ import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.study.rights.UserRights;
-import org.shanoir.ng.studycard.model.Card;
 import org.shanoir.ng.studycard.model.QualityCard;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.repository.QualityCardRepository;
@@ -91,6 +91,9 @@ public class DatasetSecurityService {
     private StudyInstanceUIDAndSubjectNameHandler studyInstanceUIDHandler;
 
     @Autowired
+    private SeriesInstanceUIDHandler seriesInstanceUIDHandler;
+
+    @Autowired
     private RabbitTemplate rabbitTemplate;
 
     /**
@@ -108,6 +111,63 @@ public class DatasetSecurityService {
             return false;
         }
         return studyRightsService.hasRightOnStudy(studyId, rightStr);
+    }
+
+    /**
+     * Check that the connected user is allowed to visualize the series requested
+     * by the viewer. A series that carries a dataset-level virtual UID, e.g. a
+     * SEG or SR annotation, is subject to the per-dataset visualization rule
+     * (see {@link #hasRightToVisualizeDataset(Long)}); any other series, e.g. a
+     * regular acquisition, is left to the examination-level rights check.
+     *
+     * @param seriesOrDatasetUID the virtual UID requested by the viewer
+     * @return true or false
+     */
+    public boolean hasRightToVisualizeSeries(String seriesOrDatasetUID) {
+        if (KeycloakUtil.isAdmin()) {
+            return true;
+        }
+        if (!seriesInstanceUIDHandler.isDatasetUID(seriesOrDatasetUID)) {
+            return true;
+        }
+        return hasRightToVisualizeDataset(seriesInstanceUIDHandler.extractDatasetId(seriesOrDatasetUID));
+    }
+
+    /**
+     * Check that the connected user is allowed to visualize the given dataset
+     * in the viewer.
+     *
+     * The CAN_DOWNLOAD right is required in every case, but it is already
+     * enforced upstream by the viewer endpoints (see DICOMWebApi), so this
+     * method only adds the ownership rule on top: when the dataset has no owner
+     * (username is null), any user who reached this point can open it; when it
+     * is owned, e.g. an annotation imported with the CAN_ANNOTATE right, only
+     * its owner (who still needs the CAN_ANNOTATE right), a user with the
+     * CAN_ANNOTATE_REVIEW right, or a study administrator (CAN_ADMINISTRATE) can open it.
+     *
+     * @param datasetId the dataset id
+     * @return true or false
+     */
+    @Transactional
+    public boolean hasRightToVisualizeDataset(Long datasetId) {
+        if (KeycloakUtil.isAdmin()) {
+            return true;
+        }
+        Dataset dataset = datasetRepository.findById(datasetId).orElse(null);
+        if (dataset == null) {
+            return false;
+        }
+        Long owner = dataset.getUserId();
+        if (owner == null) {
+            return true;
+        }
+        Long studyId = dataset.getStudyId();
+        if (owner.equals(KeycloakUtil.getTokenUserId())
+                && hasRightOnStudy(studyId, StudyUserRight.CAN_ANNOTATE.name())) {
+            return true;
+        }
+        return hasRightOnStudy(studyId, StudyUserRight.CAN_ANNOTATE_REVIEW.name())
+                || hasRightOnStudy(studyId, StudyUserRight.CAN_ADMINISTRATE.name());
     }
 
     /**
@@ -149,7 +209,7 @@ public class DatasetSecurityService {
     /**
      * Check that the connected user has the given right for the given subject.
      *
-     * @param studyId the study id
+     * @param subjectId the subject id
      * @param rightStr the right
      * @return true or false
      */
@@ -237,7 +297,8 @@ public class DatasetSecurityService {
     /**
      * Check that the connected user has the given right for the given study card.
      *
-     * @param studyCardId the study card id
+     * @param cardId the study card id
+     * @param type the card type (study/quality)
      * @param rightStr the right
      * @return true or false
      * @throws EntityNotFoundException
@@ -249,23 +310,27 @@ public class DatasetSecurityService {
         if (cardId == null) {
             return false;
         }
-        Card card;
+
         if ("study".equals(type)) {
-            card = studyCardRepository.findById(cardId).orElse(null);
+            StudyCard card = studyCardRepository.findById(cardId).orElse(null);
+            if (card == null) {
+                throw new EntityNotFoundException("Cannot find card with id " + cardId);
+            }
+            return studyRightsService.hasRightOnStudy(card.getStudyId(), rightStr);
         } else if ("quality".equals(type)) {
-            card = qualityCardRepository.findById(cardId).orElse(null);
+            QualityCard card = qualityCardRepository.findById(cardId).orElse(null);
+            if (card == null) {
+                throw new EntityNotFoundException("Cannot find card with id " + cardId);
+            }
+            return studyRightsService.hasRightOnStudy(card.getStudyId(), rightStr);
         } else throw new IllegalArgumentException("Bad type argument '" + type + "', should be 'study' or 'quality'");
-        if (card == null) {
-            throw new EntityNotFoundException("Cannot find card with id " + cardId);
-        }
-        return studyRightsService.hasRightOnStudy(card.getStudyId(), rightStr);
     }
 
     /**
      * Check that the connected user has the given right for the given study.
      *
      * @param studyId the study id
-     * @param rightStr the right
+     * @param rightStrs the rights
      * @return true or false
      */
     public boolean hasOneRightOnStudy(Long studyId, String... rightStrs) {
@@ -282,7 +347,7 @@ public class DatasetSecurityService {
      * Check that the connected user has the given right for the given study card.
      *
      * @param studyCardId the study card id
-     * @param rightStr the right
+     * @param rightStrs the rights
      * @return true or false
      * @throws EntityNotFoundException
      */
@@ -303,8 +368,8 @@ public class DatasetSecurityService {
     /**
      * Check that the connected user has the given right for updating the given study card.
      *
-     * @param studyCardId the study card id
-     * @param rightStr the right
+     * @param studyCard the study card
+     * @param rightStrs the rights
      * @return true or false
      * @throws EntityNotFoundException
      */
@@ -348,12 +413,11 @@ public class DatasetSecurityService {
     /**
      * Check that the connected user has the given right for the given dataset.
      *
-     * @param datasetId the dataset id
+     * @param dataset the dataset
      * @param rightStr the right
      * @return true or false
-     * @throws EntityNotFoundException
      */
-    public boolean hasRightOnNewDataset(Dataset dataset, String rightStr) throws EntityNotFoundException {
+    public boolean hasRightOnNewDataset(Dataset dataset, String rightStr) {
         if (KeycloakUtil.isAdmin()) {
             return true;
         }
@@ -382,7 +446,7 @@ public class DatasetSecurityService {
     /**
      * Check that the connected user has the given right for the given dataset acquisition.
      *
-     * @param datasetId the dataset acquisition id
+     * @param datasetAcquisitionId the dataset acquisition id
      * @param rightStr the right
      * @return true or false
      * @throws EntityNotFoundException
@@ -407,9 +471,8 @@ public class DatasetSecurityService {
      * @param datasetAcquisitionIds the dataset acquisition ids
      * @param rightStr the right
      * @return true or false
-     * @throws EntityNotFoundException
      */
-    public boolean hasRightOnEveryDatasetAcquisition(List<Long> datasetAcquisitionIds, String rightStr) throws EntityNotFoundException {
+    public boolean hasRightOnEveryDatasetAcquisition(List<Long> datasetAcquisitionIds, String rightStr) {
         List<DatasetAcquisitionForRights> acqs = datasetAcquisitionRepository.findAllForRightsById(datasetAcquisitionIds)
                 .stream()
                 .map(a -> new DatasetAcquisitionForRights(a.getId(), a.getCenterId(), a.getStudyId()))
@@ -429,12 +492,11 @@ public class DatasetSecurityService {
      * Reject if one dataset doesn't have the right.
      * DatasetIds list is also cleaned here
      *
-     * @param datasets the datasets
+     * @param datasetIds the datasets
      * @param rightStr the right
      * @return true or false
-     * @throws EntityNotFoundException
      */
-    public boolean hasRightOnEveryDataset(List<Long> datasetIds, String rightStr) throws EntityNotFoundException {
+    public boolean hasRightOnEveryDataset(List<Long> datasetIds, String rightStr) {
         if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
             return true;
         }
@@ -472,11 +534,13 @@ public class DatasetSecurityService {
             throw new IllegalArgumentException("Dataset cannot be null here.");
         }
 
+        Dataset datasetWithRelations = datasetRepository.findByIdWithExaminationRelationsAndRelatedStudies(dataset.getId());
+
         Long studyId = getStudyIdFromDataset(dataset);
 
         Set<Long> studies = new HashSet<>();
         studies.add(studyId);
-        CollectionUtils.emptyIfNull(dataset.getRelatedStudies()).forEach(s -> studies.add(s.getId()));
+        CollectionUtils.emptyIfNull(datasetWithRelations.getRelatedStudies()).forEach(s -> studies.add(s.getId()));
         return hasRightOnStudiesCenter(dataset.getCenterId(), studies, rightStr);
     }
 
@@ -639,41 +703,50 @@ public class DatasetSecurityService {
     }
 
     /**
-     * Check the connected user has the given right for the given study card.
-     * If the study card is updated, check the user has the given right in both former and new study cards.
-     *
-     * @param studyCard the study card
-     * @param rightStr the right
-     * @return true or false
-     * @throws EntityNotFoundException
-     */
-    public boolean hasUpdateRightOnStudyCard(StudyCard studyCard, String rightStr) throws EntityNotFoundException {
-        return hasUpdateRightOnCard(studyCard, rightStr);
-    }
-
-    /**
-     * Check the connected user has the given right for the given study card.
-     * If the study card is updated, check the user has the given right in both former and new study cards.
-     *
-     * @param studyCard the study card
-     * @param rightStr the right
-     * @return true or false
-     * @throws EntityNotFoundException
-     */
-    public boolean hasUpdateRightOnQualityCard(QualityCard qualityCard, String rightStr) throws EntityNotFoundException {
-        return hasUpdateRightOnCard(qualityCard, rightStr);
-    }
-
-    /**
-    * Check the connected user has the given right for the given study card.
-    * If the study card is updated, check the user has the given right in both former and new study cards.
+    * Check the connected user has the given right for the given quality card.
+    * If the quality card is updated, check the user has the given right in both former and new quality cards.
     *
-    * @param studyCard the study card
+    * @param card the quality card
     * @param rightStr the right
     * @return true or false
     * @throws EntityNotFoundException
     */
-    public boolean hasUpdateRightOnCard(Card card, String rightStr) throws EntityNotFoundException {
+    public boolean hasUpdateRightOnQualityCard(QualityCard card, String rightStr) throws EntityNotFoundException {
+        if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+            return true;
+        }
+        if (card == null) {
+            throw new IllegalArgumentException("Quality card cannot be null here.");
+        }
+        if (card.getId() == null) {
+            throw new IllegalArgumentException("Quality card id cannot be null here.");
+        }
+        if (card.getStudyId() == null) {
+            return false;
+        }
+
+        QualityCard dbCard = qualityCardRepository.findById(card.getId()).orElse(null);
+        if (dbCard == null) {
+            throw new EntityNotFoundException("Cannot find quality card with id " + card.getId());
+        }
+
+        if (card.getStudyId().equals(dbCard.getStudyId())) { // study hasn't changed
+            return studyRightsService.hasRightOnStudy(card.getStudyId(), rightStr);
+        } else { // study has changed : check user has right on both studies
+            return studyRightsService.hasRightOnStudy(card.getStudyId(), rightStr) && studyRightsService.hasRightOnStudy(dbCard.getStudyId(), rightStr);
+        }
+    }
+
+    /**
+     * Check the connected user has the given right for the given study card.
+     * If the study card is updated, check the user has the given right in both former and new study cards.
+     *
+     * @param card the study card
+     * @param rightStr the right
+     * @return true or false
+     * @throws EntityNotFoundException
+     */
+    public boolean hasUpdateRightOnStudyCard(StudyCard card, String rightStr) throws EntityNotFoundException {
         if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
             return true;
         }
@@ -686,18 +759,11 @@ public class DatasetSecurityService {
         if (card.getStudyId() == null) {
             return false;
         }
-        Card dbCard;
-        if (card instanceof StudyCard) {
-            dbCard = studyCardRepository.findById(card.getId()).orElse(null);
-            if (dbCard == null) {
-                throw new EntityNotFoundException("Cannot find study card with id " + card.getId());
-            }
-        } else if (card instanceof QualityCard) {
-            dbCard = qualityCardRepository.findById(card.getId()).orElse(null);
-            if (dbCard == null) {
-                throw new EntityNotFoundException("Cannot find quality card with id " + card.getId());
-            }
-        } else throw new IllegalStateException("Cannot find the type of card");
+        StudyCard dbCard = studyCardRepository.findById(card.getId()).orElse(null);
+        if (dbCard == null) {
+            throw new EntityNotFoundException("Cannot find study card with id " + card.getId());
+        }
+
         if (card.getStudyId().equals(dbCard.getStudyId())) { // study hasn't changed
             return studyRightsService.hasRightOnStudy(card.getStudyId(), rightStr);
         } else { // study has changed : check user has right on both studies
@@ -734,6 +800,9 @@ public class DatasetSecurityService {
      */
     public boolean checkDatasetDTOPage(Iterable<DatasetDTO> page, String rightStr) {
         UserRights userRights = studyRightsService.getUserRights();
+        if (page == null) {
+            return true;
+        }
         for (DatasetDTO dataset : page) {
             Long studyId = dataset.getStudyId();
             Long centerId = dataset.getCenterId();
@@ -747,14 +816,15 @@ public class DatasetSecurityService {
     /**
      * Filter datasets in that page checking the connected user has the right on those datasets.
      *
-     * @param page the page
+     * @param list the dataset list
      * @param rightStr the right
      * @return true
      */
     public boolean filterDatasetList(List<Dataset> list, String rightStr) {
+        List<Dataset> loadedList = datasetRepository.findByIdsWithProcessingAncestors(list.stream().map(Dataset::getId).toList());
         UserRights userRights = studyRightsService.getUserRights();
-        Set<Dataset> toRemove = new HashSet<>();
-        list.forEach((Dataset ds) -> {
+        Set<Long> toRemove = new HashSet<>();
+        loadedList.forEach((Dataset ds) -> {
             if (ds.getDatasetAcquisition() == null
                     || ds.getDatasetAcquisition().getExamination() == null
                     || ds.getDatasetAcquisition().getExamination().getStudyId() == null) {
@@ -764,7 +834,7 @@ public class DatasetSecurityService {
                         // filter the input datasets as well
                         filterDatasetList(ds.getDatasetProcessing().getInputDatasets(), rightStr);
                     } else {
-                        toRemove.add(ds);
+                        toRemove.add(ds.getId());
                     }
                 } else {
                     throw new IllegalStateException("Cannot check dataset n°" + ds.getId() + " rights, this dataset has neither examination nor processing parent !");
@@ -774,6 +844,42 @@ public class DatasetSecurityService {
                 Long centerId = ds.getDatasetAcquisition().getExamination().getCenterId();
                 // check rightStr on study, then check center rights
                 if (!userRights.hasStudyRights(studyId, rightStr) || !userRights.hasStudyCenterRights(studyId, centerId)) {
+                    toRemove.add(ds.getId());
+                }
+            }
+        });
+        list.removeIf(ds -> toRemove.contains(ds.getId()));
+        return true;
+    }
+
+    /**
+     * Filter out the annotation datasets, e.g. displayed in the study tree, that
+     * the connected user is not allowed to see, mirroring the per-dataset
+     * visualization rule of the viewer (see {@link #hasRightToVisualizeDataset(Long)}):
+     * an annotation with no owner (username null) stays visible to everyone, while
+     * an owned one is kept only for its owner (with the CAN_ANNOTATE right), a
+     * user with the CAN_ANNOTATE_REVIEW right, or a study administrator (CAN_ADMINISTRATE).
+     * Non-annotation datasets carry no owner and are never removed here.
+     *
+     * @param list the datasets to filter in place
+     * @return true
+     */
+    public boolean filterAnnotationDatasetList(List<Dataset> list) {
+        if (KeycloakUtil.isAdmin()) {
+            return true;
+        }
+        Long userId = KeycloakUtil.getTokenUserId();
+        UserRights userRights = studyRightsService.getUserRights();
+        Set<Dataset> toRemove = new HashSet<>();
+        list.forEach((Dataset ds) -> {
+            Long owner = ds.getUserId();
+            if (owner != null) {
+                Long studyId = ds.getStudyId();
+                boolean canSeeAllAnnotations = userRights.hasStudyRights(studyId, StudyUserRight.CAN_ANNOTATE_REVIEW.name())
+                        || userRights.hasStudyRights(studyId, StudyUserRight.CAN_ADMINISTRATE.name());
+                boolean ownAnnotator = owner.equals(userId)
+                        && userRights.hasStudyRights(studyId, StudyUserRight.CAN_ANNOTATE.name());
+                if (!canSeeAllAnnotations && !ownAnnotator) {
                     toRemove.add(ds);
                 }
             }
@@ -804,7 +910,7 @@ public class DatasetSecurityService {
     /**
      * Filter examinations in that page checking the connected user has the right on those examinations.
      *
-     * @param page the page
+     * @param list the examination list
      * @param rightStr the right
      * @return true
      */
@@ -825,11 +931,11 @@ public class DatasetSecurityService {
     /**
      * Filter datasets checking the connected user has the right on those.
      *
-     * @param page the page
+     * @param list the dataset DTO list
      * @param rightStr the right
      * @return true
      */
-    public boolean filterDatasetDTOList(List<DatasetDTO> list, String rightStr) throws EntityNotFoundException {
+    public boolean filterDatasetDTOList(List<DatasetDTO> list, String rightStr) {
         if (list == null || list.isEmpty()) {
             return true;
         }
@@ -863,7 +969,7 @@ public class DatasetSecurityService {
     /**
      * Filter dataset acquisitions checking the connected user has the right on those.
      *
-     * @param page the page
+     * @param list the datasetAcquisition list
      * @param rightStr the right
      * @return true
      */
@@ -885,7 +991,7 @@ public class DatasetSecurityService {
     /**
      * Filter dataset acquisitions checking the connected user has the right on those.
      *
-     * @param page the page
+     * @param list the datasetAcquisition DTO list
      * @param rightStr the right
      * @return true
      */
@@ -907,11 +1013,11 @@ public class DatasetSecurityService {
     /**
     * Filter dataset acquisitions checking the connected user has the right on those.
     *
-    * @param page the page
+    * @param list the examination datasetAcquisition DTO list
     * @param rightStr the right
     * @return true
     */
-    public boolean filterExaminationDatasetAcquisitionDTOList(List<ExaminationDatasetAcquisitionDTO> list, String rightStr) throws EntityNotFoundException {
+    public boolean filterExaminationDatasetAcquisitionDTOList(List<ExaminationDatasetAcquisitionDTO> list, String rightStr) {
         if (KeycloakUtil.isAdmin()) {
             return true;
         }
@@ -979,22 +1085,43 @@ public class DatasetSecurityService {
     }
 
     /**
-     * Filter study cards in that page checking the connected user has the right on those cards.
+     * Filter quality cards in that page checking the connected user has the right on those cards.
      *
-     * @param page the page
+     * @param list the quality card list
      * @param rightStr the right
      * @return true
      */
-    public boolean filterCardList(List<Card> list, String rightStr) {
+    public boolean filterQualityCardList(List<QualityCard> list, String rightStr) {
         if (list == null) {
             return true;
         }
         Set<Long> studyIds = new HashSet<>();
-        list.forEach((Card sc) -> {
+        list.forEach((QualityCard sc) -> {
             studyIds.add(sc.getStudyId());
         });
         Set<Long> checkedIds = studyRightsService.hasRightOnStudies(studyIds, rightStr);
-        list.removeIf((Card sc) -> !checkedIds.contains(sc.getStudyId()));
+        list.removeIf((QualityCard sc) -> !checkedIds.contains(sc.getStudyId()));
+
+        return true;
+    }
+
+    /**
+     * Filter study cards in that page checking the connected user has the right on those cards.
+     *
+     * @param list the study card list
+     * @param rightStr the right
+     * @return true
+     */
+    public boolean filterStudyCardList(List<StudyCard> list, String rightStr) {
+        if (list == null) {
+            return true;
+        }
+        Set<Long> studyIds = new HashSet<>();
+        list.forEach((StudyCard sc) -> {
+            studyIds.add(sc.getStudyId());
+        });
+        Set<Long> checkedIds = studyRightsService.hasRightOnStudies(studyIds, rightStr);
+        list.removeIf((StudyCard sc) -> !checkedIds.contains(sc.getStudyId()));
 
         return true;
     }
@@ -1024,7 +1151,7 @@ public class DatasetSecurityService {
     /**
      * Filter examinations in that list checking the connected user has the right on those examinations.
      *
-     * @param page the page
+     * @param list the examination DTO list
      * @param rightStr the right
      * @return true
      */
@@ -1071,12 +1198,12 @@ public class DatasetSecurityService {
     /**
      * Check that the connected user has the given right for the given examination.
      *
-     * @param examinationId the examination id
+     * @param examination the examination DTO
      * @param rightStr the right
      * @return true or false
      * @throws EntityNotFoundException
      */
-    public boolean hasRightOnTrustedExaminationDTO(ExaminationDTO examination, String rightStr) throws EntityNotFoundException {
+    public boolean hasRightOnTrustedExaminationDTO(ExaminationDTO examination, String rightStr) {
         if (KeycloakUtil.isAdmin()) {
             return true;
         }
@@ -1122,7 +1249,7 @@ public class DatasetSecurityService {
      * @return true or false
      * @throws EntityNotFoundException
      */
-    public boolean hasRightOnExaminations(List<Long> examinationIds, String rightStr) throws EntityNotFoundException {
+    public boolean hasRightOnExaminations(List<Long> examinationIds, String rightStr) {
         if (KeycloakUtil.isAdmin()) {
             return true;
         }
@@ -1145,7 +1272,7 @@ public class DatasetSecurityService {
      * @return true or false
      * @throws EntityNotFoundException
      */
-    public boolean hasRightOnExecutionCandidates(List<ExecutionCandidateDTO> executionCandidates) throws EntityNotFoundException {
+    public boolean hasRightOnExecutionCandidates(List<ExecutionCandidateDTO> executionCandidates) {
         if (KeycloakUtil.isAdmin()) {
             return true;
         }

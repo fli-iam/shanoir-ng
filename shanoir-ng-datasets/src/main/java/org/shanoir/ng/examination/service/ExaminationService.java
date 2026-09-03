@@ -29,6 +29,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -52,6 +53,16 @@ public interface ExaminationService {
     @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_ADMINISTRATE'))")
     void deleteExaminationAsync(Long examinationId, Long studyId, ShanoirEvent event);
 
+      /*
+     * Delete an empty examination without checking rights,
+     * used during quality control to delete any empty examination created during import.
+     *
+     * @param id examination id.
+     * @throws EntityNotFoundException
+     */
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    void deleteEmptyExamination(Long id) throws EntityNotFoundException;
+
     /**
      * Get all examinations for a specific user to support DICOMweb.
      *
@@ -60,6 +71,15 @@ public interface ExaminationService {
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterExaminationList(returnObject, 'CAN_SEE_ALL')")
     List<Examination> findAll();
+
+    /**
+     * Get all examinations for a specific user to support DICOMweb.
+     *
+     * @return
+     */
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterExaminationList(returnObject, 'CAN_SEE_ALL')")
+    List<Examination> findAllWithAcqAndDatasets();
 
     /**
      * Get a paginated list of examinations reachable by connected user.
@@ -175,4 +195,20 @@ public interface ExaminationService {
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_IMPORT'))")
     void syncStudyInstanceUIDFromPacs(Long examinationId) throws EntityNotFoundException, ShanoirException;
 
+    /**
+     * This method generates during the examination creation a DICOM
+     * StudyInstanceUID, that will be used for all DICOM files of this
+     * examination (== DICOM study).
+     *
+     * @param examination
+     */
+    void generateStudyInstanceUID(Examination examination);
+
+    /**
+     * Validate a dataset
+     *
+     * @param result
+     * @throws RestServiceException
+     */
+    void validate(BindingResult result) throws RestServiceException;
 }

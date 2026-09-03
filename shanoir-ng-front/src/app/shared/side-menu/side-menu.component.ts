@@ -11,28 +11,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { AnimationCallbackEvent, Component, DestroyRef } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DatePipe } from '@angular/common';
+import { AnimationCallbackEvent, Component, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+
+import { AccessRequestService } from '@app/users/access-request/access-request.service';
 
 import { environment } from '../../../environments/environment';
 import { VERSION } from '../../../environments/version';
+import { DatasetAcquisitionService } from '../../dataset-acquisitions/shared/dataset-acquisition.service';
 import { SolrService } from '../../solr/solr.service';
 import { StudyService } from '../../studies/shared/study.service';
-import { UserService } from '../../users/shared/user.service';
 import { ConfirmDialogService } from "../components/confirm-dialog/confirm-dialog.service";
+import { LoadingBarComponent } from '../components/loading-bar/loading-bar.component';
 import { ConsoleService } from '../console/console.service';
 import { KeycloakService } from '../keycloak/keycloak.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { ImagesUrlUtil } from '../utils/images-url.util';
-import { LoadingBarComponent } from '../components/loading-bar/loading-bar.component';
 
 
 @Component({
     selector: 'side-menu',
     templateUrl: 'side-menu.component.html',
     styleUrls: ['side-menu.component.css', environment.production ? 'prod.css' : 'dev.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [RouterLink, RouterLinkActive, LoadingBarComponent, DatePipe]
 })
 
@@ -51,10 +54,11 @@ export class SideMenuComponent {
     constructor(
             public keycloakService: KeycloakService,
             private solrService: SolrService,
+            private datasetAcquisitionService: DatasetAcquisitionService,
             private consoleService: ConsoleService,
             public notificationsService: NotificationsService,
             private studyService: StudyService,
-            private userService: UserService,
+            private accessRequestService: AccessRequestService,
             private confirmDialogService: ConfirmDialogService,
             private destroyRef: DestroyRef) {
 
@@ -67,7 +71,7 @@ export class SideMenuComponent {
         if (storedState) this.state = JSON.parse(storedState) as SideMenuState;
         else this.state = new SideMenuState();
 
-        this.userService.accessRequets
+        this.accessRequestService.accessRequets
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe(nb => {
             if (nb) {
@@ -105,6 +109,31 @@ export class SideMenuComponent {
                     });
                 }
             });
+    }
+
+    /**
+     * Cleans up the acquisitions emptied before their removal was proposed on dataset deletion.
+     * The list is fetched first so that the administrator sees what would be deleted.
+     */
+    cleanUpEmptyAcquisitions() {
+        this.datasetAcquisitionService.getEmpty().then(empty => {
+            if (empty.length == 0) {
+                this.consoleService.log('info', 'No empty dataset acquisition to clean up.');
+                return;
+            }
+            this.confirmDialogService.confirm('Clean up empty acquisitions',
+                'The following ' + empty.length + ' dataset acquisition(s) hold no dataset anymore and would be deleted : '
+                + empty.map(acquisition => '"' + acquisition.name + '" (id n° ' + acquisition.id + ')').join(', ')
+                + '.<br/><br/>Are you sure ?')
+                .then(userChoice => {
+                    if (userChoice) {
+                        this.datasetAcquisitionService.deleteEmpty().then(deleted => {
+                            this.consoleService.log('info', deleted.length + ' empty dataset acquisition(s) deleted',
+                                ['ids : ' + deleted.join(', ')]);
+                        });
+                    }
+                });
+        });
     }
 
     duasToSign(): number {

@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { inject, Injectable, OnDestroy } from '@angular/core';
 import { Subscription, firstValueFrom } from 'rxjs';
 
@@ -19,6 +19,7 @@ import { ConsoleService } from "../../console/console.service";
 import { ShanoirError } from "../../models/error.model";
 import { ConfirmDialogService } from "../confirm-dialog/confirm-dialog.service";
 import { Page } from '../table/pageable.model';
+import { getDeclaredFields } from '../../reflect/field.decorator';
 
 import { Entity } from './entity.abstract';
 
@@ -60,11 +61,11 @@ export abstract class EntityService<T extends Entity> implements OnDestroy {
         return res;
     }
 
-    delete(id: number): Promise<void> {
-        return firstValueFrom(this.http.delete<void>(this.API_URL + '/' + id));
+    delete(id: number, params?: HttpParams): Promise<void> {
+        return firstValueFrom(this.http.delete<void>(this.API_URL + '/' + id, params ? { params: params } : {}));
     }
 
-    deleteWithConfirmDialog(name: string, entity: Entity, customMsg?: string): Promise<boolean> {
+    deleteWithConfirmDialog(name: string, entity: Entity, customMsg?: string, deleteParams?: HttpParams): Promise<boolean> {
         const dialogTitle : string = 'Delete ' + name;
         const defaultMsg : string = 'Are you sure you want to finally delete the ' + name
             + (entity['name'] ? ' "' + entity['name'] + '"' : ' with id n° ' + entity.id) + ' ?';
@@ -75,7 +76,7 @@ export abstract class EntityService<T extends Entity> implements OnDestroy {
                 customMsg || defaultMsg,
             ).then(res => {
                 if (res) {
-                    return this.delete(entity.id).then(() => {
+                    return this.delete(entity.id, deleteParams).then(() => {
                         if (name == 'examination') {
                             this.consoleService.log('info', 'The ' + name + ' n°' + entity.id + ' has sucessfully started to delete. Check the job page to see its progress.');
                         } else {
@@ -130,23 +131,50 @@ export abstract class EntityService<T extends Entity> implements OnDestroy {
     }
 
     protected mapPage = (page: Page<T>): Promise<Page<T>> => {
-        if (!page) return null;
+        if (!page) return Promise.resolve(null);
         return this.mapEntityList(page.content).then(entities => {
             page.content = entities;
             return page;
         });
     }
 
+    private deepAssign<T extends object>(target: T, source: Partial<T>): T {
+        for (const key of Object.keys(source) as (keyof T)[]) {
+            const sourceValue = source[key];
+            const targetValue = target[key];
+            if (
+                sourceValue !== null &&
+                typeof sourceValue === 'object' &&
+                !Array.isArray(sourceValue) &&
+                targetValue !== null &&
+                typeof targetValue === 'object' &&
+                !Array.isArray(targetValue)
+            ) {
+                this.deepAssign(targetValue, sourceValue);
+            } else {
+                target[key] = sourceValue as T[keyof T];
+            }
+        }
+        return target;
+    }
+
     protected toRealObject(entity: any): T {
-        const trueObject = Object.assign(this.getEntityInstance(entity), entity);
+        const trueObject = this.deepAssign(this.getEntityInstance(entity), entity);
+        this.convertEntity(entity, trueObject);
+        return trueObject;
+    }
+
+    private convertEntity(entity: any, trueObject: any) {
+        const declaredFields: string[] = getDeclaredFields(trueObject);
         Object.keys(entity).forEach(key => {
             const value = entity[key];
             // For Date Object, put the json object to a real Date object
             if (String(key).indexOf("Date") > -1 && value) {
                 trueObject[key] = new Date(value);
+            } else if ((value instanceof Object) && declaredFields.indexOf(key) > -1) {
+                this.convertEntity(value, trueObject[key]);
             }
         });
-        return trueObject;
     }
 
     public stringify(obj: any) {
@@ -164,7 +192,7 @@ export abstract class EntityService<T extends Entity> implements OnDestroy {
         else return value;
     }
 
-    private static datePattern(date: Date): string {
+    protected static datePattern(date: Date): string {
         return date.getFullYear()
             + '-'
             + ('0' + (date.getMonth() + 1)).slice(-2)
