@@ -82,6 +82,24 @@ services:
     networks:
       - shanoir_ng_network
   #
+  # Init service: run and stop. Create temporary certificate
+  # related to SHANOIR_URL_HOST for all Shanoir microservices
+  # and set rights on log folder for native images
+  #  
+  init-cert-and-logs:
+    container_name: "${SHANOIR_PREFIX}init-cert-and-logs"
+    build:
+      context: docker-compose
+      target: init-cert-and-logs
+    environment:
+      - SHANOIR_URL_HOST
+      - SHANOIR_CERTIFICATE
+      - SHANOIR_CERTIFICATE_PEM_CRT
+      - SHANOIR_CERTIFICATE_PEM_KEY
+    volumes:
+      - "certificate-share-data:/etc/ssl/certs/java"
+      - "logs:/var/log/shanoir-ng-logs"
+  #
   # Database for all other microservices
   #
   database:
@@ -147,13 +165,15 @@ services:
       - SHANOIR_SMTP_PORT
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
-      - certificate-share-data:/etc/ssl/certs/java
+      - "certificate-share-data:/etc/ssl/certs/java:ro"
     networks:
       - shanoir_ng_network
     ports:
      - "9901:9901"
      - "9911:9911"
     depends_on:
+      init-cert-and-logs:
+        condition: service_completed_successfully
       database-migrations:
         condition: service_completed_successfully
       database:
@@ -191,6 +211,8 @@ services:
      - "9902:9902"
      - "9912:9912"
     depends_on:
+      init-cert-and-logs:
+        condition: service_completed_successfully
       database-migrations:
         condition: service_completed_successfully
       database:
@@ -226,6 +248,8 @@ services:
      # do not add by default, as it blocks local ShUp from using 44105
      # - "44105:44105"
     depends_on:
+      init-cert-and-logs:
+        condition: service_completed_successfully
       database-migrations:
         condition: service_completed_successfully
       database:
@@ -272,6 +296,8 @@ services:
      - "9904:9904"
      - "9914:9914"
     depends_on:
+      init-cert-and-logs:
+        condition: service_completed_successfully
       database-migrations:
         condition: service_completed_successfully
       database:
@@ -312,6 +338,8 @@ services:
      - "9905:9905"
      - "9915:9915"
     depends_on:
+      init-cert-and-logs:
+        condition: service_completed_successfully
       database-migrations:
         condition: service_completed_successfully
       database:
@@ -321,7 +349,8 @@ services:
       users:
         condition: service_started
   #
-  # Nifti conversion microservice
+  # NIfTI conversion microservice
+  # Only contacted by RabbitMQ, no REST-API
   #
   nifti-conversion:
     container_name: "${SHANOIR_PREFIX}nifti-conversion"
@@ -339,9 +368,13 @@ services:
       - "tmp:/tmp"
     networks:
       - shanoir_ng_network
-
+    depends_on:
+      import:
+        condition: service_started
+      datasets:
+        condition: service_started
   #
-  # Solr microservice for Shanoir-NG search
+  # Solr microservice for Shanoir search
   #
   solr:
     container_name: "${SHANOIR_PREFIX}solr"
@@ -451,6 +484,7 @@ services:
     ports:
      - "443:443"
     depends_on:
+      - "init-cert-and-logs"
       - "users"
       - "studies"
       - "import"

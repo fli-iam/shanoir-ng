@@ -14,7 +14,6 @@
 
 package org.shanoir.ng.user.service;
 
-import org.keycloak.representations.AccessTokenResponse;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.PasswordPolicyException;
 import org.shanoir.ng.shared.exception.SecurityException;
@@ -23,7 +22,6 @@ import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.user.model.vip.CountryCode;
 import org.shanoir.ng.user.model.vip.VIPUser;
 import org.shanoir.ng.user.model.vip.VIPUserLevel;
-import org.shanoir.ng.user.repository.UserRepository;
 import org.shanoir.ng.utils.PasswordUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,12 +42,13 @@ import org.springframework.web.client.RestTemplate;
 @Component
 @ConditionalOnProperty(name = "vip.enabled", havingValue = "true")
 public class VIPUserServiceImpl implements VIPUserService {
-    private static final String INRIA_ADMIN_GENERATED = "inria_admin_generated";
 
     /**
      * Logger
      */
     private static final Logger LOG = LoggerFactory.getLogger(VIPUserServiceImpl.class);
+
+    private static final String INRIA_ADMIN_GENERATED = "inria_admin_generated";
 
     @Value("${vip.uri}")
     private String vipUri;
@@ -58,17 +57,11 @@ public class VIPUserServiceImpl implements VIPUserService {
     private RestTemplate restTemplate;
 
     @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
     private KeycloakServiceAccountUtils keycloakServiceAccountUtils;
-
-
 
     @Override
     public User createVIPAccountRequest(final User user) throws SecurityException, MicroServiceCommunicationException, PasswordPolicyException {
-        AccessTokenResponse accessTokenResponse = keycloakServiceAccountUtils.getServiceAccountAccessToken();
-
+        String accessToken = keycloakServiceAccountUtils.getAccessTokenString();
         /* Password generation */
         final String newPassword = PasswordUtils.generatePassword();
         if (!PasswordUtils.checkPasswordPolicy(newPassword)) {
@@ -86,7 +79,7 @@ public class VIPUserServiceImpl implements VIPUserService {
 
         // prepare entity.
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Bearer " + accessTokenResponse.getToken());
+        headers.set("Authorization", "Bearer " + accessToken);
         HttpEntity entity = new HttpEntity<>(vipUser, headers);
 
         try {
@@ -101,4 +94,5 @@ public class VIPUserServiceImpl implements VIPUserService {
             return user;
         }
     }
+
 }

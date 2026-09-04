@@ -65,7 +65,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -153,7 +152,6 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 
     @RabbitListener(queues = RabbitMQConfiguration.IMPORTER_QUEUE_DATASET, containerFactory = "multipleConsumersFactory")
     @RabbitHandler
-    @Transactional
     @WithMockKeycloakUser(authorities = { "ROLE_ADMIN" })
     public void createNewDatasetAcquisition(Message importJobStr) throws IOException, AmqpRejectAndDontRequeueException {
         ImportJob importJob = objectMapper.readValue(importJobStr.getBody(), ImportJob.class);

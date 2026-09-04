@@ -134,10 +134,9 @@ public class RabbitMQSubjectService {
 
     @RabbitListener(queues = RabbitMQConfiguration.SUBJECTS_QUEUE_WITH_DATASETS, containerFactory = "multipleConsumersFactory")
     @RabbitHandler
-    public Long createOrUpdateSubjectWithAMQP(String subjectAsString) {
+    public Long createOrUpdateSubjectWithAMQP(Subject subject) {
         try {
             SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
-            Subject subject = mapper.readValue(subjectAsString, Subject.class);
             subject = manageSubject(subject, true);
             return subject.getId();
         } catch (Exception e) {

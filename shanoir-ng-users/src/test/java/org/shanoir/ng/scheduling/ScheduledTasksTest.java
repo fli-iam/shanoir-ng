@@ -27,8 +27,9 @@ import org.shanoir.ng.user.service.UserService;
 import org.shanoir.ng.user.utils.KeycloakClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.aot.DisabledInAotMode;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 /**
  * Test class for ShcheduledTasks class
@@ -37,15 +38,16 @@ import org.springframework.test.context.ActiveProfiles;
  */
 @SpringBootTest
 @ActiveProfiles("test")
+@DisabledInAotMode
 public class ScheduledTasksTest {
 
-    @MockBean
+    @MockitoBean
     private EmailService emailService;
 
-    @MockBean
+    @MockitoBean
     private UserService userService;
 
-    @MockBean
+    @MockitoBean
     private KeycloakClient keycloakClient;
 
     @Autowired
