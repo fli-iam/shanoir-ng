@@ -410,12 +410,16 @@ services:
       POSTGRES_HOST: "${SHANOIR_PREFIX}dcm4chee-database"
       WILDFLY_CHOWN: /storage
       WILDFLY_WAIT_FOR: "${SHANOIR_PREFIX}ldap:389 ${SHANOIR_PREFIX}dcm4chee-database:5432"
+    entrypoint: ["/opt/shanoir/entrypoint-wrapper.sh"]
+    command: ["standalone.sh", "-b", "0.0.0.0", "-bmanagement", "0.0.0.0"]
     depends_on:
       - "ldap"
       - "dcm4chee-database"
     volumes:
       - "dcm4chee-arc-wildfly-data:/opt/wildfly/standalone"
       - "dcm4chee-arc-storage-data:/storage"
+      - "./docker-compose/dcm4chee/entrypoint-wrapper.sh:/opt/shanoir/entrypoint-wrapper.sh:ro"
+      - "./docker-compose/dcm4chee/tune-wildfly-io-worker.sh:/opt/shanoir/tune-wildfly-io-worker.sh:ro"
   #
   # Nginx
   #

@@ -51,7 +51,7 @@ public class PlannedExecutionManager {
     private static final Logger LOG = LoggerFactory.getLogger(PlannedExecutionManager.class);
 
     private  int maxStatusRetries = 3;
-    private long statusSleepSeconds = 20;
+    private long statusSleepSeconds = 2000;
     private int maxThreads = 3;
 
     private List<ExecutionInQueue> executionsQueue = new ArrayList<>();
