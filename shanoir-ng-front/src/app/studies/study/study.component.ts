@@ -313,6 +313,10 @@ export class StudyComponent extends EntityComponent<Study> {
 
         formGroup.setValidators(this.inclusionRatePairValidator.bind(this));
 
+        // Mark as touched right away so the "at least one center is required" messages
+        // are visible from the start on a study with no center yet.
+        formGroup.get('studyCenterList')?.markAsTouched();
+
         formGroup.get('startDate')?.valueChanges.subscribe(() => {
             formGroup.get('endDate')?.updateValueAndValidity();
         });
@@ -480,12 +484,15 @@ export class StudyComponent extends EntityComponent<Study> {
         const studyCenterListControl = this.form.get('studyCenterList');
         studyCenterListControl.setValue([...this.study.studyCenterList]);
         studyCenterListControl.markAsDirty();
+        studyCenterListControl.markAsTouched();
         studyCenterListControl.updateValueAndValidity();
     }
 
     onPrefixChange() {
-        this.form.get('studyCenterList').markAsDirty();
-        this.form.get('studyCenterList').updateValueAndValidity();
+        const studyCenterListControl = this.form.get('studyCenterList');
+        studyCenterListControl.markAsDirty();
+        studyCenterListControl.markAsTouched();
+        studyCenterListControl.updateValueAndValidity();
     }
 
     private validateCenter = (): ValidationErrors | null => {
@@ -502,6 +509,7 @@ export class StudyComponent extends EntityComponent<Study> {
         const studyCenterListControl = this.form.get('studyCenterList');
         studyCenterListControl.setValue([...this.study.studyCenterList]);
         studyCenterListControl.markAsDirty();
+        studyCenterListControl.markAsTouched();
         studyCenterListControl.updateValueAndValidity();
     }
 

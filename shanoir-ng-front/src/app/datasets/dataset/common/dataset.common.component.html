@@ -136,8 +136,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <input
                             type="text"
                             [ngModel]="dataset.updatedMetadata.name ? dataset.updatedMetadata.name : dataset.originMetadata.name"
-                            (ngModelChange)="dataset.updatedMetadata.name = $event"
-                            (change)="updateForm()"
+                            (ngModelChange)="dataset.updatedMetadata.name = $event; updateForm()"
                             [ngModelOptions]="{ standalone: true }" />
                     }
                 }
@@ -154,8 +153,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <input
                             type="text"
                             [ngModel]="dataset.updatedMetadata.comment ? dataset.updatedMetadata.comment : dataset.originMetadata.comment"
-                            (ngModelChange)="dataset.updatedMetadata.comment = $event"
-                            (change)="updateForm()"
+                            (ngModelChange)="dataset.updatedMetadata.comment = $event; updateForm()"
                             [ngModelOptions]="{ standalone: true }" />
                     }
                 }
