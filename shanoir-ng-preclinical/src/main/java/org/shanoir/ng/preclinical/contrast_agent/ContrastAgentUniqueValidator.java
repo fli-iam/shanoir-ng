@@ -14,10 +14,10 @@
 
 package org.shanoir.ng.preclinical.contrast_agent;
 
-import org.shanoir.ng.shared.validation.UniqueConstraintManagerImpl;
+import org.shanoir.ng.shared.validation.UniqueConstraintManager;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ContrastAgentUniqueValidator extends UniqueConstraintManagerImpl<ContrastAgent> {
+public class ContrastAgentUniqueValidator extends UniqueConstraintManager<ContrastAgent> {
 
 }

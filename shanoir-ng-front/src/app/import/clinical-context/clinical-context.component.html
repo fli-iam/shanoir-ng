@@ -34,6 +34,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <span class="right-col">
                     <select-box
                         [(ngModel)]="study"
+                        [ngModelOptions]="{ standalone: true }"
                         (userChange)="onSelectStudy()"
                         [viewRoute]="'/study/details/' + $safeNavigationMigration(study?.id)"
                         [viewDisabled]="!study"
@@ -61,6 +62,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <span class="right-col">
                         <select-box
                             [(ngModel)]="studycard"
+                            [ngModelOptions]="{ standalone: true }"
                             (userChange)="onSelectStudyCard()"
                             [viewRoute]="'/study-card/details/' + $safeNavigationMigration(studycard?.id)"
                             (userClear)="onClearStudyCard()"
@@ -119,6 +121,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             [disabled]="(!useStudyCard && (!study || !centerOptions)) || loading != 0"
                             [readOnly]="useStudyCard && (modality == 'MR' || modality == 'bruker')"
                             [(ngModel)]="center"
+                            [ngModelOptions]="{ standalone: true }"
                             (userChange)="onSelectCenter()"
                             [viewRoute]="'/center/details/' + $safeNavigationMigration(center?.id)"
                             [viewDisabled]="!center"
@@ -156,6 +159,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             [disabled]="(!useStudyCard && (!center || !acquisitionEquipmentOptions)) || loading != 0"
                             [readOnly]="useStudyCard && (modality == 'MR' || modality == 'bruker')"
                             [(ngModel)]="acquisitionEquipment"
+                            [ngModelOptions]="{ standalone: true }"
                             (userChange)="onContextChange()"
                             [viewRoute]="'/acquisition-equipment/details/' + $safeNavigationMigration(acquisitionEquipment?.id)"
                             [viewDisabled]="!acquisitionEquipment"
@@ -194,6 +198,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         class="subject-select"
                         [disabled]="loading != 0 || !study || !acquisitionEquipment"
                         [(ngModel)]="subject"
+                        [ngModelOptions]="{ standalone: true }"
                         (userChange)="onSelectSubject()"
                         [viewRoute]="'/subject/details/' + $safeNavigationMigration(this.subject?.id)"
                         [viewDisabled]="!subject"
@@ -221,6 +226,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         class="examination-select"
                         [disabled]="!study || !subject || loading != 0"
                         [(ngModel)]="examination"
+                        [ngModelOptions]="{ standalone: true }"
                         (userChange)="onSelectExam()"
                         [viewRoute]="'/examination/details/' + $safeNavigationMigration(this.examination?.id)"
                         [viewDisabled]="!examination"

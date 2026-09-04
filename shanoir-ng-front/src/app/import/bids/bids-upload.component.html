@@ -68,6 +68,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <span class="right-col">
                 <select-box
                     [(ngModel)]="study"
+                    [ngModelOptions]="{ standalone: true }"
                     (userChange)="onSelectStudy()"
                     [viewRoute]="'/study/details/' + $safeNavigationMigration(study?.id)"
                     [viewDisabled]="!study"
@@ -80,6 +81,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <select-box
                     [disabled]="!study || !centerOptions || this.study?.studyCenterList?.length == 1"
                     [(ngModel)]="center"
+                    [ngModelOptions]="{ standalone: true }"
                     [viewRoute]="'/center/details/' + $safeNavigationMigration(center?.id)"
                     [viewDisabled]="!center"
                     [options]="centerOptions"></select-box>

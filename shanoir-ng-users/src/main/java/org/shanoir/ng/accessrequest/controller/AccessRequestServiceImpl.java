@@ -20,6 +20,7 @@ import java.util.Optional;
 import org.shanoir.ng.accessrequest.model.AccessRequest;
 import org.shanoir.ng.accessrequest.repository.AccessRequestRepository;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -60,7 +61,7 @@ public class AccessRequestServiceImpl implements AccessRequestService {
 
     @Override
     public List<AccessRequest> findByStudyIdAndStatus(List<Long> studiesId, int status) {
-        return this.accessRequestRepository.findByStudyIdInAndStatus(studiesId, AccessRequest.ON_DEMAND);
+        return this.accessRequestRepository.findByStudyIdInAndStatus(studiesId, status);
     }
 
     @Override
@@ -71,6 +72,27 @@ public class AccessRequestServiceImpl implements AccessRequestService {
     @Override
     public List<AccessRequest> findByUserId(Long userId) {
         return this.accessRequestRepository.findByUserId(userId);
+    }
+
+    @Override
+    public void requestExtension(Long studyId, Long userId, java.time.LocalDate extensionDate) {
+        List<AccessRequest> accessRequests = this.accessRequestRepository.findByUserIdAndStudyId(userId, studyId);
+        if (!accessRequests.isEmpty()) {
+            AccessRequest accessRequest = accessRequests.get(0);
+            accessRequest.setExpirationDate(extensionDate);
+            accessRequest.setStatus(AccessRequest.ON_EXTENSION_DEMAND);
+            this.accessRequestRepository.save(accessRequest);
+        } else {
+            AccessRequest accessRequest = new AccessRequest();
+            accessRequest.setStudyId(studyId);
+            User user = new User();
+            user.setId(userId);
+            accessRequest.setUser(user);
+            accessRequest.setExpirationDate(extensionDate);
+            accessRequest.setStatus(AccessRequest.ON_EXTENSION_DEMAND);
+            accessRequest.setMotivation("This is an extension request, please check the asked expiration date.");
+            this.accessRequestRepository.save(accessRequest);
+        }
     }
 
 }

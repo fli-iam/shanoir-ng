@@ -25,12 +25,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         [route]="node.route"
         [hasBox]="hasBox"
         [(ngModel)]="node.selected"
+        [ngModelOptions]="{ standalone: true }"
         (chkbxChange)="selectedChange.emit()"
         (firstOpen)="firstOpen()"
         [hasChildren]="hasChildren()"
         [dataLoading]="loading"
         [title]="node.title + ' n°' + node.id">
-      
+
         @if (menuOpened && withMenu && node.id != null) {
             <dropdown-menu [(openInput)]="menuOpened">
                 <a [routerLink]="detailsPath + node.id" class="open-new-tab">
@@ -49,8 +50,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 }
             </dropdown-menu>
         }
-        @if (node.open && node.datasetAcquisitions && node.datasetAcquisitions != UNLOADED) {
-            @for (datasetAcqNode of node.datasetAcquisitions; track datasetAcqNode; let i = $index) {
+        @if (node.open && node.datasetAcquisitions && node.datasetAcquisitions != 'UNLOADED') {
+            @for (datasetAcqNode of $any(node.datasetAcquisitions); track datasetAcqNode; let i = $index) {
                 <dataset-acquisition-node
                     node
                     [input]="datasetAcqNode"
