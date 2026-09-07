@@ -81,9 +81,6 @@ public class ExecutionServiceImpl implements ExecutionService {
     private DatasetService datasetService;
 
     @Autowired
-    private DatasetSecurityService datasetSecurityService;
-
-    @Autowired
     private KeycloakServiceAccountUtils keycloakServiceAccountUtils;
 
     @Autowired
