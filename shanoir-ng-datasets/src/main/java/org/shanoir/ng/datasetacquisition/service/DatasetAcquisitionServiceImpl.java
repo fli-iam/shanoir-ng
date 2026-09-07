@@ -342,16 +342,9 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
             event.setMessage("Delete examination - datasetAcquisition with id : " + id);
             shanoirEventService.publishEvent(event);
         }
+        // the examination deletion event reports this deletion, no acquisition event is published
+        // here: one per acquisition would only flood the jobs
         delete(entity, event);
-
-        shanoirEventService.publishEvent(new ShanoirEvent(
-                ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT,
-                id.toString(),
-                KeycloakUtil.getTokenUserId(),
-                "Dataset acquisition " + id + " deleted.",
-                ShanoirEvent.SUCCESS,
-                1f,
-                entity.getExamination().getStudyId()));
     }
 
     @Override

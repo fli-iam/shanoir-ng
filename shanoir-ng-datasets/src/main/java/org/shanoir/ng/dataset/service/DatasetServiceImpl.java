@@ -191,6 +191,12 @@ public class DatasetServiceImpl implements DatasetService {
     @Override
     @Transactional
     public void deleteById(final Long id) throws ShanoirException, SolrServerException, IOException, RestServiceException {
+        deleteById(id, false);
+    }
+
+    @Override
+    @Transactional
+    public void deleteById(final Long id, final boolean cascade) throws ShanoirException, SolrServerException, IOException, RestServiceException {
         final Dataset dataset = repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(Dataset.class, id));
         // Do not delete entity if it is the source (or if it has copies). If getSourceId() is not null, it means it's a copy
@@ -203,7 +209,7 @@ public class DatasetServiceImpl implements DatasetService {
         }
         long startTime = System.currentTimeMillis();
         delete(dataset);
-        deleteDatasetFilesFromDiskAndPacs(dataset);
+        deleteDatasetFilesFromDiskAndPacs(dataset, cascade);
         long endTime = System.currentTimeMillis();
         long elapsedTime = endTime - startTime;
         LOG.info("Dataset deletion time: " + elapsedTime + " milliseconds");
@@ -211,6 +217,7 @@ public class DatasetServiceImpl implements DatasetService {
 
     /**
      * Called by acquisition delete. Does not reject from pacs as acquisition already does it.
+     * The deletion is reported by the parent event only: no deletion event is published here.
      * @param id
      * @throws ShanoirException
      * @throws SolrServerException
@@ -227,10 +234,14 @@ public class DatasetServiceImpl implements DatasetService {
                     ));
         }
 
-        datasetService.deleteById(id);
+        datasetService.deleteById(id, true);
     }
 
     public void deleteDatasetFilesFromDiskAndPacs(Dataset dataset) throws ShanoirException {
+        deleteDatasetFilesFromDiskAndPacs(dataset, false);
+    }
+
+    private void deleteDatasetFilesFromDiskAndPacs(Dataset dataset, boolean cascade) throws ShanoirException {
         if (!dicomWeb) {
             return;
         }
@@ -239,7 +250,7 @@ public class DatasetServiceImpl implements DatasetService {
             boolean isDicom = DatasetExpressionFormat.DICOM.equals(expression.getDatasetExpressionFormat());
             List<DatasetFile> datasetFiles = expression.getDatasetFiles();
             if (dataset.getSource() == null)
-                datasetAsyncService.deleteDatasetFilesFromDiskAndPacsAsync(datasetFiles, isDicom, id);
+                datasetAsyncService.deleteDatasetFilesFromDiskAndPacsAsync(datasetFiles, isDicom, id, cascade);
         }
     }
 

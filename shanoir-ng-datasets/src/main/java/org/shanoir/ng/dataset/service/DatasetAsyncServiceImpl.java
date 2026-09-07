@@ -41,34 +41,43 @@ public class DatasetAsyncServiceImpl implements DatasetAsyncService {
     @Autowired
     private ShanoirEventService eventService;
 
-    public void deleteDatasetFilesFromDiskAndPacs(List<DatasetFile> datasetFiles, boolean isDicom, Long datasetId) throws ShanoirException {
-        deleteDatasetFilesFromDiskAndPacsAsync(datasetFiles, isDicom, datasetId);
+    public void deleteDatasetFilesFromDiskAndPacs(List<DatasetFile> datasetFiles, boolean isDicom, Long datasetId, boolean cascade) throws ShanoirException {
+        deleteDatasetFilesFromDiskAndPacsAsync(datasetFiles, isDicom, datasetId, cascade);
     }
 
+    /**
+     * @param cascade true when a parent deletion (acquisition, examination...) drives this one and
+     *                already reports its own progress: no dataset deletion event is published then,
+     *                to avoid flooding the jobs with one event per deleted dataset.
+     */
     @Override
     @Async
-    public void deleteDatasetFilesFromDiskAndPacsAsync(List<DatasetFile> datasetFiles, boolean isDicom, Long datasetId) throws ShanoirException {
+    public void deleteDatasetFilesFromDiskAndPacsAsync(List<DatasetFile> datasetFiles, boolean isDicom, Long datasetId, boolean cascade) throws ShanoirException {
 
         ShanoirEvent event = null;
-        event = new ShanoirEvent(
-                ShanoirEventType.DELETE_DATASET_EVENT,
-                String.valueOf(datasetId),
-                KeycloakUtil.getTokenUserId(),
-                "Delete dataset with id :" + datasetId,
-                ShanoirEvent.IN_PROGRESS,
-                0f,
-                null);
+        if (!cascade) {
+            event = new ShanoirEvent(
+                    ShanoirEventType.DELETE_DATASET_EVENT,
+                    String.valueOf(datasetId),
+                    KeycloakUtil.getTokenUserId(),
+                    "Delete dataset with id :" + datasetId,
+                    ShanoirEvent.IN_PROGRESS,
+                    0f,
+                    null);
 
-        eventService.publishEvent(event);
+            eventService.publishEvent(event);
+        }
 
         for (DatasetFile file : datasetFiles) {
             // DICOM
             if (isDicom && file.isPacs()) {
                 dicomWebService.rejectDatasetFromPacs(file.getPath());
-                float progress = event.getProgress();
-                progress += 1f / datasetFiles.size();
-                event.setProgress(progress);
-                eventService.publishEvent(event);
+                if (event != null) {
+                    float progress = event.getProgress();
+                    progress += 1f / datasetFiles.size();
+                    event.setProgress(progress);
+                    eventService.publishEvent(event);
+                }
                 // NIfTI
             } else if (!file.isPacs()) {
                 try {
@@ -81,9 +90,11 @@ public class DatasetAsyncServiceImpl implements DatasetAsyncService {
             }
         }
 
-        event.setMessage("Dataset " + datasetId + " deleted.");
-        event.setProgress(1f);
-        event.setStatus(ShanoirEvent.SUCCESS);
-        eventService.publishEvent(event);
+        if (event != null) {
+            event.setMessage("Dataset " + datasetId + " deleted.");
+            event.setProgress(1f);
+            event.setStatus(ShanoirEvent.SUCCESS);
+            eventService.publishEvent(event);
+        }
     }
 }

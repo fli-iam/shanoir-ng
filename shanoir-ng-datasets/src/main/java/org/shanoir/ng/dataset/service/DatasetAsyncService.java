@@ -23,5 +23,5 @@ public interface DatasetAsyncService {
 
 
     // No PreAuthorize here since it's always called after a security check
-    void deleteDatasetFilesFromDiskAndPacsAsync(List<DatasetFile> datasetFiles, boolean isDicom, Long datasetId) throws ShanoirException;
+    void deleteDatasetFilesFromDiskAndPacsAsync(List<DatasetFile> datasetFiles, boolean isDicom, Long datasetId, boolean cascade) throws ShanoirException;
 }
