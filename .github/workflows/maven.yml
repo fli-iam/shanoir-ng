@@ -32,11 +32,11 @@ jobs:
       run: git fetch --no-tags --no-recurse-submodules --depth=1 origin +refs/heads/master:refs/remotes/origin/master
 #    - name: check migration names
 #      run: cd docker-compose/database-migrations && ./check_migration_names.py
-    - name: Set up JDK 21
+    - name: Set up JDK 25
       uses: actions/setup-java@v4
       with:
         distribution: temurin
-        java-version: 21
+        java-version: 25
     - name: Create directory /shanoir-ng-logs
       run: sudo mkdir -m777 /var/log/shanoir-ng-logs
     - name: Maven cache
@@ -67,6 +67,8 @@ jobs:
         SHANOIR_KEYCLOAK_PASSWORD: '&a1A&a1A'
         SHANOIR_CONTINUANCE_HOUR: 5
         SHANOIR_SHUTDOWN_HOUR: 2
+        SHANOIR_SMTP_HOST: localhost
+        SHANOIR_SMTP_PORT: 25
         VIP_URL_SCHEME: https
         VIP_URL_HOST: vip
         VIP_CLIENT_SECRET: SECRET

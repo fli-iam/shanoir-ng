@@ -54,6 +54,7 @@ export class TaskService extends EntityService<Task> {
         trueObject.id = Number(trueObject.id);
         trueObject.studyId = Number(trueObject.studyId);
         trueObject.objectId = Number(trueObject.objectId);
+        trueObject.recomputeRoute();
         return trueObject;
     }
 

@@ -31,6 +31,7 @@ import org.shanoir.ng.role.model.Role;
 import org.shanoir.ng.role.repository.RoleRepository;
 import org.shanoir.ng.role.service.RoleServiceImpl;
 import org.shanoir.ng.utils.ModelsUtil;
+import org.springframework.test.context.aot.DisabledInAotMode;
 
 /**
  * User detail service test.
@@ -39,6 +40,7 @@ import org.shanoir.ng.utils.ModelsUtil;
  *
  */
 @RunWith(MockitoJUnitRunner.class)
+@DisabledInAotMode
 public class RoleServiceTest {
 
     @Mock

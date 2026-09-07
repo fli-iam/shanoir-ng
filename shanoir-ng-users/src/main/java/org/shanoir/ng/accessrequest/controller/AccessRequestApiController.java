@@ -15,24 +15,26 @@
 package org.shanoir.ng.accessrequest.controller;
 
 import java.time.LocalDate;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import io.swagger.v3.oas.annotations.Parameter;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.shanoir.ng.accessrequest.model.AccessRequest;
+import org.shanoir.ng.accessrequest.model.ValidationDTO;
 import org.shanoir.ng.email.EmailService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.email.StudyInvitationEmail;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
+import org.shanoir.ng.shared.event.UserAccessData;
 import org.shanoir.ng.shared.exception.AccountNotOnDemandException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.user.model.User;
@@ -42,8 +44,10 @@ import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpException;
+import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -53,16 +57,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.shanoir.ng.accessrequest.model.ValidationDTO;
-import org.shanoir.ng.shared.core.model.IdName;
-import org.shanoir.ng.shared.event.UserAccessData;
-import org.shanoir.ng.study.rights.StudyRightsService;
-import org.springframework.amqp.AmqpRejectAndDontRequeueException;
-import org.springframework.beans.factory.annotation.Value;
+import io.swagger.v3.oas.annotations.Parameter;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Api for access request, to make a demand on
@@ -102,7 +99,7 @@ public class AccessRequestApiController implements AccessRequestApi {
     private static final Logger LOG = LoggerFactory.getLogger(AccessRequestApiController.class);
 
     public ResponseEntity<AccessRequest> saveNewAccessRequest(
-            @Parameter(name = "access request to create", required = true) @RequestBody AccessRequest request,
+            AccessRequest request,
             BindingResult result) throws RestServiceException {
         // Create a new access request
         User user = userService.findById(KeycloakUtil.getTokenUserId());
@@ -207,7 +204,7 @@ public class AccessRequestApiController implements AccessRequestApi {
     public ResponseEntity<Void> resolveNewAccessRequest(
             @Parameter(name = "id of the access request to resolve", required = true) @PathVariable("accessRequestId") Long accessRequestId,
             @Parameter(name = "Accept or refuse the request", required = true) @RequestBody ValidationDTO validation,
-            BindingResult result) throws RestServiceException, AccountNotOnDemandException, EntityNotFoundException, JsonProcessingException, AmqpException {
+            BindingResult result) throws RestServiceException, AccountNotOnDemandException, EntityNotFoundException, JacksonException, AmqpException {
         AccessRequest resolvedRequest = accessRequestService.findById(accessRequestId).orElse(null);
         int status = resolvedRequest != null ? resolvedRequest.getStatus() : -1;
         if (resolvedRequest == null || (status != AccessRequest.ON_DEMAND && status != AccessRequest.ON_EXTENSION_DEMAND)) {
@@ -322,20 +319,13 @@ public class AccessRequestApiController implements AccessRequestApi {
         return new ResponseEntity<AccessRequest>(acceReq, HttpStatus.OK);
     }
 
-    public     ResponseEntity<AccessRequest> inviteUserToStudy(
-            @Parameter(name = "Study the user is invited in", required = true)
-                @RequestParam(value = "studyId", required = true) Long studyId,
-            @Parameter(name = "Study name the user is invited in", required = true)
-                @RequestParam(value = "studyName", required = true) String studyName,
-            @Parameter(name = "Issuer of the invitation", required = true)
-                @RequestParam(value = "issuer", required = false) String issuer,
-            @Parameter(name = "The future function of the user in the study he is invited in", required = true)
-                @RequestParam(value = "function", required = false) String function,
-            @Parameter(name = "The email or login of the invited user.")
-                @RequestParam(value = "email", required = true) String emailOrLogin) throws RestServiceException, JsonProcessingException, AmqpException {
-
+    public ResponseEntity<AccessRequest> inviteUserToStudy(
+            Long studyId,
+            String studyName,
+            String issuer,
+            String function,
+            String emailOrLogin) throws RestServiceException, JacksonException, AmqpException {
         boolean isEmail = emailOrLogin.contains("@");
-
         User user;
 
         if (isEmail) {
@@ -356,7 +346,6 @@ public class AccessRequestApiController implements AccessRequestApi {
                     studyId);
             eventService.publishEvent(subscription);
 
-
             // User exists => return an access request to be added
             // create a new access request to return
             AccessRequest request = new AccessRequest();
@@ -371,7 +360,7 @@ public class AccessRequestApiController implements AccessRequestApi {
             if (isEmail) {
                 StudyInvitationEmail mail = new StudyInvitationEmail();
                 mail.setInvitedMail(emailOrLogin);
-                mail.setStudyId(studyId.toString());
+                mail.setStudyId(studyId);
                 mail.setStudyName(studyName);
                 mail.setInvitationIssuer(issuer);
                 mail.setFunction(function);
@@ -380,14 +369,12 @@ public class AccessRequestApiController implements AccessRequestApi {
             } else {
                 return new ResponseEntity<AccessRequest>(HttpStatus.BAD_REQUEST);
             }
-
         }
-
     }
 
     public ResponseEntity<List<AccessRequest>> findAllByStudyId(
-            @Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId) throws RestServiceException {
-
+            Long studyId) throws RestServiceException {
         return new ResponseEntity<List<AccessRequest>>(this.accessRequestService.findByStudyIdAndStatus(Collections.singletonList(studyId), AccessRequest.ON_DEMAND), HttpStatus.OK);
     }
+
 }

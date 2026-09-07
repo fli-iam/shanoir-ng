@@ -50,13 +50,16 @@ public class ShanoirEventsService {
     @Autowired
     private ShanoirEventRepositoryCustom repositoryCustom;
 
+    @Autowired
+    private ShanoirEventMapper shanoirEventMapper;
+
     private static final Logger LOG = LoggerFactory.getLogger(ShanoirEventsService.class);
 
     public static final long INACTIVE_TIMEOUT = 5 * DateUtils.MILLIS_PER_MINUTE;
 
-    public void addEvent(ShanoirEvent event) {
-        // Call repository
-        repository.save(event);
+    public void addEvent(org.shanoir.ng.shared.event.ShanoirEvent event) {
+        org.shanoir.ng.events.ShanoirEvent localEvent = shanoirEventMapper.toLocalEvent(event);
+        repository.save(localEvent);
         // This is sad but with the @CreationTimestamp the date is not returned by the
         // save method
         ShanoirEvent saved = repository.findById(event.getId()).orElse(null);
@@ -91,7 +94,8 @@ public class ShanoirEventsService {
             list.add(type);
         }
         List<ShanoirEvent> dbEvents = Utils
-                .toList(repository.findByUserIdAndEventTypeInAndLastUpdateYoungerThan7Days(userId, list));
+                .toList(repository.findByUserIdAndEventTypeInAndLastUpdateGreaterThan(userId, list,
+                        DateUtils.addDays(new Date(), -1 * ShanoirEventRepository.TIMEOUT_DAYS)));
         List<ShanoirEventLight> events = new ArrayList<>();
         cleanEvents(dbEvents);
         for (ShanoirEvent event : dbEvents) {
@@ -192,7 +196,8 @@ public class ShanoirEventsService {
      * @return number of events
      */
     public Long countPassedEvents(Integer days) {
-        return repository
+        return repositoryCustom
                 .countByLastUpdateAfter(new Date(System.currentTimeMillis() - days * DateUtils.MILLIS_PER_DAY));
     }
+
 }

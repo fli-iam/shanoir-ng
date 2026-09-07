@@ -14,11 +14,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
       
-      - name: JDK 21
+      - name: JDK 25
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 21
+          java-version: 25
 
       - name: Maven cache
         uses: actions/cache@v4
@@ -27,7 +27,7 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-maven-
 
-      - name: Publish Maven package ng-back
-        run: mvn -f ./shanoir-ng-back/pom.xml --batch-mode deploy
+      - name: Publish Maven package ng-parent
+        run: mvn -f ./shanoir-ng-parent/pom.xml --batch-mode deploy
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -56,11 +56,9 @@ public class RabbitMqStudyUserService {
         StudyUserCommand[] commands;
         try {
             LOG.debug("Received study-user commands : {}", commandArrStr);
-
             SimpleModule module = new SimpleModule();
             module.addAbstractTypeMapping(StudyUserInterface.class, StudyUser.class);
             mapper.registerModule(module);
-
             commands = mapper.readValue(commandArrStr, StudyUserCommand[].class);
             service.processCommands(Arrays.asList(commands));
         } catch (Exception e) {
@@ -81,7 +79,8 @@ public class RabbitMqStudyUserService {
     @RabbitHandler
     @Transactional
     public List<Long> getStudiesICanAdmin(Long userId) {
-        List<StudyUser> sus = Utils.toList(this.studyUserRightsRepository.findByUserIdAndRight(userId, StudyUserRight.CAN_ADMINISTRATE.getId()));
+        List<StudyUser> sus = Utils.toList(
+                this.studyUserRightsRepository.findByUserIdAndRight(userId, StudyUserRight.CAN_ADMINISTRATE.getId()));
         if (CollectionUtils.isEmpty(sus)) {
             return null;
         }
@@ -95,13 +94,12 @@ public class RabbitMqStudyUserService {
     @RabbitHandler
     @Transactional
     public List<Long> getStudyAdmins(Long studyId) {
-        List<StudyUser> admins = Utils.toList(this.studyUserRightsRepository.findByStudyIdAndRight(studyId, StudyUserRight.CAN_ADMINISTRATE.getId()));
+        List<StudyUser> admins = Utils.toList(
+                this.studyUserRightsRepository.findByStudyIdAndRight(studyId, StudyUserRight.CAN_ADMINISTRATE.getId()));
         if (CollectionUtils.isEmpty(admins)) {
             return null;
         }
-        return admins.stream()
-            .filter(StudyUser::canAccessStudy)
-            .map(StudyUser::getUserId)
-            .collect(Collectors.toList());
+        return admins.stream().map(studyUser -> studyUser.getUserId()).collect(Collectors.toList());
     }
+
 }

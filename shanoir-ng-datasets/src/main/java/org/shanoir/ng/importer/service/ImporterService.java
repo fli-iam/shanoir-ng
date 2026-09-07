@@ -61,6 +61,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import ch.qos.logback.core.util.StringUtil;
+import jakarta.transaction.Transactional;
 
 @Service
 @Scope("prototype")
@@ -121,6 +122,7 @@ public class ImporterService {
         return ImporterService.instancesCreated;
     }
 
+    @Transactional
     public void createAllDatasetAcquisition(ImportJob importJob, Long userId) throws ShanoirException {
         LOG.info("createAllDatasetAcquisition: " + this + " ImporterService-instances created: " + getInstancesCreated());
         ShanoirEvent event = importJob.getShanoirEvent();

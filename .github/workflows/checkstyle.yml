@@ -26,11 +26,11 @@ jobs:
       - name: Code checkout
         uses: actions/checkout@v3
 
-      - name: Set up JDK 21
+      - name: Set up JDK 25
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 21
+          java-version: 25
           cache: 'maven'
 
       - name: Maven cache
@@ -42,7 +42,7 @@ jobs:
 
       - name: Download dependencies
         run: mvn dependency:go-offline --batch-mode
-        working-directory: ./shanoir-ng-back/
+        working-directory: ./shanoir-ng-parent/
 
       - name: Run Checkstyle
         run: |
@@ -53,6 +53,8 @@ jobs:
           modules=(
             "org.shanoir-ng:shanoir-ng-ms-common"
             "org.shanoir-ng:shanoir-ng-study-rights"
+            "org.shanoir-ng:shanoir-ng-ms-common-jackson3"
+            "org.shanoir-ng:shanoir-ng-study-rights-jackson3"
             "org.shanoir-ng:shanoir-ng-users"
             "org.shanoir.anonymization:anonymization"
             "org.shanoir-ng:shanoir-ng-studies"
@@ -71,7 +73,7 @@ jobs:
           done
 
           exit $EXIT
-        working-directory: ./shanoir-ng-back/
+        working-directory: ./shanoir-ng-parent/
 
   eslint:
     runs-on: ubuntu-latest

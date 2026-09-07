@@ -40,7 +40,7 @@ public class JacksonConfiguration {
      * Allows to configure the Jackson object mapper.
      *
      * @param objectMapper
-     *            an instance of {@link ObjectMapper}.
+     *                     an instance of {@link ObjectMapper}.
      */
     @Autowired
     public void configureJacksonObjectMapper(final ObjectMapper objectMapper) {
@@ -76,7 +76,8 @@ public class JacksonConfiguration {
 
     public class MyClassSerializerModifier extends BeanSerializerModifier {
         @Override
-        public JsonSerializer<?> modifySerializer(SerializationConfig config, BeanDescription beanDesc, JsonSerializer<?> serializer) {
+        public JsonSerializer<?> modifySerializer(SerializationConfig config, BeanDescription beanDesc,
+                JsonSerializer<?> serializer) {
             if (beanDesc.getBeanClass() == Page.class) {
                 return new MyClassSerializer((JsonSerializer<Object>) serializer);
             }

@@ -75,10 +75,10 @@ public class BidsImporterApiController implements BidsImporterApi {
     private RabbitTemplate rabbitTemplate;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private ShanoirEventService eventService;
 
     @Autowired
-    private ShanoirEventService eventService;
+    private ObjectMapper objectMapper;
 
     @Autowired
     private ImportJobStatusService importJobStatusService;
@@ -139,7 +139,7 @@ public class BidsImporterApiController implements BidsImporterApi {
                 importJob.setSubjectName(subjectName);
 
                 // Create subject
-                subjectId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECTS_QUEUE_WITH_DATASETS, objectMapper.writeValueAsString(subject));
+                subjectId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECTS_QUEUE_WITH_DATASETS, subject);
                 if (subjectId == null) {
                     throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), SUBJECT_CREATION_ERROR, null));
                 }
@@ -181,12 +181,12 @@ public class BidsImporterApiController implements BidsImporterApi {
                     examCreated = true;
 
                     // Create multiple examinations for every session folder
-                    examId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EXAMINATION_CREATION_QUEUE, objectMapper.writeValueAsString(examination));
+                    examId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EXAMINATION_CREATION_QUEUE, examination);
 
                     if (examId == null) {
                         throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), EXAMINATION_CREATION_ERROR, null));
                     }
-                    publishExaminationCreatedEvent(examId, examination, centerId, dateResolution);
+                    publishExaminationCreatedEvent(studyId, examId, subjectId, centerId, dateResolution);
 
                     importJob.setExaminationId(examId);
 
@@ -211,12 +211,12 @@ public class BidsImporterApiController implements BidsImporterApi {
                         }
                         examination = ImportUtils.createExam(studyId, centerId, subjectId, "",
                                 dateResolution.getDate(), subjectName);
-                        examId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EXAMINATION_CREATION_QUEUE, objectMapper.writeValueAsString(examination));
+                        examId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EXAMINATION_CREATION_QUEUE, examination);
 
                         if (examId == null) {
                             throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), EXAMINATION_CREATION_ERROR, null));
                         }
-                        publishExaminationCreatedEvent(examId, examination, centerId, dateResolution);
+                        publishExaminationCreatedEvent(studyId, examId, subjectId, centerId, dateResolution);
 
                         importJob.setExaminationId(examId);
                         examCreated = true;
@@ -230,12 +230,20 @@ public class BidsImporterApiController implements BidsImporterApi {
         return new ResponseEntity<>(null, HttpStatus.OK);
     }
 
-    private void publishExaminationCreatedEvent(Long examId, ExaminationDTO examination, Long centerId,
+    /**
+     * This method publish an Event to link in ms-studies the
+     * new created exam with the study.
+     * @param studyId
+     * @param examId
+     * @param subjectId
+     * @param centerId
+     * @param dateResolution
+     */
+    private void publishExaminationCreatedEvent(Long studyId, Long examId, Long subjectId, Long centerId,
             BidsExaminationDateResolution dateResolution) {
-        String message = dateResolution.formatEventMessage() + ";centerId:" + centerId + ";subjectId:"
-                + examination.getSubject().getId();
+        String message = dateResolution.formatEventMessage() + ";centerId:" + centerId + ";subjectId:" + subjectId;
         eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EXAMINATION_EVENT, examId.toString(),
-                KeycloakUtil.getTokenUserId(), message, ShanoirEvent.SUCCESS, examination.getStudyId()));
+                KeycloakUtil.getTokenUserId(), message, ShanoirEvent.SUCCESS, studyId));
     }
 
     /**
