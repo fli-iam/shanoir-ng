@@ -170,11 +170,12 @@ class SeriesInstanceUIDHandlerTest {
         DatasetProcessing processing = new DatasetProcessing();
         processing.setOutputDatasets(List.of(createDataset(new GenericDataset(), 600L,
                 "/studies/1.2.3/series/" + SERIES_UID_OUTPUT + "/instances/1.2.6")));
-        when(datasetProcessingRepository.findAllByInputDatasets_IdIn(anyList())).thenReturn(List.of(processing));
+        when(datasetProcessingRepository.findAllByInputDatasets_IdInWithOutputsAndDatasetFile(anyList())).thenReturn(List.of(processing));
 
         Map<String, String> seriesToVirtualUIDs = handler.findSeriesToVirtualUIDs(42L);
 
         assertEquals(3, seriesToVirtualUIDs.size());
+
         assertEquals("1.4.9.12.34.1.8527.100", seriesToVirtualUIDs.get(SERIES_UID_ACQ));
         assertEquals("1.4.9.12.34.1.8527.0.500", seriesToVirtualUIDs.get(SERIES_UID_SEG));
         assertEquals("1.4.9.12.34.1.8527.0.600", seriesToVirtualUIDs.get(SERIES_UID_OUTPUT));
