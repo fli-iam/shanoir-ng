@@ -24,6 +24,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -280,12 +281,25 @@ class DatasetAcquisitionServiceImplTest {
         verify(repository).deleteById(ACQ_ID);
         // the emptiness of the acquisition is never even questioned on this path
         verify(datasetRepository, never()).countByDatasetAcquisitionId(Mockito.anyLong());
+    }
+
+    /**
+     * The examination deletion reports its own progress on a single event: an acquisition deleted
+     * as part of that cascade must not add an event of its own, one per acquisition would only
+     * flood the jobs of the user.
+     */
+    @Test
+    void deleteByIdCascadeOnlyReportsProgressOnTheExaminationEvent() throws Exception {
+        acquisition.setDatasets(List.of(dataset(11L), dataset(12L)));
+        ShanoirEvent examinationEvent = new ShanoirEvent(
+                ShanoirEventType.DELETE_EXAMINATION_EVENT, "7", 1L, "", ShanoirEvent.IN_PROGRESS, 0f, STUDY_ID);
+        examinationEvent.setEventProperties(Map.of("progressMax", "2"));
+
+        service.deleteByIdCascade(ACQ_ID, examinationEvent);
 
         ArgumentCaptor<ShanoirEvent> captor = ArgumentCaptor.forClass(ShanoirEvent.class);
-        verify(shanoirEventService).publishEvent(captor.capture());
-        // without a message and a progress, the job shows up empty and at NaN%
-        assertEquals(Float.valueOf(1f), captor.getValue().getProgress());
-        assertFalse(captor.getValue().getMessage().isEmpty());
+        verify(shanoirEventService, Mockito.atLeastOnce()).publishEvent(captor.capture());
+        assertTrue(captor.getAllValues().stream().allMatch(published -> published == examinationEvent));
     }
 
     @Test
