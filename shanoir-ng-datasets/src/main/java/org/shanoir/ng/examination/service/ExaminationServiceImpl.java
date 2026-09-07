@@ -121,7 +121,7 @@ public class ExaminationServiceImpl implements ExaminationService {
     @Lazy
     private ExaminationService examinationService;
 
-    @Transactional(readOnly = true)
+    @Transactional
     public void deleteById(final Long id, ShanoirEvent event) throws ShanoirException, SolrServerException, IOException, RestServiceException {
         Optional<Examination> examinationOpt = examinationRepository.findById(id);
         if (!examinationOpt.isPresent()) {
