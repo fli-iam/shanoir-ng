@@ -100,14 +100,13 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
     }
 
     @Override
-    public ResponseEntity<DatasetProcessingDTO> findDatasetProcessingById(
-            @Parameter(description = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId) {
+    public ResponseEntity<DatasetProcessingDTO> findDatasetProcessingById(Long datasetProcessingId) {
 
-        final Optional<DatasetProcessing> datasetProcessing = repository.findByIdWithInputs(datasetProcessingId);
+        final Optional<DatasetProcessing> datasetProcessing = repository.findByIdWithParentAndInputs(datasetProcessingId);
         if (!datasetProcessing.isPresent()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity<>(datasetProcessingMapper.processingToProcessingDTOWithInputIds(datasetProcessing.get()), HttpStatus.OK);
+        return new ResponseEntity<>(datasetProcessingMapper.processingToProcessingDTOWithParentAndInputIds(datasetProcessing.get()), HttpStatus.OK);
     }
 
     @Override

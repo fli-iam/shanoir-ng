@@ -125,6 +125,12 @@ public interface DatasetProcessingRepository extends CrudRepository<DatasetProce
 
     @Query("SELECT processing FROM DatasetProcessing processing "
             + "JOIN FETCH processing.inputDatasets "
+            + "JOIN FETCH processing.parent "
+            + "WHERE processing.id = :id")
+    Optional<DatasetProcessing> findByIdWithParentAndInputs(Long id);
+
+    @Query("SELECT processing FROM DatasetProcessing processing "
+            + "JOIN FETCH processing.inputDatasets "
             + "WHERE processing.id = :id")
     Optional<DatasetProcessing> findByIdWithInputs(Long id);
 
