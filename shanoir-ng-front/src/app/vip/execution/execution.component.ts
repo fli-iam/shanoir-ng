@@ -227,7 +227,13 @@ export class ExecutionComponent implements OnInit {
             },
             (error) => {
                 this.isSubmitted = false;
-                this.msgService.log('error', 'Sorry, an error occurred while submitting execution.');
+                if (error.status === 403) {
+                    // POST on /vip/execution/ returns a 403 if this is for a study the user
+                    // has no CAN_EXECUTE (or admin/expert) right on.
+                    this.msgService.log('error', 'You do not have the rights to run an execution on this study.');
+                } else {
+                    this.msgService.log('error', 'Sorry, an error occurred while submitting execution.');
+                }
                 console.error(error);
             }
         );
