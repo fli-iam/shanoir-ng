@@ -61,7 +61,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <li [class.active]="activeTab == 'subjects'" [routerLink]="'.'" [fragment]="'subjects'" replaceUrl="true">
                         <span class="subjects">Subjects</span>
                     </li>
-                    <li [class.active]="activeTab == 'centers'" [routerLink]="'.'" [fragment]="'centers'" replaceUrl="true">
+                    <li [class.active]="activeTab == 'centers'" [routerLink]="'.'" [fragment]="'centers'" replaceUrl="true" title="At least one center is required to save this study">
                         <span class="centers">Centers</span>
                     </li>
                     <li [class.active]="activeTab == 'members'" [routerLink]="'.'" [fragment]="'members'" replaceUrl="true">
@@ -106,6 +106,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <fieldset [class.hidden-tab]="activeTab != 'general'" tab="general">
                     <legend i18n="Study detail|Name label@@studyDetailGeneral">General</legend>
                     <ol>
+                        @if (mode != 'view' && study.studyCenterList?.length === 0) {
+                            <li class="info">
+                                <span class="icon"><i class="fas fa-info-circle"></i></span>
+                                This study needs at least one center linked to it before it can be saved — add one in the
+                                <a [routerLink]="'.'" [fragment]="'centers'">Centers</a> tab.
+                            </li>
+                        }
                         <li>
                             <label i18n="Study detail|Name label@@studyDetailName">Name</label>
                             <span class="right-col">
