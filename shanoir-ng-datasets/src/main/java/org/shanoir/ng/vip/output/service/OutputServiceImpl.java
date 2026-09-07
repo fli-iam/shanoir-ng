@@ -57,7 +57,7 @@ public class OutputServiceImpl implements OutputService {
 
     private static final Logger LOG = LoggerFactory.getLogger(OutputServiceImpl.class);
 
-    @Value("${vip-data-folder:'SECRET'}")
+    @Value("${vip.upload-folder:'SECRET'}")
     private String importDir;
 
     @Autowired
