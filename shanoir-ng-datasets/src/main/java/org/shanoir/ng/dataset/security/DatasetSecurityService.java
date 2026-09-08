@@ -536,7 +536,11 @@ public class DatasetSecurityService {
 
         Dataset datasetWithRelations = datasetRepository.findByIdWithExaminationRelationsAndRelatedStudies(dataset.getId());
 
-        Long studyId = getStudyIdFromDataset(dataset);
+        // the dataset given here can be detached (e.g. @PostAuthorize runs once the
+        // service transaction is closed), so read the parents from the freshly
+        // loaded entity: its datasetProcessing is fetch-joined, the parameter's is
+        // a lazy proxy for processed datasets
+        Long studyId = getStudyIdFromDataset(datasetWithRelations);
 
         Set<Long> studies = new HashSet<>();
         studies.add(studyId);

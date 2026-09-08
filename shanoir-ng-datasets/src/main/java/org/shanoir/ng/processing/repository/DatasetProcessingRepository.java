@@ -17,10 +17,12 @@ package org.shanoir.ng.processing.repository;
 import java.util.List;
 import java.util.Optional;
 
+import org.hibernate.Hibernate;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Repository for dataset processings.
@@ -66,6 +68,27 @@ public interface DatasetProcessingRepository extends CrudRepository<DatasetProce
      */
     @EntityGraph(attributePaths = "outputDatasets")
     List<DatasetProcessing> findAllByInputDatasets_IdIn(List<Long> datasetIds);
+
+    /**
+     * Same as {@link #findAllByInputDatasets_IdIn(List)}, with the dataset expressions
+     * and dataset files of the output datasets initialized, so callers can read them
+     * outside of a session.
+     *
+     * @param datasetIds list of input dataset ids.
+     * @return a list of dataset processing.
+     */
+    @Transactional(readOnly = true)
+    default List<DatasetProcessing> findAllByInputDatasets_IdInWithOutputDatasetFiles(List<Long> datasetIds) {
+        List<DatasetProcessing> processings = findAllByInputDatasets_IdIn(datasetIds);
+        processings.forEach(processing ->
+                processing.getOutputDatasets().forEach(ds -> {
+                    Hibernate.initialize(ds.getDatasetExpressions());
+                    ds.getDatasetExpressions().forEach(de ->
+                            Hibernate.initialize(de.getDatasetFiles()));
+                })
+        );
+        return processings;
+    }
 
     /**
      * Find all dataset processing by comment and type.
