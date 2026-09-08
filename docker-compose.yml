@@ -87,7 +87,9 @@ services:
   database:
     container_name: "${SHANOIR_PREFIX}database"
     image: "ghcr.io/fli-iam/shanoir-ng/database:NG_v2.12.0"
-    command: --max_allowed_packet 20000000
+    # max_connections: MariaDB defaults to 151, which all microservice Hikari pools share.
+    # The datasets pool alone is sized for the ~1000-concurrent-request VIP download burst.
+    command: --max_allowed_packet 20000000 --max_connections=300
     environment:
       - MARIADB_ROOT_PASSWORD=password
       - MARIADB_AUTO_UPGRADE=1
@@ -379,6 +381,9 @@ services:
   dcm4chee-database:
     container_name: "${SHANOIR_PREFIX}dcm4chee-database"
     image: dcm4che/postgres-dcm4chee:14.4-27
+    # max_connections must stay above WILDFLY_PACSDS_MAX_POOL_SIZE (variables.env), otherwise the
+    # archive's JDBC pool cannot reach its configured size and retrieves fail under load.
+    command: ["postgres", "-c", "max_connections=500"]
     logging:
       driver: json-file
       options:
@@ -410,12 +415,16 @@ services:
       POSTGRES_HOST: "${SHANOIR_PREFIX}dcm4chee-database"
       WILDFLY_CHOWN: /storage
       WILDFLY_WAIT_FOR: "${SHANOIR_PREFIX}ldap:389 ${SHANOIR_PREFIX}dcm4chee-database:5432"
+    entrypoint: ["/opt/shanoir/entrypoint-wrapper.sh"]
+    command: ["standalone.sh", "-b", "0.0.0.0", "-bmanagement", "0.0.0.0"]
     depends_on:
       - "ldap"
       - "dcm4chee-database"
     volumes:
       - "dcm4chee-arc-wildfly-data:/opt/wildfly/standalone"
       - "dcm4chee-arc-storage-data:/storage"
+      - "./docker-compose/dcm4chee/entrypoint-wrapper.sh:/opt/shanoir/entrypoint-wrapper.sh:ro"
+      - "./docker-compose/dcm4chee/tune-wildfly-io-worker.sh:/opt/shanoir/tune-wildfly-io-worker.sh:ro"
   #
   # Nginx
   #

@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.processing.service;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -36,6 +37,7 @@ import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.download.DatasetDownloadError;
+import org.shanoir.ng.download.WADODownloaderService.PacsDownloadAbortedException;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.processing.repository.DatasetProcessingRepository;
@@ -56,7 +58,6 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImpl implements ProcessingDownloaderService {    /** Number of downloadable datasets. */
@@ -70,8 +71,17 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
     @PersistenceContext
     private EntityManager em;
 
-    @Transactional(readOnly = true)
     public void massiveDownload(List<DatasetProcessing> processingList, boolean resultOnly, String format, HttpServletResponse response, boolean withManifest, Long converterId) throws RestServiceException {
+        // Load the inputs/outputs and their DICOM file references in ONE short transaction, so
+        // the per-file PACS calls in the download loop below hold no DB connection. Without
+        // this the whole method was @Transactional and a Hikari connection was pinned for the
+        // entire (PACS-bound) download - a handful of concurrent downloads exhausted the pool.
+        List<Long> processingIds = processingList.stream().map(DatasetProcessing::getId).toList();
+        List<DatasetProcessing> loaded = datasetProcessingRepository.findByIdsWithInputsOutputsAndExpressions(processingIds);
+        doMassiveProcessingsDownload(loaded, resultOnly, format, response, withManifest, converterId);
+    }
+
+    private void doMassiveProcessingsDownload(List<DatasetProcessing> processingList, boolean resultOnly, String format, HttpServletResponse response, boolean withManifest, Long converterId) throws RestServiceException {
         manageResultOnly(processingList, resultOnly);
 
         response.setContentType("application/zip");
@@ -80,6 +90,13 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
         Map<Long, List<String>> filesByAcquisitionId = new HashMap<>();
 
         try (ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream())) {
+            // Commit the headers now, so an already-abandoned request is dropped before it
+            // starts pulling anything from the PACS.
+            try {
+                response.flushBuffer();
+            } catch (IOException e) {
+                throw new PacsDownloadAbortedException("Client disconnected before download started", e);
+            }
             manageProcessingsDownload(processingList, downloadResults, zipOutputStream, format, withManifest, filesByAcquisitionId, converterId);
 
             String ids = Stream.concat(
@@ -97,6 +114,9 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
             );
             event.setStatus(ShanoirEvent.SUCCESS);
             eventService.publishEvent(event);
+        } catch (PacsDownloadAbortedException e) {
+            response.setContentType(null);
+            LOG.info("Processing download aborted: {}", e.getMessage());
         } catch (Exception e) {
             response.setContentType(null);
             LOG.error("Unexpected error while downloading dataset files.", e);
@@ -159,12 +179,14 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
                 Map<String, List<String>> datasetDownloadNameListPerPath = new HashMap<>();
 
                 manageDatasetDownload(dataset, downloadResults, zipOutputStream, subjectName, processingFilePath + "/" + shapeForPath(dataset.getName()), format, withManifest, filesByAcquisitionId, converterId, datasetDownloadNameListPerPath);
+                zipOutputStream.flush();
             }
 
             for (Dataset dataset : outputs) {
                 Map<String, List<String>> datasetDownloadNameListPerPath = new HashMap<>();
 
                 manageDatasetDownload(dataset, downloadResults, zipOutputStream, subjectName, processingFilePath + "/output", format, withManifest, filesByAcquisitionId, converterId, datasetDownloadNameListPerPath);
+                zipOutputStream.flush();
             }
         }
         if (!filesByAcquisitionId.isEmpty())

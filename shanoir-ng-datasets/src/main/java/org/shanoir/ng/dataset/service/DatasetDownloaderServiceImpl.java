@@ -19,8 +19,10 @@ import java.io.IOException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,6 +61,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.annotation.PostConstruct;
@@ -138,11 +141,18 @@ public class DatasetDownloaderServiceImpl {
         // Prepare the HTTP response for a zip download
         response.setContentType("application/zip");
         response.setHeader("Content-Disposition", "attachment;filename=\"" + getFileName(datasets) + "\"");
-        // Flush headers immediately so the client sees the response start before
-        // the (potentially slow) per-dataset DB/PACS work below produces any bytes,
-        // otherwise a client-side read timeout can fire while nothing has been sent yet.
 
         try (ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream())) {
+            // Commit the headers now: it flushes the response start to the client before the
+            // (slow) per-dataset PACS work, and it fails fast if the client already gave up -
+            // VIP times out at 30s and retries, so an abandoned request that keeps pulling from
+            // the PACS steals capacity from the retry that replaced it.
+            try {
+                response.flushBuffer();
+            } catch (IOException e) {
+                throw new WADODownloaderService.PacsDownloadAbortedException("Client disconnected before download started", e);
+            }
+
             Map<String, List<String>> datasetDownloadNameListPerPath = new HashMap<>();
             datasetDownloadPath = new HashMap<>();
             if (Objects.nonNull(sorting)) {
@@ -181,6 +191,11 @@ public class DatasetDownloaderServiceImpl {
                         converterId,
                         datasetDownloadNameListPerPath
                 );
+
+                // Surface a client disconnect early: without this a browser that closed the
+                // connection is only noticed when the zip is finalised, so the server keeps
+                // pulling every remaining dataset from the PACS for a download nobody reads.
+                zipOutputStream.flush();
             }
 
             // Write manifest if any files exist
@@ -212,6 +227,11 @@ public class DatasetDownloaderServiceImpl {
             );
             event.setStatus(ShanoirEvent.SUCCESS);
             eventService.publishEvent(event);
+        } catch (WADODownloaderService.PacsDownloadAbortedException e) {
+            // Client went away: there is nothing to send back, just stop pulling from the PACS.
+            // Not an error worth a stack trace.
+            response.setContentType(null);
+            LOG.info("Download aborted: {}", e.getMessage());
         } catch (Exception e) {
             response.setContentType(null);
             LOG.error("Unexpected error while downloading dataset files.", e);
@@ -221,34 +241,37 @@ public class DatasetDownloaderServiceImpl {
         }
     }
 
-    @Transactional(readOnly = true)
     protected Map<Long, String> getDatasetDownloadPath(List<Dataset> datasets, String sorting) {
-        HashMap<Long, String> datasetDownloadPath = new HashMap<>();
+        // Phase 1: one short read-only transaction pulls every value the path needs from the DB,
+        // including the WADO metadata URL for datasets whose acquisition start time is missing.
+        // No network call happens here, so the DB connection is released before the (potentially
+        // slow, pool-contended) PACS call in phase 2 - otherwise a Hikari connection is held for
+        // the whole PACS round-trip and, under load, the pool is exhausted.
+        List<DatasetPathData> pathDataList = self.collectDatasetPathData(datasets, sorting);
 
-        for (Dataset dataset : datasets) {
+        // Phase 2: no transaction - PACS metadata lookups and string assembly only.
+        Map<Long, String> datasetDownloadPath = new HashMap<>();
+        for (DatasetPathData d : pathDataList) {
             String path = "";
-            Dataset relevantDataset = dataset;
-
-            if (Objects.nonNull(dataset.getDatasetProcessing().getId())) {
-                relevantDataset = datasetService.getFirstRealInput(dataset);
-            }
 
             if (sorting.contains("study")) {
-                path += "/Study_" + relevantDataset.getDatasetAcquisition().getExamination().getStudy().getName() + "_id_" + relevantDataset.getDatasetAcquisition().getExamination().getStudy().getId();
+                path += "/Study_" + d.studyName() + "_id_" + d.studyId();
             }
 
             if (sorting.contains("subject")) {
-                path += "/Subject_" + relevantDataset.getDatasetAcquisition().getExamination().getSubject().getName() + "_id_" + relevantDataset.getDatasetAcquisition().getExamination().getSubject().getId();
+                path += "/Subject_" + d.subjectName() + "_id_" + d.subjectId();
             }
 
             if (sorting.contains("exam")) {
-                path += "/Exam_" + relevantDataset.getDatasetAcquisition().getExamination().getComment() + "_id_" + relevantDataset.getDatasetAcquisition().getExamination().getId();
+                path += "/Exam_" + d.examComment() + "_id_" + d.examId();
             }
 
             if (sorting.contains("acquisitionDate")) {
                 String dateTime;
-                if (relevantDataset.getDatasetAcquisition().getAcquisitionStartTime() == null) {
-                    Map<String, String> dateTimeMap = datasetService.getSpecificDicomMetadataValues(relevantDataset, List.of("00080022", "00080032"));
+                if (d.acquisitionStartTime() == null) {
+                    Map<String, String> dateTimeMap = d.dicomMetadataUrl() != null
+                            ? fetchDicomDateValues(d.dicomMetadataUrl())
+                            : Collections.emptyMap();
                     if (dateTimeMap.containsKey("00080022")) {
                         dateTime = LocalDate.parse(dateTimeMap.get("00080022"), DateTimeFormatter.ofPattern("yyyyMMdd")).format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
                     } else {
@@ -261,15 +284,103 @@ public class DatasetDownloaderServiceImpl {
                         dateTime += "_NoTime";
                     }
                 } else {
-                    dateTime = relevantDataset.getDatasetAcquisition().getAcquisitionStartTime().format(DateTimeFormatter.ofPattern("dd-MM-yyyy_HH-mm"));
+                    dateTime = d.acquisitionStartTime().format(DateTimeFormatter.ofPattern("dd-MM-yyyy_HH-mm"));
                 }
-                path += "/Acq_date_" + dateTime + "_acq_id_" + relevantDataset.getDatasetAcquisition().getId();
+                path += "/Acq_date_" + dateTime + "_acq_id_" + d.acquisitionId();
             } else if (sorting.contains("acquisition")) {
-                path += "/Acq_id_" + relevantDataset.getDatasetAcquisition().getId();
+                path += "/Acq_id_" + d.acquisitionId();
             }
-            datasetDownloadPath.put(dataset.getId(), path);
+            datasetDownloadPath.put(d.datasetId(), path);
         }
         return datasetDownloadPath;
+    }
+
+    @Transactional(readOnly = true)
+    protected List<DatasetPathData> collectDatasetPathData(List<Dataset> datasets, String sorting) {
+        boolean needAcquisitionDate = sorting.contains("acquisitionDate");
+        List<DatasetPathData> result = new ArrayList<>();
+
+        for (Dataset dataset : datasets) {
+            Dataset relevantDataset = dataset;
+            if (Objects.nonNull(dataset.getDatasetProcessing().getId())) {
+                relevantDataset = datasetService.getFirstRealInput(dataset);
+            }
+
+            Examination exam = relevantDataset.getDatasetAcquisition().getExamination();
+            String studyName = null;
+            Long studyId = null;
+            String subjectName = null;
+            Long subjectId = null;
+            String examComment = null;
+            Long examId = null;
+
+            if (sorting.contains("study")) {
+                studyName = exam.getStudy().getName();
+                studyId = exam.getStudy().getId();
+            }
+            if (sorting.contains("subject")) {
+                subjectName = exam.getSubject().getName();
+                subjectId = exam.getSubject().getId();
+            }
+            if (sorting.contains("exam")) {
+                examComment = exam.getComment();
+                examId = exam.getId();
+            }
+
+            LocalDateTime acquisitionStartTime = relevantDataset.getDatasetAcquisition().getAcquisitionStartTime();
+            URL dicomMetadataUrl = null;
+            if (needAcquisitionDate && acquisitionStartTime == null) {
+                List<URL> dicomUrls = new ArrayList<>();
+                DatasetFileUtils.getDatasetFilePathURLs(relevantDataset, dicomUrls, DatasetExpressionFormat.DICOM, new DatasetDownloadError());
+                if (!dicomUrls.isEmpty()) {
+                    dicomMetadataUrl = dicomUrls.get(0);
+                }
+            }
+
+            result.add(new DatasetPathData(dataset.getId(), studyName, studyId, subjectName, subjectId,
+                    examComment, examId, relevantDataset.getDatasetAcquisition().getId(),
+                    acquisitionStartTime, dicomMetadataUrl));
+        }
+        return result;
+    }
+
+    /**
+     * Reads the DICOM acquisition date/time tags (00080022 / 00080032) from the PACS. Runs
+     * outside any transaction - it must never be called while a DB connection is held.
+     */
+    private Map<String, String> fetchDicomDateValues(URL dicomMetadataUrl) {
+        Map<String, String> results = new HashMap<>();
+        try {
+            String metadataStr = downloader.downloadDicomMetadataForURL(dicomMetadataUrl);
+            JsonNode metadata = objectMapper.readTree(metadataStr).get(0);
+            for (String key : List.of("00080022", "00080032")) {
+                if (Objects.nonNull(metadata) && metadata.has(key) && metadata.get(key).has("Value")
+                        && metadata.get(key).get("Value").get(0).asText() != null) {
+                    results.put(key, metadata.get(key).get("Value").get(0).asText());
+                }
+            }
+        } catch (Exception e) {
+            LOG.warn("Could not read DICOM date metadata from [{}] for download sorting", dicomMetadataUrl, e);
+        }
+        return results;
+    }
+
+    /**
+     * Per-dataset scalars extracted inside the read-only transaction of
+     * {@link #collectDatasetPathData}, so phase 2 of {@link #getDatasetDownloadPath} needs
+     * neither a Hibernate session nor a DB connection.
+     */
+    protected record DatasetPathData(
+            Long datasetId,
+            String studyName,
+            Long studyId,
+            String subjectName,
+            Long subjectId,
+            String examComment,
+            Long examId,
+            Long acquisitionId,
+            LocalDateTime acquisitionStartTime,
+            URL dicomMetadataUrl) {
     }
 
     protected void manageDatasetDownload(Dataset dataset, Map<Long, DatasetDownloadError> downloadResults, ZipOutputStream zipOutputStream, String subjectName, String datasetFilePath, String outputFormat, boolean withManifest, Map<Long, List<String>> filesByAcquisitionId, Long converterId, Map<String, List<String>> datasetDownloadNameListPerPath) throws Exception {
@@ -297,8 +408,10 @@ public class DatasetDownloaderServiceImpl {
                 tempDir = convertToNifti(dataset, pathURLs, converterToUse, downloadResult, subjectName);
                 DatasetFileUtils.copyFilesForDownload(storageService, pathURLs, zipOutputStream, dataset, subjectName, true, datasetFilePath, datasetDownloadNameListPerPath);
             } finally {
-                LOG.info("Deleting temporary conversion folder [{}]", tempDir.getAbsolutePath());
-                FileUtils.deleteQuietly(tempDir);
+                if (tempDir != null) {
+                    LOG.info("Deleting temporary conversion folder [{}]", tempDir.getAbsolutePath());
+                    FileUtils.deleteQuietly(tempDir);
+                }
             }
         } else { // Download the other types
             DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, format, downloadResult);
