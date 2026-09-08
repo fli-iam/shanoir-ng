@@ -19,7 +19,7 @@ export class Id {
     ) {}
 
     public static toIdList(from: any[]): Id[] {
-        const list: Id[] = [];
+        let list: Id[];
         for (const item of from) {
             if (item.id) list.push(new Id(item.id));
         }

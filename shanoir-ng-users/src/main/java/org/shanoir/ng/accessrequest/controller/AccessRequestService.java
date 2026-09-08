@@ -14,7 +14,6 @@
 
 package org.shanoir.ng.accessrequest.controller;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,7 +37,5 @@ public interface AccessRequestService {
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
     void deleteById(Long id) throws EntityNotFoundException;
-
-    void requestExtension(Long studyId, Long userId, LocalDate extensionDate);
 
 }

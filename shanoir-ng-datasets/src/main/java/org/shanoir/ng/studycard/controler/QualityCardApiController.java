@@ -16,14 +16,18 @@ package org.shanoir.ng.studycard.controler;
 
 import java.util.List;
 
+import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
+import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.PacsException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.model.QualityCard;
-import org.shanoir.ng.studycard.repository.QualityCardRepository;
+import org.shanoir.ng.studycard.service.CardsProcessingService;
 import org.shanoir.ng.studycard.service.QualityCardService;
+import org.shanoir.ng.studycard.service.QualityCardUniqueConstraintManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,27 +35,46 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.RequestBody;
+
+import io.swagger.v3.oas.annotations.Parameter;
 
 @Controller
 public class QualityCardApiController implements QualityCardApi {
+
+    private static final String MICROSERVICE_COMMUNICATION_ERROR = "Microservice communication error";
 
     private static final String PACS_COMMUNICATION_ERROR = "Error during PACS communication while applying quality card on study";
 
     private static final Logger LOG = LoggerFactory.getLogger(QualityCardApiController.class);
 
     @Autowired
-    private QualityCardService service;
+    private QualityCardService qualityCardService;
 
     @Autowired
-    private QualityCardRepository repository;
+    private QualityCardUniqueConstraintManager uniqueConstraintManager;
 
-    public ResponseEntity<Void> deleteQualityCard(Long qualityCardId) {
-        repository.deleteById(qualityCardId);
-        return new ResponseEntity<>(HttpStatus.OK);
+    @Autowired
+    private CardsProcessingService cardProcessingService;
+
+    @Override
+    public ResponseEntity<Void> deleteQualityCard(
+             Long qualityCardId) throws RestServiceException {
+        try {
+            qualityCardService.deleteById(qualityCardId);
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (MicroServiceCommunicationException e) {
+            throw new RestServiceException(
+                    new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), MICROSERVICE_COMMUNICATION_ERROR, null));
+        }
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    public ResponseEntity<QualityCard> findQualityCardById(Long qualityCardId) {
-        QualityCard qualityCard = repository.findById(qualityCardId).orElse(null);
+    @Override
+    public ResponseEntity<QualityCard> findQualityCardById(
+             Long qualityCardId) {
+        final QualityCard qualityCard = qualityCardService.findById(qualityCardId);
         if (qualityCard == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -59,48 +82,87 @@ public class QualityCardApiController implements QualityCardApi {
     }
 
 
-    public ResponseEntity<List<QualityCard>> findQualityCardByStudyId(Long studyId) {
-        List<QualityCard> qualityCards = repository.findByStudyId(studyId);
+    @Override
+    public ResponseEntity<List<QualityCard>> findQualityCardByStudyId(
+            Long studyId) {
+        final List<QualityCard> qualityCards = qualityCardService.findByStudy(studyId);
         if (qualityCards.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity<>(qualityCards, HttpStatus.OK);
     }
 
+    @Override
     public ResponseEntity<List<QualityCard>> findQualityCards() {
-        List<QualityCard> qualityCards = repository.findAll();
+        final List<QualityCard> qualityCards = qualityCardService.findAll();
         if (qualityCards.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity<>(qualityCards, HttpStatus.OK);
     }
 
-    public ResponseEntity<QualityCard> saveNewQualityCard(QualityCard qualityCard, BindingResult result) throws RestServiceException {
-        service.validate(qualityCard, result);
-        service.resetIdsForFreshInsert(qualityCard);
-        qualityCard = repository.save(qualityCard);
-        return new ResponseEntity<>(qualityCard, HttpStatus.OK);
+    @Override
+    public ResponseEntity<QualityCard> saveNewQualityCard(
+            @Parameter(description = "Quality Card to create", required = true) @RequestBody QualityCard qualityCard,
+            final BindingResult result) throws RestServiceException {
+        validate(qualityCard, result);
+        QualityCard createdQualityCard;
+        try {
+            createdQualityCard = qualityCardService.save(qualityCard);
+        } catch (MicroServiceCommunicationException e) {
+            throw new RestServiceException(
+                    new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), MICROSERVICE_COMMUNICATION_ERROR, null));
+        }
+        return new ResponseEntity<>(createdQualityCard, HttpStatus.OK);
     }
 
-    public ResponseEntity<Void> updateQualityCard(Long qualityCardId, QualityCard qualityCard, BindingResult result) throws RestServiceException {
-        service.validate(qualityCard, result);
+    @Override
+    public ResponseEntity<Void> updateQualityCard(
+             Long qualityCardId,
+            @Parameter(description = "quality card to update", required = true) @RequestBody QualityCard qualityCard,
+            final BindingResult result) throws RestServiceException {
+
+        validate(qualityCard, result);
         try {
-            service.update(qualityCard);
+            qualityCardService.update(qualityCard);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (EntityNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (MicroServiceCommunicationException e) {
+            throw new RestServiceException(
+                    new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), MICROSERVICE_COMMUNICATION_ERROR, null));
         }
     }
 
-    public ResponseEntity<QualityCardResult> applyQualityCardOnStudy(Long qualityCardId) throws RestServiceException {
-        QualityCard qualityCard = repository.findById(qualityCardId).orElse(null);
+    /**
+     * Validate a quality card
+     *
+     * @param qualityCard
+     * @param result
+     * @throws RestServiceException
+     */
+    protected void validate(QualityCard qualityCard, BindingResult result) throws RestServiceException {
+        final FieldErrorMap errors = new FieldErrorMap()
+                .add(new FieldErrorMap(result))
+                .add(uniqueConstraintManager.validate(qualityCard));
+        if (!errors.isEmpty()) {
+            ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors));
+            throw new RestServiceException(error);
+        }
+    }
+
+    @Override
+    public ResponseEntity<QualityCardResult> applyQualityCardOnStudy(
+             Long qualityCardId) throws RestServiceException, MicroServiceCommunicationException {
+
+        final QualityCard qualityCard = qualityCardService.findById(qualityCardId);
         if (qualityCard == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         LOG.info("apply quality card: name:" + qualityCard.getName() + ", studyId: " + qualityCard.getStudyId());
         QualityCardResult results = null;
         try {
-            results = service.applyQualityCardOnStudy(qualityCard, true);
+            results = cardProcessingService.applyQualityCardOnStudy(qualityCard, true);
         } catch (PacsException e) {
             LOG.error(PACS_COMMUNICATION_ERROR, e);
             throw new RestServiceException(
@@ -109,15 +171,40 @@ public class QualityCardApiController implements QualityCardApi {
         return new ResponseEntity<>(results, HttpStatus.OK);
     }
 
-    public ResponseEntity<QualityCardResult> testQualityCardOnStudy(Long qualityCardId, Integer from, Integer to) throws RestServiceException {
-        QualityCard qualityCard = repository.findById(qualityCardId).orElse(null);
+    @Override
+    public ResponseEntity<QualityCardResult> testQualityCardOnStudy(
+             Long qualityCardId) throws RestServiceException, MicroServiceCommunicationException, PacsException {
+
+        final QualityCard qualityCard = qualityCardService.findById(qualityCardId);
         if (qualityCard == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         QualityCardResult results = null;
         LOG.info("test quality card: name:" + qualityCard.getName() + ", studyId: " + qualityCard.getStudyId());
         try {
-            results = service.applyQualityCardOnStudy(qualityCard, false, from, to);
+            results = cardProcessingService.applyQualityCardOnStudy(qualityCard, false);
+        } catch (PacsException e) {
+            LOG.error(PACS_COMMUNICATION_ERROR, e);
+            throw new RestServiceException(
+                    new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), PACS_COMMUNICATION_ERROR, e));
+        }
+        return new ResponseEntity<>(results, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<QualityCardResult> testQualityCardOnStudy(
+            Long qualityCardId,
+            int start,
+            int stop) throws RestServiceException, MicroServiceCommunicationException, PacsException {
+
+        final QualityCard qualityCard = qualityCardService.findById(qualityCardId);
+        if (qualityCard == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        LOG.info("test quality card: name:" + qualityCard.getName() + ", studyId: " + qualityCard.getStudyId());
+        QualityCardResult results = null;
+        try {
+            results = cardProcessingService.applyQualityCardOnStudy(qualityCard, start, stop);
         } catch (PacsException e) {
             LOG.error(PACS_COMMUNICATION_ERROR, e);
             throw new RestServiceException(

@@ -31,7 +31,6 @@ import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.modality.ParameterQuantificationDataset;
 import org.shanoir.ng.dataset.modality.PetDataset;
 import org.shanoir.ng.dataset.modality.RegistrationDataset;
-import org.shanoir.ng.dataset.modality.RtDataset;
 import org.shanoir.ng.dataset.modality.SegmentationDataset;
 import org.shanoir.ng.dataset.modality.SpectDataset;
 import org.shanoir.ng.dataset.modality.StatisticalDataset;
@@ -91,8 +90,7 @@ import jakarta.persistence.Transient;
         @JsonSubTypes.Type(value = BidsDataset.class, name = DatasetType.Names.BIDS),
         @JsonSubTypes.Type(value = MeasurementDataset.class, name = DatasetType.Names.MEASUREMENT),
         @JsonSubTypes.Type(value = XaDataset.class, name = DatasetType.Names.XA),
-        @JsonSubTypes.Type(value = SrDataset.class, name = DatasetType.Names.SR),
-        @JsonSubTypes.Type(value = RtDataset.class, name = DatasetType.Names.RT)})
+        @JsonSubTypes.Type(value = SrDataset.class, name = DatasetType.Names.SR)})
 public abstract class Dataset extends AbstractEntity {
 
     /**
@@ -209,12 +207,6 @@ public abstract class Dataset extends AbstractEntity {
     @JsonIgnore
     @Transient
     private String sopInstanceUID;
-
-    @Transient
-    private Boolean inPacs;
-
-    @Transient
-    private Long centerId;
 
     public Dataset() {
     }
@@ -446,12 +438,31 @@ public abstract class Dataset extends AbstractEntity {
         return getDatasetAcquisition().getExamination().getStudyId();
     }
 
+    /**
+     * @return the centerId
+     */
+    @Transient
     public Long getCenterId() {
-        return centerId;
+        if (getDatasetAcquisition() == null || getDatasetAcquisition().getExamination() == null) {
+            if (getDatasetProcessing() != null && getDatasetProcessing().getInputDatasets() != null) {
+                return getDatasetProcessing().getInputDatasets().get(0).getCenterId();
+            }
+            return null;
+        }
+        return getDatasetAcquisition().getExamination().getCenterId();
     }
 
-    public void setCenterId(Long centerId) {
-        this.centerId = centerId;
+    /**
+     * @return The first original (non-derived) Dataset in the chain.
+     */
+    @JsonIgnore
+    @Transient
+    public Dataset getFirstRealInput() {
+        if (this.datasetProcessing != null) {
+            return this.datasetProcessing.getInputDatasets().get(0).getFirstRealInput();
+        } else {
+            return this;
+        }
     }
 
     /**
@@ -542,14 +553,7 @@ public abstract class Dataset extends AbstractEntity {
     }
 
     public boolean getInPacs() {
-        if (inPacs != null) {
-            return inPacs;
-        }
-        return datasetExpressions != null && !datasetExpressions.isEmpty();
-    }
-
-    public void setInPacs(Boolean inPacs) {
-        this.inPacs = inPacs;
+        return getDatasetExpressions() != null && getDatasetExpressions().size() > 0;
     }
 
     public List<StudyTag> getTags() {

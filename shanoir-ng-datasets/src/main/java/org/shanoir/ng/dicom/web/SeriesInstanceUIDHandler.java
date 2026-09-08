@@ -27,21 +27,17 @@ import org.shanoir.ng.anonymization.uid.generation.UIDGeneration;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
-import org.shanoir.ng.dataset.repository.DatasetRepository;
+import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.GenericDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.ct.CtDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.pet.PetDatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.model.rt.RtDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.xa.XaDatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.processing.repository.DatasetProcessingRepository;
-import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.shared.exception.ShanoirException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +49,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 
 import jakarta.annotation.PostConstruct;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class SeriesInstanceUIDHandler {
@@ -86,13 +81,10 @@ public class SeriesInstanceUIDHandler {
     private DatasetAcquisitionService acquisitionService;
 
     @Autowired
-    private DatasetRepository datasetRepository;
+    private DatasetService datasetService;
 
     @Autowired
     private DatasetProcessingRepository datasetProcessingRepository;
-
-    @Autowired
-    private DatasetAcquisitionRepository acquisitionRepository;
 
     /**
      * The viewer requests the metadata of each serie of an examination
@@ -180,15 +172,15 @@ public class SeriesInstanceUIDHandler {
         if (entry != null && System.currentTimeMillis() - entry.creationTime() < EXAMINATION_SERIES_TTL_MS) {
             return entry.seriesToVirtualUIDs();
         }
-        List<DatasetAcquisition> acquisitions = acquisitionRepository.findByExaminationIdWithDatasetsAndDatasetFiles(examinationId);
+        List<DatasetAcquisition> acquisitions = acquisitionService.findByExamination(examinationId);
         Map<String, String> seriesToVirtualUIDs = Collections.unmodifiableMap(buildSeriesToVirtualUIDs(acquisitions));
         examinationToSeriesVirtualUIDsCache.put(examinationId,
                 new ExaminationSeriesCacheEntry(System.currentTimeMillis(), seriesToVirtualUIDs));
         return seriesToVirtualUIDs;
     }
 
-    public Map<String, String> findSeriesToVirtualUIDsOfAcquisition(Long acquisitionId) throws ShanoirException {
-        DatasetAcquisition acquisition = acquisitionRepository.findByIdWithDatasetsAndDatasetFiles(acquisitionId).orElseThrow(() -> new EntityNotFoundException(DatasetAcquisition.class, acquisitionId));
+    public Map<String, String> findSeriesToVirtualUIDsOfAcquisition(Long acquisitionId) {
+        DatasetAcquisition acquisition = acquisitionService.findById(acquisitionId);
         if (acquisition == null) {
             return Collections.emptyMap();
         }
@@ -312,7 +304,6 @@ public class SeriesInstanceUIDHandler {
         }
     }
 
-    @Transactional(readOnly = true)
     public String findSeriesInstanceUIDFromCacheOrDatabase(String acquisitionUID) {
         String seriesInstanceUID = virtualUIDToSeriesInstanceUIDCache.get(acquisitionUID);
         if (seriesInstanceUID == null) {
@@ -336,7 +327,7 @@ public class SeriesInstanceUIDHandler {
         String seriesInstanceUID = virtualUIDToSeriesInstanceUIDCache.get(datasetUID);
         if (seriesInstanceUID == null) {
             Long datasetId = extractDatasetId(datasetUID);
-            Dataset dataset = datasetRepository.findById(datasetId).orElse(null);
+            Dataset dataset = datasetService.findById(datasetId);
             if (dataset != null) {
                 seriesInstanceUID = findSeriesInstanceUID(dataset);
                 if (seriesInstanceUID != null) {
@@ -359,7 +350,6 @@ public class SeriesInstanceUIDHandler {
                 || acquisition instanceof CtDatasetAcquisition
                 || acquisition instanceof PetDatasetAcquisition
                 || acquisition instanceof XaDatasetAcquisition
-                || acquisition instanceof RtDatasetAcquisition
                 || acquisition instanceof GenericDatasetAcquisition) {
             List<Dataset> datasets = acquisition.getDatasets();
             if (!datasets.isEmpty()) {

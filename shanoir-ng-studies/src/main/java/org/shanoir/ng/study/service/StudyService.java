@@ -125,14 +125,6 @@ public interface StudyService {
     void addStudyUserToStudy(StudyUser studyUser, Study study);
 
     /**
-     * Updates one studyUser to a study.
-     *
-     * @param studyUser
-     * @param study
-     */
-    void updateStudyUserToStudy(StudyUser studyUser, Study study);
-
-    /**
      * Remove a studyUser from a study
      *
      * @param studyId
@@ -169,11 +161,6 @@ public interface StudyService {
      * Returns all publicly available studies;
      */
     List<Study> findPublicStudies();
-
-    /**
-     * Returns all expired studies;
-     */
-    List<Study> findExpiredStudies();
 
     /**
      * Returns all draft studies the user can access;

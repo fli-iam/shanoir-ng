@@ -61,7 +61,8 @@ export class HandleErrorService implements ErrorHandler {
                 this.consoleService.log('error', msg, details);
             }
         } catch (error) {
-            throw new Error('Error handler failed', error);
+            console.error(error);
+            throw new Error('Error handler failed, cause above');
         }
     }
 
@@ -75,7 +76,8 @@ export class HandleErrorService implements ErrorHandler {
             const details: string[] = [error.message];
             this.consoleService.log('error', msg, details);
         } catch (error) {
-            throw new Error('Error handler failed', error);
+            console.error(error);
+            throw new Error('Error handler failed, cause above');
         }
     }
 

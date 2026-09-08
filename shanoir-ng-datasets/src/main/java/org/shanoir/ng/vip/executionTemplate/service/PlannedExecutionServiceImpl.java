@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.vip.executionTemplate.service;
 
+import com.fasterxml.jackson.core.ObjectCodec;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.shared.service.TransactionRunner;
 import org.shanoir.ng.dataset.model.Dataset;
@@ -70,6 +71,9 @@ public class PlannedExecutionServiceImpl implements PlannedExecutionService {
     @Autowired
     @Lazy
     private PlannedExecutionManager plannedExecutionManager;
+
+    @Autowired
+    private ObjectCodec objectCodec;
 
     //A call is corresponding to all or a part of an examination acquisitions. If various examination imported, then multiple calls will be done
     public void applyExecution(Map<Long, List<Long>> createdAcquisitionsPerTemplateId) {
@@ -158,15 +162,15 @@ public class PlannedExecutionServiceImpl implements PlannedExecutionService {
             datasetIds = datasetRepository.findFilteredIdsByDatasetAcquisitionIdIn(acquisitionIds, "%");
         }
 
-        List<DatasetAcquisition> acqList = acquisitionRepository.findByIdsWithDatasets(acquisitionIds);
-        for (DatasetAcquisition acquisition : acqList) {
+        for (Long acquisitionId : acquisitionIds) {
+            DatasetAcquisition acquisition = acquisitionRepository.findById(acquisitionId).orElse(null);
             if (Objects.nonNull(acquisition)) {
                 List<Dataset> datasetList = acquisition.getDatasets();
                 for (int i = 0; i < datasetList.size(); i++) {
                     Dataset dataset = datasetList.get(i);
 
                     // Delete the planned execution record only after the last dataset of this acquisition is submitted.
-                    List<Long> plannedExecutionToRemove = (i == datasetList.size() - 1) ? List.of(acquisition.getId()) : List.of();
+                    List<Long> plannedExecutionToRemove = (i == datasetList.size() - 1) ? List.of(acquisitionId) : List.of();
                     plannedExecutionManager.addToExecutionsQueue(new ExecutionInQueue(template, dataset.getId(), "dataset", plannedExecutionToRemove));
                     try {
                         Thread.sleep(1000); // Delay between submissions, VIP needs it

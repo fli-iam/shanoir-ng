@@ -11,14 +11,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, EventEmitter, forwardRef, Input, Output, OnInit, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, EventEmitter, forwardRef, Input, Output, OnInit, DestroyRef } from '@angular/core';
 import { ControlValueAccessor, UntypedFormBuilder, UntypedFormGroup, NG_VALUE_ACCESSOR, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { Location, DatePipe } from '@angular/common';
+import { Location } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
-import { ConfirmDialogService } from '@app/shared/components/confirm-dialog/confirm-dialog.service';
-import { DatepickerComponent } from '@app/shared/date-picker/date-picker.component';
+import { ConfirmDialogService } from 'src/app/shared/components/confirm-dialog/confirm-dialog.service';
 
 import { StudyService } from '../../studies/shared/study.service';
 import { Option, SelectBoxComponent } from '../../shared/select/select.component';
@@ -35,8 +34,7 @@ import { AccountRequestInfo } from './account-request-info.model';
             multi: true,
         }
     ],
-    changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [FormsModule, ReactiveFormsModule, SelectBoxComponent, DatepickerComponent, DatePipe]
+    imports: [FormsModule, ReactiveFormsModule, SelectBoxComponent]
 })
 export class AccountRequestInfoComponent implements ControlValueAccessor, OnInit {
 
@@ -58,8 +56,8 @@ export class AccountRequestInfoComponent implements ControlValueAccessor, OnInit
                 private destroyRef: DestroyRef
             ) { }
 
-    setDisabledState?(_isDisabled: boolean): void {
-        return;
+    setDisabledState?(_isDisabled: boolean): void { 
+        return; 
     }
 
     writeValue(obj: any): void {
@@ -99,8 +97,7 @@ export class AccountRequestInfoComponent implements ControlValueAccessor, OnInit
             // 'function': [this.info.function, [Validators.required, Validators.maxLength(200)]],
             // 'contact': [this.info.contact, [Validators.maxLength(200)]],
             'studyId': [this.info.studyId, [Validators.required]],
-            'studyName': [this.info.studyName],
-            'studyExpiration': [this.info.studyExpirationDate]
+            'studyName': [this.info.studyName]
         });
         this.form.valueChanges
         .pipe(takeUntilDestroyed(this.destroyRef))
@@ -116,7 +113,6 @@ export class AccountRequestInfoComponent implements ControlValueAccessor, OnInit
         info.institution = this.form.value.institution;
         info.studyId = this.form.value.studyId;
         info.studyName = this.form.value.studyName;
-        info.studyExpirationDate = this.form.value.studyExpiration;
         this.info = info;
         this.onChange(this.info);
     }

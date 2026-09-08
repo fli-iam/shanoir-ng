@@ -57,12 +57,7 @@ public abstract class DICOMConditionOnDatasets extends CardCondition {
         this.getValues().stream().forEach(s -> LOG.debug(s));
 
         if (dicomAttributes == null) {
-            // No DICOM attributes could be retrieved for this dataset (e.g. no PACS url, dataset not
-            // found in PACS). Treated as "unknown" rather than failing the whole quality check: this
-            // dataset is excluded from cardinality counting instead of crashing the study-wide run.
-            if (report != null) report.append("\nThe condition [" + toString()
-                    + "] could not be checked on one dataset because no DICOM attributes could be retrieved for it.");
-            return null;
+            throw new IllegalArgumentException("dicomAttributes can't be null");
         }
         VR tagVr = StandardElementDictionary.INSTANCE.vrOf(dicomTag);
         VM tagVm = VM.of(dicomTag);

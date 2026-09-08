@@ -14,34 +14,26 @@
 
 package org.shanoir.ng.vip.executionTemplate.dto.mapper;
 
-import org.mapstruct.*;
-import org.shanoir.ng.shared.mapper.StudyMapper;
+import org.mapstruct.DecoratedWith;
+import org.mapstruct.IterableMapping;
+import org.mapstruct.Mapper;
+import org.mapstruct.Named;
 import org.shanoir.ng.vip.executionTemplate.dto.ExecutionTemplateDTO;
 import org.shanoir.ng.vip.executionTemplate.model.ExecutionTemplate;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring", uses = {StudyMapper.class})
+@Mapper(componentModel = "spring")
+@DecoratedWith(ExecutionTemplateDecorator.class)
 public interface ExecutionTemplateMapper {
 
-    ////// Entity to DTO
+    @Named("ExecutionTemplateToDTO")
+    ExecutionTemplateDTO executionTemplateToDTO(ExecutionTemplate executionTemplate);
 
-    // Single entity
+    @IterableMapping(qualifiedByName = "ExecutionTemplateToDTO")
+    List<ExecutionTemplateDTO> executionTemplatesToDTOs(List<ExecutionTemplate> executionTemplates);
 
-    @Named("idRelations")
-    @Mapping(target = "studyId", source = "study", qualifiedByName = "id")
-    ExecutionTemplateDTO executionTemplateToDTOWithIdRelations(ExecutionTemplate executionTemplate);
-
-    // Entity list
-
-    @IterableMapping(qualifiedByName = "idRelations")
-    List<ExecutionTemplateDTO> executionTemplateListToDTOListWithStudy(List<ExecutionTemplate> executionTemplates);
-
-    ////// DTO toEntity
-
-    // Single entity
     @Named("ExecutionTemplateDTOToEntity")
-    @Mapping(target = "study", source = "studyId", qualifiedByName = "idOnly")
     ExecutionTemplate executionTemplateDTOToEntity(ExecutionTemplateDTO dto);
 
 }

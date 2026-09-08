@@ -52,7 +52,7 @@ public class StudyCardRepositoryTest {
     private StudyInstanceUIDAndSubjectNameHandler studyInstanceUIDHandler;
 
     @Test
-    public void findAllTest() {
+    public void findAllTest() throws Exception {
         Iterable<StudyCard> studyCardDb = studyCardRepository.findAll();
         assertThat(studyCardDb).isNotNull();
         int nbStudyCard = 0;
@@ -65,13 +65,13 @@ public class StudyCardRepositoryTest {
     }
 
     @Test
-    public void findByStudyIdInTest() {
+    public void findByStudyIdInTest() throws Exception {
         List<StudyCard> studyCards = studyCardRepository.findByStudyIdIn(Arrays.asList(STUDY_TEST_1_ID));
         assertNotNull(studyCards);
     }
 
     @Test
-    public void findOneTest() {
+    public void findOneTest() throws Exception {
         StudyCard studyCardDb = studyCardRepository.findById(STUDYCARD_TEST_1_ID).orElse(null);
         assertThat(studyCardDb.getName()).isEqualTo(STUDYCARD_TEST_1_DATA);
     }

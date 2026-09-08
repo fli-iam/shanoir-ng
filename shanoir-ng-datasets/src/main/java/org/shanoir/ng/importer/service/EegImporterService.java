@@ -15,6 +15,7 @@
 package org.shanoir.ng.importer.service;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLConnection;
 import java.nio.file.Files;
@@ -81,7 +82,7 @@ public class EegImporterService {
      * @param importJob the import job from importer MS.
      */
     @Transactional
-    public void createEegDataset(final EegImportJob importJob) {
+    public void createEegDataset(final EegImportJob importJob) throws IOException {
         Long userId = KeycloakUtil.getTokenUserId();
         ShanoirEvent event;
         if (Objects.isNull(importJob.getShanoirEvent())) {

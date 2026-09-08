@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, HostBinding, Input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, HostBinding, Input } from '@angular/core';
 
 
 
@@ -20,7 +20,6 @@ import { Component, HostBinding, Input, ChangeDetectionStrategy } from '@angular
     selector: 'tool-tip',
     templateUrl: 'tooltip.component.html',
     styleUrls: ['tooltip.component.css'],
-    changeDetection: ChangeDetectionStrategy.Eager,
     imports: []
 })
 

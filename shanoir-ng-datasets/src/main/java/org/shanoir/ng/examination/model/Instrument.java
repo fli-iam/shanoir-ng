@@ -57,7 +57,7 @@ public class Instrument extends AbstractEntity {
     private ScientificArticle instrumentDefinitionArticle;
 
     /** Instrument application domain. */
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection
     @CollectionTable(name = "instrument_domains", joinColumns = @JoinColumn(name = "instrument_id"))
     @Column(name = "domain")
     private List<Integer> domains;

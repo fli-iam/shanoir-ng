@@ -14,8 +14,6 @@
 
 package org.shanoir.ng.accountrequest.model;
 
-import java.time.LocalDate;
-
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 
 import jakarta.persistence.Entity;
@@ -45,8 +43,6 @@ public class AccountRequestInfo extends AbstractEntity {
     private Long studyId;
 
     private String studyName;
-
-    private LocalDate studyExpirationDate;
 
     /**
      * @return the contact
@@ -104,14 +100,6 @@ public class AccountRequestInfo extends AbstractEntity {
 
     public void setStudyName(String studyName) {
         this.studyName = studyName;
-    }
-
-    public LocalDate getStudyExpirationDate() {
-        return studyExpirationDate;
-    }
-
-    public void setStudyExpirationDate(LocalDate studyExpirationDate) {
-        this.studyExpirationDate = studyExpirationDate;
     }
 
 }

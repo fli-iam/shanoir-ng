@@ -88,5 +88,6 @@ public interface ExecutionTemplateApi {
     @PutMapping(value = "/{parameterId}", consumes = "application/json", produces = "application/json")
     @PreAuthorize("hasRole('ADMIN')")
     ResponseEntity<ExecutionTemplateDTO> updateExecutionTemplate(
-            @Parameter(description = "execution template updated", required = true) @RequestBody ExecutionTemplateDTO executionTemplateDTO);
+            @Parameter(description = "execution template updated", required = true) @RequestBody ExecutionTemplateDTO executionTemplateDTO,
+            @Parameter(description = "id of the execution template", required = true) @PathVariable("parameterId") Long parameterId);
 }

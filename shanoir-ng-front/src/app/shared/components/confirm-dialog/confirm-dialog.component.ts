@@ -12,30 +12,24 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { FormsModule } from '@angular/forms';
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component } from '@angular/core';
 
-import { SuperPromise } from '@app/utils/super-promise';
-
-import { DatepickerComponent } from "../../date-picker/date-picker.component";
+import { SuperPromise } from 'src/app/utils/super-promise';
 
 
 @Component({
     selector: 'confirm-dialog',
     templateUrl: 'confirm-dialog.component.html',
     styleUrls: ['confirm-dialog.component.css'],
-    changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [DatepickerComponent, FormsModule]
+    imports: []
 })
 export class ConfirmDialogComponent {
 
     title: string;
-    mode: 'confirm' | 'choose' | 'info' | 'error' | 'extendDate';
+    mode: 'confirm' | 'choose' | 'info' | 'error';
     private _message: string;
     link: string;
     buttons: {yes: string, no?: string, cancel?: string};
-    date: Date = new Date();
-    minDate: Date = new Date();
     private closePromise: SuperPromise<any> = new SuperPromise();
 
     public get message(): string {
@@ -78,22 +72,7 @@ export class ConfirmDialogComponent {
         return this.closePromise;
     }
 
-    public openExtendDate(title: string, message?: string, button?: string, date?: Date): Promise<{response: boolean, date: Date}> {
-        this.title = title;
-        this.message = message;
-        this.buttons = {yes: button, cancel: 'Cancel'};
-        this.mode = 'extendDate';
-        if (date) {
-            this.date = date;
-        }
-        return this.closePromise;
-    }
-
     public close(answer: any) {
-        if (this.mode == 'extendDate') {
-            this.closePromise.resolve({response: answer, date: this.date});
-        } else {
-            this.closePromise.resolve(answer); // forces boolean to be returned
-        }
+        this.closePromise.resolve(answer); // forces boolean to be returned
     }
 }

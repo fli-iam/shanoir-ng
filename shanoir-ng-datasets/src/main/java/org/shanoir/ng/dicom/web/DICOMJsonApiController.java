@@ -21,7 +21,6 @@ import org.shanoir.ng.dicom.web.dto.StudyDTO;
 import org.shanoir.ng.dicom.web.dto.mapper.ExaminationToStudyDTOMapper;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
-import org.shanoir.ng.shared.service.TransactionRunner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,14 +37,11 @@ public class DICOMJsonApiController implements DICOMJsonApi {
 
     @Override
     public ResponseEntity<StudiesDTO> findStudies() {
-        List<Examination> examinations = examinationService.findAllWithAcqAndDatasets();
+        List<Examination> examinations = examinationService.findAll();
         if (examinations.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
-
-        TransactionRunner tr = new TransactionRunner();
-
-        List<StudyDTO> studies = tr.callInTransaction(em -> examinationToStudyDTOMapper.examinationsToStudyDTOs(examinations));
+        List<StudyDTO> studies = examinationToStudyDTOMapper.examinationsToStudyDTOs(examinations);
         StudiesDTO studiesDTO = new StudiesDTO();
         studiesDTO.setStudies(studies);
         return new ResponseEntity<StudiesDTO>(studiesDTO, HttpStatus.OK);

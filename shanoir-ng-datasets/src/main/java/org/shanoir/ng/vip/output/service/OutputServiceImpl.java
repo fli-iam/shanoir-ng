@@ -57,8 +57,10 @@ public class OutputServiceImpl implements OutputService {
 
     private static final Logger LOG = LoggerFactory.getLogger(OutputServiceImpl.class);
 
-    @Value("${vip.upload-folder:'SECRET'}")
+    @Value("${vip-data-folder:'SECRET'}")
     private String importDir;
+
+    private static final String VIP_UPLOAD_FOLDER = "output_uploads";
 
     @Autowired
     private List<OutputHandler> outputHandlers;
@@ -70,7 +72,7 @@ public class OutputServiceImpl implements OutputService {
     @Lazy
     private DatasetProcessingRepository processingRepository;
 
-    @Transactional
+    @Transactional(readOnly = true)
     public void process(ExecutionMonitoring monitoring) throws ResultHandlerException, EntityNotFoundException {
         process(monitoring, outputHandlers);
     }
@@ -86,7 +88,7 @@ public class OutputServiceImpl implements OutputService {
     protected void process(ExecutionMonitoring monitoring, List<OutputHandler> selectedOutputHandlers) throws ResultHandlerException {
         List<File> outputFiles;
 
-        File userImportDir = new File(this.importDir + File.separator + monitoring.getResultsLocation());
+        File userImportDir = new File(this.importDir + File.separator + VIP_UPLOAD_FOLDER + File.separator + monitoring.getResultsLocation());
         if (userImportDir.exists()) {
             for (File archive : getArchivesToProcess(userImportDir)) {
                 LOG.info("Processing archive : " + archive.getAbsolutePath());

@@ -34,23 +34,21 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <span class="right-col">
                     <select-box
                         [(ngModel)]="study"
-                        [ngModelOptions]="{ standalone: true }"
                         (userChange)="onSelectStudy()"
-                        [viewRoute]="'/study/details/' + $safeNavigationMigration(study?.id)"
+                        [viewRoute]="'/study/details/' + study?.id"
                         [viewDisabled]="!study"
                         [options]="studyOptions"
-                        [disabled]="loading != 0"></select-box>
+                        [disabled]="loading"></select-box>
                 </span>
             </li>
             <li>
                 <label [class.required-label]="!useStudyCard">Select a center</label>
                 <span class="right-col">
                     <select-box
-                        [disabled]="!study || loading != 0"
+                        [disabled]="!study || loading"
                         [(ngModel)]="center"
-                        [ngModelOptions]="{ standalone: true }"
                         (userChange)="onSelectCenter()"
-                        [viewRoute]="'/center/details/' + $safeNavigationMigration(center?.id)"
+                        [viewRoute]="'/center/details/' + center?.id"
                         [viewDisabled]="!center"
                         (newClick)="openCreateCenter()"
                         [newHidden]="hasCompatibleCenters"
@@ -77,11 +75,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <label [class.required-label]="!useStudyCard">Select a center equipment</label>
                 <span class="right-col">
                     <select-box
-                        [disabled]="!center || loading != 0"
+                        [disabled]="!center || loading"
                         [(ngModel)]="acquisitionEquipment"
-                        [ngModelOptions]="{ standalone: true }"
                         (userChange)="onContextChange()"
-                        [viewRoute]="'/acquisition-equipment/details/' + $safeNavigationMigration(acquisitionEquipment?.id)"
+                        [viewRoute]="'/acquisition-equipment/details/' + acquisitionEquipment?.id"
                         [viewDisabled]="!acquisitionEquipment"
                         (newClick)="openCreateAcqEqt()"
                         [newHidden]="hasCompatibleEquipments"
@@ -114,11 +111,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <label class="required-label">Select a subject</label>
                 <span class="right-col">
                     <select-box
-                        [disabled]="loading != 0 || !study || !acquisitionEquipment"
+                        [disabled]="loading || !study || !acquisitionEquipment"
                         [(ngModel)]="subject"
-                        [ngModelOptions]="{ standalone: true }"
                         (userChange)="onSelectSubject()"
-                        [viewRoute]="'/subject/details/' + $safeNavigationMigration(subject?.id)"
+                        [viewRoute]="'/subject/details/' + subject?.id"
                         [viewDisabled]="!subject"
                         [optionArr]="subjects"></select-box>
                     <button class="new-subject" (click)="openCreateSubject()" [disabled]="!study || !acquisitionEquipment">
@@ -141,11 +137,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <label class="required-label">Select an examination</label>
                 <span class="right-col">
                     <select-box
-                        [disabled]="!study || !subject || loading != 0"
+                        [disabled]="!study || !subject || loading"
                         [(ngModel)]="examination"
-                        [ngModelOptions]="{ standalone: true }"
                         (userChange)="onSelectExam()"
-                        [viewRoute]="'/examination/details/' + $safeNavigationMigration(examination?.id)"
+                        [viewRoute]="'/examination/details/' + examination?.id"
                         [viewDisabled]="!examination"
                         [optionArr]="examinations"
                         [pipe]="subjectExaminationLabelPipe"></select-box>

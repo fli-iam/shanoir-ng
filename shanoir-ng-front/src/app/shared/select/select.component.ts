@@ -12,21 +12,20 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import {
-  AfterViewInit,
-  Component,
-  ElementRef,
-  EventEmitter,
-  forwardRef,
-  HostBinding,
-  HostListener,
-  Input,
-  OnChanges,
-  OnDestroy,
-  Output,
-  PipeTransform,
-  SimpleChanges,
-  ViewChild,
-  ChangeDetectionStrategy
+    AfterViewInit,
+    Component,
+    ElementRef,
+    EventEmitter,
+    forwardRef,
+    HostBinding,
+    HostListener,
+    Input,
+    OnChanges,
+    OnDestroy,
+    Output,
+    PipeTransform,
+    SimpleChanges,
+    ViewChild,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
@@ -48,7 +47,6 @@ import { GlobalService } from '../services/global.service';
             multi: true,
         }
     ],
-    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [FormsModule, RouterLink]
 })
 
@@ -102,7 +100,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     @Output() addClick: EventEmitter<any> = new EventEmitter();
     @HostBinding('class.compact') @Input() compactMode: boolean = false;
 
-    @Input() listLength: number = 16;
+    readonly LIST_LENGTH: number = 16;
 
     constructor(
             private element: ElementRef, 
@@ -299,7 +297,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
             this.noResult = false;
             return;
         }
-        this.displayedOptions = this.displayableOptions.slice(this.firstScrollOptionIndex, this.firstScrollOptionIndex + this.listLength);
+        this.displayedOptions = this.displayableOptions.slice(this.firstScrollOptionIndex, this.firstScrollOptionIndex + this.LIST_LENGTH);
         this.displayedOptions = this.displayedOptions.sort((a, b) => {
             if (a.section == b.section) return 0;
             else return ((a.section || 0) > (b.section || 0)) ? -1 : 1;
@@ -367,10 +365,10 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     
     private scrollToSelected() {
         if (this.scrollable && this.selectedOptionIndex) {
-            if (this.selectedOptionIndex < this.displayableOptions.length - this.listLength) {
+            if (this.selectedOptionIndex < this.displayableOptions.length - this.LIST_LENGTH) {
                 this.firstScrollOptionIndex = this.selectedOptionIndex;
             } else  {
-                this.firstScrollOptionIndex = this.displayableOptions.length - this.listLength;
+                this.firstScrollOptionIndex = this.displayableOptions.length - this.LIST_LENGTH;
             }
         } else {
             this.firstScrollOptionIndex = 0;
@@ -403,7 +401,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     }
 
     onWheel(event) {
-        if (event.wheelDelta < 0 && (this.firstScrollOptionIndex < this.length - this.listLength)) {
+        if (event.wheelDelta < 0 && (this.firstScrollOptionIndex < this.length - this.LIST_LENGTH)) {
             this.firstScrollOptionIndex ++;
         }
         if (event.wheelDelta > 0 && this.firstScrollOptionIndex > 0) {
@@ -450,9 +448,9 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
             const nextIndex: number = this.displayableOptions.slice(nextIndexStart).findIndex(opt => {return !opt.disabled});
             if (nextIndex == -1) return;
             const nbSteps: number = (this.focusedOptionIndex != null && this.focusedOptionIndex != undefined) ? nextIndex + 1 : 0;
-            if (this.scrollable && this.focusedOptionIndex + nbSteps >= this.listLength) {
+            if (this.scrollable && this.focusedOptionIndex + nbSteps >= this.LIST_LENGTH) {
                 this.firstScrollOptionIndex += nbSteps;
-                this.focusedOptionIndex = this.listLength - 1;
+                this.focusedOptionIndex = this.LIST_LENGTH - 1;
             } else {
                 this.focusedOptionIndex += nbSteps;
             }
@@ -491,7 +489,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
         const now: number = Date.now();
         this.scrollButtonTime = now;
         if (way == 'down') {
-            if (this.firstScrollOptionIndex < this.displayableOptions.length - this.listLength) {
+            if (this.firstScrollOptionIndex < this.displayableOptions.length - this.LIST_LENGTH) {
                 this.firstScrollOptionIndex ++;
             }
         } else if (way == 'up') {
@@ -503,7 +501,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
             if (this.scrollButtonTime == now) {
                 this.scrollButtonInterval = setInterval(() => {
                     if (way == 'down') {
-                        if (this.firstScrollOptionIndex < this.displayableOptions.length - this.listLength) {
+                        if (this.firstScrollOptionIndex < this.displayableOptions.length - this.LIST_LENGTH) {
                             this.firstScrollOptionIndex ++;
                         }
                     } else if (way == 'up') {
@@ -545,8 +543,8 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
         
         this.firstScrollOptionIndex = 
         Math.min(
-            Math.round((this.displayableOptions.length - this.listLength) * (relativeDropY / (listHeight - 50))), 
-            this.displayableOptions.length - this.listLength
+            Math.round((this.displayableOptions.length - this.LIST_LENGTH) * (relativeDropY / (listHeight - 50))), 
+            this.displayableOptions.length - this.LIST_LENGTH
             );
     }
 
@@ -562,8 +560,8 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
 
     private pageUp() {
         this.focusedOptionIndex = null;
-        if (this.firstScrollOptionIndex - this.listLength >= 0) {
-            this.firstScrollOptionIndex -= this.listLength;
+        if (this.firstScrollOptionIndex - this.LIST_LENGTH >= 0) {
+            this.firstScrollOptionIndex -= this.LIST_LENGTH;
         } else {
             this.firstScrollOptionIndex = 0;
         }
@@ -571,10 +569,10 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
 
     private pageDown() {
         this.focusedOptionIndex = null;
-        if (this.firstScrollOptionIndex + 2 * this.listLength <= this.displayableOptions.length) {
-            this.firstScrollOptionIndex += this.listLength;
+        if (this.firstScrollOptionIndex + 2 * this.LIST_LENGTH <= this.displayableOptions.length) {
+            this.firstScrollOptionIndex += this.LIST_LENGTH;
         } else {
-            this.firstScrollOptionIndex = this.displayableOptions.length - this.listLength;
+            this.firstScrollOptionIndex = this.displayableOptions.length - this.LIST_LENGTH;
         }
     }
 
@@ -640,11 +638,11 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     }
 
     public get scrollable(): boolean {
-        return this.length > this.listLength;
+        return this.length > this.LIST_LENGTH;
     }
 
     public get liftHeight(): number {
-        return this.length > 0 ? 250 * this.firstScrollOptionIndex / (this.length - this.listLength) : 0;
+        return this.length > 0 ? 250 * this.firstScrollOptionIndex / (this.length - this.LIST_LENGTH) : 0;
     }
 
     private get displayableOptions(): Option<any>[] {
@@ -657,8 +655,8 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
 
 export class Option<T> {
 
-    compatible?: boolean = undefined;
-    backgroundColor?: string;
+    compatible: boolean = undefined;
+    backgroundColor: string;
       
     constructor(
         public value: T,

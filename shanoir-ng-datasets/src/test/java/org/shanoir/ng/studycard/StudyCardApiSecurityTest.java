@@ -46,7 +46,7 @@ import org.shanoir.ng.study.rights.UserRights;
 import org.shanoir.ng.studycard.controler.StudyCardApiController;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.model.StudyCardApply;
-import org.shanoir.ng.studycard.repository.StudyCardRepository;
+import org.shanoir.ng.studycard.service.CardsProcessingService;
 import org.shanoir.ng.studycard.service.StudyCardService;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.Utils;
@@ -85,7 +85,7 @@ public class StudyCardApiSecurityTest {
     private StudyCardService studyCardService;
 
     @MockBean
-    private StudyCardRepository studyCardRepository;
+    private CardsProcessingService studyCardProcessingService;
 
     @MockBean
     private DatasetAcquisitionService datasetAcquisitionService;
@@ -120,7 +120,7 @@ public class StudyCardApiSecurityTest {
 
     @Test
     @WithAnonymousUser
-    public void testAsAnonymous() throws ShanoirException {
+    public void testAsAnonymous() throws ShanoirException, RestServiceException {
         setCenterRightsContext();
 
         StudyCardApply studycardApply = new StudyCardApply();
@@ -161,7 +161,7 @@ public class StudyCardApiSecurityTest {
         studycardApply.setStudyCardId(1L);
         StudyCard studyCard = new StudyCard();
         studyCard.setId(1L);
-        given(studyCardRepository.findById(1L)).willReturn(Optional.of(studyCard));
+        given(studyCardService.findById(1L)).willReturn(studyCard);
 
         given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(false);
         assertAccessDenied(api::applyStudyCard, studycardApply);

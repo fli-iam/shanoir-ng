@@ -14,15 +14,19 @@
 
 package org.shanoir.ng.shared.mapper;
 
-import org.mapstruct.DecoratedWith;
+import java.util.List;
+
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.model.SubjectDTO;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
-@DecoratedWith(SubjectDecorator.class)
 public interface SubjectMapper {
 
-    SubjectDTO subjectToSubjectDTO(Subject subject);
+    List<Subject> echoTimeDTOListToEchoTimeList(
+            List<SubjectDTO> echoTimeDTOList);
+
+    Subject echoTimeDTOToEchoTime(
+            SubjectDTO echoTimes);
 }

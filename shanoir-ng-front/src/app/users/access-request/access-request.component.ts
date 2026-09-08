@@ -12,28 +12,27 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { FormsModule, ReactiveFormsModule, UntypedFormGroup } from '@angular/forms';
+import { Component } from '@angular/core';
+import { UntypedFormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
-import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
-import { DatepickerComponent } from '@app/shared/date-picker/date-picker.component';
-import { IdName } from '@app/shared/models/id-name.model';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { IdName } from 'src/app/shared/models/id-name.model';
 
-import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
-import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
+import { UserService } from '../shared/user.service'
 import { Option, SelectBoxComponent } from '../../shared/select/select.component';
 import { StudyService } from '../../studies/shared/study.service';
+import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
+import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
 
-import { AccessRequest } from './access-request.model';
+import { AccessRequest } from './access-request.model'
 import { AccessRequestService } from './access-request.service';
 
 @Component({
     selector: 'access-request',
     templateUrl: 'access-request.component.html',
     styleUrls: ['access-request.component.css'],
-    changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, SelectBoxComponent, DatepickerComponent]
+    imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, SelectBoxComponent]
 })
 
 export class AccessRequestComponent extends EntityComponent<AccessRequest> {
@@ -49,6 +48,7 @@ export class AccessRequestComponent extends EntityComponent<AccessRequest> {
 
     constructor(
             protected activatedRoute: ActivatedRoute,
+            public userService: UserService,
             public studyService: StudyService,
             public accessRequestService: AccessRequestService) {
                 super(activatedRoute);
@@ -94,7 +94,7 @@ export class AccessRequestComponent extends EntityComponent<AccessRequest> {
                     this.router.navigate(['study/details', studyId]);
                 });
             } else {
-                this.accessRequestService.getAccessRequests().then(accessRequests => {
+                this.userService.getAccessRequests().then(accessRequests => {
                     if (accessRequests != null && accessRequests.find(ar => ar.studyId == studyId)) {
                         this.confirmDialogService.inform('Access request pending', 'You already have asked an access request for this study, wait for the administrator to confirm your access.').then(() => {
                             this.router.navigate(['study/list']);
@@ -109,8 +109,7 @@ export class AccessRequestComponent extends EntityComponent<AccessRequest> {
         return this.formBuilder.group({
             'motivation': [this.accessRequest.motivation, []],
             'studyId': [this.accessRequest.studyId, []],
-            'studyName': [this.accessRequest.studyName, []],
-            'expirationDate': [this.accessRequest.expirationDate]
+            'studyName': [this.accessRequest.studyName, []]
         });
     }
 
@@ -125,9 +124,9 @@ export class AccessRequestComponent extends EntityComponent<AccessRequest> {
     }
 
     acceptRequest() {
-        this.accessRequestService.resolveRequest(this.accessRequest.id, true, this.accessRequest.expirationDate)
+        this.accessRequestService.resolveRequest(this.accessRequest.id, true)
             .then(() => {
-                this.accessRequestService.decreaseAccessRequests();
+                this.userService.decreaseAccessRequests();
                 this.router.navigate(['/study/details/' + this.accessRequest.studyId])
             }).then(() => {
                 window.location.hash="members";
@@ -136,8 +135,8 @@ export class AccessRequestComponent extends EntityComponent<AccessRequest> {
     }
 
     refuseRequest() {
-        this.accessRequestService.resolveRequest(this.accessRequest.id, false, this.accessRequest.expirationDate).then(() => {
-            this.accessRequestService.decreaseAccessRequests();
+        this.accessRequestService.resolveRequest(this.accessRequest.id, false).then(() => {
+            this.userService.decreaseAccessRequests();
             this.goBack();
         });
     }

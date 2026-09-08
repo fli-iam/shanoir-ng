@@ -28,7 +28,7 @@ public class UserRights {
     public UserRights(List<StudyUser> studyUsers) {
         if (studyUsers != null) {
             for (StudyUser su : studyUsers) {
-                if (su.canAccessStudy()) {
+                if (su.isConfirmed()) {
                     studyRights.put(su.getStudyId(), su);
                 }
             }

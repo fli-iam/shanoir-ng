@@ -88,7 +88,7 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
     @Lazy
     private ExecutionMonitoringServiceImpl emProxyService;
 
-    public ExecutionMonitoring createExecutionMonitoring(ExecutionCandidateDTO sample) throws RestServiceException, EntityNotFoundException {
+    public ExecutionMonitoring createExecutionMonitoring(ExecutionCandidateDTO sample) throws RestServiceException {
         ExecutionMonitoring executionMonitoring = new ExecutionMonitoring();
 
         executionMonitoring.setName(sample.getPipelineIdentifier().replaceAll("[/.]", "_") + "_" + LocalDateTime.now().format(readableFormatter));

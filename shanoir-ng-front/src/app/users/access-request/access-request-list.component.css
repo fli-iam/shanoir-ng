@@ -41,7 +41,3 @@ button.refuse { background-color: var(--color-error); }
     display: block;
     overflow: hidden;
 }
-
-.status {
-    font-weight: bold;
-}

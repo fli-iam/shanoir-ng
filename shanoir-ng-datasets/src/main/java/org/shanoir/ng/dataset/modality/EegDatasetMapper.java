@@ -14,8 +14,20 @@
 
 package org.shanoir.ng.dataset.modality;
 
-import org.mapstruct.*;
-import org.shanoir.ng.dataset.dto.mapper.DatasetMappingConfig;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.mapstruct.DecoratedWith;
+import org.mapstruct.IterableMapping;
+import org.mapstruct.Mapper;
+import org.mapstruct.Named;
+import org.shanoir.ng.dataset.dto.mapper.DatasetMetadataMapper;
+import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.examination.model.Examination;
+import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.shared.paging.PageImpl;
+import org.springframework.data.domain.Page;
 
 /**
  * Mapper for datasets.
@@ -23,20 +35,111 @@ import org.shanoir.ng.dataset.dto.mapper.DatasetMappingConfig;
  * @author msimon
  *
  */
-@Mapper(componentModel = "spring", config = DatasetMappingConfig.class)
+@Mapper(componentModel = "spring", uses = { DatasetMetadataMapper.class })
+@DecoratedWith(EegDatasetDecorator.class)
 public interface EegDatasetMapper {
 
-    ////// Entity to DTO
 
-    //Single entity
+    /**
+     * Map list of @Dataset to list of @IdNameDTO.
+     *
+     * @param datasets
+     *            list of datasets.
+     * @return list of datasets DTO.
+     */
+    List<IdName> datasetsToIdNameDTOs(List<EegDataset> datasets);
 
-    @Named("withProcessingAncestorsAndExamination")
-    @InheritConfiguration(name = "datasetToDatasetDTOWithProcessingAncestorsAndExaminationPrototype")
-    @Mapping(target = "channels", expression = "java(null)")
-    @Mapping(target = "events", expression = "java(null)")
-    EegDatasetDTO eegDatasetToEegDatasetDTOWithProcessingAncestorsAndExamination(EegDataset dataset);
+    /**
+     * Map a @Dataset to a @DatasetDTO.
+     *
+     * @param datasets
+     *            dataset.
+     * @return dataset DTO.
+     */
+    @Named(value = "standard")
+    EegDatasetDTO datasetToDatasetDTO(EegDataset dataset);
 
-    @Named("withMetadata")
-    @InheritConfiguration(name = "datasetToDatasetDTOWithMetadataPrototype")
-    EegDatasetDTO eegDatasetToEegDatasetDTOWithMetadata(EegDataset dataset);
+    /**
+     * Map a @Dataset to a @DatasetDTO.
+     *
+     * @param datasets
+     *            dataset.
+     * @return dataset DTO.
+     */
+    @Named(value = "withProcessings")
+    EegDatasetWithDependenciesDTO datasetToDatasetAndProcessingsDTO(EegDataset dataset);
+    /**
+     * Map a @Dataset to a @DatasetDTO.
+     *
+     * @param datasets
+     *            dataset.
+     * @return dataset DTO.
+     */
+    @IterableMapping(qualifiedByName = "standard")
+    List<EegDatasetDTO> datasetToDatasetDTO(List<EegDataset> datasets);
+
+    /**
+     * Map a @Dataset to a @DatasetDTO.
+     *
+     * @param datasets
+     *            dataset.
+     * @return dataset DTO.
+     */
+    @IterableMapping(qualifiedByName = "standard")
+    PageImpl<EegDatasetDTO> datasetToDatasetDTO(Page<EegDataset> page);
+
+    /**
+     * Map a @Dataset to a @IdNameDTO.
+     *
+     * @param dataset
+     *            dataset to map.
+     * @return dataset DTO.
+     */
+    IdName datasetToIdNameDTO(EegDataset dataset);
+
+    default List<Long> mapCopiesFromDataset(List<Dataset> copies) {
+        if (copies == null) {
+            return null;
+        }
+        return copies.stream()
+                .map(Dataset::getId)
+                .collect(Collectors.toList());
+    }
+
+    default Long mapSourceFromDataset(Dataset source) {
+        return source != null ? source.getId() : null;
+    }
+    default List<Long> mapCopiesFromDatasetAcquisition(List<DatasetAcquisition> copies) {
+        if (copies == null) {
+            return null;
+        }
+        return copies.stream()
+                .map(DatasetAcquisition::getId)
+                .collect(Collectors.toList());
+    }
+
+    default Long mapSourceFromDatasetAcquisition(DatasetAcquisition source) {
+        return source != null ? source.getId() : null;
+    }
+
+    default List<DatasetAcquisition> mapCopiesDatasetAcquisitionFromLong(List<Long> copies) {
+        return null;
+    }
+
+    default DatasetAcquisition mapSourceDatasetAcquisitionFromLong(Long source) {
+        return null;
+    }
+
+    default List<Long> mapCopiesFromExamination(List<Examination> copies) {
+        if (copies == null) {
+            return null;
+        }
+        return copies.stream()
+                .map(Examination::getId)
+                .collect(Collectors.toList());
+    }
+
+    default Long mapSourceFromExamination(Examination source) {
+        return source != null ? source.getId() : null;
+    }
 }

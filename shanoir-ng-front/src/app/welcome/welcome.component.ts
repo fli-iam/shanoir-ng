@@ -8,8 +8,7 @@ import {
   Renderer2,
   ViewChild,
   ViewEncapsulation,
-  DOCUMENT,
-  ChangeDetectionStrategy
+  DOCUMENT
 } from '@angular/core';
 import { SlicePipe, TitleCasePipe } from '@angular/common';
 
@@ -28,7 +27,6 @@ import { isDarkColor } from "../utils/app.utils";
     templateUrl: './welcome.component.html',
     styleUrls: ['./welcome.component.css'],
     encapsulation: ViewEncapsulation.None,
-    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [SlicePipe, TitleCasePipe]
 })
 export class WelcomeComponent implements OnInit {

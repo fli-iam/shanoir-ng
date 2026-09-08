@@ -12,17 +12,16 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import {
-  Component,
-  ElementRef,
-  EventEmitter,
-  HostListener,
-  Input,
-  OnChanges,
-  Output,
-  QueryList,
-  SimpleChanges,
-  ViewChildren,
-  ChangeDetectionStrategy
+    Component,
+    ElementRef,
+    EventEmitter,
+    HostListener,
+    Input,
+    OnChanges,
+    Output,
+    QueryList,
+    SimpleChanges,
+    ViewChildren,
 } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
@@ -39,7 +38,6 @@ import { StudyCardConditionComponent } from './condition/condition.component';
     selector: 'study-card-rule',
     templateUrl: 'study-card-rule.component.html',
     styleUrls: ['study-card-rule.component.css'],
-    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [StudyCardConditionComponent, StudyCardActionComponent]
 })
 export class StudyCardRuleComponent implements OnChanges {
@@ -59,7 +57,7 @@ export class StudyCardRuleComponent implements OnChanges {
     touched: boolean = false;
     assignmentFieldOptions: Option<string>[];
     conditionFieldOptions: Option<string>[];
-    @Input() addSubForm: (subForm: FormGroup, previousForm?: FormGroup) => FormGroup;
+    @Input() addSubForm: (subForm: FormGroup) => FormGroup;
 
     constructor(public elementRef: ElementRef) { }
 

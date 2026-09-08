@@ -11,24 +11,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { ChangeDetectionStrategy, Component, ElementRef, Input, OnChanges, QueryList, SimpleChanges, ViewChildren } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, ElementRef, Input, OnChanges, QueryList, SimpleChanges, ViewChildren } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 
-import { Entity } from '@app/shared/components/entity/entity.abstract';
-import { TreeNodeAbstractComponent } from '@app/shared/components/tree/tree-node.abstract.component';
-import { QualityCardService } from '@app/study-cards/shared/quality-card.service';
-import { isDarkColor } from '@app/utils/app.utils';
-import { SuperPromise } from '@app/utils/super-promise';
+import { Entity } from 'src/app/shared/components/entity/entity.abstract';
+import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
+import { QualityCardService } from 'src/app/study-cards/shared/quality-card.service';
+import { isDarkColor } from 'src/app/utils/app.utils';
+import { SuperPromise } from 'src/app/utils/super-promise';
 
-import { CenterNodeComponent } from '../../centers/tree/center-node.component';
-import { DropdownMenuComponent } from '../../shared/components/dropdown-menu/dropdown-menu.component';
-import { MenuItemComponent } from '../../shared/components/dropdown-menu/menu-item/menu-item.component';
-import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
-import { KeycloakService } from "../../shared/keycloak/keycloak.service";
 import { StudyCardService } from '../../study-cards/shared/study-card.service';
-import { StudyCardNodeComponent } from '../../study-cards/tree/study-card-node.component';
-import { SubjectNodeComponent } from '../../subjects/tree/subject-node.component';
+import { KeycloakService } from "../../shared/keycloak/keycloak.service";
 import {
     MemberNode,
     QualityCardNode,
@@ -38,11 +32,17 @@ import {
     SubjectNode,
     UNLOADED
 } from '../../tree/tree.model';
-import { MemberNodeComponent } from '../../users/tree/member-node.component';
 import { StudyRightsService } from "../shared/study-rights.service";
 import { StudyUserRight } from '../shared/study-user-right.enum';
 import { Study } from '../shared/study.model';
 import { TreeService } from '../study/tree.service';
+import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
+import { DropdownMenuComponent } from '../../shared/components/dropdown-menu/dropdown-menu.component';
+import { MenuItemComponent } from '../../shared/components/dropdown-menu/menu-item/menu-item.component';
+import { SubjectNodeComponent } from '../../subjects/tree/subject-node.component';
+import { CenterNodeComponent } from '../../centers/tree/center-node.component';
+import { StudyCardNodeComponent } from '../../study-cards/tree/study-card-node.component';
+import { MemberNodeComponent } from '../../users/tree/member-node.component';
 
 export type Sort = {field: 'name' | 'id', way : 'asc' | 'desc'}
 
@@ -50,7 +50,6 @@ export type Sort = {field: 'name' | 'id', way : 'asc' | 'desc'}
     selector: 'study-node',
     templateUrl: 'study-node.component.html',
     styleUrls: ['study-node.component.css'],
-    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [TreeNodeComponent, DropdownMenuComponent, RouterLink, MenuItemComponent, FormsModule, SubjectNodeComponent, CenterNodeComponent, StudyCardNodeComponent, MemberNodeComponent]
 })
 

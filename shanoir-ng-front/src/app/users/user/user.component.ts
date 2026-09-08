@@ -11,17 +11,17 @@
 * You should have received a copy of the GNU General Public License
 * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 */
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component } from '@angular/core';
 import {
     AbstractControl, FormsModule, ReactiveFormsModule, UntypedFormControl, UntypedFormGroup, ValidationErrors,
     ValidatorFn, Validators
 } from '@angular/forms';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 
-import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
-import { StudyUser } from '@app/studies/shared/study-user.model';
-import { StudyService } from '@app/studies/shared/study.service';
-import { Selection } from '@app/studies/study/tree.service';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { StudyUser } from 'src/app/studies/shared/study-user.model';
+import { StudyService } from 'src/app/studies/shared/study.service';
+import { Selection } from 'src/app/studies/study/tree.service';
 
 import { Role } from '../../roles/role.model';
 import { RoleService } from '../../roles/role.service';
@@ -41,8 +41,7 @@ import { UserService } from '../shared/user.service';
     selector: 'user-detail',
     templateUrl: 'user.component.html',
     styleUrls: ['user.component.css'],
-    changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [FormsModule, ReactiveFormsModule, RouterLink, FormFooterComponent, DatepickerComponent, CheckboxComponent, AccountRequestInfoComponent, LocalDateFormatPipe]
+    imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, DatepickerComponent, CheckboxComponent, AccountRequestInfoComponent, LocalDateFormatPipe]
 })
 
 export class UserComponent extends EntityComponent<User> {

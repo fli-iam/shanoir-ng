@@ -14,7 +14,6 @@
 
 package org.shanoir.ng.study.repository;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,9 +39,6 @@ public interface StudyRepository extends JpaRepository<Study, Long>, StudyReposi
 
     @EntityGraph(attributePaths = { "studyTags", "profile" })
     List<Study> findByVisibleByDefaultTrueAndIsDraftFalse();
-
-    @EntityGraph(attributePaths = { "studyTags", "profile" })
-    List<Study> findDistinctByStudyUserListUserIdAndStudyUserListExpirationDateBefore(Long userId, LocalDate date);
 
     List<Study> findByIsDraftTrue();
 

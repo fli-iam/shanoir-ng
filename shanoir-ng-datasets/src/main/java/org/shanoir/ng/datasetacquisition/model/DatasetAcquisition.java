@@ -24,7 +24,6 @@ import org.shanoir.ng.datasetacquisition.model.ct.CtDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.eeg.EegDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.pet.PetDatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.model.rt.RtDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.xa.XaDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.validation.DatasetsModalityTypeCheck;
 import org.shanoir.ng.examination.model.Examination;
@@ -71,8 +70,7 @@ import jakarta.validation.constraints.NotNull;
     @Type(value = GenericDatasetAcquisition.class, name = "Generic"),
     @Type(value = EegDatasetAcquisition.class, name = "Eeg"),
     @Type(value = BidsDatasetAcquisition.class, name = "BIDS"),
-    @Type(value = XaDatasetAcquisition.class, name = "Xa"),
-    @Type(value = RtDatasetAcquisition.class, name = "Rt")})
+    @Type(value = XaDatasetAcquisition.class, name = "Xa")})
 public abstract class DatasetAcquisition extends AbstractEntity {
 
     /**
@@ -129,7 +127,7 @@ public abstract class DatasetAcquisition extends AbstractEntity {
     private List<DatasetAcquisition> copies;
 
     /** List of extra files directly attached to the dataset acquisition. */
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection
     @CollectionTable(name = "acquisition_extra_data_file_path", joinColumns = @JoinColumn(name = "dataset_acquisition_id"))
     @Column(name = "path")
     private List<String> extraDataFilePathList;

@@ -26,7 +26,6 @@ import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.SimpleEvaluationContext;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -43,7 +42,6 @@ public class ExecutionTemplateServiceImpl implements ExecutionTemplateService {
     @Lazy
     private PlannedExecutionService plannedExecutionService;
 
-    @Transactional(readOnly = true)
     public void createExecutionsFromExecutionTemplates(List<DatasetAcquisition> createdAcquisitions) {
         if (Objects.isNull(createdAcquisitions) || createdAcquisitions.isEmpty()) {
             return;
@@ -69,12 +67,8 @@ public class ExecutionTemplateServiceImpl implements ExecutionTemplateService {
     }
 
     public ExecutionTemplate update(ExecutionTemplate executionTemplate) {
-        ExecutionTemplate oldEntity = repository.findByIdWithStudy(executionTemplate.getId()).get();
+        ExecutionTemplate oldEntity = repository.findById(executionTemplate.getId()).get();
         executionTemplate.setFilters(oldEntity.getFilters());
-        executionTemplate.setStudy(oldEntity.getStudy());
-        if (executionTemplate.getParameters() != null) {
-            executionTemplate.getParameters().forEach(parameter -> parameter.setExecutionTemplate(executionTemplate));
-        }
         return executionTemplate;
     }
 

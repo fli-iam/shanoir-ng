@@ -38,7 +38,7 @@ export class BreadcrumbsService implements OnDestroy {
         locationStrategy: LocationStrategy,
         private titleService: Title) {
 
-        locationStrategy.onPopState(event => {
+        locationStrategy.onPopState((event: PopStateEvent) => {
             /* detect back & forward browser events and find the target step using its timestamp */
             for (let i=this.steps.length-1; i>=0; i--) {
                 if(this.steps[i].timestamp == event.state) {

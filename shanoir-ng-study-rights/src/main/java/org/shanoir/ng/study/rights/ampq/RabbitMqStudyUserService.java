@@ -14,10 +14,8 @@
 
 package org.shanoir.ng.study.rights.ampq;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.rights.StudyUser;
@@ -35,8 +33,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class RabbitMqStudyUserService {
@@ -68,15 +67,6 @@ public class RabbitMqStudyUserService {
         }
     }
 
-    public void receiveStudyUsers(Iterable<StudyUserCommand> commands) throws AmqpRejectAndDontRequeueException {
-        try {
-            LOG.debug("Received study-user commands : {}", commands);
-            service.processCommands(commands);
-        } catch (Exception e) {
-            throw new AmqpRejectAndDontRequeueException("Study User Update rejected !!!", e);
-        }
-    }
-
     @RabbitListener(queues = RabbitMQConfiguration.STUDY_I_CAN_ADMIN_QUEUE, containerFactory = "multipleConsumersFactory")
     @RabbitHandler
     @Transactional
@@ -85,10 +75,8 @@ public class RabbitMqStudyUserService {
         if (CollectionUtils.isEmpty(sus)) {
             return null;
         }
-        return sus.stream()
-            .filter(StudyUser::canAccessStudy)
-            .map(StudyUser::getStudyId)
-            .collect(Collectors.toList());
+        return sus.stream().map(StudyUser::getStudyId
+        ).collect(Collectors.toList());
     }
 
     @RabbitListener(queues = RabbitMQConfiguration.STUDY_ADMINS_QUEUE, containerFactory = "multipleConsumersFactory")
@@ -99,9 +87,8 @@ public class RabbitMqStudyUserService {
         if (CollectionUtils.isEmpty(admins)) {
             return null;
         }
-        return admins.stream()
-            .filter(StudyUser::canAccessStudy)
-            .map(StudyUser::getUserId)
-            .collect(Collectors.toList());
+        return admins.stream().map(studyUser ->
+            studyUser.getUserId()
+        ).collect(Collectors.toList());
     }
 }

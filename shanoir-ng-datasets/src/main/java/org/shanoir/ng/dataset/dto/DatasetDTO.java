@@ -17,8 +17,6 @@ package org.shanoir.ng.dataset.dto;
 import java.time.LocalDate;
 import java.util.List;
 
-import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
-import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 import org.shanoir.ng.tag.model.StudyTagDTOLight;
 
@@ -52,17 +50,13 @@ public class DatasetDTO {
 
     private String type;
 
-    private Boolean inPacs;
+    private boolean inPacs;
 
     private List<StudyTagDTOLight> tags;
 
     private Long source;
 
     private List<Long> copies;
-
-    private DatasetProcessingDTO datasetProcessing;
-
-    private DatasetAcquisitionDTO datasetAcquisition;
 
     /**
      * @return the creationDate
@@ -193,11 +187,11 @@ public class DatasetDTO {
         this.centerId = centerId;
     }
 
-    public Boolean isInPacs() {
+    public boolean isInPacs() {
         return inPacs;
     }
 
-    public void setInPacs(Boolean inPacs) {
+    public void setInPacs(boolean inPacs) {
         this.inPacs = inPacs;
     }
 
@@ -223,21 +217,5 @@ public class DatasetDTO {
 
     public void setCopies(List<Long> copies) {
         this.copies = copies;
-    }
-
-    public DatasetProcessingDTO getDatasetProcessing() {
-        return datasetProcessing;
-    }
-
-    public void setDatasetProcessing(DatasetProcessingDTO datasetProcessing) {
-        this.datasetProcessing = datasetProcessing;
-    }
-
-    public DatasetAcquisitionDTO getDatasetAcquisition() {
-        return datasetAcquisition;
-    }
-
-    public void setDatasetAcquisition(DatasetAcquisitionDTO datasetAcquisition) {
-        this.datasetAcquisition = datasetAcquisition;
     }
 }

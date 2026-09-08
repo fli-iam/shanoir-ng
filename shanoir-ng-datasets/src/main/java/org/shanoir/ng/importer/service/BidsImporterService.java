@@ -95,7 +95,8 @@ public class BidsImporterService {
 
     /**
      * Create BIDS dataset.
-     * @param importJobStr the import job as string
+     * @param importJob the import job
+     * @param userId the user id
      * @throws IOException
      * @throws JsonMappingException
      * @throws JsonParseException
@@ -183,10 +184,10 @@ public class BidsImporterService {
 
     /**
      * Import some nifti datasets
-     * @param importJob
      * @param bidsDataType
      * @param modalityType
      * @param event
+     * @param workfolder the work folder we are working in
      * @throws IOException
      * @throws ParseException
      * @throws JSONException

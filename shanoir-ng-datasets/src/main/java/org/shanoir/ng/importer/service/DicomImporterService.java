@@ -73,8 +73,8 @@ import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.AcquisitionEquipmentRepository;
 import org.shanoir.ng.shared.repository.CenterRepository;
 import org.shanoir.ng.shared.repository.StudyCenterRepository;
-import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
+import org.shanoir.ng.shared.service.StudyService;
 import org.shanoir.ng.shared.service.SubjectService;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.utils.KeycloakUtil;
@@ -138,7 +138,7 @@ public class DicomImporterService {
     private String seriesProperties;
 
     @Autowired
-    private StudyRepository studyRepository;
+    private StudyService studyService;
 
     @Autowired
     private DatasetSecurityService datasetSecurityService;
@@ -217,7 +217,7 @@ public class DicomImporterService {
     }
 
     @Transactional
-    public boolean importDicom(Attributes metaInformationAttributes, Attributes attributes)
+    public boolean importDicom(Attributes metaInformationAttributes, Attributes attributes, String modality)
             throws Exception {
         String deIdentificationMethod = attributes.getString(Tag.DeidentificationMethod);
         Sequence deIdentificationMethodCodeSequence = attributes.getSequence(Tag.DeidentificationMethodCodeSequence);
@@ -228,7 +228,7 @@ public class DicomImporterService {
             return false;
         }
         Long studyId = Long.parseLong(attributes.getString(Tag.ClinicalTrialProtocolID));
-        Study study = studyRepository.findById(studyId).orElse(null);
+        Study study = studyService.findById(studyId);
         if (study == null) {
             LOG.error("Shanoir study (research project) not found with ID: {}", studyId);
             return false;
@@ -519,7 +519,7 @@ public class DicomImporterService {
         }
         StudyCenter studyCenter = new StudyCenter();
         studyCenter.setId(studyCenterId);
-        Study study = studyRepository.findById(studyId).orElse(null);
+        Study study = studyService.findById(studyId);
         studyCenter.setStudy(study);
         studyCenter.setCenter(center);
         center.getStudyCenterList().add(studyCenter);
@@ -648,8 +648,7 @@ public class DicomImporterService {
      * Create the necessary dataset expression.
      *
      * @param attributes
-     * @param dataset
-     *
+     * @param measurementDataset
      * @throws MalformedURLException
      * @throws ShanoirException
      */

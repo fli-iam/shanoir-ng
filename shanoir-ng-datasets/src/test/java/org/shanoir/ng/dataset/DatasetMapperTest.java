@@ -63,7 +63,7 @@ public class DatasetMapperTest {
 
     @Test
     public void datasetToDatasetDTODTOTest() throws ParseException {
-        final DatasetDTO datasetDTO = datasetMapper.datasetToDatasetDTOWithMetadata(createDataset());
+        final DatasetDTO datasetDTO = datasetMapper.datasetToDatasetDTO(createDataset());
         Assertions.assertNotNull(datasetDTO);
         Assertions.assertTrue(DATASET_ID.equals(datasetDTO.getId()));
         Assertions.assertTrue(DATASET_NAME.equals(datasetDTO.getOriginMetadata().getName()));

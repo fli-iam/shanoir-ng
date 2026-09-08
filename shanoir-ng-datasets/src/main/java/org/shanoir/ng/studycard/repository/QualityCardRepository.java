@@ -26,6 +26,4 @@ public interface QualityCardRepository extends CrudRepository<QualityCard, Long>
     QualityCard findByName(String name);
 
     List<QualityCard> findByStudyId(Long studyId);
-
-    List<QualityCard> findAll();
 }

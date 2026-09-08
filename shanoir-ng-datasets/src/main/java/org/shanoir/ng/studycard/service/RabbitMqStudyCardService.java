@@ -37,7 +37,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class RabbitMqStudyCardService {
 
     @Autowired
-    private StudyCardRepository studyCardRepository;
+    private StudyCardRepository studyCardService;
 
     @Autowired
     private ObjectMapper mapper;
@@ -47,7 +47,7 @@ public class RabbitMqStudyCardService {
     @Transactional
     public String findStudyCard(String message) {
         try {
-            return mapper.writeValueAsString(studyCardRepository.findById(Long.valueOf(message)).orElse(null));
+            return mapper.writeValueAsString(studyCardService.findById(Long.valueOf(message)).orElse(null));
         } catch (Exception e) {
             throw new AmqpRejectAndDontRequeueException(e);
         }
@@ -62,7 +62,7 @@ public class RabbitMqStudyCardService {
             Long equipmentId = Long.valueOf(properties.getProperty("EQUIPMENT_ID_PROPERTY"));
             Long studyId = Long.valueOf(properties.getProperty("STUDY_ID_PROPERTY"));
             Long studyCardId = Long.valueOf(properties.getProperty("STUDYCARD_ID_PROPERTY"));
-            List<StudyCard> studyCards = this.studyCardRepository.findByStudyId(studyId);
+            List<StudyCard> studyCards = this.studyCardService.findByStudyId(studyId);
             for (StudyCard sc : studyCards) {
                 if (sc.getAcquisitionEquipmentId().equals(equipmentId)) {
                     return sc.getId();

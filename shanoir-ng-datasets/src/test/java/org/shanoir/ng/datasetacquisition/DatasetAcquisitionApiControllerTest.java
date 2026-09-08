@@ -30,12 +30,11 @@ import org.mockito.Mockito;
 import org.shanoir.ng.dataset.modality.EegDatasetDTO;
 import org.shanoir.ng.datasetacquisition.controler.DatasetAcquisitionApiController;
 import org.shanoir.ng.datasetacquisition.dto.ExaminationDatasetAcquisitionDTO;
-import org.shanoir.ng.datasetacquisition.dto.mapper.DatasetAcquisitionWithDatasetsMapper;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.GenericDatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.dto.mapper.DatasetAcquisitionDatasetsMapper;
 import org.shanoir.ng.datasetacquisition.dto.mapper.DatasetAcquisitionMapper;
 import org.shanoir.ng.datasetacquisition.dto.mapper.ExaminationDatasetAcquisitionMapper;
-import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.importer.dto.EegImportJob;
 import org.shanoir.ng.importer.service.DicomImporterService;
@@ -96,7 +95,7 @@ public class DatasetAcquisitionApiControllerTest {
     private ExaminationDatasetAcquisitionMapper examDsAcqMapper;
 
     @MockBean
-    private DatasetAcquisitionWithDatasetsMapper dsAcqDsMapper;
+    private DatasetAcquisitionDatasetsMapper dsAcqDsMapper;
 
     @MockBean
     private SolrService solrService;
@@ -106,9 +105,6 @@ public class DatasetAcquisitionApiControllerTest {
 
     @MockBean
     private RabbitTemplate rabbitTemplate;
-
-    @MockBean
-    private DatasetAcquisitionRepository datasetAcquisitionRepository;
 
     @MockBean
     private StorageService storageService;

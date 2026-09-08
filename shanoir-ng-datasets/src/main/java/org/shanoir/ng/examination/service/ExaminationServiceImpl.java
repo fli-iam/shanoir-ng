@@ -29,11 +29,8 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.hibernate.Hibernate;
-import org.shanoir.ng.anonymization.uid.generation.UIDGeneration;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
 import org.shanoir.ng.dicom.web.service.DICOMWebService;
@@ -41,10 +38,12 @@ import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
-import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
-import org.shanoir.ng.shared.exception.*;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.ErrorModel;
+import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.shared.service.SecurityService;
@@ -55,7 +54,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.util.Pair;
@@ -65,7 +63,6 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -114,14 +111,8 @@ public class ExaminationServiceImpl implements ExaminationService {
     @Autowired
     private StorageService storageService;
 
-    @Autowired
-    private DatasetAcquisitionRepository acquisitionRepository;
-
-    @Autowired
-    @Lazy
-    private ExaminationService examinationService;
-
-    @Transactional(readOnly = true)
+    @Override
+    @Transactional
     public void deleteById(final Long id, ShanoirEvent event) throws ShanoirException, SolrServerException, IOException, RestServiceException {
         Optional<Examination> examinationOpt = examinationRepository.findById(id);
         if (!examinationOpt.isPresent()) {
@@ -173,10 +164,11 @@ public class ExaminationServiceImpl implements ExaminationService {
     }
 
     @Async
+    @Transactional
     public void deleteExaminationAsync(Long examinationId, Long studyId, ShanoirEvent event) {
         try {
             storageService.deleteDirectoryExtraData(examinationId);
-            examinationService.deleteById(examinationId, event);
+            deleteById(examinationId, event);
             rabbitTemplate.convertAndSend(RabbitMQConfiguration.EXAMINATION_STUDY_DELETE_QUEUE, objectMapper.writeValueAsString(event));
             rabbitTemplate.convertAndSend(RabbitMQConfiguration.RELOAD_BIDS, objectMapper.writeValueAsString(studyId));
         } catch (Exception e) {
@@ -190,12 +182,13 @@ public class ExaminationServiceImpl implements ExaminationService {
     }
 
     @Async
+    @Override
     public void deleteEmptyExamination(Long id) throws EntityNotFoundException {
         Optional<Examination> examinationOpt = examinationRepository.findById(id);
         if (!examinationOpt.isPresent()) {
             throw new EntityNotFoundException(Examination.class, id);
         }
-        List<DatasetAcquisition> acquisitions = acquisitionRepository.findByExaminationIdWithDatasets(id);
+        List<DatasetAcquisition> acquisitions = datasetAcquisitionService.findByExamination(id);
         if (CollectionUtils.isEmpty(acquisitions)) {
             examinationRepository.deleteById(id);
         } else {
@@ -203,6 +196,7 @@ public class ExaminationServiceImpl implements ExaminationService {
         }
     }
 
+    @Override
     public List<Examination> findAll() {
         if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
             return examinationRepository.findAll();
@@ -214,35 +208,19 @@ public class ExaminationServiceImpl implements ExaminationService {
         }
     }
 
-    public List<Examination> findAllWithAcqAndDatasets() {
-        if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
-            return examinationRepository.findAllWithAcqAndDatasets();
-        } else {
-            List<Pair<Long, Long>> studyCenters = new ArrayList<>();
-            Set<Long> unrestrictedStudies = new HashSet<Long>();
-            securityService.getStudyCentersAndUnrestrictedStudies(studyCenters, unrestrictedStudies);
-            return examinationRepository.findAllWithAcqAndDatasetsByStudyCenterOrStudyIdIn(studyCenters, unrestrictedStudies);
-        }
-    }
-
-    @Transactional(readOnly = true)
+    @Override
     public Page<Examination> findPage(final Pageable pageable, boolean preclinical, String searchStr, String searchField) {
         List<Pair<Long, Long>> studyCenters = new ArrayList<>();
         Set<Long> unrestrictedStudies = new HashSet<Long>();
         securityService.getStudyCentersAndUnrestrictedStudies(studyCenters, unrestrictedStudies);
         if (searchStr != null && searchStr.length() >= 1) {
-            Page<Examination> page = examinationRepository.findPageByStudyCenterOrStudyIdInAndSearch(studyCenters, unrestrictedStudies, pageable, preclinical, searchStr, searchField);
-            page.forEach(examination -> Hibernate.initialize(examination.getCopies()));
-            page.forEach(examination -> Hibernate.initialize(examination.getInstrumentBasedAssessmentList()));
-            return page;
+            return examinationRepository.findPageByStudyCenterOrStudyIdInAndSearch(studyCenters, unrestrictedStudies, pageable, preclinical, searchStr, searchField);
         } else {
-            Page<Examination> page =  examinationRepository.findPageByStudyCenterOrStudyIdIn(studyCenters, unrestrictedStudies, pageable, preclinical);
-            page.forEach(examination -> Hibernate.initialize(examination.getCopies()));
-            page.forEach(examination -> Hibernate.initialize(examination.getInstrumentBasedAssessmentList()));
-            return page;
+            return examinationRepository.findPageByStudyCenterOrStudyIdIn(studyCenters, unrestrictedStudies, pageable, preclinical);
         }
     }
 
+    @Override
     public Page<Examination> findPage(final Pageable pageable, String patientName) {
         if (patientName != null && patientName.length() > 64) {
             throw new IllegalArgumentException("A patient name cannot be longer than 64 chars, it exceed the data representation limit.");
@@ -265,22 +243,27 @@ public class ExaminationServiceImpl implements ExaminationService {
         }
     }
 
+    @Override
     public List<Examination> findBySubjectId(final Long subjectId) {
         return examinationRepository.findBySubjectId(subjectId);
     }
 
+    @Override
     public List<Long> findIdsByStudyId(Long studyId) {
         return examinationRepository.findIdsByStudyId(studyId);
     }
 
+    @Override
     public List<Examination> findByStudyId(Long studyId) {
         return examinationRepository.findByStudy_Id(studyId);
     }
 
+    @Override
     public Examination findById(final Long id) {
         return examinationRepository.findById(id).orElse(null);
     }
 
+    @Override
     public Examination save(final Examination examination) throws EntityNotFoundException {
         Examination savedExamination = null;
         Subject subToSet = this.subjectService.findById(examination.getSubject().getId()).orElse(null);
@@ -292,8 +275,8 @@ public class ExaminationServiceImpl implements ExaminationService {
         return savedExamination;
     }
 
-    @Transactional
-    public Examination update(final Examination examination) throws ShanoirException, StorageException {
+    @Override
+    public Examination update(final Examination examination) throws EntityNotFoundException, ShanoirException, StorageException {
         final Examination examinationDb = examinationRepository.findById(examination.getId()).orElse(null);
         if (examinationDb == null) {
             throw new EntityNotFoundException(Examination.class, examination.getId());
@@ -311,78 +294,6 @@ public class ExaminationServiceImpl implements ExaminationService {
         updateExaminationValues(examinationDb, examination);
         examinationRepository.save(examinationDb);
         return examinationDb;
-    }
-
-    public List<Examination> findBySubjectIdStudyId(Long subjectId, Long studyId) {
-        return examinationRepository.findBySubjectIdAndStudy_Id(subjectId, studyId);
-    }
-
-    public Long getExtraDataSizeByStudyId(Long studyId) throws StorageException {
-        List<Examination> exams = this.findByStudyId(studyId);
-        long size = 0L;
-        for (Examination exam : exams) {
-            for (String path : exam.getExtraDataFilePathList()) {
-                size += storageService.getFileSizeExtraData(exam.getId(), path);
-            }
-        }
-        return size;
-    }
-
-    public String addExtraData(final Long examinationId, final MultipartFile file) {
-        try {
-            LOG.info("Saving file {} for examination: {}", file.getOriginalFilename(), examinationId);
-            return storageService.storeExtraData(
-                    examinationId,
-                    file.getOriginalFilename(),
-                    file.getInputStream(),
-                    file.getContentType(),
-                    file.getSize());
-        } catch (Exception e) {
-            LOG.error("Error while uploading file {} for examination: {}. File not uploaded. {}",
-                    file.getOriginalFilename(), examinationId, e);
-            return null;
-        }
-    }
-
-    public String addExtraDataFromFile(final Long examinationId, final File file) {
-        try {
-            LOG.info("Saving file {} for examination: {}", file.getName(), examinationId);
-            try (InputStream inputStream = new FileInputStream(file)) {
-                return storageService.storeExtraData(examinationId, file.getName(), inputStream,
-                        Files.probeContentType(file.toPath()), // detect MIME type from file
-                        file.length());
-            }
-        } catch (Exception e) {
-            LOG.error("Error while uploading file {} for examination: {}. File not uploaded. {}",
-                    file.getName(), examinationId, e);
-            return null;
-        }
-    }
-
-    @Transactional
-    public void syncStudyInstanceUIDFromPacs(Long examinationId) throws ShanoirException {
-        Examination examination = examinationRepository.findByIdWithAcquisitions(examinationId)
-                .orElseThrow(() -> new EntityNotFoundException(Examination.class, examinationId));
-        String studyInstanceUID = studyInstanceUIDHandler.findStudyInstanceUID(examination);
-        if (studyInstanceUID == null) {
-            throw new ShanoirException("Could not find StudyInstanceUID from WADO paths for examination: " + examinationId);
-        }
-        LOG.info("Syncing StudyInstanceUID {} from PACS for examination {}", studyInstanceUID, examinationId);
-        examinationRepository.updateStudyInstanceUID(examinationId, studyInstanceUID);
-    }
-
-    public void generateStudyInstanceUID(Examination examination) {
-        UIDGeneration generator = new UIDGeneration();
-        String newUID = generator.getNewUID();
-        examination.setStudyInstanceUID(newUID);
-    }
-
-    public void validate(BindingResult result) throws RestServiceException {
-        final FieldErrorMap errors = new FieldErrorMap(result);
-        if (!errors.isEmpty()) {
-            ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors));
-            throw new RestServiceException(error);
-        }
     }
 
     /**
@@ -430,4 +341,68 @@ public class ExaminationServiceImpl implements ExaminationService {
         examinationDb.setInstrumentBasedAssessmentList(examination.getInstrumentBasedAssessmentList());
         return examinationDb;
     }
+
+    @Override
+    public List<Examination> findBySubjectIdStudyId(Long subjectId, Long studyId) {
+        return examinationRepository.findBySubjectIdAndStudy_Id(subjectId, studyId);
+    }
+
+    @Override
+    public Long getExtraDataSizeByStudyId(Long studyId) throws StorageException {
+        List<Examination> exams = this.findByStudyId(studyId);
+        long size = 0L;
+        for (Examination exam : exams) {
+            for (String path : exam.getExtraDataFilePathList()) {
+                size += storageService.getFileSizeExtraData(exam.getId(), path);
+            }
+        }
+        return size;
+    }
+
+    @Override
+    public String addExtraData(final Long examinationId, final MultipartFile file) {
+        try {
+            LOG.info("Saving file {} for examination: {}", file.getOriginalFilename(), examinationId);
+            return storageService.storeExtraData(
+                    examinationId,
+                    file.getOriginalFilename(),
+                    file.getInputStream(),
+                    file.getContentType(),
+                    file.getSize());
+        } catch (Exception e) {
+            LOG.error("Error while uploading file {} for examination: {}. File not uploaded. {}",
+                    file.getOriginalFilename(), examinationId, e);
+            return null;
+        }
+    }
+
+    @Override
+    public String addExtraDataFromFile(final Long examinationId, final File file) {
+        try {
+            LOG.info("Saving file {} for examination: {}", file.getName(), examinationId);
+            try (InputStream inputStream = new FileInputStream(file)) {
+                return storageService.storeExtraData(examinationId, file.getName(), inputStream,
+                        Files.probeContentType(file.toPath()), // detect MIME type from file
+                        file.length());
+            }
+        } catch (Exception e) {
+            LOG.error("Error while uploading file {} for examination: {}. File not uploaded. {}",
+                    file.getName(), examinationId, e);
+            return null;
+        }
+    }
+
+    @Override
+    @Transactional
+    public void syncStudyInstanceUIDFromPacs(Long examinationId) throws EntityNotFoundException, ShanoirException {
+        Examination examination = examinationRepository.findByIdWithEagerAcquisitions(examinationId)
+                .orElseThrow(() -> new EntityNotFoundException(Examination.class, examinationId));
+        String studyInstanceUID = studyInstanceUIDHandler.findStudyInstanceUID(examination);
+        if (studyInstanceUID == null) {
+            throw new ShanoirException("Could not find StudyInstanceUID from WADO paths for examination: " + examinationId);
+        }
+        LOG.info("Syncing StudyInstanceUID {} from PACS for examination {}", studyInstanceUID, examinationId);
+        examinationRepository.updateStudyInstanceUID(examinationId, studyInstanceUID);
+    }
+
 }

@@ -124,10 +124,6 @@ public final class DatasetUtils {
                 dataset = new XaDataset();
                 originMetadata.setDatasetModalityType(DatasetModalityType.XA_DATASET);
                 break;
-            case DatasetType.Names.RT:
-                dataset = new RtDataset();
-                originMetadata.setDatasetModalityType(DatasetModalityType.RT_DATASET);
-                break;
             case DatasetType.Names.MEASUREMENT:
                 dataset = new MeasurementDataset();
                 originMetadata.setDatasetModalityType(DatasetModalityType.MEASUREMENT_DATASET);
@@ -159,8 +155,6 @@ public final class DatasetUtils {
             case TEMPLATE -> new TemplateDataset(d);
             case BIDS -> new BidsDataset(d);
             case XA -> new XaDataset(d);
-            case SR -> new SrDataset(d);
-            case RT -> new RtDataset(d);
             default -> new GenericDataset(d);
         };
     }

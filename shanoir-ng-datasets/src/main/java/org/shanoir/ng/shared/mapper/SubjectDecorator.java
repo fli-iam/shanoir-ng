@@ -14,22 +14,6 @@
 
 package org.shanoir.ng.shared.mapper;
 
-import org.shanoir.ng.shared.model.Subject;
-import org.shanoir.ng.shared.model.SubjectDTO;
-
-public class SubjectDecorator implements SubjectMapper {
-
-    public SubjectDTO subjectToSubjectDTO(Subject subject) {
-        if (subject == null) {
-            return null;
-        }
-
-        final SubjectDTO subjectDTO = new SubjectDTO();
-
-        subjectDTO.setId(subject.getId());
-        subjectDTO.setName(subject.getName());
-
-        return subjectDTO;
-    }
+public class SubjectDecorator {
 
 }

@@ -20,9 +20,9 @@ if (gitInfo.hash.startsWith('g'))  {
 const file = resolve(__dirname, '..', 'src', 'environments', 'version.ts');
 writeFileSync(file,
 `// IMPORTANT: THIS FILE IS AUTO GENERATED! DO NOT MANUALLY EDIT OR CHECKIN!
-/* eslint:disable */
+/* tslint:disable */
 export const VERSION = ${JSON.stringify(gitInfo, null, 4)};
-/* eslint:enable */
+/* tslint:enable */
 `, { encoding: 'utf-8' });
 
 console.log(`Wrote version info ${gitInfo.raw} to ${relative(resolve(__dirname, '..'), file)}`);

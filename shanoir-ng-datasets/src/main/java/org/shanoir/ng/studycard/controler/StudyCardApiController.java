@@ -14,19 +14,29 @@
 
 package org.shanoir.ng.studycard.controler;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.solr.client.solrj.SolrServerException;
+import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.shared.core.model.IdList;
+import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
+import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.PacsException;
 import org.shanoir.ng.shared.exception.RestServiceException;
-import org.shanoir.ng.studycard.model.DicomTag;
+import org.shanoir.ng.solr.service.SolrService;
+import org.shanoir.ng.studycard.dto.DicomTag;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.model.StudyCardApply;
-import org.shanoir.ng.studycard.repository.StudyCardRepository;
+import org.shanoir.ng.studycard.service.CardsProcessingService;
 import org.shanoir.ng.studycard.service.StudyCardService;
+import org.shanoir.ng.studycard.service.StudyCardUniqueConstraintManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,117 +44,196 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+
+import io.swagger.v3.oas.annotations.Parameter;
 
 @Controller
 public class StudyCardApiController implements StudyCardApi {
+
+    private static final String MICROSERVICE_COMMUNICATION_ERROR = "Microservice communication error";
 
     private static final String PACS_COMMUNICATION_ERROR = "Error during PACS communication while applying quality card on study";
 
     private static final Logger LOG = LoggerFactory.getLogger(StudyCardApiController.class);
 
     @Autowired
-    private StudyCardService service;
+    private StudyCardService studyCardService;
 
     @Autowired
-    private StudyCardRepository repository;
+    private StudyCardUniqueConstraintManager uniqueConstraintManager;
 
     @Autowired
     private DatasetAcquisitionService datasetAcquisitionService;
 
-    public ResponseEntity<Void> deleteStudyCard(Long studyCardId) throws RestServiceException {
-        if (datasetAcquisitionService.existsByStudyCardId(studyCardId)) {
+    @Autowired
+    private CardsProcessingService cardProcessingService;
+
+    @Autowired
+    private SolrService solrService;
+
+    @Override
+    public ResponseEntity<Void> deleteStudyCard(
+            @Parameter(description = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId) throws RestServiceException {
+        try {
+            if (datasetAcquisitionService.existsByStudyCardId(studyCardId)) {
+                throw new RestServiceException(
+                        new ErrorModel(
+                                HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                                "This study card is linked to at least one dataset acquisition."
+                        ));
+            }
+            studyCardService.deleteById(studyCardId);
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (MicroServiceCommunicationException e) {
             throw new RestServiceException(
-                    new ErrorModel(
-                            HttpStatus.UNPROCESSABLE_ENTITY.value(),
-                            "This study card is linked to at least one dataset acquisition."
-                    ));
+                    new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), MICROSERVICE_COMMUNICATION_ERROR, null));
         }
-        repository.deleteById(studyCardId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    public ResponseEntity<StudyCard> findStudyCardById(Long studyCardId) {
-        StudyCard studyCard = repository.findById(studyCardId).orElse(null);
+    @Override
+    public ResponseEntity<StudyCard> findStudyCardById(
+            @Parameter(description = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId) {
+        final StudyCard studyCard = studyCardService.findById(studyCardId);
         if (studyCard == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(studyCard, HttpStatus.OK);
     }
 
-    public ResponseEntity<List<StudyCard>> findStudyCardByStudyId(Long studyId) {
-        final List<StudyCard> studyCards = repository.findByStudyId(studyId);
+    @Override
+    public ResponseEntity<List<StudyCard>> findStudyCardByStudyId(
+            @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
+        final List<StudyCard> studyCards = studyCardService.findByStudy(studyId);
         if (studyCards.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity<>(studyCards, HttpStatus.OK);
     }
 
-    public ResponseEntity<List<StudyCard>> findStudyCardByAcqEqId(Long acqEqId) {
-        List<StudyCard> studyCards = repository.findByAcquisitionEquipmentId(acqEqId);
+    @Override
+    public ResponseEntity<List<StudyCard>> findStudyCardByAcqEqId(
+            @Parameter(description = "id of the acquisition equipment", required = true) @PathVariable("acqEqId") Long acqEqId) {
+        final List<StudyCard> studyCards = studyCardService.findStudyCardsByAcqEq(acqEqId);
         if (studyCards.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity<>(studyCards, HttpStatus.OK);
     }
 
+    @Override
     public ResponseEntity<List<StudyCard>> findStudyCards() {
-        List<StudyCard> studyCards = repository.findAll();
+        final List<StudyCard> studyCards = studyCardService.findAll();
         if (studyCards.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity<>(studyCards, HttpStatus.OK);
     }
 
-    public ResponseEntity<StudyCard> saveNewStudyCard(StudyCard studyCard, BindingResult result) throws RestServiceException {
-        service.validate(studyCard, result);
-        studyCard.setLastEditTimestamp(System.currentTimeMillis());
-        studyCard = repository.save(studyCard);
-        return new ResponseEntity<>(studyCard, HttpStatus.OK);
+    @Override
+    public ResponseEntity<StudyCard> saveNewStudyCard(
+            @Parameter(description = "study Card to create", required = true) @RequestBody StudyCard studyCard,
+            final BindingResult result) throws RestServiceException {
+        validate(studyCard, result);
+        StudyCard createdStudyCard;
+        try {
+            createdStudyCard = studyCardService.save(studyCard);
+        } catch (MicroServiceCommunicationException e) {
+            throw new RestServiceException(
+                    new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), MICROSERVICE_COMMUNICATION_ERROR, null));
+        }
+        return new ResponseEntity<>(createdStudyCard, HttpStatus.OK);
     }
 
     // Attention: used by ShanoirUploader!
-    public ResponseEntity<List<StudyCard>> searchStudyCards(IdList studyIds) {
-        List<StudyCard> studyCards = repository.findByStudyIdIn(studyIds.getIdList());
+    @Override
+    public ResponseEntity<List<StudyCard>> searchStudyCards(
+            @Parameter(description = "study ids", required = true) @RequestBody final IdList studyIds) {
+        final List<StudyCard> studyCards = studyCardService.search(studyIds.getIdList());
         if (studyCards.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity<>(studyCards, HttpStatus.OK);
     }
 
-    public ResponseEntity<Void> updateStudyCard(Long studyCardId, StudyCard studyCard, BindingResult result) throws RestServiceException {
-        service.validate(studyCard, result);
+    @Override
+    public ResponseEntity<Void> updateStudyCard(
+            @Parameter(description = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId,
+            @Parameter(description = "study card to update", required = true) @RequestBody StudyCard studyCard,
+            final BindingResult result) throws RestServiceException {
+        validate(studyCard, result);
         try {
-            service.update(studyCard);
+            studyCardService.update(studyCard);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (EntityNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (MicroServiceCommunicationException e) {
+            throw new RestServiceException(
+                    new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), MICROSERVICE_COMMUNICATION_ERROR, null));
         }
     }
 
+    @Override
     public ResponseEntity<List<DicomTag>> findDicomTags() throws RestServiceException {
-        return new ResponseEntity<>(service.findDicomTags(), HttpStatus.OK);
+        return new ResponseEntity<>(studyCardService.findDicomTags(), HttpStatus.OK);
     }
 
-    public ResponseEntity<Void> applyStudyCard(StudyCardApply studyCardApplyObject) throws RestServiceException {
+    /**
+     * Validate a studyCard
+     *
+     * @param studyCard
+     * @param result
+     * @throws RestServiceException
+     */
+    protected void validate(StudyCard studyCard, BindingResult result) throws RestServiceException {
+        final FieldErrorMap errors = new FieldErrorMap()
+                .add(new FieldErrorMap(result))
+                .add(uniqueConstraintManager.validate(studyCard));
+        if (!errors.isEmpty()) {
+            ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors));
+            throw new RestServiceException(error);
+        }
+    }
+
+    @Override
+    public ResponseEntity<Void> applyStudyCard(
+            @Parameter(description = "study card id and dataset ids", required = true) @RequestBody StudyCardApply studyCardApplyObject) throws PacsException, SolrServerException, IOException, RestServiceException {
         if (studyCardApplyObject == null
                 || studyCardApplyObject.getDatasetAcquisitionIds() == null
                 || studyCardApplyObject.getDatasetAcquisitionIds().isEmpty()
                 || studyCardApplyObject.getStudyCardId() == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        StudyCard studyCard = repository.findById(studyCardApplyObject.getStudyCardId()).orElse(null);
-        if (studyCard == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-
+        StudyCard studyCard = studyCardService.findById(studyCardApplyObject.getStudyCardId());
+        LOG.debug("re-apply studycard n° " + studyCard.getId());
+        List<DatasetAcquisition> acquisitions = datasetAcquisitionService.findById(studyCardApplyObject.getDatasetAcquisitionIds());
         try {
-            service.applyStudyCard(studyCard, studyCardApplyObject);
+            cardProcessingService.applyStudyCard(studyCard, acquisitions);
         } catch (PacsException | EntityNotFoundException e) {
             LOG.error("Study card could not be applied for acquisitions {}", studyCardApplyObject.getDatasetAcquisitionIds(), e);
             throw new RestServiceException(
                     new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), PACS_COMMUNICATION_ERROR, e));
         }
 
-        return new ResponseEntity<>(HttpStatus.OK);
+        // Get all updated dataset ids
+        List<Long> datasetIds = new ArrayList<Long>();
+        for (DatasetAcquisition acquisition : acquisitions) {
+            for (Dataset ds : acquisition.getDatasets()) {
+                datasetIds.add(ds.getId());
+            }
+        }
+
+        // Update solr metadata
+        try {
+            solrService.updateDatasetsAsync(datasetIds);
+        } catch (Exception e) {
+            LOG.error("Solr update failed for datasets {}", datasetIds, e);
+        }
+
+        return new ResponseEntity<Void>(HttpStatus.OK);
     }
+
 }

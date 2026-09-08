@@ -42,7 +42,6 @@ import org.dcm4che3.io.DicomOutputStream;
 import org.dcm4che3.json.JSONReader;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
-import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.dataset.service.DatasetUtils;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.dicom.WADOURLHandler;
@@ -51,11 +50,9 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -134,10 +131,6 @@ public class WADODownloaderService {
 
     private WebClient webClient;
 
-    @Autowired
-    @Lazy
-    private DatasetService datasetService;
-
     @PostConstruct
     public void initWebClient() {
         this.webClient = webClientBuilder
@@ -201,7 +194,7 @@ public class WADODownloaderService {
     private String buildFileName(String subjectName, Dataset dataset, String datasetFilePath, String instanceUID) {
         String serieDescription = dataset.getUpdatedMetadata().getName();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("YYYYMMdd");
-        dataset = datasetService.getFirstRealInput(dataset);
+        dataset = dataset.getFirstRealInput();
         String examDate = dataset.getDatasetAcquisition().getExamination().getExaminationDate().format(formatter);
         String name = subjectName + "_" + examDate + "_" + serieDescription + "_" + instanceUID;
         // Replace all forbidden characters.
@@ -334,7 +327,6 @@ public class WADODownloaderService {
         return null;
     }
 
-    @Transactional(readOnly = true)
     public AcquisitionAttributes<Long> getDicomAttributesForAcquisition(DatasetAcquisition acquisition) throws PacsException {
         long ts = new Date().getTime();
         List<Dataset> datasets = new ArrayList<>();

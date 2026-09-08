@@ -25,7 +25,6 @@ import java.util.Set;
 import org.dcm4che3.data.Tag;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.dicom.DicomProcessing;
 import org.shanoir.ng.download.AcquisitionAttributes;
@@ -37,7 +36,6 @@ import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
-import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.PacsException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.quality.QualityTag;
@@ -45,10 +43,8 @@ import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.model.QualityCard;
 import org.shanoir.ng.studycard.model.QualityException;
 import org.shanoir.ng.studycard.model.StudyCard;
-import org.shanoir.ng.studycard.repository.QualityCardRepository;
 import org.shanoir.ng.studycard.repository.StudyCardRepository;
 import org.shanoir.ng.studycard.service.QualityCardService;
-import org.shanoir.ng.studycard.service.StudyCardService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.shanoir.ng.utils.Utils;
@@ -79,9 +75,6 @@ public class ImporterService {
     private ExaminationRepository examinationRepository;
 
     @Autowired
-    private DatasetAcquisitionRepository acquisitionRepository;
-
-    @Autowired
     private DatasetAcquisitionContext datasetAcquisitionContext;
 
     @Autowired
@@ -103,13 +96,10 @@ public class ImporterService {
     private DatasetAcquisitionService datasetAcquisitionService;
 
     @Autowired
-    private QualityCardRepository qualityCardRepository;
-
-    @Autowired
     private QualityCardService qualityCardService;
 
     @Autowired
-    private StudyCardService studyCardService;
+    private QualityService qualityService;
 
     // This constructor will be called everytime a new bean instance is created
     public ImporterService() {
@@ -131,7 +121,7 @@ public class ImporterService {
         Set<DatasetAcquisition> generatedAcquisitions = null;
         AcquisitionsResult acquisitionsResult = null;
         try {
-            Examination examination = examinationRepository.findByIdWithAcquisitions(importJob.getExaminationId()).orElseThrow(() -> new EntityNotFoundException(Examination.class, importJob.getExaminationId()));
+            Examination examination = examinationRepository.findById(importJob.getExaminationId()).orElse(null);
             if (examination != null) {
                 // generate acquisitions
                 acquisitionsResult = generateAcquisitions(examination, importJob, event);
@@ -165,12 +155,6 @@ public class ImporterService {
             event.setMessage("[" + importJob.getStudyName() + " (n°" + importJob.getStudyId() + ")]"
                     + " Successfully created " + createdDatasetIds.size() + " dataset(s) for subject [" + importJob.getSubjectName()
                     + "] in examination [" + examination.getId() + "]");
-            // Some (but not all) series may have been excluded because a quality card tagged them ERROR:
-            // we set the report so the user knows which acquisitions were skipped and why (all-excluded
-            // is already reported via the QualityException branch below).
-            if (acquisitionsResult.qualityResult().hasError()) {
-                event.setReport(acquisitionsResult.qualityResult().toString());
-            }
             eventService.publishEvent(event);
 
             datasetsImportStatusService.markFinished(importJob.getExaminationId(), createdDatasetIds);
@@ -205,7 +189,8 @@ public class ImporterService {
         } catch (QualityException e) {
             String msg = e.buildErrorMessage();
             event.setStatus(ShanoirEvent.ERROR);
-            event.setMessage("Import from Shanoir user " + importJob.getUsername() + " aborted.\nNone of the acquisitions fulfilled the conditions from the following Quality Card(s) : " + String.join(", ", e.getQualityCardNames()) + ".");
+            event.setMessage("Import from Shanoir user " + importJob.getUsername() + " aborted.\n"
+                                + "None of the acquisitions fulfilled the conditions from the following Quality Card(s) : " + String.join(", ", e.getQualityCardNames()) + ".");
             event.setReport(e.getQualityResult().toString());
             event.setProgress(-1f);
             eventService.publishEvent(event);
@@ -214,21 +199,12 @@ public class ImporterService {
             mailService.sendFailureMail(importJob, userId, msg);
             datasetsImportStatusService.markError(importJob.getExaminationId(), msg);
             throw new ShanoirException(msg, e);
-        } catch (EntityNotFoundException e) {
-            event.setStatus(ShanoirEvent.ERROR);
-            event.setMessage("Unable to find examination " + importJob.getExaminationId() + " during the import : " + e.getClass() + " : " + e.getMessage() + ", please contact an administrator.");
-            event.setProgress(-1f);
-            eventService.publishEvent(event);
-            LOG.error("Error during import for exam: {} : {}", importJob.getExaminationId(), e.getMessage());
-            // Send mail
-            mailService.sendFailureMail(importJob, userId, e.getMessage());
-            throw new ShanoirException(event.getMessage(), e);
         } catch (Exception e) {
             event.setStatus(ShanoirEvent.ERROR);
             event.setMessage("Unexpected error during the import: " + e.getClass() + " : " + e.getMessage() + ", please contact an administrator.");
             event.setProgress(-1f);
             eventService.publishEvent(event);
-            LOG.error("Error during import for exam: {} : {}", importJob.getExaminationId(), e.getMessage());
+            LOG.error("Error during import for exam: {} : {}", importJob.getExaminationId(), e);
             // Send mail
             mailService.sendFailureMail(importJob, userId, e.getMessage());
             datasetsImportStatusService.markError(importJob.getExaminationId(), e.getMessage());
@@ -239,7 +215,7 @@ public class ImporterService {
     private AcquisitionsResult generateAcquisitions(Examination examination, ImportJob importJob,
             ShanoirEvent event) throws Exception {
         StudyCard studyCard = getStudyCard(importJob);
-        List<QualityCard> qualityCards = importJob.isFromShanoirUploader() ? Collections.emptyList() : qualityCardRepository.findByStudyId(examination.getStudyId());
+        List<QualityCard> qualityCards = importJob.isFromShanoirUploader() ? Collections.emptyList() : qualityCardService.findByStudy(examination.getStudyId());
         boolean hasQualityCards = qualityCards != null && !qualityCards.isEmpty();
         Set<DatasetAcquisition> generatedAcquisitions = new HashSet<>();
         QualityCardResult qualityResult = new QualityCardResult();
@@ -274,7 +250,7 @@ public class ImporterService {
                 // apply study card if needed
                 if (studyCard != null) {
                     importJob.setStudyCardName(studyCard.getName());
-                    studyCardService.applyStudyCardOnAcquisition(studyCard, acquisition, dicomAttributes);
+                    studyCard.apply(acquisition, dicomAttributes);
                 }
 
                 // apply quality card if needed
@@ -311,7 +287,7 @@ public class ImporterService {
         // If all series to be imported are in error we consider that the whole import failed
         if (generatedAcquisitions.isEmpty()) {
             // if the examination was created for this import, we delete it as it will be empty
-            List<DatasetAcquisition> examinationDatasetAcquisitions = acquisitionRepository.findByExaminationIdWithDatasets(examination.getId());
+            List<DatasetAcquisition> examinationDatasetAcquisitions = datasetAcquisitionService.findByExamination(examination.getId());
             if (examinationDatasetAcquisitions == null || examinationDatasetAcquisitions.isEmpty()) {
                 LOG.warn("All series to be imported for the new examination {} have control quality tag ERROR, the examination will be deleted if empty.", examination.getComment());
                 examinationService.deleteEmptyExamination(examination.getId());
@@ -387,7 +363,7 @@ public class ImporterService {
                 importJob.getExaminationId(),
                 dicomAttributes.getFirstDatasetAttributes().getString(Tag.SeriesDescription),
                 qualityCards.stream().map(QualityCard::getName).toList());
-        return qualityCardService.checkQuality(acquisition, dicomAttributes, qualityCards);
+        return qualityService.checkQuality(acquisition, dicomAttributes, qualityCards);
     }
 
     /**

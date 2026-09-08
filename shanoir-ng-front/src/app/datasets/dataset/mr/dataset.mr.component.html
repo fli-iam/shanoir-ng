@@ -73,8 +73,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <select-box
                                 [(ngModel)]="dataset.updatedMrMetadata.mrDatasetNature"
                                 [options]="natureOptions"
-                                (userChange)="updateForm()"
-                                [ngModelOptions]="{ standalone: true }"></select-box>
+                                (userChange)="updateForm()"></select-box>
                         }
                     }
                 </span>

@@ -17,6 +17,7 @@ package org.shanoir.ng.examination;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.shanoir.ng.examination.dto.ExaminationDTO;
+import org.shanoir.ng.examination.dto.SubjectExaminationDTO;
 import org.shanoir.ng.examination.dto.mapper.ExaminationMapper;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.utils.SecurityContextUtil;
@@ -45,9 +46,9 @@ public class ExaminationMapperTest {
     private ExaminationMapper examinationMapper;
 
     @Test
-    public void examinationsToExaminationDTOsTest() {
-        final List<ExaminationDTO> examinationDTOs = examinationMapper
-                .examinationListToExaminationListNullRelationsDTO(Arrays.asList(createExamination()));
+    public void examinationsToSubjectExaminationDTOsTest() {
+        final List<SubjectExaminationDTO> examinationDTOs = examinationMapper
+                .examinationsToSubjectExaminationDTOs(Arrays.asList(createExamination()));
         Assertions.assertNotNull(examinationDTOs);
         Assertions.assertTrue(examinationDTOs.size() == 1);
         Assertions.assertTrue(EXAMINATION_ID.equals(examinationDTOs.get(0).getId()));
@@ -56,7 +57,15 @@ public class ExaminationMapperTest {
     @Test
     public void examinationToExaminationDTOTest() {
         SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
-        final ExaminationDTO examinationDTO = examinationMapper.examinationToExaminationNullRelationsDTO(createExamination());
+        final ExaminationDTO examinationDTO = examinationMapper.examinationToExaminationDTO(createExamination());
+        Assertions.assertNotNull(examinationDTO);
+        Assertions.assertTrue(EXAMINATION_ID.equals(examinationDTO.getId()));
+    }
+
+    @Test
+    public void examinationToSubjectExaminationDTOTest() {
+        final SubjectExaminationDTO examinationDTO = examinationMapper
+                .examinationToSubjectExaminationDTO(createExamination());
         Assertions.assertNotNull(examinationDTO);
         Assertions.assertTrue(EXAMINATION_ID.equals(examinationDTO.getId()));
     }

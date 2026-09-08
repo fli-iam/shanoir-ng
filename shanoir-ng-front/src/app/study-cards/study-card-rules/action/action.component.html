@@ -32,7 +32,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         class="var auto-width"
         [class.error]="fieldError"
         [(ngModel)]="assignment.field"
-        [ngModelOptions]="{ standalone: true }"
         (userChange)="onChangeField()"
         (selectOption)="onSelectFieldOption($event)"
         (deSelectOption)="onDeSelectFieldOption($event)"
@@ -46,7 +45,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             class="value"
             [class.error]="valueError"
             [(ngModel)]="assignment.value"
-            [ngModelOptions]="{ standalone: true }"
             placeholder="enter value"
             (userChange)="onChangeValue()"
             (focusout)="valueTouched = true"
@@ -57,10 +55,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             class="value auto-width"
             [class.error]="valueError"
             [(ngModel)]="assignment.value"
-            [ngModelOptions]="{ standalone: true }"
             [options]="assigmentOptions"
             (userChange)="onChangeValue()"
-            [placeholder]="assignment.label"
+            [placeholder]="assignment.value"
             (focusout)="valueTouched = true"
             [clear]="false"></select-box>
     }

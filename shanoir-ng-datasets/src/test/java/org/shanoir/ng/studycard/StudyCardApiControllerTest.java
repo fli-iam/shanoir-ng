@@ -20,13 +20,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.shanoir.ng.dataset.security.DatasetSecurityService;
-import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.importer.service.DicomImporterService;
@@ -34,13 +32,13 @@ import org.shanoir.ng.importer.service.DicomSEGAndSRImporterService;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.validation.FindByRepository;
-import org.shanoir.ng.shared.validation.UniqueConstraintManager;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.studycard.controler.StudyCardApiController;
-import org.shanoir.ng.studycard.model.QualityCard;
 import org.shanoir.ng.studycard.model.StudyCard;
-import org.shanoir.ng.studycard.repository.StudyCardRepository;
+import org.shanoir.ng.studycard.service.CardsProcessingService;
+import org.shanoir.ng.studycard.service.QualityCardService;
 import org.shanoir.ng.studycard.service.StudyCardService;
+import org.shanoir.ng.studycard.service.StudyCardUniqueConstraintManager;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,7 +60,7 @@ import com.google.gson.GsonBuilder;
  *
  */
 
-@WebMvcTest(controllers = {StudyCardApiController.class, UniqueConstraintManager.class})
+@WebMvcTest(controllers = {StudyCardApiController.class, StudyCardUniqueConstraintManager.class})
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
 public class StudyCardApiControllerTest {
@@ -79,8 +77,10 @@ public class StudyCardApiControllerTest {
     private StudyCardService studyCardServiceMock;
 
     @MockBean
-    private StudyCardRepository repositoryMock;
+    private QualityCardService qualityCardServiceMock;
 
+    @MockBean
+    private CardsProcessingService studyCardProcessingServiceMock;
 
     @MockBean
     private DicomSEGAndSRImporterService dicomSEGAndSRImporterService;
@@ -92,16 +92,10 @@ public class StudyCardApiControllerTest {
     private DatasetAcquisitionService datasetAcquisitionServiceMock;
 
     @MockBean
-    private DatasetAcquisitionRepository acquisitionRepositoryMock;
-
-    @MockBean
     private WADODownloaderService downloaderMock;
 
     @MockBean
     private FindByRepository<StudyCard> findByRepositoryMock;
-
-    @MockBean
-    private FindByRepository<QualityCard> qualityCardFindByRepositoryMock;
 
     @MockBean(name = "datasetSecurityService")
     private DatasetSecurityService datasetSecurityService;
@@ -114,12 +108,12 @@ public class StudyCardApiControllerTest {
         gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
         StudyCard studyCardMock = new StudyCard();
         studyCardMock.setId(1L);
-        doNothing().when(repositoryMock).deleteById(1L);
-        given(repositoryMock.findAll()).willReturn(Arrays.asList(studyCardMock));
-        given(repositoryMock.findById(1L)).willReturn(Optional.of(studyCardMock));
-        given(repositoryMock.save(Mockito.mock(StudyCard.class))).willReturn(new StudyCard());
+        doNothing().when(studyCardServiceMock).deleteById(1L);
+        given(studyCardServiceMock.findAll()).willReturn(Arrays.asList(studyCardMock));
+        given(studyCardServiceMock.findById(1L)).willReturn(studyCardMock);
+        given(studyCardServiceMock.save(Mockito.mock(StudyCard.class))).willReturn(new StudyCard());
         given(findByRepositoryMock.findBy(Mockito.anyString(), Mockito.any(), Mockito.any())).willReturn(new ArrayList<StudyCard>());
-        given(datasetSecurityService.filterStudyCardList(Mockito.any(), Mockito.anyString())).willReturn(true);
+        given(datasetSecurityService.filterCardList(Mockito.any(), Mockito.anyString())).willReturn(true);
         given(datasetSecurityService.hasRightOnStudy(Mockito.any(), Mockito.anyString())).willReturn(true);
     }
 

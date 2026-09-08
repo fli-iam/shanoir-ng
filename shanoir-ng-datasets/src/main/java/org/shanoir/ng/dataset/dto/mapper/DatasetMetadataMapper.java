@@ -15,7 +15,6 @@
 package org.shanoir.ng.dataset.dto.mapper;
 
 import org.mapstruct.Mapper;
-import org.mapstruct.Named;
 import org.shanoir.ng.dataset.dto.DatasetMetadataDTO;
 import org.shanoir.ng.dataset.model.DatasetMetadata;
 
@@ -29,9 +28,12 @@ import org.shanoir.ng.dataset.model.DatasetMetadata;
 public interface DatasetMetadataMapper {
 
     /**
-     * Standard mapping method (there is no variations)
+     * Map a @DatasetMetadata to a @DatasetMetadataDTO.
+     *
+     * @param datasets
+     *            dataset.
+     * @return dataset DTO.
      */
-    @Named("standard")
     DatasetMetadataDTO datasetMetadataToDatasetMetadataDTO(DatasetMetadata dataset);
 
 

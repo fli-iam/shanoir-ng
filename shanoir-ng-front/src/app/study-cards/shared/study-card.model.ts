@@ -112,7 +112,7 @@ export class StudyCardCondition {
     }
 }
 
-export type FieldType = 'String' | 'Long' | 'Float' | 'Double' | 'Integer' | 'Binary' | 'Date' | 'FloatArray' | 'IntArray';
+export type TagType = 'String' | 'Long' | 'Float' | 'Double' | 'Integer' | 'Binary' | 'Date' | 'FloatArray' | 'IntArray';
 
 export type VM = {min: number, max: {number: number, multiplier: boolean}};
 
@@ -121,7 +121,7 @@ export class DicomTag {
     constructor(
         public code: number,
         public label: string,
-        public type: FieldType,
+        public type: TagType,
         public vm: VM) {};
 
     equals(other: DicomTag): boolean {

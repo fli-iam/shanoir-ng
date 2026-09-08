@@ -25,21 +25,13 @@ public class PageImpl<T> extends org.springframework.data.domain.PageImpl<T> imp
 
     private static final long serialVersionUID = 1L;
 
-    /**
-     * The superclass's {@link #getContent()} always returns an unmodifiable view of its content list,
-     * so this class keeps its own mutable copy to actually support the {@link Collection} mutator
-     * methods (add, remove, ...) that {@link Page} exposes.
-     */
-    private final List<T> mutableContent;
 
     public PageImpl() {
         super(new ArrayList<T>());
-        this.mutableContent = new ArrayList<>();
     }
 
     public PageImpl(org.springframework.data.domain.Page<T> page) {
         super(page.getContent(), PageRequest.of(page.getNumber(), page.getSize(), page.getSort()), page.getTotalElements());
-        this.mutableContent = new ArrayList<>(page.getContent());
     }
 
 
@@ -53,7 +45,6 @@ public class PageImpl<T> extends org.springframework.data.domain.PageImpl<T> imp
      */
     public PageImpl(List<T> content, Pageable pageable, long total) {
         super(content, pageable, total);
-        this.mutableContent = new ArrayList<>(content);
     }
 
     /**
@@ -64,72 +55,66 @@ public class PageImpl<T> extends org.springframework.data.domain.PageImpl<T> imp
      */
     public PageImpl(List<T> content) {
         super(content);
-        this.mutableContent = new ArrayList<>(content);
-    }
-
-    @Override
-    public List<T> getContent() {
-        return mutableContent;
     }
 
     @Override
     public boolean add(T e) {
-        return this.mutableContent.add(e);
+        return this.getContent().add(e);
     }
 
     @Override
     public boolean addAll(Collection<? extends T> c) {
-        return this.mutableContent.addAll(c);
+        return this.getContent().addAll(c);
     }
 
     @Override
     public void clear() {
-        this.mutableContent.clear();
+        this.getContent().clear();
     }
 
     @Override
     public boolean contains(Object o) {
-        return this.mutableContent.contains(o);
+        return this.getContent().contains(o);
     }
 
     @Override
     public boolean containsAll(Collection<?> c) {
-        return this.mutableContent.containsAll(c);
+        return this.getContent().containsAll(c);
     }
 
     @Override
     public boolean isEmpty() {
-        return this.mutableContent.isEmpty();
+        return this.getContent().isEmpty();
     }
 
     @Override
     public boolean remove(Object o) {
-        return this.mutableContent.remove(o);
+        return this.getContent().remove(o);
     }
 
     @Override
     public boolean removeAll(Collection<?> c) {
-        return this.mutableContent.removeAll(c);
+        return this.getContent().removeAll(c);
     }
 
     @Override
     public boolean retainAll(Collection<?> c) {
-        return this.mutableContent.retainAll(c);
+        return this.getContent().retainAll(c);
     }
 
     @Override
     public int size() {
-        return this.mutableContent.size();
+        return this.getContent().size();
     }
 
     @Override
     public Object[] toArray() {
-        return this.mutableContent.toArray();
+        return this.getContent().toArray();
     }
 
     @Override
     public <T> T[] toArray(T[] a) {
-        return this.mutableContent.toArray(a);
+        return this.getContent().toArray(a);
     }
 
 }

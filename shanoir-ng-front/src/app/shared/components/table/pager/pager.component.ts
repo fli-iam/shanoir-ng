@@ -12,14 +12,13 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, EventEmitter, Input, Output, OnChanges, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnChanges, SimpleChanges } from '@angular/core';
 
 
 @Component({
     selector: 'shanoir-pager',
     templateUrl: 'pager.component.html',
     styleUrls: ['pager.component.css'],
-    changeDetection: ChangeDetectionStrategy.Eager,
     imports: []
 })
 

@@ -145,8 +145,7 @@ public class ExtensionRequestApiControllerTest {
 
         // THEN a NOT acceptable error is sent
         Mockito.verifyNoInteractions(keycloakClient);
-        Mockito.verifyNoInteractions(emailService);
-    }
+        Mockito.verifyNoInteractions(emailService);    }
 
     @Test
     @WithMockUser(authorities = { "ROLE_ADMIN" })

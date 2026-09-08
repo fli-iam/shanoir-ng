@@ -16,52 +16,23 @@ package org.shanoir.ng.studycard.service;
 
 import java.util.List;
 
-import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
-import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.shared.exception.PacsException;
+import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.RestServiceException;
-import org.shanoir.ng.studycard.model.DicomTag;
+import org.shanoir.ng.studycard.dto.DicomTag;
 import org.shanoir.ng.studycard.model.StudyCard;
-import org.shanoir.ng.studycard.model.StudyCardApply;
-import org.springframework.validation.BindingResult;
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
 
-public interface StudyCardService {
+public interface StudyCardService extends CardService<StudyCard> {
 
-    /**
-     * Validate a quality card
-     *
-     * @param studyCard
-     * @param result
-     * @throws RestServiceException
-     */
-    void validate(StudyCard studyCard, BindingResult result) throws RestServiceException;
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterCardList(returnObject, 'CAN_SEE_ALL')")
+    List<StudyCard> findStudyCardsByAcqEq(Long acqEqId);
 
-    /**
-     * Update an existing quality card
-     *
-     * @param studyCard
-     */
-    void update(StudyCard studyCard) throws EntityNotFoundException;
+    @Override
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnStudyCard(#id, 'CAN_ADMINISTRATE'))")
+    void deleteById(Long id) throws EntityNotFoundException, MicroServiceCommunicationException;
 
-    /**
-     * Find all dicom tag types
-     */
     List<DicomTag> findDicomTags() throws RestServiceException;
-
-    /**
-     * Apply a study card on an acquisition
-     *
-     * @param studyCard
-     * @param studyCardApplyObject
-     */
-    void applyStudyCard(StudyCard studyCard, StudyCardApply studyCardApplyObject) throws PacsException, EntityNotFoundException;
-
-    /**
-     * Apply a study card's rules on a single dataset acquisition (and its datasets).
-     * Used during import, when dicoms are present in tmp directory.
-     *
-     * @return true if the application had any effect on the acquisition
-     */
-    boolean applyStudyCardOnAcquisition(StudyCard studyCard, DatasetAcquisition acquisition, AcquisitionAttributes<?> dicomAttributes) throws IllegalStateException;
 }

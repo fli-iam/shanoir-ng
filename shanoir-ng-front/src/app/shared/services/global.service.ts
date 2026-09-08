@@ -27,7 +27,7 @@ export class GlobalService implements OnDestroy {
     private subscription: Subscription;
     
     constructor(locationStrategy: LocationStrategy, router: Router) {
-        locationStrategy.onPopState(event => {
+        locationStrategy.onPopState((event: PopStateEvent) => {
             this._onNavigate.next(event);
         });
         this.subscription = router.events.subscribe(event => {
