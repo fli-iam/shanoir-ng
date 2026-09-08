@@ -170,7 +170,7 @@ class SeriesInstanceUIDHandlerTest {
         DatasetProcessing processing = new DatasetProcessing();
         processing.setOutputDatasets(List.of(createDataset(new GenericDataset(), 600L,
                 "/studies/1.2.3/series/" + SERIES_UID_OUTPUT + "/instances/1.2.6")));
-        when(datasetProcessingRepository.findAllByInputDatasets_IdIn(anyList())).thenReturn(List.of(processing));
+        when(datasetProcessingRepository.findAllByInputDatasets_IdInWithOutputDatasetFiles(anyList())).thenReturn(List.of(processing));
 
         Map<String, String> seriesToVirtualUIDs = handler.findSeriesToVirtualUIDs(42L);
 

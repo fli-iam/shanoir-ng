@@ -215,7 +215,7 @@ public class DICOMWebApiControllerTest {
         DatasetProcessing processing = new DatasetProcessing();
         processing.setOutputDatasets(List.of(dataset600));
         given(datasetProcessingRepositoryMock
-                .findAllByInputDatasets_IdIn(argThat(datasetIds -> datasetIds != null && datasetIds.contains(300L))))
+                .findAllByInputDatasets_IdInWithOutputDatasetFiles(argThat(datasetIds -> datasetIds != null && datasetIds.contains(300L))))
                 .willReturn(List.of(processing));
 
         given(dicomWebServiceMock.findSeriesOfStudy(STUDY_UID, "", ""))
