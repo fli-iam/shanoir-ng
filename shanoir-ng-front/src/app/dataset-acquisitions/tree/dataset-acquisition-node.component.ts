@@ -11,31 +11,32 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
-import { TaskState } from 'src/app/async-tasks/task.model';
-import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
-import { StudyUserRight } from 'src/app/studies/shared/study-user-right.enum';
-import { TreeService } from 'src/app/studies/study/tree.service';
+import { TaskState } from '@app/async-tasks/task.model';
+import { TreeNodeAbstractComponent } from '@app/shared/components/tree/tree-node.abstract.component';
+import { StudyUserRight } from '@app/studies/shared/study-user-right.enum';
+import { TreeService } from '@app/studies/study/tree.service';
 
 import { DatasetService } from '../../datasets/shared/dataset.service';
+import { DatasetNodeComponent } from '../../datasets/tree/dataset-node.component';
+import { DropdownMenuComponent } from '../../shared/components/dropdown-menu/dropdown-menu.component';
+import { MenuItemComponent } from '../../shared/components/dropdown-menu/menu-item/menu-item.component';
+import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
+import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
 import { ConsoleService } from "../../shared/console/console.service";
 import { MassDownloadService } from "../../shared/mass-download/mass-download.service";
 import { DatasetAcquisitionNode, DatasetNode, ShanoirNode, UNLOADED } from '../../tree/tree.model';
 import { DatasetAcquisition } from '../shared/dataset-acquisition.model';
 import { DatasetAcquisitionService } from "../shared/dataset-acquisition.service";
-import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
-import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
-import { DropdownMenuComponent } from '../../shared/components/dropdown-menu/dropdown-menu.component';
-import { MenuItemComponent } from '../../shared/components/dropdown-menu/menu-item/menu-item.component';
-import { DatasetNodeComponent } from '../../datasets/tree/dataset-node.component';
 
 
 @Component({
     selector: 'dataset-acquisition-node',
     templateUrl: 'dataset-acquisition-node.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [LoadingBarComponent, TreeNodeComponent, FormsModule, DropdownMenuComponent, RouterLink, MenuItemComponent, DatasetNodeComponent]
 })
 
@@ -83,6 +84,7 @@ export class DatasetAcquisitionNodeComponent extends TreeNodeAbstractComponent<D
                     this.input.datasetAcquisition.id,
                     label,
                     UNLOADED,
+                    null,
                     this.input.datasetAcquisition.extraDataFilePathList,
                     this.input.studyRights.includes(StudyUserRight.CAN_ADMINISTRATE),
                     this.input.studyRights.includes(StudyUserRight.CAN_DOWNLOAD)

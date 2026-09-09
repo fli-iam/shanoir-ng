@@ -16,7 +16,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
-import { SingleDownloadService } from 'src/app/shared/mass-download/single-download.service';
+import { SingleDownloadService } from '@app/shared/mass-download/single-download.service';
 
 import { EntityService } from '../../../../shared/components/entity/entity.abstract.service';
 import * as PreclinicalUtils from '../../../utils/preclinical.utils';

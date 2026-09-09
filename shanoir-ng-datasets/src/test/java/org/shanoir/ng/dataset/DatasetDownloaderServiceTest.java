@@ -136,7 +136,7 @@ public class DatasetDownloaderServiceTest {
     @BeforeEach
     public void setup() throws ShanoirException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, SolrServerException, IOException, RestServiceException {
         doNothing().when(datasetServiceMock).deleteById(1L);
-        given(datasetServiceMock.findById(1L)).willReturn(new MrDataset());
+        given(datasetServiceMock.findByIdWithProcessingAncestorsAndExaminationAndMetadata(1L)).willReturn(new MrDataset());
         given(datasetServiceMock.create(Mockito.mock(MrDataset.class))).willReturn(new MrDataset());
         given(studyRepo.findById(Mockito.anyLong())).willReturn(Optional.of(study));
         given(controllerSecurityService.idMatches(Mockito.anyLong(), Mockito.any(Dataset.class))).willReturn(true);

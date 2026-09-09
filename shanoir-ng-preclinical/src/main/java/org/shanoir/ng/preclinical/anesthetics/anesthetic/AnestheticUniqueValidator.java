@@ -14,10 +14,10 @@
 
 package org.shanoir.ng.preclinical.anesthetics.anesthetic;
 
-import org.shanoir.ng.shared.validation.UniqueConstraintManagerImpl;
+import org.shanoir.ng.shared.validation.UniqueConstraintManager;
 import org.springframework.stereotype.Service;
 
 @Service
-public class AnestheticUniqueValidator extends UniqueConstraintManagerImpl<Anesthetic> {
+public class AnestheticUniqueValidator extends UniqueConstraintManager<Anesthetic> {
 
 }

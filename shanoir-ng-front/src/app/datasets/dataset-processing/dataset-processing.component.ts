@@ -13,15 +13,15 @@
  */
 
 import { formatDate } from "@angular/common";
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule, ReactiveFormsModule, UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { distinctUntilChanged, firstValueFrom, takeUntil } from 'rxjs';
 
-import { Selection } from 'src/app/studies/study/tree.service';
-import { ExecutionMonitoringService } from 'src/app/vip/execution-monitorings/execution-monitoring.service';
-import { ExecutionMonitoring } from 'src/app/vip/models/execution-monitoring.model';
-import { Study } from "src/app/studies/shared/study.model";
+import { Selection } from '@app/studies/study/tree.service';
+import { ExecutionMonitoringService } from '@app/vip/execution-monitorings/execution-monitoring.service';
+import { ExecutionMonitoring } from '@app/vip/models/execution-monitoring.model';
+import { Study } from "@app/studies/shared/study.model";
 
 import { DatasetProcessing } from '../../datasets/shared/dataset-processing.model';
 import { DatasetProcessingType } from '../../enum/dataset-processing-type.enum';
@@ -48,6 +48,7 @@ import { DatasetProcessingListComponent } from "../dataset-processing-list/datas
     selector: 'dataset-processing-detail',
     templateUrl: 'dataset-processing.component.html',
     styleUrls: ['dataset-processing.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, RouterLink, SelectBoxComponent, DatepickerComponent, TooltipComponent, MultiSelectTableComponent, LocalDateFormatPipe, DatasetProcessingListComponent]
 })
 
@@ -222,8 +223,8 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
     }
 
     fetchDatasets(): Promise<void> {
-        if (!this.datasetProcessing?.studyId || !this.subject?.id) return Promise.resolve();
-        return this.datasetService.getByStudyIdAndSubjectId(this.datasetProcessing.studyId, this.subject.id).then(datasets => {
+        if (!this.subject?.id) return Promise.resolve();
+        return this.datasetService.getBySubjectId(this.subject.id).then(datasets => {
             for (const dataset of datasets) {
                 this.inputDatasetOptions.push(new Option<Dataset>(dataset, dataset.name));
             }

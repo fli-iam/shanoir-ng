@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, EventEmitter, forwardRef, Output, SimpleChanges, OnChanges } from '@angular/core';
+import { Component, EventEmitter, forwardRef, Output, SimpleChanges, OnChanges, ChangeDetectionStrategy } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
 
 import { ToggleSwitchComponent } from '../../shared/switch/switch.component';
@@ -29,6 +29,7 @@ import { ToggleSwitchComponent } from '../../shared/switch/switch.component';
             multi: true,
         }
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [ToggleSwitchComponent, FormsModule]
 })
 

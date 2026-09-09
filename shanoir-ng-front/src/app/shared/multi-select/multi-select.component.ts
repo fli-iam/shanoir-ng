@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, ElementRef, EventEmitter, forwardRef, HostListener, Input, OnChanges, Output, PipeTransform, SimpleChanges } from '@angular/core';
+import { Component, ElementRef, EventEmitter, forwardRef, HostListener, Input, OnChanges, Output, PipeTransform, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
 
 import {arraysEqual, isDarkColor, objectsEqual} from '../../utils/app.utils';
@@ -30,6 +30,7 @@ import { Option } from '../select/select.component';
             multi: true,
         }
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [FormsModule]
 })
 

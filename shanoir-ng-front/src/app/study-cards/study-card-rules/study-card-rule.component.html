@@ -66,7 +66,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     @for (action of rule.assignments; track action; let i = $index) {
         <div class="action">
             <action
-                [(assignment)]="rule.assignments[i]"
+                [assignment]="rule.assignments[i]"
                 [mode]="mode"
                 [fieldOptions]="assignmentFieldOptions"
                 [fields]="assignmentFields"

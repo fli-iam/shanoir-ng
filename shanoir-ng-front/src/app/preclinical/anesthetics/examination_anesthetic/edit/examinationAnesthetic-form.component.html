@@ -63,7 +63,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <span class="right-col">
                             @switch (mode) {
                                 @case ('view') {
-                                    {{ examinationAnesthetic?.injectionInterval | camel }}
+                                    {{ $safeNavigationMigration(examinationAnesthetic?.injectionInterval) | camel }}
                                 }
                                 @default {
                                     <select id="injectionInterval" formControlName="injectionInterval">
@@ -80,7 +80,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <span class="right-col">
                             @switch (mode) {
                                 @case ('view') {
-                                    {{ examinationAnesthetic?.injectionSite | camel }}
+                                    {{ $safeNavigationMigration(examinationAnesthetic?.injectionSite) | camel }}
                                 }
                                 @default {
                                     <select id="injectionSite" formControlName="injectionSite">
@@ -97,7 +97,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <span class="right-col">
                             @switch (mode) {
                                 @case ('view') {
-                                    {{ examinationAnesthetic?.injectionType | camel }}
+                                    {{ $safeNavigationMigration(examinationAnesthetic?.injectionType) | camel }}
                                 }
                                 @default {
                                     <select id="injectionType" formControlName="injectionType">

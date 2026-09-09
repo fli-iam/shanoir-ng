@@ -18,7 +18,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             [class.appear]="canAnimateEnter(i)"
             [class.select-mode]="mode == 'select'"
             [class.selected]="selectedRules.get(i) != undefined"
-            [rule]="rule"
+            [rule]="$any(rule)"
             [assignmentFields]="assignmentFields"
             [conditionFields]="conditionFields"
             [mode]="mode == 'select' ? 'view' : mode"
@@ -37,7 +37,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             [class.appear]="canAnimateEnter(i)"
             [class.select-mode]="mode == 'select'"
             [class.selected]="selectedRules.get(i) != undefined"
-            [rule]="rule"
+            [rule]="$any(rule)"
             [conditionFields]="conditionFields"
             [mode]="mode == 'select' ? 'view' : mode"
             (userChange)="onChangeCallback(rules)"
@@ -71,7 +71,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </span>
         }
         @if (cardType == 'qualitycard') {
-            <span (click)="addNewExamRule()" class="dataset">
+            <span (click)="addNewRule('Dataset')" class="dataset">
                 <i class="fas fa-plus"></i>
                 <div>Add a rule</div>
             </span>

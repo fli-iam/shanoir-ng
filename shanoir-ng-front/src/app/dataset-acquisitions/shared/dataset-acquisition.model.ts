@@ -11,7 +11,8 @@
  * You should have received a copy of the GNU General Public License
  * anumber with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Field } from 'src/app/shared/reflect/field.decorator';
+import { Field } from '@app/shared/reflect/field.decorator';
+import { QualityTag } from '@app/study-cards/shared/quality-card.model';
 
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { Dataset } from '../../datasets/shared/dataset.model';
@@ -30,7 +31,7 @@ export abstract class DatasetAcquisition extends Entity {
     @Field() rank: number;
     @Field() softwareRelease: string;
     @Field() sortingIndex: number;
-    @Field() type: 'Mr' | 'Pet' | 'Ct' | 'Eeg' | 'Xa' | 'Generic' | 'Processed' | 'BIDS'; // TODO : other types
+    @Field() type: 'Mr' | 'Pet' | 'Ct' | 'Eeg' | 'Xa' | 'Rt' | 'Generic' | 'Processed' | 'BIDS'; // TODO : other types
     @Field() protocol: any;
     @Field() name: string; // set in ExaminationDatasetAcquisitionDecorator.java
     @Field() importDate: Date;
@@ -38,5 +39,6 @@ export abstract class DatasetAcquisition extends Entity {
     @Field() copies: number[];
     @Field() source: number;
     @Field() acquisitionStartTime: Date;
+    @Field() qualityTag: QualityTag; // set in QualityCardResultEntry.java
     @Field() extraDataFilePathList: string[] = [];
 }

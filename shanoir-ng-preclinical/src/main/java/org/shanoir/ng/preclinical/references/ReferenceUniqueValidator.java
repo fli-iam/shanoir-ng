@@ -14,10 +14,10 @@
 
 package org.shanoir.ng.preclinical.references;
 
-import org.shanoir.ng.shared.validation.UniqueConstraintManagerImpl;
+import org.shanoir.ng.shared.validation.UniqueConstraintManager;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ReferenceUniqueValidator extends UniqueConstraintManagerImpl<Reference> {
+public class ReferenceUniqueValidator extends UniqueConstraintManager<Reference> {
 
 }

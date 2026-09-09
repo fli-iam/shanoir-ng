@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 
 import { MsgBoxService } from './msg-box.service';
 
@@ -21,6 +21,7 @@ import { MsgBoxService } from './msg-box.service';
     selector: 'msg-box',
     templateUrl: './msg-box.component.html',
     styleUrls: ['./msg-box.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: []
 })
 export class MsgBoxComponent {

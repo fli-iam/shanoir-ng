@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.model.Dataset;
@@ -32,10 +31,8 @@ import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.solr.service.SolrService;
-import org.shanoir.ng.utils.Utils;
 import org.shanoir.ng.vip.executionMonitoring.model.ExecutionMonitoring;
 import org.shanoir.ng.vip.processingResource.repository.ProcessingResourceRepository;
-import org.shanoir.ng.vip.processingResource.service.ProcessingResourceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -57,9 +54,6 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
     private ProcessingResourceRepository processingResourceRepository;
 
     @Autowired
-    private ProcessingResourceService processingResourceService;
-
-    @Autowired
     private DatasetService datasetService;
 
     @Autowired
@@ -76,33 +70,6 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
         to.setProcessingDate(from.getProcessingDate());
         to.setStudyId(from.getStudyId());
         return to;
-    }
-
-    public Optional<DatasetProcessing> findByComment(String comment) {
-        return repository.findByComment(comment);
-    }
-
-    @Override
-    public Optional<DatasetProcessing> findById(final Long id) {
-        return repository.findById(id);
-    }
-
-    @Override
-    public List<DatasetProcessing> findAll() {
-        return Utils.toList(repository.findAll());
-    }
-
-    public List<DatasetProcessing> findAllById(List<Long> idList) {
-        return idList.stream().flatMap(it -> findById(it).stream()).toList();
-    }
-
-    @Override
-    public List<DatasetProcessing> findByInputDatasetId(Long datasetId) {
-        return repository.findAllByInputDatasets_Id(datasetId);
-    }
-
-    public List<DatasetProcessing> findByMonitoringId(Long monitoringId) {
-        return StreamSupport.stream(repository.findAllById(repository.findAllIdsByMonitoringId(monitoringId)).spliterator(), false).collect(Collectors.toList());
     }
 
     @Override
@@ -123,7 +90,7 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
     @Override
     @Transactional
     public void deleteById(final Long id) throws ShanoirException, RestServiceException, SolrServerException, IOException {
-        final Optional<DatasetProcessing> entity = repository.findById(id);
+        final Optional<DatasetProcessing> entity = repository.findByIdWithOutputs(id);
         entity.orElseThrow(() -> new EntityNotFoundException("Cannot find dataset processing [" + id + "]"));
 
         // Load datasetProcessing output datasets
@@ -159,7 +126,7 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
      */
     @Override
     public void removeDatasetFromAllProcessingInput(Long datasetId) throws ShanoirException, RestServiceException, SolrServerException, IOException {
-        List<DatasetProcessing> processings = repository.findAllByInputDatasets_Id(datasetId);
+        List<DatasetProcessing> processings = repository.findByInputIdWithInputs(datasetId);
         List<DatasetProcessing> toUpdate = new ArrayList<>();
         List<DatasetProcessing> toDelete = new ArrayList<>();
 
@@ -187,7 +154,7 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
     }
 
     @Override
-    public void validateDatasetProcessing(DatasetProcessing processing) throws RestServiceException {
+    public void validateDatasetProcessing(DatasetProcessing processing) throws RestServiceException, EntityNotFoundException {
         if (processing.getStudyId() == null) {
             ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Processing must be linked to a study.", null);
             throw new RestServiceException(error);

@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 
 import { ImagesUrlUtil } from '../utils/images-url.util';
 
@@ -19,6 +19,7 @@ import { ImagesUrlUtil } from '../utils/images-url.util';
 @Component({
     selector: 'header',
     templateUrl: 'header.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['header.component.css']
 })
 

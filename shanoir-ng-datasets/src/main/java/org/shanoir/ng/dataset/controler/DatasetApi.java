@@ -21,7 +21,6 @@ import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.dto.DatasetDownloadData;
 import org.shanoir.ng.dataset.dto.DatasetDownloadDataInput;
 import org.shanoir.ng.dataset.dto.DatasetLight;
-import org.shanoir.ng.dataset.dto.DatasetWithDependenciesDTOInterface;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.OverallStatistics;
 import org.shanoir.ng.importer.dto.ProcessedDatasetImportJob;
@@ -111,8 +110,8 @@ public interface DatasetApi {
         @ApiResponse(responseCode = "500", description = "unexpected error")})
     @GetMapping(value = "/{datasetId}", produces = {"application/json"})
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnDataset(#datasetId, 'CAN_SEE_ALL'))")
-    ResponseEntity<DatasetWithDependenciesDTOInterface> findDatasetById(
-            @Parameter(description = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId);
+    ResponseEntity<DatasetDTO> findDatasetById(
+            @Parameter(description = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId) throws EntityNotFoundException;
 
     @Operation(summary = "", description = "Updates a dataset")
     @ApiResponses(value = {
@@ -199,19 +198,6 @@ public interface DatasetApi {
     ResponseEntity<Integer> findNbDatasetByStudyId(
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId);
 
-    @Operation(summary = "", description = "Returns the list of dataset id by subject id and study id")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "found datasets"),
-        @ApiResponse(responseCode = "204", description = "no dataset found"),
-        @ApiResponse(responseCode = "401", description = "unauthorized"),
-        @ApiResponse(responseCode = "403", description = "forbidden"),
-        @ApiResponse(responseCode = "500", description = "unexpected error")})
-    @RequestMapping(value = "/subject/{subjectId}/study/{studyId}", produces = {"application/json"}, method = RequestMethod.GET)
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#studyId, 'CAN_SEE_ALL'))")
-    ResponseEntity<List<Long>> findDatasetIdsBySubjectIdStudyId(
-            @Parameter(description = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
-            @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId);
-
     @Operation(summary = "", description = "Returns the list of dataset by subject id and study id")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "found datasets"),
@@ -219,12 +205,11 @@ public interface DatasetApi {
         @ApiResponse(responseCode = "401", description = "unauthorized"),
         @ApiResponse(responseCode = "403", description = "forbidden"),
         @ApiResponse(responseCode = "500", description = "unexpected error")})
-    @RequestMapping(value = "find/subject/{subjectId}/study/{studyId}", produces = {"application/json"}, method = RequestMethod.GET)
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#studyId, 'CAN_SEE_ALL'))")
+    @RequestMapping(value = "find/subject/{subjectId}", produces = {"application/json"}, method = RequestMethod.GET)
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnSubjectId(#subjectId, 'CAN_SEE_ALL'))")
     @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetDTOList(returnObject.getBody(), 'CAN_SEE_ALL')")
-    ResponseEntity<List<DatasetDTO>> findDatasetsBySubjectIdStudyId(
-            @Parameter(description = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
-            @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId);
+    ResponseEntity<List<DatasetDTO>> findDatasetsBySubjectId(
+            @Parameter(description = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId);
 
     @Operation(summary = "downloadDatasetById", description = "If exists, returns a zip file of the dataset corresponding to the given id")
     @ApiResponses(value = {
@@ -252,7 +237,7 @@ public interface DatasetApi {
     @GetMapping(value = "/dicom-metadata/{datasetId}")
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnDataset(#datasetId, 'CAN_DOWNLOAD'))")
     ResponseEntity<String> getDicomMetadataByDatasetId(
-            @Parameter(description = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId) throws MalformedURLException, IOException, MessagingException;
+            @Parameter(description = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId) throws MalformedURLException, IOException, MessagingException, EntityNotFoundException;
 
     @Operation(summary = "", description = "Creates a processed dataset")
     @ApiResponses(value = {

@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 
 import { BrowserPaginEntityListComponent } from '../../shared/components/entity/entity-list.browser.component.abstract';
 import { TableComponent } from '../../shared/components/table/table.component';
@@ -30,6 +30,7 @@ import { EntityService } from '../../shared/components/entity/entity.abstract.se
     selector: 'study-card-list',
     templateUrl: 'study-card-list.component.html',
     styleUrls: ['study-card-list.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [TableComponent]
 })
 export class StudyCardListComponent extends BrowserPaginEntityListComponent<StudyCard> {

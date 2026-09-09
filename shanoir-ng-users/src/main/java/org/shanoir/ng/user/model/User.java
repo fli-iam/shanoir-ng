@@ -67,7 +67,8 @@ public class User extends HalEntity implements UserDetails {
     private AccountRequestInfo accountRequestInfo;
 
     @VisibleOnlyBy(roles = { "ROLE_ADMIN" })
-    private Boolean canAccessToDicomAssociation;
+    @NotNull
+    private Boolean canAccessToDicomAssociation = Boolean.FALSE;
 
     /**
      * Keycloak two-factor (TOTP) authentication enabled flag. Not persisted in database:
@@ -182,7 +183,7 @@ public class User extends HalEntity implements UserDetails {
      * @return the canAccessToDicomAssociation
      */
     public Boolean isCanAccessToDicomAssociation() {
-        return canAccessToDicomAssociation;
+        return canAccessToDicomAssociation != null ? canAccessToDicomAssociation : Boolean.FALSE;
     }
 
     /**
@@ -190,7 +191,7 @@ public class User extends HalEntity implements UserDetails {
      *            the canAccessToDicomAssociation to set
      */
     public void setCanAccessToDicomAssociation(final Boolean canAccessToDicomAssociation) {
-        this.canAccessToDicomAssociation = canAccessToDicomAssociation;
+        this.canAccessToDicomAssociation = canAccessToDicomAssociation != null ? canAccessToDicomAssociation : Boolean.FALSE;
     }
 
     /**

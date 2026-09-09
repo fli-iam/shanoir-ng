@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLinkActive, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
@@ -33,6 +33,7 @@ import { CheckboxComponent } from '../shared/checkbox/checkbox.component';
     selector: 'quality-control',
     templateUrl: 'quality-control.component.html',
     styleUrls: ['quality-control.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [RouterLinkActive, RouterLink, StudyCardRulesComponent, FormsModule, CheckboxComponent, TableComponent]
 })
 

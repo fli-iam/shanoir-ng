@@ -70,7 +70,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <label i18n="Examination detail|Research study label@@examinationDetailStudy">Research study</label>
                             <span class="right-col">
                                 @if (mode == 'view' || (mode == 'edit' && !isAdmin())) {
-                                    <a [routerLink]="['/study/details/', examination.study?.id]">
+                                    <a [routerLink]="['/study/details/', $safeNavigationMigration(examination.study?.id)]">
                                         {{ examination.study?.name }}
                                     </a>
                                 }
@@ -114,7 +114,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <label i18n="Examination detail|Center label@@examinationDetailCenter">Center</label>
                             <span class="right-col">
                                 @if (mode == 'view' || (mode == 'edit' && !isAdmin())) {
-                                    <a [routerLink]="['/center/details/', examination.center?.id]">
+                                    <a [routerLink]="['/center/details/', $safeNavigationMigration(examination.center?.id)]">
                                         {{ examination?.center?.name }}
                                     </a>
                                 }
@@ -137,7 +137,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <span class="right-col">
                                 @switch (mode) {
                                     @case ('view') {
-                                        {{ examination?.examinationDate | localDateFormatPipe }}
+                                        {{ $safeNavigationMigration(examination?.examinationDate) | localDateFormatPipe }}
                                     }
                                     @default {
                                         <datepicker formControlName="examinationDate" required></datepicker>

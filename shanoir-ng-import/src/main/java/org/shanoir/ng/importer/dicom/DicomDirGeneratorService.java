@@ -69,6 +69,11 @@ public class DicomDirGeneratorService {
     private int addReferenceTo(File f, File dicomDir) throws IOException {
         int n = 0;
         if (f.isDirectory()) {
+            // skip macOS Finder's zip artifacts: the __MACOSX sibling tree holds
+            // twins of the real files, not DICOM data
+            if ("__MACOSX".equals(f.getName())) {
+                return 0;
+            }
             for (String s : f.list()) {
                 n += addReferenceTo(new File(f, s), dicomDir);
             }
@@ -76,6 +81,10 @@ public class DicomDirGeneratorService {
         }
         // do not add reference to DICOMDIR
         if (f.equals(dicomDir)) {
+            return 0;
+        }
+        // skip macOS Finder metadata: .DS_Store and Apple double "._<name>" files
+        if (f.getName().startsWith(".")) {
             return 0;
         }
 

@@ -14,8 +14,10 @@
 
 package org.shanoir.ng.studycard.model.condition;
 
+import java.math.BigDecimal;
 import java.util.List;
 
+import jakarta.persistence.*;
 import org.hibernate.annotations.Check;
 import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
@@ -28,13 +30,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.DiscriminatorColumn;
-import jakarta.persistence.DiscriminatorType;
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Inheritance;
-import jakarta.persistence.InheritanceType;
 import jakarta.validation.constraints.NotNull;
 
 @Entity
@@ -58,7 +53,7 @@ public abstract class CardCondition extends AbstractEntity {
 
     public static final String LIST_SEPERATOR = ",";
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @Column(name = "value")
     private List<String> values;
 
@@ -116,6 +111,68 @@ public abstract class CardCondition extends AbstractEntity {
         } else {
             throw new IllegalArgumentException("Cannot use this method for non-numerical operations (" + operation + ")");
         }
+    }
+
+    private static final List<Operation> NEGATIVE_NUMERICAL_OPERATIONS = List.of(Operation.NOT_EQUALS);
+
+    /**
+     * Same combinator semantics as {@link #textualCompare(Operation, String)}, but for the
+     * numerical operators (EQUALS, NOT_EQUALS, SMALLER_THAN, BIGGER_THAN): positive operators
+     * (EQUALS, SMALLER_THAN, BIGGER_THAN) succeed if original matches ANY (= at least one)
+     * candidate (OR), while NOT_EQUALS succeeds only if original matches NONE of the candidates.
+     */
+    protected boolean numericalCompare(Operation operation, String original) {
+        BigDecimal originalValue;
+        try {
+            originalValue = new BigDecimal(original);
+        } catch (NumberFormatException e) {
+            LOG.error("Error in studycard processing: field value \"{}\" is not numerical.", original);
+            return false;
+        }
+        boolean negative = NEGATIVE_NUMERICAL_OPERATIONS.contains(operation);
+        for (String candidate : getValues()) {
+            boolean singleMatch;
+            try {
+                singleMatch = numericalCompare(operation, originalValue.compareTo(new BigDecimal(candidate)));
+            } catch (NumberFormatException e) {
+                LOG.error("Error in studycard processing: condition value \"{}\" is not numerical.", candidate);
+                singleMatch = false;
+            }
+            if (negative) {
+                if (!singleMatch) {
+                    return false;
+                }
+            } else if (singleMatch) {
+                return true; // OR: any positive match is enough
+            }
+        }
+        return negative;
+    }
+
+    private static final List<Operation> NEGATIVE_TEXTUAL_OPERATIONS = List.of(
+            Operation.DOES_NOT_CONTAIN, Operation.DOES_NOT_START_WITH,
+            Operation.DOES_NOT_END_WITH, Operation.NOT_EQUALS);
+
+    /**
+     * This method compares original against every candidate value of this condition,
+     * combined with the meaning of the operator: positive operators (CONTAINS, EQUALS, STARTS_WITH,
+     * ENDS_WITH) succeed if original matches ANY (= at least one) candidate (OR), while negative operators
+     * (DOES_NOT_CONTAIN, DOES_NOT_START_WITH, DOES_NOT_END_WITH, NOT_EQUALS) succeed only if
+     * original matches NONE of the candidates.
+     */
+    protected boolean textualCompare(Operation operation, String original) {
+        boolean negative = NEGATIVE_TEXTUAL_OPERATIONS.contains(operation);
+        for (String candidate : getValues()) {
+            boolean singleMatch = textualCompare(operation, original, candidate);
+            if (negative) {
+                if (!singleMatch) {
+                    return false;
+                }
+            } else if (singleMatch) {
+                return true; // OR: any positive match is enough
+            }
+        }
+        return negative;
     }
 
     protected boolean textualCompare(Operation operation, String original, String studycardStr) {
@@ -199,6 +256,20 @@ public abstract class CardCondition extends AbstractEntity {
                 intArr[i] = Integer.parseInt(split[i]);
             }
             return intArr;
+        }
+    }
+
+    protected void writeConditionsReport(StringBuffer report, boolean complies, int nbOk, int nbUnknown, int total) {
+        if (report != null) {
+            if (!complies) {
+                switch (getCardinality()) {
+                    case -1 -> report.append("\nThis condition failed because only " + nbOk + " out of all (" + total + ") dataset(s) complied" + (nbUnknown > 0 ? " (" + nbUnknown + " unknown)" : ""));
+                    case 0 -> report.append("\nThis condition failed because " + nbOk + " dataset(s) complied where 0 was required" + (nbUnknown > 0 ? " (" + nbUnknown + " unknown)" : ""));
+                    default -> report.append("\nThis condition failed because only " + nbOk + " out of " + total + " dataset(s) complied" + (nbUnknown > 0 ? " (" + nbUnknown + " unknown)" : ""));
+                }
+            } else {
+                report.append("\nThe condition [" + toString() + "] succeeds because " + nbOk + " out of " + total + " dataset(s) complied" + (nbUnknown > 0 ? " (" + nbUnknown + " unknown)" : ""));
+            }
         }
     }
 

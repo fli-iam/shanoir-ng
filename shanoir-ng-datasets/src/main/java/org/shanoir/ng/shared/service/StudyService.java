@@ -14,9 +14,7 @@
 
 package org.shanoir.ng.shared.service;
 
-import org.shanoir.ng.shared.exception.AccessDeniedException;
 import org.shanoir.ng.shared.model.Study;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -27,16 +25,6 @@ import java.util.List;
  */
 @Service
 public interface StudyService {
-
-    /**
-     * Find study by its id. Check if current user can see study.
-     *
-     * @param id study id.
-     * @return a study or null.
-     * @throws AccessDeniedException
-     */
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EXPERT') and (@datasetSecurityService.hasRightOnStudy(#id, 'CAN_SEE_ALL') or @datasetSecurityService.hasRightOnStudy(#id, 'CAN_ADMINISTRATE'))")
-    Study findById(Long id);
 
     void updateStudy(Study updated, Study current);
 

@@ -15,7 +15,7 @@ import { Directive, Input, OnDestroy, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject, Subscription } from 'rxjs';
 
-import { TreeService } from 'src/app/studies/study/tree.service';
+import { TreeService } from '@app/studies/study/tree.service';
 
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
 import { capitalizeFirstLetter } from '../../../utils/app.utils';
