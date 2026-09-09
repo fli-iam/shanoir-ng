@@ -128,6 +128,9 @@ public class WADODownloaderService {
     /** How many response buffers may sit queued between netty and the writing thread. */
     private static final int STREAM_PREFETCH = 4;
 
+    /** Retries for a connection the PACS closed before sending any of the body. */
+    private static final int PREMATURE_CLOSE_RETRIES = 2;
+
     private static final String DCM = ".dcm";
 
     private static final String UNDER_SCORE = "_";
@@ -155,45 +158,37 @@ public class WADODownloaderService {
     @Lazy
     private DatasetService datasetService;
 
-    /**
-     * Dedicated connection pool towards the PACS (dcm4chee), sized for the real workload: VIP
-     * fires up to ~1000 simultaneous getPath requests, each pulling its DICOM instances, and
-     * gives up after 30s. There is deliberately NO application-level queue or semaphore in front
-     * of the PACS - this pool is the one and only limiter, so size max-connections to what
-     * dcm4chee is configured to serve concurrently (see docker-compose/dcm4chee/variables.env).
-     *
-     * Without this pool the WebClient falls back to reactor-netty's global HttpResources pool,
-     * whose default is only max(availableProcessors, 8) * 2 connections per host.
-     */
+    /** PACS HTTP connection pool size */
     @Value("${dcm4chee-arc.wado.pool.max-connections:1000}")
     private int wadoMaxConnections;
 
-    /** How many callers may wait for a free connection before acquisition fails fast. */
+    /** PACS HTTP connection pool size */
     @Value("${dcm4chee-arc.wado.pool.pending-acquire-max-count:10000}")
     private int wadoPendingAcquireMaxCount;
 
-    /**
-     * How long a caller waits in the pending queue for a connection. Kept well inside the
-     * client's 30s budget: waiting longer than the caller will ever read is pure waste.
-     */
+    /** How long a caller waits in the pending queue for a connection */
     @Value("${dcm4chee-arc.wado.pool.pending-acquire-timeout-seconds:10}")
     private long wadoPendingAcquireTimeoutSeconds;
 
-    @Value("${dcm4chee-arc.wado.pool.max-idle-seconds:60}")
+    /** How long a connection remains unused in the pool before getting destroyed and free resources. It must remains below the equivalent PACS value, otherwise Shanoir logs would be flooded with "Connection closed prematurely" */
+    @Value("${dcm4chee-arc.wado.pool.max-idle-seconds:15}")
     private long wadoMaxIdleSeconds;
 
-    @Value("${dcm4chee-arc.wado.pool.max-life-seconds:600}")
+    /** How long a connection can live at maximum (otherwise the data sent might be wrong or uncontrolled) */
+    @Value("${dcm4chee-arc.wado.pool.max-life-seconds:300}")
     private long wadoMaxLifeSeconds;
 
+    /** How long a Shanoir thread try to create an HTTP connection with the PACS before time-out */
     @Value("${dcm4chee-arc.wado.connect-timeout-ms:5000}")
     private int wadoConnectTimeoutMs;
 
-    /** Per-instance retrieve budget. Must stay below the client's own timeout. */
-    @Value("${dcm4chee-arc.wado.response-timeout-seconds:20}")
+    /** How long a connection is used before returning to the pool if no byte is sent */
+    @Value("${dcm4chee-arc.wado.response-timeout-seconds:60}")
     private long wadoResponseTimeoutSeconds;
 
     /**
      * Buffer cap for responses that cannot be streamed (multipart/related WADO-RS, metadata).
+     *
      * The common WADO-URI instance retrieve is streamed straight into the zip and never buffered,
      * which is what makes ~1000 concurrent downloads survivable on a normal heap.
      */
@@ -204,8 +199,6 @@ public class WADODownloaderService {
      * Thrown when a PACS download must be abandoned as a whole rather than continued file by
      * file - typically because the HTTP client has gone away (VIP gives up after 30s and
      * retries, and finishing a download nobody reads just steals PACS capacity from live ones).
-     * Unchecked on purpose so it propagates past the per-file catch in
-     * {@link #downloadDicomFilesForURLsAsZip} and ends the request.
      */
     public static class PacsDownloadAbortedException extends RuntimeException {
         public PacsDownloadAbortedException(String message, Throwable cause) {
@@ -265,8 +258,6 @@ public class WADODownloaderService {
         List<String> files = new ArrayList<>();
         Set<String> zippedUrls = new HashSet<>();
         long duplicates = 0;
-        // Resolved once per dataset, not once per instance: it runs a getFirstRealInput() query,
-        // which at ~1000 concurrent requests x ~100 instances meant ~100k queries per burst.
         String fileNamePrefix = buildFileNamePrefix(subjectName, dataset, datasetFilePath);
         for (Iterator<URL> iterator = urls.iterator(); iterator.hasNext();) {
             String url = iterator.next().toString();
@@ -325,13 +316,6 @@ public class WADODownloaderService {
         return null;
     }
 
-    /**
-     * Everything in a zipped instance's name that does not depend on the instance itself:
-     * "[path/]subject_examDate_serieDescription_". Built once per dataset - the
-     * {@code getFirstRealInput} lookup it needs is a DB query and used to run per instance.
-     * Sanitising the prefix and the instance UID separately gives the same result as sanitising
-     * the concatenation, since the replacement is per character.
-     */
     private String buildFileNamePrefix(String subjectName, Dataset dataset, String datasetFilePath) {
         String serieDescription = dataset.getUpdatedMetadata().getName();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("YYYYMMdd");
@@ -373,9 +357,6 @@ public class WADODownloaderService {
             return name + DCM;
         } catch (IOException | MessagingException e) {
             if (isClientDisconnected(e)) {
-                // The browser/client closed the connection: stop the whole download instead of
-                // recording a per-file failure and continuing to hammer the PACS for a request
-                // whose result nobody is reading any more.
                 throw new PacsDownloadAbortedException("HTTP client disconnected during download", e);
             }
             LOG.error("Error in downloading/writing file [{}] from pacs to zip", name, e);
@@ -388,23 +369,50 @@ public class WADODownloaderService {
     /**
      * Copies a WADO-URI instance retrieve from the PACS into a zip entry without ever holding the
      * whole object in memory: reactor-netty hands over small buffers as they arrive off the
-     * socket and the calling (request) thread drains them into the zip. {@code toIterable} with a
-     * small prefetch keeps at most a couple of buffers queued, so a download costs a few KB of
-     * heap instead of the size of the DICOM object.
+     * socket and the calling (request) thread drains them into the zip.
      */
     private void streamFileFromPACSIntoZip(String url, ZipOutputStream zipOutputStream, String name)
             throws IOException, HttpClientErrorException {
         ZipEntry entry = new ZipEntry(name + DCM);
         zipOutputStream.putNextEntry(entry);
-        // toStream() is closeable: closing it cancels the subscription, and doOnDiscard releases
-        // any buffer still queued at that point. Without both, aborting a download part-way
-        // (client gone, PACS error) would leak pooled netty buffers on every failure.
+        try {
+            for (int attempt = 0; ; attempt++) {
+                try {
+                    copyResponseIntoZip(url, zipOutputStream);
+                    return;
+                } catch (PrematureCloseRetryable e) {
+                    // The PACS closed the connection before handing over a single byte, so
+                    // nothing has been written into the entry yet and retrying is safe. This is
+                    // almost always a keep-alive race: we picked an idle pooled connection at the
+                    // very moment dcm4chee closed it. Retrying costs one round-trip; failing the
+                    // file costs the whole dataset.
+                    if (attempt >= PREMATURE_CLOSE_RETRIES) {
+                        throw new IOException("Download failed after " + (attempt + 1)
+                                + " attempts: " + e.getMessage(), e.getCause());
+                    }
+                    LOG.debug("Retrying [{}] after a premature close from the PACS (attempt {})", url, attempt + 1);
+                }
+            }
+        } finally {
+            zipOutputStream.closeEntry();
+        }
+    }
+
+    /**
+     * One attempt at copying the response body into the (already opened) zip entry.
+     * {@code toStream()} is closeable: closing it cancels the subscription, and {@code doOnDiscard}
+     * releases any buffer still queued at that point. Without both, aborting a download part-way
+     * (client gone, PACS error) would leak pooled netty buffers on every failure.
+     */
+    private void copyResponseIntoZip(String url, ZipOutputStream zipOutputStream)
+            throws IOException, HttpClientErrorException, PrematureCloseRetryable {
+        boolean anyByteWritten = false;
         try (Stream<DataBuffer> body = responseBodyStream(url).toStream(STREAM_PREFETCH)) {
             Iterator<DataBuffer> buffers = body.iterator();
             while (buffers.hasNext()) {
                 DataBuffer buffer = buffers.next();
                 try (InputStream in = buffer.asInputStream()) {
-                    in.transferTo(zipOutputStream);
+                    anyByteWritten |= in.transferTo(zipOutputStream) > 0;
                 } finally {
                     DataBufferUtils.release(buffer);
                 }
@@ -419,9 +427,28 @@ public class WADODownloaderService {
                 throw new HttpClientErrorException(HttpStatus.SERVICE_UNAVAILABLE,
                         "PACS connection pool saturated: " + e.getMessage());
             }
+            // Only retryable while the entry is still empty - once bytes are in the zip we cannot
+            // start the body over without duplicating them.
+            if (!anyByteWritten && isPrematureClose(e)) {
+                throw new PrematureCloseRetryable(e);
+            }
             throw new IOException("Download failed: " + e.getMessage(), e);
-        } finally {
-            zipOutputStream.closeEntry();
+        }
+    }
+
+    private static boolean isPrematureClose(Throwable e) {
+        for (Throwable t = e; t != null; t = t.getCause()) {
+            if (t.getClass().getSimpleName().equals("PrematureCloseException")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** Internal marker: the response died before any byte reached the zip, so it can be retried. */
+    private static class PrematureCloseRetryable extends Exception {
+        PrematureCloseRetryable(Throwable cause) {
+            super(cause.getMessage(), cause);
         }
     }
 
@@ -629,11 +656,6 @@ public class WADODownloaderService {
         }
     }
 
-    /**
-     * Tells apart a genuine connectivity error from the pool being unable to hand out a
-     * connection: pending-queue full ({@code PoolAcquirePendingLimitException}) or the
-     * {@link ConnectionProvider#builder pendingAcquireTimeout} elapsing.
-     */
     private boolean isPacsPoolSaturated(WebClientRequestException e) {
         for (Throwable t = e; t != null; t = t.getCause()) {
             String name = t.getClass().getSimpleName();
@@ -649,10 +671,6 @@ public class WADODownloaderService {
         return false;
     }
 
-    // Internal async methods for potential reuse.
-    // No .onStatus() handler: retrieve() already errors on 4xx/5xx with a WebClientResponseException
-    // that carries the actual status code - which the callers below turn into a clear message
-    // (a bare IOException here would hide whether it was a 404, a 503, ...).
     private Mono<byte[]> downloadFileFromPACSAsync(final String url) {
         return webClient.get()
                 .uri(url)

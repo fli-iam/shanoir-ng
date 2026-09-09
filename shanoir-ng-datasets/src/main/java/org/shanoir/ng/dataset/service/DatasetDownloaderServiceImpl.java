@@ -71,8 +71,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class DatasetDownloaderServiceImpl {
 
-    protected static final String FAILURES_TXT = "failures.txt";
-
     protected static final String NII = "nii";
 
     protected static final String DCM = "dcm";
@@ -84,12 +82,6 @@ public class DatasetDownloaderServiceImpl {
     protected static final String JSON_RESULT_FILENAME = "ERRORS.json";
 
     protected static final Long DEFAULT_NIFTI_CONVERTER_ID = 6L;
-
-    protected static final String GZIP_EXTENSION = ".gz";
-
-    protected static final String NII_GZ = ".nii.gz";
-
-    protected static final String CONVERSION_FAILED_ERROR_MSG = "Nifti conversion failed, you may try to select another one.";
 
     @Autowired
     protected DatasetService datasetService;
@@ -143,10 +135,7 @@ public class DatasetDownloaderServiceImpl {
         response.setHeader("Content-Disposition", "attachment;filename=\"" + getFileName(datasets) + "\"");
 
         try (ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream())) {
-            // Commit the headers now: it flushes the response start to the client before the
-            // (slow) per-dataset PACS work, and it fails fast if the client already gave up -
-            // VIP times out at 30s and retries, so an abandoned request that keeps pulling from
-            // the PACS steals capacity from the retry that replaced it.
+            // Commit the headers now: ensure that the connexion is ok, the client is still alive, and send first byte to avoid timeout
             try {
                 response.flushBuffer();
             } catch (IOException e) {
@@ -192,9 +181,7 @@ public class DatasetDownloaderServiceImpl {
                         datasetDownloadNameListPerPath
                 );
 
-                // Surface a client disconnect early: without this a browser that closed the
-                // connection is only noticed when the zip is finalised, so the server keeps
-                // pulling every remaining dataset from the PACS for a download nobody reads.
+                // stream.flush() method allows to check that the client is still alive, and avoid data sending into void
                 zipOutputStream.flush();
             }
 
@@ -228,8 +215,7 @@ public class DatasetDownloaderServiceImpl {
             event.setStatus(ShanoirEvent.SUCCESS);
             eventService.publishEvent(event);
         } catch (WADODownloaderService.PacsDownloadAbortedException e) {
-            // Client went away: there is nothing to send back, just stop pulling from the PACS.
-            // Not an error worth a stack trace.
+            // Client disconnected while PACS is repeating data into zipStream
             response.setContentType(null);
             LOG.info("Download aborted: {}", e.getMessage());
         } catch (Exception e) {
@@ -242,14 +228,8 @@ public class DatasetDownloaderServiceImpl {
     }
 
     protected Map<Long, String> getDatasetDownloadPath(List<Dataset> datasets, String sorting) {
-        // Phase 1: one short read-only transaction pulls every value the path needs from the DB,
-        // including the WADO metadata URL for datasets whose acquisition start time is missing.
-        // No network call happens here, so the DB connection is released before the (potentially
-        // slow, pool-contended) PACS call in phase 2 - otherwise a Hikari connection is held for
-        // the whole PACS round-trip and, under load, the pool is exhausted.
         List<DatasetPathData> pathDataList = self.collectDatasetPathData(datasets, sorting);
 
-        // Phase 2: no transaction - PACS metadata lookups and string assembly only.
         Map<Long, String> datasetDownloadPath = new HashMap<>();
         for (DatasetPathData d : pathDataList) {
             String path = "";
@@ -365,11 +345,6 @@ public class DatasetDownloaderServiceImpl {
         return results;
     }
 
-    /**
-     * Per-dataset scalars extracted inside the read-only transaction of
-     * {@link #collectDatasetPathData}, so phase 2 of {@link #getDatasetDownloadPath} needs
-     * neither a Hibernate session nor a DB connection.
-     */
     protected record DatasetPathData(
             Long datasetId,
             String studyName,

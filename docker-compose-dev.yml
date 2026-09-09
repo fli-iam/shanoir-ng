@@ -94,9 +94,7 @@ services:
     build:
       context: docker-compose
       target: database
-    # max_connections: MariaDB defaults to 151, which all microservice Hikari pools share.
-    # The datasets pool alone is sized for the ~1000-concurrent-request VIP download burst.
-    command: --max_allowed_packet 20000000 --max_connections=300
+    command: --max_allowed_packet 20000000
     environment:
       - MARIADB_ROOT_PASSWORD=password
       - MARIADB_AUTO_UPGRADE=1
@@ -280,6 +278,10 @@ services:
       - VIP_CLIENT_SECRET
       - SHANOIR_CONTINUANCE_HOUR
       - SHANOIR_SHUTDOWN_HOUR
+      # PACS download concurrency. The application.yml default is deliberately safe against an
+      # untuned dcm4chee; this stack tunes the archive (docker-compose/dcm4chee/variables.env),
+      # so it opts into the higher value here.
+      - SHANOIR_PACS_MAX_CONNECTIONS=${SHANOIR_PACS_MAX_CONNECTIONS:-1000}
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - certificate-share-data:/etc/ssl/certs/java:ro
