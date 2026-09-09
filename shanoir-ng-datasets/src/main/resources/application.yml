@@ -39,13 +39,8 @@ spring:
     username: datasets
     password: password
     driver-class-name: org.mariadb.jdbc.Driver
-    # Sized for the VIP burst (~1000 simultaneous getPath requests): each does a handful of short
-    # lookups, none held across a PACS call any more. Keep it under the server's max_connections
-    # (see the database command in docker-compose.yml), which is shared with the other services.
-    hikari.maximum-pool-size: 150
+    hikari.maximum-pool-size: 70
     hikari.minimum-idle:  70
-    # Fail a connection wait well inside the client's 30s budget instead of burning all of it.
-    hikari.connection-timeout: 10000
   jpa:
     show-sql: false
     defer-datasource-initialization: true
@@ -175,29 +170,18 @@ dcm4chee-arc:
   dicom.web.rs.upload: /dcm4chee-arc/aets/DCM4CHEE/rs/studies
   dicom.web.http.client.max.total: 500
   dicom.web.http.client.max.per.route: 500
-  # Dedicated reactor-netty connection pool used by WADODownloaderService to pull DICOM
-  # files/metadata from the PACS. This pool is the ONLY limiter in front of dcm4chee - there is
-  # deliberately no application-level queue or semaphore - so pool.max-connections must be kept
-  # in step with what dcm4chee is configured to serve concurrently
-  # (WILDFLY_IO_TASK_MAX_THREADS / WILDFLY_PACSDS_MAX_POOL_SIZE in
-  # docker-compose/dcm4chee/variables.env).
-  #
-  # Sized for the real workload: VIP fires up to ~1000 simultaneous getPath requests and gives up
-  # after 30s, so every timeout below is deliberately well inside that budget - waiting longer
-  # than the caller will ever read only steals PACS capacity from live requests.
+
+  # IMPORTANT: pool.max-connections must not exceed what the target dcm4chee can actually serve.
   wado:
-    connect-timeout-ms: 5000
-    response-timeout-seconds: 20
-    # Responses that cannot be streamed (multipart WADO-RS, metadata) are buffered up to this
-    # size. Plain WADO-URI instance retrieves are streamed straight into the zip and never
-    # buffered, which is what keeps ~1000 concurrent downloads within a normal heap.
+    connect-timeout-ms: ${SHANOIR_PACS_CONNECT_TIMEOUT_MS:5000}
+    response-timeout-seconds: ${SHANOIR_PACS_RESPONSE_TIMEOUT_SECONDS:60}
     max-in-memory-bytes: 67108864
     pool:
-      max-connections: 1000
-      pending-acquire-max-count: 10000
-      pending-acquire-timeout-seconds: 10
-      max-idle-seconds: 60
-      max-life-seconds: 600
+      max-connections: ${SHANOIR_PACS_MAX_CONNECTIONS:100}
+      pending-acquire-max-count: ${SHANOIR_PACS_PENDING_ACQUIRE_MAX_COUNT:10000}
+      pending-acquire-timeout-seconds: ${SHANOIR_PACS_PENDING_ACQUIRE_TIMEOUT_SECONDS:10}
+      max-idle-seconds: ${SHANOIR_PACS_MAX_IDLE_SECONDS:15}
+      max-life-seconds: ${SHANOIR_PACS_MAX_LIFE_SECONDS:300}
 
 # VIP
 vip:

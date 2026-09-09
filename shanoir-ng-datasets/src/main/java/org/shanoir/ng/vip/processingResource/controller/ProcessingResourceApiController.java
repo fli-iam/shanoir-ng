@@ -14,7 +14,6 @@
 
 package org.shanoir.ng.vip.processingResource.controller;
 
-import com.zaxxer.hikari.HikariDataSource;
 import jakarta.servlet.http.HttpServletResponse;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
@@ -22,7 +21,6 @@ import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
-import org.shanoir.ng.vip.processingResource.repository.ProcessingResourceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,13 +43,7 @@ public class ProcessingResourceApiController implements ProcessingResourceApi {
     private DatasetDownloaderServiceImpl datasetDownloaderService;
 
     @Autowired
-    private ProcessingResourceRepository processingResourceRepository;
-
-    @Autowired
     private DatasetRepository  datasetRepository;
-
-    @Autowired
-    private HikariDataSource dataSource;
 
     private static final AtomicInteger NUMBER_OF_DOWNLOAD = new AtomicInteger(0);
 

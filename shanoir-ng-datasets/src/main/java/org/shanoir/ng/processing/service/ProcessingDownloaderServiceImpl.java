@@ -72,10 +72,6 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
     private EntityManager em;
 
     public void massiveDownload(List<DatasetProcessing> processingList, boolean resultOnly, String format, HttpServletResponse response, boolean withManifest, Long converterId) throws RestServiceException {
-        // Load the inputs/outputs and their DICOM file references in ONE short transaction, so
-        // the per-file PACS calls in the download loop below hold no DB connection. Without
-        // this the whole method was @Transactional and a Hikari connection was pinned for the
-        // entire (PACS-bound) download - a handful of concurrent downloads exhausted the pool.
         List<Long> processingIds = processingList.stream().map(DatasetProcessing::getId).toList();
         List<DatasetProcessing> loaded = datasetProcessingRepository.findByIdsWithInputsOutputsAndExpressions(processingIds);
         doMassiveProcessingsDownload(loaded, resultOnly, format, response, withManifest, converterId);
@@ -90,13 +86,12 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
         Map<Long, List<String>> filesByAcquisitionId = new HashMap<>();
 
         try (ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream())) {
-            // Commit the headers now, so an already-abandoned request is dropped before it
-            // starts pulling anything from the PACS.
             try {
                 response.flushBuffer();
             } catch (IOException e) {
                 throw new PacsDownloadAbortedException("Client disconnected before download started", e);
             }
+
             manageProcessingsDownload(processingList, downloadResults, zipOutputStream, format, withManifest, filesByAcquisitionId, converterId);
 
             String ids = Stream.concat(
