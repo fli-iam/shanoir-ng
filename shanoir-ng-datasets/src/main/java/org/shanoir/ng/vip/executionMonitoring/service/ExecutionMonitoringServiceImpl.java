@@ -130,14 +130,16 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
 
 
     public void startMonitoringJob(ExecutionMonitoring createdMonitoring, ShanoirEvent event, Integer jobsNumber) {
-        monitoringQueue.add(new MonitoringJob(createdMonitoring, event, jobsNumber, KeycloakUtil.getTokenUserId()));
+        MonitoringJob job = new MonitoringJob(createdMonitoring, event, jobsNumber, KeycloakUtil.getTokenUserId());
 
-        if (!isRunning) { //If we remove this line, each calling thread needs to wait the old ones to finish the synchronized block below before resuming the code execution. It's only for code performance.
-            synchronized (this) { //Allow the synchronized block to be executed only by one thread at a time. It avoids concurrency
-                if (!isRunning) {  //In case of two calling threads hitting the 1st !isRunning check condition at the same time, it may leads to 2 distinct monitoring loop if we remove this second !isRunning check, what we want to avoid
-                    isRunning = true;
-                    emProxyService.monitoringLoop();
-                }
+        // Queuing the job and starting a loop for it must be atomic with respect to the loop's own exit check, see
+        // hasJobsToPoll(). The guarded section is a queue add, a boolean read and an async submit that returns at
+        // once, never a monitoring round, so concurrent callers are not made to wait on each other in practice.
+        synchronized (this) {
+            monitoringQueue.add(job);
+            if (!isRunning) {
+                isRunning = true;
+                emProxyService.monitoringLoop();
             }
         }
     }
@@ -145,20 +147,47 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
 
     @Async // We keep that method async, because the startMonitoringJob ensure that only one thread of this method can exist at a time, and it doesn't block the 1st calling method
     protected void monitoringLoop() {
-        while (!monitoringQueue.isEmpty()) {
-            long startTime = System.currentTimeMillis();
+        try {
+            while (hasJobsToPoll()) {
+                long startTime = System.currentTimeMillis();
 
-            for (MonitoringJob job : monitoringQueue) {
-                processMonitoringJob(job);
-            }
-            while (System.currentTimeMillis() - startTime < sleepTime) {
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    LOG.error("Error in the monitoring loop", e);
+                for (MonitoringJob job : monitoringQueue) {
+                    processMonitoringJob(job);
+                }
+                while (System.currentTimeMillis() - startTime < sleepTime) {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        LOG.error("Error in the monitoring loop", e);
+                    }
                 }
             }
+        } finally {
+            releaseLoop();
         }
+    }
+
+    /**
+     * Tell whether the monitoring loop has another round to run, and release it if the queue has been drained.
+     *
+     * Reading the queue and clearing the running flag has to be atomic with respect to {@link #startMonitoringJob}:
+     * otherwise an execution queued in between is left in the queue while the loop stops believing it is empty, and
+     * nothing ever polls it again. Its owner then never hears about their execution, and its results are never
+     * imported (issue #3813).
+     */
+    private synchronized boolean hasJobsToPoll() {
+        if (monitoringQueue.isEmpty()) {
+            isRunning = false;
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Release the monitoring loop, so that the next queued execution starts a new one. Called on every exit path,
+     * as an unexpected error leaving the flag set would silently stop all VIP monitoring until the next restart.
+     */
+    private synchronized void releaseLoop() {
         isRunning = false;
     }
 
