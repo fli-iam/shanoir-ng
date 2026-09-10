@@ -21,6 +21,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 import java.util.List;
 
@@ -101,6 +102,22 @@ public class ExecutionMonitoringServiceImplTest {
 
         assertEquals(USER_A, publishedEventFor(executionOfA).getUserId());
         assertEquals(USER_B, publishedEventFor(executionOfB).getUserId());
+    }
+
+    /**
+     * The monitoring loop reaches a newly queued execution only once it is done polling the ones queued before it,
+     * several seconds later. Its owner must be told about it as soon as it is submitted, not that late.
+     */
+    @Test
+    public void shouldReportTheExecutionBeforeItIsEverPolled() throws Exception {
+        ExecutionMonitoring executionOfB = executionMonitoring(2L, "exec-of-b");
+
+        queueAs(USER_A, executionMonitoring(1L, "exec-of-a"));
+        queueAs(USER_B, executionOfB);
+
+        // no monitoring round has run at this point
+        assertEquals(USER_B, publishedEventFor(executionOfB).getUserId());
+        verifyNoInteractions(executionService);
     }
 
     @Test
