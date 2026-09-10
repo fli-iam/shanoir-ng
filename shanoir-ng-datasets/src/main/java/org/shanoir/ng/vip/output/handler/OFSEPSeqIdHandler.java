@@ -380,7 +380,7 @@ public class OFSEPSeqIdHandler extends OutputHandler {
             JSONObject serie = series.getJSONObject(i);
             Long serieId = serie.getLong(ID);
 
-            List<Dataset> datasets = datasetRepository.findByProcessingIdIn(List.of(processing.getId()));
+            List<Dataset> datasets = datasetRepository.findInputsOfProcessingIdBySerieId(processing.getId(), serieId);
 
             if (datasets.isEmpty()) {
                 LOG.error("No dataset found for serie/acquisition [" + serieId + "]");
