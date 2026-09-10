@@ -61,9 +61,11 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
     public static final float DEFAULT_PROGRESS = 0.5f;
     @Value("${vip.sleep-time}")
     private long sleepTime;
+    /** Pause observed after each polled execution, so a full queue does not hammer the VIP API. In ms. */
+    private long jobPollDelay = 10000;
     private static final Logger LOG = LoggerFactory.getLogger(ExecutionMonitoringServiceImpl.class);
     private static final String RIGHT_STR = "CAN_SEE_ALL";
-    private final ConcurrentLinkedQueue<Map<String, Object>> monitoringQueue = new ConcurrentLinkedQueue<>();
+    private final ConcurrentLinkedQueue<MonitoringJob> monitoringQueue = new ConcurrentLinkedQueue<>();
     private volatile boolean isRunning = false;
 
     @Autowired
@@ -125,12 +127,7 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
 
 
     public void startMonitoringJob(ExecutionMonitoring createdMonitoring, ShanoirEvent event, Integer jobsNumber) {
-        Map<String, Object> monitoringMap = new HashMap<>();
-        monitoringMap.put("monitoring", createdMonitoring);
-        monitoringMap.put("event", event);
-        monitoringMap.put("attempt", 1);
-        monitoringMap.put("jobsNumber", jobsNumber);
-        monitoringQueue.add(monitoringMap);
+        monitoringQueue.add(new MonitoringJob(createdMonitoring, event, jobsNumber));
 
         if (!isRunning) { //If we remove this line, each calling thread needs to wait the old ones to finish the synchronized block below before resuming the code execution. It's only for code performance.
             synchronized (this) { //Allow the synchronized block to be executed only by one thread at a time. It avoids concurrency
@@ -143,67 +140,13 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
     }
 
 
-    @Async //We keep that method async, because the startMonitoringJob ensure that only one thread of this method can exist at a time, and it doesn't block the 1st calling method
+    @Async // We keep that method async, because the startMonitoringJob ensure that only one thread of this method can exist at a time, and it doesn't block the 1st calling method
     protected void monitoringLoop() {
         while (!monitoringQueue.isEmpty()) {
             long startTime = System.currentTimeMillis();
 
-            for (Map<String, Object> emMap : monitoringQueue) {
-                ExecutionMonitoring monitoring = (ExecutionMonitoring) emMap.get("monitoring");
-                ShanoirEvent event = (ShanoirEvent) emMap.get("event");
-                Integer attempt = (Integer) emMap.get("attempt");
-                Integer jobsNumber = (Integer) emMap.get("jobsNumber");
-                String execLabel = getExecLabel(monitoring);
-
-
-                if (Objects.isNull(event) || !Objects.equals(event.getStatus(), ShanoirEvent.IN_PROGRESS)) {
-                    event = initShanoirEvent(monitoring, event, execLabel, jobsNumber);
-                    emMap.put("event", event);
-                    LOG.info("Monitoring of execution id: " + monitoring.getId() + ", identifier: " + monitoring.getPipelineIdentifier() + ", name: " + monitoring.getName() + " started");
-                }
-
-                try {
-                    VipExecutionDTO dto = executionService.getExecutionAsServiceAccount(attempt, monitoring.getIdentifier()).block();
-                    if (dto == null) {
-                        emMap.put("attempt", (Integer) emMap.get("attempt") + 1);
-                        continue;
-                    } else {
-                        emMap.put("attempt", 1);
-                    }
-
-                    switch (dto.getStatus()) {
-                        case FINISHED -> {
-                            monitoring.setJobs(dto.getJobs());
-                            monitoring.setStatus(dto.getStatus());
-                            LOG.info("Monitoring of execution id: " + monitoring.getId() + ", status: " + monitoring.getStatus());
-                            emProxyService.processFinishedJob(monitoring, event, dto.getEndDate());
-                        }
-                        case UNKNOWN, EXECUTION_FAILED, KILLED -> {
-                            monitoring.setJobs(dto.getJobs());
-                            monitoring.setStatus(dto.getStatus());
-                            LOG.info("Monitoring of execution id: " + monitoring.getId() + ", status: " + monitoring.getStatus());
-                            emProxyService.processKilledJob(monitoring, event, dto);
-                        }
-                        default -> {
-                            if (!(Objects.isNull(dto.getJobs()) || Objects.equals(dto.getJobs().size(), 0))) {
-                                Integer doneJobs = dto.getJobs().values().stream().mapToInt(e -> (ExecutionStatus.RUNNING.getRestLabel().toUpperCase().equals(e.get("status")) || ExecutionStatus.QUEUED.getRestLabel().toUpperCase().equals(e.get("status"))) ? 0 : 1).sum();
-                                updateShanoirEvent(event, doneJobs, jobsNumber, execLabel);
-                            }
-                        }
-                    }
-                    if (!Objects.equals(dto.getStatus(), ExecutionStatus.RUNNING)) {
-                        monitoringQueue.remove(emMap);
-                    }
-                    Thread.sleep(10000);
-                } catch (Exception e) {
-                    // Unwrap ReactiveException thrown from async method
-                    Throwable ex = Exceptions.unwrap(e);
-                    LOG.error("Error while monitoring processing {}. Stopping the monitoring ...", monitoring.getId(), ex.getCause());
-                    if (Objects.nonNull(event)) {
-                        setEventInError(event, execLabel + " : " + ex.getMessage());
-                    }
-                    monitoringQueue.remove(emMap);
-                }
+            for (MonitoringJob job : monitoringQueue) {
+                processMonitoringJob(job);
             }
             while (System.currentTimeMillis() - startTime < sleepTime) {
                 try {
@@ -214,6 +157,63 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
             }
         }
         isRunning = false;
+    }
+
+    /**
+     * Poll VIP for the state of a single queued execution and handle its outcome. The job is dropped from the
+     * monitoring queue as soon as its execution is no longer running, or if the polling itself failed.
+     */
+    private void processMonitoringJob(MonitoringJob job) {
+        ExecutionMonitoring monitoring = job.monitoring;
+        String execLabel = getExecLabel(monitoring);
+
+        if (Objects.isNull(job.event) || !Objects.equals(job.event.getStatus(), ShanoirEvent.IN_PROGRESS)) {
+            job.event = initShanoirEvent(monitoring, job.event, execLabel, job.jobsNumber);
+            LOG.info("Monitoring of execution id: " + monitoring.getId() + ", identifier: " + monitoring.getPipelineIdentifier() + ", name: " + monitoring.getName() + " started");
+        }
+
+        try {
+            VipExecutionDTO dto = executionService.getExecutionAsServiceAccount(job.attempt, monitoring.getIdentifier()).block();
+            if (dto == null) {
+                job.attempt++;
+                return;
+            } else {
+                job.attempt = 1;
+            }
+
+            switch (dto.getStatus()) {
+                case FINISHED -> {
+                    monitoring.setJobs(dto.getJobs());
+                    monitoring.setStatus(dto.getStatus());
+                    LOG.info("Monitoring of execution id: " + monitoring.getId() + ", status: " + monitoring.getStatus());
+                    emProxyService.processFinishedJob(monitoring, job.event, dto.getEndDate());
+                }
+                case UNKNOWN, EXECUTION_FAILED, KILLED -> {
+                    monitoring.setJobs(dto.getJobs());
+                    monitoring.setStatus(dto.getStatus());
+                    LOG.info("Monitoring of execution id: " + monitoring.getId() + ", status: " + monitoring.getStatus());
+                    emProxyService.processKilledJob(monitoring, job.event, dto);
+                }
+                default -> {
+                    if (!(Objects.isNull(dto.getJobs()) || Objects.equals(dto.getJobs().size(), 0))) {
+                        Integer doneJobs = dto.getJobs().values().stream().mapToInt(e -> (ExecutionStatus.RUNNING.getRestLabel().toUpperCase().equals(e.get("status")) || ExecutionStatus.QUEUED.getRestLabel().toUpperCase().equals(e.get("status"))) ? 0 : 1).sum();
+                        updateShanoirEvent(job.event, doneJobs, job.jobsNumber, execLabel);
+                    }
+                }
+            }
+            if (!Objects.equals(dto.getStatus(), ExecutionStatus.RUNNING)) {
+                monitoringQueue.remove(job);
+            }
+            Thread.sleep(jobPollDelay);
+        } catch (Exception e) {
+            // Unwrap ReactiveException thrown from async method
+            Throwable ex = Exceptions.unwrap(e);
+            LOG.error("Error while monitoring processing {}. Stopping the monitoring ...", monitoring.getId(), ex.getCause());
+            if (Objects.nonNull(job.event)) {
+                setEventInError(job.event, execLabel + " : " + ex.getMessage());
+            }
+            monitoringQueue.remove(job);
+        }
     }
 
     public String getVipIdentifierFromMonitoringId(Long id) {
@@ -331,5 +331,27 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
         event.setStatus(ShanoirEvent.ERROR);
         event.setProgress(1f);
         eventService.publishEvent(event);
+    }
+
+    /**
+     * A VIP execution awaiting monitoring, as held in {@link #monitoringQueue}.
+     */
+    private static final class MonitoringJob {
+
+        private final ExecutionMonitoring monitoring;
+
+        private final Integer jobsNumber;
+
+        /** Shanoir event reporting this execution to its owner, created on the first poll if not resumed from one. */
+        private ShanoirEvent event;
+
+        /** Consecutive failed attempts to read this execution from VIP, reset as soon as one succeeds. */
+        private int attempt = 1;
+
+        MonitoringJob(ExecutionMonitoring monitoring, ShanoirEvent event, Integer jobsNumber) {
+            this.monitoring = monitoring;
+            this.event = event;
+            this.jobsNumber = jobsNumber;
+        }
     }
 }
