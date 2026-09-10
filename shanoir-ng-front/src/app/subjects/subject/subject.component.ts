@@ -30,13 +30,14 @@ import { IdName } from '../../shared/models/id-name.model';
 import { Option, SelectBoxComponent } from '../../shared/select/select.component';
 import { Study } from '../../studies/shared/study.model';
 import { StudyService } from '../../studies/shared/study.service';
+import { CenterService } from '../../centers/shared/center.service';
 import { ImagedObjectCategory } from '../shared/imaged-object-category.enum';
 import { Subject } from '../shared/subject.model';
 import { SubjectService } from '../shared/subject.service';
 import { Tag } from "../../tags/tag.model";
 import { dateDisplay } from "../../shared/./localLanguage/localDate.abstract";
 import { isDarkColor } from "../../utils/app.utils";
-import { regexExample } from "../../utils/regex-example.util";
+import { regexExample, matchPatternSuffix, escapeRegex, patternUsesCenterPrefix } from "../../utils/regex-example.util";
 import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
 import { CheckboxComponent } from '../../shared/checkbox/checkbox.component';
 import { TagInputComponent } from '../../tags/tag.input.component';
@@ -88,9 +89,20 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
         new Option<string>('PHANTOM', 'Phantom')
     ];
 
+    /**
+     * When the current user only has rights on some of the selected study's centers, and that
+     * study's subject-name pattern embeds per-center prefixes, this regex requires the new
+     * subject's common name to carry the prefix of one of the centers the user may act on.
+     * null = no such restriction (user has every center, or the pattern doesn't use them).
+     */
+    private allowedCenterSegmentRegex: RegExp = null;
+    /** The center prefixes the user is allowed to use, for the info box. Empty = no restriction. */
+    protected allowedCenterPrefixes: string[] = [];
+
     constructor(private route: ActivatedRoute,
                 private subjectService: SubjectService,
                 private studyService: StudyService,
+                private centerService: CenterService,
                 private downloadService: MassDownloadService,
                 private studyRightsService: StudyRightsService,
                 private userRightsService: StudyRightsService) {
@@ -139,6 +151,20 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
             this.isImporting = this.breadcrumbsService.isImporting();
             if (this.isImporting)
                 this.importMode = this.breadcrumbsService.findImportMode();
+            // At import the study is injected as a prefill (onSelectStudy() never fires), so run the
+            // exact same center-prefix rights check as the standalone form, on a freshly loaded
+            // full study - keeping both creation paths consistent.
+            if (this.breadcrumbsService.currentStep.isPrefilled("entity")) {
+                this.breadcrumbsService.currentStep.getPrefilledValue("entity").then((prefilled: Subject) => {
+                    const studyId = prefilled?.study?.id;
+                    if (!studyId) return;
+                    this.studyService.get(studyId).then(fullStudy => {
+                        this.computeCenterPrefixRestriction(fullStudy).finally(() => {
+                            this.form?.get('name')?.updateValueAndValidity();
+                        });
+                    });
+                });
+            }
         }
     }
 
@@ -226,13 +252,54 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
     };
 
     public onSelectStudy() {
+        // Clear any restriction from a previously selected study right away, before the new
+        // study (and the user's centers on it) are fetched, so it can't leak across selections.
+        this.allowedCenterSegmentRegex = null;
+        this.allowedCenterPrefixes = [];
         this.studyService.get(this.subject.study?.id).then(study => {
             this.subject.study = study;
             this.studyService.getTagsFromStudyId(this.subject.study.id).then(tags => {
                 this.subject.study.tags = tags ? tags : [];
             })
-            this.form.get('name')?.updateValueAndValidity({ onlySelf: true, emitEvent: false });
+            this.computeCenterPrefixRestriction(study).finally(() => {
+                this.form.get('name')?.updateValueAndValidity();
+            });
         });
+    }
+
+    /**
+     * Restricts which center prefix a new subject's common name may carry, based on the current
+     * user's per-center rights on the selected study. No-op (restriction cleared) when the user
+     * has rights on every center of the study, when the study has no subject-name pattern, when
+     * that pattern doesn't embed center prefixes, or when none of the user's centers has a prefix.
+     */
+    private computeCenterPrefixRestriction(study: Study): Promise<void> {
+        this.allowedCenterSegmentRegex = null;
+        this.allowedCenterPrefixes = [];
+        if (this.mode != 'create' || !study?.id || !study.subjectNamePattern
+                || !patternUsesCenterPrefix(study.subjectNamePattern, study.studyCenterList ?? [])) {
+            return Promise.resolve();
+        }
+        return this.centerService.getCentersByStudyId(study.id).then(accessibleCenters => {
+            const studyCenters = study.studyCenterList ?? [];
+            const accessibleIds = new Set((accessibleCenters ?? []).map(c => c.id));
+            // The endpoint returns every center of the study when the user isn't center-restricted.
+            const hasAllCenters = studyCenters.length > 0 && studyCenters.every(sc => accessibleIds.has(sc.center.id));
+            if (hasAllCenters) return;
+            const allowedPrefixes = Array.from(new Set(
+                studyCenters
+                    .filter(sc => accessibleIds.has(sc.center.id))
+                    .map(sc => sc.subjectNamePrefix)
+                    .filter(prefix => prefix?.length > 0)
+            ));
+            if (!allowedPrefixes.length) return;
+            const suffix = matchPatternSuffix(study.subjectNamePattern);
+            if (!suffix) return;
+            const sep = escapeRegex(suffix.separator);
+            const alternation = '(' + allowedPrefixes.map(prefix => escapeRegex(prefix)).join('|') + ')';
+            this.allowedCenterSegmentRegex = new RegExp(sep + alternation + sep + suffix.charClass + '{' + suffix.length + '}$');
+            this.allowedCenterPrefixes = allowedPrefixes;
+        }).catch(() => { /* leave the restriction disabled if accessible centers can't be fetched */ });
     }
 
     private forbiddenNameValidator(forbiddenValues: string[]): ValidatorFn {
@@ -253,10 +320,16 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
             const pattern = this.subject?.study?.subjectNamePattern;
             if (!pattern || !c.value) return null;
             try {
-                return new RegExp(pattern).test(c.value) ? null : { 'subjectNamePattern': true };
+                if (!new RegExp(pattern).test(c.value)) return { 'subjectNamePattern': true };
             } catch {
                 return null;
             }
+            // The user only has rights on some of the study's centers: the common name must carry
+            // the prefix of one of those centers. Same rule for the standalone form and for import.
+            if (this.allowedCenterSegmentRegex && !this.allowedCenterSegmentRegex.test(c.value)) {
+                return { 'subjectNameCenterPrefixRight': true };
+            }
+            return null;
         };
     }
 

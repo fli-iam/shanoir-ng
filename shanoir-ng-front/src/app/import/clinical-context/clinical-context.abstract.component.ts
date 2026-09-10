@@ -40,7 +40,7 @@ import { Subject } from '../../subjects/shared/subject.model';
 import { SubjectService } from '../../subjects/shared/subject.service';
 import { ContextData, ImportDataService } from '../shared/import.data-service';
 import { ImportService } from '../shared/import.service';
-import { extractPatternPrefix, extractPatternSeparator } from '../../utils/regex-example.util';
+import { extractPatternPrefix, extractPatternSeparator, patternUsesCenterPrefix } from '../../utils/regex-example.util';
 
 @Directive()
 export abstract class AbstractClinicalContextComponent implements OnDestroy, OnInit {
@@ -446,12 +446,19 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
             this.loading++;
             this.acquisitionEquipment = null;
             if (this.center) {
-                this.subjectNamePrefix = this.study.studyCenterList.find(studyCenter => studyCenter.center.id === this.center.id)?.subjectNamePrefix;;
+                this.subjectNamePrefix = this.study.studyCenterList.find(studyCenter => studyCenter.center.id === this.center.id)?.subjectNamePrefix;
             }
             if (this.subjectNamePrefix) {
                 const separator = extractPatternSeparator(this.study.subjectNamePattern) ?? '-';
                 const namePrefix = extractPatternPrefix(this.study.subjectNamePattern, this.study.studyCenterList) ?? this.study.name;
-                this.subjectNamePrefix = namePrefix + separator + this.subjectNamePrefix + separator;
+                // Only prefill the per-center index when the study's pattern actually embeds it
+                // (or when there's no pattern at all - legacy behavior). A pattern
+                // configured without center prefixes would otherwise get an unmatchable prefill.
+                const includeCenterIndex = !this.study.subjectNamePattern
+                        || patternUsesCenterPrefix(this.study.subjectNamePattern, this.study.studyCenterList);
+                this.subjectNamePrefix = includeCenterIndex
+                        ? namePrefix + separator + this.subjectNamePrefix + separator
+                        : namePrefix + separator;
             }
             this.acquisitionEquipmentOptions = this.getEquipmentOptions(this.center);
             this.selectDefaultEquipment(this.acquisitionEquipmentOptions);

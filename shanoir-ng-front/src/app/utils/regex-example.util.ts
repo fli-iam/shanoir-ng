@@ -107,6 +107,20 @@ function buildCenterPrefixSegment(separator: string, centers: CenterPrefixSource
 }
 
 /**
+ * Whether the given persisted pattern actually weaves in the study's per-center prefixes
+ * (i.e. the study author kept "Use center index / prefix" ticked when saving). Returns false
+ * for an empty/unrecognized pattern, or when no center has a prefix configured.
+ */
+export function patternUsesCenterPrefix(pattern: string, centers: CenterPrefixSource[] = []): boolean {
+    const suffix = matchPatternSuffix(pattern);
+    if (!suffix) return false;
+    const segment = buildCenterPrefixSegment(suffix.separator, centers);
+    if (!segment) return false;
+    const front = pattern.slice(1, pattern.length - suffix.fullMatch.length);
+    return front.endsWith(segment);
+}
+
+/**
  * Extracts the "Subject name prefix" literal from a persisted subjectNamePattern - the study
  * name, or the first configured custom prefix if that option was used instead - i.e. everything
  * before the optional center-prefix segment and the final separator+identifier. Needs the
