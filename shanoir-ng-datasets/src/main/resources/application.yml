@@ -176,6 +176,9 @@ vip:
   uri: ${VIP_URL_SCHEME}://${VIP_URL_HOST}/rest
   upload-folder: /tmp/vip_uploads
   sleep-time: 20000
+  # Max time (ms) an execution may stay Running before being considered failed. Guards against
+  # out-of-pipe VIP failures (e.g. failed Shanoir input download) that VIP never reports as terminal.
+  execution-timeout-ms: ${VIP_EXECUTION_TIMEOUT_MS:900000} # 15 minutes
   file-formats: .nii.gz, .nii
   result-file-name: input_params.json
   shanoir-vip-host: ${SHANOIR_URL_HOST:local}

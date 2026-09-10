@@ -61,6 +61,8 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
     public static final float DEFAULT_PROGRESS = 0.5f;
     @Value("${vip.sleep-time}")
     private long sleepTime;
+    @Value("${vip.execution-timeout-ms}")
+    private long executionTimeoutMs;
     private static final Logger LOG = LoggerFactory.getLogger(ExecutionMonitoringServiceImpl.class);
     private static final String RIGHT_STR = "CAN_SEE_ALL";
     private final ConcurrentLinkedQueue<Map<String, Object>> monitoringQueue = new ConcurrentLinkedQueue<>();
@@ -130,11 +132,12 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
         monitoringMap.put("event", event);
         monitoringMap.put("attempt", 1);
         monitoringMap.put("jobsNumber", jobsNumber);
+        monitoringMap.put("startTime", System.currentTimeMillis());
         monitoringQueue.add(monitoringMap);
 
-        if (!isRunning) { //If we remove this line, each calling thread needs to wait the old ones to finish the synchronized block below before resuming the code execution. It's only for code performance.
-            synchronized (this) { //Allow the synchronized block to be executed only by one thread at a time. It avoids concurrency
-                if (!isRunning) {  //In case of two calling threads hitting the 1st !isRunning check condition at the same time, it may leads to 2 distinct monitoring loop if we remove this second !isRunning check, what we want to avoid
+        if (!isRunning) { // If we remove this line, each calling thread needs to wait the old ones to finish the synchronized block below before resuming the code execution. It's only for code performance.
+            synchronized (this) { // Allow the synchronized block to be executed only by one thread at a time. It avoids concurrency
+                if (!isRunning) {  // In case of two calling threads hitting the 1st !isRunning check condition at the same time, it may leads to 2 distinct monitoring loop if we remove this second !isRunning check, what we want to avoid
                     isRunning = true;
                     emProxyService.monitoringLoop();
                 }
@@ -153,6 +156,7 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
                 ShanoirEvent event = (ShanoirEvent) emMap.get("event");
                 Integer attempt = (Integer) emMap.get("attempt");
                 Integer jobsNumber = (Integer) emMap.get("jobsNumber");
+                Long jobStartTime = (Long) emMap.get("startTime");
                 String execLabel = getExecLabel(monitoring);
 
 
@@ -191,7 +195,11 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
                             }
                         }
                     }
-                    if (!Objects.equals(dto.getStatus(), ExecutionStatus.RUNNING)) {
+                    if (dto.getStatus() == ExecutionStatus.RUNNING && isExecutionTimedOut(jobStartTime)) {
+                        LOG.warn("Execution id: {} still Running after timeout ({} ms) with no result, marking as failed", monitoring.getId(), executionTimeoutMs);
+                        emProxyService.processTimedOutJob(monitoring, event);
+                        monitoringQueue.remove(emMap);
+                    } else if (!Objects.equals(dto.getStatus(), ExecutionStatus.RUNNING)) {
                         monitoringQueue.remove(emMap);
                     }
                     Thread.sleep(10000);
@@ -288,6 +296,33 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
 
         setEventInError(event, execLabel + " : "  + vipExecutionDTO.getStatus().getRestLabel()
                 + (vipExecutionDTO.getErrorCode() != null ? " (Error code : " + vipExecutionDTO.getErrorCode() + ")" : ""));
+    }
+
+    /**
+     * Whether an execution has been monitored longer than the configured timeout. A null start
+     * time (should not happen for jobs enqueued through startMonitoringJob) is treated as not
+     * timed out, so a missing timestamp never wrongly fails an execution.
+     */
+    protected boolean isExecutionTimedOut(Long jobStartTime) {
+        return jobStartTime != null && System.currentTimeMillis() - jobStartTime > executionTimeoutMs;
+    }
+
+    /**
+     * Manage an execution that VIP keeps reporting as Running long past its timeout. This covers
+     * out-of-pipe VIP failures (e.g. a failed Shanoir input download) that VIP never surfaces as a
+     * terminal state, which would otherwise leave the monitoring Running forever. Mark it failed so
+     * the UI stops showing an indefinite Running state.
+     */
+    @Transactional
+    protected void processTimedOutJob(ExecutionMonitoring execution, ShanoirEvent event) throws EntityNotFoundException {
+        String execLabel = getExecLabel(execution);
+
+        LOG.warn("Execution id: {}, identifier: {}, name: {} timed out with no result, marking as [{}]",
+                execution.getId(), execution.getPipelineIdentifier(), execution.getName(), ExecutionStatus.EXECUTION_FAILED.getRestLabel());
+        execution.setStatus(ExecutionStatus.EXECUTION_FAILED);
+        update(execution);
+
+        setEventInError(event, execLabel + " : timed out with no result, please check the VIP logs");
     }
 
     /**
