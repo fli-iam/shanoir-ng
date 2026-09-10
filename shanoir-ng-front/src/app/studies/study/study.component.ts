@@ -104,6 +104,7 @@ export class StudyComponent extends EntityComponent<Study> {
     protected userExpirationColor: string;
     public openPrefix: boolean = false;
     public useSubjectNamePattern: boolean = false;
+    public useCenterPrefix: boolean = false;
     public namePrefixOption: string = 'study_name';
     public customNamePrefixes: string[] = [''];
     public separator: string = '-';
@@ -140,11 +141,12 @@ export class StudyComponent extends EntityComponent<Study> {
 
     /**
      * Reconstructs the pattern-builder fields (namePrefixOption, customNamePrefixes, separator,
-     * idLength, idType) from a persisted subjectNamePattern regex, so the "Subject Name Pattern"
-     * fieldset reflects what's actually saved instead of resetting to its default values every
-     * time the study entity is (re)loaded (e.g. right after Update). The center-prefix segment
-     * doesn't need decomposing: it's already re-derived live from study.studyCenterList by
-     * buildCenterPrefixSegment(), so it's only stripped off here, not parsed.
+     * idLength, idType, useCenterPrefix) from a persisted subjectNamePattern regex, so the
+     * "Subject Name Pattern" fieldset reflects what's actually saved instead of resetting to its
+     * default values every time the study entity is (re)loaded (e.g. right after Update). The
+     * center-prefix segment isn't decomposed: it's re-derived live from study.studyCenterList by
+     * buildRawCenterPrefixSegment(); here we only detect whether the saved regex contained it
+     * (to restore useCenterPrefix) and strip it off.
      */
     private parseSubjectNamePatternIntoFields(pattern: string): void {
         this.namePrefixOption = 'study_name';
@@ -152,6 +154,9 @@ export class StudyComponent extends EntityComponent<Study> {
         this.separator = '-';
         this.idLength = 4;
         this.idType = 'string';
+        // Default for a study without a persisted pattern yet: mirror the previous implicit
+        // behaviour, i.e. weave in the center indexes as soon as at least one center has one.
+        this.useCenterPrefix = this.getDistinctCenterPrefixes().length > 0;
         if (!pattern) return;
 
         const suffixMatch = matchPatternSuffix(pattern);
@@ -164,8 +169,11 @@ export class StudyComponent extends EntityComponent<Study> {
         // fullMatch.length is used to know how many characters to remove
         // to isolate the prefix + center prefix (if exists)
         let front = pattern.slice(1, pattern.length - suffixMatch.fullMatch.length);
-        const expectedCenterSegment = this.buildCenterPrefixSegment();
-        if (expectedCenterSegment && front.endsWith(expectedCenterSegment)) {
+        // The persisted regex is the source of truth: the center segment is present iff the
+        // user had "Use center index / prefix" checked when the pattern was last saved.
+        const expectedCenterSegment = this.buildRawCenterPrefixSegment();
+        this.useCenterPrefix = !!expectedCenterSegment && front.endsWith(expectedCenterSegment);
+        if (this.useCenterPrefix) {
             front = front.slice(0, front.length - expectedCenterSegment.length);
         }
 
@@ -200,18 +208,26 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     /**
-     * The "(separator + centerPrefix)" segment of the pattern. Made optional as a whole
-     * when at least one center has no prefix configured yet, 
-     * so subjects for those centers aren't blocked - and so we never end up
+     * The "(separator + centerPrefix)" segment of the pattern, regardless of whether the user
+     * opted to use it. Made optional as a whole when at least one center has no prefix
+     * configured yet, so subjects for those centers aren't blocked - and so we never end up
      * with a duplicated separator when the center prefix is skipped.
      */
-    private buildCenterPrefixSegment(): string {
+    private buildRawCenterPrefixSegment(): string {
         const centerPrefixes = this.getDistinctCenterPrefixes();
         if (!centerPrefixes.length) return '';
         const someCenterHasNoPrefix = this.study.studyCenterList.some(studyCenter => !studyCenter.subjectNamePrefix?.length);
         const alternation = '(' + centerPrefixes.map(prefix => escapeRegex(prefix)).join('|') + ')';
         const unit = escapeRegex(this.separator) + alternation;
         return someCenterHasNoPrefix ? '(' + unit + ')?' : unit;
+    }
+
+    /**
+     * The center-prefix segment actually woven into the pattern: empty unless the user
+     * ticked "Use center index / prefix", so an unused segment never adds a stray separator.
+     */
+    private buildCenterPrefixSegment(): string {
+        return this.useCenterPrefix ? this.buildRawCenterPrefixSegment() : '';
     }
 
     private buildSubjectNamePatternRegex(): string {
@@ -258,7 +274,7 @@ export class StudyComponent extends EntityComponent<Study> {
         const examplePrefix = this.exampleSubjectNamePrefix;
         const sampleChars = this.idType == 'numeric' ? '84271937' : 'A8f2K5qZ';
         const sample = sampleChars.substring(0, this.idLength).padEnd(this.idLength, this.idType == 'numeric' ? '0' : 'x');
-        const centerPrefixes = this.getDistinctCenterPrefixes();
+        const centerPrefixes = this.useCenterPrefix ? this.getDistinctCenterPrefixes() : [];
         const previewCenterPrefix = this.getPreviewCenterPrefix(centerPrefixes);
         const centerPrefixExample = previewCenterPrefix ? this.separator + previewCenterPrefix : '';
         return examplePrefix + centerPrefixExample + this.separator + sample;

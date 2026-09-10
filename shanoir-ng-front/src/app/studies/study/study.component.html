@@ -710,6 +710,31 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         </div>
                         @if (useSubjectNamePattern) {
                             <br>
+                            <div class="pattern-field">
+                                Use center index / prefix :
+                                <span class="pattern-use-checkbox">
+                                    @switch (mode) {
+                                        @case ('view') {
+                                            @if (useCenterPrefix) {
+                                                <span class="bool-true"><i class="fas fa-check"></i></span>
+                                            }
+                                            @if (!useCenterPrefix) {
+                                                <span class="bool-false"><i class="fas fa-times"></i></span>
+                                            }
+                                        }
+                                        @default {
+                                            <checkbox [(ngModel)]="useCenterPrefix" [ngModelOptions]="{standalone: true}" (ngModelChange)="onPatternFieldChange()"></checkbox>
+                                        }
+                                    }
+                                </span>
+                            </div>
+                            <div class="info-frame pattern-info">
+                                <i class="fas fa-info-circle"></i>
+                                A subject's common name may or may not include an index specific to its acquisition center.
+                                <br>
+                                Go to the <b><a [routerLink]="'.'" [fragment]="'centers'" replaceUrl="true">Centers</a></b> tab to set an index for each acquisition center.
+                            </div>
+                            <br>
                             <div class="pattern-builder">
                                 <div class="pattern-field">
                                     Subject name prefix :
@@ -865,9 +890,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                             <th>Acquisition Center</th>
                                             <th></th>
                                             <th>
-                                                Subject Prefix (optional)
-                                                <tool-tip>A default prefix for the new subjects created when importing datasets in this study.
-                                                          Use the Subjects tab to define your subject name pattern.
+                                                Center index / prefix (optional)
+                                                <tool-tip>A per-center index that can be embedded in the subject's common name.
+                                                          Use the Subjects tab to define your subject name pattern and to choose whether it uses these indexes.
                                                 </tool-tip>
                                             </th>
                                             <th></th>
