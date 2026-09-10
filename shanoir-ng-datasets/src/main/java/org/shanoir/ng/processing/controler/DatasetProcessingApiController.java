@@ -124,7 +124,7 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
         if (datasetProcessings.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
-        return new ResponseEntity<>(datasetProcessingMapper.processingListToProcessingDTOListWithNullRelations(datasetProcessings), HttpStatus.OK);
+        return new ResponseEntity<>(datasetProcessingMapper.processingListToProcessingDTOListWithParentId(datasetProcessings), HttpStatus.OK);
     }
 
     public ResponseEntity<List<DatasetProcessingDTO>> getProcessingsByMonitoring(@Parameter(description = "id of the monitoring", required = true) @PathVariable("monitoringId") Long monitoringId) {
