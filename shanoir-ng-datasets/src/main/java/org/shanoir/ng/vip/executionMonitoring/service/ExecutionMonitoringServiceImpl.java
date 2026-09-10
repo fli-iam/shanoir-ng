@@ -21,6 +21,7 @@ import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.utils.KeycloakUtil;
+import org.shanoir.ng.utils.SecurityContextUtil;
 import org.shanoir.ng.vip.execution.dto.ExecutionCandidateDTO;
 import org.shanoir.ng.vip.execution.dto.VipExecutionDTO;
 import org.shanoir.ng.vip.execution.service.ExecutionServiceImpl;
@@ -39,6 +40,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.Exceptions;
@@ -127,7 +130,7 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
 
 
     public void startMonitoringJob(ExecutionMonitoring createdMonitoring, ShanoirEvent event, Integer jobsNumber) {
-        monitoringQueue.add(new MonitoringJob(createdMonitoring, event, jobsNumber));
+        monitoringQueue.add(new MonitoringJob(createdMonitoring, event, jobsNumber, KeycloakUtil.getTokenUserId()));
 
         if (!isRunning) { //If we remove this line, each calling thread needs to wait the old ones to finish the synchronized block below before resuming the code execution. It's only for code performance.
             synchronized (this) { //Allow the synchronized block to be executed only by one thread at a time. It avoids concurrency
@@ -160,15 +163,40 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
     }
 
     /**
+     * Poll one queued execution under its own, self-contained security context.
+     *
+     * The monitoring loop is a background system task shared by every user: it is started by whoever happened to
+     * queue the first execution, and the async executor pins that user's security context to the loop thread for
+     * its whole lifetime. Reading the connected user from the thread here therefore yields an arbitrary user, which
+     * is what made executions be reported to the wrong person (issue #3813). It also made result import depend on
+     * that user's rights.
+     *
+     * So each job is polled under a system context instead, exactly as the resumption runner already does on
+     * startup, and the owner of the execution is carried explicitly by {@link MonitoringJob#ownerId} for the sole
+     * purpose of addressing its Shanoir event. The previous context is restored afterwards so nothing leaks from
+     * one job to the next.
+     */
+    private void processMonitoringJob(MonitoringJob job) {
+        SecurityContext previousContext = SecurityContextHolder.getContext();
+        SecurityContextHolder.setContext(SecurityContextHolder.createEmptyContext());
+        SecurityContextUtil.initAuthenticationContext(KeycloakUtil.ROLE_ADMIN);
+        try {
+            pollMonitoringJob(job);
+        } finally {
+            SecurityContextHolder.setContext(previousContext);
+        }
+    }
+
+    /**
      * Poll VIP for the state of a single queued execution and handle its outcome. The job is dropped from the
      * monitoring queue as soon as its execution is no longer running, or if the polling itself failed.
      */
-    private void processMonitoringJob(MonitoringJob job) {
+    private void pollMonitoringJob(MonitoringJob job) {
         ExecutionMonitoring monitoring = job.monitoring;
         String execLabel = getExecLabel(monitoring);
 
         if (Objects.isNull(job.event) || !Objects.equals(job.event.getStatus(), ShanoirEvent.IN_PROGRESS)) {
-            job.event = initShanoirEvent(monitoring, job.event, execLabel, job.jobsNumber);
+            job.event = initShanoirEvent(monitoring, job.event, execLabel, job.jobsNumber, job.ownerId);
             LOG.info("Monitoring of execution id: " + monitoring.getId() + ", identifier: " + monitoring.getPipelineIdentifier() + ", name: " + monitoring.getName() + " started");
         }
 
@@ -244,14 +272,14 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
     /**
      * Create or update Shanoir event relative to an execution monitoring
      */
-    private ShanoirEvent initShanoirEvent(ExecutionMonitoring processing, ShanoirEvent event, String execLabel, Integer jobsNumber) {
+    private ShanoirEvent initShanoirEvent(ExecutionMonitoring processing, ShanoirEvent event, String execLabel, Integer jobsNumber, Long ownerId) {
         String startMsg = execLabel + " : " + ExecutionStatus.RUNNING.getRestLabel() + " (0/" + jobsNumber + " jobs done)";
 
         if (event == null) {
             event = new ShanoirEvent(
                     ShanoirEventType.EXECUTION_MONITORING_EVENT,
                     processing.getId().toString(),
-                    KeycloakUtil.getTokenUserId(),
+                    ownerId,
                     startMsg,
                     ShanoirEvent.IN_PROGRESS,
                     DEFAULT_PROGRESS);
@@ -342,16 +370,23 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
 
         private final Integer jobsNumber;
 
+        /**
+         * Id of the user who queued this execution. Captured on the calling thread, because the monitoring loop
+         * that later polls this job runs under an unrelated user's context.
+         */
+        private final Long ownerId;
+
         /** Shanoir event reporting this execution to its owner, created on the first poll if not resumed from one. */
         private ShanoirEvent event;
 
         /** Consecutive failed attempts to read this execution from VIP, reset as soon as one succeeds. */
         private int attempt = 1;
 
-        MonitoringJob(ExecutionMonitoring monitoring, ShanoirEvent event, Integer jobsNumber) {
+        MonitoringJob(ExecutionMonitoring monitoring, ShanoirEvent event, Integer jobsNumber, Long ownerId) {
             this.monitoring = monitoring;
             this.event = event;
             this.jobsNumber = jobsNumber;
+            this.ownerId = ownerId;
         }
     }
 }
