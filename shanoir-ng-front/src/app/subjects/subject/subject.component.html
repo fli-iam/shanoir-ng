@@ -265,8 +265,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         @if (mode == 'create' && subject.study?.subjectNamePattern) {
                             <li class="info">
                                 <span class="icon"><i class="fas fa-info-circle"></i></span>
-                                This study requires subject common names to match the following example:
-                                <code>{{ subjectNamePatternPreview }}</code>
+                                @if (subjectNamePatternExamples.length > 1) {
+                                    This study requires subject common names to match one of the following examples:
+                                    <code>{{ subjectNamePatternExamples.join(', ') }}</code>
+                                } @else {
+                                    This study requires subject common names to match the following example:
+                                    <code>{{ subjectNamePatternExamples[0] }}</code>
+                                }
                             </li>
                         }
                         @if (mode == 'create' && allowedCenterPrefixes.length > 0) {

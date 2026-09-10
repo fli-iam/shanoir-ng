@@ -37,7 +37,7 @@ import { SubjectService } from '../shared/subject.service';
 import { Tag } from "../../tags/tag.model";
 import { dateDisplay } from "../../shared/./localLanguage/localDate.abstract";
 import { isDarkColor } from "../../utils/app.utils";
-import { regexExample, matchPatternSuffix, escapeRegex, patternUsesCenterPrefix } from "../../utils/regex-example.util";
+import { regexExamples, matchPatternSuffix, escapeRegex, patternUsesCenterPrefix } from "../../utils/regex-example.util";
 import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
 import { CheckboxComponent } from '../../shared/checkbox/checkbox.component';
 import { TagInputComponent } from '../../tags/tag.input.component';
@@ -311,8 +311,9 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
         };
     }
 
-    get subjectNamePatternPreview(): string {
-        return regexExample(this.subject?.study?.subjectNamePattern);
+    /** One example per "Subject name prefix" custom names, or a single-element array. */
+    get subjectNamePatternExamples(): string[] {
+        return regexExamples(this.subject?.study?.subjectNamePattern);
     }
 
     private subjectNamePatternValidator(): ValidatorFn {

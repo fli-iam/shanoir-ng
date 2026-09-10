@@ -214,3 +214,27 @@ export function regexExample(pattern: string): string {
     }
     return result;
 }
+
+/**
+ * Like regexExample(), but expands a *leading* top-level alternation group - the "Subject name
+ * prefix" options "custom name(s)" produced by study.component.ts - into one example per option.
+ * Every other alternation (center index, identifier) stays at its single example value. 
+ * Returns a single-element array when the pattern has no leading prefix alternation, and [] for an empty/unset pattern.
+ */
+export function regexExamples(pattern: string): string[] {
+    if (!pattern) return [];
+    if (!pattern.startsWith('^(')) return [regexExample(pattern)];
+    let depth = 0;
+    let close = -1;
+    for (let i = 1; i < pattern.length; i++) {
+        const ch = pattern[i];
+        if (ch == '\\') { i++; continue; }
+        if (ch == '(') depth++;
+        else if (ch == ')') { depth--; if (depth == 0) { close = i; break; } }
+    }
+    if (close == -1) return [regexExample(pattern)];
+    const alternatives = splitTopLevelAlternation(pattern.slice(2, close));
+    if (alternatives.length <= 1) return [regexExample(pattern)];
+    const rest = pattern.slice(close + 1);
+    return alternatives.map(alt => regexExample('^' + alt + rest));
+}
