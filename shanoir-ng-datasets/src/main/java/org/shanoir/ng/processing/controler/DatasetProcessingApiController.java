@@ -201,8 +201,7 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
             @RequestParam(value = "resultOnly") boolean resultOnly,
             HttpServletResponse response) throws RestServiceException {
 
-        List<DatasetProcessing> processingList = repository.findByIdsWithInputsAndOutputs(processingIds);
-        processingDownloaderService.massiveDownload(processingList, resultOnly, "dcm", response, false, null);
+        processingDownloaderService.massiveDownloadByProcessingIds(processingIds, resultOnly, "dcm", response, false, null);
     }
 
     @Override
