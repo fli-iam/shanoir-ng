@@ -130,7 +130,15 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
 
 
     public void startMonitoringJob(ExecutionMonitoring createdMonitoring, ShanoirEvent event, Integer jobsNumber) {
-        MonitoringJob job = new MonitoringJob(createdMonitoring, event, jobsNumber, KeycloakUtil.getTokenUserId());
+        if (event == null) {
+            // Report the execution to its owner right now, on their own thread. Creating the event on the first
+            // poll instead would delay it by one poll round, so a user queuing an execution while others are
+            // already being monitored would not see their task appear for several seconds. It also guarantees the
+            // event is addressed to the user who queued the execution rather than to whoever runs the loop.
+            event = createShanoirEvent(createdMonitoring, jobsNumber);
+        }
+        MonitoringJob job = new MonitoringJob(createdMonitoring, event, jobsNumber);
+        LOG.info("Monitoring of execution id: " + createdMonitoring.getId() + ", identifier: " + createdMonitoring.getPipelineIdentifier() + ", name: " + createdMonitoring.getName() + " started");
 
         // Queuing the job and starting a loop for it must be atomic with respect to the loop's own exit check, see
         // hasJobsToPoll(). The guarded section is a queue add, a boolean read and an async submit that returns at
@@ -201,9 +209,9 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
      * that user's rights.
      *
      * So each job is polled under a system context instead, exactly as the resumption runner already does on
-     * startup, and the owner of the execution is carried explicitly by {@link MonitoringJob#ownerId} for the sole
-     * purpose of addressing its Shanoir event. The previous context is restored afterwards so nothing leaks from
-     * one job to the next.
+     * startup, and the event addressing the execution to its owner is built upfront by {@link #startMonitoringJob}
+     * on the owner's own thread. The previous context is restored afterwards so nothing leaks from one job to the
+     * next.
      */
     private void processMonitoringJob(MonitoringJob job) {
         SecurityContext previousContext = SecurityContextHolder.getContext();
@@ -224,9 +232,9 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
         ExecutionMonitoring monitoring = job.monitoring;
         String execLabel = getExecLabel(monitoring);
 
-        if (Objects.isNull(job.event) || !Objects.equals(job.event.getStatus(), ShanoirEvent.IN_PROGRESS)) {
-            job.event = initShanoirEvent(monitoring, job.event, execLabel, job.jobsNumber, job.ownerId);
-            LOG.info("Monitoring of execution id: " + monitoring.getId() + ", identifier: " + monitoring.getPipelineIdentifier() + ", name: " + monitoring.getName() + " started");
+        if (!Objects.equals(job.event.getStatus(), ShanoirEvent.IN_PROGRESS)) {
+            resumeShanoirEvent(job.event, monitoring, job.jobsNumber);
+            LOG.info("Monitoring of execution id: " + monitoring.getId() + ", identifier: " + monitoring.getPipelineIdentifier() + ", name: " + monitoring.getName() + " resumed");
         }
 
         try {
@@ -299,26 +307,40 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
     }
 
     /**
-     * Create or update Shanoir event relative to an execution monitoring
+     * Create and publish the Shanoir event reporting an execution monitoring to its owner.
+     *
+     * Called on the thread that queues the execution, so the event is addressed to the user who launched it. The
+     * monitoring loop must never create it: it is a background task running under a system context, and it would
+     * only get to this execution once it is done polling the ones already queued.
      */
-    private ShanoirEvent initShanoirEvent(ExecutionMonitoring processing, ShanoirEvent event, String execLabel, Integer jobsNumber, Long ownerId) {
-        String startMsg = execLabel + " : " + ExecutionStatus.RUNNING.getRestLabel() + " (0/" + jobsNumber + " jobs done)";
-
-        if (event == null) {
-            event = new ShanoirEvent(
-                    ShanoirEventType.EXECUTION_MONITORING_EVENT,
-                    processing.getId().toString(),
-                    ownerId,
-                    startMsg,
-                    ShanoirEvent.IN_PROGRESS,
-                    DEFAULT_PROGRESS);
-        } else {
-            event.setMessage(startMsg);
-            event.setStatus(ShanoirEvent.IN_PROGRESS);
-            event.setProgress(DEFAULT_PROGRESS);
-        }
+    private ShanoirEvent createShanoirEvent(ExecutionMonitoring processing, Integer jobsNumber) {
+        ShanoirEvent event = new ShanoirEvent(
+                ShanoirEventType.EXECUTION_MONITORING_EVENT,
+                processing.getId().toString(),
+                KeycloakUtil.getTokenUserId(),
+                startMessage(processing, jobsNumber),
+                ShanoirEvent.IN_PROGRESS,
+                DEFAULT_PROGRESS);
         eventService.publishEvent(event);
         return event;
+    }
+
+    /**
+     * Put back in progress the event of an execution whose monitoring is resumed, typically after a restart. The
+     * event already belongs to the user who launched the execution, so its owner is left untouched.
+     */
+    private void resumeShanoirEvent(ShanoirEvent event, ExecutionMonitoring processing, Integer jobsNumber) {
+        event.setMessage(startMessage(processing, jobsNumber));
+        event.setStatus(ShanoirEvent.IN_PROGRESS);
+        event.setProgress(DEFAULT_PROGRESS);
+        eventService.publishEvent(event);
+    }
+
+    /**
+     * Message reporting an execution monitoring that has yet to complete a single job
+     */
+    private String startMessage(ExecutionMonitoring processing, Integer jobsNumber) {
+        return getExecLabel(processing) + " : " + ExecutionStatus.RUNNING.getRestLabel() + " (0/" + jobsNumber + " jobs done)";
     }
 
     /**
@@ -399,23 +421,16 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
 
         private final Integer jobsNumber;
 
-        /**
-         * Id of the user who queued this execution. Captured on the calling thread, because the monitoring loop
-         * that later polls this job runs under an unrelated user's context.
-         */
-        private final Long ownerId;
-
-        /** Shanoir event reporting this execution to its owner, created on the first poll if not resumed from one. */
+        /** Shanoir event reporting this execution to its owner. Never null: built when the job is queued. */
         private ShanoirEvent event;
 
         /** Consecutive failed attempts to read this execution from VIP, reset as soon as one succeeds. */
         private int attempt = 1;
 
-        MonitoringJob(ExecutionMonitoring monitoring, ShanoirEvent event, Integer jobsNumber, Long ownerId) {
+        MonitoringJob(ExecutionMonitoring monitoring, ShanoirEvent event, Integer jobsNumber) {
             this.monitoring = monitoring;
             this.event = event;
             this.jobsNumber = jobsNumber;
-            this.ownerId = ownerId;
         }
     }
 }
