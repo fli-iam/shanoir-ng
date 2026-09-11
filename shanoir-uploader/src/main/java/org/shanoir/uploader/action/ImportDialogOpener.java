@@ -24,6 +24,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 import org.shanoir.ng.importer.model.ImportJobBase;
 import org.shanoir.ng.importer.model.Serie;
@@ -139,19 +140,32 @@ public class ImportDialogOpener {
                             StudyCard studyCard = (StudyCard) itStudyCards.next();
                             // filter all study cards related to the selected study
                             if (study.getId().equals(studyCard.getStudyId())) {
-                                studyCardsStudy.add(studyCard);
                                 for (AcquisitionEquipment acquisitionEquipment : acquisitionEquipments) {
                                     // find the correct equipment for each study card and add it
                                     if (acquisitionEquipment.getId().equals(studyCard.getAcquisitionEquipmentId())) {
                                         studyCard.setAcquisitionEquipment(acquisitionEquipment);
                                     }
                                 }
-                                // If at least one study card is compatible, then study is compatible
-                                if (equipmentDicomForCompatibility != null
-                                        && ImportUtils.flagStudyCardCompatible(studyCard,
-                                                equipmentDicomForCompatibility)) {
-                                    compatibleStudyCard = true;
-                                }
+                                studyCardsStudy.add(studyCard);
+                            }
+                        }
+                        // Only propose study cards whose acquisition center actually belongs to this
+                        // study, mirroring getStudyCardOptions() in clinical-context.abstract.component.ts
+                        studyCardsStudy = filterStudyCardsByAccessibleCenters(study, studyCardsStudy);
+                        // Display first, if it exists, the study card whose acquisition equipment serial
+                        // number matches the DICOM "informations DICOM" of the exam being imported, so
+                        // it's the one pre-selected first in the form.
+                        if (equipmentDicomForCompatibility != null) {
+                            final String dicomSerialNumber = equipmentDicomForCompatibility.getDeviceSerialNumber();
+                            studyCardsStudy.sort(Comparator.comparing(studyCard ->
+                                    !ImportUtils.matchesSerialNumber(studyCard.getAcquisitionEquipment(), dicomSerialNumber)));
+                        }
+                        for (StudyCard studyCard : studyCardsStudy) {
+                            // If at least one study card is compatible, then study is compatible
+                            if (equipmentDicomForCompatibility != null
+                                    && ImportUtils.flagStudyCardCompatible(studyCard,
+                                            equipmentDicomForCompatibility)) {
+                                compatibleStudyCard = true;
                             }
                         }
                         if (compatibleStudyCard) {
@@ -167,6 +181,29 @@ public class ImportDialogOpener {
         } else {
             return null;
         }
+    }
+
+    /**
+     * Filters out study cards from a center that isn't attached to the study. 
+     * A study card whose equipment couldn't be resolved is excluded defensively, 
+     * since its center can't be verified.
+     *
+     * @param study the study the study cards belong to
+     * @param studyCards the study's own study cards, with their acquisitionEquipment already set
+     * @return the study cards whose center belongs to the study, or the input list unfiltered if
+     *         the study's centers could not be determined
+     */
+    private List<StudyCard> filterStudyCardsByAccessibleCenters(Study study, List<StudyCard> studyCards) {
+        if (study.getStudyCenterList() == null) {
+            return studyCards;
+        }
+        List<Long> accessibleCenterIds = study.getStudyCenterList().stream()
+                .map(studyCenter -> studyCenter.getCenter().getId())
+                .toList();
+        return studyCards.stream()
+                .filter(studyCard -> studyCard.getAcquisitionEquipment() != null
+                        && accessibleCenterIds.contains(studyCard.getAcquisitionEquipment().getCenter().getId()))
+                .collect(Collectors.toList());
     }
 
     /**
