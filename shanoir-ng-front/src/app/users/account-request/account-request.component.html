@@ -175,6 +175,15 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                     Email should be unique!
                                 </label>
                             }
+                            @if (hasError('email', ['blacklist'])) {
+                                <label
+                                    class="form-validation-alert"
+                                    animate.enter="slide-down-error"
+                                    animate.leave="slide-up-error"
+                                    i18n="Edit user|Email blacklist error@@editUserEmailBlacklistError">
+                                    This mail supplier is not accepted. Please make academic or professional mail your first choice.
+                                </label>
+                            }
                         </span>
                     </li>
                     <li class="info">
