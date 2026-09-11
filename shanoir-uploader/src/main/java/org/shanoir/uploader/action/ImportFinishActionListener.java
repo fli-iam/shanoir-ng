@@ -5,13 +5,16 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
@@ -30,10 +33,12 @@ import org.shanoir.uploader.model.rest.Examination;
 import org.shanoir.uploader.model.rest.ImagedObjectCategory;
 import org.shanoir.uploader.model.rest.Study;
 import org.shanoir.uploader.model.rest.StudyCard;
+import org.shanoir.uploader.model.rest.StudyCenter;
 import org.shanoir.uploader.model.rest.Subject;
 import org.shanoir.uploader.model.rest.SubjectType;
 import org.shanoir.uploader.utils.ImportUtils;
 import org.shanoir.uploader.utils.QualityUtils;
+import org.shanoir.uploader.utils.SubjectNamePatternUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -188,6 +193,70 @@ public class ImportFinishActionListener implements ActionListener {
         if (!useExistingSubjectInStudy) {
             // Subject name: entered by the user in the GUI
             String subjectName = mainWindow.importDialog.subjectTextField.getText();
+
+            // When a NEW subject is about to be created from a name typed by the user, mirror the
+            // web import behavior: the name must respect the study's subject common name pattern (if
+            // any), and - when that pattern embeds per-center prefixes - it must carry the prefix
+            // of a center the user is allowed to act on. 
+            // Mass import from excel file has its own runner and is not affected.
+            logger.info("Subject name check: newSubject={}, manualNameMode={}, subjectName={}",
+                    subjectREST == null, ShUpConfig.isModeSubjectNameManual(), subjectName);
+            if (subjectREST == null && ShUpConfig.isModeSubjectNameManual()) {
+                String namePattern = study.getSubjectNamePattern();
+                logger.info("Subject name check: study [{}] subjectNamePattern = {}", study.getId(), namePattern);
+                if (namePattern != null && !namePattern.isEmpty()) {
+                    if (!SubjectNamePatternUtils.nameMatchesPattern(subjectName, namePattern)) {
+                        showErrorAndReset(startButton, folderKey, null, "The subject common name \"" + subjectName
+                                + "\" does not match the pattern required by this study.");
+                        return;
+                    }
+                    List<StudyCenter> studyCenters = study.getStudyCenterList() != null
+                            ? study.getStudyCenterList() : new ArrayList<>();
+                    List<String> allCenterPrefixes = studyCenters.stream()
+                            .map(StudyCenter::getSubjectNamePrefix)
+                            .filter(p -> p != null && !p.isEmpty())
+                            .collect(Collectors.toList());
+                    boolean someCenterHasNoPrefix = studyCenters.stream()
+                            .anyMatch(sc -> sc.getSubjectNamePrefix() == null || sc.getSubjectNamePrefix().isEmpty());
+                    boolean patternUsesCenterPrefix = SubjectNamePatternUtils.patternUsesCenterPrefix(
+                            namePattern, allCenterPrefixes, someCenterHasNoPrefix);
+                    logger.info("Subject name check: studyCenterPrefixes={}, someCenterHasNoPrefix={}, patternUsesCenterPrefix={}",
+                            allCenterPrefixes, someCenterHasNoPrefix, patternUsesCenterPrefix);
+                    if (patternUsesCenterPrefix) {
+                        List<Center> accessibleCenters = null;
+                        try {
+                            accessibleCenters = ShUpOnloadConfig.getShanoirUploaderServiceClient()
+                                    .findCentersByStudy(study.getId());
+                        } catch (Exception e) {
+                            logger.warn("Could not fetch accessible centers for study {}, skipping the "
+                                    + "center-prefix rights check.", study.getId(), e);
+                        }
+                        logger.info("Subject name check: accessible centers = {}", accessibleCenters == null ? null
+                                : accessibleCenters.stream().map(Center::getId).collect(Collectors.toList()));
+                        if (accessibleCenters != null) {
+                            Set<Long> accessibleIds = accessibleCenters.stream()
+                                    .map(Center::getId).collect(Collectors.toSet());
+                            boolean hasAllCenters = !studyCenters.isEmpty() && studyCenters.stream()
+                                    .allMatch(sc -> sc.getCenter() != null && accessibleIds.contains(sc.getCenter().getId()));
+                            List<String> allowedPrefixes = studyCenters.stream()
+                                    .filter(sc -> sc.getCenter() != null && accessibleIds.contains(sc.getCenter().getId()))
+                                    .map(StudyCenter::getSubjectNamePrefix)
+                                    .filter(p -> p != null && !p.isEmpty())
+                                    .distinct()
+                                    .collect(Collectors.toList());
+                            logger.info("Subject name check: hasAllCenters={}, allowedPrefixes={}", hasAllCenters, allowedPrefixes);
+                            if (!hasAllCenters && !allowedPrefixes.isEmpty() && !SubjectNamePatternUtils
+                                    .nameUsesAllowedCenterPrefix(subjectName, namePattern, allowedPrefixes)) {
+                                showErrorAndReset(startButton, folderKey, null, "You may only create subjects for "
+                                        + "the centers you have rights on: the common name must include the index "
+                                        + "of one of them (" + String.join(", ", allowedPrefixes) + ").");
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+
             ImagedObjectCategory category = (ImagedObjectCategory) mainWindow.importDialog.subjectImageObjectCategoryCB.getSelectedItem();
             String languageHemDom = (String) mainWindow.importDialog.subjectLanguageHemisphericDominanceCB.getSelectedItem();
             String manualHemDom = (String) mainWindow.importDialog.subjectManualHemisphericDominanceCB.getSelectedItem();

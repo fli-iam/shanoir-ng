@@ -38,6 +38,8 @@ public class IdNameCenterStudyDTO extends IdName {
 
     private Integer studyCardPolicy;
 
+    private String subjectNamePattern;
+
     /**
      * Simple constructor.
      */
@@ -88,6 +90,14 @@ public class IdNameCenterStudyDTO extends IdName {
 
     public void setStudyCardPolicy(Integer studyCardPolicy) {
         this.studyCardPolicy = studyCardPolicy;
+    }
+
+    public String getSubjectNamePattern() {
+        return subjectNamePattern;
+    }
+
+    public void setSubjectNamePattern(String subjectNamePattern) {
+        this.subjectNamePattern = subjectNamePattern;
     }
 
 }

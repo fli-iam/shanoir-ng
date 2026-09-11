@@ -81,6 +81,9 @@ public abstract class StudyDecorator implements StudyMapper {
         simpleStudyDTO.setStudyCenterList(studyCenterMapper.studyCenterListToStudyCenterDTOList(study.getStudyCenterList()));
         //simpleStudyDTO.setTags(tagMapper.tagListToTagDTOList(study.getTags()));
         simpleStudyDTO.setProfile(study.getProfile());
+        if (study.getExtraDetails() != null) {
+            simpleStudyDTO.setSubjectNamePattern(study.getExtraDetails().getSubjectNamePattern());
+        }
         return simpleStudyDTO;
     }
 

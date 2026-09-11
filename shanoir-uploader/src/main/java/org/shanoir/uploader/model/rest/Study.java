@@ -40,12 +40,22 @@ public class Study implements Comparable<Study> {
 
     private Profile profile;
 
+    private String subjectNamePattern;
+
     public StudyExtraDetails getExtraDetails() {
         return extraDetails;
     }
 
     public void setExtraDetails(StudyExtraDetails extraDetails) {
         this.extraDetails = extraDetails;
+    }
+
+    public String getSubjectNamePattern() {
+        return subjectNamePattern;
+    }
+
+    public void setSubjectNamePattern(String subjectNamePattern) {
+        this.subjectNamePattern = subjectNamePattern;
     }
 
     public Long getId() {
