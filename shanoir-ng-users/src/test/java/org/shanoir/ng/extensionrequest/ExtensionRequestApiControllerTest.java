@@ -102,9 +102,7 @@ public class ExtensionRequestApiControllerTest {
                 .content(JacksonUtils.serialize(extensionRequest)))
                 .andExpect(status().isOk());
 
-        // THEN an extension is requested and password is changed
-        Mockito.verify(keycloakClient).resetPassword(mockUser.getKeycloakId());
-        Mockito.verify(emailService).notifyUserResetPassword(Mockito.eq(mockUser), Mockito.anyString());
+        // THEN an extension is requested
         Mockito.verify(userService).requestExtension(Mockito.eq(mockUser.getId()), Mockito.any(ExtensionRequestInfo.class));
     }
 

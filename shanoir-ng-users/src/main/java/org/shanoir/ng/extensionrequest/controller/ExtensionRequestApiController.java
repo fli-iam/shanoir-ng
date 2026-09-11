@@ -56,8 +56,6 @@ public class ExtensionRequestApiController extends AbstractUserRequestApiControl
             LOG.info("Resetting password after extension request for user {}", userToExtend.getUsername());
 
             getUserService().requestExtension(userToExtend.getId(), requestInfo);
-            String password = keycloakClient.resetPassword(userToExtend.getKeycloakId());
-            emailService.notifyUserResetPassword(userToExtend, password);
 
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (EntityNotFoundException e) {

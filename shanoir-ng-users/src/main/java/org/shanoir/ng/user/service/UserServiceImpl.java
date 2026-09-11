@@ -118,8 +118,12 @@ public class UserServiceImpl implements UserService {
             userDb.setFirstExpirationNotificationSent(false);
             userDb.setSecondExpirationNotificationSent(false);
             final User updatedUser = updateUserOnAllSystems(userDb, user);
+
+            String password = keycloakClient.resetPassword(userDb.getKeycloakId());
+
             // Send emails
             emailService.notifyExtensionRequestAccepted(updatedUser);
+            emailService.notifyUserResetPassword(userDb, password);
             return updatedUser;
         } else {
             // Account creation
