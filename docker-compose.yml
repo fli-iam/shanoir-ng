@@ -260,7 +260,6 @@ services:
       - VIP_CLIENT_SECRET
       - SHANOIR_CONTINUANCE_HOUR
       - SHANOIR_SHUTDOWN_HOUR
-      - SHANOIR_PACS_MAX_CONNECTIONS=${SHANOIR_PACS_MAX_CONNECTIONS:-1000}
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - certificate-share-data:/etc/ssl/certs/java:ro

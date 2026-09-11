@@ -175,7 +175,7 @@ dcm4chee-arc:
   wado:
     connect-timeout-ms: ${SHANOIR_PACS_CONNECT_TIMEOUT_MS:5000}
     response-timeout-seconds: ${SHANOIR_PACS_RESPONSE_TIMEOUT_SECONDS:60}
-    max-in-memory-bytes: 67108864
+    max-in-memory-bytes: ${SHANOIR_PACS_MAX_IN_MEMORY_BYTES:67108864}
     pool:
       max-connections: ${SHANOIR_PACS_MAX_CONNECTIONS:100}
       pending-acquire-max-count: ${SHANOIR_PACS_PENDING_ACQUIRE_MAX_COUNT:10000}
