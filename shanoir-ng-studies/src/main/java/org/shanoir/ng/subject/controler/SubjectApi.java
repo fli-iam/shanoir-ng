@@ -170,8 +170,7 @@ public interface SubjectApi {
             @ApiResponse(responseCode = "500", description = "unexpected error") })
     @GetMapping(value = "/findByIdentifier/{subjectIdentifier}", produces = {"application/json" })
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    @PostAuthorize("hasRole('ADMIN') or @studySecurityService.hasRightOnSubjectForEveryStudies(returnObject.getBody(), 'CAN_SEE_ALL')")
-    // PostAuthorize removed here: only a subject can be returned from studies with correct rights
+    @PostAuthorize("hasRole('ADMIN') or returnObject.getBody() == null or @studySecurityService.hasRightOnSubject(returnObject.getBody(), 'CAN_SEE_ALL')")
     ResponseEntity<SubjectDTO> findSubjectByIdentifier(
             @Parameter(description = "identifier of the subject", required = true) @PathVariable("subjectIdentifier") String subjectIdentifier);
 
