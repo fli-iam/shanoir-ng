@@ -17,6 +17,7 @@ package org.shanoir.ng.processing.service;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,7 +57,6 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImpl implements ProcessingDownloaderService {    /** Number of downloadable datasets. */
@@ -70,20 +70,21 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
     @PersistenceContext
     private EntityManager em;
 
-    @Transactional(readOnly = true)
-    public void massiveDownload(List<DatasetProcessing> processingList, boolean resultOnly, String format, HttpServletResponse response, boolean withManifest, Long converterId) throws RestServiceException {
-        manageResultOnly(processingList, resultOnly);
+    public void massiveDownloadByProcessingIds(List<Long> processingIds, boolean resultOnly, String format, HttpServletResponse response, boolean withManifest, Long converterId) throws RestServiceException {
+        massiveDownload(datasetProcessingRepository.findByIdsWithInputsAndOutputsAndDatasetFiles(processingIds), resultOnly, format, response, withManifest, converterId);
+    }
 
+    public void massiveDownload(List<DatasetProcessing> processingList, boolean resultOnly, String format, HttpServletResponse response, boolean withManifest, Long converterId) throws RestServiceException {
         response.setContentType("application/zip");
         response.setHeader("Content-Disposition", "attachment;filename=\"Processings_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")) + "\"");
         Map<Long, DatasetDownloadError> downloadResults = new HashMap<Long, DatasetDownloadError>();
         Map<Long, List<String>> filesByAcquisitionId = new HashMap<>();
 
         try (ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream())) {
-            manageProcessingsDownload(processingList, downloadResults, zipOutputStream, format, withManifest, filesByAcquisitionId, converterId);
+            manageProcessingsDownload(processingList, downloadResults, zipOutputStream, format, withManifest, filesByAcquisitionId, converterId, resultOnly);
 
             String ids = Stream.concat(
-                            processingList.stream().flatMap(p -> p.getInputDatasets().stream()),
+                            resultOnly ? Stream.empty() : processingList.stream().flatMap(p -> p.getInputDatasets().stream()),
                             processingList.stream().flatMap(p -> p.getOutputDatasets().stream())
                     )
                     .map(dataset -> dataset.getId().toString())
@@ -141,18 +142,18 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
 
     public void massiveDownloadByExaminations(List<Examination> examinationList, String processingComment, boolean resultOnly, String format, HttpServletResponse response, boolean withManifest, Long converterId) throws RestServiceException {
         List<Long> processingIdsList = datasetProcessingRepository.findAllIdsByExaminationIds(examinationList.stream().map(Examination::getId).toList());
-        List<DatasetProcessing> processingList = datasetProcessingRepository.findByIdsWithInputsAndOutputs(processingIdsList);
+        List<DatasetProcessing> processingList = datasetProcessingRepository.findByIdsWithInputsAndOutputsAndDatasetFiles(processingIdsList);
         if (!Objects.isNull(processingComment)) {
             processingList = processingList.stream().filter(it -> Objects.equals(it.getComment(), processingComment)).toList();
         }
         massiveDownload(processingList, resultOnly, format, response, withManifest, converterId);
     }
 
-    protected void manageProcessingsDownload(List<DatasetProcessing> processingList, Map<Long, DatasetDownloadError> downloadResults, ZipOutputStream zipOutputStream, String format, boolean withManifest, Map<Long, List<String>> filesByAcquisitionId, Long converterId) throws Exception {
+    protected void manageProcessingsDownload(List<DatasetProcessing> processingList, Map<Long, DatasetDownloadError> downloadResults, ZipOutputStream zipOutputStream, String format, boolean withManifest, Map<Long, List<String>> filesByAcquisitionId, Long converterId, boolean resultOnly) throws Exception {
         for (DatasetProcessing processing : processingList) {
             String processingFilePath = getExecFilepath(processing.getId(), getExaminationDatas(processing.getInputDatasets()));
             String subjectName = getProcessingSubject(processing);
-            List<Dataset> inputs = processing.getInputDatasets();
+            List<Dataset> inputs = resultOnly ? Collections.emptyList() : processing.getInputDatasets();
             List<Dataset> outputs = processing.getOutputDatasets();
 
             for (Dataset dataset : inputs) {
@@ -177,14 +178,6 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
             zipOutputStream.putNextEntry(zipEntry);
             zipOutputStream.write(objectMapper.writeValueAsString(downloadResults).getBytes());
             zipOutputStream.closeEntry();
-        }
-    }
-
-    protected void manageResultOnly(List<DatasetProcessing> processingList, boolean resultOnly) {
-        if (resultOnly) {
-            processingList.forEach(it -> {
-                it.setInputDatasets(new ArrayList<>());
-            });
         }
     }
 
