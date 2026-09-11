@@ -57,7 +57,6 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImpl implements ProcessingDownloaderService {    /** Number of downloadable datasets. */
@@ -71,12 +70,10 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
     @PersistenceContext
     private EntityManager em;
 
-    @Transactional(readOnly = true)
     public void massiveDownloadByProcessingIds(List<Long> processingIds, boolean resultOnly, String format, HttpServletResponse response, boolean withManifest, Long converterId) throws RestServiceException {
-        massiveDownload(datasetProcessingRepository.findByIdsWithInputsAndOutputs(processingIds), resultOnly, format, response, withManifest, converterId);
+        massiveDownload(datasetProcessingRepository.findByIdsWithInputsAndOutputsAndDatasetFiles(processingIds), resultOnly, format, response, withManifest, converterId);
     }
 
-    @Transactional(readOnly = true)
     public void massiveDownload(List<DatasetProcessing> processingList, boolean resultOnly, String format, HttpServletResponse response, boolean withManifest, Long converterId) throws RestServiceException {
         response.setContentType("application/zip");
         response.setHeader("Content-Disposition", "attachment;filename=\"Processings_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")) + "\"");
@@ -143,10 +140,9 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
         }
     }
 
-    @Transactional(readOnly = true)
     public void massiveDownloadByExaminations(List<Examination> examinationList, String processingComment, boolean resultOnly, String format, HttpServletResponse response, boolean withManifest, Long converterId) throws RestServiceException {
         List<Long> processingIdsList = datasetProcessingRepository.findAllIdsByExaminationIds(examinationList.stream().map(Examination::getId).toList());
-        List<DatasetProcessing> processingList = datasetProcessingRepository.findByIdsWithInputsAndOutputs(processingIdsList);
+        List<DatasetProcessing> processingList = datasetProcessingRepository.findByIdsWithInputsAndOutputsAndDatasetFiles(processingIdsList);
         if (!Objects.isNull(processingComment)) {
             processingList = processingList.stream().filter(it -> Objects.equals(it.getComment(), processingComment)).toList();
         }

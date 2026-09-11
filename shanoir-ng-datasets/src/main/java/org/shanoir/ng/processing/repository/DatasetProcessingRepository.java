@@ -16,6 +16,7 @@ package org.shanoir.ng.processing.repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.hibernate.Hibernate;
 import org.shanoir.ng.processing.model.DatasetProcessing;
@@ -170,6 +171,24 @@ public interface DatasetProcessingRepository extends CrudRepository<DatasetProce
     default List<DatasetProcessing> findByIdsWithInputsAndOutputs(List<Long> ids) {
         List<DatasetProcessing> processings = findByIdsWithInputs(ids);
         findByIdsWithOutputs(ids);
+        return processings;
+    }
+
+    /**
+     * Same as findByIdsWithInputsAndOutputs, with the expressions and files of every input and
+     * output dataset initialized too. OSIV being disabled, the returned processings are detached :
+     * everything the download walks through has to be loaded here.
+     *
+     * @param ids
+     * @return
+     */
+    @Transactional(readOnly = true)
+    default List<DatasetProcessing> findByIdsWithInputsAndOutputsAndDatasetFiles(List<Long> ids) {
+        List<DatasetProcessing> processings = findByIdsWithInputsAndOutputs(ids);
+        processings.forEach(processing ->
+                Stream.concat(processing.getInputDatasets().stream(), processing.getOutputDatasets().stream())
+                        .forEach(dataset -> dataset.getDatasetExpressions()
+                                .forEach(expression -> Hibernate.initialize(expression.getDatasetFiles()))));
         return processings;
     }
 
