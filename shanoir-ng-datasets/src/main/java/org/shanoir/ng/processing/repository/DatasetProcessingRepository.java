@@ -16,6 +16,7 @@ package org.shanoir.ng.processing.repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.hibernate.Hibernate;
 import org.shanoir.ng.processing.model.DatasetProcessing;
@@ -133,6 +134,12 @@ public interface DatasetProcessingRepository extends CrudRepository<DatasetProce
 
     @Query("SELECT processing FROM DatasetProcessing processing "
             + "JOIN FETCH processing.inputDatasets "
+            + "JOIN FETCH processing.parent "
+            + "WHERE processing.id = :id")
+    Optional<DatasetProcessing> findByIdWithParentAndInputs(Long id);
+
+    @Query("SELECT processing FROM DatasetProcessing processing "
+            + "JOIN FETCH processing.inputDatasets "
             + "WHERE processing.id = :id")
     Optional<DatasetProcessing> findByIdWithInputs(Long id);
 
@@ -152,6 +159,23 @@ public interface DatasetProcessingRepository extends CrudRepository<DatasetProce
             + "JOIN FETCH processing.inputDatasets "
             + "WHERE processing.id IN :ids")
     List<DatasetProcessing> findByIdsWithInputsAndOutputs(List<Long> ids);
+
+    /**
+     * Same as {@link #findByIdsWithInputsAndOutputs}, additionally initializing every input/output
+     * dataset's DICOM expressions and files. Lets the caller resolve PACS/file URLs up front and
+     * then run the (slow) download without holding a DB connection.
+     */
+    @Transactional(readOnly = true)
+    default List<DatasetProcessing> findByIdsWithInputsOutputsAndExpressions(List<Long> ids) {
+        List<DatasetProcessing> processings = findByIdsWithInputsAndOutputs(ids);
+        processings.forEach(processing ->
+                Stream.concat(
+                                processing.getInputDatasets().stream(),
+                                processing.getOutputDatasets().stream())
+                        .forEach(dataset -> dataset.getDatasetExpressions().forEach(expression ->
+                                Hibernate.initialize(expression.getDatasetFiles()))));
+        return processings;
+    }
 
     @Query("SELECT DISTINCT p FROM DatasetProcessing p "
             + "JOIN FETCH p.inputDatasets "
