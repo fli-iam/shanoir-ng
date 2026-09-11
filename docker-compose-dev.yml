@@ -278,10 +278,8 @@ services:
       - VIP_CLIENT_SECRET
       - SHANOIR_CONTINUANCE_HOUR
       - SHANOIR_SHUTDOWN_HOUR
-      # PACS download concurrency. The application.yml default is deliberately safe against an
-      # untuned dcm4chee; this stack tunes the archive (docker-compose/dcm4chee/variables.env),
-      # so it opts into the higher value here.
-      - SHANOIR_PACS_MAX_CONNECTIONS=${SHANOIR_PACS_MAX_CONNECTIONS:-1000}
+    # PACS client tuning (SHANOIR_PACS_*) lives next to the dcm4chee tuning it must match.
+    env_file: ./docker-compose/dcm4chee/variables.env
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - certificate-share-data:/etc/ssl/certs/java:ro
