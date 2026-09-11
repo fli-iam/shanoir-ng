@@ -22,7 +22,7 @@ import { StudyCard } from '../../study-cards/shared/study-card.model';
 import { ProcessedDatasetType } from '../../enum/processed-dataset-type.enum';
 import { DatasetType } from '../../datasets/shared/dataset-type.model';
 import { DatasetProcessing } from '../../datasets/shared/dataset-processing.model';
-import {Subject} from "../../subjects/shared/subject.model";
+import { Subject } from "../../subjects/shared/subject.model";
 
 import { ProcessedDatasetImportJob } from './processed-dataset-data.model';
 import { EegImportJob } from './eeg-data.model';

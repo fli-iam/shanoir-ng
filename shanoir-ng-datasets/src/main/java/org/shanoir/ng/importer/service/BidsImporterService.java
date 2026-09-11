@@ -222,11 +222,9 @@ public class BidsImporterService {
             String name = importedFile.getName();
             name = name
                     .replaceAll("\\.", "_")
-                    .replaceFirst("sub-[^_]+", "sub-" + subjectId)
                     .replaceFirst(
-                            "(sub-[^_]+_)ses-[^_]+_",
-                            "$1ses-" + examination.getId() + "_"
-                    );
+                        "(sub-[^_]+_)ses-[^_]+_",
+                        "$1ses-" + examination.getId() + "_");
             if (!name.contains("ses-")) {
                 name = name.replaceFirst(
                         "(sub-[^_]+_)",
@@ -234,7 +232,6 @@ public class BidsImporterService {
             }
 
             // Parse name to get acquisition / session / run / task
-
             BidsDataset datasetToCreate;
             DatasetExpression expression;
 
@@ -297,12 +294,8 @@ public class BidsImporterService {
 
             if (equipmentId == 0L && importedFile.getName().endsWith(".json")
                     && Files.size(Path.of(importedFile.getPath())) < 1000000) {
-                // Check equipment in json file
-                //JSONParser json = new JSONParser(new FileReader(importedFile));
-                // LinkedHashMap jsonObject = (LinkedHashMap) json.parse();
-                ObjectMapper jsonMapper = new ObjectMapper();
                 // Parse JSON file into a LinkedHashMap
-                LinkedHashMap<String, Object> jsonObject = jsonMapper.readValue(importedFile, LinkedHashMap.class);
+                LinkedHashMap<String, Object> jsonObject = objectMapper.readValue(importedFile, LinkedHashMap.class);
                 if (jsonObject.get("DeviceSerialNumber") != null) {
                     String code = (String) jsonObject.get("DeviceSerialNumber");
                     equipmentId = equipments.get(code) != null ? Long.valueOf(equipments.get(code)) : 0L;
@@ -322,7 +315,7 @@ public class BidsImporterService {
 
         event.setStatus(ShanoirEvent.SUCCESS);
         event.setMessage("[" + importJob.getStudyName() + " (n°" + importJob.getStudyId() + ")]"
-                + " Successfully created " + datasets.size() + " dataset(s) for subject [" + importJob.getSubjectName()
+                + " Created " + datasets.size() + " dataset(s) for subject [" + examination.getSubject().getName()
                 + "] in examination [" + examination.getId() + "]");
         event.setProgress(1f);
         eventService.publishEvent(event);

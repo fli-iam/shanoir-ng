@@ -91,9 +91,13 @@ public final class DicomUtils {
         if (referencedFileIDArray != null) {
             stringBuilder.append(rootFilePath).append(File.separator);
             for (int count = 0; count < referencedFileIDArray.length; count++) {
-                stringBuilder.append(referencedFileIDArray[count]);
-                if (count != referencedFileIDArray.length - 1) {
-                    stringBuilder.append(File.separator);
+                String part = referencedFileIDArray[count];
+                // Filter out "."
+                if (!".".equals(part)) {
+                    stringBuilder.append(part);
+                    if (count != referencedFileIDArray.length - 1) {
+                        stringBuilder.append(File.separator);
+                    }
                 }
             }
             return stringBuilder.toString();

@@ -26,6 +26,11 @@ import org.shanoir.ng.shared.quality.QualityTag;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
+ * Each ImportJobBase has one specific ID, that it identifies and
+ * allows to trace it. We do not use the newly generated StudyInstanceUID
+ * of the exam here, as Shanoir allows to import datasets into existing
+ * examinations, where we want to separate each ImportJob.
+ *
  * One ImportJobBase is related to the import of ONE DICOM STUDY,
  * which equals ONE EXAMINATION in Shanoir. We are doing this, as one
  * DICOM study can have a size of up to 10Gb nowadays. This means
@@ -57,6 +62,8 @@ public class ImportJobBase implements Serializable {
 
     private static final long serialVersionUID = 8804929608059674037L;
 
+    private String id = "";
+
     private long timestamp;
 
     /* DicomQuery, that has been used to extract the DICOM study = ImportJobBase */
@@ -76,6 +83,8 @@ public class ImportJobBase implements Serializable {
     private PatientVerification patientVerification;
 
     // DICOM study for this import job
+    // Important to keep: carries the old StudyInstanceUID,
+    // required to do the mapping after pseudonymization
     private Study study;
 
     // series to import with this import job
@@ -126,6 +135,14 @@ public class ImportJobBase implements Serializable {
     private String uploadPercentage;
 
     private String studyInstanceUID;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public long getTimestamp() {
         return timestamp;
@@ -395,7 +412,7 @@ public class ImportJobBase implements Serializable {
                 }
             }
         }
-        return "userId=" + userId + ",studyName=" + studyName + ",studyCardId=" + studyCardId + ",type=" + getImportType()
+        return "id=" + id + ",userId=" + userId + ",studyName=" + studyName + ",studyCardId=" + studyCardId + ",type=" + getImportType()
                 + ",workFolder=" + workFolder + ",pseudoProfile=" + anonymisationProfileToUse + ",modality=" + modality
                 + ",enhanced=" + enhanced
                 + ",subjectName=" + subjectName + ",examinationId=" + examinationId + ",StudyInstanceUID="

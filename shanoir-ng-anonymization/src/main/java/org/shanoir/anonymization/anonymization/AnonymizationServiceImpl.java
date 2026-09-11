@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -68,8 +69,17 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 
     private static Map<String, List<String>> tagsToDeleteForManufacturer;
 
+    /**
+     * Per-directory locks used when checking/deleting an original series folder
+     * once it has been emptied by moving all of its (now renamed) files into
+     * their new seriesInstanceUID folder. Needed because several files that
+     * originally lived in the same folder can be processed concurrently by
+     * different threads of a batch.
+     */
+    private static final Map<String, Object> DIR_LOCKS = new ConcurrentHashMap<>();
+
     @Override
-    public void anonymize(ArrayList<File> dicomFiles, String profile) throws Exception {
+    public AnonymizationResult anonymize(ArrayList<File> dicomFiles, String profile, File importJobDir) throws Exception {
         long startTime = System.currentTimeMillis();
         final int totalAmount = dicomFiles.size();
         LOG.info("Start pseudonymization: profile {} on {} DICOM files.", profile, totalAmount);
@@ -82,33 +92,34 @@ public class AnonymizationServiceImpl implements AnonymizationService {
         Map<String, String> frameOfReferenceUIDs = new HashMap<>();
         Map<String, String> studyInstanceUIDs = new HashMap<>();
         Map<String, String> studyIds = new HashMap<>();
+        Map<String, String> sopInstanceUIDsByFilePath = new HashMap<>();
 
         AnonymizationStats stats = new AnonymizationStats();
         LOG.debug("anonymize : totalAmount={}", totalAmount);
         int current = 0;
         for (int i = 0; i < dicomFiles.size(); ++i) {
             final File file = dicomFiles.get(i);
-            // Perform the anonymization
-            performAnonymization(file, anonymizationMap, false, "", "", null, seriesInstanceUIDs, frameOfReferenceUIDs,
-                    studyInstanceUIDs, studyIds, stats);
+            performAnonymization(file, importJobDir, anonymizationMap, false, "", "", null, seriesInstanceUIDs, frameOfReferenceUIDs,
+                    studyInstanceUIDs, studyIds, sopInstanceUIDsByFilePath, stats);
             current++;
             final int currentPercent = current * 100 / totalAmount;
             LOG.debug("anonymize : anonymization current percent= {} %", currentPercent);
         }
         logInfos("End pseudonymization", startTime);
         stats.logSummary();
+        return new AnonymizationResult(seriesInstanceUIDs, studyInstanceUIDs, frameOfReferenceUIDs, sopInstanceUIDsByFilePath);
     }
 
     @Override
-    public void anonymizeForShanoir(ArrayList<File> dicomFiles, String profile, String patientLastName,
-            String patientFirstName, String patientID, String studyInstanceUID) throws Exception {
+    public AnonymizationResult anonymizeForShanoir(ArrayList<File> dicomFiles, String profile, String patientLastName,
+            String patientFirstName, String patientID, String studyInstanceUID, File importJobDir) throws Exception {
         String patientName = patientLastName + "^" + patientFirstName + "^^^";
-        anonymizeForShanoir(dicomFiles, profile, patientName, patientID, studyInstanceUID);
+        return anonymizeForShanoir(dicomFiles, profile, patientName, patientID, studyInstanceUID, importJobDir);
     }
 
     @Override
-    public void anonymizeForShanoir(ArrayList<File> dicomFiles, String profile, String patientName, String patientID,
-            String studyInstanceUID) throws Exception {
+    public AnonymizationResult anonymizeForShanoir(ArrayList<File> dicomFiles, String profile, String patientName,
+            String patientID, String studyInstanceUID, File importJobDir) throws Exception {
         long startTime = System.currentTimeMillis();
         final int totalAmount = dicomFiles.size();
         LOG.info("Start pseudonymization: profile {} on {} DICOM files.", profile, totalAmount);
@@ -122,21 +133,23 @@ public class AnonymizationServiceImpl implements AnonymizationService {
         Map<String, String> frameOfReferenceUIDs = new HashMap<>();
         Map<String, String> studyInstanceUIDs = new HashMap<>();
         Map<String, String> studyIds = new HashMap<>();
+        Map<String, String> sopInstanceUIDs = new HashMap<>();
 
         AnonymizationStats stats = new AnonymizationStats();
         LOG.debug("anonymize : totalAmount={}", totalAmount);
         int current = 0;
         for (int i = 0; i < dicomFiles.size(); ++i) {
             final File file = dicomFiles.get(i);
-            // Perform the anonymization
-            performAnonymization(file, anonymizationMap, true, patientName, patientID, studyInstanceUID,
-                    seriesInstanceUIDs, frameOfReferenceUIDs, studyInstanceUIDs, studyIds, stats);
+            performAnonymization(file, importJobDir, anonymizationMap, true, patientName, patientID, studyInstanceUID,
+                    seriesInstanceUIDs, frameOfReferenceUIDs, studyInstanceUIDs, studyIds,
+                    sopInstanceUIDs, stats);
             current++;
             final int currentPercent = current * 100 / totalAmount;
             LOG.debug("anonymize : anonymization current percent= {} %", currentPercent);
         }
         logInfos("End pseudonymization", startTime);
         stats.logSummary();
+        return new AnonymizationResult(seriesInstanceUIDs, studyInstanceUIDs, frameOfReferenceUIDs, sopInstanceUIDs);
     }
 
     private void logInfos(final String methodName, long startTime) {
@@ -182,6 +195,16 @@ public class AnonymizationServiceImpl implements AnonymizationService {
      * Further does each part of an UID has to start with a non-zero value, see
      * UIDGeneration code.
      *
+     * Once anonymization of the DICOM attributes is complete and the file has
+     * been written back to disk, the file itself is renamed to
+     * "<SOPInstanceUID>.dcm" AND moved into a folder named after its (possibly
+     * newly generated) SeriesInstanceUID, created directly under importJobDir
+     * (skipping the move if a file with that name already exists in the target
+     * folder). Once a file has been moved out, if its original parent folder is
+     * left empty, that folder is deleted. sopInstanceUIDsByFilePath is keyed by
+     * the file's ORIGINAL SOPInstanceUID so callers can still resolve it from an
+     * untouched, pre-rename referencedFileID.
+     *
      * Overload kept for backward compatibility with existing external callers: it
      * simply runs the anonymization with a fresh, single-file stats tracker that
      * is discarded afterwards. Prefer the overload below in batch contexts, so
@@ -189,18 +212,22 @@ public class AnonymizationServiceImpl implements AnonymizationService {
      *
      * @param dicomFile
      *                  the image path
+     * @param importJobDir
+     *                  the root folder of the import job; new per-series folders
+     *                  are created directly under it
      * @param profile
      *                  anonymization profile
      * @throws Exception
      */
-    public void performAnonymization(final File dicomFile, Map<String, String> anonymizationMap,
+    public void performAnonymization(final File dicomFile, final File importJobDir, Map<String, String> anonymizationMap,
             boolean isShanoirAnonymization,
             String patientName, String patientID, String studyInstanceUID, Map<String, String> seriesInstanceUIDs,
             Map<String, String> frameOfReferenceUIDs,
-            Map<String, String> studyInstanceUIDs, Map<String, String> studyIds) throws Exception {
-        performAnonymization(dicomFile, anonymizationMap, isShanoirAnonymization, patientName, patientID,
+            Map<String, String> studyInstanceUIDs, Map<String, String> studyIds,
+            Map<String, String> sopInstanceUIDs) throws Exception {
+        performAnonymization(dicomFile, importJobDir, anonymizationMap, isShanoirAnonymization, patientName, patientID,
                 studyInstanceUID, seriesInstanceUIDs, frameOfReferenceUIDs, studyInstanceUIDs, studyIds,
-                new AnonymizationStats());
+                sopInstanceUIDs, new AnonymizationStats());
     }
 
     /**
@@ -209,11 +236,12 @@ public class AnonymizationServiceImpl implements AnonymizationService {
      * files and reported once at the end (see {@link #anonymize} /
      * {@link #anonymizeForShanoir}).
      */
-    public void performAnonymization(final File dicomFile, Map<String, String> anonymizationMap,
+    public void performAnonymization(final File dicomFile, final File importJobDir, Map<String, String> anonymizationMap,
             boolean isShanoirAnonymization,
             String patientName, String patientID, String studyInstanceUID, Map<String, String> seriesInstanceUIDs,
             Map<String, String> frameOfReferenceUIDs,
-            Map<String, String> studyInstanceUIDs, Map<String, String> studyIds, AnonymizationStats stats)
+            Map<String, String> studyInstanceUIDs, Map<String, String> studyIds,
+            Map<String, String> sopInstanceUIDs, AnonymizationStats stats)
             throws Exception {
         DicomInputStream din = null;
         DicomOutputStream dos = null;
@@ -243,6 +271,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
              * (I made the mistake already twice...).
              */
             Attributes datasetAttributes = din.readDataset();
+            String sopInstanceUID = datasetAttributes.getString(Tag.SOPInstanceUID);
 
             // Make sure the PatientName and PatientID exist in the dataset attributes.
             if (!datasetAttributes.contains(Tag.PatientID))
@@ -267,6 +296,9 @@ public class AnonymizationServiceImpl implements AnonymizationService {
                 LOG.debug("StudyInstanceUID used from ImportJob: {}", studyInstanceUID);
                 studyInstanceUIDs.put(studyInstanceUIDVendor, studyInstanceUID);
             }
+            String seriesInstanceUIDVendor = datasetAttributes.getString(Tag.SeriesInstanceUID);
+            String seriesNumberVendor = datasetAttributes.getString(Tag.SeriesNumber);
+            String seriesDescriptionVendor = datasetAttributes.getString(Tag.SeriesDescription);
 
             String manufacturer = datasetAttributes.getString(Tag.Manufacturer);
             Set<String> tagsToDeleteForCurrentManufacturer = getTagsToDeleteForManufacturer(manufacturer);
@@ -321,16 +353,59 @@ public class AnonymizationServiceImpl implements AnonymizationService {
                     }
                 }
             }
+
+            stats.recordStudyUID(studyInstanceUIDVendor, studyInstanceUIDs.get(studyInstanceUIDVendor));
+            stats.recordSeriesUID(studyInstanceUIDVendor, seriesInstanceUIDVendor,
+                    seriesInstanceUIDs.get(seriesInstanceUIDVendor), seriesDescriptionVendor, seriesNumberVendor);
+            stats.recordInstance(studyInstanceUIDVendor, seriesInstanceUIDVendor);
+
             // Special anonymization of patient data if isShanoirAnonymization
             if (isShanoirAnonymization) {
                 anonymizePatientMetaData(datasetAttributes, patientName, patientID, patientBirthDateAttr, stats);
             }
+
+            String finalSopInstanceUID = datasetAttributes.getString(Tag.SOPInstanceUID);
+            String finalSeriesInstanceUID = datasetAttributes.getString(Tag.SeriesInstanceUID);
+
             LOG.debug("finish anonymization: begin storage");
             dos = new DicomOutputStream(dicomFile);
             dos.writeDataset(metaInformationAttributes, datasetAttributes);
+            dos.close();
+            dos = null;
+            // Rename the file to "<SOPInstanceUID>.dcm" and move it into
+            // "<importJobDir>/<SeriesInstanceUID>/", now that the anonymized content
+            // has been fully written and flushed to disk.
+            if (finalSopInstanceUID != null) {
+                sopInstanceUIDs.put(sopInstanceUID, finalSopInstanceUID);
+                File originalParentDir = dicomFile.getParentFile();
+                File targetDir = originalParentDir;
+                if (finalSeriesInstanceUID != null && !finalSeriesInstanceUID.isEmpty() && importJobDir != null) {
+                    File seriesDir = new File(importJobDir, finalSeriesInstanceUID);
+                    if (!seriesDir.exists()) {
+                        seriesDir.mkdirs();
+                    }
+                    if (seriesDir.exists()) {
+                        targetDir = seriesDir;
+                    } else {
+                        LOG.error("performAnonymization : could not create series folder {}, keeping file in {}",
+                                seriesDir.getAbsolutePath(), originalParentDir.getAbsolutePath());
+                    }
+                }
+                File renamedFile = new File(targetDir, finalSopInstanceUID + ".dcm");
+                if (renamedFile.exists()) {
+                    LOG.warn(
+                            "performAnonymization : skipping rename, target file {} already exists (SOPInstanceUID collision for {})",
+                            renamedFile.getAbsolutePath(), dicomFile.getAbsolutePath());
+                } else if (!dicomFile.renameTo(renamedFile)) {
+                    LOG.error("performAnonymization : could not rename/move file {} to {}",
+                            dicomFile.getAbsolutePath(), renamedFile.getAbsolutePath());
+                } else if (!targetDir.equals(originalParentDir)) {
+                    deleteDirectoryIfEmpty(originalParentDir, importJobDir);
+                }
+            }
             LOG.debug("finish anonymization: end storage");
         } catch (final IOException exc) {
-            LOG.error("performAnonymization : error while anonimizing file " + dicomFile.toString() + " : ", exc);
+            LOG.error("performAnonymization : error while anonymizing file " + dicomFile.toString() + " : ", exc);
         } finally {
             try {
                 if (din != null) {
@@ -341,6 +416,38 @@ public class AnonymizationServiceImpl implements AnonymizationService {
                 }
             } catch (IOException e) {
                 LOG.error(e.getMessage(), e);
+            }
+        }
+    }
+
+    /**
+     * Deletes {@code dir} if it is now empty, once a file has been moved out of
+     * it into its new per-series folder. Synchronized per-directory (via
+     * {@link #DIR_LOCKS}) because several files originally living in the same
+     * folder can be processed concurrently by different threads of a batch, and
+     * we must avoid one thread deleting the folder while another is still about
+     * to move a sibling file out of it, or double-deleting it.
+     *
+     * @param dir
+     *            the file's original parent folder, now possibly empty
+     * @param importJobDir
+     *            the import job root; never deleted even if "empty"
+     */
+    private void deleteDirectoryIfEmpty(File dir, File importJobDir) {
+        if (dir == null || dir.equals(importJobDir)) {
+            return;
+        }
+        String key = dir.getAbsolutePath();
+        Object lock = DIR_LOCKS.computeIfAbsent(key, k -> new Object());
+        synchronized (lock) {
+            File[] remaining = dir.listFiles();
+            if (remaining != null && remaining.length == 0) {
+                if (dir.delete()) {
+                    LOG.debug("performAnonymization : deleted now-empty folder {}", dir.getAbsolutePath());
+                    DIR_LOCKS.remove(key);
+                } else {
+                    LOG.warn("performAnonymization : could not delete now-empty folder {}", dir.getAbsolutePath());
+                }
             }
         }
     }
@@ -649,6 +756,16 @@ public class AnonymizationServiceImpl implements AnonymizationService {
      * {@link AnonymizationServiceImpl#anonymize}) to produce one aggregated
      * report at the end of the job.
      *
+     * In addition, tracks the actual DICOM hierarchy that matters most when
+     * checking a big pseudonymization run (patient-study-series-instance): for
+     * every study, its old -> new StudyInstanceUID mapping and, nested under it,
+     * for every one of its series, the old -> new SeriesInstanceUID mapping plus
+     * how many instances (i.e. how many freshly generated SOPInstanceUIDs, one
+     * per file) were produced for that series. This is what lets a big study
+     * (e.g. 60+ series, DICOM Enhanced) be checked at a glance: one Study/Series
+     * UID mapping each, and a per-series instance count that should match the
+     * expected number of files in that series.
+     *
      * Uses AtomicLong/ConcurrentHashMap rather than plain counters because
      * {@link AnonymizationServiceImpl#performAnonymization} is public API and
      * may be invoked concurrently by external multi-threaded callers (see the
@@ -660,6 +777,17 @@ public class AnonymizationServiceImpl implements AnonymizationService {
         private final Map<String, AtomicLong> publicByType = new ConcurrentHashMap<>();
         private final Map<String, AtomicLong> privateByType = new ConcurrentHashMap<>();
 
+        // Study -> Series -> instance-count hierarchy, keyed by the ORIGINAL
+        // (pre-anonymization) UIDs.
+        private final Map<String, StudyReport> studyReports = new ConcurrentHashMap<>();
+
+        private final AtomicLong studyUidsGenerated = new AtomicLong();
+        private final AtomicLong studyUidsReused = new AtomicLong();
+        private final AtomicLong seriesUidsGenerated = new AtomicLong();
+        private final AtomicLong seriesUidsReused = new AtomicLong();
+        private final AtomicLong instancesRecorded = new AtomicLong();
+        private final AtomicLong instancesUnattributed = new AtomicLong();
+
         private void record(boolean isPrivate, String type) {
             totalModified.incrementAndGet();
             (isPrivate ? privateByType : publicByType)
@@ -667,18 +795,98 @@ public class AnonymizationServiceImpl implements AnonymizationService {
                     .incrementAndGet();
         }
 
+        /**
+         * Records the old -> new StudyInstanceUID mapping. Safe to call once per
+         * file of the study: the mapping is created on first sight (and counted as
+         * "generated") and left untouched (and counted as "reused") on every
+         * subsequent call for the same old StudyInstanceUID. No-op if either UID is
+         * null (e.g. the file had no StudyInstanceUID, or it wasn't anonymized this
+         * run).
+         */
+        void recordStudyUID(String oldStudyInstanceUID, String newStudyInstanceUID) {
+            if (oldStudyInstanceUID == null || newStudyInstanceUID == null) {
+                return;
+            }
+            StudyReport existing = studyReports.putIfAbsent(oldStudyInstanceUID, new StudyReport(newStudyInstanceUID));
+            if (existing == null) {
+                studyUidsGenerated.incrementAndGet();
+            } else {
+                studyUidsReused.incrementAndGet();
+            }
+        }
+
+        /**
+         * Records the old -> new SeriesInstanceUID mapping, nested under its study.
+         * Same "first sight generates, subsequent calls reuse" semantics as
+         * {@link #recordStudyUID}. Must be called after {@link #recordStudyUID} for
+         * the same file, so the study report already exists with its real
+         * StudyInstanceUID mapping when the series gets attached to it.
+         *
+         * @param seriesDescription
+         *            the file's SeriesDescription (e.g. "t1", "flair"), carried into
+         *            the report purely as descriptive metadata so the series
+         *            overview log line is readable by name, not just by UID; only
+         *            used the first time this series is seen, ignored on reuse
+         */
+        void recordSeriesUID(String oldStudyInstanceUID, String oldSeriesInstanceUID, String newSeriesInstanceUID,
+                String seriesDescription, String seriesNumber) {
+            if (oldStudyInstanceUID == null || oldSeriesInstanceUID == null || newSeriesInstanceUID == null) {
+                return;
+            }
+            StudyReport studyReport = studyReports.computeIfAbsent(oldStudyInstanceUID, k -> new StudyReport(null));
+            SeriesReport existing = studyReport.seriesReports.putIfAbsent(oldSeriesInstanceUID,
+                    new SeriesReport(newSeriesInstanceUID, seriesDescription, seriesNumber));
+            if (existing == null) {
+                seriesUidsGenerated.incrementAndGet();
+            } else {
+                seriesUidsReused.incrementAndGet();
+            }
+        }
+
+        /**
+         * Records one processed instance (i.e. one file - always given a freshly
+         * generated SOPInstanceUID, never reused) under its study/series, so the
+         * per-series instance count can be checked against the expected number of
+         * files in that series. If the study or series UID is missing, the instance
+         * is still counted, but only in the "unattributed" total, since it cannot
+         * be placed in the hierarchy.
+         */
+        void recordInstance(String oldStudyInstanceUID, String oldSeriesInstanceUID) {
+            if (oldStudyInstanceUID == null || oldSeriesInstanceUID == null) {
+                instancesUnattributed.incrementAndGet();
+                return;
+            }
+            StudyReport studyReport = studyReports.computeIfAbsent(oldStudyInstanceUID, k -> new StudyReport(null));
+            SeriesReport seriesReport = studyReport.seriesReports.computeIfAbsent(oldSeriesInstanceUID,
+                    k -> new SeriesReport(null, null, null));
+            seriesReport.instanceCount.incrementAndGet();
+            instancesRecorded.incrementAndGet();
+        }
+
         public long getTotalModified() {
             return totalModified.get();
         }
 
         /**
+         * Read-only view of the study -> series -> instance-count hierarchy, for
+         * callers that want to consume the report programmatically (e.g. assert the
+         * per-series instance counts against the expected file counts) instead of,
+         * or in addition to, reading it from the logs.
+         */
+        public Map<String, StudyReport> getStudyReports() {
+            return Collections.unmodifiableMap(studyReports);
+        }
+
+        /**
          * Logs the aggregated report at INFO level: total tags modified, then a
-         * breakdown by type for public tags and for private tags.
+         * breakdown by type for public tags and for private tags, and finally the
+         * study -> series -> instance-count hierarchy with old/new UID mappings.
          */
         public void logSummary() {
             LOG.info("Pseudonymization report: {} tag(s) modified in total.", totalModified.get());
             logScope("public", publicByType);
             logScope("private", privateByType);
+            logHierarchy();
         }
 
         private void logScope(String scope, Map<String, AtomicLong> byType) {
@@ -686,6 +894,127 @@ public class AnonymizationServiceImpl implements AnonymizationService {
             LOG.info("  {} tags modified: {}", scope, scopeTotal);
             byType.forEach((type, count) -> LOG.info("    - {}: {}", type, count.get()));
         }
+
+        /**
+         * Logs, per study and per series, the old -> new UID mapping and the number
+         * of instances (SOPInstanceUIDs generated) found for that series, so that
+         * for a big study with many series it can be verified at a glance that:
+         * (a) exactly one StudyInstanceUID and one SeriesInstanceUID mapping exists
+         * per study/series, and (b) the instance count per series matches the
+         * expected number of files.
+         */
+        private void logHierarchy() {
+            LOG.info("Study/Series/Instance report: {} study/studies, {} StudyInstanceUID(s) generated ({} reused),"
+                    + " {} SeriesInstanceUID(s) generated ({} reused), {} instance(s)/SOPInstanceUID(s) generated"
+                    + "{}.",
+                    studyReports.size(), studyUidsGenerated.get(), studyUidsReused.get(), seriesUidsGenerated.get(),
+                    seriesUidsReused.get(), instancesRecorded.get(),
+                    instancesUnattributed.get() > 0
+                            ? " (" + instancesUnattributed.get() + " instance(s) could not be attributed to a"
+                                    + " study/series, and are excluded from the breakdown below)"
+                            : "");
+            studyReports.forEach((oldStudyUID, studyReport) -> {
+                long studyInstanceTotal = studyReport.seriesReports.values().stream()
+                        .mapToLong(seriesReport -> seriesReport.instanceCount.get()).sum();
+                LOG.info("  Study  {} -> {}  : {} series, {} instance(s) total", oldStudyUID,
+                        studyReport.newStudyInstanceUID, studyReport.seriesReports.size(), studyInstanceTotal);
+                LOG.info("    Series overview: {}", buildSeriesOverview(studyReport));
+            });
+        }
+
+        private String buildSeriesOverview(StudyReport studyReport) {
+            StringBuilder overview = new StringBuilder();
+            studyReport.seriesReports.entrySet().stream()
+                    .sorted(Map.Entry.comparingByValue(java.util.Comparator.comparing(
+                            seriesReport -> seriesReport.seriesNumber,
+                            java.util.Comparator.nullsLast(java.util.Comparator.naturalOrder()))))
+                    .forEach(entry -> {
+                        String oldSeriesUID = entry.getKey();
+                        SeriesReport seriesReport = entry.getValue();
+                        if (overview.length() > 0) {
+                            overview.append(", ");
+                        }
+                        String description = seriesReport.seriesDescription != null
+                                && !seriesReport.seriesDescription.isEmpty() ? seriesReport.seriesDescription : "?";
+                        overview.append(System.lineSeparator()).append(description)
+                                .append('(').append(oldSeriesUID).append(" -> ").append(seriesReport.newSeriesInstanceUID)
+                                .append("): ").append(seriesReport.instanceCount.get()).append(" instance(s)");
+                    });
+            return overview.toString();
+        }
+
+        /**
+         * Old -> new StudyInstanceUID mapping, together with the mapping and
+         * instance counts of all series belonging to that study.
+         */
+        public static final class StudyReport {
+
+            private final String newStudyInstanceUID;
+
+            private final Map<String, SeriesReport> seriesReports = new ConcurrentHashMap<>();
+
+            private StudyReport(String newStudyInstanceUID) {
+                this.newStudyInstanceUID = newStudyInstanceUID;
+            }
+
+            public String getNewStudyInstanceUID() {
+                return newStudyInstanceUID;
+            }
+
+            public Map<String, SeriesReport> getSeriesReports() {
+                return Collections.unmodifiableMap(seriesReports);
+            }
+        }
+
+        /**
+         * Old -> new SeriesInstanceUID mapping, together with the number of
+         * instances (files) processed for that series, i.e. the number of
+         * SOPInstanceUIDs generated for it.
+         */
+        public static final class SeriesReport {
+
+            private final String newSeriesInstanceUID;
+
+            private final String seriesDescription;
+
+            private final Integer seriesNumber;
+
+            private final AtomicLong instanceCount = new AtomicLong();
+
+            private SeriesReport(String newSeriesInstanceUID, String seriesDescription, String seriesNumber) {
+                this.newSeriesInstanceUID = newSeriesInstanceUID;
+                this.seriesDescription = seriesDescription;
+                this.seriesNumber = parseSeriesNumber(seriesNumber);
+            }
+
+            private static Integer parseSeriesNumber(String seriesNumber) {
+                if (seriesNumber == null || seriesNumber.isEmpty()) {
+                    return null;
+                }
+                try {
+                    return Integer.valueOf(seriesNumber.trim());
+                } catch (NumberFormatException e) {
+                    return null;
+                }
+            }
+
+            public String getNewSeriesInstanceUID() {
+                return newSeriesInstanceUID;
+            }
+
+            public String getSeriesDescription() {
+                return seriesDescription;
+            }
+
+            public Integer getSeriesNumber() {
+                return seriesNumber;
+            }
+
+            public long getInstanceCount() {
+                return instanceCount.get();
+            }
+        }
+
     }
 
 }

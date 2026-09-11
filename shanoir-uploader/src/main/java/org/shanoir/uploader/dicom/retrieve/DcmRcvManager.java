@@ -60,6 +60,8 @@ public class DcmRcvManager {
 
     public static final String DICOM_FILE_SUFFIX = ".dcm";
 
+    private DicomListener listener;
+
     public void configureAndStartSCPServer(final ConfigBean configBean, final String workFolderPath) throws MalformedURLException {
         LOG.info("DICOM SCP server (mini-pacs) configured locally with params:"
                 + " AET title: " + configBean.getLocalDicomServerAETCalling()
@@ -89,7 +91,7 @@ public class DcmRcvManager {
     private void startSCPServer(final String workFolderPath, DicomNode scpNode, ListenerParams lParams) {
         try {
             File storageDir = new File(workFolderPath);
-            DicomListener listener = new DicomListener(storageDir);
+            listener = new DicomListener(storageDir);
             listener.start(scpNode, lParams);
             StoreSCP storeSCP = listener.getStoreSCP();
             LOG.info("DICOM SCP server (mini-pacs) successfully initialized: " + scpNode.toString() + ", " + workFolderPath);
@@ -101,4 +103,24 @@ public class DcmRcvManager {
         }
     }
 
+    /**
+     * Stops the DICOM SCP server (mini-pacs), if it is currently running.
+     * Safe to call even if the server was never started or already stopped.
+     */
+    public void stopSCPServer() {
+        if (listener != null) {
+            try {
+                listener.stop();
+                LOG.info("DICOM SCP server (mini-pacs) successfully stopped.");
+            } catch (Exception e) {
+                LOG.error("DICOM SCP server (mini-pacs): error while stopping: " + e.getMessage(), e);
+            } finally {
+                listener = null;
+            }
+        } else {
+            LOG.info("DICOM SCP server (mini-pacs) was not running, nothing to stop.");
+        }
+    }
+
 }
+

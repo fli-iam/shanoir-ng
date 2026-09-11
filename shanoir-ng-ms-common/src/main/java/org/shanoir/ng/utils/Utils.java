@@ -197,7 +197,7 @@ public final class Utils {
         }
     }
 
-    public static <T> List<T> buildArrayList(T...items) {
+    public static <T> List<T> buildArrayList(T... items) {
         List<T> ret = new ArrayList<>();
         if (items != null) {
             for (T item : items) {
