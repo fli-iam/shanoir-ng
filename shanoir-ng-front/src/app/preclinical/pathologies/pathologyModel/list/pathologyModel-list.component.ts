@@ -12,9 +12,9 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import {Component,ViewChild} from '@angular/core';
+import {Component, ViewChild, ChangeDetectionStrategy} from '@angular/core';
 
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
 
 import { PathologyModel } from '../shared/pathologyModel.model';
 import { PathologyModelService } from '../shared/pathologyModel.service';
@@ -24,11 +24,11 @@ import { BrowserPaginEntityListComponent } from '../../../../shared/components/e
 import { SubjectPathologyService } from '../../subjectPathology/shared/subjectPathology.service';
 import { ShanoirError } from '../../../../shared/models/error.model';
 
-
 @Component({
     selector: 'pathologyModel-list',
     templateUrl: 'pathologyModel-list.component.html',
     styleUrls: ['pathologyModel-list.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [TableComponent]
 })
 export class PathologyModelsListComponent extends BrowserPaginEntityListComponent<PathologyModel> {
@@ -93,8 +93,7 @@ export class PathologyModelsListComponent extends BrowserPaginEntityListComponen
     protected openDeleteConfirmDialog = (entity: PathologyModel) => {
         this.subjectPathologyService.getAllSubjectForPathologyModel(entity.id).then(subjectPathologies => {
     		if (subjectPathologies){
-    			let hasSubjects: boolean  = false;
-    			hasSubjects = subjectPathologies.length > 0;
+    			const hasSubjects: boolean = subjectPathologies.length > 0;
     			if (hasSubjects){
                     this.consoleService.log('warn', 'This pathology model is linked to subjects, it can not be deleted');
     			}else{

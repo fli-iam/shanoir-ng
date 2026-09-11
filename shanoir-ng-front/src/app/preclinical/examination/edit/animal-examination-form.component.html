@@ -57,7 +57,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <span class="right-col">
                                 @switch (mode) {
                                     @case ('view') {
-                                        <a [routerLink]="['/study/details/', examination.study?.id]">
+                                        <a [routerLink]="['/study/details/', $safeNavigationMigration(examination.study?.id)]">
                                             {{ examination.study?.name }}
                                         </a>
                                     }
@@ -127,7 +127,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <span class="right-col">
                                 @switch (mode) {
                                     @case ('view') {
-                                        <a [routerLink]="['/center/details/', examination.center?.id]">
+                                        <a [routerLink]="['/center/details/', $safeNavigationMigration(examination.center?.id)]">
                                             {{ examination.center?.name }}
                                         </a>
                                     }
@@ -228,7 +228,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         </li>
                         <li>
                             <label i18n="Examination detail|Subject weight label@@examinationDetailSubjectWeight">
-                                Subject weight ({{ getUnit(examination.weightUnitOfMeasure?.toString()) }})
+                                Subject weight ({{ getUnit($safeNavigationMigration(examination.weightUnitOfMeasure?.toString())) }})
                             </label>
                             <span class="right-col">
                                 @if (mode == 'view') {

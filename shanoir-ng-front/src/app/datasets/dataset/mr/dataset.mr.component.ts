@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { UntypedFormGroup, FormsModule } from '@angular/forms';
 
 import { Mode } from '../../../shared/components/entity/entity.component.abstract';
@@ -25,6 +25,7 @@ import { MrDataset, MrDatasetMetadata, MrDatasetNature } from './dataset.mr.mode
 @Component({
     selector: 'mr-dataset-details',
     templateUrl: 'dataset.mr.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [SelectBoxComponent, FormsModule]
 })
 

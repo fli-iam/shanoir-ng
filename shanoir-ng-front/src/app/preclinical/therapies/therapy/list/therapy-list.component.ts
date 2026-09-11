@@ -12,9 +12,9 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import {Component, ViewChild} from '@angular/core'
+import {Component, ViewChild, ChangeDetectionStrategy} from '@angular/core'
 
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
 
 import { Therapy } from '../shared/therapy.model';
 import { TherapyService } from '../shared/therapy.service';
@@ -31,6 +31,7 @@ import { ShanoirError } from '../../../../shared/models/error.model';
     selector: 'therapy-list',
     templateUrl: 'therapy-list.component.html',
     styleUrls: ['therapy-list.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [TableComponent]
 })
 export class TherapiesListComponent  extends BrowserPaginEntityListComponent<Therapy> {
@@ -77,8 +78,7 @@ export class TherapiesListComponent  extends BrowserPaginEntityListComponent<The
     protected openDeleteConfirmDialog = (entity: Therapy) => {
         this.subjectTherapyService.getAllSubjectForTherapy(entity.id).then(subjectTherapies => {
     		if (subjectTherapies){
-    			let hasSubjects: boolean  = false;
-    			hasSubjects = subjectTherapies.length > 0;
+    			const hasSubjects: boolean = subjectTherapies.length > 0;
     			if (hasSubjects){
     				this.confirmDialogService
                 		.confirm('Delete therapy', 'This therapy is linked to subjects, it can not be deleted')

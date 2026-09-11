@@ -1,8 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 
-import { BreadcrumbsService } from 'src/app/breadcrumbs/breadcrumbs.service';
-import { Pipeline } from 'src/app/vip/models/pipeline';
+import { BreadcrumbsService } from '@app/breadcrumbs/breadcrumbs.service';
+import { Pipeline } from '@app/vip/models/pipeline';
 
 import { ExecutionDataService } from '../execution.data-service';
 
@@ -13,6 +13,7 @@ import { PipelineComponent } from './pipeline/pipeline.component';
     selector: 'app-pipelines',
     templateUrl: './pipelines.component.html',
     styleUrls: ['./pipelines.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [PipelineComponent]
 })
 export class PipelinesComponent implements OnInit {

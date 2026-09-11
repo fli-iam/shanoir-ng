@@ -73,6 +73,7 @@ import org.springframework.amqp.rabbit.annotation.QueueBinding;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -91,6 +92,7 @@ public class RabbitMQDatasetsService {
     private static final String RABBIT_MQ_ERROR = "Something went wrong deserializing the event.";
 
     @Autowired
+    @Lazy
     private DatasetService datasetService;
 
     @Autowired
@@ -118,6 +120,7 @@ public class RabbitMQDatasetsService {
     private SolrService solrService;
 
     @Autowired
+    @Lazy
     private ExaminationService examinationService;
 
     @Autowired
@@ -338,7 +341,6 @@ public class RabbitMQDatasetsService {
      */
     @RabbitListener(queues = RabbitMQConfiguration.DELETE_SUBJECT_QUEUE, containerFactory = "singleConsumerFactory")
     public void deleteSubject(String eventAsString) throws AmqpRejectAndDontRequeueException {
-        SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
         ShanoirEvent event;
         Long subjectId;
         try {
@@ -347,6 +349,14 @@ public class RabbitMQDatasetsService {
         } catch (Exception e) {
             LOG.error("Something went wrong deserializing the event. {}", e.getMessage());
             throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR + e.getMessage(), e);
+        }
+        // Keep the identity of the user who actually asked for the deletion, so that every
+        // event published while cascading this deletion (examinations, dataset acquisitions...)
+        // is correctly attributed to them instead of falling back to the generic system user.
+        if (event.getUserId() != null) {
+            SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN", event.getUserId());
+        } else {
+            SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
         }
 
         StringBuilder report = new StringBuilder();
@@ -365,7 +375,7 @@ public class RabbitMQDatasetsService {
         int processed = 0;
         for (Examination exam : listExam) {
             try {
-                examinationService.deleteById(exam.getId(), null);
+                examinationService.deleteById(exam.getId(), event);
                 studyIds.add(exam.getStudyId());
             } catch (Exception e) {
                 LOG.error("Could not delete examination {} of subject {}", exam.getId(), subjectId, e);
@@ -418,14 +428,20 @@ public class RabbitMQDatasetsService {
             )
     @Transactional
     public void deleteStudy(String eventAsString) throws AmqpRejectAndDontRequeueException {
-        SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
-
         try {
             ShanoirEvent event = objectMapper.readValue(eventAsString, ShanoirEvent.class);
+            // Keep the identity of the user who actually asked for the deletion, so that every
+            // event published while cascading this deletion (examinations, dataset acquisitions...)
+            // is correctly attributed to them instead of falling back to the generic system user.
+            if (event.getUserId() != null) {
+                SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN", event.getUserId());
+            } else {
+                SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
+            }
 
             // Delete associated examinations and datasets from solr repository then from database
             for (Examination exam : examinationRepository.findByStudy_Id(Long.valueOf(event.getObjectId()))) {
-                examinationService.deleteById(exam.getId(), null);
+                examinationService.deleteById(exam.getId(), event);
             }
             // also delete associated study cards
             for (StudyCard sc : studyCardRepository.findByStudyId(Long.valueOf(event.getObjectId()))) {

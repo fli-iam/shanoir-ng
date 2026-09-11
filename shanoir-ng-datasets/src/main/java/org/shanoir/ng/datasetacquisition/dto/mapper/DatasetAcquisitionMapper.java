@@ -15,73 +15,157 @@
 package org.shanoir.ng.datasetacquisition.dto.mapper;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
+import org.hibernate.Hibernate;
 import org.mapstruct.*;
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+
 import org.shanoir.ng.datasetacquisition.model.GenericDatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.model.bids.BidsDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.ct.CtDatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.model.eeg.EegDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.pet.PetDatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.model.rt.RtDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.xa.XaDatasetAcquisition;
-import org.shanoir.ng.examination.dto.mapper.ExaminationMapper;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.springframework.data.domain.Page;
 
-@Mapper(componentModel = "spring", uses = { ExaminationMapper.class })
-@DecoratedWith(DatasetAcquisitionDecorator.class)
-@MapperConfig(mappingInheritanceStrategy = MappingInheritanceStrategy.AUTO_INHERIT_FROM_CONFIG)
+@Mapper(componentModel = "spring", config = DatasetAcquisitionMappingConfig.class)
 public interface DatasetAcquisitionMapper {
 
+    ////// Entity to DTO
 
-    List<DatasetAcquisitionDTO> datasetAcquisitionsToDatasetAcquisitionDTOs(
-            List<DatasetAcquisition> datasetAcquisitions);
-
-    public PageImpl<DatasetAcquisitionDTO> datasetAcquisitionsToDatasetAcquisitionDTOs(Page<DatasetAcquisition> page);
-
-
-    @Mapping(target = "copies", expression = "java(mapCopiesFromDatasetAcquisition(datasetAcquisition.getCopies()))")
-    @Mapping(target = "source", expression = "java(mapSourceFromDatasetAcquisition(datasetAcquisition.getSource()))")
-    DatasetAcquisitionDTO datasetAcquisitionToDatasetAcquisitionDTO(
-            DatasetAcquisition datasetAcquisition);
-
-    DatasetAcquisition datasetAcquisitionDTOToDatasetAcquisition(DatasetAcquisitionDTO datasetAcquisition);
-
-    @ObjectFactory
-    default DatasetAcquisition createDatasetAcquisition(DatasetAcquisitionDTO dto) {
-        if (dto.getType().equals("Mr")) return new MrDatasetAcquisition();
-        else if (dto.getType().equals("Pet")) return new PetDatasetAcquisition();
-        else if (dto.getType().equals("Ct")) return new CtDatasetAcquisition();
-        else if (dto.getType().equals("BIDS")) return new BidsDatasetAcquisition();
-        else if (dto.getType().equals("Eeg")) return new EegDatasetAcquisition();
-        else if (dto.getType().equals("Xa")) return new XaDatasetAcquisition();
-        else if (dto.getType().equals("Rt")) return new RtDatasetAcquisition();
-        else if (dto.getType().equals("Generic")) return new GenericDatasetAcquisition();
-        else throw new IllegalStateException("Cannot map from a dataset acquisition dto that don't provide a valid type. Given type = " + dto.getType());
-    }
-
-    default List<Long> mapCopiesFromDatasetAcquisition(List<DatasetAcquisition> copies) {
-        if (copies == null) {
+    @Named("id")
+    default Long acquisitionToLongId(DatasetAcquisition acquisition) {
+        if (acquisition == null) {
             return null;
         }
-        return copies.stream()
-                .map(DatasetAcquisition::getId)
-                .collect(Collectors.toList());
+        return acquisition.getId();
     }
 
-    default Long mapSourceFromDatasetAcquisition(DatasetAcquisition source) {
-        return source != null ? source.getId() : null;
+    @Named("id")
+    default List<Long> acquisitionsToLongIds(List<DatasetAcquisition> acquisitions) {
+        if (acquisitions == null) {
+            return null;
+        }
+        return acquisitions.stream().filter(Objects::nonNull).map(DatasetAcquisition::getId).collect(Collectors.toList());
     }
 
-    default List<DatasetAcquisition> mapCopiesDatasetAcquisitionFromLong(List<Long> copies) {
-        return null;
+    @Named("idOnly")
+    default DatasetAcquisitionDTO acquisitionToId(DatasetAcquisition acquisition) {
+        if (acquisition == null) {
+            return null;
+        }
+        DatasetAcquisitionDTO dto = new DatasetAcquisitionDTO();
+        dto.setId(acquisition.getId());
+        return dto;
     }
 
-    default DatasetAcquisition mapSourceDatasetAcquisitionFromLong(Long source) {
-        return null;
+    @Named("idOnly")
+    default List<DatasetAcquisitionDTO> acquisitionsToIds(List<DatasetAcquisition> acquisitions) {
+        if (acquisitions == null) {
+            return null;
+        }
+        return acquisitions.stream().filter(Objects::nonNull).map(acq -> {
+            DatasetAcquisitionDTO dto = new DatasetAcquisitionDTO();
+            dto.setId(acq.getId());
+            return dto;
+        }).collect(Collectors.toList());
+    }
+
+    //Single entity
+
+    /**
+     * Some context of usage :
+     */
+    @Named("nullRelations")
+    @Mapping(target = "examination", expression = "java(null)")
+    @Mapping(target = "copies", expression = "java(null)")
+    @Mapping(target = "source", expression = "java(null)")
+    @Mapping(target = "studyCard", expression = "java(null)")
+    DatasetAcquisitionDTO acquisitionToAcquisitionNullRelationsDTO(DatasetAcquisition acquisition);
+
+    /**
+     * Some context of usage :
+     */
+    @Named("idRelations")
+    @Mapping(target = "examination", source = "examination", qualifiedByName = "idOnly")
+    @Mapping(target = "copies", source = "copies", qualifiedByName = "id")
+    @Mapping(target = "source", source = "source", qualifiedByName = "id")
+    @Mapping(target = "studyCard", expression = "java(null)")
+    DatasetAcquisitionDTO acquisitionToAcquisitionIdRelationsDTO(DatasetAcquisition datasetAcquisition);
+
+    /**
+     * Some context of usage :
+     * - Loading tree from lower entity (dataset)
+     */
+    @Named("withExamination")
+    @Mapping(target = "examination", source = "examination", qualifiedByName = "withStudy")
+    @Mapping(target = "copies", expression = "java(null)")
+    @Mapping(target = "source", expression = "java(null)")
+    @Mapping(target = "studyCard", expression = "java(null)")
+    DatasetAcquisitionDTO acquisitionToAcquisitionWithExaminationDTO(DatasetAcquisition datasetAcquisition);
+
+
+
+    ////// DTO to entity
+
+    @Named("idOnly")
+    default DatasetAcquisition acquisitionDTOToId(Long id) {
+        if (id == null) {
+            return null;
+        }
+        DatasetAcquisition acquisition = new GenericDatasetAcquisition();
+        acquisition.setId(id);
+        return acquisition;
+    }
+
+    @Named("idOnly")
+    default List<DatasetAcquisition> acquisitionDTOListToIds(List<Long> ids) {
+        if (ids == null) {
+            return null;
+        }
+        return ids.stream().filter(Objects::nonNull).map(id -> {
+            DatasetAcquisition acquisition = new GenericDatasetAcquisition();
+            acquisition.setId(id);
+            return acquisition;
+        }).collect(Collectors.toList());
+    }
+
+    // Single entity
+
+    /**
+     * Some context of usage :
+     */
+    @Named("mediumRelations")
+    @Mapping(target = "examination", source = "examination", qualifiedByName = "idRelations")
+    @Mapping(target = "copies", source = "copies", qualifiedByName = "idOnly")
+    @Mapping(target = "source", source = "source", qualifiedByName = "idOnly")
+    @Mapping(target = "studyCard", expression = "java(null)")
+    GenericDatasetAcquisition acquisitionDTOToAcquisitionIdRelations(DatasetAcquisitionDTO dto);
+
+    ////// Pageable
+
+    @IterableMapping(qualifiedByName = "withExamination")
+    PageImpl<DatasetAcquisitionDTO> acquisitionPageToAcquisitionWithExaminationDTOPage(Page<DatasetAcquisition> page);
+
+    @IterableMapping(qualifiedByName = "idRelations")
+    PageImpl<DatasetAcquisitionDTO> acquisitionPageToAcquisitionIdRelationsDTOPage(Page<DatasetAcquisition> page);
+
+    ////// Miscellaneous
+
+    @AfterMapping
+    default void setType(DatasetAcquisition acquisition, @MappingTarget DatasetAcquisitionDTO dto) {
+        DatasetAcquisition unproxiedAcq = (DatasetAcquisition) Hibernate.unproxy(acquisition); // Can not cast a proxy
+        if (unproxiedAcq.getType().equals("Mr")) {
+            dto.setProtocol(((MrDatasetAcquisition) unproxiedAcq).getMrProtocol());
+        } else if (unproxiedAcq.getType().equals("Pet")) {
+            dto.setProtocol(((PetDatasetAcquisition) unproxiedAcq).getPetProtocol());
+        } else if (unproxiedAcq.getType().equals("Ct")) {
+            dto.setProtocol(((CtDatasetAcquisition) unproxiedAcq).getCtProtocol());
+        } else if (unproxiedAcq.getType().equals("Xa")) {
+            dto.setProtocol(((XaDatasetAcquisition) unproxiedAcq).getXaProtocol());
+        }
     }
 }

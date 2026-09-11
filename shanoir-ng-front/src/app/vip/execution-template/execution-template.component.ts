@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component } from '@angular/core'
+import { ChangeDetectorRef, Component, ChangeDetectionStrategy } from '@angular/core'
 import { ActivatedRoute } from "@angular/router"
 import {
     FormGroup,
@@ -8,8 +8,8 @@ import {
 } from "@angular/forms"
 import { CommonModule } from '@angular/common'
 
-import { FormFooterComponent } from 'src/app/shared/components/form-footer/form-footer.component'
-import { TooltipComponent } from 'src/app/shared/components/tooltip/tooltip.component'
+import { FormFooterComponent } from '@app/shared/components/form-footer/form-footer.component'
+import { TooltipComponent } from '@app/shared/components/tooltip/tooltip.component'
 
 import { EntityComponent } from "../../shared/components/entity/entity.component.abstract"
 import { ExecutionTemplate } from "../models/execution-template"
@@ -25,6 +25,7 @@ import { ExecutionTemplateFilterListComponent } from './filter/execution-templat
     selector: 'execution-template',
     templateUrl: './execution-template.component.html',
     styleUrls: ['./execution-template.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
         CommonModule,
         ReactiveFormsModule,

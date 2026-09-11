@@ -21,7 +21,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import org.junit.jupiter.api.BeforeEach;
+
 import org.junit.jupiter.api.Test;
 import static org.mockito.BDDMockito.given;
 import org.mockito.Mockito;
@@ -111,15 +111,6 @@ public class DatasetServiceSecurityTest {
 
     private StudyUser su1 = new StudyUser();
 
-    @BeforeEach
-    public void setup() {
-        su1.setStudyId(1L);
-        su1.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_SEE_ALL));
-        su1.setCenterIds(Arrays.asList(new Long[]{1L}));
-        given(rightsService.getUserRights()).willReturn(new UserRights(Arrays.asList(su1)));
-        given(datasetRepository.findRelatedStudyIds(Mockito.anyLong())).willReturn(Set.of());
-    }
-
     @Test
     @WithAnonymousUser
     public void testAsAnonymous() throws ShanoirException {
@@ -127,7 +118,7 @@ public class DatasetServiceSecurityTest {
         Set<Long> ids = Mockito.anySet();
         given(rightsService.hasRightOnStudies(ids, Mockito.anyString())).willReturn(ids);
 
-        assertAccessDenied(service::findById, ENTITY_ID);
+        assertAccessDenied(service::findByIdWithProcessingAncestorsAndExaminationAndMetadata, ENTITY_ID);
         assertAccessDenied(service::findPage, PageRequest.of(0, 10));
         assertAccessDenied(service::create, mockDataset(null));
         assertAccessDenied(service::update, mockDataset(1L));
@@ -161,7 +152,7 @@ public class DatasetServiceSecurityTest {
     @Test
     @WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_ADMIN" })
     public void testAsAdmin() throws ShanoirException {
-        assertAccessAuthorized(service::findById, ENTITY_ID);
+        assertAccessAuthorized(service::findByIdWithProcessingAncestorsAndExaminationAndMetadata, ENTITY_ID);
         assertAccessAuthorized(service::findPage, PageRequest.of(0, 10));
         assertAccessAuthorized(service::create, mockDataset(null));
         assertAccessAuthorized(service::update, mockDataset(1L));
@@ -172,10 +163,10 @@ public class DatasetServiceSecurityTest {
     private void testFindOne() throws ShanoirException {
         //findById(Long)
         given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(false);
-        assertAccessAuthorized(service::findById, 1L);
-        assertAccessDenied(service::findById, 2L);
-        assertAccessDenied(service::findById, 3L);
-        assertAccessDenied(service::findById, 4L);
+        assertAccessAuthorized(service::findByIdWithProcessingAncestorsAndExaminationAndMetadata, 1L);
+        assertAccessDenied(service::findByIdWithProcessingAncestorsAndExaminationAndMetadata, 2L);
+        assertAccessDenied(service::findByIdWithProcessingAncestorsAndExaminationAndMetadata, 3L);
+        assertAccessDenied(service::findByIdWithProcessingAncestorsAndExaminationAndMetadata, 4L);
     }
 
 
@@ -199,7 +190,7 @@ public class DatasetServiceSecurityTest {
         assertAccessDenied(service::findByStudyId, 3L);
     }
 
-    private void testFindPage() throws ShanoirException {
+    private void testFindPage() {
         //findPage(Pageable)
         assertThat(service.findPage(PageRequest.of(0, 10))).hasSize(1);
     }
@@ -439,6 +430,9 @@ public class DatasetServiceSecurityTest {
         // dataset 1
         Dataset dataset1 = mockDataset(1L, 1L, 1L, 1L, 1L);
         given(datasetRepository.findById(1L)).willReturn(Optional.of(dataset1));
+        given(datasetRepository.findByIdWithProcessingAncestorsAndExaminationAndMetadata(1L)).willReturn(Optional.of(dataset1));
+        given(datasetRepository.findByIdWithExaminationRelationsAndRelatedStudies(1L)).willReturn(dataset1);
+        given(datasetRepository.findByAcquisitionIdWithProcessingAncestorsAndExamination(1L)).willReturn(Utils.toList(dataset1));
         DatasetRightsDTO drv1 = mockDatasetRightsDTO(1L, 1L, 1L);
         given(datasetRepository.findRightsDtoBaseById(dataset1.getId())).willReturn(drv1);
         exam1.setDatasetAcquisitions(Utils.toList(dsAcq1));
@@ -446,6 +440,9 @@ public class DatasetServiceSecurityTest {
         // dataset 2
         Dataset dataset2 = mockDataset(2L, 2L, 2L, 2L, 3L);
         given(datasetRepository.findById(2L)).willReturn(Optional.of(dataset2));
+        given(datasetRepository.findByIdWithProcessingAncestorsAndExaminationAndMetadata(2L)).willReturn(Optional.of(dataset2));
+        given(datasetRepository.findByIdWithExaminationRelationsAndRelatedStudies(2L)).willReturn(dataset2);
+        given(datasetRepository.findByAcquisitionIdWithProcessingAncestorsAndExamination(2L)).willReturn(Utils.toList(dataset2));
         DatasetRightsDTO drv2 = mockDatasetRightsDTO(2L, 2L, 3L);
         given(datasetRepository.findRightsDtoBaseById(dataset2.getId())).willReturn(drv2);
         exam2.setDatasetAcquisitions(Utils.toList(dsAcq2));
@@ -453,6 +450,9 @@ public class DatasetServiceSecurityTest {
         // dataset 3
         Dataset dataset3 = mockDataset(3L, 3L, 3L, 3L, 1L);
         given(datasetRepository.findById(3L)).willReturn(Optional.of(dataset3));
+        given(datasetRepository.findByIdWithProcessingAncestorsAndExaminationAndMetadata(3L)).willReturn(Optional.of(dataset3));
+        given(datasetRepository.findByIdWithExaminationRelationsAndRelatedStudies(3L)).willReturn(dataset3);
+        given(datasetRepository.findByAcquisitionIdWithProcessingAncestorsAndExamination(3L)).willReturn(Utils.toList(dataset3));
         DatasetRightsDTO drv3 = mockDatasetRightsDTO(3L, 3L, 1L);
         given(datasetRepository.findRightsDtoBaseById(dataset3.getId())).willReturn(drv3);
         exam3.setDatasetAcquisitions(Utils.toList(dsAcq3));
@@ -460,19 +460,28 @@ public class DatasetServiceSecurityTest {
         // dataset 4
         Dataset dataset4 = mockDataset(4L, 4L, 4L, 4L, 4L);
         given(datasetRepository.findById(4L)).willReturn(Optional.of(dataset4));
+        given(datasetRepository.findByIdWithProcessingAncestorsAndExaminationAndMetadata(4L)).willReturn(Optional.of(dataset4));
+        given(datasetRepository.findByIdWithExaminationRelationsAndRelatedStudies(4L)).willReturn(dataset4);
+        given(datasetRepository.findByAcquisitionIdWithProcessingAncestorsAndExamination(4L)).willReturn(Utils.toList(dataset4));
         DatasetRightsDTO drv4 = mockDatasetRightsDTO(4L, 4L, 4L);
         given(datasetRepository.findRightsDtoBaseById(dataset4.getId())).willReturn(drv4);
         exam4.setDatasetAcquisitions(Utils.toList(dsAcq4));
         dsAcq4.setDatasets(Arrays.asList(new Dataset[]{dataset4}));
 
-        StudyUser su1 = new StudyUser();
+        su1 = new StudyUser();
         su1.setStudyId(1L);
+        su1.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_SEE_ALL));
         su1.setCenterIds(Arrays.asList(new Long[]{1L}));
+        given(rightsService.getUserRights()).willReturn(new UserRights(Arrays.asList(su1)));
+        given(datasetRepository.findRelatedStudyIds(Mockito.anyLong())).willReturn(Set.of());
         given(rightsRepository.findByUserId(LOGGED_USER_ID)).willReturn(Arrays.asList(new StudyUser[]{su1}));
+        given(rightsRepository.findAllByUserId(LOGGED_USER_ID)).willReturn(Optional.of(Arrays.asList(new StudyUser[]{su1})));
+
         given(datasetRepository.findAll(Mockito.any(Pageable.class))).willReturn(new PageImpl<>(Arrays.asList(new Dataset[]{dataset1, dataset3})));
         given(datasetRepository.findAll()).willReturn(Utils.toList(dataset1, dataset2, dataset3, dataset4));
         given(rightsRepository.findDistinctStudyIdByUserId(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId())).willReturn(Arrays.asList(1L, 2L));
-        given(datasetRepository.findByDatasetAcquisitionExaminationStudy_IdIn(Arrays.asList(1L, 2L), PageRequest.of(0, 10).getSort())).willReturn(new PageImpl<>((Arrays.asList(new Dataset[]{dataset1, dataset2, dataset3}))));
+        given(datasetRepository.findByStudyIdsWithProcessingAncestorsAndExamination(Arrays.asList(1L, 2L), PageRequest.of(0, 10).getSort())).willReturn(Arrays.asList(dataset1, dataset2, dataset3));
+        given(datasetRepository.findByStudyIdsWithProcessingAncestorsAndExamination(Arrays.asList(1L), PageRequest.of(0, 10).getSort())).willReturn(Arrays.asList(dataset1));
         given(datasetRepository.findByDatasetAcquisition_Examination_Study_Id(1L)).willReturn(new PageImpl<>((Arrays.asList(new Dataset[]{dataset1, dataset3}))));
 
         given(datasetRepository.findAllById(Utils.toList(1L))).willReturn(Utils.toList(dataset1));
@@ -487,6 +496,9 @@ public class DatasetServiceSecurityTest {
         given(datasetRepository.findByDatasetAcquisitionId(2L)).willReturn(Utils.toList(dataset2));
         given(datasetRepository.findByDatasetAcquisitionId(3L)).willReturn(Utils.toList(dataset3));
         given(datasetRepository.findByDatasetAcquisitionId(4L)).willReturn(Utils.toList(dataset4));
+
+        given(datasetRepository.findByIdsWithProcessingAncestorsAndExamination(Utils.toList(1L, 2L, 3L, 4L))).willReturn(Utils.toList(dataset1, dataset2, dataset3, dataset4));
+        given(datasetRepository.findByIdsWithProcessingAncestors(Utils.toList(1L, 2L, 3L, 4L))).willReturn(Utils.toList(dataset1, dataset2, dataset3, dataset4));
 
         // rights
         given(datasetRepository.findDatasetsForRights(Utils.toList(1L))).willReturn(Utils.toList(new DatasetForRights(1L, 1L, 1L, new HashSet())));

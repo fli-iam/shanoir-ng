@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, Input, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 
 import { ColumnDefinition } from "../../shared/components/table/column.definition.type";
 import { Page, Pageable } from "../../shared/components/table/pageable.model";
@@ -26,6 +26,7 @@ import { Study } from "../shared/study.model";
     selector: 'study-history',
     templateUrl: './study-history.component.html',
     styleUrls: ['./study-history.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [TableComponent]
 })
 export class StudyHistoryComponent implements OnInit {
@@ -76,7 +77,7 @@ export class StudyHistoryComponent implements OnInit {
         this.eventHistory.then( () => this.getPage);
     }
 
-    getPage(pageable: Pageable): Promise<Page<ShanoirEvent> | void> {
+    getPage(pageable: Pageable): Promise<Page<ShanoirEvent>> {
         return this.shanoirEventService.getPage(pageable, this.study.id, this.table.filter.searchStr? this.table.filter.searchStr : "", this.table.filter.searchField ? this.table.filter.searchField : "").then(page => {
             page.content.forEach(item => {
                 if (this.users.get(item.userId) == undefined) {
@@ -93,6 +94,8 @@ export class StudyHistoryComponent implements OnInit {
         }).catch(reason => {
             if(reason?.error?.code != 403) {
                 throw Error(reason);
+            } else {
+                return new Page<ShanoirEvent>();
             }
         });
     }

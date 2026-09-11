@@ -32,7 +32,7 @@ public interface ExecutionMonitoringService {
      * @param sample a item of the exec candidate list
      * @return the created execution monitoring
      */
-    ExecutionMonitoring createExecutionMonitoring(ExecutionCandidateDTO sample) throws RestServiceException;
+    ExecutionMonitoring createExecutionMonitoring(ExecutionCandidateDTO sample) throws RestServiceException, EntityNotFoundException;
 
     /**
      * Update an execution monitoring.

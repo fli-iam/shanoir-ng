@@ -29,6 +29,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 @if (link) {
                     <a [href]="link">{{ link }}</a>
                 }
+                @if (mode == 'extendDate') {
+                    <label>Ask access extension until : </label>
+                    <datepicker [(ngModel)]="date" [ngModelOptions]="{ standalone: true }" [min]="minDate"></datepicker>
+                }
             </div>
         }
         <div class="footer">
@@ -41,7 +45,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             @if (mode == 'choose') {
                 <button type="button" (click)="close('no')">{{ buttons?.no || 'No' }}</button>
             }
-            @if (mode == 'confirm' || (mode == 'choose' && buttons?.cancel)) {
+            @if (mode == 'confirm' || mode == 'extendDate' || (mode == 'choose' && buttons?.cancel)) {
                 <button type="button" (click)="close(false)">
                     {{ buttons && buttons.cancel ? buttons.cancel : 'Cancel' }}
                 </button>

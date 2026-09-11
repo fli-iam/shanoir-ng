@@ -112,6 +112,9 @@ public final class ShanoirEventType {
     /** User added to a study. */
     public static final String USER_ADD_TO_STUDY_EVENT = "userAddToStudy.event";
 
+    /** User extended access to a study. */
+    public static final String USER_EXTEND_TO_STUDY_EVENT = "userExtendToStudy.event";
+
     /** Apply quality card */
     public static final String CHECK_QUALITY_EVENT = "checkQuality.event";
 

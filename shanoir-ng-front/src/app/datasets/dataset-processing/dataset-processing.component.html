@@ -49,7 +49,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <span class="right-col">
                             @switch (mode) {
                                 @case ('view') {
-                                    <a [routerLink]="['/study/details/', datasetProcessing?.studyId]">
+                                    <a [routerLink]="['/study/details/', $safeNavigationMigration(datasetProcessing?.studyId)]">
                                         {{ studyName }}
                                     </a>
                                 }

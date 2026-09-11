@@ -54,10 +54,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     [dataset]="dataset"
                     [parentFormGroup]="form"
                     [hasAdministrateRight]="hasAdministrateRight"></common-dataset-details>
-                @if (dataset.type == 'Mr') {
+                @if (mrDataset; as dataset) {
                     <mr-dataset-details [mode]="mode" [dataset]="dataset" [parentFormGroup]="form"></mr-dataset-details>
                 }
-                @if (dataset.type == 'Eeg') {
+                @if (eegDataset; as dataset) {
                     <eeg-dataset-details [mode]="mode" [dataset]="dataset"></eeg-dataset-details>
                 }
 

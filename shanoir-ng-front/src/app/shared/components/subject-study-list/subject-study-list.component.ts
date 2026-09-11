@@ -11,10 +11,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, forwardRef, Input, OnChanges, OnDestroy, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, forwardRef, Input, OnChanges, OnDestroy, SimpleChanges, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Router } from '@angular/router';
 import { combineLatest, Subject as RxjsSubject, Subscription } from 'rxjs';
+
+import { IdName } from '@app/shared/models/id-name.model';
 
 import { Study } from '../../../studies/shared/study.model';
 import { Subject } from '../../../subjects/shared/subject.model';
@@ -41,6 +43,7 @@ import { TooltipComponent } from '../tooltip/tooltip.component';
             multi: true
         }
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [TooltipComponent, FormsModule, TableComponent]
 })
 
@@ -48,7 +51,7 @@ export class SubjectStudyListComponent extends AbstractInput<Subject[]> implemen
 
     @Input() mode: Mode;
     @Input() study: Study;
-    @Input() selectableList: Subject[];
+    @Input() selectableList: IdName[];
     public selected: Subject;
     @Input() displaySubjectType: boolean = true;
     @Input() allowRemove: boolean;

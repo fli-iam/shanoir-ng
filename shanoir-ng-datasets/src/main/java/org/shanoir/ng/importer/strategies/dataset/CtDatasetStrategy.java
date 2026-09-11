@@ -31,6 +31,7 @@ import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.importer.strategies.datasetexpression.DatasetExpressionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class CtDatasetStrategy implements DatasetStrategy<CtDataset> {
@@ -69,6 +70,7 @@ public class CtDatasetStrategy implements DatasetStrategy<CtDataset> {
 
 
     @Override
+    @Transactional(readOnly = true)
     public CtDataset generateSingleDataset(Attributes attributes, Serie serie, Dataset dataset, int datasetIndex,
             Long subjectId) throws Exception {
         CtDataset ctDataset = new CtDataset();

@@ -40,6 +40,7 @@ import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.storage.StorageException;
 import org.shanoir.ng.storage.StorageService;
@@ -162,7 +163,7 @@ public class ProcessedDatasetImporterService {
      * @param event
      * @return
      */
-    private boolean checkProcessedDatasetImportJob(ProcessedDatasetImportJob job, ShanoirEvent event) {
+    private boolean checkProcessedDatasetImportJob(ProcessedDatasetImportJob job, ShanoirEvent event) throws EntityNotFoundException {
         if (job.getDatasetProcessing() == null) {
             event.setStatus(ShanoirEvent.ERROR);
             event.setMessage("Dataset processing missing.");

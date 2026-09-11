@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { DatasetProcessing } from "src/app/datasets/shared/dataset-processing.model";
+import { DatasetProcessing } from "@app/datasets/shared/dataset-processing.model";
 
 import { StatusEnum } from "./execution";
 

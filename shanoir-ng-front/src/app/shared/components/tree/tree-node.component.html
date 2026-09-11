@@ -45,10 +45,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </a>
     }
     @if (hasBox) {
-        <input #box class="box" type="checkbox" [(ngModel)]="value" (change)="chkbxChange.emit(value)" class="clickable" />
+        <input #box class="box" type="checkbox" [(ngModel)]="value" [ngModelOptions]="{ standalone: true }" (change)="chkbxChange.emit(value)" class="clickable" />
     }
     @if (editable) {
-        <input #editableLabel type="text" [(ngModel)]="label" (change)="labelChange.emit(label)" />
+        <input #editableLabel type="text" [(ngModel)]="label" [ngModelOptions]="{ standalone: true }" (change)="labelChange.emit(label)" />
     }
     @if (editable && buttonPicto) {
         <span class="button-picto clickable" (click)="buttonClick.emit()">

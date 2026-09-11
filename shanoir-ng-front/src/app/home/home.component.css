@@ -16,9 +16,9 @@
 
 .block { border: none; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08); background-color: white; margin: 10px; display: inline-block; text-align: center; overflow: hidden; border-radius: 16px; transition: box-shadow 0.2s ease; }
 .block table { border-collapse: collapse; }
-.block .icon, .block .pannel, .block-title { width: 180px; padding: 0 10px; vertical-align: middle; }
+.block .icon, .block .panel, .block-title { width: 180px; padding: 0 10px; vertical-align: middle; }
 .block .icon, .block { height: 200px; }
-.block .pannel { text-align: left; }
+.block .panel { text-align: left; }
 .block, .block table, .block input { font-size: 12px; }
 .block-title { font-size: 20px; font-weight: bold; margin-bottom: 10px; color: var(--very-dark-grey); }
 .block-desc { font-size: 10px; line-height: 1.2; color: var(--greyer); }
@@ -26,11 +26,11 @@
 .icon i { font-size: 120px; display: block; height: 136px; margin-top: 10px; color: var(--block-color, var(--color-a)); opacity: 1; }
 .icon.link:hover { background-color: color-mix(in srgb, var(--block-color, var(--color-a)) 20%, white); }
 .block td { position: relative; height: 200px; }
-.block .pannel table { width: 100%; }
-.block .pannel td { height: auto; }
+.block .panel table { width: 100%; }
+.block .panel td { height: auto; }
 
 .access-requests { --block-color: var(--blue); }
-.access-requests .pannel table { margin-top: 8px; }
+.access-requests .panel table { margin-top: 8px; }
 .access-requests-list:hover { color: var(--block-color); }
 .access-requests-list td {  overflow: hidden; }
 .access-requests-list .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 80px; }
@@ -39,8 +39,8 @@
 .pending { font-size: 16px; }
 .pending em { font-style: normal; font-size: 20px; color: var(--color-a); font-weight: bold; }
 .solr { --block-color: var(--color-b); }
-.solr .pannel { font-size: 20px; text-align: center; }
-.solr .pannel i { margin-right: 7px; }
+.solr .panel { font-size: 20px; text-align: center; }
+.solr .panel i { margin-right: 7px; }
 .solr input { margin-bottom: 10px; text-align: center; }
 
 .jobs { --block-color: var(--orange); }
@@ -48,7 +48,7 @@
 .notifications { --block-color: var(--pink); }
 .notification-list:hover { color: var(--block-color); }
 .notification-list td { max-width: 102px; overflow: hidden; }
-.notifications .pannel tr + tr { border-top: 1px solid var(--grey); }
+.notifications .panel tr + tr { border-top: 1px solid var(--grey); }
 
 .studies { --block-color: var(--color-a); }
 .studies th { line-height: 30px; }
@@ -72,3 +72,10 @@ h2 { margin-bottom: 30px; }
 .doc { --block-color: var(--color-b); }
 .doc li { line-height: 20px; }
 .doc li i { color: var(--color-a-light); margin-right: 7px; }
+
+.expiring-studies { border-color: orangered; }
+.expiring-studies .icon { background-color: orangered; }
+.expiring-studies .study-name { font-weight: bold; color: var(--color-a); }
+.expiring-studies .date { font-weight: bold; color: orangered; }
+.expiring-studies .panel { text-align: center; }
+.expiring-studies .panel div { margin: 20px 0; }

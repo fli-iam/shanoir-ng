@@ -58,6 +58,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -90,6 +91,7 @@ public class DicomSEGAndSRImporterService {
     private SolrService solrService;
 
     @Autowired
+    @Lazy
     private DatasetService datasetService;
 
     @Autowired
