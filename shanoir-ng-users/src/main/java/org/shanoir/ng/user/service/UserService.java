@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.user.service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -177,6 +178,19 @@ public interface UserService {
      */
     @PreAuthorize("#user.getId() == null && #user.getRole() == null && #user.isAccountRequestDemand() != null && #user.isAccountRequestDemand()")
     User createAccountRequest(User user) throws PasswordPolicyException, SecurityException;
+
+    /**
+     * Creates an account request for a user with a specified expiration date.
+     *
+     * @param user the user to create.
+     * @param expirationDate the expiration date for the account.
+     * @return the created user with its fresh id.
+     * @throws PasswordPolicyException if the given password doesn't meet the security requirements.
+     * @throws SecurityException if the new user could not be register into Keycloak.
+     * In this case the user is not saved in the database either.
+     */
+    @PreAuthorize("#user.getId() == null && #user.getRole() == null && #user.isAccountRequestDemand() != null && #user.isAccountRequestDemand()")
+    User createAccountRequest(User user, LocalDate expirationDate) throws PasswordPolicyException, SecurityException;
 
     /**
      * Search users by their id.

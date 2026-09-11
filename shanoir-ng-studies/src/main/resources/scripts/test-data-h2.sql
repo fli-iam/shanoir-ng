@@ -27,12 +27,12 @@ VALUES
     (3, 400, 5, 2000, 1, 5, 2, 'INRIA', 'INRIA', 'INRIA', 3);
 
 INSERT INTO study_user
-	(id, receive_study_user_report, receive_new_import_report, confirmed, study_id, user_id, user_name)
+	(id, receive_study_user_report, receive_new_import_report, confirmed, study_id, user_id, user_name, expiration_date, received_expiration_notification)
 VALUES
-	(1, 0, 1, 1, 1, 1, 'admin'),
-	(2, 0, 1, 1, 3, 1, 'admin'),
-	(3, 0, 0, 1, 1, 2, 'jlouis'),
-	(4, 0, 1, 1, 2, 1, 'admin');
+	(1, 0, 1, 1, 1, 1, 'admin', null, 0),
+	(2, 0, 1, 1, 3, 1, 'admin', null, 0),
+	(3, 0, 0, 1, 1, 2, 'jlouis', null, 0),
+	(4, 0, 1, 1, 2, 1, 'admin', null, 0);
 
 INSERT INTO study_user_study_user_rights
 	(study_user_id, study_user_rights)

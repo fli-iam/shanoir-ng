@@ -12,18 +12,18 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { KeyValue, NgClass, KeyValuePipe } from "@angular/common";
-import { Component, ElementRef, ViewChild } from '@angular/core';
-import { UntypedFormGroup, ValidationErrors, Validators, FormsModule, ReactiveFormsModule, AbstractControl } from '@angular/forms';
+import { Component, ElementRef, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { UntypedFormGroup, ValidationErrors, Validators, FormsModule, ReactiveFormsModule, AbstractControl, ValidatorFn } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 
-import { TaskState } from 'src/app/async-tasks/task.model';
-import { DUAAssistantComponent } from 'src/app/dua/dua-assistant.component';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
-import { Tag } from 'src/app/tags/tag.model';
-import { AccessRequest } from 'src/app/users/access-request/access-request.model';
-import { AccessRequestService } from 'src/app/users/access-request/access-request.service';
-import { ExecutionTemplateListComponent } from "src/app/vip/execution-template/execution-template-list.component";
+import { TaskState } from '@app/async-tasks/task.model';
+import { DUAAssistantComponent } from '@app/dua/dua-assistant.component';
+import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
+import { MassDownloadService } from '@app/shared/mass-download/mass-download.service';
+import { Tag } from '@app/tags/tag.model';
+import { AccessRequest } from '@app/users/access-request/access-request.model';
+import { AccessRequestService } from '@app/users/access-request/access-request.service';
+import { ExecutionTemplateListComponent } from "@app/vip/execution-template/execution-template-list.component";
 
 import { Center } from '../../centers/shared/center.model';
 import { CenterService } from '../../centers/shared/center.service';
@@ -64,6 +64,7 @@ import { BidsTreeComponent } from "../../bids/tree/bids-tree.component";
 import { StudyHistoryComponent } from "../study-history/study-history.component";
 import { LocalDateFormatPipe } from "../../shared/localLanguage/localDateFormat.pipe";
 import { SizePipe } from "../../shared/utils/size.pipe";
+import { DaysLeftPipe } from "../../shared/localLanguage/daysLeft.pipe";
 
 import { Selection } from './tree.service';
 import { CopyFromCsvComponent } from "./copy-csv.component";
@@ -73,7 +74,7 @@ import { CopyFromCsvComponent } from "./copy-csv.component";
     templateUrl: 'study.component.html',
     styleUrls: ['study.component.css'],
     imports: [NgClass, FormsModule, ReactiveFormsModule, FormFooterComponent, RouterLink, DatepickerComponent, SelectBoxComponent, CheckboxComponent, TooltipComponent, LoadingBarComponent, TagCreatorComponent, TableComponent, StudyUserListComponent, QualityControlComponent,
-        BidsTreeComponent, StudyHistoryComponent, KeyValuePipe, LocalDateFormatPipe, SizePipe, CopyFromCsvComponent, ExecutionTemplateListComponent, StudyEmailMembersComponent]
+        BidsTreeComponent, StudyHistoryComponent, KeyValuePipe, LocalDateFormatPipe, DaysLeftPipe, SizePipe, CopyFromCsvComponent, ExecutionTemplateListComponent, StudyEmailMembersComponent]
 })
 
 export class StudyComponent extends EntityComponent<Study> {
@@ -101,7 +102,8 @@ export class StudyComponent extends EntityComponent<Study> {
     isStudyAdmin: boolean;
     subjectTagsInUse: Tag[] = [];
     subjectColumnDefs: ColumnDefinition[];
-
+    protected userExpiration: Date;
+    protected userExpirationColor: string;
     public openPrefix: boolean = false;
 
     centerOptions: Option<IdName>[];
@@ -132,10 +134,11 @@ export class StudyComponent extends EntityComponent<Study> {
             private userService: UserService,
             private studyRightsService: StudyRightsService,
             private studyCardService: StudyCardService,
-            private accessRequestService: AccessRequestService,
+            protected accessRequestService: AccessRequestService,
             protected downloadService: MassDownloadService) {
         super(route);
         this.activeTab = 'general';
+
     }
 
     protected getRoutingName(): string {
@@ -163,6 +166,7 @@ export class StudyComponent extends EntityComponent<Study> {
         super.entity = study;
         this.updateSubjectTagsInUse();
         this.updateSubjectColumnDefs();
+        this.computeExpirationDate(study);
     }
 
     public get entity(): Study {
@@ -313,6 +317,10 @@ export class StudyComponent extends EntityComponent<Study> {
 
         formGroup.setValidators(this.inclusionRatePairValidator.bind(this));
 
+        // Mark as touched right away so the "at least one center is required" messages
+        // are visible from the start on a study with no center yet.
+        formGroup.get('studyCenterList')?.markAsTouched();
+
         formGroup.get('startDate')?.valueChanges.subscribe(() => {
             formGroup.get('endDate')?.updateValueAndValidity();
         });
@@ -320,9 +328,9 @@ export class StudyComponent extends EntityComponent<Study> {
         return formGroup;
     }
 
-    private inclusionRatePairValidator(group: UntypedFormGroup) {
-        const rate = group.get('inclusionRate')?.value;
-        const unit = group.get('inclusionRateUnit')?.value;
+    private inclusionRatePairValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
+        const rate = control.get('inclusionRate')?.value;
+        const unit = control.get('inclusionRateUnit')?.value;
 
         if ((rate && !unit) || (!rate && unit)) return { inclusionRatePair: true };
 
@@ -367,6 +375,19 @@ export class StudyComponent extends EntityComponent<Study> {
         if (startDay === null || endDay === null) return null;
         if (endDay <= startDay) return { order: true };
         return null;
+    }
+
+    private computeExpirationDate(study: Study) {
+        this.userExpiration = study?.studyUserList?.find(su => su.userId == KeycloakService.auth.userId)?.expirationDate;
+        if (this.userExpiration && this.userExpiration > new Date()) {
+            if (this.userExpiration && this.userExpiration < new Date(new Date().getTime() + 30 * 24 * 60 * 60 * 1000)) {
+                this.userExpirationColor = 'darkorange';
+            } else {
+                this.userExpirationColor = 'green';
+            }
+        } else {
+            this.userExpirationColor = 'red';
+        }
     }
 
     private toDateOnlyTimestamp(value: Date | string): number | null {
@@ -444,7 +465,7 @@ export class StudyComponent extends EntityComponent<Study> {
         this.subjectService
             .getAllSubjectsNames()
             .then(subjects => {
-                this.subjects = subjects?.sort(function(a:Subject, b:Subject){
+                this.subjects = subjects?.sort((a:IdName, b:IdName) => {
                     return a.name.localeCompare(b.name);
                 });
             });
@@ -467,12 +488,15 @@ export class StudyComponent extends EntityComponent<Study> {
         const studyCenterListControl = this.form.get('studyCenterList');
         studyCenterListControl.setValue([...this.study.studyCenterList]);
         studyCenterListControl.markAsDirty();
+        studyCenterListControl.markAsTouched();
         studyCenterListControl.updateValueAndValidity();
     }
 
     onPrefixChange() {
-        this.form.get('studyCenterList').markAsDirty();
-        this.form.get('studyCenterList').updateValueAndValidity();
+        const studyCenterListControl = this.form.get('studyCenterList');
+        studyCenterListControl.markAsDirty();
+        studyCenterListControl.markAsTouched();
+        studyCenterListControl.updateValueAndValidity();
     }
 
     private validateCenter = (): ValidationErrors | null => {
@@ -489,6 +513,7 @@ export class StudyComponent extends EntityComponent<Study> {
         const studyCenterListControl = this.form.get('studyCenterList');
         studyCenterListControl.setValue([...this.study.studyCenterList]);
         studyCenterListControl.markAsDirty();
+        studyCenterListControl.markAsTouched();
         studyCenterListControl.updateValueAndValidity();
     }
 

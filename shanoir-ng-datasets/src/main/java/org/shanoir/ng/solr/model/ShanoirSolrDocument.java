@@ -113,13 +113,16 @@ public class ShanoirSolrDocument {
     @Field
     private String username;
 
+    @Field
+    private String qualityTag;
+
     public ShanoirSolrDocument() {
     }
 
     public ShanoirSolrDocument(String id, Long datasetId, String datasetName, String datasetType, String datasetNature,
             Date datasetCreationDate, Long examinationId, String examinationComment, Date examinationDate, String acquisitionEquipmentName,
             String subjectName, String subjectType, Long subjectId, String studyName, Long studyId, String centerName, Long centerId, Double sliceThickness,
-            Double pixelBandwidth, Double magneticFieldStrength, boolean processed, Date importDate, String username, Integer sortingIndex, Boolean dataReuseAgreement) {
+            Double pixelBandwidth, Double magneticFieldStrength, boolean processed, Date importDate, String username, Integer sortingIndex, Boolean dataReuseAgreement, String qualityTag) {
         this.id = id;
         this.datasetId = datasetId;
         this.datasetName = datasetName;
@@ -145,6 +148,7 @@ public class ShanoirSolrDocument {
         this.processed = processed;
         this.importDate = importDate;
         this.username = username;
+        this.qualityTag = qualityTag;
     }
 
     public String getId() {
@@ -413,5 +417,13 @@ public class ShanoirSolrDocument {
 
     public void setDataReuseAgreement(Boolean dataReuseAgreement) {
         this.dataReuseAgreement = dataReuseAgreement;
+    }
+
+    public String getQualityTag() {
+        return qualityTag;
+    }
+
+    public void setQualityTag(String qualityTag) {
+        this.qualityTag = qualityTag;
     }
 }

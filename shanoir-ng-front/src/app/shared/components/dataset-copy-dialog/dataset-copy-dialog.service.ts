@@ -14,8 +14,8 @@
 
 import { ComponentRef, Injectable } from '@angular/core';
 
-import { ServiceLocator } from 'src/app/utils/locator.service';
-import { DatasetService } from 'src/app/datasets/shared/dataset.service';
+import { ServiceLocator } from '@app/utils/locator.service';
+import { DatasetService } from '@app/datasets/shared/dataset.service';
 
 import { DatasetCopyDialogComponent, InputDataset } from './dataset-copy-dialog.component';
 

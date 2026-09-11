@@ -26,6 +26,7 @@ import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.storage.StorageException;
 import org.shanoir.ng.study.dto.CopyData;
+import org.shanoir.ng.study.dto.IdDate;
 import org.shanoir.ng.study.dto.IdNameCenterStudyDTO;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.dto.StudyLightDTO;
@@ -110,6 +111,17 @@ public interface StudyApi {
             @ApiResponse(responseCode = "500", description = "unexpected error") })
     @RequestMapping(value = "/public/data", produces = { "application/json" }, method = RequestMethod.GET)
     ResponseEntity<List<StudyLightDTO>> findPublicStudiesData();
+
+    // find expired studies on /data
+    @Operation(summary = "", description = "If exists, returns the studies that are expired")
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found studies"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "404", description = "no study found"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @RequestMapping(value = "/expired", produces = { "application/json" }, method = RequestMethod.GET)
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    ResponseEntity<List<StudyLightDTO>> findExpiredStudiesData();
 
     @Operation(summary = "", description = "Returns id and name for all the studies")
     @ApiResponses(value = {
@@ -408,6 +420,16 @@ public interface StudyApi {
     @GetMapping(value = "/studyUser/{studyId}", produces = { "application/json" })
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER'))")
     ResponseEntity<List<StudyUser>> getStudyUserByStudyId(@PathVariable("studyId") Long studyId);
+
+    @Operation(summary = "", description = "If exists, returns a list of expiration dates corresponding to the given userId")
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "List of expiration dates"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "404", description = "no study found"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @GetMapping(value = "/userExpirationDates", produces = { "application/json" })
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER'))")
+    ResponseEntity<List<IdDate>> getUserExpirationDates();
 
     @Operation(summary = "getStudyStatistics", description = "Returns study imaging statistics corresponding to the given study id")
     @ApiResponses(value = {

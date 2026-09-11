@@ -83,7 +83,10 @@ public enum DatasetModalityType {
     PARAMETER_QUANTIFICATION_DATASET(20),
 
     // MEASUREMENT Dataset
-    MEASUREMENT_DATASET(21);
+    MEASUREMENT_DATASET(21),
+
+    // RT Dataset (RTSTRUCT, RTDOSE, RTPLAN)
+    RT_DATASET(22);
 
     private int id;
 

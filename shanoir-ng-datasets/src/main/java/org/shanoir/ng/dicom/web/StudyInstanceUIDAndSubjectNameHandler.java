@@ -28,6 +28,7 @@ import org.shanoir.ng.datasetacquisition.model.GenericDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.ct.CtDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.pet.PetDatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.rt.RtDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.xa.XaDatasetAcquisition;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.examination.model.Examination;
@@ -44,6 +45,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 
 import jakarta.annotation.PostConstruct;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * The StudyInstanceUIDAndSubjectNameHandler component manages the translation
@@ -292,6 +294,7 @@ public class StudyInstanceUIDAndSubjectNameHandler {
      * @param examinationUID
      * @return
      */
+    @Transactional(readOnly = true)
     public String findStudyInstanceUIDFromCacheOrDatabase(String examinationUID) {
         String studyInstanceUID = examinationUIDToStudyInstanceUIDCache.get(examinationUID);
         if (studyInstanceUID == null) {
@@ -356,6 +359,7 @@ public class StudyInstanceUIDAndSubjectNameHandler {
                     || acquisition instanceof CtDatasetAcquisition
                     || acquisition instanceof PetDatasetAcquisition
                     || acquisition instanceof XaDatasetAcquisition
+                    || acquisition instanceof RtDatasetAcquisition
                     || acquisition instanceof GenericDatasetAcquisition) {
                 List<Dataset> datasets = acquisition.getDatasets();
                 if (!datasets.isEmpty()) {

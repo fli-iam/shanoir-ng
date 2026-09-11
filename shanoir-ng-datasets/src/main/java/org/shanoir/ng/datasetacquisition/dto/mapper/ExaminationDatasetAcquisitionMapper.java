@@ -20,9 +20,7 @@ import org.mapstruct.DecoratedWith;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
-import org.shanoir.ng.dataset.dto.DatasetWithProcessingsDTO;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
-import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.dto.ExaminationDatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 
@@ -37,11 +35,12 @@ import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 public interface ExaminationDatasetAcquisitionMapper {
 
     /**
-     * Map list of @DatasetAcquisition to list
-     * of @ExaminationDatasetAcquisitionDTO.
+     * Map list of @DatasetAcquisition to list of @ExaminationDatasetAcquisitionDTO.
+     * This decorator needs some data loaded:
+     * - The datasets without any relations
      *
-     * @param datasetAcquisitions
-     *            list of dataset acquisitions.
+     * @param datasetAcquisitions list of dataset acquisitions.
+     *
      * @return list of dataset acquisitions DTO.
      */
     List<ExaminationDatasetAcquisitionDTO> datasetAcquisitionsToExaminationDatasetAcquisitionDTOs(
@@ -57,8 +56,4 @@ public interface ExaminationDatasetAcquisitionMapper {
     @Mappings({ @Mapping(target = "name", ignore = true) })
     ExaminationDatasetAcquisitionDTO datasetAcquisitionToExaminationDatasetAcquisitionDTO(
             DatasetAcquisition datasetAcquisition);
-
-    @Mappings({ @Mapping(target = "source", ignore = true), @Mapping(target = "copies", ignore = true) })
-    DatasetWithProcessingsDTO datasetToDatasetWithProcessingsDTO(Dataset dataset);
-
 }

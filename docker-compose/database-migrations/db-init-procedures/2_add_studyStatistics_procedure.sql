@@ -32,22 +32,22 @@ SELECT DISTINCT
     da.import_date AS import_date,
     d.id AS dataset_id,
     dm.name AS dataset_name,
-    (CASE dm.dataset_modality_type WHEN 1 THEN 'Mr' 
-                                   WHEN 2 THEN 'Meg' 
-                                   WHEN 3 THEN 'Ct' 
-                                   WHEN 4 THEN 'Spect' 
-                                   WHEN 5 THEN 'Pet' 
-                                   WHEN 6 THEN 'Egg' 
-                                   WHEN 7 THEN 'Generic' 
-                                   WHEN 8 THEN 'Ieeg' 
-                                   WHEN 9 THEN 'Micr' 
+    (CASE dm.dataset_modality_type WHEN 1 THEN 'Mr'
+                                   WHEN 2 THEN 'Meg'
+                                   WHEN 3 THEN 'Ct'
+                                   WHEN 4 THEN 'Spect'
+                                   WHEN 5 THEN 'Pet'
+                                   WHEN 6 THEN 'Egg'
+                                   WHEN 7 THEN 'Generic'
+                                   WHEN 8 THEN 'Ieeg'
+                                   WHEN 9 THEN 'Micr'
                                    WHEN 10 THEN 'Beh'
                                    WHEN 11 THEN 'Nirs'
                                    WHEN 12 THEN 'Xa' END) AS modality,
-    (CASE s.quality_tag WHEN 1 THEN 'Valid' WHEN 2 THEN 'Warning' WHEN 3 THEN 'Error' END) AS quality
+    (CASE da.quality_tag WHEN 1 THEN 'Valid' WHEN 2 THEN 'Warning' WHEN 3 THEN 'Error' END) AS quality
 FROM
     datasets.examination e
-INNER JOIN 
+INNER JOIN
     datasets.center c ON e.center_id = c.id
 INNER JOIN
     datasets.dataset_acquisition da ON e.id = da.examination_id
@@ -55,12 +55,12 @@ INNER JOIN
     datasets.dataset d ON da.id = d.dataset_acquisition_id
 INNER JOIN
     datasets.dataset_metadata dm ON d.updated_metadata_id = dm.id
-INNER JOIN 
+INNER JOIN
     studies.subject s ON d.subject_id = s.id
 INNER JOIN
     studies.study_center sc ON c.id = sc.center_id
-WHERE e.study_id = studyId 
-AND s.study_id = studyId 
+WHERE e.study_id = studyId
+AND s.study_id = studyId
 AND sc.study_id = studyId;
 END //
 

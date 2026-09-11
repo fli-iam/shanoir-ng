@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 import { Step } from '../../breadcrumbs/breadcrumbs.service';
@@ -31,6 +31,7 @@ import { SelectBoxComponent } from '../../shared/select/select.component';
     selector: 'processed-dataset-clinical-context',
     templateUrl: 'processed-dataset-clinical-context.component.html',
     styleUrls: ['../clinical-context/clinical-context.component.css', '../shared/import.step.css', './processed-dataset-clinical-context.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [TooltipComponent, SelectBoxComponent, FormsModule]
 })
 export class ProcessedDatasetClinicalContextComponent extends AbstractClinicalContextComponent {

@@ -13,18 +13,19 @@
  */
 
 import { HttpClient } from '@angular/common/http';
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
-import { DatasetAcquisitionService } from 'src/app/dataset-acquisitions/shared/dataset-acquisition.service';
-import { DatasetService } from 'src/app/datasets/shared/dataset.service';
-import { ExaminationService } from 'src/app/examinations/shared/examination.service';
-import { StudyService } from 'src/app/studies/shared/study.service';
+import { DatasetAcquisitionService } from '@app/dataset-acquisitions/shared/dataset-acquisition.service';
+import { DatasetService } from '@app/datasets/shared/dataset.service';
+import { ExaminationService } from '@app/examinations/shared/examination.service';
+import { StudyService } from '@app/studies/shared/study.service';
 
 @Component({
     selector: 'dev-test',
     templateUrl: 'test.component.html',
     standalone: true,
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [FormsModule]
 })
 

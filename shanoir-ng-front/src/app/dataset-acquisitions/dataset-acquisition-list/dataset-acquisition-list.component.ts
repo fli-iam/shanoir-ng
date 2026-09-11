@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 
 import { TableComponent } from '../../shared/components/table/table.component';
 import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
@@ -29,6 +29,7 @@ import { EntityService } from '../../shared/components/entity/entity.abstract.se
     selector: 'dataset-acquisition-list',
     templateUrl: 'dataset-acquisition-list.component.html',
     styleUrls: ['dataset-acquisition-list.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [TableComponent]
 })
 export class DatasetAcquisitionListComponent extends EntityListComponent<DatasetAcquisition> {

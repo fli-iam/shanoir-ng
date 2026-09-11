@@ -29,6 +29,8 @@ spring:
       credentials:
         access-key: ${S3_ACCESS_KEY_ID}
         secret-key: ${S3_SECRET_ACCESS_KEY}
+  config:
+    import: "classpath:/shanoir-shared.yml"
   datasource:
     url: jdbc:mariadb://${SHANOIR_DB_HOST:${SHANOIR_PREFIX}database}:${SHANOIR_DB_PORT:3306}/${SHANOIR_DB_NAME:studies}?characterEncoding=utf-8
     username: studies

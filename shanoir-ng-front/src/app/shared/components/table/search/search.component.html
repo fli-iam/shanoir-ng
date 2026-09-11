@@ -12,9 +12,9 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 <button type="button" (click)="resetSearch()" title="clear search"><i class="fas fa-broom"></i></button>
-<input class="search-txt" [(ngModel)]="filter.searchStr" (change)="search()" type="text" placeholder="search..." />
+<input class="search-txt" [(ngModel)]="filter.searchStr" (change)="search()" [ngModelOptions]="{ standalone: true }" type="text" placeholder="search..." />
 to filter
-<select class="search-field" [(ngModel)]="filter.searchField" (change)="search()">
+<select class="search-field" [(ngModel)]="filter.searchField" (change)="search()" [ngModelOptions]="{ standalone: true }">
     @if (searchableColumns?.length > 1) {
         <option value="">*</option>
     }

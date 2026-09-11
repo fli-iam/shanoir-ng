@@ -24,11 +24,13 @@ import org.shanoir.ng.datasetacquisition.model.ct.CtDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.eeg.EegDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.pet.PetDatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.rt.RtDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.xa.XaDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.validation.DatasetsModalityTypeCheck;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
+import org.shanoir.ng.shared.quality.QualityTag;
 import org.shanoir.ng.studycard.model.StudyCard;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -69,7 +71,8 @@ import jakarta.validation.constraints.NotNull;
     @Type(value = GenericDatasetAcquisition.class, name = "Generic"),
     @Type(value = EegDatasetAcquisition.class, name = "Eeg"),
     @Type(value = BidsDatasetAcquisition.class, name = "BIDS"),
-    @Type(value = XaDatasetAcquisition.class, name = "Xa")})
+    @Type(value = XaDatasetAcquisition.class, name = "Xa"),
+    @Type(value = RtDatasetAcquisition.class, name = "Rt")})
 public abstract class DatasetAcquisition extends AbstractEntity {
 
     /**
@@ -126,12 +129,14 @@ public abstract class DatasetAcquisition extends AbstractEntity {
     private List<DatasetAcquisition> copies;
 
     /** List of extra files directly attached to the dataset acquisition. */
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "acquisition_extra_data_file_path", joinColumns = @JoinColumn(name = "dataset_acquisition_id"))
     @Column(name = "path")
     private List<String> extraDataFilePathList;
 
     private LocalDateTime acquisitionStartTime;
+
+    private Integer qualityTag;
 
     /**
      * The DICOM SeriesInstanceUID present in the backup PACS of Shanoir,
@@ -160,6 +165,7 @@ public abstract class DatasetAcquisition extends AbstractEntity {
         this.copies = other.copies;
         this.source = other.source;
         this.acquisitionStartTime = other.acquisitionStartTime;
+        this.qualityTag = other.qualityTag;
     }
 
     /**
@@ -351,6 +357,14 @@ public abstract class DatasetAcquisition extends AbstractEntity {
 
     public void setSeriesInstanceUID(String seriesInstanceUID) {
         this.seriesInstanceUID = seriesInstanceUID;
+    }
+
+    public QualityTag getQualityTag() {
+        return QualityTag.get(qualityTag);
+    }
+
+    public void setQualityTag(QualityTag tag) {
+        this.qualityTag = tag != null ? tag.getId() : null;
     }
 
 }

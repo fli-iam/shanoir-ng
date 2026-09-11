@@ -12,7 +12,7 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 <div [hidden]="!downloadState?.progress">
-    <progress-bar [progress]="downloadState?.progress" [text]="'Preparing download'" [unknownDownload]="true"></progress-bar>
+    <progress-bar [progress]="$safeNavigationMigration(downloadState?.progress)" [text]="'Preparing download'" [unknownDownload]="true"></progress-bar>
 </div>
 @if (node) {
     <node
@@ -25,11 +25,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         [route]="node.route"
         [hasBox]="hasBox"
         [(ngModel)]="node.selected"
+        [ngModelOptions]="{ standalone: true }"
         (chkbxChange)="selectedChange.emit()"
         (firstOpen)="firstOpen()"
         [hasChildren]="hasChildren()"
         [dataLoading]="loading"
         [title]="node.title + ' n°' + node.id">
+
         @if (menuOpened && withMenu && node.id != null) {
             <dropdown-menu [(openInput)]="menuOpened">
                 <a [routerLink]="detailsPath + node.id" class="open-new-tab">
@@ -48,8 +50,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 }
             </dropdown-menu>
         }
-        @if (node.open && node.datasetAcquisitions && node.datasetAcquisitions != $any('UNLOADED')) {
-            @for (datasetAcqNode of node.datasetAcquisitions; track datasetAcqNode; let i = $index) {
+        @if (node.open && node.datasetAcquisitions && node.datasetAcquisitions != 'UNLOADED') {
+            @for (datasetAcqNode of $any(node.datasetAcquisitions); track datasetAcqNode; let i = $index) {
                 <dataset-acquisition-node
                     node
                     [input]="datasetAcqNode"
@@ -57,13 +59,18 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     [hasBox]="hasBox"
                     (acquisitionDelete)="onAcquisitionDelete(i)"
                     [withMenu]="withMenu"></dataset-acquisition-node>
+                @if ($any(datasetAcqNode).qualityTag) {
+                    <span class="tag label dark"
+                          [style.background]="getQualityTagColor(datasetAcqNode)">
+                    </span>
+                }
             }
         }
-        @if (!!node.extraDataFilePathList && node.extraDataFilePathList != $any('UNLOADED') && node.extraDataFilePathList.length > 0) {
+        @if (!!node.extraDataFilePathList && node.extraDataFilePathList != UNLOADED && node.extraDataFilePathList.length > 0) {
             <node
                 label="Extra data files"
                 awesome="fa-regular fa-folder-open"
-                [hasChildren]="!!node.extraDataFilePathList && node.extraDataFilePathList != $any('UNLOADED') && node.extraDataFilePathList.length > 0"
+                [hasChildren]="true"
                 [(opened)]="node.extraDataOpen">
                 @for (file of node.extraDataFilePathList; track file) {
                     <node

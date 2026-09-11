@@ -15,18 +15,20 @@
 package org.shanoir.ng.studycard.dto;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.shanoir.ng.shared.model.Study;
-import org.shanoir.ng.shared.model.Subject;
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.shared.quality.QualityTag;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
- * This class contains the result of an application of a study card
+ * This class contains the result of an application of a quality card
  * on an entire study. For each examination, when the result is wrong
  * on the examination level already, we will not check deeper on the
  * acquisition level. When everything is clear on the examination level,
@@ -42,50 +44,54 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class QualityCardResult extends CopyOnWriteArrayList<QualityCardResultEntry> {
 
-    private List<Subject> updatedSubjects = new CopyOnWriteArrayList<>();
+    private List<DatasetAcquisition> updatedDatasetAcquisitions = new CopyOnWriteArrayList<>();
 
-    public List<Subject> getUpdatedSubjects() {
-        return updatedSubjects;
+    public List<DatasetAcquisition> getUpdatedDatasetAcquisitions() {
+        return updatedDatasetAcquisitions;
     }
 
-    private void setUpdatedSubjects(List<Subject> updatedSubjects) {
-        this.updatedSubjects = updatedSubjects;
-    }
-
-    public void addUpdatedSubject(Subject subject) {
-        if (getUpdatedSubjects() == null) setUpdatedSubjects(new ArrayList<>());
-        if (subject == null || subject.getId() == null) return;
-        for (Subject presentSub : getUpdatedSubjects()) {
-            if (subject.getId().equals(presentSub.getId())
-                    && presentSub.getQualityTag().getId() >= subject.getQualityTag().getId()) {
-                return;
-            }
-        }
-        getUpdatedSubjects().add(subject);
+    private void setUpdatedDatasetAcquisitions(List<DatasetAcquisition> updatedDatasetAcquisitions) {
+        this.updatedDatasetAcquisitions = updatedDatasetAcquisitions;
     }
 
     /***
-     * Remove unchanged subject-studies
-     * @param study the study containing the original subject-studies
+     * Add a dataset acquisition to the list of updated dataset acquisitions,
+     * if it is not already in the list or if it is in the list but with a better quality tag.
+     * @param datasetAcquisition
      */
-    public void removeUnchanged(Study study) {
-        if (getUpdatedSubjects() == null) return;
-        for (Subject original : study.getSubjectList()) {
-            getUpdatedSubjects().removeIf(updated ->
-                    updated.getId().equals(original.getId())
-                    && updated.getQualityTag() != null
-                    && updated.getQualityTag().equals(original.getQualityTag())
-            );
+    public void addUpdatedDatasetAcquisition(DatasetAcquisition datasetAcquisition) {
+        if (datasetAcquisition == null || datasetAcquisition.getId() == null) return;
+        if (getUpdatedDatasetAcquisitions() == null) setUpdatedDatasetAcquisitions(new ArrayList<>());
+
+        for (int i = 0; i < getUpdatedDatasetAcquisitions().size(); i++) {
+            DatasetAcquisition presentDatasetAcq = getUpdatedDatasetAcquisitions().get(i);
+            if (datasetAcquisition.getId().equals(presentDatasetAcq.getId())) {
+                // if a same id is found, we replace if the new quality tag is worst than the previous one
+                if (datasetAcquisition.getQualityTag().getId() > presentDatasetAcq.getQualityTag().getId()) {
+                    getUpdatedDatasetAcquisitions().set(i, datasetAcquisition);
+                }
+                return;
+            }
         }
+        getUpdatedDatasetAcquisitions().add(datasetAcquisition);
     }
 
     public void merge(QualityCardResult result) {
         this.addAll(result);
-        if (result.getUpdatedSubjects() != null) {
-            for (Subject subjectStudy : result.getUpdatedSubjects()) {
-                this.addUpdatedSubject(subjectStudy);
+        if (result.getUpdatedDatasetAcquisitions() != null) {
+            for (DatasetAcquisition datasetAcquisition : result.getUpdatedDatasetAcquisitions()) {
+                this.addUpdatedDatasetAcquisition(datasetAcquisition);
             }
         }
+    }
+
+    public boolean isValid() {
+        for (QualityCardResultEntry entry : this) {
+            if (QualityTag.VALID.equals(entry.getTagSet()) && !entry.isFailedValid()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public boolean hasError() {
@@ -124,6 +130,17 @@ public class QualityCardResult extends CopyOnWriteArrayList<QualityCardResultEnt
         } catch (JsonProcessingException e) {
             return "json error";
         }
+    }
+
+    /*
+     * Find the quality card result entry with the worst quality tag by its dataset acquisition ID.
+     * @param id the dataset acquisition ID
+     * @return the quality card result entry if found, empty optional otherwise
+     */
+    public Optional<QualityCardResultEntry> findById(Long id) {
+        return stream()
+            .filter(entry -> Objects.equals(entry.getDatasetAcquisitionId(), id))
+            .max(Comparator.comparingInt(entry -> entry.getTagSet().getId()));
     }
 
 }

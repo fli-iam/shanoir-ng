@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { allOfEnum } from "src/app/utils/app.utils";
+import { allOfEnum } from "@app/utils/app.utils";
 
 export enum InjectionInterval {
     BEFORE = "BEFORE",

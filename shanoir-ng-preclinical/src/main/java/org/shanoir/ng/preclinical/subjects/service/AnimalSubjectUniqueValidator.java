@@ -15,8 +15,8 @@
 package org.shanoir.ng.preclinical.subjects.service;
 
 import org.shanoir.ng.preclinical.subjects.model.AnimalSubject;
-import org.shanoir.ng.shared.validation.UniqueConstraintManagerImpl;
+import org.shanoir.ng.shared.validation.UniqueConstraintManager;
 import org.springframework.stereotype.Service;
 
 @Service
-public class AnimalSubjectUniqueValidator extends UniqueConstraintManagerImpl<AnimalSubject> { }
+public class AnimalSubjectUniqueValidator extends UniqueConstraintManager<AnimalSubject> { }

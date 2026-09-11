@@ -14,10 +14,10 @@
 
 package org.shanoir.ng.preclinical.pathologies;
 
-import org.shanoir.ng.shared.validation.UniqueConstraintManagerImpl;
+import org.shanoir.ng.shared.validation.UniqueConstraintManager;
 import org.springframework.stereotype.Service;
 
 @Service
-public class PathologyUniqueValidator extends UniqueConstraintManagerImpl<Pathology> {
+public class PathologyUniqueValidator extends UniqueConstraintManager<Pathology> {
 
 }

@@ -17,6 +17,7 @@ package org.shanoir.ng.email;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,16 +27,15 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.InternetAddress;
 import org.shanoir.ng.accessrequest.model.AccessRequest;
 import org.shanoir.ng.email.model.DatasetDetail;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.email.DuaDraftWrapper;
 import org.shanoir.ng.shared.email.EmailDatasetImportFailed;
 import org.shanoir.ng.shared.email.EmailDatasetsImported;
-import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
 import org.shanoir.ng.shared.email.EmailStudy;
+import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
 import org.shanoir.ng.shared.email.StudyInvitationEmail;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.user.repository.UserRepository;
@@ -45,6 +45,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.mail.javamail.MimeMessagePreparator;
@@ -53,6 +54,9 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.util.HtmlUtils;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
+
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.InternetAddress;
 
 /**
  * Implementation of email service.
@@ -83,6 +87,12 @@ public class EmailServiceImpl implements EmailService {
 
     private static final String STUDY_NAME = "studyName";
 
+    private static final String STUDY_ADDRESS = "studyAddress";
+
+    private static final String EXTENSION_REQUEST_ADDRESS = "extensionRequestAddress";
+
+    private static final String EXTENSION_DATE = "extensionDate";
+
     private static final String SUBJECT = "subject";
 
     private static final String EXAMINATION = "examination";
@@ -92,6 +102,8 @@ public class EmailServiceImpl implements EmailService {
     private static final String EXAM_DATE = "exam_date";
 
     private static final String STUDY_CARD = "study_card";
+
+    private static final String QUALITY_CARDS = "quality_cards";
 
     private static final String SERIES = "series";
 
@@ -182,7 +194,26 @@ public class EmailServiceImpl implements EmailService {
             messageHelper.setText(content, true);
         };
         mailSender.send(messagePreparator);
+    }
 
+    @Override
+    public void notifyStudyUserWillExpire(IdName study, User user, LocalDate expiration) throws MailException {
+        MimeMessagePreparator messagePreparator = mimeMessage -> {
+            final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+            this.setFromAdministrator(messageHelper);
+            messageHelper.setTo(user.getEmail());
+            messageHelper.setSubject("Shanoir Study Access Expiration");
+            final Map<String, Object> variables = new HashMap<>();
+            variables.put(FIRSTNAME, user.getFirstName());
+            variables.put(LASTNAME, user.getLastName());
+            variables.put(SERVER_ADDRESS, shanoirServerAddress);
+            variables.put(EXTENSION_REQUEST_ADDRESS, shanoirServerAddress + "study/list?id=" + study.getId() + "&requestExtension=" + study.getId());
+            variables.put(EXPIRATION_DATE, FORMATTER.format(expiration));
+            variables.put(STUDY_NAME, study.getName());
+            final String content = build("notifyStudyUserWillExpire", variables);
+            messageHelper.setText(content, true);
+        };
+        mailSender.send(messagePreparator);
     }
 
     @Override
@@ -243,6 +274,89 @@ public class EmailServiceImpl implements EmailService {
             variables.put("user", user);
             variables.put(SERVER_ADDRESS, shanoirServerAddress);
             final String content = build("notifyAdminAccountExtensionRequest", variables);
+            messageHelper.setText(content, true);
+        };
+        mailSender.send(messagePreparator);
+    }
+
+    /**
+    * Send a mail to the user when their access request extension is granted
+    */
+    @Override
+    public void notifyUserAccessRequestExtensionGranted(User user, IdName study, LocalDate extensionDate) {
+        MimeMessagePreparator messagePreparator = mimeMessage -> {
+            final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+            this.setFromAdministrator(messageHelper);
+            messageHelper.setTo(user.getEmail());
+            messageHelper.setSubject("Shanoir Account Extension Granted");
+            final Map<String, Object> variables = new HashMap<>();
+            variables.put(FIRSTNAME, user.getFirstName());
+            variables.put(LASTNAME, user.getLastName());
+            variables.put(SERVER_ADDRESS, shanoirServerAddress);
+            variables.put(STUDY_NAME, study.getName());
+            variables.put(STUDY_ADDRESS, shanoirServerAddress + "study/details/" + study.getId());
+            variables.put(EXTENSION_DATE, extensionDate.format(DateTimeFormatter.ofPattern("dd MMMM yyyy")));
+            final String content = build("notifyUserAccessRequestExtensionGranted", variables);
+            messageHelper.setText(content, true);
+        };
+        mailSender.send(messagePreparator);
+    }
+
+    /**
+    * Send a mail to the study admins when a user access request extension is granted
+    */
+    @Override
+    public void notifyAdminsAccessRequestExtensionGranted(User user, IdName study, LocalDate extensionDate) {
+        final List<String> adminEmails = userRepository.findAdminEmails();
+        MimeMessagePreparator messagePreparator = mimeMessage -> {
+            final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+            this.setFromAdministrator(messageHelper);
+            messageHelper.setTo(adminEmails.toArray(new String[0]));
+            messageHelper.setSubject("Shanoir Account Extension Granted");
+            final Map<String, Object> variables = new HashMap<>();
+            variables.put(STUDY_NAME, study.getName());
+            variables.put(STUDY_ADDRESS, shanoirServerAddress + "study/details/" + study.getId());
+            variables.put(FIRSTNAME, user.getFirstName());
+            variables.put(LASTNAME, user.getLastName());
+            variables.put(EXTENSION_DATE, extensionDate.format(DateTimeFormatter.ofPattern("dd MMMM yyyy")));
+            final String content = build("notifyAdminsAccessRequestExtensionGranted", variables);
+            messageHelper.setText(content, true);
+        };
+        mailSender.send(messagePreparator);
+    }
+
+    @Override
+    public void notifyUserAccessRequestExtensionRefused(User user, IdName study) {
+        MimeMessagePreparator messagePreparator = mimeMessage -> {
+            final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+            this.setFromAdministrator(messageHelper);
+            messageHelper.setTo(user.getEmail());
+            messageHelper.setSubject("Shanoir Account Extension Refused");
+            final Map<String, Object> variables = new HashMap<>();
+            variables.put(FIRSTNAME, user.getFirstName());
+            variables.put(LASTNAME, user.getLastName());
+            variables.put(SERVER_ADDRESS, shanoirServerAddress);
+            variables.put(STUDY_NAME, study.getName());
+            final String content = build("notifyUserAccessRequestExtensionRefused", variables);
+            messageHelper.setText(content, true);
+        };
+        mailSender.send(messagePreparator);
+    }
+
+    @Override
+    public void notifyAdminsAccessRequestExtensionRequest(IdName user, IdName study, LocalDate extensionDate) {
+        final List<String> adminEmails = userRepository.findAdminEmails();
+        MimeMessagePreparator messagePreparator = mimeMessage -> {
+            final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+            this.setFromAdministrator(messageHelper);
+            messageHelper.setTo(adminEmails.toArray(new String[0]));
+            messageHelper.setSubject("Shanoir Account Extension Request");
+            final Map<String, Object> variables = new HashMap<>();
+            variables.put(STUDY_NAME, study.getName());
+            variables.put(SERVER_ADDRESS, shanoirServerAddress);
+            variables.put(FIRSTNAME, user.getName());
+            variables.put(EXTENSION_DATE, extensionDate.format(DateTimeFormatter.ofPattern("dd MMMM yyyy")));
+            final String content = build("notifyAdminsAccessRequestExtensionRequest", variables);
             messageHelper.setText(content, true);
         };
         mailSender.send(messagePreparator);
@@ -518,6 +632,7 @@ public class EmailServiceImpl implements EmailService {
                 variables.put(EXAMINATION, examDetail);
                 variables.put(EXAM_DATE, generatedMail.getExamDate());
                 variables.put(STUDY_CARD, generatedMail.getStudyCard());
+                variables.put(QUALITY_CARDS, generatedMail.getQualityCards());
                 variables.put(SERVER_ADDRESS, shanoirServerAddress);
                 final String content = build("notifyStudyAdminDataImported", variables);
                 LOG.info(content);

@@ -13,11 +13,11 @@
  */
 
 import { Location } from '@angular/common';
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, ValidationErrors, Validators, FormsModule, ReactiveFormsModule, AbstractControl, ValidatorFn } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
-import { ConsoleService } from 'src/app/shared/console/console.service';
+import { ConsoleService } from '@app/shared/console/console.service';
 
 import * as AppUtils from '../../utils/app.utils';
 import { AccountRequestInfo } from '../account-request-info/account-request-info.model';
@@ -31,6 +31,7 @@ import { ConsoleComponent } from '../../shared/console/console.component';
     selector: 'accountRequest',
     templateUrl: 'account-request.component.html',
     styleUrls: ['account-request.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [HeaderComponent, FormsModule, ReactiveFormsModule, AccountRequestInfoComponent, ConsoleComponent]
 })
 

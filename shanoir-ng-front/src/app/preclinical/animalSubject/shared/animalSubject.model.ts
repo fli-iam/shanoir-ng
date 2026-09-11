@@ -12,9 +12,9 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Field } from 'src/app/shared/reflect/field.decorator';
-import { Subject } from 'src/app/subjects/shared/subject.model';
-import { SubjectDTO } from 'src/app/subjects/shared/subject.dto';
+import { Field } from '@app/shared/reflect/field.decorator';
+import { Subject } from '@app/subjects/shared/subject.model';
+import { SubjectDTO } from '@app/subjects/shared/subject.dto';
 
 import { Entity } from "../../../shared/components/entity/entity.abstract";
 import { ImagedObjectCategory } from "../../../subjects/shared/imaged-object-category.enum";

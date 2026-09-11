@@ -63,15 +63,11 @@ public interface DatasetAcquisitionService {
     @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetAcquisitionList(returnObject, 'CAN_SEE_ALL')")
     List<DatasetAcquisition> findByDatasetId(Long[] datasetIds);
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetAcquisitionList(returnObject, 'CAN_SEE_ALL')")
-    List<DatasetAcquisition> findByExamination(Long examinationId);
-
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and  @datasetSecurityService.hasRightOnExamination(#entity.examination.id, 'CAN_ADMINISTRATE')")
     DatasetAcquisition update(DatasetAcquisition entity) throws EntityNotFoundException;
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and  @datasetSecurityService.filterDatasetAcquisitionList(#entities, 'CAN_ADMINISTRATE')")
-    Iterable<DatasetAcquisition> update(List<DatasetAcquisition> entities);
+    Iterable<DatasetAcquisition> update(List<DatasetAcquisition> entities) throws EntityNotFoundException;
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and  @datasetSecurityService.hasRightOnDatasetAcquisition(#id, 'CAN_ADMINISTRATE')")
     void deleteById(Long id, ShanoirEvent event) throws EntityNotFoundException, ShanoirException, SolrServerException, IOException, RestServiceException;

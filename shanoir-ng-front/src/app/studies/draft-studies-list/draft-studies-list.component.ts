@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
@@ -24,6 +24,7 @@ import { KeycloakService } from '../../shared/keycloak/keycloak.service';
     selector: 'draft-studies-list',
     templateUrl: 'draft-studies-list.component.html',
     styleUrls: ['draft-studies-list.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [RouterLink]
 })
 
