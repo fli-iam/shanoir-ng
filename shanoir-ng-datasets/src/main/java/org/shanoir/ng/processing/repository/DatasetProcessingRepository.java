@@ -153,16 +153,10 @@ public interface DatasetProcessingRepository extends CrudRepository<DatasetProce
             + "WHERE processing.id IN :ids")
     List<DatasetProcessing> findByIdsWithInputs(List<Long> ids);
 
-    @Query("SELECT DISTINCT processing FROM DatasetProcessing processing "
-            + "LEFT JOIN FETCH processing.outputDatasets "
-            + "WHERE processing.id IN :ids")
-    List<DatasetProcessing> findByIdsWithOutputs(List<Long> ids);
-
     /**
-     * inputDatasets and outputDatasets are both bags, so Hibernate refuses to fetch them
-     * within a single query (MultipleBagFetchException). They are fetched by two queries
-     * sharing the same persistence context instead, which leaves both collections
-     * initialized on the returned entities.
+     * inputDatasets and outputDatasets are both bags, so Hibernate refuses to fetch them both
+     * within a single query (MultipleBagFetchException) : inputDatasets is fetched by the query,
+     * outputDatasets is initialized right after, while the session is still open.
      *
      * @param ids
      * @return
@@ -170,7 +164,7 @@ public interface DatasetProcessingRepository extends CrudRepository<DatasetProce
     @Transactional(readOnly = true)
     default List<DatasetProcessing> findByIdsWithInputsAndOutputs(List<Long> ids) {
         List<DatasetProcessing> processings = findByIdsWithInputs(ids);
-        findByIdsWithOutputs(ids);
+        processings.forEach(processing -> Hibernate.initialize(processing.getOutputDatasets()));
         return processings;
     }
 
