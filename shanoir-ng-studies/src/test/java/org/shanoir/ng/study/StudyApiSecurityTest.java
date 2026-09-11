@@ -37,7 +37,6 @@ import org.shanoir.ng.study.repository.StudyRepository;
 import org.shanoir.ng.study.repository.StudyUserRepository;
 import org.shanoir.ng.studycenter.StudyCenter;
 import org.shanoir.ng.subject.repository.SubjectRepository;
-import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.shanoir.ng.shared.core.model.IdName;
@@ -80,8 +79,6 @@ public class StudyApiSecurityTest {
     @MockBean
     private StudyUserRepository studyUserRepository;
 
-    @MockBean
-    private SubjectStudyRepository subjectStudyRepository;
 
     @BeforeEach
     public void setup() {

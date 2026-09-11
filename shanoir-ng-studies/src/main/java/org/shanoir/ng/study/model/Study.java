@@ -33,7 +33,6 @@ import org.shanoir.ng.shared.validation.Unique;
 import org.shanoir.ng.studycenter.StudyCenter;
 import org.shanoir.ng.studyexamination.StudyExamination;
 import org.shanoir.ng.subject.model.Subject;
-import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.shanoir.ng.tag.model.StudyTag;
 import org.shanoir.ng.tag.model.Tag;
 import org.shanoir.ng.timepoint.Timepoint;
@@ -73,7 +72,7 @@ import jakarta.validation.constraints.NotNull;
  */
 @Entity
 @NamedEntityGraph(name = "Study.All", attributeNodes = { @NamedAttributeNode("studyUserList"),
-        @NamedAttributeNode("studyCenterList"), @NamedAttributeNode("subjectStudyList"),
+        @NamedAttributeNode("studyCenterList"), @NamedAttributeNode("subjects"),
         @NamedAttributeNode("studyTags"),
         @NamedAttributeNode("protocolFilePaths"), @NamedAttributeNode("dataUserAgreementPaths"),
         @NamedAttributeNode("timepoints"), @NamedAttributeNode("tags"), @NamedAttributeNode("profile"),
@@ -155,12 +154,8 @@ public class Study extends HalEntity {
     @Transient
     private int nbExaminations;
 
-    /** Relations between the subjects and the studies. */
     @OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<SubjectStudy> subjectStudyList = new ArrayList<>();
-
-    @OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Subject> subjects = new ArrayList<>();
+    private List<Subject> subjects;
 
     @Transient
     private int nbSubjects;
@@ -443,21 +438,6 @@ public class Study extends HalEntity {
      */
     public void setStudyUserList(List<StudyUser> studyUserList) {
         this.studyUserList = studyUserList;
-    }
-
-    /**
-     * @return the subjectStudyList
-     */
-    public List<SubjectStudy> getSubjectStudyList() {
-        return subjectStudyList;
-    }
-
-    /**
-     * @param subjectStudyList
-     *            the subjectStudyList to set
-     */
-    public void setSubjectStudyList(List<SubjectStudy> subjectStudyList) {
-        this.subjectStudyList = subjectStudyList;
     }
 
     public List<Subject> getSubjects() {

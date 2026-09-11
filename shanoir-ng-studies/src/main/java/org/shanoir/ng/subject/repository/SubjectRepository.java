@@ -23,7 +23,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -43,10 +42,10 @@ import org.springframework.data.repository.query.Param;
  */
 public interface SubjectRepository extends JpaRepository<Subject, Long>, SubjectRepositoryCustom {
 
-    @EntityGraph(attributePaths = {"subjectStudyList.study.name", "subjectStudyList.study.tags", "subjectStudyList.subjectStudyTags", "subjectStudyList.study.studyUserList", "pseudonymusHashValues", "study.id", "study.studyUserList", "study.studyUserList.studyUserRights"})
+    @EntityGraph(attributePaths = {"pseudonymusHashValues", "study.tags", "study.studyUserList", "study.studyUserList.studyUserRights"})
     Optional<Subject> findById(Long id);
 
-    @EntityGraph(attributePaths = {"subjectStudyList.study.name", "subjectStudyList.study.studyUserList"})
+    @EntityGraph(attributePaths = {"study.studyUserList"})
     List<Subject> findAllById(Iterable<Long> ids);
 
     @EntityGraph(attributePaths = {"tags"})
@@ -58,8 +57,8 @@ public interface SubjectRepository extends JpaRepository<Subject, Long>, Subject
 
     List<Subject> findByStudyIdAndNameIn(Long studyId, Iterable<String> names);
 
-    @EntityGraph(attributePaths = {"subjectStudyList.study.name", "subjectStudyList.study.tags"})
-    Subject findFirstByIdentifierAndSubjectStudyListStudyIdIn(String identifier, Iterable<Long> studyIds);
+    @EntityGraph(attributePaths = {"study.tags"})
+    Subject findFirstByIdentifierAndStudyIdIn(String identifier, Iterable<Long> studyIds);
 
     @Query(value = "SELECT * FROM subject WHERE name LIKE :centerCode AND name REGEXP '^[0-9]+$' AND CHAR_LENGTH(name) IN (7, 8) ORDER BY name DESC LIMIT 1", nativeQuery = true)
     Subject findSubjectFromCenterCode(@Param("centerCode") String centerCode);
@@ -67,28 +66,28 @@ public interface SubjectRepository extends JpaRepository<Subject, Long>, Subject
     Page<Subject> findByNameContaining(String name, Pageable pageable);
 
     @EntityGraph(attributePaths = {"tags"})
-    Page<Subject> findDistinctByPreclinicalIsFalseAndNameContainingAndSubjectStudyListStudyIdIn(String name, Pageable pageable, Iterable<Long> studyIds);
+    Page<Subject> findDistinctByPreclinicalIsFalseAndNameContainingAndStudyIdIn(String name, Pageable pageable, Iterable<Long> studyIds);
 
     /**
      * Returns all instances of the type.
      *
      * @return all entities
      */
-    Iterable<Subject> findBySubjectStudyListStudyIdIn(Iterable<Long> studyIds);
+    Iterable<Subject> findByStudyIdIn(Iterable<Long> studyIds);
 
-    Iterable<Subject> findBySubjectStudyListStudyIdInAndIdIn(Iterable<Long> studyIds, Iterable<Long> ids);
+    Iterable<Subject> findByStudyIdInAndIdIn(Iterable<Long> studyIds, Iterable<Long> ids);
 
-    @EntityGraph(attributePaths = {"subjectStudyList.study.name", "subjectStudyList.study.tags", "subjectStudyList.study.studyUserList"})
+    @EntityGraph(attributePaths = {"study.tags", "study.studyUserList"})
     List<Subject> findByPreclinical(boolean preclinical);
 
-    boolean existsBySubjectStudyListStudyIdAndName(Long studyId, String name);
+    boolean existsByStudyIdAndName(Long studyId, String name);
 
     List<Subject> findByStudy_Id(Long studyId);
 
-    // delete subject study tags by subject id
-    @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query("DELETE FROM SubjectStudyTag sst WHERE sst.subjectStudy.subject.id = :subjectId")
-    void deleteSubjectStudyTagsBySubjectId(@Param("subjectId") Long subjectId);
+    List<Subject> findByStudyIdAndStudy_StudyUserList_UserId(Long studyId, Long userId);
+
+    @Query("SELECT s.study.id, COUNT(s) FROM Subject s GROUP BY s.study.id")
+    List<Object[]> countByStudyIdGroupBy();
 
     @Query("""
             select new org.shanoir.ng.shared.core.model.IdName(s.id, s.name)

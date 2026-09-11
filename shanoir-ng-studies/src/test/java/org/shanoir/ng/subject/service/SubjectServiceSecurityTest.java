@@ -33,7 +33,6 @@ import org.shanoir.ng.study.repository.StudyRepository;
 import org.shanoir.ng.study.repository.StudyUserRepository;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.repository.SubjectRepository;
-import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -171,7 +170,6 @@ public class SubjectServiceSecurityTest {
         Subject subjectMockNoRights = buildSubjectMock(1L);
         given(repository.findByStudyIdAndName(1L, name)).willReturn(subjectMockNoRights);
         given(repository.findById(1L)).willReturn(Optional.of(subjectMockNoRights));
-        given(repository.findSubjectWithSubjectStudyById(1L)).willReturn(subjectMockNoRights);
         given(repository.findSubjectFromCenterCode("centerCode%")).willReturn(subjectMockNoRights);
         assertAccessDenied(service::findById, 1L);
         assertAccessDenied(service::findSubjectFromCenterCode, "centerCode");
@@ -180,7 +178,6 @@ public class SubjectServiceSecurityTest {
         addStudyToMock(subjectMockWrongRights, 100L, StudyUserRight.CAN_ADMINISTRATE, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT);
         given(repository.findByStudyIdAndName(1L, name)).willReturn(subjectMockWrongRights);
         given(repository.findById(1L)).willReturn(Optional.of(subjectMockWrongRights));
-        given(repository.findSubjectWithSubjectStudyById(1L)).willReturn(subjectMockWrongRights);
         given(repository.findSubjectFromCenterCode("centerCode%")).willReturn(subjectMockWrongRights);
         assertAccessDenied(service::findById, 1L);
         assertAccessDenied(service::findSubjectFromCenterCode, "centerCode");
@@ -189,7 +186,6 @@ public class SubjectServiceSecurityTest {
         addStudyToMock(subjectMockRightRights, 100L, StudyUserRight.CAN_SEE_ALL);
         given(repository.findByStudyIdAndName(1L, name)).willReturn(subjectMockRightRights);
         given(repository.findById(1L)).willReturn(Optional.of(subjectMockRightRights));
-        given(repository.findSubjectWithSubjectStudyById(1L)).willReturn(subjectMockRightRights);
         given(repository.findSubjectFromCenterCode("centerCode%")).willReturn(subjectMockRightRights);
         given(studyRepository.findById(100L)).willReturn(Optional.of(subjectMockRightRights.getStudy()));
         assertAccessAuthorized(service::findById, 1L);
@@ -267,19 +263,6 @@ public class SubjectServiceSecurityTest {
     private void addStudyToMock(Subject mock, Long id, StudyUserRight... rights) {
         Study study = buildStudyMock(id, rights);
         mock.setStudy(study);
-
-        SubjectStudy subjectStudy = new SubjectStudy();
-        subjectStudy.setSubject(mock);
-        subjectStudy.setStudy(study);
-
-        if (study.getSubjectStudyList() == null) {
-            study.setSubjectStudyList(new ArrayList<SubjectStudy>());
-        }
-        if (mock.getSubjectStudyList() == null) {
-            mock.setSubjectStudyList(new ArrayList<SubjectStudy>());
-        }
-        study.getSubjectStudyList().add(subjectStudy);
-        mock.getSubjectStudyList().add(subjectStudy);
     }
 
 }

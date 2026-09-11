@@ -51,7 +51,6 @@ public class StudyCenter extends AbstractEntity {
     @JoinColumn(name = "study_id", nullable = false)
     @JsonIgnoreProperties({
         "studyCenterList",
-        "subjectStudyList",
         "subjects",
         "studyUserList",
         "examinations",

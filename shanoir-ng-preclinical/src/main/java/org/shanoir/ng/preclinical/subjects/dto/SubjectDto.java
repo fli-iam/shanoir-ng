@@ -51,9 +51,6 @@ public class SubjectDto {
     @JsonProperty("imagedObjectCategory")
     private ImagedObjectCategory imagedObjectCategory;
 
-    @JsonProperty("subjectStudyList")
-    private List<SubjectStudyDto> subjectStudyList;
-
     @JsonProperty("preclinical")
     private boolean preclinical;
 
@@ -115,14 +112,6 @@ public class SubjectDto {
      */
     public void setImagedObjectCategory(ImagedObjectCategory imagedObjectCategory) {
         this.imagedObjectCategory = imagedObjectCategory;
-    }
-
-    public List<SubjectStudyDto> getSubjectStudyList() {
-        return subjectStudyList;
-    }
-
-    public void setSubjectStudyList(List<SubjectStudyDto> subjectStudyList) {
-        this.subjectStudyList = subjectStudyList;
     }
 
     public boolean isPreclinical() {

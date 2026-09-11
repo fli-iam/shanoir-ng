@@ -44,11 +44,6 @@ VALUES
 	(1,'DemoSubject', 'sub1', '2013/01/01', 2, 1, 1, 2, NULL, 1);
 
 
-INSERT INTO subject_study
-	(id, physically_involved, study_id, subject_id, subject_study_identifier, subject_type)
-VALUES
-	(1, 0, 1, 1, 'Subject 1 for study 1', 1);
-
 INSERT INTO `manufacturer`
 	(id, name)
 VALUES

@@ -369,7 +369,7 @@ public class DatasetApiSecurityTest {
         study.setName("");
         study.setIsDraft(false);
         study.setRelatedDatasets(new ArrayList<>());
-        study.setSubjectStudyList(new ArrayList<>());
+        study.setSubjectList(new ArrayList<>());
         study.setTags(new ArrayList<>());
         return study;
     }

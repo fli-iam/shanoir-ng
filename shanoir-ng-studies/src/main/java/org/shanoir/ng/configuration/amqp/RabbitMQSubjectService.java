@@ -18,14 +18,9 @@ package org.shanoir.ng.configuration.amqp;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.ShanoirException;
-import org.shanoir.ng.shared.subjectstudy.SubjectType;
-import org.shanoir.ng.study.model.Study;
-import org.shanoir.ng.study.repository.StudyRepository;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.shanoir.ng.subject.service.SubjectService;
-import org.shanoir.ng.subjectstudy.model.SubjectStudy;
-import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,12 +46,6 @@ public class RabbitMQSubjectService {
     private SubjectService subjectService;
 
     @Autowired
-    private StudyRepository studyRepository;
-
-    @Autowired
-    private SubjectStudyRepository subjectStudyRepository;
-
-    @Autowired
     private ObjectMapper mapper;
 
     /**
@@ -73,48 +62,6 @@ public class RabbitMQSubjectService {
         } catch (Exception e) {
             LOG.error("Error while serializing subjects for participants.tsv file.", e);
             throw new AmqpRejectAndDontRequeueException(e);
-        }
-    }
-
-    /**
-     * This methods allows to update a subject with a subjectStudy if not existing.
-     * @param message the IDName we are receiving containing 1) The subject id in the id 2) The study id in the name
-     * @return the study name
-     */
-    @RabbitListener(queues = RabbitMQConfiguration.DATASET_SUBJECT_STUDY_QUEUE, containerFactory = "multipleConsumersFactory")
-    @RabbitHandler
-    @Transactional
-    public String updateSubjectStudy(String message) {
-        IdName idNameMessage;
-        try {
-            idNameMessage = mapper.readValue(message, IdName.class);
-            if (idNameMessage == null) {
-                throw new IllegalStateException("no rabbitmq message parsed from " + message);
-            }
-            Long subjectId = idNameMessage.getId();
-            Long studyId = Long.valueOf(idNameMessage.getName());
-            Subject subject = subjectRepository.findById(subjectId).orElseThrow();
-            for (SubjectStudy subStud : subject.getSubjectStudyList()) {
-                if (subStud.getStudy().getId().equals(studyId)) {
-                    // subject study already exists, don't create a new one.
-                    return subStud.getStudy().getName();
-                }
-            }
-            SubjectStudy subStud = new SubjectStudy();
-            subStud.setSubject(subject);
-            Study study = studyRepository.findById(studyId).orElseThrow();
-
-            subStud.setSubjectType(SubjectType.PATIENT);
-            subStud.setPhysicallyInvolved(true);
-            subStud.setStudy(study);
-            subjectStudyRepository.save(subStud);
-            return study.getName();
-        } catch (NullPointerException e) {
-            LOG.error("Error while creating subjectStudy", e);
-            return null;
-        } catch (Exception e) {
-            LOG.error("Error while creating subjectStudy", e);
-            return null;
         }
     }
 
@@ -165,10 +112,6 @@ public class RabbitMQSubjectService {
         Long studyId = null;
         if (subject.getStudy() != null) {
             studyId = subject.getStudy().getId();
-        }
-        // @todo: to be removed later
-        if (subject.getSubjectStudyList() != null && !subject.getSubjectStudyList().isEmpty()) {
-            studyId = subject.getSubjectStudyList().get(0).getStudy().getId();
         }
         Subject subjectOld = subjectRepository.findByStudyIdAndName(studyId, subject.getName());
         if (subjectOld == null) {

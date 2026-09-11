@@ -123,16 +123,16 @@ public class Study extends IdName {
     }
 
     /**
-     * @return the subjectStudyList
+     * @return the subjectList
      */
     public List<Subject> getSubjectList() {
         return subjectList;
     }
 
     /**
-     * @param subjectList the subjectStudyList to set
+     * @param subjectList the subjectList to set
      */
-    public void setSubjectStudyList(List<Subject> subjectList) {
+    public void setSubjectList(List<Subject> subjectList) {
         this.subjectList = subjectList;
     }
 
