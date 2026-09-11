@@ -80,7 +80,17 @@ public interface DatasetProcessingMapper {
     @Named("withInputIds")
     @Mapping(target = "inputDatasets", source = "inputDatasets", qualifiedByName = "id")
     @Mapping(target = "outputDatasets", expression = "java(null)")
+    @Mapping(target = "parentId", expression = "java(null)")
     DatasetProcessingDTO processingToProcessingDTOWithInputIds(DatasetProcessing processing);
+
+    /**
+     * Some context of usage :
+     */
+    @Named("withParentAndInputIds")
+    @Mapping(target = "inputDatasets", source = "inputDatasets", qualifiedByName = "id")
+    @Mapping(target = "outputDatasets", expression = "java(null)")
+    @Mapping(target = "parentId", source = "parent", qualifiedByName = "id")
+    DatasetProcessingDTO processingToProcessingDTOWithParentAndInputIds(DatasetProcessing processing);
 
     /**
      * Some context of usage :
@@ -88,6 +98,7 @@ public interface DatasetProcessingMapper {
     @Named("withOutputIds")
     @Mapping(target = "inputDatasets", expression = "java(null)")
     @Mapping(target = "outputDatasets", source = "outputDatasets", qualifiedByName = "id")
+    @Mapping(target = "parentId", expression = "java(null)")
     DatasetProcessingDTO processingToProcessingWithOutputIdsDTO(DatasetProcessing processing);
 
     /**
