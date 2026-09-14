@@ -406,13 +406,14 @@ public class WADODownloaderService {
      */
     private void copyResponseIntoZip(String url, ZipOutputStream zipOutputStream)
             throws IOException, HttpClientErrorException, PrematureCloseRetryable {
-        boolean anyByteWritten = false;
+        long startNanos = System.nanoTime();
+        long bytesWritten = 0;
         try (Stream<DataBuffer> body = responseBodyStream(url).toStream(STREAM_PREFETCH)) {
             Iterator<DataBuffer> buffers = body.iterator();
             while (buffers.hasNext()) {
                 DataBuffer buffer = buffers.next();
                 try (InputStream in = buffer.asInputStream()) {
-                    anyByteWritten |= in.transferTo(zipOutputStream) > 0;
+                    bytesWritten += in.transferTo(zipOutputStream);
                 } finally {
                     DataBufferUtils.release(buffer);
                 }
@@ -429,11 +430,12 @@ public class WADODownloaderService {
             }
             // Only retryable while the entry is still empty - once bytes are in the zip we cannot
             // start the body over without duplicating them.
-            if (!anyByteWritten && isPrematureClose(e)) {
+            if (bytesWritten == 0 && isPrematureClose(e)) {
                 throw new PrematureCloseRetryable(e);
             }
             throw new IOException("Download failed: " + e.getMessage(), e);
         }
+        PacsTransferStats.record(bytesWritten, System.nanoTime() - startNanos);
     }
 
     private static boolean isPrematureClose(Throwable e) {
@@ -620,8 +622,11 @@ public class WADODownloaderService {
      */
     private byte[] downloadFileFromPACS(final String url) throws IOException, HttpClientErrorException {
         try {
-            return downloadFileFromPACSAsync(url)
+            long startNanos = System.nanoTime();
+            byte[] responseBody = downloadFileFromPACSAsync(url)
                     .block(); // Block at the end to convert Mono to sync result
+            PacsTransferStats.record(responseBody != null ? responseBody.length : 0, System.nanoTime() - startNanos);
+            return responseBody;
         } catch (WebClientResponseException e) {
             throw new HttpClientErrorException(e.getStatusCode(),
                     "Download failed: " + e.getMessage());

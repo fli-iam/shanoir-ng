@@ -18,6 +18,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
+import org.shanoir.ng.download.PacsTransferStats;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
@@ -67,7 +68,17 @@ public class ProcessingResourceApiController implements ProcessingResourceApi {
                         return new ResponseEntity<Void>(HttpStatus.BAD_REQUEST);
                     }
 
-                    datasetDownloaderService.massiveDownload(format, datasets, response, true, converterId, true, sorting);
+                    PacsTransferStats pacsStats = PacsTransferStats.start();
+                    try {
+                        datasetDownloaderService.massiveDownload(format, datasets, response, true, converterId, true, sorting);
+                    } finally {
+                        PacsTransferStats.stop();
+                        LOG.info("VIP download [{}]: {} PACS responses, average PACS response time: {} ms, bytes received: {}, flow rate: {} MB/s",
+                                completePath, pacsStats.getResponseCount(),
+                                String.format("%.1f", pacsStats.getAverageResponseMillis()),
+                                pacsStats.getTotalBytes(),
+                                String.format("%.2f", pacsStats.getBytesPerSecond() / 1_000_000));
+                    }
                     return new ResponseEntity<Void>(HttpStatus.OK);
                 default:
                     ErrorModel errorModel = new ErrorModel(HttpStatus.BAD_REQUEST.value(), "Action " + action + " not supported");
