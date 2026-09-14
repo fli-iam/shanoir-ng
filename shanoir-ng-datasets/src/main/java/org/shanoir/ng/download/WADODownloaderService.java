@@ -162,8 +162,8 @@ public class WADODownloaderService {
     @Value("${dcm4chee-arc.wado.pool.max-connections:1000}")
     private int wadoMaxConnections;
 
-    /** PACS HTTP connection pool size */
-    @Value("${dcm4chee-arc.wado.pool.pending-acquire-max-count:10000}")
+    /** PACS HTTP connection queue */
+    @Value("${dcm4chee-arc.wado.pool.pending-acquire-max-count:10000}") // Likely reduce ?
     private int wadoPendingAcquireMaxCount;
 
     /** How long a caller waits in the pending queue for a connection */

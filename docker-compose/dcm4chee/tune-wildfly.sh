@@ -24,9 +24,12 @@ else
              "no-request-timeout tuning was NOT applied" >&2
     fi
 
+    sed -i -E "s#(<suffix value=\")[^\"]*(\"/>)#\1${LOGS_ROTATION:"yyyy-MM-dd"}\2#" \
+    "$JBOSS_HOME/standalone/configuration/standalone.xml"
+
     # To verify the values are correctly transmitted
     echo "tune-wildfly-io-worker.sh: Undertow tuned -" \
-         "io-threads=${WILDFLY_IO_THREADS:-32}" \
+         "io-threads=${WILDFLY_IO_THREADS:-16}" \
          "task-max-threads=${WILDFLY_IO_TASK_MAX_THREADS:-1200}" \
          "no-request-timeout=${WILDFLY_NO_REQUEST_TIMEOUT:-120000}ms" \
          "pacsds-max-pool-size=${WILDFLY_PACSDS_MAX_POOL_SIZE:-<image default>}"
