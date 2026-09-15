@@ -136,4 +136,27 @@ class DatasetServiceImplTest {
         verify(repository).delete(dataset);
         verify(propertyService).deleteByDatasetId(DATASET_ID);
     }
+
+    /**
+     * The processings of a deleted dataset are cleaned up along with it, and deleting a processing
+     * deletes its output datasets: the cascade flag must reach them, or every processed dataset of
+     * a deleted subject publishes a deletion event of its own.
+     */
+    @Test
+    void deleteByIdCascadePropagatesTheCascadeToTheProcessings() throws Exception {
+        when(repository.findById(DATASET_ID)).thenReturn(Optional.of(datasetWithoutCopies()));
+
+        service.deleteById(DATASET_ID, true);
+
+        verify(processingService).removeDatasetFromAllProcessingInput(DATASET_ID, true);
+    }
+
+    @Test
+    void deleteByIdReportsItsOwnDeletionOfTheProcessingOutputs() throws Exception {
+        when(repository.findById(DATASET_ID)).thenReturn(Optional.of(datasetWithoutCopies()));
+
+        service.deleteById(DATASET_ID);
+
+        verify(processingService).removeDatasetFromAllProcessingInput(DATASET_ID, false);
+    }
 }
