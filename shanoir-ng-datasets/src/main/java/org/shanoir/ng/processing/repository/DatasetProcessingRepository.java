@@ -16,6 +16,7 @@ package org.shanoir.ng.processing.repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.hibernate.Hibernate;
 import org.shanoir.ng.processing.model.DatasetProcessing;
@@ -147,11 +148,43 @@ public interface DatasetProcessingRepository extends CrudRepository<DatasetProce
             + "WHERE processing.id = :id")
     Optional<DatasetProcessing> findByIdWithInputsAndOutputs(Long id);
 
-    @Query("SELECT processing FROM DatasetProcessing processing "
-            + "JOIN FETCH processing.outputDatasets "
-            + "JOIN FETCH processing.inputDatasets "
+    @Query("SELECT DISTINCT processing FROM DatasetProcessing processing "
+            + "LEFT JOIN FETCH processing.inputDatasets "
             + "WHERE processing.id IN :ids")
-    List<DatasetProcessing> findByIdsWithInputsAndOutputs(List<Long> ids);
+    List<DatasetProcessing> findByIdsWithInputs(List<Long> ids);
+
+    /**
+     * inputDatasets and outputDatasets are both bags, so Hibernate refuses to fetch them both
+     * within a single query (MultipleBagFetchException) : inputDatasets is fetched by the query,
+     * outputDatasets is initialized right after, while the session is still open.
+     *
+     * @param ids
+     * @return
+     */
+    @Transactional(readOnly = true)
+    default List<DatasetProcessing> findByIdsWithInputsAndOutputs(List<Long> ids) {
+        List<DatasetProcessing> processings = findByIdsWithInputs(ids);
+        processings.forEach(processing -> Hibernate.initialize(processing.getOutputDatasets()));
+        return processings;
+    }
+
+    /**
+     * Same as findByIdsWithInputsAndOutputs, with the expressions and files of every input and
+     * output dataset initialized too. OSIV being disabled, the returned processings are detached :
+     * everything the download walks through has to be loaded here.
+     *
+     * @param ids
+     * @return
+     */
+    @Transactional(readOnly = true)
+    default List<DatasetProcessing> findByIdsWithInputsAndOutputsAndDatasetFiles(List<Long> ids) {
+        List<DatasetProcessing> processings = findByIdsWithInputsAndOutputs(ids);
+        processings.forEach(processing ->
+                Stream.concat(processing.getInputDatasets().stream(), processing.getOutputDatasets().stream())
+                        .forEach(dataset -> dataset.getDatasetExpressions()
+                                .forEach(expression -> Hibernate.initialize(expression.getDatasetFiles()))));
+        return processings;
+    }
 
     @Query("SELECT DISTINCT p FROM DatasetProcessing p "
             + "JOIN FETCH p.inputDatasets "
