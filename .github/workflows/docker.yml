@@ -63,6 +63,12 @@ jobs:
     timeout-minutes: 15
     steps:
 
+      # mitigation for "no space left on device" errors: the runner's default
+      # ~14GB of free disk space is not enough to build all the shanoir-ng
+      # docker images
+      - name: Free disk space
+        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # v1.3.1
+
       - name: Check out the repo
         uses: actions/checkout@v4
         with:
