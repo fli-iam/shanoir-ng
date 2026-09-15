@@ -215,10 +215,6 @@ public class DatasetServiceImpl implements DatasetService {
         LOG.info("Dataset deletion time: " + elapsedTime + " milliseconds");
     }
 
-    public void deleteDatasetFilesFromDiskAndPacs(Dataset dataset) throws ShanoirException {
-        deleteDatasetFilesFromDiskAndPacs(dataset, false);
-    }
-
     private void deleteDatasetFilesFromDiskAndPacs(Dataset dataset, boolean cascade) throws ShanoirException {
         if (!dicomWeb) {
             return;
