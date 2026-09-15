@@ -408,6 +408,23 @@ public class ImportUtils {
         return false;
     }
 
+    /**
+     * Check if the given acquisition equipment's serial number matches the DICOM device serial
+     * number, regardless of manufacturer model name - used to pre-select the study card whose
+     * equipment corresponds to the exam being imported.
+     */
+    public static boolean matchesSerialNumber(AcquisitionEquipment acquisitionEquipment, String deviceSerialNumber) {
+        if (acquisitionEquipment == null
+                || acquisitionEquipment.getSerialNumber() == null
+                || acquisitionEquipment.getSerialNumber().isBlank()
+                || deviceSerialNumber == null
+                || deviceSerialNumber.isBlank()) {
+            return false;
+        }
+        return acquisitionEquipment.getSerialNumber().equalsIgnoreCase(deviceSerialNumber)
+                || deviceSerialNumber.contains(acquisitionEquipment.getSerialNumber());
+    }
+
     private static boolean checkEquipment(AcquisitionEquipment acquisitionEquipment, String manufacturerModelName, String deviceSerialNumber) {
         if (acquisitionEquipment == null
             || acquisitionEquipment.getManufacturerModel() == null
