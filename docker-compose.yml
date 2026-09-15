@@ -379,6 +379,9 @@ services:
   dcm4chee-database:
     container_name: "${SHANOIR_PREFIX}dcm4chee-database"
     image: dcm4che/postgres-dcm4chee:14.4-27
+    # max_connections must stay above WILDFLY_PACSDS_MAX_POOL_SIZE (variables.env), otherwise the
+    # archive's JDBC pool cannot reach its configured size and retrieves fail under load.
+    command: ["postgres", "-c", "max_connections=500"]
     logging:
       driver: json-file
       options:
@@ -407,15 +410,24 @@ services:
       - "2575:2575"
     env_file: ./docker-compose/dcm4chee/variables.env
     environment:
+      WILDFLY_IO_THREADS: 16
+      WILDFLY_IO_TASK_MAX_THREADS: 1200
+      WILDFLY_PACSDS_MAX_POOL_SIZE: 120000
+      WILDFLY_NO_REQUEST_TIMEOUT: 300
+      LOGS_ROTATION: "yyyy-MM-dd-HH"
+      WILDFLY_INIT: "/opt/wildfly/standalone/configuration/tune-wildfly.sh"
       POSTGRES_HOST: "${SHANOIR_PREFIX}dcm4chee-database"
       WILDFLY_CHOWN: /storage
       WILDFLY_WAIT_FOR: "${SHANOIR_PREFIX}ldap:389 ${SHANOIR_PREFIX}dcm4chee-database:5432"
+    command: ["standalone.sh", "-b", "0.0.0.0", "-bmanagement", "0.0.0.0"]
     depends_on:
       - "ldap"
       - "dcm4chee-database"
     volumes:
       - "dcm4chee-arc-wildfly-data:/opt/wildfly/standalone"
       - "dcm4chee-arc-storage-data:/storage"
+      # Not mounted at the WILDFLY_INIT path directly: the entrypoint renames that file to .done, which fails on a bind mount
+      - "./docker-compose/dcm4chee/tune-wildfly.sh:/docker-entrypoint.d/configuration/tune-wildfly.sh:ro"
   #
   # Nginx
   #

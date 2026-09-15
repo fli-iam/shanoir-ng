@@ -141,7 +141,7 @@ public class PlannedExecutionManager {
                     });
                 } else {
                     try {
-                        Thread.sleep(statusSleepSeconds);
+                        TimeUnit.SECONDS.sleep(statusSleepSeconds);
                     } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
                         break;

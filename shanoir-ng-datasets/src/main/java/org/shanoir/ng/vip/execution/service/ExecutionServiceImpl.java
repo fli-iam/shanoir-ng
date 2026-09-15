@@ -194,10 +194,18 @@ public class ExecutionServiceImpl implements ExecutionService {
                         LOG.info("Unauthorized : refreshing token... ({} attempts)", attempts);
                         return Mono.empty();
                     }
-                    return Mono.error(new ResultHandlerException("Failed to get execution details from VIP in " + attempts + " attempts", null));
+                    return response.bodyToMono(String.class)
+                            .defaultIfEmpty("")
+                            .flatMap(body -> {
+                                LOG.error("Failed to get execution [{}] details from VIP in {} attempts : HTTP {} - {}",
+                                        identifier, attempts, response.statusCode(), body);
+                                return Mono.error(new ResultHandlerException("Failed to get execution details from VIP in " + attempts
+                                        + " attempts : HTTP " + response.statusCode() + " - " + body, null));
+                            });
                 })
                 .bodyToMono(VipExecutionDTO.class)
                 .onErrorResume(e -> {
+                    LOG.error("Can't get execution [{}] from VIP API", identifier, e);
                     ErrorModel model = new ErrorModel(HttpStatus.SERVICE_UNAVAILABLE.value(), "Can't get execution [" + identifier + "] from VIP API", e.getMessage());
                     return Mono.error(new RestServiceException(e, model));
                 });

@@ -171,6 +171,18 @@ dcm4chee-arc:
   dicom.web.http.client.max.total: 500
   dicom.web.http.client.max.per.route: 500
 
+  # IMPORTANT: pool.max-connections must not exceed what the target dcm4chee can actually serve.
+  wado:
+    connect-timeout-ms: ${SHANOIR_PACS_CONNECT_TIMEOUT_MS:5000}
+    response-timeout-seconds: ${SHANOIR_PACS_RESPONSE_TIMEOUT_SECONDS:60}
+    max-in-memory-bytes: ${SHANOIR_PACS_MAX_IN_MEMORY_BYTES:67108864}
+    pool:
+      max-connections: ${SHANOIR_PACS_MAX_CONNECTIONS:100}
+      pending-acquire-max-count: ${SHANOIR_PACS_PENDING_ACQUIRE_MAX_COUNT:10000}
+      pending-acquire-timeout-seconds: ${SHANOIR_PACS_PENDING_ACQUIRE_TIMEOUT_SECONDS:10}
+      max-idle-seconds: ${SHANOIR_PACS_MAX_IDLE_SECONDS:15}
+      max-life-seconds: ${SHANOIR_PACS_MAX_LIFE_SECONDS:300}
+
 # VIP
 vip:
   uri: ${VIP_URL_SCHEME}://${VIP_URL_HOST}/rest
