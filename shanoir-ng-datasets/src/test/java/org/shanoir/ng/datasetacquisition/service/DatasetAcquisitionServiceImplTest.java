@@ -276,8 +276,8 @@ class DatasetAcquisitionServiceImplTest {
             service.deleteByIdCascade(ACQ_ID, null);
         }
 
-        verify(datasetService).deleteById(11L, true);
-        verify(datasetService).deleteById(12L, true);
+        verify(datasetService).deleteById(11L, null);
+        verify(datasetService).deleteById(12L, null);
         verify(repository).deleteById(ACQ_ID);
         // the emptiness of the acquisition is never even questioned on this path
         verify(datasetRepository, never()).countByDatasetAcquisitionId(Mockito.anyLong());
@@ -310,8 +310,8 @@ class DatasetAcquisitionServiceImplTest {
         // before it completes and can not delete the acquisition row itself
         service.delete(acquisition, null);
 
-        verify(datasetService).deleteById(11L, true);
-        verify(datasetService).deleteById(12L, true);
+        verify(datasetService).deleteById(11L, null);
+        verify(datasetService).deleteById(12L, null);
         verify(repository).deleteById(ACQ_ID);
     }
 }

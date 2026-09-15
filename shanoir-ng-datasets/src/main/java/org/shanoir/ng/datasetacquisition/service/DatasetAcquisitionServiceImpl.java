@@ -282,7 +282,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
                     }
 
                     datasetIds.add(ds.getId());
-                    datasetService.deleteById(ds.getId(), true);
+                    datasetService.deleteById(ds.getId(), event);
                 }
                 if (!datasetIds.isEmpty()) solrService.deleteFromIndex(datasetIds);
             }

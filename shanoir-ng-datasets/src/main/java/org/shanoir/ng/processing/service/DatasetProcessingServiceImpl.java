@@ -29,6 +29,7 @@ import org.shanoir.ng.processing.repository.DatasetProcessingRepository;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.vip.executionMonitoring.model.ExecutionMonitoring;
@@ -90,12 +91,12 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
     @Override
     @Transactional
     public void deleteById(final Long id) throws ShanoirException, RestServiceException, SolrServerException, IOException {
-        deleteById(id, false);
+        deleteById(id, null);
     }
 
     @Override
     @Transactional
-    public void deleteById(final Long id, final boolean cascade) throws ShanoirException, RestServiceException, SolrServerException, IOException {
+    public void deleteById(final Long id, final ShanoirEvent parentEvent) throws ShanoirException, RestServiceException, SolrServerException, IOException {
         final Optional<DatasetProcessing> entity = repository.findByIdWithOutputs(id);
         entity.orElseThrow(() -> new EntityNotFoundException("Cannot find dataset processing [" + id + "]"));
 
@@ -117,11 +118,11 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
         processingResourceRepository.deleteByProcessingId(id);
 
         for (Dataset ds : datasets) {
-            datasetService.deleteById(ds.getId(), cascade);
+            datasetService.deleteById(ds.getId(), parentEvent);
             solrService.deleteFromIndex(ds.getId());
         }
 
-        this.deleteByParentId(id, cascade);
+        this.deleteByParentId(id, parentEvent);
         repository.deleteById(id);
     }
 
@@ -131,7 +132,7 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
      * @param datasetId
      */
     @Override
-    public void removeDatasetFromAllProcessingInput(Long datasetId, boolean cascade) throws ShanoirException, RestServiceException, SolrServerException, IOException {
+    public void removeDatasetFromAllProcessingInput(Long datasetId, ShanoirEvent parentEvent) throws ShanoirException, RestServiceException, SolrServerException, IOException {
         List<DatasetProcessing> processings = repository.findByInputIdWithInputs(datasetId);
         List<DatasetProcessing> toUpdate = new ArrayList<>();
         List<DatasetProcessing> toDelete = new ArrayList<>();
@@ -146,16 +147,16 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
             }
         }
         for (DatasetProcessing proc : toDelete) {
-            this.deleteById(proc.getId(), cascade);
+            this.deleteById(proc.getId(), parentEvent);
         }
         repository.saveAll(toUpdate);
     }
 
     @Override
-    public void deleteByParentId(Long id, boolean cascade) throws ShanoirException, RestServiceException, SolrServerException, IOException {
+    public void deleteByParentId(Long id, ShanoirEvent parentEvent) throws ShanoirException, RestServiceException, SolrServerException, IOException {
         List<DatasetProcessing> processings = repository.findAllByParentId(id);
         for (DatasetProcessing child : processings) {
-            this.deleteById(child.getId(), cascade);
+            this.deleteById(child.getId(), parentEvent);
         }
     }
 

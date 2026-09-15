@@ -19,6 +19,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -40,6 +42,8 @@ import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.datasetfile.DatasetFileRepository;
 import org.shanoir.ng.processing.service.DatasetProcessingService;
 import org.shanoir.ng.property.service.DatasetPropertyService;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.vip.processingResource.repository.ProcessingResourceRepository;
 import org.springframework.http.HttpStatus;
@@ -56,6 +60,10 @@ import org.springframework.http.HttpStatus;
 class DatasetServiceImplTest {
 
     private static final Long DATASET_ID = 11L;
+
+    private final ShanoirEvent parentEvent = new ShanoirEvent(
+            ShanoirEventType.DELETE_EXAMINATION_EVENT, "5970", 1L, "Deleting examination...",
+            ShanoirEvent.IN_PROGRESS, 0f, 42L);
 
     @Mock
     private DatasetRepository repository;
@@ -118,12 +126,12 @@ class DatasetServiceImplTest {
         when(repository.findById(DATASET_ID)).thenReturn(Optional.of(datasetWithCopies()));
 
         RestServiceException exception = assertThrows(RestServiceException.class,
-                () -> service.deleteById(DATASET_ID, true));
+                () -> service.deleteById(DATASET_ID, parentEvent));
 
         assertEquals(HttpStatus.UNPROCESSABLE_ENTITY.value(), exception.getErrorModel().getCode().intValue());
         verify(repository, never()).delete(any(Dataset.class));
         verify(datasetAsyncService, never())
-                .deleteDatasetFilesFromDiskAndPacsAsync(any(), anyBoolean(), anyLong(), anyBoolean());
+                .deleteDatasetFilesFromDiskAndPacsAsync(any(), anyBoolean(), anyLong(), any());
     }
 
     @Test
@@ -131,7 +139,7 @@ class DatasetServiceImplTest {
         Dataset dataset = datasetWithoutCopies();
         when(repository.findById(DATASET_ID)).thenReturn(Optional.of(dataset));
 
-        service.deleteById(DATASET_ID, true);
+        service.deleteById(DATASET_ID, parentEvent);
 
         verify(repository).delete(dataset);
         verify(propertyService).deleteByDatasetId(DATASET_ID);
@@ -139,16 +147,16 @@ class DatasetServiceImplTest {
 
     /**
      * The processings of a deleted dataset are cleaned up along with it, and deleting a processing
-     * deletes its output datasets: the cascade flag must reach them, or every processed dataset of
+     * deletes its output datasets: the parent event must reach them, or every processed dataset of
      * a deleted subject publishes a deletion event of its own.
      */
     @Test
-    void deleteByIdCascadePropagatesTheCascadeToTheProcessings() throws Exception {
+    void deleteByIdCascadePropagatesTheParentEventToTheProcessings() throws Exception {
         when(repository.findById(DATASET_ID)).thenReturn(Optional.of(datasetWithoutCopies()));
 
-        service.deleteById(DATASET_ID, true);
+        service.deleteById(DATASET_ID, parentEvent);
 
-        verify(processingService).removeDatasetFromAllProcessingInput(DATASET_ID, true);
+        verify(processingService).removeDatasetFromAllProcessingInput(DATASET_ID, parentEvent);
     }
 
     @Test
@@ -157,6 +165,6 @@ class DatasetServiceImplTest {
 
         service.deleteById(DATASET_ID);
 
-        verify(processingService).removeDatasetFromAllProcessingInput(DATASET_ID, false);
+        verify(processingService).removeDatasetFromAllProcessingInput(eq(DATASET_ID), isNull());
     }
 }

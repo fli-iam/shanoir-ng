@@ -45,21 +45,23 @@ public class DatasetAsyncServiceImpl implements DatasetAsyncService {
     @Autowired
     private ShanoirEventService eventService;
 
-    public void deleteDatasetFilesFromDiskAndPacs(List<DatasetFile> datasetFiles, boolean isDicom, Long datasetId, boolean cascade) throws ShanoirException {
-        deleteDatasetFilesFromDiskAndPacsAsync(datasetFiles, isDicom, datasetId, cascade);
+    public void deleteDatasetFilesFromDiskAndPacs(List<DatasetFile> datasetFiles, boolean isDicom, Long datasetId, ShanoirEvent parentEvent) throws ShanoirException {
+        deleteDatasetFilesFromDiskAndPacsAsync(datasetFiles, isDicom, datasetId, parentEvent);
     }
 
     /**
-     * @param cascade true when a parent deletion (acquisition, examination...) drives this one and
-     *                already reports its own progress: no dataset deletion event is published then,
-     *                to avoid flooding the jobs with one event per deleted dataset.
+     * @param parentEvent the event of the parent deletion (acquisition, examination, subject...)
+     *                    that drives this one and already reports its own progress. It is given
+     *                    only when this deletion is cascaded: no dataset deletion event is then
+     *                    published, to avoid flooding the jobs with one event per deleted dataset.
+     *                    A dataset deleted on its own gets no parent event, and reports itself.
      */
     @Override
     @Async
-    public void deleteDatasetFilesFromDiskAndPacsAsync(List<DatasetFile> datasetFiles, boolean isDicom, Long datasetId, boolean cascade) throws ShanoirException {
+    public void deleteDatasetFilesFromDiskAndPacsAsync(List<DatasetFile> datasetFiles, boolean isDicom, Long datasetId, ShanoirEvent parentEvent) throws ShanoirException {
 
         ShanoirEvent event = null;
-        if (!cascade) {
+        if (parentEvent == null) {
             event = new ShanoirEvent(
                     ShanoirEventType.DELETE_DATASET_EVENT,
                     String.valueOf(datasetId),
@@ -95,7 +97,7 @@ public class DatasetAsyncServiceImpl implements DatasetAsyncService {
                 }
             }
         } catch (ShanoirException | RuntimeException e) {
-            reportDeletionError(event, datasetId, e);
+            reportDeletionError(event, parentEvent, datasetId, e);
             throw e;
         }
 
@@ -111,9 +113,10 @@ public class DatasetAsyncServiceImpl implements DatasetAsyncService {
      * Reports a deletion failure. A direct deletion fails its own event, that would otherwise stay
      * in progress forever, while a cascaded one, that publishes nothing as long as all goes well,
      * gets a one-off error event: failures are rare enough not to flood the jobs, and silent ones
-     * would leave the parent deletion looking complete.
+     * would leave the parent deletion looking complete. The parent event is not failed itself, as
+     * it goes on reporting the rest of the cascade, but it tells which study the failure belongs to.
      */
-    private void reportDeletionError(ShanoirEvent event, Long datasetId, Exception e) {
+    private void reportDeletionError(ShanoirEvent event, ShanoirEvent parentEvent, Long datasetId, Exception e) {
         LOG.error("Error while deleting the files of dataset {} from disk and pacs.", datasetId, e);
 
         ShanoirEvent errorEvent = event;
@@ -125,7 +128,7 @@ public class DatasetAsyncServiceImpl implements DatasetAsyncService {
                     null,
                     ShanoirEvent.ERROR,
                     0f,
-                    null);
+                    parentEvent != null ? parentEvent.getStudyId() : null);
         }
         errorEvent.setMessage("Dataset " + datasetId + " could not be deleted : " + e.getMessage());
         errorEvent.setStatus(ShanoirEvent.ERROR);

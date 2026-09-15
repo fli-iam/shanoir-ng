@@ -39,6 +39,7 @@ import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.dicom.web.service.DICOMWebService;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.KeycloakUtil;
 
@@ -50,6 +51,10 @@ import org.shanoir.ng.utils.KeycloakUtil;
 class DatasetAsyncServiceImplTest {
 
     private static final Long DATASET_ID = 11L;
+
+    private final ShanoirEvent parentEvent = new ShanoirEvent(
+            ShanoirEventType.DELETE_EXAMINATION_EVENT, "5970", 1L, "Deleting examination...",
+            ShanoirEvent.IN_PROGRESS, 0f, 42L);
 
     @Mock
     private DICOMWebService dicomWebService;
@@ -78,7 +83,7 @@ class DatasetAsyncServiceImplTest {
         try (MockedStatic<KeycloakUtil> keycloak = Mockito.mockStatic(KeycloakUtil.class)) {
             keycloak.when(KeycloakUtil::getTokenUserId).thenReturn(1L);
 
-            service.deleteDatasetFilesFromDiskAndPacsAsync(onePacsFile(), true, DATASET_ID, true);
+            service.deleteDatasetFilesFromDiskAndPacsAsync(onePacsFile(), true, DATASET_ID, parentEvent);
         }
 
         verify(eventService, never()).publishEvent(any(ShanoirEvent.class));
@@ -96,12 +101,13 @@ class DatasetAsyncServiceImplTest {
             keycloak.when(KeycloakUtil::getTokenUserId).thenReturn(1L);
 
             assertThrows(ShanoirException.class,
-                    () -> service.deleteDatasetFilesFromDiskAndPacsAsync(onePacsFile(), true, DATASET_ID, true));
+                    () -> service.deleteDatasetFilesFromDiskAndPacsAsync(onePacsFile(), true, DATASET_ID, parentEvent));
         }
 
         ShanoirEvent published = lastPublishedEvent();
         assertEquals(ShanoirEvent.ERROR, published.getStatus());
         assertTrue(published.getMessage().contains("pacs is down"));
+        assertEquals(parentEvent.getStudyId(), published.getStudyId());
     }
 
     /**
@@ -115,7 +121,7 @@ class DatasetAsyncServiceImplTest {
             keycloak.when(KeycloakUtil::getTokenUserId).thenReturn(1L);
 
             assertThrows(ShanoirException.class,
-                    () -> service.deleteDatasetFilesFromDiskAndPacsAsync(onePacsFile(), true, DATASET_ID, false));
+                    () -> service.deleteDatasetFilesFromDiskAndPacsAsync(onePacsFile(), true, DATASET_ID, null));
         }
 
         ShanoirEvent published = lastPublishedEvent();
