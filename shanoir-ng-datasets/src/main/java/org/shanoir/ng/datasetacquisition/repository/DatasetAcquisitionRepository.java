@@ -113,7 +113,7 @@ public interface DatasetAcquisitionRepository extends PagingAndSortingRepository
     /**
      * Same as findByIdsWithDatasets(), but also initializes "copies" (mapped by every
      * DatasetAcquisitionDTO) so callers outside of a transaction (e.g. a controller mapping
-     * the result to a DTO during study card application) don't hit a LazyInitializationException. 
+     * the result to a DTO during study card application) don't hit a LazyInitializationException.
      * Done as two steps to avoid Hibernate's MultipleBagFetchException.
      */
     @Transactional(readOnly = true)
