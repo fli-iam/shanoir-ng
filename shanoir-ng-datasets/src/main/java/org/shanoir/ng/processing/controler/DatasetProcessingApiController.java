@@ -150,6 +150,7 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
             @Parameter(description = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId) throws EntityNotFoundException {
         DatasetProcessing datasetProcessing = repository.findByIdWithOutputs(datasetProcessingId).orElseThrow(() -> new EntityNotFoundException(DatasetProcessing.class, datasetProcessingId));
         List<Dataset> outputDatasets = datasetProcessing.getOutputDatasets();
+        datasetService.populateInPacs(outputDatasets);
         return new ResponseEntity<>(datasetMapper.datasetListToDatasetDTOListWithProcessing(outputDatasets), HttpStatus.OK);
     }
 
