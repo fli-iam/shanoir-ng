@@ -123,11 +123,20 @@ public interface DatasetAcquisitionRepository extends PagingAndSortingRepository
         return acquisitions;
     }
 
-    @Query("SELECT da FROM DatasetAcquisition da "
-            + "LEFT JOIN FETCH da.datasets as ds "
-            + "LEFT JOIN FETCH ds.datasetExpressions "
-            + "WHERE da.id IN :ids")
-    List<DatasetAcquisition> findByIdsWithDatasetExpressions(List<Long> ids);
+    /**
+     * Fetch-joining "datasets" and "datasets.datasetExpressions" in the same query throws
+     * Hibernate's MultipleBagFetchException (two different List/bag collections at once), so
+     * this reuses findByIdsWithDatasets() and initializes datasetExpressions as a second step,
+     * same pattern as findByIdWithDatasetsAndDatasetFiles() below.
+     */
+    @Transactional(readOnly = true)
+    default List<DatasetAcquisition> findByIdsWithDatasetExpressions(List<Long> ids) {
+        List<DatasetAcquisition> acquisitions = findByIdsWithDatasets(ids);
+        acquisitions.forEach(acq ->
+                acq.getDatasets().forEach(ds -> Hibernate.initialize(ds.getDatasetExpressions()))
+        );
+        return acquisitions;
+    }
 
     @Transactional(readOnly = true)
     default Optional<DatasetAcquisition> findByIdWithDatasetsAndDatasetFiles(Long id) {
