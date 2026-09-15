@@ -62,13 +62,24 @@ public interface DatasetProcessingService {
     void deleteById(Long id) throws ShanoirException, RestServiceException, SolrServerException, IOException;
 
     /**
+     * Delete a dataset processing and its output datasets.
+     *
+     * @param id processing id.
+     * @param cascade true when a parent deletion (dataset, acquisition, examination...) drives this
+     *                one and already reports its own progress: the output datasets are then deleted
+     *                without publishing a deletion event each.
+     */
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
+    void deleteById(Long id, boolean cascade) throws ShanoirException, RestServiceException, SolrServerException, IOException;
+
+    /**
      * Unlink given dataset from all processing
      * Remove processing if linked to no other dataset
      *
      * @param datasetId
      */
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
-    void removeDatasetFromAllProcessingInput(Long datasetId) throws ShanoirException, RestServiceException, SolrServerException, IOException;
+    void removeDatasetFromAllProcessingInput(Long datasetId, boolean cascade) throws ShanoirException, RestServiceException, SolrServerException, IOException;
 
     /**
      * Delete child processing of given processing
@@ -79,7 +90,7 @@ public interface DatasetProcessingService {
      * @throws SolrServerException
      * @throws IOException
      */
-    void deleteByParentId(Long id) throws RestServiceException, ShanoirException, SolrServerException, IOException;
+    void deleteByParentId(Long id, boolean cascade) throws RestServiceException, ShanoirException, SolrServerException, IOException;
 
     void validateDatasetProcessing(DatasetProcessing processing) throws RestServiceException, EntityNotFoundException;
 }

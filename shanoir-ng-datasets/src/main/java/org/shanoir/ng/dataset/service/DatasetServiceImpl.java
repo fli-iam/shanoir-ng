@@ -160,12 +160,12 @@ public class DatasetServiceImpl implements DatasetService {
 
     private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
 
-    private void delete(Dataset entity) throws ShanoirException, SolrServerException, IOException, RestServiceException {
+    private void delete(Dataset entity, boolean cascade) throws ShanoirException, SolrServerException, IOException, RestServiceException {
         Long id = entity.getId();
 
         // Remove parent processing to avoid errors
         entity.setDatasetProcessing(null);
-        processingService.removeDatasetFromAllProcessingInput(id);
+        processingService.removeDatasetFromAllProcessingInput(id, cascade);
         processingResourceRepository.deleteByDatasetId(id);
         propertyService.deleteByDatasetId(id);
 
@@ -208,7 +208,7 @@ public class DatasetServiceImpl implements DatasetService {
                     ));
         }
         long startTime = System.currentTimeMillis();
-        delete(dataset);
+        delete(dataset, cascade);
         deleteDatasetFilesFromDiskAndPacs(dataset, cascade);
         long endTime = System.currentTimeMillis();
         long elapsedTime = endTime - startTime;
