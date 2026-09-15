@@ -68,6 +68,10 @@ jobs:
       # docker images
       - name: Free disk space
         uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # v1.3.1
+        with:
+          # not removed by default: the maven build below does not rely on
+          # the runner's preinstalled tool cache (Node, Python, Go, ...)
+          tool-cache: true
 
       - name: Check out the repo
         uses: actions/checkout@v4
