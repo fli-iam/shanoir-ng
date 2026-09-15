@@ -21,14 +21,18 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -42,6 +46,7 @@ import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.model.Study;
+import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.service.SubjectService;
 import org.shanoir.ng.studycard.repository.QualityCardRepository;
@@ -51,10 +56,8 @@ import org.shanoir.ng.utils.KeycloakUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
- * Checks that the deletions cascaded from a subject or study deletion (received asynchronously
- * over RabbitMQ) are attributed to the user who actually requested the deletion, instead of
- * falling back to the generic system user - which used to leave every dataset acquisition
- * deletion event of the cascade without any identifiable user in the study's history.
+ * Checks asynchronous deletion cascades received over RabbitMQ (subject / study deletion):
+ * user attribution on cascaded events, examination cleanup before subject removal, and error reporting.
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -163,6 +166,79 @@ class RabbitMQDatasetsServiceTest {
 
         verify(examinationService).deleteById(EXAM_ID, event);
         assertEquals(REQUESTING_USER_ID, userIdSeenDuringCascade.get());
+    }
+
+    @Test
+    void deleteSubjectCompletesSuccessfullyWhenExaminationsAreDeleted() throws Exception {
+        ShanoirEvent event = deleteSubjectEvent();
+        Subject subject = new Subject(SUBJECT_ID, "phantom");
+
+        when(objectMapper.readValue(anyString(), eq(ShanoirEvent.class))).thenReturn(event);
+        when(subjectService.findById(SUBJECT_ID)).thenReturn(Optional.of(subject));
+        when(examinationRepository.findBySubjectId(SUBJECT_ID)).thenReturn(new ArrayList<>(List.of(examination(EXAM_ID))));
+        when(studyRepository.findAllById(any())).thenReturn(Collections.emptyList());
+
+        rabbitMQDatasetsService.deleteSubject("{\"irrelevant\":\"payload\"}");
+
+        verify(examinationService).deleteById(EXAM_ID, event);
+        verify(subjectService).delete(SUBJECT_ID);
+        verify(eventService).publishSuccessEvent(eq(event), contains("phantom"));
+        verify(eventService, never()).publishErrorEvent(any(), anyString());
+    }
+
+    @Test
+    void deleteSubjectReportsExaminationErrorAndStillAttemptsSubjectRemoval() throws Exception {
+        ShanoirEvent event = deleteSubjectEvent();
+
+        when(objectMapper.readValue(anyString(), eq(ShanoirEvent.class))).thenReturn(event);
+        when(subjectService.findById(SUBJECT_ID)).thenReturn(Optional.of(new Subject(SUBJECT_ID, "phantom")));
+        when(examinationRepository.findBySubjectId(SUBJECT_ID)).thenReturn(new ArrayList<>(List.of(examination(EXAM_ID))));
+        when(studyRepository.findAllById(any())).thenReturn(Collections.emptyList());
+        doThrow(new RuntimeException("copied examination")).when(examinationService).deleteById(eq(EXAM_ID), eq(event));
+
+        rabbitMQDatasetsService.deleteSubject("{\"irrelevant\":\"payload\"}");
+
+        verify(subjectService).delete(SUBJECT_ID);
+        verify(eventService).publishErrorEvent(eq(event), contains("some of its data could not be deleted"));
+        assertTrue(event.getReport().contains("Examination [" + EXAM_ID + "] could not be deleted"));
+    }
+
+    @Test
+    void deleteSubjectReportsSubjectErrorWhenExaminationsAreDeletedButSubjectRemains() throws Exception {
+        ShanoirEvent event = deleteSubjectEvent();
+
+        when(objectMapper.readValue(anyString(), eq(ShanoirEvent.class))).thenReturn(event);
+        when(subjectService.findById(SUBJECT_ID)).thenReturn(Optional.of(new Subject(SUBJECT_ID, "phantom")));
+        when(examinationRepository.findBySubjectId(SUBJECT_ID)).thenReturn(new ArrayList<>(List.of(examination(EXAM_ID))));
+        when(studyRepository.findAllById(any())).thenReturn(Collections.emptyList());
+        doThrow(new RuntimeException("FK constraint examination.subject_id")).when(subjectService).delete(SUBJECT_ID);
+
+        rabbitMQDatasetsService.deleteSubject("{\"irrelevant\":\"payload\"}");
+
+        verify(examinationService).deleteById(EXAM_ID, event);
+        verify(eventService).publishErrorEvent(eq(event), contains("some of its data could not be deleted"));
+        assertTrue(event.getReport().contains("Subject [" + SUBJECT_ID + "] could not be deleted from ms datasets"));
+        verify(eventService, never()).publishSuccessEvent(any(), anyString());
+    }
+
+    private ShanoirEvent deleteSubjectEvent() {
+        return new ShanoirEvent(
+                ShanoirEventType.DELETE_SUBJECT_EVENT,
+                SUBJECT_ID.toString(),
+                REQUESTING_USER_ID,
+                "Deleting subject...",
+                ShanoirEvent.IN_PROGRESS,
+                0f,
+                STUDY_ID);
+    }
+
+    private Examination examination(Long id) {
+        Study study = new Study();
+        study.setId(STUDY_ID);
+        Examination exam = new Examination();
+        exam.setId(id);
+        exam.setStudy(study);
+        return exam;
     }
 
 }
