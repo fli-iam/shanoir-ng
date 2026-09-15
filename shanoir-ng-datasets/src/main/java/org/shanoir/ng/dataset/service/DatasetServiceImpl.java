@@ -215,28 +215,6 @@ public class DatasetServiceImpl implements DatasetService {
         LOG.info("Dataset deletion time: " + elapsedTime + " milliseconds");
     }
 
-    /**
-     * Called by acquisition delete. Does not reject from pacs as acquisition already does it.
-     * The deletion is reported by the parent event only: no deletion event is published here.
-     * @param id
-     * @throws ShanoirException
-     * @throws SolrServerException
-     * @throws IOException
-     * @throws RestServiceException
-     */
-    public void deleteByIdCascade(final Long id) throws ShanoirException, SolrServerException, IOException, RestServiceException {
-        // Do not delete entity if it is the source (or if it has copies). If getSourceId() is not null, it means it's a copy
-        if (repository.existsBySourceId(id)) {
-            throw new RestServiceException(
-                    new ErrorModel(
-                            HttpStatus.UNPROCESSABLE_ENTITY.value(),
-                            "This dataset is linked to another dataset that was copied."
-                    ));
-        }
-
-        datasetService.deleteById(id, true);
-    }
-
     public void deleteDatasetFilesFromDiskAndPacs(Dataset dataset) throws ShanoirException {
         deleteDatasetFilesFromDiskAndPacs(dataset, false);
     }
