@@ -127,15 +127,18 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
     @Override
     @Transactional
     public void deleteById(final Long id, final ShanoirEvent parentEvent) throws ShanoirException, RestServiceException, SolrServerException, IOException {
-        final Optional<DatasetProcessing> entity = repository.findByIdWithOutputs(id);
-        entity.orElseThrow(() -> new EntityNotFoundException("Cannot find dataset processing [" + id + "]"));
+        final DatasetProcessing processing = repository.findByIdWithOutputs(id)
+                .orElseThrow(() -> new EntityNotFoundException("Cannot find dataset processing [" + id + "]"));
 
         // Load datasetProcessing output datasets
-        List<Dataset> datasets = entity.get().getOutputDatasets();
+        List<Dataset> datasets = processing.getOutputDatasets();
         List<Long> datasetIds = datasets.stream().map(Dataset::getId).collect(Collectors.toList());
 
-        // Check for rights
-        boolean hasRights = datasetSecurityService.hasRightOnEveryDataset(datasetIds, "CAN_ADMINISTRATE");
+        // Check for rights. The study of the processing is checked on its own, as the output
+        // datasets it would otherwise be deduced from may all have been deleted already, and an
+        // empty dataset list is granted every right.
+        boolean hasRights = datasetSecurityService.hasRightOnStudy(processing.getStudyId(), "CAN_ADMINISTRATE")
+                && datasetSecurityService.hasRightOnEveryDataset(datasetIds, "CAN_ADMINISTRATE");
 
         if (!hasRights)
             throw new RestServiceException(
