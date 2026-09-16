@@ -107,7 +107,13 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 
     @Override
     public List<DatasetAcquisition> findByDatasetId(Long[] datasetIds) {
-        return repository.findDistinctByDatasetsIdIn(datasetIds);
+        // findDistinctByDatasetsIdIn() leaves each acquisition's "datasets" and "copies"
+        // collections lazy, which then could blow up with a LazyInitializationException
+        List<Long> acquisitionIds = repository.findDistinctByDatasetsIdIn(datasetIds).stream()
+                .map(DatasetAcquisition::getId)
+                .toList();
+                // So we Re-fetch the matched acquisitions with both datasets and copies eagerly loaded
+        return acquisitionIds.isEmpty() ? List.of() : repository.findByIdsWithDatasetsAndCopies(acquisitionIds);
     }
 
     @Override
