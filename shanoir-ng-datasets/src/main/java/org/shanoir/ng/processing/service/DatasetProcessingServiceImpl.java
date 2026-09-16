@@ -30,8 +30,11 @@ import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.solr.service.SolrService;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.vip.executionMonitoring.model.ExecutionMonitoring;
 import org.shanoir.ng.vip.processingResource.repository.ProcessingResourceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,6 +66,9 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
     @Autowired
     private SolrService solrService;
 
+    @Autowired
+    private ShanoirEventService eventService;
+
     protected DatasetProcessing updateValues(final DatasetProcessing from, final DatasetProcessing to) {
         to.setDatasetProcessingType(from.getDatasetProcessingType());
         to.setComment(from.getComment());
@@ -91,7 +97,31 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
     @Override
     @Transactional
     public void deleteById(final Long id) throws ShanoirException, RestServiceException, SolrServerException, IOException {
-        deleteById(id, null);
+        // A processing deleted on its own reports itself, and its output datasets are then deleted
+        // under its event rather than publishing one deletion event each.
+        ShanoirEvent event = new ShanoirEvent(
+                ShanoirEventType.DELETE_DATASET_PROCESSING_EVENT,
+                String.valueOf(id),
+                KeycloakUtil.getTokenUserId(),
+                "Delete dataset processing with id : " + id,
+                ShanoirEvent.IN_PROGRESS,
+                0f,
+                repository.findById(id).map(DatasetProcessing::getStudyId).orElse(null));
+        eventService.publishEvent(event);
+
+        try {
+            deleteById(id, event);
+        } catch (Exception e) {
+            event.setMessage("Dataset processing " + id + " could not be deleted : " + e.getMessage());
+            event.setStatus(ShanoirEvent.ERROR);
+            eventService.publishEvent(event);
+            throw e;
+        }
+
+        event.setMessage("Dataset processing " + id + " deleted.");
+        event.setProgress(1f);
+        event.setStatus(ShanoirEvent.SUCCESS);
+        eventService.publishEvent(event);
     }
 
     @Override
