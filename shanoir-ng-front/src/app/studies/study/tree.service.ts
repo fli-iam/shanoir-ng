@@ -245,6 +245,9 @@ export class TreeService {
                     this.treeAvailable = !!this.selectedNode;
                     return node;
                 }
+                // the selection found no node : the previous one has to be dropped, as it would
+                // otherwise stay armed for removeCurrentNode() and be removed in its place
+                this.selectedNode = null;
             });
 
         }
