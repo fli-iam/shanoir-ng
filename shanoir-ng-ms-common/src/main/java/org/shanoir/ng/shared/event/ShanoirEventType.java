@@ -49,6 +49,8 @@ public final class ShanoirEventType {
     public static final String UPDATE_DATASET_ACQUISITION_EVENT = "updateDatasetAcquisition.event";
     public static final String DELETE_DATASET_ACQUISITION_EVENT = "deleteDatasetAcquisition.event";
 
+    public static final String DELETE_DATASET_PROCESSING_EVENT = "deleteDatasetProcessing.event";
+
     /** Equipement **/
     public static final String CREATE_EQUIPEMENT_EVENT = "createEquipement.event";
     public static final String UPDATE_EQUIPEMENT_EVENT = "updateEquipement.event";
