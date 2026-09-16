@@ -248,6 +248,11 @@ export class TreeService {
                 // the selection found no node : the previous one has to be dropped, as it would
                 // otherwise stay armed for removeCurrentNode() and be removed in its place
                 this.selectedNode = null;
+            }).catch(error => {
+                // idem, a selection that could not be resolved leaves no node behind
+                this.selectedNode = null;
+                console.error('Could not select the tree node', error);
+                return null;
             });
 
         }
@@ -274,9 +279,6 @@ export class TreeService {
         } else if (selection?.type == 'acquisition') {
             node = this.selectAcquisition(selection.entity as DatasetAcquisition);
         } else if (selection?.type == 'processing') {
-            if ((selection.entity as DatasetProcessing).parentId == null) {
-                return Promise.resolve(null);
-            }
             node = this.selectProcessing(selection.entity as DatasetProcessing);
         } else if (selection?.type == 'examination') {
             node = this.selectExamination(selection.entity as Examination);
@@ -303,6 +305,9 @@ export class TreeService {
         return this.studyNodeOpenPromise.then(() => {
             return this.studyNode.subjectsNode.open().then(() => {
                 return this.findDatasetChainFromBottomDataset(dataset).then(ret => {
+                    if (!ret) {
+                        return null;
+                    }
                     if (this.studyNode.subjectsNode.subjects != UNLOADED) {
                         const subjectNode: SubjectNode = this.studyNode.subjectsNode.subjects?.find(sn => {
                             return sn.id == ret.subjectId;
@@ -380,7 +385,10 @@ export class TreeService {
             datasetPromise = Promise.resolve(dataset);
         }
         return datasetPromise.then(ds => {
-            if (ds?.hasProcessing) {
+            if (!ds) {
+                return Promise.resolve(null);
+            }
+            if (ds.hasProcessing) {
                 return this.findDatasetChain({id: ds.datasetProcessing.inputDatasets[0].id, outProcessing: {id: ds.datasetProcessing.id, outDataset: {id: ds.id}}})
             } else {
                 return Promise.resolve({id: ds?.id,
@@ -417,13 +425,13 @@ export class TreeService {
 
         return processingPromise.then(async proc => {
             const firstRealInput = await this.datasetProcessingService.getFirstRealInput(proc);
+            if (!firstRealInput) {
+                // a processing is shown under its input dataset : without one, it has no node
+                return null;
+            }
             return this.selectDataset(firstRealInput).then(parentDsNode => {
                 return parentDsNode?.open().then(() => {
                     if (parentDsNode.processings != UNLOADED) {
-                        if (proc.parentId === null) {
-                            return parentDsNode.processings?.filter(pnode => pnode.id > proc.id)
-                                .sort((a, b) => a.id - b.id)[0];
-                        }
                         return parentDsNode.processings?.find(pnode => pnode.id == proc.id);
                     }
                 });
