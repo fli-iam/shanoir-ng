@@ -144,7 +144,7 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
             throw new RestServiceException(
                     new ErrorModel(
                             HttpStatus.UNAUTHORIZED.value(),
-                            "You don't have the right to delete datasets on studies you don't administrate."
+                            "You don't have the right to delete processings on studies you don't administrate."
                     ));
 
         // delete associated ressources
