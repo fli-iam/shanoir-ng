@@ -184,14 +184,17 @@ public class ImportDialogOpener {
     }
 
     /**
-     * Filters out study cards from a center that isn't attached to the study. 
-     * A study card whose equipment couldn't be resolved is excluded defensively, 
-     * since its center can't be verified.
+     * Filters out study cards from a center that isn't attached to the study, then, if the
+     * connected user is restricted to specific centers on this study, further filters down to
+     * only those centers (mirroring UserRights.hasStudyCenterRights on the backend). A study
+     * card whose equipment couldn't be resolved is excluded defensively, since its center can't
+     * be verified.
      *
      * @param study the study the study cards belong to
      * @param studyCards the study's own study cards, with their acquisitionEquipment already set
-     * @return the study cards whose center belongs to the study, or the input list unfiltered if
-     *         the study's centers could not be determined
+     * @return the study cards whose center belongs to the study and, if applicable, to the
+     *         connected user's own center restriction; or the input list unfiltered if the
+     *         study's centers could not be determined
      */
     private List<StudyCard> filterStudyCardsByAccessibleCenters(Study study, List<StudyCard> studyCards) {
         if (study.getStudyCenterList() == null) {
@@ -200,9 +203,15 @@ public class ImportDialogOpener {
         List<Long> accessibleCenterIds = study.getStudyCenterList().stream()
                 .map(studyCenter -> studyCenter.getCenter().getId())
                 .toList();
+        if (study.getRestrictedCenterIds() != null && !study.getRestrictedCenterIds().isEmpty()) {
+            accessibleCenterIds = accessibleCenterIds.stream()
+                    .filter(study.getRestrictedCenterIds()::contains)
+                    .toList();
+        }
+        final List<Long> accessibleCenterIdsFinal = accessibleCenterIds;
         return studyCards.stream()
                 .filter(studyCard -> studyCard.getAcquisitionEquipment() != null
-                        && accessibleCenterIds.contains(studyCard.getAcquisitionEquipment().getCenter().getId()))
+                        && accessibleCenterIdsFinal.contains(studyCard.getAcquisitionEquipment().getCenter().getId()))
                 .collect(Collectors.toList());
     }
 
