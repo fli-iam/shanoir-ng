@@ -60,8 +60,13 @@ import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Service
 public class DatasetSecurityService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(DatasetSecurityService.class);
 
     @Autowired
     private DatasetRepository datasetRepository;
@@ -1000,9 +1005,15 @@ public class DatasetSecurityService {
         Set<DatasetAcquisitionDTO> toRemove = new HashSet<>();
         UserRights userRights = studyRightsService.getUserRights();
         for (DatasetAcquisitionDTO da : list) {
-            Long studyId = da.getExamination().getStudyId();
-            Long centerId = da.getExamination().getCenterId();
-            if (!userRights.hasStudyCenterRights(studyId, centerId, rightStr)) {
+            Long studyId = da.getExamination() != null ? da.getExamination().getStudyId() : null;
+            Long centerId = da.getExamination() != null ? da.getExamination().getCenterId() : null;
+            boolean allowed = userRights.hasStudyCenterRights(studyId, centerId, rightStr);
+            LOG.warn("TEMP-DEBUG filterDatasetAcquisitionDTOList: acquisitionId={}, studyId={}, centerId={}, right={}, hasStudyRights={}, hasCenterRestrictions={}, allowed={}",
+                    da.getId(), studyId, centerId, rightStr,
+                    studyId != null && userRights.hasStudyRights(studyId, rightStr),
+                    studyId != null && userRights.hasCenterRestrictionsFor(studyId),
+                    allowed);
+            if (!allowed) {
                 toRemove.add(da);
             }
         }

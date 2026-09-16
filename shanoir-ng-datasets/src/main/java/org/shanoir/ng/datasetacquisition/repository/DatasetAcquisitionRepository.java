@@ -110,11 +110,33 @@ public interface DatasetAcquisitionRepository extends PagingAndSortingRepository
             + "WHERE da.id IN :ids")
     List<DatasetAcquisition> findByIdsWithDatasets(List<Long> ids);
 
-    @Query("SELECT da FROM DatasetAcquisition da "
-            + "LEFT JOIN FETCH da.datasets as ds "
-            + "LEFT JOIN FETCH ds.datasetExpressions "
-            + "WHERE da.id IN :ids")
-    List<DatasetAcquisition> findByIdsWithDatasetExpressions(List<Long> ids);
+    /**
+     * Same as findByIdsWithDatasets(), but also initializes "copies" (mapped by every
+     * DatasetAcquisitionDTO) so callers outside of a transaction (e.g. a controller mapping
+     * the result to a DTO during study card application) don't hit a LazyInitializationException.
+     * Done as two steps to avoid Hibernate's MultipleBagFetchException.
+     */
+    @Transactional(readOnly = true)
+    default List<DatasetAcquisition> findByIdsWithDatasetsAndCopies(List<Long> ids) {
+        List<DatasetAcquisition> acquisitions = findByIdsWithDatasets(ids);
+        acquisitions.forEach(acq -> Hibernate.initialize(acq.getCopies()));
+        return acquisitions;
+    }
+
+    /**
+     * Fetch-joining "datasets" and "datasets.datasetExpressions" in the same query throws
+     * Hibernate's MultipleBagFetchException (two different List/bag collections at once), so
+     * this reuses findByIdsWithDatasets() and initializes datasetExpressions as a second step,
+     * same pattern as findByIdWithDatasetsAndDatasetFiles() below.
+     */
+    @Transactional(readOnly = true)
+    default List<DatasetAcquisition> findByIdsWithDatasetExpressions(List<Long> ids) {
+        List<DatasetAcquisition> acquisitions = findByIdsWithDatasets(ids);
+        acquisitions.forEach(acq ->
+                acq.getDatasets().forEach(ds -> Hibernate.initialize(ds.getDatasetExpressions()))
+        );
+        return acquisitions;
+    }
 
     @Transactional(readOnly = true)
     default Optional<DatasetAcquisition> findByIdWithDatasetsAndDatasetFiles(Long id) {

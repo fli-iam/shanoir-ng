@@ -93,8 +93,10 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
             datasetProcessingService.deleteById(datasetProcessingId);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (IOException | SolrServerException | ShanoirException e) {
-            LOG.error("Error while deleting datasets: ", e);
+            LOG.error("Error while deleting dataset processing: ", e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
