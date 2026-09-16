@@ -175,7 +175,6 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
             newDsAcq = DatasetAcquisitionUtils.copyDatasetAcquisitionFromDatasetAcquisition(oldAcq);
         }
 
-        oldAcq.getCopies().add(newDsAcq);
         newDsAcq.setExamination(newExam);
         newDsAcq.setCopies(new ArrayList<>());
         newDsAcq.setSource(oldAcq);
@@ -190,7 +189,6 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
         Examination oldExam = acq.getExamination();
         Study newStudy = studyRepository.getReferenceById(studyId);
         Examination newExamination = new Examination(oldExam, newStudy, targetSubject);
-        oldExam.getCopies().add(newExamination);
         newExamination.setSource(oldExam);
         newExamination.setCopies(new ArrayList<>());
         examinationRepository.save(newExamination);
