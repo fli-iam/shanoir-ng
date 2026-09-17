@@ -195,7 +195,6 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
                     if (!Objects.equals(dto.getStatus(), ExecutionStatus.RUNNING)) {
                         monitoringQueue.remove(emMap);
                     }
-                    Thread.sleep(10000);
                 } catch (Exception e) {
                     // Unwrap ReactiveException thrown from async method
                     Throwable ex = Exceptions.unwrap(e);
@@ -206,6 +205,7 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
                     monitoringQueue.remove(emMap);
                 }
             }
+            // Paces the whole cycle, so polling stays at sleepTime whatever the number of monitored executions.
             while (System.currentTimeMillis() - startTime < sleepTime) {
                 try {
                     Thread.sleep(1000);
