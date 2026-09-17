@@ -130,6 +130,7 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
         monitoringMap.put("event", event);
         monitoringMap.put("attempt", 1);
         monitoringMap.put("jobsNumber", jobsNumber);
+        monitoringMap.put("userId", KeycloakUtil.getTokenUserId());
         monitoringQueue.add(monitoringMap);
 
         if (!isRunning) { //If we remove this line, each calling thread needs to wait the old ones to finish the synchronized block below before resuming the code execution. It's only for code performance.
@@ -153,11 +154,12 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
                 ShanoirEvent event = (ShanoirEvent) emMap.get("event");
                 Integer attempt = (Integer) emMap.get("attempt");
                 Integer jobsNumber = (Integer) emMap.get("jobsNumber");
+                Long userId = (Long) emMap.get("userId");
                 String execLabel = getExecLabel(monitoring);
 
 
                 if (Objects.isNull(event) || !Objects.equals(event.getStatus(), ShanoirEvent.IN_PROGRESS)) {
-                    event = initShanoirEvent(monitoring, event, execLabel, jobsNumber);
+                    event = initShanoirEvent(monitoring, event, execLabel, jobsNumber, userId);
                     emMap.put("event", event);
                     LOG.info("Monitoring of execution id: " + monitoring.getId() + ", identifier: " + monitoring.getPipelineIdentifier() + ", name: " + monitoring.getName() + " started");
                 }
@@ -244,14 +246,14 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
     /**
      * Create or update Shanoir event relative to an execution monitoring
      */
-    private ShanoirEvent initShanoirEvent(ExecutionMonitoring processing, ShanoirEvent event, String execLabel, Integer jobsNumber) {
+    private ShanoirEvent initShanoirEvent(ExecutionMonitoring processing, ShanoirEvent event, String execLabel, Integer jobsNumber, Long userId) {
         String startMsg = execLabel + " : " + ExecutionStatus.RUNNING.getRestLabel() + " (0/" + jobsNumber + " jobs done)";
 
         if (event == null) {
             event = new ShanoirEvent(
                     ShanoirEventType.EXECUTION_MONITORING_EVENT,
                     processing.getId().toString(),
-                    KeycloakUtil.getTokenUserId(),
+                    userId,
                     startMsg,
                     ShanoirEvent.IN_PROGRESS,
                     DEFAULT_PROGRESS);
