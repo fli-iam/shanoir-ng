@@ -31,11 +31,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <div class="row">
             <div class="pipeline-list">
                 <div class="pipelines">
-                    @for (pipeline of pipelines; track pipeline.identifier) {
+                    @for (group of pipelineGroups; track group.name) {
                         <app-pipeline
-                                [pipeline]="pipeline"
-                                [selected]="pipeline.identifier === selectedIdentifier"
-                                (click)="selectPipeline(pipeline)"></app-pipeline>
+                                [group]="group"
+                                [selectedIdentifier]="selectedIdentifier"
+                                (pipelineSelected)="selectPipeline($event)"></app-pipeline>
                     }
                 </div>
             </div>
