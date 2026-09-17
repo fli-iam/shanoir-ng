@@ -110,11 +110,21 @@ public interface DatasetAcquisitionRepository extends PagingAndSortingRepository
             + "WHERE da.id IN :ids")
     List<DatasetAcquisition> findByIdsWithDatasets(List<Long> ids);
 
-    @Query("SELECT da FROM DatasetAcquisition da "
-            + "LEFT JOIN FETCH da.datasets as ds "
-            + "LEFT JOIN FETCH ds.datasetExpressions "
-            + "WHERE da.id IN :ids")
-    List<DatasetAcquisition> findByIdsWithDatasetExpressions(List<Long> ids);
+    @Transactional(readOnly = true)
+    default List<DatasetAcquisition> findByIdsWithDatasetsAndCopies(List<Long> ids) {
+        List<DatasetAcquisition> acquisitions = findByIdsWithDatasets(ids);
+        acquisitions.forEach(acq -> Hibernate.initialize(acq.getCopies()));
+        return acquisitions;
+    }
+
+    @Transactional(readOnly = true)
+    default List<DatasetAcquisition> findByIdsWithDatasetExpressions(List<Long> ids) {
+        List<DatasetAcquisition> acquisitions = findByIdsWithDatasets(ids);
+        acquisitions.forEach(acq ->
+                acq.getDatasets().forEach(ds -> Hibernate.initialize(ds.getDatasetExpressions()))
+        );
+        return acquisitions;
+    }
 
     @Transactional(readOnly = true)
     default Optional<DatasetAcquisition> findByIdWithDatasetsAndDatasetFiles(Long id) {

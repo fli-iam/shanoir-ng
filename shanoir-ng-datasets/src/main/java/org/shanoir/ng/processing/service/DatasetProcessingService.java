@@ -21,6 +21,7 @@ import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.springframework.security.access.prepost.PreAuthorize;
 
@@ -62,13 +63,24 @@ public interface DatasetProcessingService {
     void deleteById(Long id) throws ShanoirException, RestServiceException, SolrServerException, IOException;
 
     /**
+     * Delete a dataset processing and its output datasets.
+     *
+     * @param id processing id.
+     * @param parentEvent the event of the parent deletion (dataset, acquisition, examination...)
+     *                    driving this one, which already reports its own progress: the output
+     *                    datasets are then deleted without publishing a deletion event each.
+     */
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
+    void deleteById(Long id, ShanoirEvent parentEvent) throws ShanoirException, RestServiceException, SolrServerException, IOException;
+
+    /**
      * Unlink given dataset from all processing
      * Remove processing if linked to no other dataset
      *
      * @param datasetId
      */
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
-    void removeDatasetFromAllProcessingInput(Long datasetId) throws ShanoirException, RestServiceException, SolrServerException, IOException;
+    void removeDatasetFromAllProcessingInput(Long datasetId, ShanoirEvent parentEvent) throws ShanoirException, RestServiceException, SolrServerException, IOException;
 
     /**
      * Delete child processing of given processing
@@ -79,7 +91,7 @@ public interface DatasetProcessingService {
      * @throws SolrServerException
      * @throws IOException
      */
-    void deleteByParentId(Long id) throws RestServiceException, ShanoirException, SolrServerException, IOException;
+    void deleteByParentId(Long id, ShanoirEvent parentEvent) throws RestServiceException, ShanoirException, SolrServerException, IOException;
 
     void validateDatasetProcessing(DatasetProcessing processing) throws RestServiceException, EntityNotFoundException;
 }
