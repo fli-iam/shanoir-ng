@@ -13,10 +13,15 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 @if (pipeline) {
-    <div class="pipeline">
+    <div class="pipeline" [class.selected]="selected" [title]="pipeline.identifier">
         <div class="icon">
             <img [src]="ImagesUrlUtil.PIPELINE_IMAGE_ICON_PATH" alt="" />
         </div>
+        <div class="labels">
+            <span class="name">{{ displayName }}</span>
+            @if (displayVersion) {
+                <span class="version">v{{ displayVersion }}</span>
+            }
+        </div>
     </div>
-    <p class="name">{{pipeline.identifier}}</p>
 }

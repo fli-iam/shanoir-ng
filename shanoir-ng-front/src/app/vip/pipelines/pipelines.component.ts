@@ -20,6 +20,8 @@ export class PipelinesComponent implements OnInit {
 
     pipelines: Pipeline[];
     selectedPipeline: Pipeline;
+    /** Identifier of the clicked pipeline, so that the tile is highlighted while its description loads. */
+    selectedIdentifier: string;
     descriptionLoading: boolean;
 
     constructor(private breadcrumbsService: BreadcrumbsService, 
@@ -42,6 +44,7 @@ export class PipelinesComponent implements OnInit {
     }
 
     selectPipeline(pipeline: Pipeline) {
+        this.selectedIdentifier = pipeline.identifier;
         this.descriptionLoading = true;
         this.pipelineService.getPipeline(pipeline.identifier).then(
             (pipeline: Pipeline) => {

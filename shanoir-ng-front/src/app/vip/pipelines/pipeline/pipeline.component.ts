@@ -28,10 +28,20 @@ import { ImagesUrlUtil } from '@app/shared/utils/images-url.util';
 export class PipelineComponent implements OnInit {
 
   @Input() pipeline: Pipeline;
+  @Input() selected: boolean = false;
   readonly ImagesUrlUtil = ImagesUrlUtil;
 
   ngOnInit(): void {
       return;
+  }
+
+  /** The identifier is built as "<name>/<version>", fall back on it when VIP does not send both fields. */
+  get displayName(): string {
+      return this.pipeline.name ?? this.pipeline.identifier?.split('/')[0] ?? this.pipeline.identifier;
+  }
+
+  get displayVersion(): string {
+      return this.pipeline.version ?? this.pipeline.identifier?.split('/')[1];
   }
 
 }
