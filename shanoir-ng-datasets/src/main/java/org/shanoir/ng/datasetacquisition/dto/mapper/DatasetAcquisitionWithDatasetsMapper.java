@@ -32,6 +32,9 @@ public interface DatasetAcquisitionWithDatasetsMapper {
     @Named("idRelations")
     @InheritConfiguration(name = "acquisitionToAcquisitionIdRelationsDTOPrototype")
     @Mapping(target = "datasets", source = "datasets", qualifiedByName = "idOnly")
+    // DatasetSecurityService.filterDatasetAcquisitionDTOList() needs 
+    // examination.studyId/centerId to check the user's rights
+    @Mapping(target = "examination", source = "examination", qualifiedByName = "withStudy")
     DatasetAcquisitionWithDatasetsDTO datasetAcquisitionToDatasetAcquisitionDTOWithDatasetIds(DatasetAcquisition datasetAcquisition);
 
     // Entity list
