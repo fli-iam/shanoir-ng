@@ -93,8 +93,10 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
             datasetProcessingService.deleteById(datasetProcessingId);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (IOException | SolrServerException | ShanoirException e) {
-            LOG.error("Error while deleting datasets: ", e);
+            LOG.error("Error while deleting dataset processing: ", e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -124,7 +126,7 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
         if (datasetProcessings.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
-        return new ResponseEntity<>(datasetProcessingMapper.processingListToProcessingDTOListWithNullRelations(datasetProcessings), HttpStatus.OK);
+        return new ResponseEntity<>(datasetProcessingMapper.processingListToProcessingDTOListWithParentId(datasetProcessings), HttpStatus.OK);
     }
 
     public ResponseEntity<List<DatasetProcessingDTO>> getProcessingsByMonitoring(@Parameter(description = "id of the monitoring", required = true) @PathVariable("monitoringId") Long monitoringId) {
@@ -150,6 +152,7 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
             @Parameter(description = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId) throws EntityNotFoundException {
         DatasetProcessing datasetProcessing = repository.findByIdWithOutputs(datasetProcessingId).orElseThrow(() -> new EntityNotFoundException(DatasetProcessing.class, datasetProcessingId));
         List<Dataset> outputDatasets = datasetProcessing.getOutputDatasets();
+        datasetService.populateInPacs(outputDatasets);
         return new ResponseEntity<>(datasetMapper.datasetListToDatasetDTOListWithProcessing(outputDatasets), HttpStatus.OK);
     }
 
@@ -201,8 +204,7 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
             @RequestParam(value = "resultOnly") boolean resultOnly,
             HttpServletResponse response) throws RestServiceException {
 
-        List<DatasetProcessing> processingList = repository.findByIdsWithInputsAndOutputs(processingIds);
-        processingDownloaderService.massiveDownload(processingList, resultOnly, "dcm", response, false, null);
+        processingDownloaderService.massiveDownloadByProcessingIds(processingIds, resultOnly, "dcm", response, false, null);
     }
 
     @Override

@@ -29,8 +29,12 @@ import org.shanoir.ng.processing.repository.DatasetProcessingRepository;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.solr.service.SolrService;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.vip.executionMonitoring.model.ExecutionMonitoring;
 import org.shanoir.ng.vip.processingResource.repository.ProcessingResourceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,6 +66,9 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
     @Autowired
     private SolrService solrService;
 
+    @Autowired
+    private ShanoirEventService eventService;
+
     protected DatasetProcessing updateValues(final DatasetProcessing from, final DatasetProcessing to) {
         to.setDatasetProcessingType(from.getDatasetProcessingType());
         to.setComment(from.getComment());
@@ -90,32 +97,65 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
     @Override
     @Transactional
     public void deleteById(final Long id) throws ShanoirException, RestServiceException, SolrServerException, IOException {
-        final Optional<DatasetProcessing> entity = repository.findByIdWithOutputs(id);
-        entity.orElseThrow(() -> new EntityNotFoundException("Cannot find dataset processing [" + id + "]"));
+        // A processing deleted on its own reports itself, and its output datasets are then deleted
+        // under its event rather than publishing one deletion event each.
+        ShanoirEvent event = new ShanoirEvent(
+                ShanoirEventType.DELETE_DATASET_PROCESSING_EVENT,
+                String.valueOf(id),
+                KeycloakUtil.getTokenUserId(),
+                "Delete dataset processing with id : " + id,
+                ShanoirEvent.IN_PROGRESS,
+                0f,
+                repository.findById(id).map(DatasetProcessing::getStudyId).orElse(null));
+        eventService.publishEvent(event);
+
+        try {
+            deleteById(id, event);
+        } catch (Exception e) {
+            event.setMessage("Dataset processing " + id + " could not be deleted : " + e.getMessage());
+            event.setStatus(ShanoirEvent.ERROR);
+            eventService.publishEvent(event);
+            throw e;
+        }
+
+        event.setMessage("Dataset processing " + id + " deleted.");
+        event.setProgress(1f);
+        event.setStatus(ShanoirEvent.SUCCESS);
+        eventService.publishEvent(event);
+    }
+
+    @Override
+    @Transactional
+    public void deleteById(final Long id, final ShanoirEvent parentEvent) throws ShanoirException, RestServiceException, SolrServerException, IOException {
+        final DatasetProcessing processing = repository.findByIdWithOutputs(id)
+                .orElseThrow(() -> new EntityNotFoundException("Cannot find dataset processing [" + id + "]"));
 
         // Load datasetProcessing output datasets
-        List<Dataset> datasets = entity.get().getOutputDatasets();
+        List<Dataset> datasets = processing.getOutputDatasets();
         List<Long> datasetIds = datasets.stream().map(Dataset::getId).collect(Collectors.toList());
 
-        // Check for rights
-        boolean hasRights = datasetSecurityService.hasRightOnEveryDataset(datasetIds, "CAN_ADMINISTRATE");
+        // Check for rights. The study of the processing is checked on its own, as the output
+        // datasets it would otherwise be deduced from may all have been deleted already, and an
+        // empty dataset list is granted every right.
+        boolean hasRights = datasetSecurityService.hasRightOnStudy(processing.getStudyId(), "CAN_ADMINISTRATE")
+                && datasetSecurityService.hasRightOnEveryDataset(datasetIds, "CAN_ADMINISTRATE");
 
         if (!hasRights)
             throw new RestServiceException(
                     new ErrorModel(
                             HttpStatus.UNAUTHORIZED.value(),
-                            "You don't have the right to delete datasets on studies you don't administrate."
+                            "You don't have the right to delete processings on studies you don't administrate."
                     ));
 
         // delete associated ressources
         processingResourceRepository.deleteByProcessingId(id);
 
         for (Dataset ds : datasets) {
-            datasetService.deleteById(ds.getId());
+            datasetService.deleteById(ds.getId(), parentEvent);
             solrService.deleteFromIndex(ds.getId());
         }
 
-        this.deleteByParentId(id);
+        this.deleteByParentId(id, parentEvent);
         repository.deleteById(id);
     }
 
@@ -125,7 +165,7 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
      * @param datasetId
      */
     @Override
-    public void removeDatasetFromAllProcessingInput(Long datasetId) throws ShanoirException, RestServiceException, SolrServerException, IOException {
+    public void removeDatasetFromAllProcessingInput(Long datasetId, ShanoirEvent parentEvent) throws ShanoirException, RestServiceException, SolrServerException, IOException {
         List<DatasetProcessing> processings = repository.findByInputIdWithInputs(datasetId);
         List<DatasetProcessing> toUpdate = new ArrayList<>();
         List<DatasetProcessing> toDelete = new ArrayList<>();
@@ -140,16 +180,16 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
             }
         }
         for (DatasetProcessing proc : toDelete) {
-            this.deleteById(proc.getId());
+            this.deleteById(proc.getId(), parentEvent);
         }
         repository.saveAll(toUpdate);
     }
 
     @Override
-    public void deleteByParentId(Long id) throws ShanoirException, RestServiceException, SolrServerException, IOException {
+    public void deleteByParentId(Long id, ShanoirEvent parentEvent) throws ShanoirException, RestServiceException, SolrServerException, IOException {
         List<DatasetProcessing> processings = repository.findAllByParentId(id);
         for (DatasetProcessing child : processings) {
-            this.deleteById(child.getId());
+            this.deleteById(child.getId(), parentEvent);
         }
     }
 
