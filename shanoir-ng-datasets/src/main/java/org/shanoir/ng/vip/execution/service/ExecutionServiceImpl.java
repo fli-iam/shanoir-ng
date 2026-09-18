@@ -132,7 +132,7 @@ public class ExecutionServiceImpl implements ExecutionService {
     }
 
     public Mono<VipExecutionDTO> getExecution(String identifier) {
-        String url = vipExecutionUri + "/" + identifier;
+        String url = vipUrl + vipExecutionUri + "/" + identifier;
         return webClient.get()
                 .uri(url)
                 .headers(headers -> headers.addAll(utils.getUserHttpHeaders()))
