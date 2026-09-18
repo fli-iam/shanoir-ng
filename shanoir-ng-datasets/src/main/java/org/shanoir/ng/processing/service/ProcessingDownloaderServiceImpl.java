@@ -33,6 +33,8 @@ import org.apache.commons.collections4.ListUtils;
 import org.apache.solr.common.util.Pair;
 import org.assertj.core.util.Lists;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.DatasetExpression;
+import org.shanoir.ng.dataset.repository.DatasetExpressionRepository;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
@@ -50,6 +52,7 @@ import org.shanoir.ng.utils.KeycloakUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -67,11 +70,42 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
     @Autowired
     private DatasetRepository datasetRepository;
 
+    @Autowired
+    private DatasetExpressionRepository datasetExpressionRepository;
+
     @PersistenceContext
     private EntityManager em;
 
+    @Transactional(readOnly = true)
     public void massiveDownloadByProcessingIds(List<Long> processingIds, boolean resultOnly, String format, HttpServletResponse response, boolean withManifest, Long converterId) throws RestServiceException {
-        massiveDownload(datasetProcessingRepository.findByIdsWithInputsAndOutputsAndDatasetFiles(processingIds), resultOnly, format, response, withManifest, converterId);
+        massiveDownload(findProcessingsWithInputsOutputsAndDatasetFiles(processingIds), resultOnly, format, response, withManifest, converterId);
+    }
+
+    /**
+     * Fetches the given processings with their input/output datasets, dataset expressions and
+     * dataset files all eagerly loaded, in a fixed number of batched queries instead of one query
+     * per processing/dataset/expression. OSIV is disabled, so this whole chain has to run within
+     * one transaction (see the @Transactional on the two public callers) for the fetch queries
+     * below to share the same persistence context and populate the same managed entities.
+     *
+     * @param processingIds
+     * @return
+     */
+    private List<DatasetProcessing> findProcessingsWithInputsOutputsAndDatasetFiles(List<Long> processingIds) {
+        List<DatasetProcessing> processings = datasetProcessingRepository.findByIdsWithInputsAndOutputs(processingIds);
+        List<Long> datasetIds = processings.stream()
+                .flatMap(processing -> Stream.concat(processing.getInputDatasets().stream(), processing.getOutputDatasets().stream()))
+                .map(Dataset::getId)
+                .distinct()
+                .toList();
+        List<Dataset> datasetsWithExpressions = datasetRepository.findByIdsWithDatasetExpression(datasetIds);
+        List<Long> expressionIds = datasetsWithExpressions.stream()
+                .flatMap(dataset -> dataset.getDatasetExpressions().stream())
+                .map(DatasetExpression::getId)
+                .distinct()
+                .toList();
+        datasetExpressionRepository.findByIdsWithDatasetFiles(expressionIds);
+        return processings;
     }
 
     public void massiveDownload(List<DatasetProcessing> processingList, boolean resultOnly, String format, HttpServletResponse response, boolean withManifest, Long converterId) throws RestServiceException {
@@ -140,9 +174,10 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
         }
     }
 
+    @Transactional(readOnly = true)
     public void massiveDownloadByExaminations(List<Examination> examinationList, String processingComment, boolean resultOnly, String format, HttpServletResponse response, boolean withManifest, Long converterId) throws RestServiceException {
         List<Long> processingIdsList = datasetProcessingRepository.findAllIdsByExaminationIds(examinationList.stream().map(Examination::getId).toList());
-        List<DatasetProcessing> processingList = datasetProcessingRepository.findByIdsWithInputsAndOutputsAndDatasetFiles(processingIdsList);
+        List<DatasetProcessing> processingList = findProcessingsWithInputsOutputsAndDatasetFiles(processingIdsList);
         if (!Objects.isNull(processingComment)) {
             processingList = processingList.stream().filter(it -> Objects.equals(it.getComment(), processingComment)).toList();
         }
