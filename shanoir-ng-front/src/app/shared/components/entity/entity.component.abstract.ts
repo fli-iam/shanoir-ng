@@ -667,7 +667,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
         const msg = this.getOnDeleteConfirmMessage ? this.getOnDeleteConfirmMessage(entity) : null;
         this.getService().deleteWithConfirmDialog(this.getRoutingName(), entity, msg).then(deleted => {
             if (deleted) {
-                if (this.treeService.treeOpened && this.treeService.treeAvailable) {
+                if (this.treeService.treeOpened && this.treeService.treeAvailable && this.treeService.selectedNode) {
                     this.treeService.removeCurrentNode();
                     this.goToParent();
                 } else {
