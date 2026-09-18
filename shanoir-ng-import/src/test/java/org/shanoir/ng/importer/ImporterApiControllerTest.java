@@ -16,7 +16,6 @@ package org.shanoir.ng.importer;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -51,7 +50,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.client.RestTemplate;
-
 
 /**
  * Unit tests for importer controller.
@@ -155,12 +153,4 @@ public class ImporterApiControllerTest {
         assertTrue(((String) captor.getValue()).contains(dataset.getName()));
     }
 
-    @Test
-    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
-    public void testGetDicomImageNoPath() throws Exception {
-
-        mvc.perform(MockMvcRequestBuilders.get(GET_DICOM)
-                .param("path", ""))
-                .andExpect(status().is(200));
-    }
 }

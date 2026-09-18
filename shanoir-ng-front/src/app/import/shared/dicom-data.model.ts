@@ -16,6 +16,7 @@ import { SimpleSubject } from "../../subjects/shared/subject.model";
 import { Sex } from "../../subjects/shared/subject.types";
 
 export class ImportJob {
+    id: string;
     timestamp: number;
     fromDicomZip: boolean;
     fromShanoirUploader: boolean;

@@ -16,13 +16,13 @@ package org.shanoir.ng.importer;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.shanoir.anonymization.anonymization.AnonymizationResult;
 import org.shanoir.anonymization.anonymization.AnonymizationServiceImpl;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.dicom.query.DicomStoreSCPServer;
@@ -48,7 +48,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -67,8 +66,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class ImporterManagerService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ImporterManagerService.class);
-
-    private static final SecureRandom RANDOM = new SecureRandom();
 
     /**
      * For the moment Spring is not used here to autowire, as we try to keep the
@@ -105,14 +102,9 @@ public class ImporterManagerService {
     @Autowired
     private StudyUserRightsRepository studyUserRightRepo;
 
-    @Value("${shanoir.import.directory}")
-    private String importDir;
-
     @Async
     public void manageImportJob(final ImportJobBase importJob) {
-        final String statusKey = ImportJobStatusService.keyOf(importJob.getWorkFolder());
-        importJobStatusService.setInProgress(statusKey, "Starting import");
-
+        importJobStatusService.setInProgress(importJob, "Starting import");
         ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT,
                 importJob.getExaminationId().toString(), importJob.getUserId(),
                 "Starting import", ShanoirEvent.IN_PROGRESS,
@@ -120,16 +112,7 @@ public class ImporterManagerService {
         event.setTimestamp(importJob.getTimestamp());
         eventService.publishEvent(event);
         importJob.setShanoirEvent(event);
-        importJob.setUsername(KeycloakUtil.getTokenUserName());
         try {
-            // Always create a userId specific folder in the import work folder
-            // (the root of everything): split imports to clearly separate them
-            // into separate folders for each user
-            final String userImportDirFilePath = importDir + File.separator + Long.toString(importJob.getUserId());
-            final File userImportDir = new File(userImportDirFilePath);
-            if (!userImportDir.exists()) {
-                userImportDir.mkdirs(); // create if not yet existing, e.g. in case of PACS import
-            }
             // 1. call to cleanSeries: remove ignored series, that have been detected to be
             // ignored by the uploadDicomZipFile (DicomDirToModelService) or the QueryPACSService
             // (either from ShUp or the web-gui-pacs import), see usage of
@@ -138,27 +121,29 @@ public class ImporterManagerService {
             // In PACS import the DICOM files are still in the PACS, we have to download
             // them first and then analyze them:
             // what gives us a list of images for each serie.
-            final File importJobDir;
+            final File importJobDir = new File(importJob.getWorkFolder());
             if (importJob.isFromPacs()) {
-                importJobDir = createImportJobDir(userImportDir.getAbsolutePath());
                 // At first all DICOM files arrive normally in /tmp/shanoir-dcmrcv
                 // (see config DicomStoreSCPServer)
                 downloadAndMoveDicomFilesToImportJobDir(importJobDir,
-                        importJob.getStudyInstanceUID(), importJob.getSeries(), event);
-                // Convert instances to images, as already done after zip file upload
+                        importJob.getStudy().getStudyInstanceUID(), importJob.getSeries(), event);
                 imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(importJob,
-                        importJobDir.getAbsolutePath(), true, event, false);
+                        importJobDir.getAbsolutePath(), event, true);
+            // isFromShUp: Pseudonymization already done and UIDs updated in importJob
+            // createImages already done now in new versions of ShUp too
             } else if (importJob.isFromShanoirUploader()) {
-                importJobDir = new File(importJob.getWorkFolder());
-                // Convert instances to images, as already done after zip file upload
-                imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(importJob,
-                        importJobDir.getAbsolutePath(), false, event, false);
-            } else if (importJob.isFromDicomZip()) {
-                // Images creation and analyze of dicom files has been done after upload already
-                importJobDir = new File(importJob.getWorkFolder());
-            } else {
+                boolean legacy = importJob.getSeries().getFirst().getInstances() != null;
+                // still manage imports of old versions
+                if (legacy) {
+                    imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(importJob,
+                            importJobDir.getAbsolutePath(), event, false);
+                }
+            // isFromDicomZip: do nothing, as images creation and analyze of DICOM files
+            // have been done after upload of ZIP file(s) already
+            } else if (!importJob.isFromDicomZip()) {
                 throw new ShanoirException("Unsupported type of import.");
             }
+
             // 2. call to cleanSeries: at this point we are sure for all imports, that the
             // ImagesCreatorAndDicomFileAnalyzer has been run and correctly classified
             // everything. So no need to check afterwards for erroneous series.
@@ -169,15 +154,14 @@ public class ImporterManagerService {
 
             event.setProgress(0.25F);
             eventService.publishEvent(event);
-            importJobStatusService.setInProgress(statusKey, "Pseudonymizing and creating datasets");
-
+            importJobStatusService.setInProgress(importJob, "Pseudonymizing and creating datasets");
             if (!importJob.isFromShanoirUploader()) {
-                pseudonymize(importJob, event, importJobDir);
+                pseudonymizeAndUpdateImportJobUIDs(importJob, event, importJobDir);
             }
             datasetsCreatorService.createDatasets(importJob, importJobDir);
-
-            importJobStatusService.setFinished(statusKey, importJob);
-
+            importJobStatusService.setFinished(importJob);
+            ImportUtils.cleanUpImportJob(importJob);
+            // Send to ms-dataset to finish import
             this.rabbitTemplate.convertAndSend(RabbitMQConfiguration.IMPORTER_QUEUE_DATASET,
                     objectMapper.writeValueAsString(importJob));
             long importJobDirSize = ImportUtils.getDirectorySize(importJobDir.toPath());
@@ -191,7 +175,7 @@ public class ImporterManagerService {
             event.setStatus(ShanoirEvent.ERROR);
             event.setProgress(-1f);
             eventService.publishEvent(event);
-            importJobStatusService.setError(statusKey, event.getMessage());
+            importJobStatusService.setError(importJob, event.getMessage());
             sendFailureMail(importJob, e.getMessage());
         }
     }
@@ -216,7 +200,7 @@ public class ImporterManagerService {
         }
     }
 
-    private void pseudonymize(final ImportJobBase importJob, ShanoirEvent event, final File importJobDir)
+    private void pseudonymizeAndUpdateImportJobUIDs(final ImportJobBase importJob, ShanoirEvent event, final File importJobDir)
             throws FileNotFoundException, ShanoirException {
         if (importJob.getAnonymisationProfileToUse() != null && !importJob.getAnonymisationProfileToUse().isEmpty()) {
             ArrayList<File> dicomFiles = getDicomFilesForImportJob(importJob, importJobDir.getAbsolutePath());
@@ -229,7 +213,8 @@ public class ImporterManagerService {
             event.setMessage("Pseudonymizing DICOM files for subject [" + subjectName + "]...");
             eventService.publishEvent(event);
             try {
-                ANONYMIZER.anonymizeForShanoir(dicomFiles, importJob.getAnonymisationProfileToUse(), subjectName, subjectName, importJob.getStudyInstanceUID());
+                AnonymizationResult anonymizationResult = ANONYMIZER.anonymizeForShanoir(dicomFiles, importJob.getAnonymisationProfileToUse(), subjectName, subjectName, importJob.getStudyInstanceUID(), importJobDir);
+                ImportUtils.updateImportJobWithPseudonymizedUIDs(importJob, importJobDir, anonymizationResult);
             } catch (Exception e) {
                 LOG.error(e.getMessage(), e);
                 throw new ShanoirException("Error during pseudonymization.");
@@ -274,38 +259,6 @@ public class ImporterManagerService {
         } catch (AmqpException | JsonProcessingException e) {
             LOG.error("Could not send email for this import. ", e);
         }
-    }
-
-    /**
-     * This method creates a random number named work folder to work within during the import.
-     *
-     * @return file: work folder
-     * @throws ShanoirException
-     */
-    private File createImportJobDir(final String parent) throws ShanoirException {
-        long n = createRandomLong();
-        File importJobDir = new File(parent, Long.toString(n));
-        if (!importJobDir.exists()) {
-            importJobDir.mkdirs();
-        } else {
-            throw new ShanoirException("Error while creating importJobDir: folder already exists.");
-        }
-        return importJobDir;
-    }
-
-    /**
-     * This method creates a random long number.
-     *
-     * @return long: random number
-     */
-    private long createRandomLong() {
-        long n = RANDOM.nextLong();
-        if (n == Long.MIN_VALUE) {
-            n = 0; // corner case
-        } else {
-            n = Math.abs(n);
-        }
-        return n;
     }
 
     /**
@@ -359,7 +312,7 @@ public class ImporterManagerService {
      * @throws FileNotFoundException
      */
     private ArrayList<File> getDicomFilesForImportJob(final ImportJobBase importJob, final String workFolderPath) throws FileNotFoundException {
-        Set<File> pathsSet = new HashSet<>(50000);
+        Set<File> pathsSet = new HashSet<>(100000);
         List<Serie> series = importJob.getSeries();
         for (Iterator<Serie> seriesIt = series.iterator(); seriesIt.hasNext();) {
             Serie serie = seriesIt.next();
@@ -382,8 +335,8 @@ public class ImporterManagerService {
         List<Image> images = serie.getImages();
         for (Iterator<Image> imagesIt = images.iterator(); imagesIt.hasNext();) {
             Image image = imagesIt.next();
-            String path = image.getPath();
-            File file = new File(workFolderPath + File.separator + path);
+            String path = workFolderPath + File.separator + image.getPath();
+            File file = new File(path);
             if (file.exists()) {
                 pathsSet.add(file);
             } else {

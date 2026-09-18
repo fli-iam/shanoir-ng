@@ -15,6 +15,7 @@
 import { EegDatasetDTO } from "../../datasets/shared/dataset.dto"
 
 export class EegImportJob {
+    id: string;
     workFolder: string;
     examinationId: number;
     studyId: number;

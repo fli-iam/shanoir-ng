@@ -3,8 +3,10 @@ package org.shanoir.uploader.action;
 import java.io.File;
 import java.io.IOException;
 
+import org.shanoir.anonymization.anonymization.AnonymizationResult;
 import org.shanoir.ng.importer.model.ImportJobBase;
 import org.shanoir.ng.importer.model.UploadState;
+import org.shanoir.ng.utils.ImportUtils;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.dicom.anonymize.Anonymizer;
 import org.shanoir.uploader.nominativeData.NominativeDataImportJobManager;
@@ -21,10 +23,10 @@ public class ImportFinishRunnable implements Runnable {
 
     private static final Logger logger = LoggerFactory.getLogger(ImportFinishRunnable.class);
 
-    private final File uploadFolder;
+    private final File importJobFolder;
 
     private final ImportJobBase importJob;
-    
+
     private final Anonymizer anonymizer = new Anonymizer();
 
     /** Invoked exactly once, on whatever thread this Runnable finishes on,
@@ -32,41 +34,42 @@ public class ImportFinishRunnable implements Runnable {
      *  release its per-folder in-progress guard and restore UI state. */
     private final Runnable onDone;
 
-    public ImportFinishRunnable(final File uploadFolder, final ImportJobBase importJob) {
-        this(uploadFolder, importJob, null);
+    public ImportFinishRunnable(final File importJobFolder, final ImportJobBase importJob) {
+        this(importJobFolder, importJob, null);
     }
 
-    public ImportFinishRunnable(final File uploadFolder, final ImportJobBase importJob,
+    public ImportFinishRunnable(final File importJobFolder, final ImportJobBase importJob,
             final Runnable onDone) {
-        this.uploadFolder = uploadFolder;
+        this.importJobFolder = importJobFolder;
         this.importJob = importJob;
         this.onDone = onDone;
     }
 
     public void run() {
         try {
-            boolean anonymizationSuccess = false;
+            AnonymizationResult anonymizationResult = null;
             try {
                 String anonymizationProfile = ShUpConfig.profileProperties.getProperty(ShUpConfig.ANONYMIZATION_PROFILE);
-                anonymizationSuccess = anonymizer.pseudonymize(uploadFolder, anonymizationProfile, importJob.getSubjectName(), importJob.getStudyInstanceUID());
+                anonymizationResult = anonymizer.pseudonymize(importJobFolder, anonymizationProfile,
+                        importJob.getSubjectName(), importJob.getStudyInstanceUID());
             } catch (IOException e) {
-                logger.error(uploadFolder.getName() + ": " + e.getMessage(), e);
+                logger.error(importJobFolder.getName() + ": " + e.getMessage(), e);
             }
-
-            if (anonymizationSuccess) {
+            if (anonymizationResult != null) {
                 try {
+                    ImportUtils.updateImportJobWithPseudonymizedUIDs(importJob, importJobFolder, anonymizationResult);
                     importJob.setUploadState(UploadState.START_IMPORT_JOB);
-                    NominativeDataImportJobManager importJobManager = new NominativeDataImportJobManager(uploadFolder.getAbsolutePath());
+                    NominativeDataImportJobManager importJobManager =
+                            new NominativeDataImportJobManager(importJobFolder.getAbsolutePath());
                     importJobManager.writeImportJob(importJob);
                 } catch (Exception e) {
-                    logger.error(uploadFolder.getName() + ": " + e.getMessage(), e);
+                    logger.error(importJobFolder.getName() + ": " + e.getMessage(), e);
                 }
-                logger.info(uploadFolder.getName() + " scheduled for upload.");
+                logger.info(importJobFolder.getName() + " scheduled for upload.");
             } else {
-                logger.error(uploadFolder.getName() + ": Error during anonymization.");
+                logger.error(importJobFolder.getName() + ": Error during anonymization.");
             }
         } finally {
-            // Always release the guard/UI state, even on unexpected exceptions.
             if (onDone != null) {
                 onDone.run();
             }

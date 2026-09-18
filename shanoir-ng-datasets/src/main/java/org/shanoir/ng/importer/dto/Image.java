@@ -43,6 +43,7 @@ public class Image {
     @JsonProperty("imageOrientationPatient")
     private List<Double> imageOrientationPatient;
 
+    @JsonProperty("sopInstanceUID")
     private String sopInstanceUID;
 
     public String getPath() {
