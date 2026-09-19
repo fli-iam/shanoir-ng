@@ -99,9 +99,6 @@ public class RabbitMQConfiguration {
     /** Get the list of subjects for a given study. */
     public static final String DATASET_SUBJECT_QUEUE = "dataset-subjects-queue";
 
-    /** Create a subject study for a given subject and study. */
-    public static final String DATASET_SUBJECT_STUDY_QUEUE = "dataset-subject-study-queue";
-
     /** Delete animal subject => Delete associated subject. */
     public static final String DELETE_ANIMAL_SUBJECT_QUEUE = "delete-animal-subject-queue";
 
@@ -323,11 +320,6 @@ public class RabbitMQConfiguration {
     @Bean
     public static Queue datasetSubjectQueue() {
         return new Queue(DATASET_SUBJECT_QUEUE, true);
-    }
-
-    @Bean
-    public static Queue datasetSubjectStudyQueue() {
-        return new Queue(DATASET_SUBJECT_STUDY_QUEUE, true);
     }
 
     @Bean
