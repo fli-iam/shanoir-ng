@@ -49,7 +49,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
+
 
 /**
  * User service implementation.
@@ -100,7 +101,7 @@ public class UserServiceImpl implements UserService {
     private AccessRequestService accessRequestService;
 
     @Override
-    public User confirmAccountRequest(final User user) throws EntityNotFoundException, AccountNotOnDemandException {
+    public User confirmAccountRequest(final User user) throws EntityNotFoundException, AccountNotOnDemandException, SecurityException {
         final User userDb = userRepository.findById(user.getId()).orElse(null);
         if (userDb == null) {
             LOG.error("User with id {} not found", user.getId());
