@@ -120,7 +120,7 @@ public class UserServiceTest {
 
     @Test
     @WithMockUser(authorities = { "ROLE_ADMIN" })
-    public void confirmAccountRequestTest() throws AccountNotOnDemandException, EntityNotFoundException  {
+    public void confirmAccountRequestTest() throws AccountNotOnDemandException, EntityNotFoundException, SecurityException {
         final User user = ModelsUtil.createUser();
         user.setAccountRequestDemand(true);
         given(userRepository.findById(USER_ID)).willReturn(Optional.of(user));
