@@ -236,7 +236,11 @@ jobs:
           registry: ${{ env.DOCKER_REPOSITORY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
+      
+      # Build dependencies of users-native below to be found
+      - name: Maven build
+        run: mvn -f ./shanoir-ng-parent/pom.xml install -DskipTests
+        
       # Produces a local image "shanoir-ng-users-native:latest" on the
       # runner's own docker daemon, per the plugin's
       # <image><name>${project.name}-native</name></image> configuration.
