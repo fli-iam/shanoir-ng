@@ -101,7 +101,7 @@ public class UserServiceImpl implements UserService {
     private AccessRequestService accessRequestService;
 
     @Override
-    public User confirmAccountRequest(final User user) throws EntityNotFoundException, AccountNotOnDemandException {
+    public User confirmAccountRequest(final User user) throws EntityNotFoundException, AccountNotOnDemandException, SecurityException {
         final User userDb = userRepository.findById(user.getId()).orElse(null);
         if (userDb == null) {
             LOG.error("User with id {} not found", user.getId());
