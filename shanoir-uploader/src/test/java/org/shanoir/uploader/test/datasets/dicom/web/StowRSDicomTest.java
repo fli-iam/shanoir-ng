@@ -43,7 +43,7 @@ public class StowRSDicomTest extends AbstractTest {
                 // requires code modification on server
                 // shUpClient.postDicom(newFile);
             }
-        } catch (URISyntaxException e) {
+        } catch (Exception e) {
             logger.error("Error while reading file", e);
         }
     }
