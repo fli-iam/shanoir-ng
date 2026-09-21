@@ -27,10 +27,10 @@ import java.time.Duration;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -51,10 +51,11 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
@@ -62,12 +63,18 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
+import io.netty.handler.timeout.ReadTimeoutHandler;
+import reactor.netty.http.client.HttpClient;
+import reactor.netty.resources.ConnectionProvider;
+
+import jakarta.annotation.PostConstruct;
 import jakarta.json.Json;
 import jakarta.json.stream.JsonParser;
 import jakarta.mail.BodyPart;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMultipart;
 import jakarta.mail.util.ByteArrayDataSource;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
@@ -126,8 +133,11 @@ public class WADODownloaderService {
 
     private static final String CONTENT_TYPE = "&contentType";
 
+    /** Number of PACS responses fetched in advance, while the current one is written into the zip. */
+    @Value("${dcm4chee-arc.dicom.wado.prefetch:4}")
+    private int wadoPrefetch;
+
     @Autowired
-    @Qualifier("buffer500")
     private WebClient webClient;
 
     @Autowired
@@ -136,6 +146,29 @@ public class WADODownloaderService {
     @Autowired
     @Lazy
     private DatasetService datasetService;
+
+    /** One PACS response, or the error that replaced it, tied to the URL it was requested for. */
+    private record PacsResponse(String url, byte[] body, Throwable error) { }
+
+    @PostConstruct
+    public void initWebClient() {
+        ConnectionProvider provider = ConnectionProvider.builder("pacs-wado")
+                .maxConnections(500)
+                .maxIdleTime(Duration.ofSeconds(15))
+                .maxLifeTime(Duration.ofMinutes(5))
+                .evictInBackground(Duration.ofSeconds(30))
+                .build();
+
+        HttpClient httpClient = HttpClient.create(provider)
+                .responseTimeout(Duration.ofSeconds(30))
+                .doOnConnected(conn -> conn.addHandlerLast(
+                        new ReadTimeoutHandler(Duration.ofSeconds(30).toSeconds(), TimeUnit.SECONDS)));
+
+        this.webClient = WebClient.builder()
+                .clientConnector(new ReactorClientHttpConnector(httpClient))
+                .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(1024 * 1024 * 500))
+                .build();
+    }
 
     /**
      * This method receives a list of URLs containing WADO-RS or WADO-URI urls and downloads
@@ -154,76 +187,73 @@ public class WADODownloaderService {
      */
     public List<String> downloadDicomFilesForURLsAsZip(final List<URL> urls, final ZipOutputStream zipOutputStream, String subjectName, Dataset dataset, String datasetFilePath, DatasetDownloadError downloadResult) {
         List<String> files = new ArrayList<>();
-        Set<String> zippedUrls = new HashSet<>();
-        long duplicates = 0;
-        for (Iterator<URL> iterator = urls.iterator(); iterator.hasNext();) {
-            String url = iterator.next().toString();
-            if (!zippedUrls.contains(url)) {
-                zippedUrls.add(url);
-                String sopInstanceUID = wadoURLHandler.extractUIDs(url)[2];
-                // Build name
-                String name = buildFileName(subjectName, dataset, datasetFilePath, sopInstanceUID);
-                // Download and zip
+        String namePrefix = buildFileNamePrefix(subjectName, dataset, datasetFilePath);
+        String anonymizedSubjectName = dataset.getSource() != null ? subjectName : null;
+
+        List<String> urlsToDownload = urls.stream().map(URL::toString).distinct().toList();
+
+        // Flux allows to download asynchronously (up to 4,w hich is the first iteration of the wadoPrefetch)
+        try (Stream<PacsResponse> responses = Flux.fromIterable(urlsToDownload)
+                .flatMap(url -> downloadFileFromPACSAsync(url)
+                                .map(body -> new PacsResponse(url, body, null))
+                                .onErrorResume(e -> Mono.just(new PacsResponse(url, null, e))),
+                        wadoPrefetch)
+                .toStream(wadoPrefetch)) {
+            // Then we put each file one by one in the zip
+            Iterator<PacsResponse> iterator = responses.iterator();
+            while (iterator.hasNext()) {
+                PacsResponse response = iterator.next();
+                String name = namePrefix + sanitize(wadoURLHandler.extractUIDs(response.url())[2]);
                 try {
-                    String zipedFile = null;
-                    if (dataset.getSource() != null) {
-                        zipedFile = downloadAndWriteFileInZip(url, zipOutputStream, name, subjectName);
-                    } else {
-                        zipedFile = downloadAndWriteFileInZip(url, zipOutputStream, name, null);
-                    }
-                    if (zipedFile != null) {
-                        files.add(zipedFile);
-                    }
+                    files.add(writeFileInZip(response, zipOutputStream, name, anonymizedSubjectName));
+                    zipOutputStream.flush();
+                } catch (IOException e) {
+                    LOG.error("Could not flush dataset [{}] to the client", dataset.getId(), e);
+                    downloadResult.update("Could not flush dataset [" + dataset.getId() + "] to the client : " + e.getMessage(), DatasetDownloadError.PARTIAL_FAILURE);
                 } catch (ZipPacsFileException e) {
                     LOG.error("Could not download dataset [{}] as dicom", dataset.getId(), e);
                     downloadResult.update("Could not download dataset [" + dataset.getId() + "] as dicom : " + e.getMessage(), DatasetDownloadError.PARTIAL_FAILURE);
                 }
-            } else {
-                duplicates++;
             }
-        }
-        if (duplicates > 0) {
-            LOG.error("There were [" + duplicates + "] duplicate dataset_files when zipping dataset [" + dataset.getId() + "], they were ignored.");
         }
         return files;
     }
 
-    private String buildFileName(String subjectName, Dataset dataset, String datasetFilePath, String instanceUID) {
+    private String buildFileNamePrefix(String subjectName, Dataset dataset, String datasetFilePath) {
         String serieDescription = dataset.getUpdatedMetadata().getName();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("YYYYMMdd");
-        dataset = datasetService.getFirstRealInput(dataset);
-        String examDate = dataset.getDatasetAcquisition().getExamination().getExaminationDate().format(formatter);
-        String name = subjectName + "_" + examDate + "_" + serieDescription + "_" + instanceUID;
-        // Replace all forbidden characters.
-        name = name.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
+        String examDate = datasetService.getFirstRealInput(dataset)
+                .getDatasetAcquisition().getExamination().getExaminationDate().format(formatter);
+        String prefix = sanitize(subjectName + "_" + examDate + "_" + serieDescription + "_");
         // add folder logic if necessary
-        if (datasetFilePath != null) {
-            name = datasetFilePath + File.separator + name;
-        }
-        return name;
+        return datasetFilePath != null ? datasetFilePath + File.separator + prefix : prefix;
+    }
+
+    private String sanitize(String name) {
+        return name.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
     }
 
     /**
-     * Downloads and writes the file specified by url into zipOutputStream, using name + .DCM as filename.
-     * If the downloading fails, a text file is added instead and null is returned.
-     * @param url
+     * Writes the PACS response for one file into zipOutputStream, using name + .DCM as filename.
+     * @param response the PACS response, or the error that replaced it
      * @param zipOutputStream
      * @param name the filename without extension
-     * @return the added file name, null if failed
-     * @throws ZipPacsFileException
-     * @throws IOException when couldn't write into the stream
+     * @return the added file name
+     * @throws ZipPacsFileException when the download failed or could not be written into the stream
      */
-    private String downloadAndWriteFileInZip(String url, ZipOutputStream zipOutputStream, String name, String subjectName) throws ZipPacsFileException {
-        byte[] responseBody = null;
+    private String writeFileInZip(PacsResponse response, ZipOutputStream zipOutputStream, String name, String subjectName) throws ZipPacsFileException {
+        if (response.error() != null) {
+            if (response.error() instanceof WebClientResponseException e) {
+                throw new ZipPacsFileException("Received " + e.getStatusCode() + " from PACS", e);
+            }
+            throw new ZipPacsFileException("Download failed: " + response.error().getMessage(), response.error());
+        }
         try {
-            responseBody = downloadFileFromPACS(url);
-            extractDICOMZipFromMHTMLFile(responseBody, name, zipOutputStream, url.contains(WADO_REQUEST_TYPE_WADO_RS), subjectName);
+            extractDICOMZipFromMHTMLFile(response.body(), name, zipOutputStream, response.url().contains(WADO_REQUEST_TYPE_WADO_RS), subjectName);
             return name + DCM;
         } catch (IOException | MessagingException e) {
             LOG.error("Error in downloading/writing file [{}] from pacs to zip", name, e);
             throw new ZipPacsFileException(e);
-        } catch (HttpClientErrorException e) {
-            throw new ZipPacsFileException("Received " + e.getStatusCode() + " from PACS", e);
         }
     }
 
@@ -360,8 +390,7 @@ public class WADODownloaderService {
      */
     private byte[] downloadFileFromPACS(final String url) throws IOException, HttpClientErrorException {
         try {
-            return downloadFileFromPACSAsync(url)
-                    .block(); // Block at the end to convert Mono to sync result
+            return downloadFileFromPACSAsync(url).block();
         } catch (WebClientResponseException e) {
             throw new HttpClientErrorException(e.getStatusCode(),
                     "Download failed: " + e.getMessage());
