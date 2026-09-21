@@ -22,6 +22,7 @@ import org.shanoir.ng.accessrequest.model.ValidationDTO;
 import org.shanoir.ng.shared.exception.AccountNotOnDemandException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.SecurityException;
 import org.springframework.amqp.AmqpException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -78,7 +79,7 @@ public interface AccessRequestApi {
     ResponseEntity<Void> resolveNewAccessRequest(
             @Parameter(name = "id of the access request to resolve", required = true) @PathVariable("accessRequestId") Long accessRequestId,
             @Parameter(name = "Accept or refuse the request", required = true) @RequestBody ValidationDTO validation,
-            BindingResult result) throws RestServiceException, AccountNotOnDemandException, EntityNotFoundException, JacksonException, AmqpException;
+            BindingResult result) throws RestServiceException, AccountNotOnDemandException, EntityNotFoundException, JacksonException, AmqpException, SecurityException;
 
     @Operation(summary = "extension", description = "Request an extension for the given study")
     @ApiResponses(value = {

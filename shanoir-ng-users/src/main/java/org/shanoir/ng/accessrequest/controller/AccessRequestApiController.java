@@ -34,6 +34,7 @@ import org.shanoir.ng.shared.exception.AccountNotOnDemandException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
@@ -204,7 +205,7 @@ public class AccessRequestApiController implements AccessRequestApi {
     public ResponseEntity<Void> resolveNewAccessRequest(
             @Parameter(name = "id of the access request to resolve", required = true) @PathVariable("accessRequestId") Long accessRequestId,
             @Parameter(name = "Accept or refuse the request", required = true) @RequestBody ValidationDTO validation,
-            BindingResult result) throws RestServiceException, AccountNotOnDemandException, EntityNotFoundException, JacksonException, AmqpException {
+            BindingResult result) throws RestServiceException, AccountNotOnDemandException, EntityNotFoundException, JacksonException, AmqpException, SecurityException {
         AccessRequest resolvedRequest = accessRequestService.findById(accessRequestId).orElse(null);
         int status = resolvedRequest != null ? resolvedRequest.getStatus() : -1;
         if (resolvedRequest == null || (status != AccessRequest.ON_DEMAND && status != AccessRequest.ON_EXTENSION_DEMAND)) {

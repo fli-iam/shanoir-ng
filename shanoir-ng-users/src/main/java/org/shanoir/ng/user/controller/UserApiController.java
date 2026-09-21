@@ -67,7 +67,7 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 
         } catch (EntityNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } catch (AccountNotOnDemandException e) {
+        } catch (AccountNotOnDemandException | SecurityException e) {
             throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), e.getMessage()));
         }
     }
