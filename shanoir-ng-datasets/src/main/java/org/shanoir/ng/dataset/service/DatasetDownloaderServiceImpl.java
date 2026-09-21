@@ -21,6 +21,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -143,6 +144,7 @@ public class DatasetDownloaderServiceImpl {
         // otherwise a client-side read timeout can fire while nothing has been sent yet.
 
         try (ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream())) {
+            response.flushBuffer();
             Map<String, List<String>> datasetDownloadNameListPerPath = new HashMap<>();
             datasetDownloadPath = new HashMap<>();
             if (Objects.nonNull(sorting)) {
@@ -221,9 +223,11 @@ public class DatasetDownloaderServiceImpl {
         }
     }
 
+    private record DownloadPathParts(String basePath, Long acquisitionId, String dateTime, URL metadataUrl) { }
+
     @Transactional(readOnly = true)
-    protected Map<Long, String> getDatasetDownloadPath(List<Dataset> datasets, String sorting) {
-        HashMap<Long, String> datasetDownloadPath = new HashMap<>();
+    protected Map<Long, DownloadPathParts> resolveDownloadPathParts(List<Dataset> datasets, String sorting) {
+        Map<Long, DownloadPathParts> parts = new HashMap<>();
 
         for (Dataset dataset : datasets) {
             String path = "";
@@ -233,43 +237,88 @@ public class DatasetDownloaderServiceImpl {
                 relevantDataset = datasetService.getFirstRealInput(dataset);
             }
 
+            Examination examination = relevantDataset.getDatasetAcquisition().getExamination();
+
             if (sorting.contains("study")) {
-                path += "/Study_" + relevantDataset.getDatasetAcquisition().getExamination().getStudy().getName() + "_id_" + relevantDataset.getDatasetAcquisition().getExamination().getStudy().getId();
+                path += "/Study_" + examination.getStudy().getName() + "_id_" + examination.getStudy().getId();
             }
 
             if (sorting.contains("subject")) {
-                path += "/Subject_" + relevantDataset.getDatasetAcquisition().getExamination().getSubject().getName() + "_id_" + relevantDataset.getDatasetAcquisition().getExamination().getSubject().getId();
+                path += "/Subject_" + examination.getSubject().getName() + "_id_" + examination.getSubject().getId();
             }
 
             if (sorting.contains("exam")) {
-                path += "/Exam_" + relevantDataset.getDatasetAcquisition().getExamination().getComment() + "_id_" + relevantDataset.getDatasetAcquisition().getExamination().getId();
+                path += "/Exam_" + examination.getComment() + "_id_" + examination.getId();
             }
+
+            String dateTime = null;
+            URL metadataUrl = null;
+            if (sorting.contains("acquisitionDate")) {
+                if (relevantDataset.getDatasetAcquisition().getAcquisitionStartTime() != null) {
+                    dateTime = relevantDataset.getDatasetAcquisition().getAcquisitionStartTime()
+                            .format(DateTimeFormatter.ofPattern("dd-MM-yyyy_HH-mm"));
+                } else {
+                    metadataUrl = firstDicomMetadataUrl(relevantDataset);
+                }
+            }
+
+            parts.put(dataset.getId(), new DownloadPathParts(path, relevantDataset.getDatasetAcquisition().getId(), dateTime, metadataUrl));
+        }
+        return parts;
+    }
+
+    protected Map<Long, String> getDatasetDownloadPath(List<Dataset> datasets, String sorting) {
+        Map<Long, DownloadPathParts> parts = self.resolveDownloadPathParts(datasets, sorting);
+        Map<Long, String> datasetDownloadPath = new HashMap<>();
+
+        for (Map.Entry<Long, DownloadPathParts> entry : parts.entrySet()) {
+            DownloadPathParts part = entry.getValue();
+            String path = part.basePath();
 
             if (sorting.contains("acquisitionDate")) {
-                String dateTime;
-                if (relevantDataset.getDatasetAcquisition().getAcquisitionStartTime() == null) {
-                    Map<String, String> dateTimeMap = datasetService.getSpecificDicomMetadataValues(relevantDataset, List.of("00080022", "00080032"));
-                    if (dateTimeMap.containsKey("00080022")) {
-                        dateTime = LocalDate.parse(dateTimeMap.get("00080022"), DateTimeFormatter.ofPattern("yyyyMMdd")).format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
-                    } else {
-                        dateTime = "NoDate";
-                    }
-
-                    if (dateTimeMap.containsKey("00080032") && dateTimeMap.get("00080032").length() > 4) {
-                        dateTime += "_" + dateTimeMap.get("00080032").substring(0, 2) + "-" + dateTimeMap.get("00080032").substring(2, 4);
-                    } else {
-                        dateTime += "_NoTime";
-                    }
-                } else {
-                    dateTime = relevantDataset.getDatasetAcquisition().getAcquisitionStartTime().format(DateTimeFormatter.ofPattern("dd-MM-yyyy_HH-mm"));
-                }
-                path += "/Acq_date_" + dateTime + "_acq_id_" + relevantDataset.getDatasetAcquisition().getId();
+                String dateTime = part.dateTime() != null
+                        ? part.dateTime()
+                        : readAcquisitionDateTimeFromPacs(part.metadataUrl());
+                path += "/Acq_date_" + dateTime + "_acq_id_" + part.acquisitionId();
             } else if (sorting.contains("acquisition")) {
-                path += "/Acq_id_" + relevantDataset.getDatasetAcquisition().getId();
+                path += "/Acq_id_" + part.acquisitionId();
             }
-            datasetDownloadPath.put(dataset.getId(), path);
+            datasetDownloadPath.put(entry.getKey(), path);
         }
         return datasetDownloadPath;
+    }
+
+    private URL firstDicomMetadataUrl(Dataset dataset) {
+        List<URL> pathURLs = new ArrayList<>();
+        DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM, new DatasetDownloadError());
+        return pathURLs.isEmpty() ? null : pathURLs.get(0);
+    }
+
+    private String readAcquisitionDateTimeFromPacs(URL metadataUrl) {
+        Map<String, String> dateTimeMap = Collections.emptyMap();
+        if (metadataUrl != null) {
+            try {
+                dateTimeMap = datasetService.extractDicomMetadataValues(
+                        downloader.downloadDicomMetadataForURL(metadataUrl), List.of("00080022", "00080032"));
+            } catch (Exception e) {
+                LOG.error("Could not read the acquisition date from the pacs for [{}]", metadataUrl, e);
+            }
+        }
+
+        String dateTime;
+        if (dateTimeMap.containsKey("00080022")) {
+            dateTime = LocalDate.parse(dateTimeMap.get("00080022"), DateTimeFormatter.ofPattern("yyyyMMdd"))
+                    .format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+        } else {
+            dateTime = "NoDate";
+        }
+
+        if (dateTimeMap.containsKey("00080032") && dateTimeMap.get("00080032").length() > 4) {
+            dateTime += "_" + dateTimeMap.get("00080032").substring(0, 2) + "-" + dateTimeMap.get("00080032").substring(2, 4);
+        } else {
+            dateTime += "_NoTime";
+        }
+        return dateTime;
     }
 
     protected void manageDatasetDownload(Dataset dataset, Map<Long, DatasetDownloadError> downloadResults, ZipOutputStream zipOutputStream, String subjectName, String datasetFilePath, String outputFormat, boolean withManifest, Map<Long, List<String>> filesByAcquisitionId, Long converterId, Map<String, List<String>> datasetDownloadNameListPerPath) throws Exception {
