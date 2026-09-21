@@ -58,7 +58,6 @@ import org.shanoir.ng.utils.SecurityContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
-import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -103,11 +102,11 @@ public class BidsImporterService {
     @RabbitListener(queues = RabbitMQConfiguration.IMPORTER_BIDS_DATASET_QUEUE, containerFactory = "multipleConsumersFactory")
     @RabbitHandler
     @Transactional
-    public void createAllBidsDatasetAcquisition(Message importJobStr) throws AmqpRejectAndDontRequeueException {
+    public void createAllBidsDatasetAcquisition(String importJobStr) throws AmqpRejectAndDontRequeueException {
         ShanoirEvent event = null;
         try {
             SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
-            ImportJob importJob = objectMapper.readValue(importJobStr.getBody(), ImportJob.class);
+            ImportJob importJob = objectMapper.readValue(importJobStr, ImportJob.class);
             Long userId = importJob.getUserId();
             event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getExaminationId().toString(), userId, "Starting import...", ShanoirEvent.IN_PROGRESS, importJob.getStudyId());
             eventService.publishEvent(event);

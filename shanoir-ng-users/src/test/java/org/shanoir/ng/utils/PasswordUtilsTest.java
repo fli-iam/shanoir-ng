@@ -18,12 +18,14 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.test.context.aot.DisabledInAotMode;
 
 /**
  * @author msimon
  *
  */
 @RunWith(MockitoJUnitRunner.class)
+@DisabledInAotMode
 public class PasswordUtilsTest {
 
     private static final String PASSWORD = "testtest";

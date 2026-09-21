@@ -77,21 +77,22 @@ public class PageDeserializer extends JsonDeserializer<Page<?>> implements Conte
             ctxt.handleUnexpectedToken(handledType(), p);
         }
 
-        //Note that Sort field of Page is ignored here.
-        //Feel free to add more switch cases above to deserialize it as well.
+        // Note that Sort field of Page is ignored here.
+        // Feel free to add more switch cases above to deserialize it as well.
         return new PageImpl<>(list, PageRequest.of(pageNumber, pageSize), total);
     }
 
     /**
      * This is the main point here.
-     * The PageDeserializer is created for each specific deserialization with concrete generic parameter type of Page.
+     * The PageDeserializer is created for each specific deserialization with
+     * concrete generic parameter type of Page.
      */
     @Override
     public JsonDeserializer<?> createContextual(DeserializationContext ctxt, BeanProperty property) {
-        //This is the Page actually
+        // This is the Page actually
         final JavaType wrapperType = ctxt.getContextualType();
         final PageDeserializer deserializer = new PageDeserializer();
-        //This is the parameter of Page
+        // This is the parameter of Page
         deserializer.valueType = wrapperType.containedType(0);
         return deserializer;
     }
