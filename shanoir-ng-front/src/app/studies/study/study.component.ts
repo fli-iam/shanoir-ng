@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { KeyValue, NgClass, KeyValuePipe } from "@angular/common";
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, ViewChild } from '@angular/core';
 import { UntypedFormGroup, ValidationErrors, Validators, FormsModule, ReactiveFormsModule, AbstractControl, ValidatorFn } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 
@@ -73,6 +73,7 @@ import { CopyFromCsvComponent } from "./copy-csv.component";
     selector: 'study-detail',
     templateUrl: 'study.component.html',
     styleUrls: ['study.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [NgClass, FormsModule, ReactiveFormsModule, FormFooterComponent, RouterLink, DatepickerComponent, SelectBoxComponent, CheckboxComponent, TooltipComponent, LoadingBarComponent, TagCreatorComponent, TableComponent, StudyUserListComponent, QualityControlComponent,
         BidsTreeComponent, StudyHistoryComponent, KeyValuePipe, LocalDateFormatPipe, DaysLeftPipe, SizePipe, CopyFromCsvComponent, ExecutionTemplateListComponent, StudyEmailMembersComponent]
 })
