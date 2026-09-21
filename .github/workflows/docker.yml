@@ -85,6 +85,9 @@ jobs:
           distribution: temurin
           java-version: 25
 
+      - name: Create directory /shanoir-ng-logs
+        run: sudo mkdir -m777 /var/log/shanoir-ng-logs
+
       # maven cache only enabled on development builds
       - name: Set up Maven cache
         uses: actions/cache@v4
@@ -215,6 +218,9 @@ jobs:
           distribution: temurin
           java-version: 25
 
+      - name: Create directory /shanoir-ng-logs
+        run: sudo mkdir -m777 /var/log/shanoir-ng-logs
+      
       # maven cache only enabled on development builds
       - name: Set up Maven cache
         uses: actions/cache@v4
