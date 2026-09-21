@@ -64,6 +64,7 @@ public class AsyncTaskApiController implements AsyncTaskApi {
                 ShanoirEventType.DELETE_NIFTI_EVENT,
                 ShanoirEventType.DELETE_DATASET_EVENT,
                 ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT,
+                ShanoirEventType.DELETE_DATASET_PROCESSING_EVENT,
                 ShanoirEventType.BIDS_EXPORT);
 
         // Get only event with last updates < 7 days

@@ -72,6 +72,7 @@ public class ShanoirEventsService {
                 || ShanoirEventType.DOWNLOAD_STATISTICS_EVENT.equals(event.getEventType())
                 || ShanoirEventType.DELETE_DATASET_EVENT.equals(event.getEventType())
                 || ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT.equals(event.getEventType())
+                || ShanoirEventType.DELETE_DATASET_PROCESSING_EVENT.equals(event.getEventType())
                 || ShanoirEventType.MASSIVE_OUTPUTS_DOWNLOAD.equals(event.getEventType())
                 || ShanoirEventType.DELETE_EXAMINATION_EVENT.equals(event.getEventType())
                 || ShanoirEventType.DELETE_SUBJECT_EVENT.equals(event.getEventType())

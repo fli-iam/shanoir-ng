@@ -160,12 +160,12 @@ public class DatasetServiceImpl implements DatasetService {
 
     private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
 
-    private void delete(Dataset entity) throws ShanoirException, SolrServerException, IOException, RestServiceException {
+    private void delete(Dataset entity, ShanoirEvent parentEvent) throws ShanoirException, SolrServerException, IOException, RestServiceException {
         Long id = entity.getId();
 
         // Remove parent processing to avoid errors
         entity.setDatasetProcessing(null);
-        processingService.removeDatasetFromAllProcessingInput(id);
+        processingService.removeDatasetFromAllProcessingInput(id, parentEvent);
         processingResourceRepository.deleteByDatasetId(id);
         propertyService.deleteByDatasetId(id);
 
@@ -191,6 +191,12 @@ public class DatasetServiceImpl implements DatasetService {
     @Override
     @Transactional
     public void deleteById(final Long id) throws ShanoirException, SolrServerException, IOException, RestServiceException {
+        deleteById(id, null);
+    }
+
+    @Override
+    @Transactional
+    public void deleteById(final Long id, final ShanoirEvent parentEvent) throws ShanoirException, SolrServerException, IOException, RestServiceException {
         final Dataset dataset = repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(Dataset.class, id));
         // Do not delete entity if it is the source (or if it has copies). If getSourceId() is not null, it means it's a copy
@@ -202,35 +208,14 @@ public class DatasetServiceImpl implements DatasetService {
                     ));
         }
         long startTime = System.currentTimeMillis();
-        delete(dataset);
-        deleteDatasetFilesFromDiskAndPacs(dataset);
+        delete(dataset, parentEvent);
+        deleteDatasetFilesFromDiskAndPacs(dataset, parentEvent);
         long endTime = System.currentTimeMillis();
         long elapsedTime = endTime - startTime;
         LOG.info("Dataset deletion time: " + elapsedTime + " milliseconds");
     }
 
-    /**
-     * Called by acquisition delete. Does not reject from pacs as acquisition already does it.
-     * @param id
-     * @throws ShanoirException
-     * @throws SolrServerException
-     * @throws IOException
-     * @throws RestServiceException
-     */
-    public void deleteByIdCascade(final Long id) throws ShanoirException, SolrServerException, IOException, RestServiceException {
-        // Do not delete entity if it is the source (or if it has copies). If getSourceId() is not null, it means it's a copy
-        if (repository.existsBySourceId(id)) {
-            throw new RestServiceException(
-                    new ErrorModel(
-                            HttpStatus.UNPROCESSABLE_ENTITY.value(),
-                            "This dataset is linked to another dataset that was copied."
-                    ));
-        }
-
-        datasetService.deleteById(id);
-    }
-
-    public void deleteDatasetFilesFromDiskAndPacs(Dataset dataset) throws ShanoirException {
+    private void deleteDatasetFilesFromDiskAndPacs(Dataset dataset, ShanoirEvent parentEvent) throws ShanoirException {
         if (!dicomWeb) {
             return;
         }
@@ -239,7 +224,7 @@ public class DatasetServiceImpl implements DatasetService {
             boolean isDicom = DatasetExpressionFormat.DICOM.equals(expression.getDatasetExpressionFormat());
             List<DatasetFile> datasetFiles = expression.getDatasetFiles();
             if (dataset.getSource() == null)
-                datasetAsyncService.deleteDatasetFilesFromDiskAndPacsAsync(datasetFiles, isDicom, id);
+                datasetAsyncService.deleteDatasetFilesFromDiskAndPacsAsync(datasetFiles, isDicom, id, parentEvent);
         }
     }
 
