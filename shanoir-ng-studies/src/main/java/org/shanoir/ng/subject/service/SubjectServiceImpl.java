@@ -295,6 +295,14 @@ public class SubjectServiceImpl implements SubjectService {
         if (!subjectOld.getName().equals(subjectNew.getName())) {
             throw new ShanoirException("You can not update the subject name.", HttpStatus.FORBIDDEN.value());
         }
+        // The study of a subject can not be changed: its examinations keep the study id they
+        // have been created with, and its tags belong to the tag list of that study. A study
+        // sent as null, absent or without an id leaves the subject in its study.
+        Long newStudyId = subjectNew.getStudy() != null ? subjectNew.getStudy().getId() : null;
+        Long oldStudyId = subjectOld.getStudy() != null ? subjectOld.getStudy().getId() : null;
+        if (newStudyId != null && !newStudyId.equals(oldStudyId)) {
+            throw new ShanoirException("You can not update the subject study.", HttpStatus.FORBIDDEN.value());
+        }
         subjectOld = updateSubjectValues(subjectOld, subjectNew);
         subjectOld = subjectRepository.save(subjectOld);
         updateSubjectInMicroservices(subjectMapper.subjectToSubjectDTO(subjectOld));
@@ -303,26 +311,25 @@ public class SubjectServiceImpl implements SubjectService {
     }
 
     private Subject updateSubjectValues(final Subject subjectOld, final Subject subjectNew) throws ShanoirException {
-        // We can not update subject name, birth date, identifier and pseudonymus hash
-        // values
+        // We can not update subject name, study, birth date, identifier and pseudonymus hash values
         subjectOld.setSex(subjectNew.getSex());
         subjectOld.setManualHemisphericDominance(subjectNew.getManualHemisphericDominance());
         subjectOld.setLanguageHemisphericDominance(subjectNew.getLanguageHemisphericDominance());
         subjectOld.setImagedObjectCategory(subjectNew.getImagedObjectCategory());
         subjectOld.setUserPersonalCommentList(subjectNew.getUserPersonalCommentList());
-        // We can not update the study: attention: created exams contain study id
         subjectOld.setStudyIdentifier(subjectNew.getStudyIdentifier());
         subjectOld.setSubjectType(subjectNew.getSubjectType());
         if (subjectNew.getTags() != null) {
             subjectOld.setTags(subjectNew.getTags());
+            // The tags are cascaded, so they are saved with the study of the subject: the
+            // client sends them without one.
             for (Tag tagOld : subjectOld.getTags()) {
-                tagOld.setStudy(subjectNew.getStudy());
+                tagOld.setStudy(subjectOld.getStudy());
             }
         }
 
         subjectOld.setPhysicallyInvolved(subjectNew.isPhysicallyInvolved());
         subjectOld.setQualityTag(subjectNew.getQualityTag());
-        subjectOld.setStudy(subjectNew.getStudy());
         return subjectOld;
     }
 
