@@ -46,11 +46,11 @@ public interface SubjectService {
      * @return a list of subjects.
      */
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    @PostFilter("hasRole('ADMIN') or @studySecurityService.hasRightOnTrustedSubjectForOneStudy(filterObject, 'CAN_SEE_ALL')")
+    @PostFilter("hasRole('ADMIN') or @studySecurityService.hasRightOnTrustedSubject(filterObject, 'CAN_SEE_ALL')")
     List<Subject> findAll();
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    @PostFilter("hasRole('ADMIN') or @studySecurityService.hasRightOnTrustedSubjectForOneStudy(filterObject, 'CAN_SEE_ALL')")
+    @PostFilter("hasRole('ADMIN') or @studySecurityService.hasRightOnTrustedSubject(filterObject, 'CAN_SEE_ALL')")
     Iterable<Subject> findAllById(List<Long> subjectIds);
 
     /**
@@ -92,7 +92,7 @@ public interface SubjectService {
      * @return a template or null.
      */
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    @PostAuthorize("hasRole('ADMIN') or @studySecurityService.hasRightOnTrustedSubjectForOneStudy(returnObject, 'CAN_SEE_ALL')")
+    @PostAuthorize("hasRole('ADMIN') or @studySecurityService.hasRightOnTrustedSubject(returnObject, 'CAN_SEE_ALL')")
     Subject findById(Long id);
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
@@ -120,7 +120,7 @@ public interface SubjectService {
      * @return a subject or null
      */
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    @PostAuthorize("hasRole('ADMIN') or @studySecurityService.hasRightOnTrustedSubjectForOneStudy(returnObject, 'CAN_SEE_ALL')")
+    @PostAuthorize("hasRole('ADMIN') or @studySecurityService.hasRightOnTrustedSubject(returnObject, 'CAN_SEE_ALL')")
     Subject findSubjectFromCenterCode(String centerCode);
 
     /**
@@ -129,7 +129,7 @@ public interface SubjectService {
      * @param subject subject to create.
      * @return created subject.
      */
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnTrustedSubjectForOneStudy(#subject, 'CAN_IMPORT'))")
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnTrustedSubject(#subject, 'CAN_IMPORT'))")
     Subject create(Subject subject, boolean withAMQP) throws ShanoirException;
 
     /**
@@ -138,7 +138,7 @@ public interface SubjectService {
      * @param subject subject to create.
      * @return created subject.
      */
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnTrustedSubjectForOneStudy(#subject, 'CAN_IMPORT'))")
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnTrustedSubject(#subject, 'CAN_IMPORT'))")
     Subject createAutoIncrement(Subject subject, Long centerId, boolean withAMQP) throws ShanoirException;
 
     /**
@@ -151,7 +151,7 @@ public interface SubjectService {
      * @throws ShanoirException
      * @throws RestServiceException
      */
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnSubjectForOneStudy(#subject, 'CAN_IMPORT'))")
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnSubject(#subject, 'CAN_IMPORT'))")
     Subject update(@Param("subject") Subject subject) throws ShanoirException;
 
     /**
@@ -160,7 +160,7 @@ public interface SubjectService {
      * @param id subject id.
      * @throws EntityNotFoundException
      */
-    @PreAuthorize("hasAnyRole('ADMIN') or hasAnyRole('EXPERT') and @studySecurityService.hasRightOnSubjectForEveryStudy(#id, 'CAN_ADMINISTRATE')")
+    @PreAuthorize("hasAnyRole('ADMIN') or hasAnyRole('EXPERT') and @studySecurityService.hasRightOnSubject(#id, 'CAN_ADMINISTRATE')")
     void deleteById(Long id) throws EntityNotFoundException;
 
     /**
@@ -184,7 +184,7 @@ public interface SubjectService {
     Page<Subject> getClinicalFilteredPageByStudies(Pageable page, String name, List<Study> studies);
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    @PostFilter("hasRole('ADMIN') or @studySecurityService.hasRightOnTrustedSubjectForOneStudy(filterObject, 'CAN_SEE_ALL')")
+    @PostFilter("hasRole('ADMIN') or @studySecurityService.hasRightOnTrustedSubject(filterObject, 'CAN_SEE_ALL')")
     List<Subject> findByPreclinical(boolean preclinical);
 
     boolean existsSubjectWithNameInStudy(String name, Long studyId);

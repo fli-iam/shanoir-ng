@@ -215,17 +215,16 @@ public class StudySecurityService {
     }
 
     /**
-     * Check that the connected user has the given right in at least one study to
-     * which the subject participates.
+     * Check that the connected user has the given right on the study of the subject.
+     * The subject is read from the database, so the id can come from the user API.
      *
      * @param subjectId
      *            the subject id
      * @param rightStr
      *            the right
-     * @return true or false
-     * @throws EntityNotFoundException
+     * @return true or false, false when no subject has this id
      */
-    public boolean hasRightOnSubjectForOneStudy(Long subjectId, String rightStr) {
+    public boolean hasRightOnSubject(Long subjectId, String rightStr) {
         Subject subject = subjectRepository.findById(subjectId).orElse(null);
         if (subject == null) {
             LOG.error("Subject not found with id: " + subjectId);
@@ -235,8 +234,8 @@ public class StudySecurityService {
         return subject.getStudy() != null && hasPrivilege(subject.getStudy(), right);
     }
 
-    public boolean hasRightOnSubjectForOneStudy(Subject subject, String rightStr) {
-        return hasRightOnSubjectForOneStudy(subject.getId(), rightStr);
+    public boolean hasRightOnSubject(Subject subject, String rightStr) {
+        return subject != null && hasRightOnSubject(subject.getId(), rightStr);
     }
 
     /**
@@ -280,29 +279,8 @@ public class StudySecurityService {
     }
 
     /**
-     * Check that the connected user has the given right in every study to which the
-     * subject participates.
-     *
-     * @param subjectId
-     *            the subject id
-     * @param rightStr
-     *            the right
-     * @return true or false
-     * @throws EntityNotFoundException
-     */
-    public boolean hasRightOnSubjectForEveryStudy(Long subjectId, String rightStr) throws EntityNotFoundException {
-        Subject subject = subjectRepository.findById(subjectId).orElse(null);
-        if (subject == null) {
-            throw new EntityNotFoundException("Subject not found with id: " + subjectId);
-        }
-        StudyUserRight right = StudyUserRight.valueOf(rightStr);
-        // As the subject is already from the database, study object is valid
-        return subject.getStudy() != null && hasPrivilege(subject.getStudy(), right);
-    }
-
-    /**
-     * Check that the connected user has the given right in at least one study to
-     * which the subject participates. ! ATTENTION ! This method is meant to be used
+     * Check that the connected user has the given right on the study of the subject,
+     * without reading the subject again. ! ATTENTION ! This method is meant to be used
      * with a trusted Subject, meaning it should not be used with a Subject object
      * that comes from the user API but most likely from a Subject coming from the
      * database.
@@ -312,7 +290,7 @@ public class StudySecurityService {
      * @param rightStr
      * @return true or false
      */
-    public boolean hasRightOnTrustedSubjectForOneStudy(Subject subject, String rightStr) {
+    public boolean hasRightOnTrustedSubject(Subject subject, String rightStr) {
         if (subject == null || rightStr == null) {
             return false;
         }
@@ -335,24 +313,17 @@ public class StudySecurityService {
     }
 
     /**
-     * Check that the connected user has the given right in all studies to
-     * which the subject participates. ! ATTENTION ! This method is meant to be used
-     * with a trusted Subject, meaning it should not be used with a Subject object
-     * that comes from the user API but most likely from a Subject coming from the
-     * database.
+     * Check that the connected user has the given right on the study of the subject.
+     * The subject is read from the database, so the DTO can come from the user API.
      *
      * @param subjectDto
-     *            the subject id
+     *            the subject
      * @param rightStr
-     * @return true or false
+     *            the right
+     * @return true or false, false when no subject has this id
      */
     public boolean hasRightOnSubject(SubjectDTO subjectDto, String rightStr) {
-        Subject subject = subjectRepository.findById(subjectDto.getId()).orElse(null);
-        StudyUserRight right = StudyUserRight.valueOf(rightStr);
-        if (subject != null && subject.getStudy() != null) {
-            return hasPrivilege(subject.getStudy(), right);
-        }
-        return false;
+        return subjectDto != null && hasRightOnSubject(subjectDto.getId(), rightStr);
     }
 
     /**
@@ -373,7 +344,7 @@ public class StudySecurityService {
             map.put(dto.getId(), dto);
         }
         for (Subject subject : subjectRepository.findAllById(new ArrayList<>(map.keySet()))) {
-            if (hasRightOnTrustedSubjectForOneStudy(subject, rightStr)) {
+            if (hasRightOnTrustedSubject(subject, rightStr)) {
                 newList.add(map.get(subject.getId()));
             }
         }
@@ -399,7 +370,7 @@ public class StudySecurityService {
             map.put(dto.getId(), dto);
         }
         for (Subject subject : subjectRepository.findAllById(new ArrayList<>(map.keySet()))) {
-            if (hasRightOnTrustedSubjectForOneStudy(subject, rightStr)) {
+            if (hasRightOnTrustedSubject(subject, rightStr)) {
                 newList.add(map.get(subject.getId()));
             }
         }
@@ -425,7 +396,7 @@ public class StudySecurityService {
             map.put(dto.getId(), dto);
         }
         for (Subject subject : subjectRepository.findAllById(new ArrayList<>(map.keySet()))) {
-            if (hasRightOnTrustedSubjectForOneStudy(subject, rightStr)) {
+            if (hasRightOnTrustedSubject(subject, rightStr)) {
                 newList.add(map.get(subject.getId()));
             }
         }
