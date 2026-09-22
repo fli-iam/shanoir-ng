@@ -112,7 +112,7 @@ export class DateRangeSliderComponent implements OnChanges {
 
     onHandleKeyDown(handle: Handle, event: KeyboardEvent): void {
         const current = handle === 'start' ? this.draftStart : this.draftEnd;
-        let next: Date | null = null;
+        let next: Date;
         switch (event.key) {
             case 'ArrowLeft':
             case 'ArrowDown':
