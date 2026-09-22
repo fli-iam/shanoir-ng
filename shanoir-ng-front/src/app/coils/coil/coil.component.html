@@ -95,7 +95,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <span class="right-col">
                                 @switch (mode) {
                                     @case ('view') {
-                                        <a [routerLink]="['/center/details/', coil.center?.id]">
+                                        <a [routerLink]="['/center/details/', $safeNavigationMigration(coil.center?.id)]">
                                             {{ coil.center?.name }}
                                         </a>
                                     }
@@ -121,7 +121,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <span class="right-col">
                                 @switch (mode) {
                                     @case ('view') {
-                                        <a [routerLink]="['/manufacturer-model/details/', coil.manufacturerModel?.id]">
+                                        <a [routerLink]="['/manufacturer-model/details/', $safeNavigationMigration(coil.manufacturerModel?.id)]">
                                             {{ coil.manufacturerModel | manufModelLabel }}
                                         </a>
                                     }

@@ -12,15 +12,15 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { FormsModule, ReactiveFormsModule, UntypedFormGroup } from '@angular/forms';
 
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import { InjectionInterval } from 'src/app/preclinical/shared/enum/injectionInterval';
-import { InjectionSite } from 'src/app/preclinical/shared/enum/injectionSite';
-import { InjectionType } from 'src/app/preclinical/shared/enum/injectionType';
-import { SelectBoxComponent } from 'src/app/shared/select/select.component';
+import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
+import { InjectionInterval } from '@app/preclinical/shared/enum/injectionInterval';
+import { InjectionSite } from '@app/preclinical/shared/enum/injectionSite';
+import { InjectionType } from '@app/preclinical/shared/enum/injectionType';
+import { SelectBoxComponent } from '@app/shared/select/select.component';
 
 import { ExaminationAnesthetic }    from '../shared/examinationAnesthetic.model';
 import { ExaminationAnestheticService } from '../shared/examinationAnesthetic.service';
@@ -36,6 +36,7 @@ import { CamelPipe } from '../../../../utils/app.utils';
 @Component({
     selector: 'examination-anesthetic-form',
     templateUrl: 'examinationAnesthetic-form.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, CamelPipe, SelectBoxComponent]
 })
 export class ExaminationAnestheticFormComponent extends EntityComponent<ExaminationAnesthetic> {

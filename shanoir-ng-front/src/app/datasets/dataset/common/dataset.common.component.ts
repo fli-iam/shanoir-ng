@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule, ReactiveFormsModule, UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
@@ -32,6 +32,7 @@ import { Dataset } from '../../shared/dataset.model';
 @Component({
     selector: 'common-dataset-details',
     templateUrl: 'dataset.common.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [FormsModule, ReactiveFormsModule, RouterLink, DatepickerComponent, LocalDateFormatPipe]
 })
 export class CommonDatasetComponent implements OnChanges {

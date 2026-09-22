@@ -18,8 +18,8 @@ import java.io.IOException;
 import java.util.List;
 
 import org.shanoir.ng.examination.dto.ExaminationDTO;
-import org.shanoir.ng.examination.dto.SubjectExaminationDTO;
 import org.shanoir.ng.shared.dto.FileEntryDTO;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.storage.StorageException;
 import org.springframework.data.domain.Page;
@@ -71,7 +71,7 @@ public interface ExaminationApi {
     @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_SEE_ALL')")
     ResponseEntity<ExaminationDTO> findExaminationById(
             @Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId)
-            throws RestServiceException;
+            throws RestServiceException, EntityNotFoundException;
 
     @Operation(summary = "", description = "Returns all the examinations")
     @ApiResponses(value = {
@@ -107,7 +107,7 @@ public interface ExaminationApi {
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
     @GetMapping(value = "/subject/{subjectId}/study/{studyId}", produces = { "application/json" })
-    ResponseEntity<List<SubjectExaminationDTO>> findExaminationsBySubjectIdStudyId(
+    ResponseEntity<List<ExaminationDTO>> findExaminationsBySubjectIdStudyId(
             @Parameter(description = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId);
 

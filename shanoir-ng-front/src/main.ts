@@ -4,7 +4,7 @@ import localeEs from '@angular/common/locales/es';
 import localeFr from '@angular/common/locales/fr';
 import { enableProdMode, ErrorHandler, importProvidersFrom, provideZoneChangeDetection } from '@angular/core';
 import { ClipboardModule } from '@angular/cdk/clipboard';
-import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { bootstrapApplication, BrowserModule } from '@angular/platform-browser';
 import { RouterModule } from '@angular/router';
@@ -84,7 +84,6 @@ import { QualityCardDTOService } from './app/study-cards/shared/quality-card.dto
 import { QualityCardService } from './app/study-cards/shared/quality-card.service';
 import { StudyCardDTOService } from './app/study-cards/shared/study-card.dto';
 import { StudyCardService } from './app/study-cards/shared/study-card.service';
-import { SubjectStudyPipe } from './app/subjects/shared/subject-study.pipe';
 import { SubjectDTOService } from './app/subjects/shared/subject.dto';
 import { SubjectService } from './app/subjects/shared/subject.service';
 import { AccessRequestService } from './app/users/access-request/access-request.service';
@@ -183,7 +182,6 @@ const options = {
         NotificationsService,
         CenterDTOService,
         LoaderService,
-        SubjectStudyPipe,
         KeycloakSessionService,
         ConsoleService,
         ExtraDataService,
@@ -203,8 +201,8 @@ const options = {
         ExecutionTemplateService,
         ExecutionTemplateFilterService,
         { provide: HTTP_INTERCEPTORS, useClass: ShanoirHttpInterceptor, multi: true },
-        provideHttpClient(withInterceptorsFromDi()),
         provideCharts(withDefaultRegisterables(zoomPlugin)),
+        provideHttpClient(withXhr(), withInterceptorsFromDi())
     ]
 }
 

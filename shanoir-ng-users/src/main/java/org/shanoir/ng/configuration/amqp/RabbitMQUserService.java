@@ -14,28 +14,42 @@
 
 package org.shanoir.ng.configuration.amqp;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Arrays;
 
 import org.shanoir.ng.email.EmailService;
-import org.shanoir.ng.events.ShanoirEvent;
 import org.shanoir.ng.events.ShanoirEventsService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.email.DuaDraftWrapper;
 import org.shanoir.ng.shared.email.EmailDatasetImportFailed;
 import org.shanoir.ng.shared.email.EmailDatasetsImported;
-import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
 import org.shanoir.ng.shared.email.EmailStudy;
+import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.study.rights.StudyUserInterface;
 import org.shanoir.ng.study.rights.ampq.RabbitMqStudyUserService;
+import org.shanoir.ng.study.rights.command.CommandType;
+import org.shanoir.ng.study.rights.command.StudyUserCommand;
+import org.shanoir.ng.user.model.User;
+import org.shanoir.ng.user.service.UserService;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.ExchangeTypes;
-import org.springframework.amqp.rabbit.annotation.*;
+import org.springframework.amqp.rabbit.annotation.Exchange;
+import org.springframework.amqp.rabbit.annotation.Queue;
+import org.springframework.amqp.rabbit.annotation.QueueBinding;
+import org.springframework.amqp.rabbit.annotation.RabbitHandler;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
+import tools.jackson.databind.ObjectMapper;
+
 @Component
+@Profile("!test")
 public class RabbitMQUserService {
 
     private static final Logger LOG = LoggerFactory.getLogger(RabbitMQUserService.class);
@@ -47,23 +61,66 @@ public class RabbitMQUserService {
     private EmailService emailService;
 
     @Autowired
+    private UserService userService;
+
+    @Autowired
     private ObjectMapper mapper;
 
     @Autowired
     private RabbitMqStudyUserService listener;
+
     @RabbitListener(bindings = @QueueBinding(
             value = @Queue(value = RabbitMQConfiguration.STUDY_USER_QUEUE_USERS, durable = "true"),
             exchange = @Exchange(value = RabbitMQConfiguration.STUDY_USER_EXCHANGE, ignoreDeclarationExceptions = "true",
                     autoDelete = "false", durable = "true", type = ExchangeTypes.FANOUT)), containerFactory = "multipleConsumersFactory"
     )
-    public void receiveMessage(String commandArrStr) {
-        listener.receiveStudyUsers(commandArrStr);
+    public void receiveMessage(String commandArrStr) throws AmqpRejectAndDontRequeueException {
+        try {
+            StudyUserCommand[] commands = mapper.readValue(commandArrStr, StudyUserCommand[].class);
+            listener.receiveStudyUsers(Arrays.asList(commands));
+            updateAccountExpirationDate(commands);
+        } catch (Exception e) {
+            throw new AmqpRejectAndDontRequeueException("Failed to process study-user commands.", e);
+        }
     }
 
     /**
-     * Receives a shanoirEvent as a json object, thus create a event in the queue
-     * @param commandArrStr the task as a json string.
+     * Update the expiration date of the user account if the expiration date of the study user is after the expiration date of the user account.
+     * This is to avoid that a user account expires before the expiration date of the study user
+     * which would prevent the user from accessing the study.
+     * @param commands
      */
+    private void updateAccountExpirationDate(StudyUserCommand[] commands) {
+        SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
+        for (StudyUserCommand command : commands) {
+            // If the command is a create or update command and the study user has an expiration date, check if the user account needs to be updated
+            if ((CommandType.CREATE.equals(command.getType()) || CommandType.UPDATE.equals(command.getType()))
+                    && command.getStudyUser() != null) {
+                StudyUserInterface studyUser = command.getStudyUser();
+                if (studyUser.getExpirationDate() != null) {
+                    User user = userService.findById(studyUser.getUserId());
+                    if (user == null) {
+                        LOG.error("User in StudyUserCommand(s) not found.");
+                        continue;
+                    }
+                    if (user.getExpirationDate() == null) {
+                        LOG.error("User found with ExpirationDate == null.");
+                        continue;
+                    }
+                    if (studyUser.getExpirationDate().isAfter(user.getExpirationDate())) {
+                        user.setExpirationDate(studyUser.getExpirationDate());
+                        try {
+                            userService.update(user);
+                        } catch (EntityNotFoundException e) {
+                            // should not happen, user was found before
+                            LOG.error("Could not update user expiration date for user with id " + user.getId(), e);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     @RabbitListener(bindings = @QueueBinding(
             key = "*.event",
             value = @Queue(value = RabbitMQConfiguration.SHANOIR_EVENTS_QUEUE, durable = "true"),
@@ -176,4 +233,5 @@ public class RabbitMQUserService {
             throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the dua draft event.", e);
         }
     }
+
 }

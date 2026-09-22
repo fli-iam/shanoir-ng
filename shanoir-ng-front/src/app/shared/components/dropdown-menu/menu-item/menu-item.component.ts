@@ -13,12 +13,13 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ContentChildren, forwardRef, HostListener, Input, QueryList, AfterViewInit } from '@angular/core';
+import { Component, ContentChildren, forwardRef, HostListener, Input, QueryList, AfterViewInit, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
     selector: 'menu-item',
     templateUrl: 'menu-item.component.html',
     styleUrls: ['menu-item.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: []
 })
 

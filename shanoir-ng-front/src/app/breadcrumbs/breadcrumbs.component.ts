@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { AfterViewChecked, AfterViewInit, Component, ElementRef, HostListener, OnDestroy } from '@angular/core';
+import { AfterViewChecked, AfterViewInit, Component, ElementRef, HostListener, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject, Subscription, firstValueFrom } from 'rxjs';
 import { take } from 'rxjs/operators';
@@ -26,6 +26,7 @@ import { BreadcrumbsService, Step } from './breadcrumbs.service';
     selector: 'breadcrumbs',
     templateUrl: 'breadcrumbs.component.html',
     styleUrls: ['breadcrumbs.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: []
 })
 

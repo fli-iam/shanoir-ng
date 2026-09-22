@@ -12,11 +12,11 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, Input, Output, EventEmitter, OnChanges } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnChanges, ChangeDetectionStrategy } from '@angular/core';
 import { UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
 
 import { AnestheticIngredient } from '../shared/anestheticIngredient.model';
 import { AnestheticIngredientService } from '../shared/anestheticIngredient.service';
@@ -32,6 +32,7 @@ import { Step } from '../../../../breadcrumbs/breadcrumbs.service';
 @Component({
     selector: 'anesthetic-ingredient-form',
     templateUrl: 'anestheticIngredient-form.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [FormsModule, ReactiveFormsModule]
 })
 export class AnestheticIngredientFormComponent extends EntityComponent<AnestheticIngredient> implements OnChanges {

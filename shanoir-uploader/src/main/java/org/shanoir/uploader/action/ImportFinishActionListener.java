@@ -123,11 +123,9 @@ public class ImportFinishActionListener implements ActionListener {
                 return;
             }
             String magneticFieldStrength = mainWindow.importDialog.mriMagneticFieldStrengthText.getText();
-            // Check that magnetic field strength is a number value if modality is not CT or XA
+            // Check that magnetic field strength is a number value if modality is MR
             String modality = importJob.getFirstSerie().getModality();
-            if (modality != null
-                    && !modality.equals("CT")
-                    && !modality.equals("XA")) {
+            if (modality != null && modality.equals("MR")) {
                 String regex = "\\d+(\\.\\d+)?";
                 Pattern pattern = Pattern.compile(regex);
                 Matcher matcher = pattern.matcher(magneticFieldStrength);

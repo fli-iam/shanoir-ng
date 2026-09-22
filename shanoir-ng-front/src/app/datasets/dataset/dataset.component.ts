@@ -12,14 +12,14 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { UntypedFormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
-import { TaskState } from 'src/app/async-tasks/task.model';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
-import { Selection } from 'src/app/studies/study/tree.service';
+import { TaskState } from '@app/async-tasks/task.model';
+import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
+import { MassDownloadService } from '@app/shared/mass-download/mass-download.service';
+import { Selection } from '@app/studies/study/tree.service';
 
 import { DicomArchiveService } from '../../import/shared/dicom-archive.service';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
@@ -35,6 +35,7 @@ import { MrDataset } from './mr/dataset.mr.model';
 import { CommonDatasetComponent } from './common/dataset.common.component';
 import { MrDatasetComponent } from './mr/dataset.mr.component';
 import { EegDatasetComponent } from './eeg/dataset.eeg.component';
+import { EegDataset } from './eeg/dataset.eeg.model';
 
 
 
@@ -42,6 +43,7 @@ import { EegDatasetComponent } from './eeg/dataset.eeg.component';
     selector: 'dataset-detail',
     templateUrl: 'dataset.component.html',
     styleUrls: ['dataset.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, CommonDatasetComponent, MrDatasetComponent, EegDatasetComponent, PapayaComponent]
 })
 
@@ -199,4 +201,11 @@ export class DatasetComponent extends EntityComponent<Dataset> {
         this.router.navigate(['/solr-search']);
     }
 
+    get mrDataset(): MrDataset | null {
+        return this.dataset.type === 'Mr' ? this.dataset as MrDataset : null;
+    }
+
+    get eegDataset(): EegDataset | null {
+        return this.dataset.type === 'Eeg' ? this.dataset as EegDataset : null;
+    }
 }

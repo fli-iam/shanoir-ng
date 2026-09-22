@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
@@ -38,6 +38,7 @@ import { AnestheticIngredientFormComponent } from '../../ingredients/edit/anesth
     selector: 'anesthetic-form',
     templateUrl: 'anesthetic-form.component.html',
     styleUrls: ['anesthetic-form.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, SelectBoxComponent, AnestheticIngredientFormComponent, TableComponent]
 })
 export class AnestheticFormComponent extends EntityComponent<Anesthetic> {

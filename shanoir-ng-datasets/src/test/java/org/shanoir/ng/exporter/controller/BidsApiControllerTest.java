@@ -25,6 +25,7 @@ import org.shanoir.ng.bids.service.BidsTreeSemaphore;
 import org.shanoir.ng.bids.service.BidsValidationPublisher;
 import org.shanoir.ng.importer.service.DicomImporterService;
 import org.shanoir.ng.importer.service.DicomSEGAndSRImporterService;
+import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.service.StudyService;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,6 +61,9 @@ public class BidsApiControllerTest {
 
     @MockBean
     private StudyService studyService;
+
+    @MockBean
+    private StudyRepository studyRepository;
 
     @Autowired
     private MockMvc mvc;

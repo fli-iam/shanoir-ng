@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 
 import { InstrumentBasedAssessment, Instrument, VariableAssessment } from '../instrument-assessment/instrument.model'
 import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
@@ -21,6 +21,7 @@ import { TreeNodeComponent } from '../../shared/components/tree/tree-node.compon
 @Component({
     selector: 'instrument-assessment-detail',
     templateUrl: 'instrument-assessment.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [TreeNodeComponent]
 })
 

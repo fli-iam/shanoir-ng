@@ -13,7 +13,7 @@
  */
 
 import { Location } from '@angular/common';
-import { Component, ElementRef, HostBinding, OnDestroy, ViewChild } from '@angular/core';
+import { Component, ElementRef, HostBinding, OnDestroy, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import html2canvas from 'html2canvas';
@@ -37,6 +37,7 @@ import { DuaDocument } from './shared/dua-document.model';
     selector: 'dua-assistant',
     templateUrl: 'dua-assistant.component.html',
     styleUrls: ['dua-assistant.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [HeaderComponent, RouterLink, FormsModule, ReactiveFormsModule, UploaderComponent, TooltipComponent]
 })
 

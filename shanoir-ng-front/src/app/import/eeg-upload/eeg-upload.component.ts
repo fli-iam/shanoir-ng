@@ -13,11 +13,11 @@
  */
 
 import { HttpEventType, HttpResponse } from '@angular/common/http';
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 
-import { TaskState } from 'src/app/async-tasks/task.model';
+import { TaskState } from '@app/async-tasks/task.model';
 
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { EegImportJob } from '../shared/eeg-data.model';
@@ -34,6 +34,7 @@ type Status = 'none' | 'uploading' | 'uploaded' | 'error';
     selector: 'eeg-upload',
     templateUrl: 'eeg-upload.component.html',
     styleUrls: ['eeg-upload.component.css', '../shared/import.step.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [UploaderComponent, LoadingBarComponent]
 })
 export class EegUploadComponent implements OnDestroy {

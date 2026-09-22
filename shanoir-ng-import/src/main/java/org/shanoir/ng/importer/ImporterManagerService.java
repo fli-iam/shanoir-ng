@@ -242,7 +242,7 @@ public class ImporterManagerService {
     private void sendFailureMail(ImportJobBase importJob, String errorMessage) {
         EmailDatasetImportFailed generatedMail = new EmailDatasetImportFailed();
         generatedMail.setExaminationId(importJob.getExaminationId().toString());
-        generatedMail.setStudyId(importJob.getStudyId().toString());
+        generatedMail.setStudyId(importJob.getStudyId());
         generatedMail.setSubjectName(importJob.getSubjectName());
         generatedMail.setStudyName(importJob.getStudyName());
         generatedMail.setUserId(importJob.getUserId());
@@ -260,7 +260,7 @@ public class ImporterManagerService {
         // Get all recpients
         List<StudyUser> users = (List<StudyUser>) studyUserRightRepo.findByStudyId(job.getStudyId());
         for (StudyUser user : users) {
-            if (user.isReceiveNewImportReport()) {
+            if (user.isReceiveNewImportReport() && user.canAccessStudy()) {
                 recipients.add(user.getUserId());
             }
         }

@@ -129,7 +129,7 @@ public abstract class DatasetAcquisition extends AbstractEntity {
     private List<DatasetAcquisition> copies;
 
     /** List of extra files directly attached to the dataset acquisition. */
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "acquisition_extra_data_file_path", joinColumns = @JoinColumn(name = "dataset_acquisition_id"))
     @Column(name = "path")
     private List<String> extraDataFilePathList;

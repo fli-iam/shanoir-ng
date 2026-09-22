@@ -27,6 +27,27 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </div>
     </div>
 }
+@if (expiringStudies?.length > 0) {
+    @for (study of expiringStudies; track study) {
+        <div class="block expiring-studies">
+            <table>
+                <tr>
+                    <td class="icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <div class="block-title">Expiring Study</div>
+                    </td>
+                    <td>
+                        <div class="panel">
+                            <div>Your access to study <span class="study-name">{{ study.name }}</span> is expiring soon !</div>
+                            <div>Expires on: <span class="date">{{ expiringDates.get(study.id) | date: 'dd/MM/yyyy' }}</span></div>
+                            <div><button class="right-button" (click)="accessRequestService.openAccessExtensionModal(expiringDates.get(study.id), study)">Ask extension</button></div>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    }
+}
 
 @if (loaded && (admin || !challengeDua)) {
     <div>
@@ -42,7 +63,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <div class="block-desc">Search across all datasets</div>
                     </td>
                     <!-- <td>
-        <div class="pannel">
+        <div class="panel">
           <input type="text" [(ngModel)]="solrInput" placeholder="Search in Shanoir..." />
           <div routerLink="/solr-search" [state]="{ input: solrInput }" class="link">
             <i class="fas fa-search"></i>Go
@@ -62,7 +83,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <div class="block-desc">Items needing your action</div>
                         </td>
                         <td>
-                            <div class="pannel">
+                            <div class="panel">
                                 <table>
                                     @for (notif of notifications; track notif) {
                                         <tr routerLink="/dua" class="notification-list link">
@@ -93,7 +114,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <div class="block-desc">Track your background tasks</div>
                         </td>
                         <td>
-                            <div class="pannel">
+                            <div class="panel">
                                 <table>
                                     @for (job of jobs; track job) {
                                         <tr>
@@ -142,7 +163,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <div class="block-desc">Studies you belong to</div>
                     </td>
                     <td>
-                        <div class="pannel">
+                        <div class="panel">
                             <table>
                                 <tr>
                                     <th></th>
@@ -171,7 +192,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <div class="block-desc">Guides &amp; API references</div>
                     </td>
                     <td>
-                        <ul class="pannel">
+                        <ul class="panel">
                             <li>
                                 <a href="https://github.com/fli-iam/shanoir-ng/wiki/User-Tutorial" target="_blank">
                                     <i class="fas fa-graduation-cap"></i>

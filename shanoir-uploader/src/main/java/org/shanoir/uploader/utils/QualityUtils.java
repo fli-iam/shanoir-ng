@@ -36,15 +36,15 @@ import org.shanoir.ng.importer.DatasetsCreatorService;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.model.ImportJobBase;
 import org.shanoir.ng.importer.model.Serie;
-import org.shanoir.ng.importer.service.QualityService;
 import org.shanoir.ng.shared.quality.QualityTag;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.dto.QualityCardResultEntry;
 import org.shanoir.ng.studycard.model.QualityCard;
+import org.shanoir.ng.studycard.service.QualityCardService;
+import org.shanoir.ng.studycard.service.QualityCardServiceImpl;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.model.mapper.SerieMapper;
-import org.shanoir.uploader.model.mapper.StudyMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,7 +57,7 @@ public class QualityUtils {
 
     private static final Logger LOG = LoggerFactory.getLogger(QualityUtils.class);
 
-    private static final QualityService qualityService = new QualityService();
+    private static final QualityCardService qualityService = new QualityCardServiceImpl();
 
     private static final ImagesCreatorAndDicomFileAnalyzerService imagesCreatorAndDicomFileAnalyzer = new ImagesCreatorAndDicomFileAnalyzerService();
 
@@ -141,25 +141,6 @@ public class QualityUtils {
         return scrollPane;
     }
 
-    /**
-     * Convert ImportJob from import ms as used by Shanoir Uploader into Datasets ImportJob needed to call the ImporterService.checkQuality() method
-     * @param importJob
-     * @return
-     */
-    private static org.shanoir.ng.importer.dto.ImportJob convertImportJob(ImportJobBase importJob) {
-        org.shanoir.ng.importer.dto.ImportJob importJobDto = new org.shanoir.ng.importer.dto.ImportJob();
-        importJobDto.setExaminationId(importJob.getExaminationId());
-        importJobDto.setTimestamp(importJob.getTimestamp());
-        importJobDto.setFromDicomZip(importJob.isFromDicomZip());
-        importJobDto.setFromShanoirUploader(Boolean.TRUE);
-        importJobDto.setFromPacs(importJob.isFromPacs());
-        importJobDto.setWorkFolder(importJob.getWorkFolder());
-        importJobDto.setStudy(StudyMapper.INSTANCE.toDto(importJob.getStudy()));
-        importJobDto.setUserId(importJob.getUserId());
-        importJobDto.setUsername(importJob.getUsername());
-        return importJobDto;
-    }
-
     public static String getQualityControlreport(QualityCardResult qualityCardResult) {
         String qualityCardReport = "";
 
@@ -176,7 +157,7 @@ public class QualityUtils {
     public static Long seriesInstanceUIDToLong(String seriesInstanceUID) throws NoSuchAlgorithmException {
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
         byte[] hash = digest.digest(seriesInstanceUID.getBytes(StandardCharsets.UTF_8));
-    
+
         // We take only the first 8 bytes of the hash to convert it to a long value
         ByteBuffer buffer = ByteBuffer.wrap(hash, 0, 8);
         return buffer.getLong();
