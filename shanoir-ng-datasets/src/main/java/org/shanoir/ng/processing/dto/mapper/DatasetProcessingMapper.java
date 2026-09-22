@@ -77,10 +77,29 @@ public interface DatasetProcessingMapper {
     /**
      * Some context of usage :
      */
+    @Named("withParentId")
+    @Mapping(target = "inputDatasets", expression = "java(null)")
+    @Mapping(target = "outputDatasets", expression = "java(null)")
+    @Mapping(target = "parentId", source = "parent", qualifiedByName = "id")
+    DatasetProcessingDTO processingToProcessingDTOWithParentId(DatasetProcessing processing);
+
+    /**
+     * Some context of usage :
+     */
     @Named("withInputIds")
     @Mapping(target = "inputDatasets", source = "inputDatasets", qualifiedByName = "id")
     @Mapping(target = "outputDatasets", expression = "java(null)")
+    @Mapping(target = "parentId", expression = "java(null)")
     DatasetProcessingDTO processingToProcessingDTOWithInputIds(DatasetProcessing processing);
+
+    /**
+     * Some context of usage :
+     */
+    @Named("withParentAndInputIds")
+    @Mapping(target = "inputDatasets", source = "inputDatasets", qualifiedByName = "id")
+    @Mapping(target = "outputDatasets", expression = "java(null)")
+    @Mapping(target = "parentId", source = "parent", qualifiedByName = "id")
+    DatasetProcessingDTO processingToProcessingDTOWithParentAndInputIds(DatasetProcessing processing);
 
     /**
      * Some context of usage :
@@ -88,6 +107,7 @@ public interface DatasetProcessingMapper {
     @Named("withOutputIds")
     @Mapping(target = "inputDatasets", expression = "java(null)")
     @Mapping(target = "outputDatasets", source = "outputDatasets", qualifiedByName = "id")
+    @Mapping(target = "parentId", expression = "java(null)")
     DatasetProcessingDTO processingToProcessingWithOutputIdsDTO(DatasetProcessing processing);
 
     /**
@@ -104,4 +124,11 @@ public interface DatasetProcessingMapper {
      */
     @IterableMapping(qualifiedByName = "nullRelations")
     List<DatasetProcessingDTO> processingListToProcessingDTOListWithNullRelations(List<DatasetProcessing> processings);
+
+    /**
+     * Some context of usage : listing the processings a dataset is input of, where the caller
+     * only needs to know the parent monitoring of each processing.
+     */
+    @IterableMapping(qualifiedByName = "withParentId")
+    List<DatasetProcessingDTO> processingListToProcessingDTOListWithParentId(List<DatasetProcessing> processings);
 }
