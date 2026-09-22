@@ -104,6 +104,7 @@ public class IdNameCenterStudyDTO extends IdName {
 
     public void setSubjectNamePattern(String subjectNamePattern) {
         this.subjectNamePattern = subjectNamePattern;
+    }
 
     public List<Long> getRestrictedCenterIds() {
         return restrictedCenterIds;
