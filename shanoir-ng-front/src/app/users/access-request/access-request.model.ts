@@ -24,4 +24,5 @@ export class AccessRequest extends Entity {
     @Field() motivation: string;
     @Field() status: number;
     @Field() alreadyMember: boolean;
+    @Field() expirationDate: Date;
 }

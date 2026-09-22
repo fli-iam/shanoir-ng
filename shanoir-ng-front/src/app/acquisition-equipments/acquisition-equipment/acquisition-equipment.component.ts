@@ -12,13 +12,13 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { AbstractControl, AsyncValidatorFn, UntypedFormGroup, ValidationErrors, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { of } from "rxjs";
 
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import { Selection } from 'src/app/studies/study/tree.service';
+import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
+import { Selection } from '@app/studies/study/tree.service';
 
 import { CenterService } from '../../centers/shared/center.service';
 import { DatasetModalityType } from '../../enum/dataset-modality-type.enum';
@@ -38,6 +38,7 @@ import { TooltipComponent } from '../../shared/components/tooltip/tooltip.compon
 @Component({
     selector: 'acquisition-equipment-detail',
     templateUrl: 'acquisition-equipment.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, HelpMessageComponent, RouterLink, SelectBoxComponent, TooltipComponent, ManufacturerModelPipe]
 })
 

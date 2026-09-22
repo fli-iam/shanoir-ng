@@ -15,8 +15,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <input
     type="text"
     [(ngModel)]="model"
+    [ngModelOptions]="{ standalone: true }"
     (ngModelChange)="onChange($event)"
-    (change)="userChange.emit($event)"
+    (change)="manualChange($event)"
     [placeholder]="placeholder"
     [disabled]="disabled" />
 <span class="spacer">{{ model && model.length > 0 ? model : placeholder }}</span>

@@ -16,7 +16,7 @@ import { HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { Task, TaskState } from 'src/app/async-tasks/task.model';
+import { Task, TaskState } from '@app/async-tasks/task.model';
 
 import { NotificationsService } from '../notifications/notifications.service';
 import { SessionService } from '../services/session.service';

@@ -24,6 +24,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.http.HttpHeaders;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -88,7 +89,7 @@ public interface DICOMWebApi {
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationUID, 'CAN_SEE_ALL'))")
     ResponseEntity<String> findSeriesOfStudy(
             @Parameter(description = "examinationUID", required = true) @PathVariable("examinationUID") String examinationUID, @RequestParam Map<String, String> allParams
-        ) throws RestServiceException, JsonMappingException, JsonProcessingException;
+        ) throws RestServiceException, ShanoirException, JsonProcessingException;
 
     @Operation(summary = "", description = "Returns the metadata of a DICOM serie/acquisition of an examination")
     @ApiResponses(value = {

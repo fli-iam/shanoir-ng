@@ -18,14 +18,9 @@ import java.util.List;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.validator.constraints.NotBlank;
-import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
-import org.shanoir.ng.download.AcquisitionAttributes;
-import org.shanoir.ng.download.WADODownloaderService;
-import org.shanoir.ng.shared.exception.PacsException;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
 import org.shanoir.ng.shared.validation.Unique;
-import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.model.rule.QualityCardRule;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -49,7 +44,7 @@ import jakarta.validation.constraints.NotNull;
 @Entity
 @JsonPropertyOrder({ "_links", "id", "name", "isDisabled" })
 @GenericGenerator(name = "IdOrGenerate", strategy = "org.shanoir.ng.shared.model.UseIdOrGenerate")
-public class QualityCard extends HalEntity implements Card {
+public class QualityCard extends HalEntity {
 
     /** The name of the study card. */
     @NotBlank
@@ -63,7 +58,7 @@ public class QualityCard extends HalEntity implements Card {
     @NotNull
     private boolean toCheckAtImport;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "quality_card_id")
     private List<QualityCardRule> rules;
 
@@ -99,38 +94,11 @@ public class QualityCard extends HalEntity implements Card {
         this.rules = rules;
     }
 
-    /**
-    * Application during import, when dicoms are present in tmp directory.
-    * @param examination
-    * @param studyCard
-    * @param dicomAttributes
-    */
-    public QualityCardResult apply(DatasetAcquisition datasetAcquisition, AcquisitionAttributes<?> dicomAttributes, WADODownloaderService downloader) throws PacsException {
-        QualityCardResult result = new QualityCardResult();
-        if (this.getRules() != null) {
-            for (QualityCardRule rule : this.getRules()) {
-                rule.apply(datasetAcquisition, dicomAttributes, result, downloader);
-            }
-        }
-        return result;
-    }
-
     public boolean isToCheckAtImport() {
         return toCheckAtImport;
     }
 
     public void setToCheckAtImport(boolean toCheckAtImport) {
         this.toCheckAtImport = toCheckAtImport;
-    }
-
-    public boolean hasDicomConditions() {
-        if (getRules() != null) {
-            for (QualityCardRule rule : getRules()) {
-                if (rule.hasDicomConditions()) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 }

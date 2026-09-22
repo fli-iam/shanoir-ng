@@ -123,7 +123,7 @@ public class StudySecurityService {
         return founded != null
                 && founded.getStudyUserRights() != null
                 && !founded.getStudyUserRights().isEmpty()
-                && founded.isConfirmed();
+                && founded.canAccessStudy();
     }
 
     public boolean hasRightOnStudyTag(Long id, String rightStr) throws EntityNotFoundException {
@@ -174,7 +174,7 @@ public class StudySecurityService {
         StudyUserRight right = StudyUserRight.valueOf(rightStr);
         List<StudyUser> studyUsers = studyUserRepository.findByUserId(KeycloakUtil.getTokenUserId());
         for (StudyUser su : studyUsers) {
-            if (su.getStudyUserRights().contains(right) && su.isConfirmed()) {
+            if (su.getStudyUserRights().contains(right) && su.canAccessStudy()) {
                 return true;
             }
         }
@@ -545,7 +545,7 @@ public class StudySecurityService {
      */
     public boolean studyUsersMatchStudy(Study study) {
         for (StudyUser su : study.getStudyUserList()) {
-            if (su.getStudy() != null && su.getStudy().getId() != null && su.getStudy().getId() != study.getId())
+            if (su.getStudy() != null && su.getStudy().getId() != null && !su.getStudy().getId().equals(study.getId()))
                 return false;
         }
         return true;
@@ -614,7 +614,7 @@ public class StudySecurityService {
         if (studyUser == null) {
             return false;
         }
-        return studyUser.getStudyUserRights() != null && studyUser.getStudyUserRights().contains(neededRight) && studyUser.isConfirmed();
+        return studyUser.getStudyUserRights() != null && studyUser.getStudyUserRights().contains(neededRight) && studyUser.canAccessStudy();
     }
 
     /**

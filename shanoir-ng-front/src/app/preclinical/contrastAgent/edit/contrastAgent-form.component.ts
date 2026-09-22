@@ -12,11 +12,11 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
 import { UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
 
 import { EntityComponent } from '../../../shared/components/entity/entity.component.abstract';
 import { Reference } from '../../reference/shared/reference.model';
@@ -33,6 +33,7 @@ import { FormFooterComponent } from '../../../shared/components/form-footer/form
     selector: 'contrast-agent-form',
     templateUrl: 'contrastAgent-form.component.html',
     styleUrls: ['contrastAgent-form.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [FormsModule, ReactiveFormsModule, FormFooterComponent]
 })
 export class ContrastAgentFormComponent extends EntityComponent<ContrastAgent>{

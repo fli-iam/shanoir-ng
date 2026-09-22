@@ -11,37 +11,38 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, ElementRef, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 
-import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
-import { ConsoleService } from 'src/app/shared/console/console.service';
-import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
-import { StudyUserRight } from 'src/app/studies/shared/study-user-right.enum';
-import { TreeService } from 'src/app/studies/study/tree.service';
+import { TreeNodeAbstractComponent } from '@app/shared/components/tree/tree-node.abstract.component';
+import { ConsoleService } from '@app/shared/console/console.service';
+import { MassDownloadService } from '@app/shared/mass-download/mass-download.service';
+import { StudyUserRight } from '@app/studies/shared/study-user-right.enum';
+import { TreeService } from '@app/studies/study/tree.service';
 
 import { ExaminationPipe } from '../../examinations/shared/examination.pipe';
 import { ExaminationService } from '../../examinations/shared/examination.service';
 import { SubjectExamination } from '../../examinations/shared/subject-examination.model';
+import { ExaminationNodeComponent } from '../../examinations/tree/examination-node.component';
+import { DropdownMenuComponent } from '../../shared/components/dropdown-menu/dropdown-menu.component';
+import { MenuItemComponent } from '../../shared/components/dropdown-menu/menu-item/menu-item.component';
+import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
 import {
+    AnimalSubjectNode,
     ClinicalSubjectNode,
     ExaminationNode,
-    AnimalSubjectNode,
     ShanoirNode,
     SubjectNode,
     UNLOADED
 } from '../../tree/tree.model';
 import { Subject } from '../shared/subject.model';
 import { SubjectService } from '../shared/subject.service';
-import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
-import { DropdownMenuComponent } from '../../shared/components/dropdown-menu/dropdown-menu.component';
-import { MenuItemComponent } from '../../shared/components/dropdown-menu/menu-item/menu-item.component';
-import { ExaminationNodeComponent } from '../../examinations/tree/examination-node.component';
 
 
 @Component({
     selector: 'subject-node',
     templateUrl: 'subject-node.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [TreeNodeComponent, DropdownMenuComponent, RouterLink, MenuItemComponent, ExaminationNodeComponent]
 })
 

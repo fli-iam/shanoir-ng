@@ -24,6 +24,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         [dataLoading]="loading"
         [hasBox]="hasBox"
         [(ngModel)]="node.selected"
+        [ngModelOptions]="{ standalone: true }"
         (chkbxChange)="selectedChange.emit()"
         [hasChildren]="hasChildren()"
         (firstOpen)="loadProcessings()"
@@ -45,7 +46,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         @if (node.open && node.inPacs) {
             <metadata-node [input]="node.metadata"></metadata-node>
         }
-        @if (node.open && node.processings && node.processings != $any('UNLOADED')) {
+        @if (node.open && node.processings && node.processings != UNLOADED) {
             @for (processing of node.processings; track processing; let i = $index) {
                 <processing-node
                     node

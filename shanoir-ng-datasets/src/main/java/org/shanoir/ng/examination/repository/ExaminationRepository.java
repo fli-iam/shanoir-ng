@@ -17,16 +17,17 @@ package org.shanoir.ng.examination.repository;
 import java.util.List;
 import java.util.Optional;
 
+import org.hibernate.Hibernate;
 import org.shanoir.ng.examination.dto.ExaminationForRightsDTO;
 import org.shanoir.ng.examination.model.Examination;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Repository for examination.
@@ -101,6 +102,18 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
      */
     List<Examination> findAll();
 
+
+    /**
+     * Get all examinations, clinical or preclinical.
+     *
+     * @return list of examinations.
+     */
+    @Query("SELECT e FROM Examination e "
+            + "LEFT JOIN FETCH e.datasetAcquisitions da "
+            + "LEFT JOIN FETCH da.datasets "
+            + "WHERE e.id = :id ")
+    List<Examination> findAllWithAcqAndDatasets();
+
     /**
      * Get all examinations, clinical or preclinical filtered by the patient/subject name.
      *
@@ -139,11 +152,6 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
             """)
     List<ExaminationForRightsDTO> findExaminationsForRights(@Param("ids") List<Long> ids);
 
-
-    @EntityGraph(attributePaths = {"datasetAcquisitions"})
-    @Query("SELECT e FROM Examination e WHERE e.id = :id")
-    Optional<Examination> findByIdWithEagerAcquisitions(@Param("id") Long id);
-
     @Modifying
     @Query("UPDATE Examination e SET e.studyInstanceUID = :studyInstanceUID WHERE e.id = :id")
     int updateStudyInstanceUID(@Param("id") Long id, @Param("studyInstanceUID") String studyInstanceUID);
@@ -158,4 +166,34 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
 
     @Query("SELECT distinct(acq.examination.id) FROM DatasetAcquisition acq WHERE acq.id in :ids")
     List<Long> findIdsByAcquisitionIds(List<Long> ids);
+
+    @Query("SELECT e FROM Examination e "
+            + "LEFT JOIN FETCH e.datasetAcquisitions da "
+            + "WHERE e.id = :id "
+            + "ORDER BY COALESCE(da.sortingIndex, da.rank, 0)")
+    Optional<Examination> findByIdWithAcquisitions(Long id);
+
+    @Query("SELECT e FROM Examination e "
+            + "LEFT JOIN FETCH e.datasetAcquisitions da "
+            + "LEFT JOIN FETCH e.source source "
+            + "WHERE e.id = :id "
+            + "ORDER BY COALESCE(da.sortingIndex, da.rank, 0)")
+    Optional<Examination> findByIdWithAcquisitionsAndSource(Long id);
+
+    @Transactional(readOnly = true)
+    default Optional<Examination> findByIdWithAcquisitionsAndCopiesAndSource(Long id) {
+        Optional<Examination> examination = findByIdWithAcquisitionsAndSource(id);
+        examination.ifPresent(e -> Hibernate.initialize(e.getCopies()));
+        return examination;
+    }
+
+    @Transactional(readOnly = true)
+    default Optional<Examination> findByIdWithAllRelations(Long id) {
+        Optional<Examination> examination = findByIdWithAcquisitionsAndSource(id);
+        examination.ifPresent(e -> {
+            Hibernate.initialize(e.getCopies());
+            Hibernate.initialize(e.getInstrumentBasedAssessmentList());
+        });
+        return examination;
+    }
 }

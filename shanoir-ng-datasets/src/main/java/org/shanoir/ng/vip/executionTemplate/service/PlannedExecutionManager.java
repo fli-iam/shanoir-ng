@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalTime;
@@ -43,7 +44,6 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.StreamSupport;
 
 @Service
 public class PlannedExecutionManager {
@@ -96,6 +96,7 @@ public class PlannedExecutionManager {
         executor = Executors.newFixedThreadPool(maxThreads);
     }
 
+    @Transactional(readOnly = true)
     protected synchronized void manageExecutionsQueue() {
         if (running) return;
         running = true;
@@ -160,7 +161,7 @@ public class PlannedExecutionManager {
 
     public synchronized void addToInvolvedDatasetIds(List<Long> longs) {
         for (Long acquisitionId : longs) {
-            involvedDatasetIds.addAll(StreamSupport.stream(datasetRepository.findByDatasetAcquisitionId(acquisitionId).spliterator(), false).map(Dataset::getId).toList());
+            involvedDatasetIds.addAll(datasetRepository.findByDatasetAcquisitionId(acquisitionId).stream().map(Dataset::getId).toList());
         }
     }
 

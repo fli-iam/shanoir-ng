@@ -34,6 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class DicomDatasetExpressionStrategy implements DatasetExpressionStrategy {
@@ -60,6 +61,7 @@ public class DicomDatasetExpressionStrategy implements DatasetExpressionStrategy
     private String dicomWebRS;
 
     @Override
+    @Transactional(readOnly = true)
     public DatasetExpression generateDatasetExpression(Serie serie, ExpressionFormat expressionFormat) throws IOException {
         DatasetExpression pacsDatasetExpression = new DatasetExpression();
         pacsDatasetExpression.setCreationDate(LocalDateTime.now());

@@ -37,8 +37,9 @@ import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.aot.DisabledInAotMode;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import com.icegreen.greenmail.util.GreenMail;
 import com.icegreen.greenmail.util.ServerSetup;
@@ -55,6 +56,7 @@ import jakarta.mail.internet.MimeMessage;
  */
 @SpringBootTest(properties = "shanoir.instance.name=" + EmailServiceTest.INSTANCE_NAME)
 @ActiveProfiles("test")
+@DisabledInAotMode
 public class EmailServiceTest {
 
     /** The name this instance is given for the test, expected in every subject. */
@@ -69,7 +71,7 @@ public class EmailServiceTest {
 
     private GreenMail greenMail;
 
-    @MockBean
+    @MockitoBean
     private UserRepository userRepositoryMock;
 
     @BeforeEach
@@ -140,7 +142,7 @@ public class EmailServiceTest {
         // send back a list of administrators
         EmailDatasetsImported mail = new EmailDatasetsImported();
         mail.setStudyName("StudyName");
-        mail.setStudyId("12");
+        mail.setStudyId(12L);
         mail.setUserId(1L);
         mail.setRecipients(Arrays.asList(1L));
         Map<Long, String> datasets = new HashMap<>();

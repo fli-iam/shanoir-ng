@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, Input, forwardRef } from '@angular/core';
+import { Component, Input, forwardRef, ChangeDetectionStrategy } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 import { Mode } from '../../../shared/components/entity/entity.component.abstract';
@@ -23,6 +23,7 @@ import { PetProtocol } from './pet-protocol.model';
 @Component({
     selector: 'pet-protocol',
     templateUrl: 'pet-protocol.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     providers: [
         {
             provide: NG_VALUE_ACCESSOR,

@@ -20,17 +20,14 @@ import org.mockito.internal.util.collections.Sets;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
-import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
-import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
-import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
@@ -84,22 +81,13 @@ public class DatasetAcquisitionServiceSecurityTest {
     private StudyRightsService rightsService;
 
     @MockBean
-    private ShanoirEventService shanoirEventService;
-
-    @MockBean
-    private SolrService solrService;
-
-    @MockBean
-    private DatasetAcquisitionRepository datasetAcquisitionRepository;
+    private DatasetAcquisitionRepository repository;
 
     @MockBean
     private ExaminationRepository examinationRepository;
 
     @MockBean
     private StudyRepository studyRepository;
-
-    @MockBean
-    private StudyInstanceUIDAndSubjectNameHandler studyInstanceUIDHandler;
 
     @BeforeEach
     public void setup() {
@@ -189,10 +177,10 @@ public class DatasetAcquisitionServiceSecurityTest {
         assertAccessDenied(service::findById, 4L);
 
         // findByExamination(Long)
-        assertAccessAuthorized(service::findByExamination, 1L);
-        assertThat(service.findByExamination(2L).isEmpty());
-        assertThat(service.findByExamination(3L).isEmpty());
-        assertThat(service.findByExamination(4L).isEmpty());
+        assertAccessAuthorized(repository::findByExaminationIdWithDatasets, 1L);
+        assertThat(repository.findByExaminationIdWithDatasets(2L).isEmpty());
+        assertThat(repository.findByExaminationIdWithDatasets(3L).isEmpty());
+        assertThat(repository.findByExaminationIdWithDatasets(4L).isEmpty());
 
         // findPage(Pageable)
         assertThat(service.findPage(PageRequest.of(0, 10))).hasSize(1);
@@ -353,23 +341,23 @@ public class DatasetAcquisitionServiceSecurityTest {
         given(studyRepository.findById(2L)).willReturn(Optional.of(study4));
 
         DatasetAcquisition dsAcq1 = mockDsAcq(1L, 1L, 1L, 1L);
-        given(datasetAcquisitionRepository.findById(1L)).willReturn(Optional.of(dsAcq1));
-        given(datasetAcquisitionRepository.findByStudyCardId(1L)).willReturn(Utils.toList(dsAcq1));
+        given(repository.findById(1L)).willReturn(Optional.of(dsAcq1));
+        given(repository.findByStudyCardId(1L)).willReturn(Utils.toList(dsAcq1));
         DatasetAcquisition dsAcq3 = mockDsAcq(3L, 3L, 3L, 1L);
-        given(datasetAcquisitionRepository.findById(3L)).willReturn(Optional.of(dsAcq3));
-        given(datasetAcquisitionRepository.findByStudyCardId(3L)).willReturn(Utils.toList(dsAcq3));
+        given(repository.findById(3L)).willReturn(Optional.of(dsAcq3));
+        given(repository.findByStudyCardId(3L)).willReturn(Utils.toList(dsAcq3));
         DatasetAcquisition dsAcq2 = mockDsAcq(2L, 2L, 2L, 2L);
-        given(datasetAcquisitionRepository.findById(2L)).willReturn(Optional.of(dsAcq2));
-        given(datasetAcquisitionRepository.findByStudyCardId(2L)).willReturn(Utils.toList(dsAcq2));
+        given(repository.findById(2L)).willReturn(Optional.of(dsAcq2));
+        given(repository.findByStudyCardId(2L)).willReturn(Utils.toList(dsAcq2));
         DatasetAcquisition dsAcq4 = mockDsAcq(4L, 4L, 4L, 4L);
-        given(datasetAcquisitionRepository.findById(4L)).willReturn(Optional.of(dsAcq4));
-        given(datasetAcquisitionRepository.findByStudyCardId(4L)).willReturn(Utils.toList(dsAcq4));
+        given(repository.findById(4L)).willReturn(Optional.of(dsAcq4));
+        given(repository.findByStudyCardId(4L)).willReturn(Utils.toList(dsAcq4));
 
-        given(datasetAcquisitionRepository.findPageByStudyCenterOrStudyIdIn(Mockito.<Pair<Long, Long>>anyList(), Mockito.<Long>anySet(), Mockito.any(Pageable.class))).willReturn(new PageImpl<>(Arrays.asList(new DatasetAcquisition[]{}), PageRequest.of(0, 10), 0));
+        given(repository.findPageByStudyCenterOrStudyIdIn(Mockito.<Pair<Long, Long>>anyList(), Mockito.<Long>anySet(), Mockito.any(Pageable.class))).willReturn(new PageImpl<>(Arrays.asList(new DatasetAcquisition[]{}), PageRequest.of(0, 10), 0));
         List<Pair<Long, Long>> studyCenterIds = new ArrayList<>();
         studyCenterIds.add(Pair.of(1L, 1L));
-        given(datasetAcquisitionRepository.findPageByStudyCenterOrStudyIdIn(studyCenterIds, Sets.<Long>newSet(new Long[]{}), PageRequest.of(0, 10))).willReturn(new PageImpl<>(Arrays.asList(new DatasetAcquisition[]{dsAcq1}), PageRequest.of(0, 10), 1));
-        given(datasetAcquisitionRepository.findAll(Mockito.any(Pageable.class))).willReturn(new PageImpl<>(Arrays.asList(new DatasetAcquisition[]{dsAcq1, dsAcq2, dsAcq3, dsAcq4}), PageRequest.of(0, 10), 0));
+        given(repository.findPageByStudyCenterOrStudyIdIn(studyCenterIds, Sets.<Long>newSet(new Long[]{}), PageRequest.of(0, 10))).willReturn(new PageImpl<>(Arrays.asList(new DatasetAcquisition[]{dsAcq1}), PageRequest.of(0, 10), 1));
+        given(repository.findAll(Mockito.any(Pageable.class))).willReturn(new PageImpl<>(Arrays.asList(new DatasetAcquisition[]{dsAcq1, dsAcq2, dsAcq3, dsAcq4}), PageRequest.of(0, 10), 0));
         given(rightsRepository.findDistinctStudyIdByUserId(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId())).willReturn(Arrays.asList(new Long[]{1L, 2L}));
         StudyUser su1 = new StudyUser();
         su1.setStudyId(1L);

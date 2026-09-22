@@ -103,17 +103,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <span class="right-col">
                                 @switch (mode) {
                                     @case ('view') {
-                                        <a [routerLink]="['/study/details/', qualityCard.study?.id]" (click)="breadcrumbsService.markMilestone()">
+                                        <a [routerLink]="['/study/details/', $safeNavigationMigration(qualityCard.study?.id)]">
                                             {{ qualityCard.study.name }}
                                         </a>
                                     }
                                     @default {
-                                        <select-box
-                                            [readOnly]="forceStudyId"
-                                            formControlName="study"
-                                            (userChange)="onStudyChange()"
-                                            [optionArr]="studies"
-                                            [disabled]="lockStudy"></select-box>
+                                        <select-box formControlName="study" [optionArr]="studies" [disabled]="lockStudy"></select-box>
                                     }
                                 }
                             </span>
@@ -131,7 +126,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         }
                                     }
                                     @default {
-                                        <checkbox [(ngModel)]="qualityCard.toCheckAtImport" formControlName="toCheckAtImport"></checkbox>
+                                        <checkbox formControlName="toCheckAtImport"></checkbox>
                                         @if (qualityCard.toCheckAtImport) {
                                             <div class="info left-icon import-info">
                                                 <i class="fa-solid fa-triangle-exclamation"></i>
@@ -171,12 +166,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         [formGroup]="form"
                         cardType="qualitycard"
                         formControlName="rules"
-                        [(ngModel)]="qualityCard.rules"
                         [mode]="selectMode ? 'select' : mode"
                         [allCoils]="allCoils"
-                        [studyId]="qualityCard.study?.id"
+                        [studyId]="$safeNavigationMigration(qualityCard.study?.id)"
                         [showErrors]="showRulesErrors"
-                        (selectedRulesChange)="selectedRules = $event"
+                        (selectedRulesChange)="onSelectedRulesChange($event)"
                         [addSubForm]="addConditionForm.bind(this)"></study-card-rules>
                 </fieldset>
                 @if (progress > 0 && progress < 1) {

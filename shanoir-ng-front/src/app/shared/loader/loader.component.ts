@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 
 import { LoaderService } from './loader.service';
 
@@ -21,6 +21,7 @@ import { LoaderService } from './loader.service';
     selector: 'loader',
     templateUrl: './loader.component.html',
     styleUrls: ['./loader.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: []
 })
 export class LoaderComponent {

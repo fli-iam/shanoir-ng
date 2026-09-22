@@ -42,6 +42,7 @@ import org.dcm4che3.io.DicomOutputStream;
 import org.dcm4che3.json.JSONReader;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
+import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.dataset.service.DatasetUtils;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.dicom.WADOURLHandler;
@@ -50,15 +51,17 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
-import jakarta.annotation.PostConstruct;
 import jakarta.json.Json;
 import jakarta.json.stream.JsonParser;
 import jakarta.mail.BodyPart;
@@ -124,21 +127,15 @@ public class WADODownloaderService {
     private static final String CONTENT_TYPE = "&contentType";
 
     @Autowired
-    private WebClient.Builder webClientBuilder;
+    @Qualifier("buffer500")
+    private WebClient webClient;
 
     @Autowired
     private WADOURLHandler wadoURLHandler;
 
-    private WebClient webClient;
-
-    @PostConstruct
-    public void initWebClient() {
-        this.webClient = webClientBuilder
-                .codecs(configurer -> configurer
-                        .defaultCodecs()
-                        .maxInMemorySize(500 * 1024 * 1024)) // 500MB buffer for large DICOM files
-                .build();
-    }
+    @Autowired
+    @Lazy
+    private DatasetService datasetService;
 
     /**
      * This method receives a list of URLs containing WADO-RS or WADO-URI urls and downloads
@@ -194,7 +191,7 @@ public class WADODownloaderService {
     private String buildFileName(String subjectName, Dataset dataset, String datasetFilePath, String instanceUID) {
         String serieDescription = dataset.getUpdatedMetadata().getName();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("YYYYMMdd");
-        dataset = dataset.getFirstRealInput();
+        dataset = datasetService.getFirstRealInput(dataset);
         String examDate = dataset.getDatasetAcquisition().getExamination().getExaminationDate().format(formatter);
         String name = subjectName + "_" + examDate + "_" + serieDescription + "_" + instanceUID;
         // Replace all forbidden characters.
@@ -327,6 +324,7 @@ public class WADODownloaderService {
         return null;
     }
 
+    @Transactional(readOnly = true)
     public AcquisitionAttributes<Long> getDicomAttributesForAcquisition(DatasetAcquisition acquisition) throws PacsException {
         long ts = new Date().getTime();
         List<Dataset> datasets = new ArrayList<>();

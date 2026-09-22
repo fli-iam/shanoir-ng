@@ -36,7 +36,7 @@ public class ExecutionTemplate extends HalEntity {
     @Column(length = 2000)
     private String offlineToken;
 
-    @OneToMany(mappedBy = "executionTemplate", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "executionTemplate", fetch = FetchType.EAGER, orphanRemoval = true)
     private List<ExecutionTemplateFilter> filters;
 
     @OneToMany(mappedBy = "executionTemplate", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
@@ -51,6 +51,9 @@ public class ExecutionTemplate extends HalEntity {
     }
 
     public void setParameters(List<ExecutionTemplateParameter> parameters) {
+        if (parameters != null) {
+            parameters.forEach(parameter -> parameter.setExecutionTemplate(this));
+        }
         this.parameters = parameters;
     }
 
@@ -75,6 +78,9 @@ public class ExecutionTemplate extends HalEntity {
     }
 
     public void setFilters(List<ExecutionTemplateFilter> filters) {
+        if (filters != null) {
+            filters.forEach(filter -> filter.setExecutionTemplate(this));
+        }
         this.filters = filters;
     }
 

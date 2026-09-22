@@ -12,11 +12,11 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 
-import { DatasetLight, DatasetService, Format } from 'src/app/datasets/shared/dataset.service';
+import { DatasetLight, DatasetService, Format } from '@app/datasets/shared/dataset.service';
 
 import { DatasetType } from "../../../datasets/shared/dataset-type.model";
 import { Dataset } from "../../../datasets/shared/dataset.model";
@@ -30,6 +30,7 @@ import {DownloadInputIds, MassDownloadService} from '../mass-download.service';
     selector: 'download-setup-alt',
     templateUrl: 'download-setup-alt.component.html',
     styleUrls: ['download-setup-alt.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [FormsModule, ReactiveFormsModule, SelectBoxComponent]
 })
 
@@ -83,7 +84,7 @@ export class DownloadSetupAltComponent implements OnInit, OnDestroy {
             let fetchDatasets: Promise<Dataset[] | DatasetLight[]>;
             if (this.inputIds.studyId) {
                 if (this.inputIds.subjectId) {
-                    fetchDatasets = this.datasetService.getByStudyIdAndSubjectId(this.inputIds.studyId, this.inputIds.subjectId);
+                    fetchDatasets = this.datasetService.getBySubjectId(this.inputIds.subjectId);
                 } else {
                     fetchDatasets = this.datasetService.getByStudyId(this.inputIds.studyId);
                 }

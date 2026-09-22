@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 import { ColumnDefinition } from '../column.definition.type';
@@ -23,6 +23,7 @@ import { Filter } from '../pageable.model';
     selector: 'shanoir-table-search',
     templateUrl: 'search.component.html',
     styleUrls: ['search.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [FormsModule]
 })
 
