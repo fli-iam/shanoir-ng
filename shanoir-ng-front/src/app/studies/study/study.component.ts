@@ -16,15 +16,15 @@ import { ChangeDetectionStrategy, Component, ElementRef, ViewChild } from '@angu
 import { UntypedFormGroup, ValidationErrors, Validators, FormsModule, ReactiveFormsModule, AbstractControl, ValidatorFn } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 
-import { TaskState } from 'src/app/async-tasks/task.model';
-import { DUAAssistantComponent } from 'src/app/dua/dua-assistant.component';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
-import { Tag } from 'src/app/tags/tag.model';
-import { AccessRequest } from 'src/app/users/access-request/access-request.model';
-import { AccessRequestService } from 'src/app/users/access-request/access-request.service';
-import { ExecutionTemplateListComponent } from "src/app/vip/execution-template/execution-template-list.component";
-import { StudyStatisticsComponent } from "src/app/study-statistics/study-statistics.component";
+import { TaskState } from '../../async-tasks/task.model';
+import { DUAAssistantComponent } from '../../dua/dua-assistant.component';
+import { EntityService } from '../../shared/components/entity/entity.abstract.service';
+import { MassDownloadService } from '../../shared/mass-download/mass-download.service';
+import { Tag } from '../../tags/tag.model';
+import { AccessRequest } from '../../users/access-request/access-request.model';
+import { AccessRequestService } from '../../users/access-request/access-request.service';
+import { ExecutionTemplateListComponent } from "../../vip/execution-template/execution-template-list.component";
+import { StudyStatisticsComponent } from "../../study-statistics/study-statistics.component";
 
 import { Center } from '../../centers/shared/center.model';
 import { CenterService } from '../../centers/shared/center.service';
