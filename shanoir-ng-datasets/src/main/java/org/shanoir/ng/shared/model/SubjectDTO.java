@@ -13,15 +13,11 @@
  */
 package org.shanoir.ng.shared.model;
 
-import java.util.List;
-
 /**
  * @author yyao
  *
  */
 public class SubjectDTO {
-
-    private List<SubjectStudyDTO> subjectStudyList;
 
     private Long id;
 
@@ -36,20 +32,6 @@ public class SubjectDTO {
     public SubjectDTO(Long id, String name) {
         this.setId(id);
         this.setName(name);
-    }
-
-    /**
-     * @return the subjectStudyList
-     */
-    public List<SubjectStudyDTO> getSubjectStudyList() {
-        return subjectStudyList;
-    }
-
-    /**
-     * @param subjectStudyList the subjectStudyList to set
-     */
-    public void setSubjectStudyList(List<SubjectStudyDTO> subjectStudyList) {
-        this.subjectStudyList = subjectStudyList;
     }
 
     public Long getId() {
