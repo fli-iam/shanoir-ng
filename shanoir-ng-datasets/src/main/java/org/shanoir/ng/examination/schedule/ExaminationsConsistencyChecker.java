@@ -240,7 +240,7 @@ public class ExaminationsConsistencyChecker {
     }
 
     @Transactional(value = TxType.REQUIRES_NEW)
-    private void saveStudyInstanceUIDInCaseEmpty(Examination examination, Set<String> studyInstanceUIDs) {
+    protected void saveStudyInstanceUIDInCaseEmpty(Examination examination, Set<String> studyInstanceUIDs) {
         String studyInstanceUID = studyInstanceUIDs.iterator().next();
         if (examination.getStudyInstanceUID() == null || examination.getStudyInstanceUID().isBlank()) {
             examination.setStudyInstanceUID(studyInstanceUID);
@@ -254,7 +254,7 @@ public class ExaminationsConsistencyChecker {
     }
 
     @Transactional(value = TxType.REQUIRES_NEW)
-    private boolean checkExamination(Examination examination, String[] line, List<String> filesInPACS, List<Long> emptyExaminations) {
+    protected boolean checkExamination(Examination examination, String[] line, List<String> filesInPACS, List<Long> emptyExaminations) {
         List<DatasetAcquisition> acquisitions = examination.getDatasetAcquisitions();
         if (acquisitions != null && !acquisitions.isEmpty()) {
             line[3] = "0";

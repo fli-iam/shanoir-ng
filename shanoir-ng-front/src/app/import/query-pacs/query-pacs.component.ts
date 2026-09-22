@@ -12,20 +12,24 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { UntypedFormBuilder, UntypedFormGroup, ValidationErrors, ValidatorFn, Validators, FormsModule, ReactiveFormsModule, AbstractControl } from '@angular/forms';
 import { Router } from '@angular/router';
 
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
-import { slideDown } from '../../shared/animations/animations';
 import { DicomQuery, ImportJob } from '../shared/dicom-data.model';
 import { ImportDataService } from '../shared/import.data-service';
 import { ImportService } from '../shared/import.service';
 import { ConsoleService } from '../../shared/console/console.service';
+import { TooltipComponent } from '../../shared/components/tooltip/tooltip.component';
 
-export const atLeastOneNotBlank = (validator: ValidatorFn) => ( group: UntypedFormGroup ): ValidationErrors | null => {
-    const hasAtLeastOneNotBlank = group && group.controls && Object.keys(group.controls)
-      .some(key => !validator(group.controls[key]) && group.controls[key].value.trim().length != 0);
+export const atLeastOneNotBlank = (validator: ValidatorFn): ValidatorFn => (group: AbstractControl): ValidationErrors | null => {
+    const formGroup = group as UntypedFormGroup;
+    const hasAtLeastOneNotBlank = Object.keys(formGroup.controls)
+        .some(key =>
+            !validator(formGroup.controls[key])
+            && formGroup.controls[key].value.trim().length !== 0
+        );
     return hasAtLeastOneNotBlank ? null : { atLeastOneNotBlank: true };
 };
 
@@ -33,8 +37,8 @@ export const atLeastOneNotBlank = (validator: ValidatorFn) => ( group: UntypedFo
     selector: 'query-pacs',
     templateUrl: 'query-pacs.component.html',
     styleUrls: ['../shared/import.step.css'],
-    animations: [slideDown],
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager,
+    imports: [FormsModule, ReactiveFormsModule, TooltipComponent]
 })
 
 export class QueryPacsComponent{
@@ -87,13 +91,24 @@ export class QueryPacsComponent{
         // The wildcard search is not allowed for patientName and patientID
         const noWildcardPattern = /^((?!\*).)*$/;
         this.form = this.formBuilder.group({
-            'patientName': [this.dicomQuery.patientName, [Validators.maxLength(64), Validators.pattern(noWildcardPattern)]],
-            'patientID': [this.dicomQuery.patientID, [Validators.maxLength(64), Validators.pattern(noWildcardPattern)]],
-            'patientBirthDate': [this.dicomQuery.patientBirthDate, Validators.pattern(pacsDatePattern)],
-            'studyDescription': [this.dicomQuery.studyDescription, [Validators.maxLength(64), Validators.minLength(4)]],
-            'studyDate': [this.dicomQuery.studyDate, Validators.pattern(pacsDatePattern)],
-            'modality': [this.dicomQuery.modality]
-        }, { validator: atLeastOneNotBlank(Validators.required) });
+            patientName: this.formBuilder.control(this.dicomQuery.patientName, {
+                validators: [Validators.maxLength(64), Validators.pattern(noWildcardPattern)]
+            }),
+            patientID: this.formBuilder.control(this.dicomQuery.patientID, {
+                validators: [Validators.maxLength(64), Validators.pattern(noWildcardPattern)]
+            }),
+            patientBirthDate: this.formBuilder.control(this.dicomQuery.patientBirthDate, {
+                validators: [Validators.pattern(pacsDatePattern)]
+            }),
+            studyDescription: this.formBuilder.control(this.dicomQuery.studyDescription, {
+                validators: [Validators.maxLength(64), Validators.minLength(4)]
+            }),
+            studyDate: this.formBuilder.control(this.dicomQuery.studyDate, {
+                validators: [Validators.pattern(pacsDatePattern)]
+            }),
+            modality: this.formBuilder.control(this.dicomQuery.modality)
+        });
+        this.form.setValidators(atLeastOneNotBlank(Validators.required));
     }
 
     formErrors(field: string): any {

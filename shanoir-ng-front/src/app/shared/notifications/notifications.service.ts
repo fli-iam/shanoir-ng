@@ -15,7 +15,7 @@ import { Injectable } from '@angular/core';
 import { EventSourcePolyfill } from 'ng-event-source';
 import { BehaviorSubject, Observable } from 'rxjs';
 
-import { SuperTimeout } from 'src/app/utils/super-timeout';
+import { SuperTimeout } from '@app/utils/super-timeout';
 
 import { Task } from '../../async-tasks/task.model';
 import { TaskService } from '../../async-tasks/task.service';

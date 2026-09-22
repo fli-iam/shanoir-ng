@@ -12,13 +12,13 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component } from '@angular/core';
-import { UntypedFormGroup, Validators } from '@angular/forms';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { DatePipe } from '@angular/common';
 
 import { Reference } from '../../../../preclinical/reference/shared/reference.model';
 import { ReferenceService } from '../../../../preclinical/reference/shared/reference.service';
-import { slideDown } from '../../../../shared/animations/animations';
 import { EntityService } from '../../../../shared/components/entity/entity.abstract.service';
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
 import * as PreclinicalUtils from '../../../utils/preclinical.utils';
@@ -27,17 +27,20 @@ import { PathologyService } from '../../pathology/shared/pathology.service';
 import { PathologyModel } from '../../pathologyModel/shared/pathologyModel.model';
 import { PathologyModelService } from '../../pathologyModel/shared/pathologyModel.service';
 import { SubjectPathology } from '../shared/subjectPathology.model';
+import { FormFooterComponent } from '../../../../shared/components/form-footer/form-footer.component';
+import { SelectBoxComponent } from '../../../../shared/select/select.component';
+import { DatepickerComponent } from '../../../../shared/date-picker/date-picker.component';
 
 @Component({
     selector: 'subject-pathology',
     templateUrl: 'subject-pathology.component.html',
-    animations: [slideDown],
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager,
+    imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, SelectBoxComponent, DatepickerComponent, DatePipe]
 })
 export class SubjectPathologyComponent extends EntityComponent<SubjectPathology> {
 
     private allModels: PathologyModel[] = [];
-    protected displayedModels: PathologyModel[] = []; 
+    protected displayedModels: PathologyModel[] = [];
     protected locations: Reference[] = [];
     protected pathologies: Pathology[] = [];
 
@@ -106,7 +109,7 @@ export class SubjectPathologyComponent extends EntityComponent<SubjectPathology>
     }
 
     protected goToAddLocation() {
-        this.navigateToAttributeCreateStep('/location/create', 'location');
+        this.navigateToAttributeCreateStep('/preclinical-reference/create', 'anatomy.location', null, { queryParams: {category: 'anatomy', reftype: 'location'} });
     }
 
     protected loadPathologies() {

@@ -11,13 +11,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, EventEmitter, forwardRef, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, forwardRef, Input, OnChanges, Output, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
-import { Option } from '../shared/select/select.component';
+import { Option, SelectBoxComponent } from '../shared/select/select.component';
 import { isDarkColor } from '../utils/app.utils';
 
 import { Tag } from './tag.model';
+
 
 
 export type Mode =  "view" | "edit" | "create";
@@ -32,7 +33,8 @@ export type Mode =  "view" | "edit" | "create";
             multi: true
         }
     ],
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager,
+    imports: [SelectBoxComponent]
 })
 
 export class TagInputComponent implements ControlValueAccessor, OnChanges {

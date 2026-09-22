@@ -11,14 +11,13 @@ the Free Software Foundation, either version 3 of the License, or
 You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
-<node
-        *ngIf="node"
+@if (node) {
+    <node
         [class.selected]="menuOpened || treeService.isSelected(node.id, 'coil')"
         [label]="node.label"
         awesome="fas fa-magnet"
         [(opened)]="node.opened"
         [route]="node.route"
         [hasChildren]="false"
-        [title]="node.title + ' n°' + node.id">
-
-</node>
+        [title]="node.title + ' n°' + node.id"></node>
+}

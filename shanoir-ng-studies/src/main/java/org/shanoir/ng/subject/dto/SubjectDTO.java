@@ -18,11 +18,12 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.shanoir.ng.shared.dateTime.LocalDateSerializer;
+import org.shanoir.ng.shared.quality.QualityTag;
 import org.shanoir.ng.shared.subjectstudy.SubjectType;
 import org.shanoir.ng.subject.model.HemisphericDominance;
 import org.shanoir.ng.subject.model.ImagedObjectCategory;
 import org.shanoir.ng.subject.model.Sex;
-import org.shanoir.ng.subjectstudy.dto.SubjectStudyDTO;
+import org.shanoir.ng.subjectstudy.dto.StudyTagsDTO;
 import org.shanoir.ng.tag.model.TagDTO;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -51,8 +52,6 @@ public class SubjectDTO {
 
     private Sex sex;
 
-    private List<SubjectStudyDTO> subjectStudyList;
-
     private boolean preclinical;
 
     private Long studyId;
@@ -64,6 +63,14 @@ public class SubjectDTO {
     private List<TagDTO> tags;
 
     private String studyIdentifier;
+
+    private boolean subjectPreclinical;
+
+    private StudyTagsDTO study;
+
+    private String subjectStudyIdentifier;
+
+    private QualityTag qualityTag;
 
     /**
      * @return the id
@@ -177,20 +184,6 @@ public class SubjectDTO {
         this.sex = sex;
     }
 
-    /**
-     * @return the subjectStudyList
-     */
-    public List<SubjectStudyDTO> getSubjectStudyList() {
-        return subjectStudyList;
-    }
-
-    /**
-     * @param subjectStudyList the subjectStudyList to set
-     */
-    public void setSubjectStudyList(List<SubjectStudyDTO> subjectStudyList) {
-        this.subjectStudyList = subjectStudyList;
-    }
-
     public boolean isPreclinical() {
         return preclinical;
     }
@@ -238,5 +231,39 @@ public class SubjectDTO {
     public void setStudyIdentifier(String studyIdentifier) {
         this.studyIdentifier = studyIdentifier;
     }
+
+    public boolean isSubjectPreclinical() {
+        return subjectPreclinical;
+    }
+
+    public void setSubjectPreclinical(boolean subjectPreclinical) {
+        this.subjectPreclinical = subjectPreclinical;
+    }
+
+    public StudyTagsDTO getStudy() {
+        return study;
+    }
+
+    public void setStudy(StudyTagsDTO study) {
+        this.study = study;
+    }
+
+    public String getSubjectStudyIdentifier() {
+        return subjectStudyIdentifier;
+    }
+
+    public void setSubjectStudyIdentifier(String subjectStudyIdentifier) {
+        this.subjectStudyIdentifier = subjectStudyIdentifier;
+    }
+
+    public QualityTag getQualityTag() {
+        return qualityTag;
+    }
+
+    public void setQualityTag(QualityTag qualityTag) {
+        this.qualityTag = qualityTag;
+    }
+
+
 
 }

@@ -45,7 +45,6 @@ import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.TimeZone;
-import java.util.Vector;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -55,16 +54,18 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.core5.http.HttpResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShanoirUploader;
 import org.shanoir.uploader.dicom.anonymize.Pseudonymizer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
@@ -90,16 +91,16 @@ public final class Util {
     /** Time pattern for file system. */
     public static final String TIME_PATTERN_FILE_SYSTEM = "yyyy_MM_dd_HH_mm_ss_SSS";
 
-    public static ObjectMapper objectMapper = new ObjectMapper();
+    public static ObjectMapper mapper = new ObjectMapper();
 
     public static ObjectWriter objectWriter;
 
     static {
-        objectMapper
-            .registerModule(new JavaTimeModule())
-            .registerModule(new Jdk8Module())
+        mapper
+                .registerModule(new JavaTimeModule())
+                .registerModule(new Jdk8Module())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        objectWriter = objectMapper.writer().withDefaultPrettyPrinter();
+        objectWriter = mapper.writer().withDefaultPrettyPrinter();
     }
 
     /**
@@ -344,10 +345,10 @@ public final class Util {
         StringBuffer result = new StringBuffer();
         result = readStringBuffer(response);
         if (result != null) {
-            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             try {
-                JavaType type = objectMapper.getTypeFactory().constructCollectionType(List.class, classname);
-                List<T> myObjects = objectMapper.readValue(result.toString(), type);
+                JavaType type = mapper.getTypeFactory().constructCollectionType(List.class, classname);
+                List<T> myObjects = mapper.readValue(result.toString(), type);
                 return myObjects;
             } catch (JsonGenerationException e) {
                 LOG.error(e.getMessage(), e);
@@ -364,10 +365,10 @@ public final class Util {
         StringBuffer result = new StringBuffer();
         result = readStringBuffer(response);
         if (result != null) {
-            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             try {
-                JavaType type = objectMapper.constructType(classname);
-                T myObjects = objectMapper.readValue(result.toString(), type);
+                JavaType type = mapper.constructType(classname);
+                T myObjects = mapper.readValue(result.toString(), type);
                 return myObjects;
             } catch (JsonGenerationException e) {
                 LOG.error(e.getMessage(), e);
@@ -376,6 +377,20 @@ public final class Util {
             } catch (IOException e) {
                 LOG.error(e.getMessage(), e);
             }
+        }
+        return null;
+    }
+
+    public static <T> List<T> getMappedPageContent(CloseableHttpResponse response, Class<T> clazz) throws IOException {
+        try {
+            String responseBody = EntityUtils.toString(response.getEntity());
+            JsonNode root = mapper.readTree(responseBody);
+            JsonNode contentNode = root.get("content");
+            JavaType type = mapper.getTypeFactory()
+                    .constructCollectionType(List.class, clazz);
+            return mapper.readValue(contentNode.toString(), type);
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
         }
         return null;
     }
@@ -411,24 +426,24 @@ public final class Util {
         if (dirURL.getProtocol().equals("jar")) {
             /* A JAR path */
             String jarPath = dirURL.getPath().substring(5, dirURL.getPath().indexOf("!")); // strip
-                                                                                            // out
-                                                                                            // only
-                                                                                            // the
-                                                                                            // JAR
-                                                                                            // file
+                                                                                           // out
+                                                                                           // only
+                                                                                           // the
+                                                                                           // JAR
+                                                                                           // file
             JarFile jar = new JarFile(URLDecoder.decode(jarPath, "UTF-8"));
             Enumeration<JarEntry> entries = jar.entries(); // gives ALL entries
-                                                            // in jar
+                                                           // in jar
             Set<String> result = new HashSet<String>(); // avoid duplicates in
                                                         // case it is a
-                                                        // subdirectory
+                                                        // sub-directory
             while (entries.hasMoreElements()) {
                 String name = entries.nextElement().getName();
                 if (name.startsWith(path)) { // filter according to the path
                     String entry = name.substring(path.length());
                     int checkSubdir = entry.indexOf("/");
                     if (checkSubdir >= 0) {
-                        // if it is a subdirectory, we just return the directory
+                        // if it is a sub-directory, we just return the directory
                         // name
                         entry = entry.substring(0, checkSubdir);
                     }
@@ -559,29 +574,25 @@ public final class Util {
      * @return a collection of files
      */
     public static Collection<File> listFiles(final File directory, final FilenameFilter filter, final boolean recurse) {
-        // List of files / directories
-        Vector<File> files = new Vector<File>();
+        List<File> files = new ArrayList<>();
+        collectFiles(directory, filter, recurse, files);
+        return files;
+    }
 
-        // Get files / directories in the directory
+    private static void collectFiles(final File directory, final FilenameFilter filter,
+                                      final boolean recurse, final List<File> result) {
         File[] entries = directory.listFiles();
-
-        // Go over entries
+        if (entries == null) {
+            return; // not a directory, or couldn't be read
+        }
         for (File entry : entries) {
-            // If there is no filter or the filter accepts the
-            // file / directory, add it to the list
             if (filter == null || filter.accept(directory, entry.getName())) {
-                files.add(entry);
+                result.add(entry);
             }
-
-            // If the file is a directory and the recurse flag
-            // is set, recurse into the directory
             if (recurse && entry.isDirectory()) {
-                files.addAll(listFiles(entry, filter, recurse));
+                collectFiles(entry, filter, recurse, result);
             }
         }
-
-        // Return collection of files
-        return files;
     }
 
     /**

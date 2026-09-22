@@ -97,4 +97,5 @@ public class ServiceConfiguration {
     public String getTestURL() {
         return ShUpConfig.profileProperties.getProperty("shanoir.server.url");
     }
+
 }

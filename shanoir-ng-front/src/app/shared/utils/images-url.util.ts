@@ -37,10 +37,8 @@ export class ImagesUrlUtil {
     public static NOTEPAD_ICON_PATH = 'assets/images/icons/medical/notepad.png';
     public static NURSE_ICON_PATH = 'assets/images/icons/medical/nurse.png';
     public static PODIUM_ICON_PATH = 'assets/images/icons/podium.png'
-    public static SHANOIR_BLACK_LOGO_PATH = 'assets/images/logo.shanoir.black.png';
     public static SHANOIR_UP_TRANSP_LOGO_PATH = 'assets/images/logo.shanoirUp_transp.16x16.png';
-    public static SHANOIR_WHITE_LOGO_PATH = 'assets/images/logo.shanoir.white.png';
-    public static SHANOIR_WHITE_SMALL_LOGO_PATH = 'assets/images/logo.shanoir.white.small.png';
+    public static SHANOIR_WHITE_LOGO_PATH = 'assets/images/shanoirLogoWhite.svg';
     public static SHARE_ICON_PATH = 'assets/images/icons/share.png';
     public static STETHOSCOPE_ICON_PATH = 'assets/images/icons/medical/stethoscope.png';
     public static UNCHECK_ALL_ICON_PATH = 'assets/images/icons/uncheck-all.png';

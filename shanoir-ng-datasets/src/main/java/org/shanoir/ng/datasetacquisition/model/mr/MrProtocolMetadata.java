@@ -17,15 +17,8 @@ package org.shanoir.ng.datasetacquisition.model.mr;
 import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.persistence.*;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
-
-import jakarta.persistence.DiscriminatorColumn;
-import jakarta.persistence.DiscriminatorType;
-import jakarta.persistence.DiscriminatorValue;
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Inheritance;
-import jakarta.persistence.InheritanceType;
 
 /**
  * MR protocol.
@@ -86,11 +79,11 @@ public class MrProtocolMetadata extends AbstractEntity {
     private String mrSequenceName;
 
     /** (0018, 0020) Scanning sequence Description  */
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     private List<Integer> mrScanningSequence;
 
     /** (0018, 0021) Sequence Variant of the scanning sequence */
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     private List<Integer> mrSequenceVariant;
 
     /** Corresponding Dicom information : (0018,1030) Protocol name. */

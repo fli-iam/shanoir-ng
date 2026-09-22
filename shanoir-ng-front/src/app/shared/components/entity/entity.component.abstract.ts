@@ -13,6 +13,7 @@
  */
 import { Location } from '@angular/common';
 import {
+    ChangeDetectorRef,
     Directive,
     ElementRef,
     HostListener,
@@ -21,23 +22,23 @@ import {
     OnDestroy,
     OnInit,
     SimpleChanges,
-    ViewChild
+    ViewChild,
+    inject
 } from '@angular/core';
 import { AbstractControl, FormArray, FormGroup, UntypedFormBuilder, UntypedFormGroup, ValidationErrors } from '@angular/forms';
 import { ActivatedRoute, NavigationExtras, Router } from '@angular/router';
 import { firstValueFrom, Subject, Subscription } from 'rxjs';
 
-import { Selection, TreeService } from 'src/app/studies/study/tree.service';
-import { SuperPromise } from 'src/app/utils/super-promise';
+import { Selection, TreeService } from '@app/studies/study/tree.service';
+import { SuperPromise } from '@app/utils/super-promise';
 
 import { BreadcrumbsService, Step } from '../../../breadcrumbs/breadcrumbs.service';
-import { ServiceLocator } from '../../../utils/locator.service';
 import { ConsoleService } from '../../console/console.service';
 import { KeycloakService } from '../../keycloak/keycloak.service';
 import { ShanoirError } from '../../models/error.model';
+import { getDeclaredFields } from '../../reflect/field.decorator';
 import { ConfirmDialogService } from '../confirm-dialog/confirm-dialog.service';
 import { FooterState } from '../form-footer/footer-state.model';
-import { getDeclaredFields } from '../../reflect/field.decorator';
 
 import { Entity, EntityRoutes } from './entity.abstract';
 import { EntityService } from './entity.abstract.service';
@@ -70,6 +71,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     private form$: SuperPromise<void> = new SuperPromise<void>();
     protected showTreeByDefault: boolean = true;
     protected abstract getRoutingName(): string;
+    private changeDetectorRef: ChangeDetectorRef;
 
     /* services */
     protected confirmDialogService: ConfirmDialogService;
@@ -93,15 +95,16 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
 
     constructor(
         protected activatedRoute: ActivatedRoute) {
-        this.confirmDialogService = ServiceLocator.injector.get(ConfirmDialogService);
+        this.confirmDialogService = inject(ConfirmDialogService);
         this.entityRoutes = new EntityRoutes(this.getRoutingName());
-        this.router = ServiceLocator.injector.get(Router);
-        this.location = ServiceLocator.injector.get(Location);
-        this.keycloakService = ServiceLocator.injector.get(KeycloakService);
-        this.formBuilder = ServiceLocator.injector.get(UntypedFormBuilder);
-        this.consoleService = ServiceLocator.injector.get(ConsoleService);
-        this.breadcrumbsService = ServiceLocator.injector.get(BreadcrumbsService);
-        this.treeService = ServiceLocator.injector.get(TreeService);
+        this.router = inject(Router);
+        this.location = inject(Location);
+        this.keycloakService = inject(KeycloakService);
+        this.formBuilder = inject(UntypedFormBuilder);
+        this.consoleService = inject(ConsoleService);
+        this.breadcrumbsService = inject(BreadcrumbsService);
+        this.treeService = inject(TreeService);
+        this.changeDetectorRef = inject(ChangeDetectorRef);
 
         this.mode = this.activatedRoute.snapshot.data['mode'];
 
@@ -275,6 +278,10 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
                 }
             }
             this.entity = this._entity; // to wrap it as proxy after form is set
+            // The zone flush after this promise chain doesn't reliably schedule a tick
+            // (observed on @angular/core 22.1.3), so the initial form/entity render can be
+            // silently skipped unless we force it explicitly here.
+            this.changeDetectorRef.detectChanges();
         });
 
         // load called tab

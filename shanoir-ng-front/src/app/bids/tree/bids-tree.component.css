@@ -20,3 +20,9 @@ h4 { display: inline-block; }
     color: var(--color-b);
     cursor: pointer;
 }
+.refresh-button {
+    padding: 5px 5px;
+    margin-left: 3px;
+    color: var(--color-b);
+    cursor: pointer;
+}

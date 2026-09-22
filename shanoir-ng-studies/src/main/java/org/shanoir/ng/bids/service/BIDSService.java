@@ -24,4 +24,5 @@ public interface BIDSService {
     ResponseEntity<ByteArrayResource> generateParticipantsTsv(Long studyId) throws IOException;
 
     String generateParticipantsTsvFile(Long studyId) throws IOException;
+
 }

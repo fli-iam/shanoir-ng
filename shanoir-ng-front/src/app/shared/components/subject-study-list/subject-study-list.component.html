@@ -17,14 +17,16 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <tool-tip>You can choose one or more subjects from the list</tool-tip>
 </legend>
 <ol>
-    <li *ngIf="model && model.length > 0 && columnDefs">
-        <shanoir-table #table
+    @if (model && model.length > 0 && columnDefs) {
+        <li>
+            <shanoir-table
+                #table
                 [getPage]="getPage.bind(this)"
                 [editMode]="mode != 'view'"
                 [columnDefs]="columnDefs"
                 [browserSearch]="false"
                 [rowRoute]="rowClick.bind(this)"
-                (rowEdit)="onChange()">
-        </shanoir-table>
-    </li>
+                (rowEdit)="onChange()"></shanoir-table>
+        </li>
+    }
 </ol>

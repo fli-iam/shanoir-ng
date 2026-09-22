@@ -49,6 +49,7 @@ public class ProxyConfigurationState implements State {
 
     public void load(StartupStateContext context) {
         String testURL = ServiceConfiguration.getInstance().getTestURL();
+        LOG.info("Proxy test with URL: " + testURL);
         int httpResponseCode = 0;
         try {
             httpResponseCode = ShanoirUploaderServiceClient.testProxy(testURL);

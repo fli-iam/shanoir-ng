@@ -27,6 +27,7 @@ public enum ExecutionStatus {
     RUNNING("Running"),
     FINISHED("Finished"),
     EXECUTION_FAILED("ExecutionFailed"),
+    QUEUED("Queued"),
     UNKNOWN("Unknown"),
     KILLED("Killed");
 
@@ -38,8 +39,11 @@ public enum ExecutionStatus {
 
     @JsonCreator
     public static ExecutionStatus fromRestLabel(String restlabel) {
+        if ("Completed".equalsIgnoreCase(restlabel)) {
+            return FINISHED;
+        }
         for (ExecutionStatus status : values()) {
-            if (status.restLabel.equals(restlabel)) {
+            if (status.restLabel.equalsIgnoreCase(restlabel)) {
                 return status;
             }
         }

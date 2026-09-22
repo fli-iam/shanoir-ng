@@ -27,7 +27,7 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreePath;
 
-import org.shanoir.ng.importer.model.ImportJob;
+import org.shanoir.ng.importer.model.ImportJobBase;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
@@ -62,7 +62,7 @@ public class SelectionActionListener implements TreeSelectionListener {
 
     private ResourceBundle resourceBundle;
 
-    private Map<String, ImportJob> importJobs;
+    private Map<String, ImportJobBase> importJobs;
 
     public SelectionActionListener(final MainWindow mainWindow, final ResourceBundle resourceBundle) {
         this.mainWindow = mainWindow;
@@ -90,7 +90,7 @@ public class SelectionActionListener implements TreeSelectionListener {
         mainWindow.birthDateTF.setText("");
 
         mainWindow.isDicomObjectSelected = true;
-        importJobs = new LinkedHashMap<String, ImportJob>();
+        importJobs = new LinkedHashMap<String, ImportJobBase>();
 
         try {
             // returns all selected paths, which can be patients, studies and/or series
@@ -122,10 +122,10 @@ public class SelectionActionListener implements TreeSelectionListener {
                         StudyTreeNode studyTreeNode = (StudyTreeNode) tp.getParentPath().getLastPathComponent();
                         PatientTreeNode patientTreeNode = (PatientTreeNode) tp.getParentPath().getParentPath().getLastPathComponent();
                         handleStudyTreeNode(patientTreeNode, studyTreeNode, false);
-                        ImportJob importJob = importJobs.get(studyTreeNode.getStudy().getStudyInstanceUID());
+                        ImportJobBase importJob = importJobs.get(studyTreeNode.getStudy().getStudyInstanceUID());
                         Serie serie = (Serie) serieTreeNode.getSerie();
                         if (!serie.isIgnored() && !serie.isErroneous()) {
-                            importJob.getSelectedSeries().add((Serie) serie.clone());
+                            importJob.getSeries().add((Serie) serie.clone());
                         }
                     }
                 }
@@ -143,7 +143,7 @@ public class SelectionActionListener implements TreeSelectionListener {
         // for the moment use always first patient
         // idea: the selection listener is already multi-patient ready, but for
         // the moment we provide only one patient into the verification box
-        ImportJob importJob = importJobs.values().iterator().next();
+        ImportJobBase importJob = importJobs.values().iterator().next();
         Patient patient = importJob.getPatient();
         final String name = patient.getPatientName();
         String lastName = Util.computeLastName(name);
@@ -191,7 +191,7 @@ public class SelectionActionListener implements TreeSelectionListener {
             return;
         }
         String studyInstanceUID = study.getStudyInstanceUID();
-        ImportJob importJob = importJobs.get(studyInstanceUID);
+        ImportJobBase importJob = importJobs.get(studyInstanceUID);
         if (importJob == null) {
             importJob = ImportUtils.createNewImportJob(patient, study);
             if (addAllSeries) {
@@ -202,14 +202,14 @@ public class SelectionActionListener implements TreeSelectionListener {
                         List<Serie> series = study.getSeries();
                         for (Serie serie : series) {
                             if (!serie.isIgnored() && !serie.isErroneous()) {
-                                importJob.getSelectedSeries().add((Serie) serie.clone());
+                                importJob.getSeries().add((Serie) serie.clone());
                             }
                         }
                     }
                 }
                 // ignore empty DICOM studies without series
                 // happens when DICOM study with different modality exists in DICOM server
-                if (!importJob.getSelectedSeries().isEmpty()) {
+                if (!importJob.getSeries().isEmpty()) {
                     importJobs.put(studyInstanceUID, importJob);
                 }
             } else {
@@ -218,7 +218,7 @@ public class SelectionActionListener implements TreeSelectionListener {
         }
     }
 
-    public Map<String, ImportJob> getImportJobs() {
+    public Map<String, ImportJobBase> getImportJobs() {
         return importJobs;
     }
 

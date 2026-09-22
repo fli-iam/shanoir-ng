@@ -12,7 +12,8 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, OnInit, SimpleChanges, Input, HostBinding, OnDestroy, OnChanges } from "@angular/core";
+import { Component, OnInit, SimpleChanges, Input, HostBinding, OnDestroy, OnChanges, ChangeDetectionStrategy } from "@angular/core";
+
 
 declare let papaya: any;
 declare let papayaContainers: any[];
@@ -21,7 +22,8 @@ declare let papayaContainers: any[];
     selector: "papaya",
     templateUrl: "papaya.component.html",
     styleUrls: ["papaya.component.css"],
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager,
+    imports: []
 })
 export class PapayaComponent implements OnInit, OnDestroy, OnChanges {
     @Input() params: any[];

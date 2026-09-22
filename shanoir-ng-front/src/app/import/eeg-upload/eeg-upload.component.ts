@@ -13,17 +13,19 @@
  */
 
 import { HttpEventType, HttpResponse } from '@angular/common/http';
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 
-import { TaskState } from 'src/app/async-tasks/task.model';
+import { TaskState } from '@app/async-tasks/task.model';
 
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
-import { slideDown } from '../../shared/animations/animations';
 import { EegImportJob } from '../shared/eeg-data.model';
 import { ImportDataService } from '../shared/import.data-service';
 import { ImportService } from '../shared/import.service';
+import { UploaderComponent } from '../../shared/components/uploader/uploader.component';
+import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
+
 
 
 type Status = 'none' | 'uploading' | 'uploaded' | 'error';
@@ -32,8 +34,8 @@ type Status = 'none' | 'uploading' | 'uploaded' | 'error';
     selector: 'eeg-upload',
     templateUrl: 'eeg-upload.component.html',
     styleUrls: ['eeg-upload.component.css', '../shared/import.step.css'],
-    animations: [slideDown],
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager,
+    imports: [UploaderComponent, LoadingBarComponent]
 })
 export class EegUploadComponent implements OnDestroy {
 
@@ -79,9 +81,8 @@ export class EegUploadComponent implements OnDestroy {
         const formData: FormData = new FormData();
         formData.append('file', file[0], file[0].name);
         this.subscriptions.push(
-            this.importService.uploadEegFile(formData)
-                .subscribe(
-                    event => {
+            this.importService.uploadEegFile(formData).subscribe({
+                next: event => {
                     if (event.type === HttpEventType.Sent) {
                         this.uploadState.progress = 0;
                     } else if (event.type === HttpEventType.UploadProgress) {
@@ -103,13 +104,15 @@ export class EegUploadComponent implements OnDestroy {
                                 }
                             });
                     }
-                }, error => {
+                }, 
+                error: error => {
                     this.setArchiveStatus('error');
                     this.uploadState.progress = 0;
                     if (error && error.error && error.error.message) {
                         this.errorMessage = error.error.message;
                     }
-                })
+                }
+            })
         );
     }
 

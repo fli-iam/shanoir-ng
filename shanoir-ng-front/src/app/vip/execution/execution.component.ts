@@ -2,19 +2,21 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
 import { formatDate } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import {
+    FormsModule,
+    ReactiveFormsModule,
     UntypedFormControl,
     UntypedFormGroup,
     ValidatorFn,
@@ -22,20 +24,20 @@ import {
 } from '@angular/forms';
 import { Router } from '@angular/router';
 
-import { BreadcrumbsService } from 'src/app/breadcrumbs/breadcrumbs.service';
-import { DatasetLight, DatasetService } from 'src/app/datasets/shared/dataset.service';
-import { DatasetProcessingType } from 'src/app/enum/dataset-processing-type.enum';
-import { ColumnDefinition } from 'src/app/shared/components/table/column.definition.type';
-import { KeycloakService } from 'src/app/shared/keycloak/keycloak.service';
-import { MsgBoxService } from 'src/app/shared/msg-box/msg-box.service';
-import { ExecutionService } from 'src/app/vip/execution/execution.service';
-import { Execution } from 'src/app/vip/models/execution';
-import { ParameterType } from 'src/app/vip/models/parameterType';
-import { Pipeline } from 'src/app/vip/models/pipeline';
+import { BreadcrumbsService } from '@app/breadcrumbs/breadcrumbs.service';
+import { DatasetLight, DatasetService } from '@app/datasets/shared/dataset.service';
+import { DatasetProcessingType } from '@app/enum/dataset-processing-type.enum';
+import { ColumnDefinition } from '@app/shared/components/table/column.definition.type';
+import { KeycloakService } from '@app/shared/keycloak/keycloak.service';
+import { MsgBoxService } from '@app/shared/msg-box/msg-box.service';
+import { ExecutionService } from '@app/vip/execution/execution.service';
+import { Execution } from '@app/vip/models/execution';
+import { ParameterType } from '@app/vip/models/parameterType';
+import { Pipeline } from '@app/vip/models/pipeline';
+import { TooltipComponent } from '@app/shared/components/tooltip/tooltip.component';
 
 import { ConsoleService } from "../../shared/console/console.service";
-import { Option } from '../../shared/select/select.component';
-import { ServiceLocator } from "../../utils/locator.service";
+import { Option, SelectBoxComponent } from '../../shared/select/select.component';
 import { ExecutionDataService } from '../execution.data-service';
 import { DatasetParameterDTO } from "../models/dataset-parameter.dto";
 import { ExecutionCandidateDto } from "../models/execution-candidate.dto";
@@ -46,17 +48,17 @@ import { PipelineParameter } from "../models/pipelineParameter";
     selector: 'app-execution',
     templateUrl: './execution.component.html',
     styleUrls: ['./execution.component.css'],
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager,
+    imports: [FormsModule, ReactiveFormsModule, SelectBoxComponent, TooltipComponent]
 })
 export class ExecutionComponent implements OnInit {
 
-    protected consoleService = ServiceLocator.injector.get(ConsoleService);
+    protected consoleService = inject(ConsoleService);
     pipeline: Pipeline;
     executionForm: UntypedFormGroup;
     private selectedDatasets: Set<DatasetLight>;
 
     datasetsOptions: Option<DatasetLight>[];
-    token: string;
     refreshToken: string;
     parametersApplied: boolean = false;
     execution: Execution;
@@ -109,16 +111,6 @@ export class ExecutionComponent implements OnInit {
                 this.isLoading = false;
             });
 
-        this.keycloakService.getToken().then(
-            (token: string) => {
-                this.token = token;
-            }
-        )
-        this.keycloakService.getRefreshToken().then(
-            (refreshToken: string) => {
-                this.refreshToken = refreshToken;
-            }
-        )
         this.execDefaultName = this.getDefaultExecutionName();
     }
 
@@ -217,13 +209,31 @@ export class ExecutionComponent implements OnInit {
 
         this.isSubmitted = true;
 
+        // Refresh the token right before building the VIP inputs, so the refresh token embedded
+        // in the shanoir:/ URIs is freshly rotated and the session is confirmed active. If the
+        // session has expired, block the launch instead of submitting a job VIP can't authenticate.
+        try {
+            this.refreshToken = await this.keycloakService.getRefreshToken();
+        } catch {
+            this.isSubmitted = false;
+            this.msgService.log('error', 'Session expired — please log in again.');
+            return;
+        }
+
         const exec = this.initExecutionCandidate();
         this.executionService.createExecution(exec).then(
-            monitoring => {
-                this.router.navigate([`/dataset-processing/details/${monitoring.id}`]);
+            () => {
+                this.router.navigate([`/solr-search`]);
             },
             (error) => {
-                this.msgService.log('error', 'Sorry, an error occurred while submitting execution.');
+                this.isSubmitted = false;
+                if (error.status === 403) {
+                    // POST on /vip/execution/ returns a 403 if this is for a study the user
+                    // has no CAN_EXECUTE (or admin/expert) right on.
+                    this.msgService.log('error', 'You do not have the rights to run an execution on this study.');
+                } else {
+                    this.msgService.log('error', 'Sorry, an error occurred while submitting execution.');
+                }
                 console.error(error);
             }
         );
@@ -282,7 +292,7 @@ export class ExecutionComponent implements OnInit {
     getDefaultExecutionName(): string {
         return this.cleanProcessingName(this.pipeline.name
         + "_" + this.pipeline.version
-        + "_" + formatDate(new Date(), 'dd-MM-YYYY_HHmmss', 'en-US'));
+        + "_" + formatDate(new Date(), 'dd-MM-yyyy_HHmmss', 'en-US'));
 
     }
 

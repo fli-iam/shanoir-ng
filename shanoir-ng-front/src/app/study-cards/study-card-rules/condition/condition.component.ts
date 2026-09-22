@@ -11,17 +11,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges } from '@angular/core';
-import { FormArray, FormControl, FormGroup, UntypedFormBuilder, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
+import { FormArray, FormControl, FormGroup, UntypedFormBuilder, UntypedFormGroup, ValidatorFn, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 
-import { Coil } from 'src/app/coils/shared/coil.model';
+import { Coil } from '@app/coils/shared/coil.model';
 
 import { Mode } from '../../../shared/components/entity/entity.component.abstract';
-import { Option } from '../../../shared/select/select.component';
+import { Option, SelectBoxComponent } from '../../../shared/select/select.component';
 import { DicomService } from '../../shared/dicom.service';
-import { ConditionScope, DicomTag, Operation, StudyCardCondition, TagType, VM } from '../../shared/study-card.model';
+import { ConditionScope, DicomTag, FieldType, Operation, StudyCardCondition, VM } from '../../shared/study-card.model';
 import { ShanoirMetadataField } from '../action/action.component';
+import { AutoAdjustInputComponent } from '../../../shared/auto-ajust-input/auto-ajust-input.component';
+
+import { DicomTagPipe } from './dicom-tag.pipe';
 
 
 
@@ -29,7 +32,8 @@ import { ShanoirMetadataField } from '../action/action.component';
     selector: 'condition',
     templateUrl: 'condition.component.html',
     styleUrls: ['condition.component.css'],
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager,
+    imports: [SelectBoxComponent, FormsModule, ReactiveFormsModule, AutoAdjustInputComponent, DicomTagPipe]
 })
 export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges {
     
@@ -56,6 +60,11 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
         new Option('PRESENT', 'present'),
         new Option('ABSENT', 'absent'),
     ];
+    cardinalityTypeOptions: Option<'NONE' | 'ALL' | 'AT_LEAST'>[] = [
+        new Option('NONE', 'for no'),
+        new Option('ALL', 'for every'),
+        new Option('AT_LEAST', 'for at least'),
+    ];
     @Output() delete: EventEmitter<void> = new EventEmitter();
     init: boolean = false;
     conditionTypeOptions: Option<ConditionScope>[];
@@ -68,8 +77,13 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
     shanoirFieldTouched: boolean = false;
     private computeConditionOptionsSubscription: Subscription;
     private conditionChangeSubscription: Subscription;
-    @Input() addSubForm: (subForm: FormGroup) => FormGroup;
+    @Input() addSubForm: (subForm: FormGroup, previousForm?: FormGroup) => FormGroup;
     private parentForm: FormGroup;
+    // The form currently registered in the parent's "conditions" FormArray via addSubForm(),
+    // so it can be swapped out (not just added to) whenever this.form is rebuilt from scratch
+    // (buildForm()) - otherwise the old, now-orphaned FormGroup stays in the array forever,
+    // permanently polluting the parent form's validity with whatever state it was frozen in.
+    private registeredForm: FormGroup;
 
     constructor(
             private dicomService: DicomService,
@@ -87,12 +101,13 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
 
     private buildValueControl(value: string | Coil) {
         const validators: ValidatorFn[] = [Validators.required, Validators.minLength(1)]
-        const type: TagType = this.condition?.dicomTag?.type;
+        const type: FieldType = this.condition?.dicomTag?.type
+            ?? this.fields?.find(f => f.field == this.condition?.shanoirField)?.type;
         const vm: VM = this.condition?.dicomTag?.vm;
         if (['Double', 'Float'].includes(type)) {
             validators.push(Validators.pattern('[+-]?([0-9]*[.])?[0-9]+')); // reals : only numbers, with dot as decimal separator
         } else if (['Integer', 'Long'].includes(type)) {
-            validators.push(Validators.pattern('[+-]?[0-9]+')); // only numbers w/o decimals 
+            validators.push(Validators.pattern('[+-]?[0-9]+')); // only numbers w/o decimals
         } else if (type == 'String') {
             validators.push(Validators.pattern(/^[^"]*$/)); // exclude "
         } else if (type == 'Date') {
@@ -136,12 +151,13 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
                 for (const tag of tags) {
                     const hexStr: string = tag.code.toString(16).padStart(8, '0').toUpperCase();
                     const cardinality: string = this.buildCadinalityLabel(tag.vm);
-                    const label: string = hexStr.substr(0, 4) + ',' + hexStr.substr(4, 4) + ' - ' + tag.label + ' <' + tag.type + cardinality +'>';
+                    const label: string = hexStr.substring(0, 4) + ',' + hexStr.substring(4, 8) + ' - ' + tag.label + ' <' + tag.type + cardinality +'>';
                     this.tagOptions.push(new Option<DicomTag>(tag, label));
                 }
             });
         }
         this.parentForm = this.addSubForm(this.form);
+        this.registeredForm = this.form;
         setTimeout(() => this.init = true);
     }
 
@@ -164,6 +180,7 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
     ngOnDestroy(): void {
         this.computeConditionOptionsSubscription?.unsubscribe();
         this.conditionChangeSubscription?.unsubscribe();
+        this.addSubForm(null, this.registeredForm);
         setTimeout(() => {
             (this.form?.get('values') as FormArray)?.clear();
         });
@@ -173,18 +190,18 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
         if (changes.ruleScope && this.ruleScope) {
             if (this.ruleScope == 'Dataset') {
                 this.conditionTypeOptions = [
-                    new Option('StudyCardDICOMConditionOnDatasets', 'the DICOM field'),
-                    new Option('DatasetMetadataCondOnDataset', 'the dataset field'),
+                    new Option('DatasetDICOMConditionOnDataset', 'the DICOM field'), // no cardinality
+                    new Option('DatasetMetadataCondOnDataset', 'the dataset field'), // no cardinality
                 ];
             } else if (this.ruleScope == 'DatasetAcquisition') {
                 this.conditionTypeOptions = [
-                    new Option('StudyCardDICOMConditionOnDatasets', 'the DICOM field'),
-                    new Option('AcqMetadataCondOnAcq', 'the acquisition field'),
+                    new Option('AcqDICOMConditionOnDatasets', 'the DICOM field'),
+                    new Option('AcqMetadataCondOnAcq', 'the acquisition field'), // no cardinality
                     new Option('AcqMetadataCondOnDatasets', 'the dataset field'),
                 ];
             } else if (this.ruleScope == 'Examination') {
                 this.conditionTypeOptions = [
-                    new Option('StudyCardDICOMConditionOnDatasets', 'the DICOM field'),
+                    new Option('ExamDICOMConditionOnDatasets', 'the DICOM field'),
                     new Option('ExamMetadataCondOnAcq', 'the acquisition field'),
                     new Option('ExamMetadataCondOnDatasets', 'the dataset field'),
                 ];
@@ -240,8 +257,12 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
                     this.shanoirFieldOptions = null;
                 }
                 this.form = this.buildForm();
+                if (this.registeredForm) {
+                    this.parentForm = this.addSubForm(this.form, this.registeredForm);
+                    this.registeredForm = this.form;
+                }
                 this.filterOperations();
-                this.previousField = this.condition.dicomTag; 
+                this.previousField = this.condition.dicomTag;
             }
         }
     }
@@ -324,9 +345,9 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
      * Filter the available operations
      */
     private filterOperations() {
-        if (this.condition.scope == 'StudyCardDICOMConditionOnDatasets') { // DICOM fields
+        if (this.condition.scope?.includes('DICOMCondition')) { // DICOM fields
             if (this.condition?.dicomTag) {
-                const type: TagType = this.condition.dicomTag.type;
+                const type: FieldType = this.condition.dicomTag.type;
                 if (['Double', 'Float', 'Integer', 'Long', 'Date'].includes(type)) {
                     this.operations.forEach(op => {
                         if (['EQUALS', 'SMALLER_THAN', 'BIGGER_THAN', 'NOT_EQUALS','PRESENT', 'ABSENT'].includes(op.value)) {
@@ -367,7 +388,17 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
                 this.operations.forEach(op => op.disabled = false);
             }
         } else { // Shanoir fields
-            if (this.shanoirFieldOptions?.length > 0) { // with option list such as coils
+            const shanoirField: ShanoirMetadataField = this.fields?.find(f => f.field == this.condition.shanoirField);
+            if (['Long', 'Float', 'Double', 'Integer'].includes(shanoirField?.type)) {
+                this.operations.forEach(op => {
+                    if (['EQUALS', 'NOT_EQUALS', 'SMALLER_THAN', 'BIGGER_THAN'].includes(op.value)) {
+                        op.disabled = false;
+                    } else {
+                        op.disabled = true;
+                    }
+                   ;
+                });
+            } else if (this.shanoirFieldOptions?.length > 0) { // with option list such as coils
                 this.operations.forEach(op => {
                     if (['EQUALS', 'NOT_EQUALS'].includes(op.value)) {
                         op.disabled = false;
@@ -407,6 +438,10 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
             this.filterOperations();
             this.resetValues();
             this.form = this.buildForm();
+            if (this.registeredForm) {
+                this.parentForm = this.addSubForm(this.form, this.registeredForm);
+                this.registeredForm = this.form;
+            }
             this.onConditionChange();
             if (value.endsWith('OnDataset') || value.endsWith('OnDatasets')) {
                 this.fieldOptions.forEach(opt => opt.disabled = opt.section != 'Dataset');
@@ -424,7 +459,13 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
         } else if (this.condition.values.length == 0) {
             this.resetValues();
         }
-        this.onConditionChange(); 
+        this.onConditionChange();
+    }
+
+    // SMALLER_THAN/BIGGER_THAN compare against a single threshold value, so offering to add
+    // several (OR-combined) values would be misleading.
+    get allowsMultipleValues(): boolean {
+        return this.condition?.operation != 'SMALLER_THAN' && this.condition?.operation != 'BIGGER_THAN';
     }
 
     private computeConditionOptions() {
@@ -432,7 +473,7 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
             this.computeConditionOptionsSubscription.unsubscribe();
             this.computeConditionOptionsSubscription = null;
         }
-        if (this.condition.scope != 'StudyCardDICOMConditionOnDatasets') {
+        if (!this.condition.scope?.includes('DICOMCondition')) {
             const conditionField: ShanoirMetadataField = this.fields.find(metadataField => metadataField.field == this.condition.shanoirField);
             if (conditionField && conditionField.options) {
                 this.computeConditionOptionsSubscription = conditionField.options.subscribe(opts => {

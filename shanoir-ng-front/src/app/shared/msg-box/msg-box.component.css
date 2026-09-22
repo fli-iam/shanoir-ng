@@ -33,3 +33,21 @@
     width: 16px;
     text-align: center; 
 }
+
+.slide-right {
+    animation: slideRight 500ms ease-in-out both;
+}
+
+@keyframes slideRight {
+    from { right: -550px; }
+    to   { right: 0; }
+}
+
+.slide-left {
+  animation: slideLeft 500ms ease-in-out both;
+}
+
+@keyframes slideLeft {
+    from { right: 0; }
+    to   { right: -550px; }
+}

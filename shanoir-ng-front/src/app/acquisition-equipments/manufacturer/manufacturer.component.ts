@@ -12,19 +12,22 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component } from '@angular/core';
-import { UntypedFormGroup, Validators } from '@angular/forms';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { Manufacturer } from '../shared/manufacturer.model';
 import { ManufacturerService } from '../shared/manufacturer.service';
+import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
+import { HelpMessageComponent } from '../../shared/help-message/help-message.component';
 
 @Component({
     selector: 'manufacturer-detail',
     templateUrl: 'manufacturer.component.html',
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager,
+    imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, HelpMessageComponent]
 })
 
 export class ManufacturerComponent extends EntityComponent<Manufacturer> {

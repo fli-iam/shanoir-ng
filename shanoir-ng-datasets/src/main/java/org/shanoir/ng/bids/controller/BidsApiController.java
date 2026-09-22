@@ -37,12 +37,13 @@ import org.shanoir.ng.bids.service.BidsValidationPublisher;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.model.Study;
-import org.shanoir.ng.shared.service.StudyService;
+import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -70,13 +71,16 @@ public class BidsApiController implements BidsApi {
     private BidsDeserializer bidsDeserializer;
 
     @Autowired
-    private StudyService studyService;
+    private StudyRepository studyRepository;
 
     @Autowired
     private BidsValidationPublisher bidsValidationPublisher;
 
     @Autowired
     private BidsTreeSemaphore bidsTreeSemaphore;
+
+    @Value("${storage.file-system.bids-data}")
+    private String bidsStorageDir;
 
     private final HttpServletRequest request;
 
@@ -90,7 +94,7 @@ public class BidsApiController implements BidsApi {
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
             @Parameter(description = "name of the study", required = true) @PathVariable("studyName") String studyName) throws IOException {
         try {
-            bidsService.exportAsBids(studyId, studyName);
+            bidsService.exportAsBids(studyId);
         } catch (BidsTreeLockedException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
@@ -100,7 +104,7 @@ public class BidsApiController implements BidsApi {
     public ResponseEntity<BidsElement> refreshBIDSByStudyId(
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
             @Parameter(description = "name of the study", required = true) @PathVariable("studyName") String studyName) throws RestServiceException, IOException {
-        this.bidsService.deleteBidsFolder(studyId, studyName);
+        this.bidsService.deleteBidsFolder(studyId);
         return this.getBIDSStructureByStudyId(studyId);
     }
 
@@ -110,8 +114,8 @@ public class BidsApiController implements BidsApi {
             @Parameter(description = "file path") @Valid @RequestParam(value = "filePath", required = true) String filePath,
             HttpServletResponse response) throws RestServiceException, IOException {
         // Check filePath too
-        // /var/datasets-data/bids-data/stud-1_NATIVE
-        if (!filePath.startsWith("/var/datasets-data/bids-data/stud-" + studyId)) {
+        // /var/bids-data/study-1_NATIVE
+        if (!filePath.startsWith(bidsStorageDir + "/study-" + studyId)) {
             response.sendError(HttpStatus.UNAUTHORIZED.value());
             return;
         }
@@ -149,7 +153,7 @@ public class BidsApiController implements BidsApi {
         String contentType = request.getServletContext().getMimeType(zipFile.getAbsolutePath());
 
         try (InputStream is = new FileInputStream(zipFile);) {
-            response.setHeader("Content-Disposition", "attachment;filename = " + zipFile.getName());
+            response.setHeader("Content-Disposition", "attachment;filename=\"" + zipFile.getName() + "\"");
             response.setContentType(contentType);
             response.setContentLengthLong(zipFile.length());
             org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
@@ -173,9 +177,8 @@ public class BidsApiController implements BidsApi {
     public ResponseEntity<BidsElement> getBIDSStructureByStudyId(
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId)
             throws RestServiceException, IOException {
-
         BidsElement studyBidsElement;
-        Study study = studyService.findById(studyId);
+        Study study = studyRepository.findById(studyId).orElse(null);
         if (study != null) {
             boolean unlocked = bidsTreeSemaphore.awaitUnlock(studyId, 30, java.util.concurrent.TimeUnit.SECONDS);
             if (!unlocked) { // still locked after timeout
@@ -184,7 +187,7 @@ public class BidsApiController implements BidsApi {
             } else { // now unlocked
                 try {
                     // try to get the BIDS structure
-                    studyBidsElement = bidsDeserializer.deserialize(bidsService.exportAsBids(studyId, study.getName()));
+                    studyBidsElement = bidsDeserializer.deserialize(bidsService.exportAsBids(studyId));
                     return new ResponseEntity<>(studyBidsElement, HttpStatus.OK);
                 } catch (BidsTreeLockedException e) {
                     // if, by any bad luck, it has been locked between those lines by the same user requesting a refresh, throw exception
@@ -204,14 +207,12 @@ public class BidsApiController implements BidsApi {
             @Parameter(description = "Id of the study", required = true) @PathVariable("studyId") Long studyId,
             @Parameter(description = "file path") @Valid @RequestParam(value = "filePath", required = true) String filePath) throws RestServiceException, IOException {
 
-        if (!filePath.startsWith("/var/datasets-data/bids-data/stud-" + studyId)) {
+        if (!filePath.startsWith(bidsStorageDir)) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
-        // Ensure BIDS tree is exported
-        Study study = studyService.findById(studyId);
         try {
-            bidsService.exportAsBids(studyId, study.getName()); // will not recreate if already existing
+            bidsService.exportAsBids(studyId); // will not recreate if already existing
         } catch (BidsTreeLockedException e) {
             throw new RestServiceException(
                     new ErrorModel(HttpStatus.CONFLICT.value(), "The BIDS tree is currently reconstructing, try again later", null));
@@ -257,4 +258,5 @@ public class BidsApiController implements BidsApi {
             zos.finish();
         }
     }
+
 }

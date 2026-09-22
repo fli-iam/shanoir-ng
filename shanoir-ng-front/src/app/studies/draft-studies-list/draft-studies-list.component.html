@@ -14,36 +14,38 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <h2>Draft Studies Awaiting Approval</h2>
 
-<form *ngFor="let draftStudy of draftStudies; let i = index">
-    <ul>
-        <li>
-            <label i18n="draft study request|user label@@user">User</label>
-            <span class="right-col" *ngIf="draftStudy?.studyUserList?.length">
-                <a [routerLink]="['/user/details', draftStudy.studyUserList[0].userId]">
-                    {{ draftStudy.studyUserList[0].userName }}
-                </a>
-            </span>
-        </li>
-        <li>
-            <label i18n="draft study request|study label@@study">Study</label>
-            <span class="right-col">
-                <a [routerLink]="['/study/details/', draftStudy.id]">
-                    {{draftStudy.name}}
-                </a>
-            </span>
-        </li>
-        <li>
-            <label i18n="draft study request|study label@@study">Motivation</label>
-            <span class="right-col">
-                I would like this study to be approved.
-            </span>
-        </li>
-    </ul>
-    <button type="button" (click)="decide(i)" class="accept right-icon">
-        Accept
-        <i class="fa-solid fa-thumbs-up"></i>
-    </button>
-</form>
-<p *ngIf="!(draftStudies?.length > 0)">
-    No pending draft studies.
-</p>
+@for (draftStudy of draftStudies; track draftStudy; let i = $index) {
+    <form>
+        <ul>
+            <li>
+                <label i18n="draft study request|user label@@user">User</label>
+                @if (draftStudy?.studyUserList?.length) {
+                    <span class="right-col">
+                        <a [routerLink]="['/user/details', draftStudy.studyUserList[0].userId]">
+                            {{ draftStudy.studyUserList[0].userName }}
+                        </a>
+                    </span>
+                }
+            </li>
+            <li>
+                <label i18n="draft study request|study label@@study">Study</label>
+                <span class="right-col">
+                    <a [routerLink]="['/study/details/', draftStudy.id]">
+                        {{ draftStudy.name }}
+                    </a>
+                </span>
+            </li>
+            <li>
+                <label i18n="draft study request|study label@@study">Motivation</label>
+                <span class="right-col">I would like this study to be approved.</span>
+            </li>
+        </ul>
+        <button type="button" (click)="decide(i)" class="accept right-icon">
+            Accept
+            <i class="fa-solid fa-thumbs-up"></i>
+        </button>
+    </form>
+}
+@if (!(draftStudies?.length > 0)) {
+    <p>No pending draft studies.</p>
+}

@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, Input, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 
 import { Mode } from '../../../shared/components/entity/entity.component.abstract';
 import { TableComponent } from '../../../shared/components/table/table.component';
@@ -22,10 +22,12 @@ import { FilterablePageable, Page } from '../../../shared/components/table/pagea
 import{ Channel , EegDataset }from '../eeg/dataset.eeg.model';
 import {UnitOfMeasure} from "../../../enum/unitofmeasure.enum";
 
+
 @Component({
     selector: 'eeg-dataset-details',
     templateUrl: 'dataset.eeg.component.html',
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager,
+    imports: [TableComponent]
 })
 
 export class EegDatasetComponent implements OnInit  {

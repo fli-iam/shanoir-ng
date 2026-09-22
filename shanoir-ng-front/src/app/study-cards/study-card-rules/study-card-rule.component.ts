@@ -12,32 +12,35 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import {
-    Component,
-    ElementRef,
-    EventEmitter,
-    HostListener,
-    Input,
-    OnChanges,
-    Output,
-    QueryList,
-    SimpleChanges,
-    ViewChildren,
+  Component,
+  ElementRef,
+  EventEmitter,
+  HostListener,
+  Input,
+  OnChanges,
+  Output,
+  QueryList,
+  SimpleChanges,
+  ViewChildren,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
 import { Mode } from '../../shared/components/entity/entity.component.abstract';
 import { Option } from '../../shared/select/select.component';
 import { SuperPromise } from '../../utils/super-promise';
-import { StudyCardAssignment, StudyCardCondition, StudyCardRule } from '../shared/study-card.model';
+import { MetadataFieldScope, StudyCardAssignment, StudyCardCondition, StudyCardRule } from '../shared/study-card.model';
 
 import { ShanoirMetadataField, StudyCardActionComponent } from './action/action.component';
+import { StudyCardConditionComponent } from './condition/condition.component';
 
 
 @Component({
     selector: 'study-card-rule',
     templateUrl: 'study-card-rule.component.html',
     styleUrls: ['study-card-rule.component.css'],
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager,
+    imports: [StudyCardConditionComponent, StudyCardActionComponent]
 })
 export class StudyCardRuleComponent implements OnChanges {
 
@@ -56,7 +59,7 @@ export class StudyCardRuleComponent implements OnChanges {
     touched: boolean = false;
     assignmentFieldOptions: Option<string>[];
     conditionFieldOptions: Option<string>[];
-    @Input() addSubForm: (subForm: FormGroup) => FormGroup;
+    @Input() addSubForm: (subForm: FormGroup, previousForm?: FormGroup) => FormGroup;
 
     constructor(public elementRef: ElementRef) { }
 
@@ -88,8 +91,18 @@ export class StudyCardRuleComponent implements OnChanges {
         }
     }
 
-    addNewCondition() {
-        const cond = new StudyCardCondition('StudyCardDICOMConditionOnDatasets');
+    addNewCondition(metadataFieldScope: MetadataFieldScope) {
+        let cond: StudyCardCondition;
+        switch (metadataFieldScope) {
+            case 'Dataset':
+                cond = new StudyCardCondition('DatasetDICOMConditionOnDataset');
+                break;
+            case 'DatasetAcquisition':
+                cond = new StudyCardCondition('AcqMetadataCondOnAcq');
+                break;
+            default:
+                throw new Error('Unsupported metadata field scope: ' + metadataFieldScope);
+        }
         cond.values = [null];
         this.rule.conditions.push(cond);
         this.userChange.emit(this.rule);

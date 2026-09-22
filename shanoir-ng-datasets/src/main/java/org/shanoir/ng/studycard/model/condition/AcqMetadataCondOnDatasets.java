@@ -14,9 +14,8 @@
 
 package org.shanoir.ng.studycard.model.condition;
 
-import com.fasterxml.jackson.annotation.JsonTypeName;
-import jakarta.persistence.DiscriminatorValue;
-import jakarta.persistence.Entity;
+import java.util.List;
+
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.shared.exception.CheckedIllegalClassException;
 import org.shanoir.ng.studycard.model.field.DatasetMetadataField;
@@ -24,7 +23,10 @@ import org.shanoir.ng.studycard.model.field.MetadataFieldInterface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonTypeName;
+
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
 
 /**
  * Condition valid for the given DatasetAcquisition if every of it's Datasets metadata fulfill the condition
@@ -46,29 +48,38 @@ public class AcqMetadataCondOnDatasets extends StudyCardMetadataCondition<Datase
         shanoirField = field.getId();
     }
 
-    public boolean fulfilled(List<Dataset> datasets) {
+    public boolean fulfilled(List<Dataset> datasets, StringBuffer report) {
         if (datasets == null) throw new IllegalArgumentException("datasets can not be null");
         DatasetMetadataField field = this.getShanoirField();
         if (field == null) throw new IllegalArgumentException("field can not be null");
         int nbOk = 0;
         for (Dataset dataset : datasets) {
-            String valueFromDb;
-            try {
-                valueFromDb = field.get(dataset);
-            } catch (CheckedIllegalClassException e) {
-                valueFromDb = null;
-            }
-            if (valueFromDb != null) {
-                // get all possible values, that can fulfill the condition
-                for (String value : this.getValues()) {
-                    if (textualCompare(this.getOperation(), valueFromDb, value)) {
-                        LOG.info("condition fulfilled: ds.name = " + valueFromDb + ", value=" + value);
-                        nbOk++;
-                        break;
-                    }
+            boolean alreadyFulfilled = getCardinality() >= 1 && nbOk >= getCardinality();
+            if (!alreadyFulfilled) {
+                boolean fulfilled = fulfilled(field, dataset);
+                if (fulfilled) {
+                    nbOk++;
                 }
             }
         }
-        return cardinalityComplies(nbOk, datasets.size());
+        boolean complies = cardinalityComplies(nbOk, datasets.size());
+        // nbUnknown is 0 on shanoir metadata fields as fulfilled method returns true or false, never null
+        writeConditionsReport(report, complies, nbOk, 0, datasets.size());
+        return complies;
     }
+
+    private boolean fulfilled(DatasetMetadataField field, Dataset dataset) {
+        String valueFromDb;
+        try {
+            valueFromDb = field.get(dataset);
+        } catch (CheckedIllegalClassException e) {
+            valueFromDb = null;
+        }
+        if (valueFromDb != null && textualCompare(this.getOperation(), valueFromDb)) {
+            LOG.info("condition fulfilled: ds.name = " + valueFromDb);
+            return true;
+        }
+        return false;
+    }
+
 }

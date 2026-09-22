@@ -12,18 +12,20 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 
 import { BreadcrumbsService } from '../breadcrumbs/breadcrumbs.service';
 import { StudyService } from '../studies/shared/study.service';
 
 import { DataUserAgreement } from './shared/dua.model';
+import { DUASigningComponent } from './dua-signing/dua-signing.component';
 
 @Component({
     selector: 'dua',
     templateUrl: 'dua.component.html',
     styleUrls: ['dua.component.css'],
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager,
+    imports: [DUASigningComponent]
 })
 
 export class DUAComponent {

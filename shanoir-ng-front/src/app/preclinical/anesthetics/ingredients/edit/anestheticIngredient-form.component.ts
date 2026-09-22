@@ -12,11 +12,11 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, Input, Output, EventEmitter, OnChanges } from '@angular/core';
-import { UntypedFormGroup,  Validators } from '@angular/forms';
+import { Component, Input, Output, EventEmitter, OnChanges, ChangeDetectionStrategy } from '@angular/core';
+import { UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
 
 import { AnestheticIngredient } from '../shared/anestheticIngredient.model';
 import { AnestheticIngredientService } from '../shared/anestheticIngredient.service';
@@ -24,16 +24,16 @@ import { Anesthetic }   from '../../anesthetic/shared/anesthetic.model';
 import { ReferenceService } from '../../../reference/shared/reference.service';
 import { Reference }    from '../../../reference/shared/reference.model';
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
-import { slideDown } from '../../../../shared/animations/animations';
 import * as PreclinicalUtils from '../../../utils/preclinical.utils';
 import { Step } from '../../../../breadcrumbs/breadcrumbs.service';
+
 
 
 @Component({
     selector: 'anesthetic-ingredient-form',
     templateUrl: 'anestheticIngredient-form.component.html',
-    animations: [slideDown],
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager,
+    imports: [FormsModule, ReactiveFormsModule]
 })
 export class AnestheticIngredientFormComponent extends EntityComponent<AnestheticIngredient> implements OnChanges {
 
@@ -149,7 +149,7 @@ export class AnestheticIngredientFormComponent extends EntityComponent<Anestheti
             this.anesthetic.ingredients = [];
         }
         this.anesthetic.ingredients.push(this.ingredient);
-        if (this.event.observers.length > 0) {
+        if (this.event.observed) {
             this.event.emit(this.ingredient);
         }
         this.toggleForm = false;
@@ -159,7 +159,7 @@ export class AnestheticIngredientFormComponent extends EntityComponent<Anestheti
     updateIngredient(): void {
         this.ingredientsService.updateAnestheticIngredient(this.anesthetic.id, this.ingredient)
             .subscribe(() =>{
-                if (this.event.observers.length > 0) {
+                if (this.event.observed) {
                     this.event.emit(this.ingredient);
                 }
             });

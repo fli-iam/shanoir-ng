@@ -16,19 +16,20 @@ import { HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { Task, TaskState } from 'src/app/async-tasks/task.model';
+import { Task, TaskState } from '@app/async-tasks/task.model';
 
-import * as AppUtils from '../../utils/app.utils';
 import { NotificationsService } from '../notifications/notifications.service';
 import { SessionService } from '../services/session.service';
 
+import { DownloadUtilsService } from './download.utils.service';
 
 @Injectable()
 export class SingleDownloadService {
 
     constructor(
         private notificationService: NotificationsService,
-        private sessionService: SessionService) {
+        private sessionService: SessionService,
+        private downloadUtilsService: DownloadUtilsService) {
     }
 
     /**
@@ -46,7 +47,7 @@ export class SingleDownloadService {
      * @returns 
      */
     downloadSingleFile(url: string, params?: HttpParams, state?: TaskState): Observable<TaskState> {
-        const obs: Observable<TaskState> = AppUtils.downloadWithStatusGET(url, params, state);
+        const obs: Observable<TaskState> = this.downloadUtilsService.downloadWithStatusGET(url, params, state);
 
         const task: Task = new Task();
         task.id = Date.now();

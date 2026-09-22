@@ -11,8 +11,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, forwardRef, Input, HostListener, Output, EventEmitter } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { Component, forwardRef, Input, HostListener, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
 
 
 @Component({
@@ -26,7 +26,8 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
             multi: true,
         }
     ],
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager,
+    imports: [FormsModule]
 })
 
 export class AutoAdjustInputComponent implements ControlValueAccessor {
@@ -55,8 +56,13 @@ export class AutoAdjustInputComponent implements ControlValueAccessor {
         this.disabled = isDisabled;
     }
     
-    @HostListener('focusout', ['$event']) 
-    private onFocusOut() {
+    @HostListener('focusout') 
+    onFocusOut() {
         this.onTouch();
+    }
+
+    manualChange(event: Event) {
+        const target = event.target as HTMLInputElement;
+        this.userChange.emit(target.value);
     }
 }

@@ -1,0 +1,104 @@
+<div #formContainer class="content-component detail">
+    @if (form) {
+        <form [formGroup]="executionFilterForm" class="max-content" novalidate [class.disabled]="footerState.loading">
+            <form-footer [state]="footerState" (save)="save()" (edit)="goToEdit()" (delete)="delete()" (dismiss)="goToView()" (back)="goBack()"></form-footer>
+
+            @if (mode === 'view') {
+                <h2 class="header command-zone" i18n="View execution template filter|Title@@executiontemplatefilterDetailViewTitle">
+                    Execution template parameter
+                </h2>
+            }
+            @if (mode === 'edit') {
+                <h2 class="header command-zone" i18n="Edit execution template|Title@@executiontemplatefilterDetailEditTitle">
+                    Edit execution template parameter
+                </h2>
+            }
+            @if (mode === 'create') {
+                <h2 class="header command-zone" i18n="Create execution template|Title@@executiontemplatefilterDetailCreateTitle">
+                    Create execution template parameter
+                </h2>
+            }
+
+            <fieldset>
+                <ol>
+                    <li>
+                        <label i18n="Execution template detail|TemplateId label@@centerDetailName">Template</label>
+                        <span class="right-col">{{ templateName }}</span>
+                    </li>
+                    <li>
+                        <label>
+                            Field name
+                            <tool-tip>
+                                Name of the field to compare. The format is [subject, examination, acquisition].[fieldName]. Example : acquisition.name. Only
+                                strings, numbers and boolean can be filtered
+                            </tool-tip>
+                        </label>
+                        <span class="right-col">
+                            @if (mode === 'view') {
+                                {{ executionTemplateFilter.fieldName }}
+                            } @else {
+                                <input type="text" id="fieldName" formControlName="fieldName" />
+                                @if (hasError('fieldName', ['required'])) {
+                                    <label class="form-validation-alert" i18n>Field name is required.</label>
+                                }
+                                @if (hasError('fieldName', ['fieldNameFormatControl'])) {
+                                    <label class="form-validation-alert" i18n>Field name format has to be "object.fieldName".</label>
+                                }
+                            }
+                        </span>
+                    </li>
+                    <li>
+                        <label>
+                            Regex to compare
+                            <tool-tip>
+                                Regex for comparing the value of the field above. Format example : 'T2%SAG%' allows the selection of every field starting with
+                                T2 and containing SAG.
+                            </tool-tip>
+                        </label>
+                        <span class="right-col">
+                            @if (mode === 'view') {
+                                {{ executionTemplateFilter.comparedRegex }}
+                            } @else {
+                                <input type="text" id="comparedRegex" formControlName="comparedRegex" />
+                                @if (hasError('comparedRegex', ['required'])) {
+                                    <label class="form-validation-alert" i18n>Compared regex is required.</label>
+                                }
+                                @if (hasError('comparedRegex', ['comparedRegexFormatControl'])) {
+                                    <label class="form-validation-alert" i18n>Compared regex has to be composed only with strings and '%'.</label>
+                                }
+                            }
+                        </span>
+                    </li>
+                    <li>
+                        <label>
+                            Excluded
+                            <tool-tip>Negate the comparison</tool-tip>
+                        </label>
+                        <span class="right-col">
+                            <input type="checkbox" id="excluded" formControlName="excluded" [ngClass]="{ 'disabled-radio': mode === 'view' }" />
+                        </span>
+                    </li>
+                    <li>
+                        <label>
+                            Identifier
+                            <tool-tip>Used for shaping complex filter logic.</tool-tip>
+                        </label>
+                        <span class="right-col">
+                            @if (mode === 'view') {
+                                {{ executionTemplateFilter.identifier }}
+                            } @else {
+                                <input type="number" id="identifier" min="1" formControlName="identifier" />
+                                @if (hasError('identifier', ['required'])) {
+                                    <label class="form-validation-alert" i18n>Identifier is required.</label>
+                                }
+                                @if (form.get('identifier')?.hasError('uniqueInTemplateControl')) {
+                                    <label class="form-validation-alert" i18n>Priority must be unique</label>
+                                }
+                            }
+                        </span>
+                    </li>
+                </ol>
+            </fieldset>
+        </form>
+    }
+</div>

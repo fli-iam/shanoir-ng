@@ -32,6 +32,7 @@ import { DatasetListComponent } from './datasets/dataset-list/dataset-list.compo
 import { DatasetProcessingListComponent } from './datasets/dataset-processing-list/dataset-processing-list.component';
 import { DatasetProcessingComponent } from './datasets/dataset-processing/dataset-processing.component';
 import { DatasetComponent } from './datasets/dataset/dataset.component';
+import { FilesComponent } from './files/files.component';
 import { MetadataComponent } from './datasets/dataset/metadata/metadata.component';
 import { DownloadStatisticsComponent } from './datasets/download-statistics/download-statistics.component';
 import { DUAAssistantComponent } from './dua/dua-assistant.component';
@@ -75,6 +76,7 @@ import { ReferencesListComponent } from './preclinical/reference/list/reference-
 import { SubjectTherapyComponent } from './preclinical/therapies/subjectTherapy/edit/subject-therapy.component';
 import { TherapyFormComponent } from './preclinical/therapies/therapy/edit/therapy-form.component';
 import { TherapiesListComponent } from './preclinical/therapies/therapy/list/therapy-list.component';
+import { SendEmailComponent } from './users/mass-email/send-email.component';
 import { AuthAdminGuard } from './shared/roles/auth-admin-guard';
 import { AuthAdminOrExpertGuard } from './shared/roles/auth-admin-or-expert-guard';
 import { CanImportFromPACSGuard } from './shared/roles/auth-can-import-from-PACS-guard';
@@ -102,6 +104,12 @@ import { ExecutionMonitoringsComponent } from './vip/execution-monitorings/execu
 import { ExecutionComponent } from './vip/execution/execution.component';
 import { PipelinesComponent } from './vip/pipelines/pipelines.component';
 import { WelcomeComponent } from "./welcome/welcome.component";
+import {ExecutionTemplateListComponent} from "./vip/execution-template/execution-template-list.component";
+import {
+    ExecutionTemplateFilterListComponent
+} from "./vip/execution-template/filter/execution-template-filter-list.component";
+import {ExecutionTemplateComponent} from "./vip/execution-template/execution-template.component";
+import {ExecutionTemplateFilterComponent} from "./vip/execution-template/filter/execution-template-filter.component";
 
 const routes: Routes = [
     {
@@ -135,8 +143,17 @@ const routes: Routes = [
         path: 'solr-search',
         component: SolrSearchComponent
     }, {
+        path: 'files',
+        component: FilesComponent
+    }, {
         path: 'execution-monitoring',
         component: ExecutionMonitoringsComponent
+    }, {
+        path: 'execution-template-list',
+        component: ExecutionTemplateListComponent
+    }, {
+        path: 'execution-template-filter-list',
+        component: ExecutionTemplateFilterListComponent
     }, {
         path: 'pipelines',
         component: PipelinesComponent
@@ -232,6 +249,10 @@ const routes: Routes = [
     },{
         path: 'download-statistics',
         component: DownloadStatisticsComponent
+    },{
+        path: 'send-email',
+        component: SendEmailComponent,
+        canActivate: [AuthAdminGuard]
     },{
         path: 'study',
         redirectTo: 'study/list',
@@ -867,6 +888,36 @@ const routes: Routes = [
     },{
         path: 'dev',
         component: TestComponent
+    },
+    {
+        path: 'execution-template/create',
+        component: ExecutionTemplateComponent,
+        data: { mode: 'create' },
+    },
+    {
+        path: 'execution-template/edit/:id',
+        component: ExecutionTemplateComponent,
+        data: { mode: 'edit' },
+    },
+    {
+        path: 'execution-template/details/:id',
+        component: ExecutionTemplateComponent,
+        data: { mode: 'view' },
+    },
+    {
+        path: 'execution-template-filter/create',
+        component: ExecutionTemplateFilterComponent,
+        data: { mode: 'create' },
+    },
+    {
+        path: 'execution-template-filter/edit/:id',
+        component: ExecutionTemplateFilterComponent,
+        data: { mode: 'edit' },
+    },
+    {
+        path: 'execution-template-filter/details/:id',
+        component: ExecutionTemplateFilterComponent,
+        data: { mode: 'view' },
     }
 ];
 

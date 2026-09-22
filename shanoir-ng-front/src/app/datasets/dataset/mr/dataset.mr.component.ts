@@ -12,19 +12,21 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, Input, OnInit } from '@angular/core';
-import { UntypedFormGroup } from '@angular/forms';
+import { Component, Input, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { UntypedFormGroup, FormsModule } from '@angular/forms';
 
 import { Mode } from '../../../shared/components/entity/entity.component.abstract';
-import { Option } from '../../../shared/select/select.component';
+import { Option, SelectBoxComponent } from '../../../shared/select/select.component';
 import {UnitOfMeasure} from "../../../enum/unitofmeasure.enum";
 
 import { MrDataset, MrDatasetMetadata, MrDatasetNature } from './dataset.mr.model';
 
+
 @Component({
     selector: 'mr-dataset-details',
     templateUrl: 'dataset.mr.component.html',
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager,
+    imports: [SelectBoxComponent, FormsModule]
 })
 
 export class MrDatasetComponent implements OnInit{

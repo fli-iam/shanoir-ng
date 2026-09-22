@@ -81,6 +81,8 @@ public class ShanoirSolrQuery {
 
     private Collection<String> username;
 
+    private Collection<String> qualityTag;
+
     private Map<String, FacetPageable> facetPaging;
 
     /**
@@ -376,5 +378,13 @@ public class ShanoirSolrQuery {
 
     public void setDataReuseAgreement(Collection<Boolean> dataReuseAgreement) {
         this.dataReuseAgreement = dataReuseAgreement;
+    }
+
+    public Collection<String> getQualityTag() {
+        return qualityTag;
+    }
+
+    public void setQualitytag(Collection<String> qualityTag) {
+        this.qualityTag = qualityTag;
     }
 }

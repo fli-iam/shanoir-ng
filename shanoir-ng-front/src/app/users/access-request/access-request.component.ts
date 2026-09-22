@@ -2,37 +2,38 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component } from '@angular/core';
-import { UntypedFormGroup } from '@angular/forms';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { FormsModule, ReactiveFormsModule, UntypedFormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import { IdName } from 'src/app/shared/models/id-name.model';
+import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
+import { DatepickerComponent } from '@app/shared/date-picker/date-picker.component';
+import { IdName } from '@app/shared/models/id-name.model';
 
-import { UserService } from '../shared/user.service'
-import { Option } from '../../shared/select/select.component';
-import { StudyService } from '../../studies/shared/study.service';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
+import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
+import { Option, SelectBoxComponent } from '../../shared/select/select.component';
+import { StudyService } from '../../studies/shared/study.service';
 
-import { AccessRequest } from './access-request.model'
+import { AccessRequest } from './access-request.model';
 import { AccessRequestService } from './access-request.service';
-
 
 @Component({
     selector: 'access-request',
     templateUrl: 'access-request.component.html',
     styleUrls: ['access-request.component.css'],
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager,
+    imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, SelectBoxComponent, DatepickerComponent]
 })
 
 export class AccessRequestComponent extends EntityComponent<AccessRequest> {
@@ -48,7 +49,6 @@ export class AccessRequestComponent extends EntityComponent<AccessRequest> {
 
     constructor(
             protected activatedRoute: ActivatedRoute,
-            public userService: UserService,
             public studyService: StudyService,
             public accessRequestService: AccessRequestService) {
                 super(activatedRoute);
@@ -94,8 +94,8 @@ export class AccessRequestComponent extends EntityComponent<AccessRequest> {
                     this.router.navigate(['study/details', studyId]);
                 });
             } else {
-                this.userService.getAccessRequests().then(accessRequests => {
-                    if (accessRequests.find(ar => ar.studyId == studyId)) {
+                this.accessRequestService.getAccessRequests().then(accessRequests => {
+                    if (accessRequests != null && accessRequests.find(ar => ar.studyId == studyId)) {
                         this.confirmDialogService.inform('Access request pending', 'You already have asked an access request for this study, wait for the administrator to confirm your access.').then(() => {
                             this.router.navigate(['study/list']);
                         });
@@ -109,7 +109,8 @@ export class AccessRequestComponent extends EntityComponent<AccessRequest> {
         return this.formBuilder.group({
             'motivation': [this.accessRequest.motivation, []],
             'studyId': [this.accessRequest.studyId, []],
-            'studyName': [this.accessRequest.studyName, []]
+            'studyName': [this.accessRequest.studyName, []],
+            'expirationDate': [this.accessRequest.expirationDate]
         });
     }
 
@@ -124,19 +125,19 @@ export class AccessRequestComponent extends EntityComponent<AccessRequest> {
     }
 
     acceptRequest() {
-        this.accessRequestService.resolveRequest(this.accessRequest.id, true)
+        this.accessRequestService.resolveRequest(this.accessRequest.id, true, this.accessRequest.expirationDate)
             .then(() => {
-                this.userService.decreaseAccessRequests();
+                this.accessRequestService.decreaseAccessRequests();
                 this.router.navigate(['/study/details/' + this.accessRequest.studyId])
             }).then(() => {
                 window.location.hash="members";
             }
         );
     }
-    
+
     refuseRequest() {
-        this.accessRequestService.resolveRequest(this.accessRequest.id, false).then(() => {
-            this.userService.decreaseAccessRequests();
+        this.accessRequestService.resolveRequest(this.accessRequest.id, false, this.accessRequest.expirationDate).then(() => {
+            this.accessRequestService.decreaseAccessRequests();
             this.goBack();
         });
     }
@@ -144,11 +145,11 @@ export class AccessRequestComponent extends EntityComponent<AccessRequest> {
     public async hasDeleteRight(): Promise<boolean> {
         return false;
     }
-    
+
     public async hasEditRight(): Promise<boolean> {
         return false;
     }
-    
+
     save(): Promise<AccessRequest> {
         return super.save().then(ar => {
             return ar;

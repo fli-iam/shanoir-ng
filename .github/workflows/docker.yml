@@ -1,12 +1,12 @@
 # Shanoir NG - Import, manage and share neuroimaging data
 # Copyright (C) 2009-2019 Inria - https://www.inria.fr/
 # Contact us on https://project.inria.fr/shanoir/
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -63,17 +63,30 @@ jobs:
     timeout-minutes: 15
     steps:
 
+      # mitigation for "no space left on device" errors: the runner's default
+      # ~14GB of free disk space is not enough to build all the shanoir-ng
+      # docker images
+      - name: Free disk space
+        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # v1.3.1
+        with:
+          # not removed by default: the maven build below does not rely on
+          # the runner's preinstalled tool cache (Node, Python, Go, ...)
+          tool-cache: true
+
       - name: Check out the repo
         uses: actions/checkout@v4
         with:
           repository: ${{ env.PRODUCTION && github.repository || 'fli-iam/shanoir-ng' }}
           ref: ${{ env.IMAGE_TAG }}
 
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
+      - name: Set up JDK 25
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: 21
+          java-version: 25
+
+      - name: Create directory /shanoir-ng-logs
+        run: sudo mkdir -m777 /var/log/shanoir-ng-logs
 
       # maven cache only enabled on development builds
       - name: Set up Maven cache
@@ -125,14 +138,21 @@ jobs:
           # The image is exported in the OCI format ('image-manifest=true')
           # to avoid a "failed to solve: not found" error when pushing to the
           # github container registry.
+          is_main_branch = (main_branch_sha == env['IMAGE_TAG'] == env['SHA'])
           enable_cache_from = not env['PRODUCTION'] and not env['NO_CACHE']
-          enable_cache_to   = not env['PRODUCTION'] and (
-            main_branch_sha == env['IMAGE_TAG'] == env['SHA'])
+          enable_cache_to   = not env['PRODUCTION'] and is_main_branch
           print(f"{enable_cache_from = }\n{enable_cache_to = }\n")
 
           def cache_arg(enabled: bool, image: str, extra=""):
             return [f"type=registry,image-manifest=true,ref={env['DOCKER_REPOSITORY']}/{image}:cache{extra}"
                    ] if enabled else []
+
+          # - use $IMAGE_TAG for resulting docker image tag
+          # - add a second tag 'develop' when building the main branch
+          def tags(image: str):
+              return [f"{env['DOCKER_REPOSITORY']}/{image}:{t}" for t in (
+                        (env['IMAGE_TAG'], MAIN_BRANCH) if is_main_branch else
+                        (env['IMAGE_TAG'],))]
   
           # extract the list of images to be built from the docker-compose config
           images = json.loads(subprocess.check_output(
@@ -146,7 +166,7 @@ jobs:
               image: {
                 "cache-from": cache_arg(enable_cache_from, image),
                 "cache-to":   cache_arg(enable_cache_to,   image, ",mode=max"),
-                "tags": [f"{env['DOCKER_REPOSITORY']}/{image}:{env['IMAGE_TAG']}"],
+                "tags": tags(image),
                 "labels": {
                   "org.opencontainers.image.url":      env['GIT_REPO_URL'],
                   "org.opencontainers.image.source":   env['GIT_REPO_URL'],
@@ -167,3 +187,90 @@ jobs:
             docker-bake.json
           provenance: mode=min  # production builds fail in the default mode (max)
           push: true
+
+  #
+  # Native image creation for all microservices (start with users), built via
+  # spring-boot-maven-plugin's build-image goal (Cloud Native Buildpacks /
+  # Paketo), instead of a Dockerfile + buildx bake like build_images above.
+  #
+  # GitHub-hosted ubuntu-latest runners already have a Docker daemon
+  # available on the default socket, which is all build-image needs -
+  # no docker-in-docker or buildx setup required here.
+  build_native_images:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    # native-image compilation is heavier/slower (~12 min); kept separate
+    # from build_images' 15-minute timeout since it's a different job
+    timeout-minutes: 25
+    steps:
+
+      - name: Check out the repo
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.PRODUCTION && github.repository || 'fli-iam/shanoir-ng' }}
+          ref: ${{ env.IMAGE_TAG }}
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 25
+
+      - name: Create directory /shanoir-ng-logs
+        run: sudo mkdir -m777 /var/log/shanoir-ng-logs
+      
+      # maven cache only enabled on development builds
+      - name: Set up Maven cache
+        uses: actions/cache@v4
+        if: "${{ ! env.PRODUCTION }}"
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-maven-
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.DOCKER_REPOSITORY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      # Build dependencies of users-native below to be found
+      - name: Maven build
+        run: mvn -f ./shanoir-ng-parent/pom.xml install -DskipTests
+        
+      # Produces a local image "shanoir-ng-users-native:latest" on the
+      # runner's own docker daemon, per the plugin's
+      # <image><name>${project.name}-native</name></image> configuration.
+      - name: Build users-native image (buildpacks)
+        run: >
+          mvn -f ./shanoir-ng-users/pom.xml -Pnative spring-boot:build-image -DskipTests
+
+      - name: Tag and push users-native image
+        run: |
+          set -e
+
+          # Same "is this the main branch" check as build_images, so the
+          # native image gets a "develop" tag under the same conditions.
+          MAIN_BRANCH_SHA=$(curl -s \
+            -H "Authorization: Bearer ${{ github.token }}" \
+            "${{ github.api_url }}/repos/fli-iam/shanoir-ng/branches/develop" \
+            | jq -r '.commit.sha // empty')
+
+          IS_MAIN_BRANCH=false
+          if [ -n "$MAIN_BRANCH_SHA" ] && [ "$MAIN_BRANCH_SHA" = "$IMAGE_TAG" ] && [ "$IMAGE_TAG" = "$SHA" ]; then
+            IS_MAIN_BRANCH=true
+          fi
+
+          LOCAL_IMAGE="shanoir-ng-users-native:latest"
+          REMOTE_BASE="${DOCKER_REPOSITORY}/users-native"
+
+          docker tag "$LOCAL_IMAGE" "${REMOTE_BASE}:${IMAGE_TAG}"
+          docker push "${REMOTE_BASE}:${IMAGE_TAG}"
+
+          if [ "$IS_MAIN_BRANCH" = "true" ]; then
+            docker tag "$LOCAL_IMAGE" "${REMOTE_BASE}:develop"
+            docker push "${REMOTE_BASE}:develop"
+          fi

@@ -43,7 +43,7 @@ import org.springframework.data.repository.query.Param;
  */
 public interface SubjectRepository extends JpaRepository<Subject, Long>, SubjectRepositoryCustom {
 
-    @EntityGraph(attributePaths = {"subjectStudyList.study.name", "subjectStudyList.study.tags", "subjectStudyList.subjectStudyTags", "subjectStudyList.study.studyUserList", "pseudonymusHashValues"})
+    @EntityGraph(attributePaths = {"subjectStudyList.study.name", "subjectStudyList.study.tags", "subjectStudyList.subjectStudyTags", "subjectStudyList.study.studyUserList", "pseudonymusHashValues", "study.id", "study.studyUserList", "study.studyUserList.studyUserRights"})
     Optional<Subject> findById(Long id);
 
     @EntityGraph(attributePaths = {"subjectStudyList.study.name", "subjectStudyList.study.studyUserList"})

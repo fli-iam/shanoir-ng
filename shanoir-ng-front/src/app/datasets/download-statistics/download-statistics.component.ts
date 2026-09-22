@@ -12,16 +12,18 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { UntypedFormBuilder, UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { DatasetService } from '../shared/dataset.service';
+import { TooltipComponent } from '../../shared/components/tooltip/tooltip.component';
 
 @Component({
     selector: 'download-statistics',
     templateUrl: 'download-statistics.component.html',
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager,
+    imports: [FormsModule, ReactiveFormsModule, TooltipComponent]
 })
 
 export class DownloadStatisticsComponent{

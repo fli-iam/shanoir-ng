@@ -46,16 +46,16 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     | tee /etc/apt/sources.list.d/adoptium.list
 
 FROM base-debian-with-adoptium AS jdk
+RUN mkdir -pv /var/log/shanoir-ng-logs
+RUN chmod 777 /var/log/shanoir-ng-logs
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-    apt-get update -qq && apt-get install -qqy temurin-21-jdk maven bzip2 git
+    apt-get update -qq && apt-get install -qqy temurin-25-jdk maven bzip2 git
 
 FROM base-debian-with-adoptium AS base-microservice
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     apt-get update -qq \
-    && apt-get install -qqy temurin-21-jre ca-certificates-java \
+    && apt-get install -qqy temurin-25-jre ca-certificates-java \
     && update-ca-certificates
-
-RUN mkdir -pv /var/log/shanoir-ng-logs
 
 COPY --link \
     common/entrypoint_common \
@@ -65,6 +65,14 @@ COPY --link \
 ENTRYPOINT ["/bin/entrypoint", "java", "-Djava.security.egd=file:/dev/urandom", \
     "-Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts", \
     "-Djavax.net.ssl.trustStorePassword=changeit"]
+
+FROM base-microservice AS init-cert-and-logs
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    apt-get update -qq && apt-get install -qqy openssl
+COPY --link common/entrypoint_cert_init /usr/bin/
+COPY --link common/entrypoint_common    /usr/bin/
+RUN chmod +x /usr/bin/entrypoint_cert_init /usr/bin/entrypoint_common
+ENTRYPOINT ["/usr/bin/entrypoint_cert_init"]
 
 
 ################ datasets ##################################################
@@ -253,20 +261,19 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
 COPY --link users/shanoir-ng-users.jar shanoir-ng-users.jar
 COPY --link users/entrypoint /usr/bin/
 
-
 ENV	\
 	kc.admin.client.client.id="admin-cli"	\
 	kc.admin.client.realm="master"
 
 # Use the below line for remote debugging
-#CMD ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:9911", "-jar", "/shanoir-ng-users.jar", "--syncAllUsersToKeycloak=true"]
-CMD ["-jar", "/shanoir-ng-users.jar"]
+#CMD ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:9911", "-Dspring.aot.enabled=true", "-jar", "/shanoir-ng-users.jar", "--syncAllUsersToKeycloak=true"]
+CMD ["-Dspring.aot.enabled=true", "-jar", "/shanoir-ng-users.jar"]
 
 
 
 ################ keycloak ##################################################
 
-FROM quay.io/keycloak/keycloak:26.2.5 AS keycloak-base
+FROM quay.io/keycloak/keycloak:26.7.3 AS keycloak-base
 
 # keycloak options (https://www.keycloak.org/server/all-config)
 #
@@ -278,7 +285,7 @@ FROM quay.io/keycloak/keycloak:26.2.5 AS keycloak-base
 # The relevant variables can be listed with: /opt/keycloak/bin/kc.sh show-config
 #
 # All other variables are set in the entrypoint.
-ENV KC_DB="mysql" \
+ENV KC_DB="mariadb" \
     KC_LOG="console,file" \
     KC_HTTP_RELATIVE_PATH="/auth"
 
@@ -287,7 +294,10 @@ ENV KC_DB="mysql" \
 #
 FROM keycloak-base AS keycloak-builder
 
-COPY keycloak/shanoir-ng-keycloak-auth.jar /opt/keycloak/providers
+# note: mtime is overriden to prevent unwanted rebuilds at runtime
+# see: https://www.keycloak.org/server/containers#_known_issues_with_docker
+COPY --chown=keycloak:keycloak --chmod=644 keycloak/shanoir-ng-keycloak-auth.jar /opt/keycloak/providers
+RUN touch -m --date=@1743465600 /opt/keycloak/providers/*
 
 WORKDIR /opt/keycloak
 RUN /opt/keycloak/bin/kc.sh build
@@ -312,7 +322,7 @@ CMD []
 
 ################ nginx #####################################################
 
-FROM ohif/app:v3.11.0 AS nginx-viewer
+FROM ohif/app:v3.12.5 AS nginx-viewer
 
 FROM nginx AS nginx
 
@@ -323,6 +333,8 @@ COPY --link \
     nginx/shanoir.template.conf \
     nginx/shanoir.template.dev.conf \
     nginx/shanoir.template.prod.conf \
+    nginx/shanoir.template.keycloak-full.conf \
+    nginx/shanoir.template.keycloak-limited.conf \
     /etc/nginx/
 
 COPY --link \
@@ -347,26 +359,26 @@ FROM node:lts-alpine3.21 AS front-dev
 
 WORKDIR /app
 
-RUN npm install -g @angular/cli@20.3.7
+RUN npm install -g @angular/cli@21.2.8
 
 
 
 ################ database ##################################################
 
-FROM mysql/mysql-server:5.7 AS database
+FROM mariadb:11.4 AS database
 
 COPY --link --chmod=0755 \
     database/1_create_databases.sh \
     database/2_add_users.sql \
     /docker-entrypoint-initdb.d/
 
-CMD ["mysqld"]
+CMD ["mariadb"]
 
 
 
 ################ database-migrations #######################################
 
-FROM mysql:5.7 AS database-migrations
+FROM mariadb:11.4 AS database-migrations
 
 COPY --link --chmod=0755 database-migrations/shanoir-entrypoint.sh /
 COPY --link database-migrations/db-changes /opt/db-changes
@@ -379,7 +391,7 @@ CMD []
 
 ################ keycloak-database ##################################################
 
-FROM mysql/mysql-server:5.7 AS keycloak-database
+FROM mariadb:11.4 AS keycloak-database
 
 COPY --link --chmod=0755 keycloak-database/1_add_users.sql /docker-entrypoint-initdb.d/
 

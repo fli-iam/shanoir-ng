@@ -11,14 +11,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
-import { AbstractControl, FormGroup, UntypedFormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { Component, ElementRef, OnDestroy, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { AbstractControl, FormGroup, UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { NgClass } from '@angular/common';
 
-import { TaskState } from 'src/app/async-tasks/task.model';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
-import { Selection } from 'src/app/studies/study/tree.service';
+import { TaskState } from '@app/async-tasks/task.model';
+import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
+import { MassDownloadService } from '@app/shared/mass-download/mass-download.service';
+import { Selection } from '@app/studies/study/tree.service';
 
 import { environment } from '../../../environments/environment';
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
@@ -35,11 +36,16 @@ import { StudyService } from '../../studies/shared/study.service';
 import { Subject } from "../../subjects/shared/subject.model";
 import { Examination } from '../shared/examination.model';
 import { ExaminationService } from '../shared/examination.service';
+import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
+import { SelectBoxComponent } from '../../shared/select/select.component';
+import { InstrumentAssessmentComponent } from '../instrument-assessment/instrument-assessment.component';
+import { LocalDateFormatPipe } from '../../shared/localLanguage/localDateFormat.pipe';
 
 @Component({
     selector: 'examination-detail',
     templateUrl: 'examination.component.html',
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager,
+    imports: [FormsModule, ReactiveFormsModule, NgClass, FormFooterComponent, RouterLink, SelectBoxComponent, DatepickerComponent, InstrumentAssessmentComponent, LocalDateFormatPipe]
 })
 
 export class ExaminationComponent extends EntityComponent<Examination> implements OnDestroy {
@@ -76,7 +82,8 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
         protected studyService: StudyService,
         protected studyRightsService: StudyRightsService,
         public breadcrumbsService: BreadcrumbsService,
-        protected downloadService: MassDownloadService
+        protected downloadService: MassDownloadService,
+        private userRightsService: StudyRightsService
     ) {
         super(route);
         this.inImport = this.breadcrumbsService.isImporting();
@@ -218,6 +225,15 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
             .getStudiesNames()
             .then(studies => {
                 this.studies = studies;
+                this.userRightsService.getMyRights().then(rights => {
+                    if (!this.keycloakService.isUserAdmin()) {
+                        // filter studies to only those with import or admin rights
+                        this.studies = this.studies.filter(study => {
+                            const studyRights = rights.get(study.id);
+                            return studyRights && (studyRights.includes(StudyUserRight.CAN_IMPORT) || studyRights.includes(StudyUserRight.CAN_ADMINISTRATE));
+                        });
+                    }
+                });
             });
     }
 

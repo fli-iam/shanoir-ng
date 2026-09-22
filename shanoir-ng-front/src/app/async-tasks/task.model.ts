@@ -105,6 +105,9 @@ export class Task extends Entity {
 
     private buildRoute(): string {
         if (this.eventType === 'importDataset.event' && this.status != -1) {
+            if (!this.message) {
+                return null;
+            }
             if (this.message.lastIndexOf('examination [') != -1) {
                 const substring = this.message.match(/examination \[\d+\]/g)[0];
                 return '/examination/details/' + substring.slice(substring.lastIndexOf("[") + 1, substring.lastIndexOf("]"));
@@ -116,12 +119,13 @@ export class Task extends Entity {
             return '/dataset-processing/details/' + this.objectId
         } else if (this.eventType === 'solrIndexAll.event' && this.status != -1) {
             return '/solr-search';
-        } else if (['downloadStatistics.event', 'copyDataset.event'].includes(this.eventType) && this.status != -1 && this.status != 2) {
+        } else if (['downloadStatistics.event', "copyDataset.event"].includes(this.eventType) && this.status != -1 && this.status != 2) {
             return '/datasets/download/event/' + this.idAsString;
         } else if (this.eventType === 'massiveOutputsDownload.event' && this.status != -1 && this.status != 2) {
             return '/datasets/massiveProcessingOutputsDownload';
+        } else {
+            return null;
         }
-        return null;
     }
 
     stringify(): string {
@@ -159,6 +163,9 @@ export class Task extends Entity {
         if (task.hasReport != undefined) this.hasReport = task.hasReport;
         return this;
     }
+
+    public recomputeRoute(): void {
+        this.route = this.buildRoute();
+    }
+
 }
-
-

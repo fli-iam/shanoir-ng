@@ -11,23 +11,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, Input, KeyValueDiffer, KeyValueDiffers } from '@angular/core';
-import { UntypedFormGroup, Validators } from '@angular/forms';
+import { Component, Input, KeyValueDiffer, KeyValueDiffers, ChangeDetectionStrategy } from '@angular/core';
+import { UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import shajs from 'sha.js';
+import { NgClass } from '@angular/common';
 
-import { TaskState } from 'src/app/async-tasks/task.model';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
-import { StudyRightsService } from 'src/app/studies/shared/study-rights.service';
-import { StudyUserRight } from 'src/app/studies/shared/study-user-right.enum';
-import { Selection } from 'src/app/studies/study/tree.service';
-import { Step } from 'src/app/breadcrumbs/breadcrumbs.service';
+import { TaskState } from '@app/async-tasks/task.model';
+import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
+import { MassDownloadService } from '@app/shared/mass-download/mass-download.service';
+import { StudyRightsService } from '@app/studies/shared/study-rights.service';
+import { StudyUserRight } from '@app/studies/shared/study-user-right.enum';
+import { Selection } from '@app/studies/study/tree.service';
+import { Step } from '@app/breadcrumbs/breadcrumbs.service';
+import { FormFooterComponent } from '@app/shared/components/form-footer/form-footer.component';
+import { TagInputComponent } from '@app/tags/tag.input.component';
+import { CheckboxComponent } from '@app/shared/checkbox/checkbox.component';
 
-import { preventInitialChildAnimations, slideDown } from '../../../shared/animations/animations';
 import { EntityComponent } from '../../../shared/components/entity/entity.component.abstract';
-import { Option } from '../../../shared/select/select.component';
+import { Option, SelectBoxComponent } from '../../../shared/select/select.component';
 import { Study } from '../../../studies/shared/study.model';
 import { StudyService } from '../../../studies/shared/study.service';
 import { ImagedObjectCategory } from '../../../subjects/shared/imaged-object-category.enum';
@@ -44,13 +47,15 @@ import { SubjectTherapyService } from '../../therapies/subjectTherapy/shared/sub
 import * as PreclinicalUtils from '../../utils/preclinical.utils';
 import { AnimalSubject } from '../shared/animalSubject.model';
 import { AnimalSubjectService } from '../shared/animalSubject.service';
+import { SubjectPathologiesListComponent } from '../../pathologies/subjectPathology/list/subject-pathology-list.component';
+import { SubjectTherapyListComponent } from '../../therapies/subjectTherapy/list/subject-therapy-list.component';
 
 @Component({
     selector: 'animal-subject-form',
     templateUrl: 'animal-subject-form.component.html',
     styleUrls: ['../../../subjects/subject/subject.component.css', 'animal-subject-form.component.css'],
-    animations: [slideDown, preventInitialChildAnimations],
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager,
+    imports: [FormsModule, ReactiveFormsModule, NgClass, FormFooterComponent, SelectBoxComponent, TagInputComponent, CheckboxComponent, SubjectPathologiesListComponent, SubjectTherapyListComponent]
 })
 
 export class AnimalSubjectFormComponent extends EntityComponent<AnimalSubject> {

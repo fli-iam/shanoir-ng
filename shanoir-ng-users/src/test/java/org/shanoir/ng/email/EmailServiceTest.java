@@ -14,6 +14,8 @@
 
 package org.shanoir.ng.email;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
 
@@ -35,13 +37,15 @@ import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.aot.DisabledInAotMode;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import com.icegreen.greenmail.util.GreenMail;
 import com.icegreen.greenmail.util.ServerSetup;
 
 import jakarta.mail.MessagingException;
+import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 
 /**
@@ -50,9 +54,15 @@ import jakarta.mail.internet.MimeMessage;
  * @author msimon
  *
  */
-@SpringBootTest
+@SpringBootTest(properties = "shanoir.instance.name=" + EmailServiceTest.INSTANCE_NAME)
 @ActiveProfiles("test")
+@DisabledInAotMode
 public class EmailServiceTest {
+
+    /** The name this instance is given for the test, expected in every subject. */
+    static final String INSTANCE_NAME = "DEV";
+
+    private static final String SUBJECT_PREFIX = "[" + INSTANCE_NAME + "] ";
 
     private static final String NEW_PASSWORD = "testPwd";
 
@@ -61,7 +71,7 @@ public class EmailServiceTest {
 
     private GreenMail greenMail;
 
-    @MockBean
+    @MockitoBean
     private UserRepository userRepositoryMock;
 
     @BeforeEach
@@ -80,45 +90,45 @@ public class EmailServiceTest {
     @Test
     public void notifyAccountWillExpireTest() throws Exception {
         emailService.notifyAccountWillExpire(ModelsUtil.createUser());
-        assertReceivedMessageContains("Shanoir Account Expiration", "will expire on");
+        assertReceivedMessageContains(SUBJECT_PREFIX + "Account Expiration", "will expire on");
     }
 
     @Test
     public void notifyNewUserTest() throws Exception {
         emailService.notifyCreateUser(ModelsUtil.createUser(), "password");
-        assertReceivedMessageContains("Shanoir Account Creation", "Your account has been created");
+        assertReceivedMessageContains(SUBJECT_PREFIX + "Account Creation", "Your account has been created");
     }
 
     @Test
     @WithMockKeycloakUser(id = 4, username = "phdauvergne", authorities = { "ROLE_ADMIN" })
     public void notifyAccountRequestAcceptedTest() throws Exception {
         emailService.notifyAccountRequestAccepted(ModelsUtil.createUser());
-        assertReceivedMessageContains("Granted: Your Shanoir account has been activated", "Your account request has been granted");
+        assertReceivedMessageContains(SUBJECT_PREFIX + "Granted: Your account has been activated", "Your account request has been granted");
     }
 
     @Test
     public void notifyAccountRequestDeniedTest() throws Exception {
         emailService.notifyAccountRequestDenied(ModelsUtil.createUser());
-        assertReceivedMessageContains("DENIED: Your Shanoir account request has been denied", "has been denied");
+        assertReceivedMessageContains(SUBJECT_PREFIX + "DENIED: Your account request has been denied", "has been denied");
     }
 
     @Test
     @WithMockKeycloakUser(id = 4, username = "phdauvergne", authorities = { "ROLE_ADMIN" })
     public void notifyExtensionRequestAcceptedTest() throws Exception {
         emailService.notifyExtensionRequestAccepted(ModelsUtil.createUser());
-        assertReceivedMessageContains("Granted: Your Shanoir account extension has been extended", "Your account extension request has been granted");
+        assertReceivedMessageContains(SUBJECT_PREFIX + "Granted: Your account extension has been extended", "Your account extension request has been granted");
     }
 
     @Test
     public void notifyExtensionRequestDeniedTest() throws Exception {
         emailService.notifyExtensionRequestDenied(ModelsUtil.createUser());
-        assertReceivedMessageContains("DENIED: Your Shanoir account extension request has been denied", "has been denied");
+        assertReceivedMessageContains(SUBJECT_PREFIX + "DENIED: Your account extension request has been denied", "has been denied");
     }
 
     @Test
     public void notifyUserResetPasswordTest() throws Exception {
         emailService.notifyUserResetPassword(ModelsUtil.createUser(), NEW_PASSWORD);
-        assertReceivedMessageContains("[Shanoir] Réinitialisation du mot de passe", NEW_PASSWORD);
+        assertReceivedMessageContains(SUBJECT_PREFIX + "Réinitialisation du mot de passe", NEW_PASSWORD);
     }
 
     @Test
@@ -132,7 +142,7 @@ public class EmailServiceTest {
         // send back a list of administrators
         EmailDatasetsImported mail = new EmailDatasetsImported();
         mail.setStudyName("StudyName");
-        mail.setStudyId("12");
+        mail.setStudyId(12L);
         mail.setUserId(1L);
         mail.setRecipients(Arrays.asList(1L));
         Map<Long, String> datasets = new HashMap<>();
@@ -141,7 +151,66 @@ public class EmailServiceTest {
         // WHEN we receive an event with elements stating that data was imported successfully
         emailService.notifyStudyManagerDataImported(mail);
         // THEN an email is sent to the administrators
-        assertReceivedMessageContains("[Shanoir] Data imported to StudyName", "imported data to study");
+        assertReceivedMessageContains(SUBJECT_PREFIX + "Data imported to StudyName", "imported data to study");
+    }
+
+    @Test
+    public void sendMassEmailTest() throws IOException, MessagingException {
+        final User first = massEmailUser("first@test.shanoir.fr");
+        final User second = massEmailUser("second@test.shanoir.fr");
+
+        emailService.sendMassEmail(Arrays.asList(first, second), "Maintenance",
+                "Service unavailable <tomorrow>.\nSorry for the inconvenience.", null, null);
+
+        final MimeMessage[] receivedMessages = greenMail.getReceivedMessages();
+        assertEquals(2, receivedMessages.length);
+        assertEquals(SUBJECT_PREFIX + "Maintenance", receivedMessages[0].getSubject());
+        final String content = (String) receivedMessages[0].getContent();
+        assertTrue(content.contains("Dear"));
+        // markup of the announcement is escaped, line breaks are rendered
+        assertTrue(content.contains("Service unavailable &lt;tomorrow&gt;.<br/>Sorry for the inconvenience."));
+        // a platform wide announcement stays signed by the administrator
+        assertTrue(content.contains("Shanoir administrator"));
+    }
+
+    @Test
+    public void sendStudyMassEmailNamesSenderAndStudyTest() throws IOException, MessagingException {
+        final User member = massEmailUser("member@test.shanoir.fr");
+        final User sender = massEmailUser("sender@test.shanoir.fr");
+        sender.setFirstName("Jane");
+        sender.setLastName("Doe");
+
+        emailService.sendMassEmail(Arrays.asList(member), "Kick-off meeting", "See you on monday.", sender,
+                "My Study");
+
+        final MimeMessage[] receivedMessages = greenMail.getReceivedMessages();
+        assertEquals(1, receivedMessages.length);
+        // the study name tells the members what the email relates to
+        assertEquals(SUBJECT_PREFIX + "[My Study] Kick-off meeting", receivedMessages[0].getSubject());
+        assertEquals("sender@test.shanoir.fr", ((InternetAddress) receivedMessages[0].getReplyTo()[0]).getAddress());
+        final String content = (String) receivedMessages[0].getContent();
+        // the members know who addressed them
+        assertTrue(content.contains("Jane Doe"));
+        assertTrue(content.contains("administrator of the study"));
+        assertTrue(content.contains("My Study"));
+        assertFalse(content.contains("Shanoir administrator"));
+    }
+
+    @Test
+    public void sendMassEmailSkipsFailingRecipientTest() {
+        final User failing = massEmailUser(null);
+        final User valid = massEmailUser("valid@test.shanoir.fr");
+
+        emailService.sendMassEmail(Arrays.asList(failing, valid), "Maintenance", "Service unavailable.",
+                null, null);
+
+        assertEquals(1, greenMail.getReceivedMessages().length);
+    }
+
+    private User massEmailUser(final String email) {
+        final User user = ModelsUtil.createUser();
+        user.setEmail(email);
+        return user;
     }
 
     private void assertReceivedMessageContains(final String expectedSubject, final String expectedContent)

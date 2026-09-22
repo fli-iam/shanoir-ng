@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { AfterViewInit, Component, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 
 import { TableComponent } from '../shared/components/table/table.component';
 import { ColumnDefinition } from '../shared/components/table/column.definition.type';
@@ -24,13 +24,15 @@ import { BrowserPaging } from '../shared/components/table/browser-paging.model';
 
 import { TaskService } from './task.service';
 import { Task } from './task.model';
+import { TaskStatusComponent } from './status/task-status.component';
 
 
 @Component({
     selector: 'async-tasks',
     templateUrl: 'async-tasks.component.html',
     styleUrls: ['async-tasks.component.css'],
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager,
+    imports: [TableComponent, TaskStatusComponent]
 })
 
 export class AsyncTasksComponent extends EntityListComponent<Task> implements AfterViewInit {
@@ -73,6 +75,8 @@ export class AsyncTasksComponent extends EntityListComponent<Task> implements Af
             {
                headerName: 'Message', field: 'message', width: '100%', type:'link',
                download: item => this.downloadStats(item),
+               downloadCondition: item => ['downloadStatistics.event', 'copyDataset.event'].includes(item.eventType) && item.progress == 1,
+               link: item => item.route
             }, {
                headerName: 'Progress', field: 'progress', width: '110px', type: 'progress',
                cellRenderer: params => { return {progress: params.data?.progress, status: params.data?.status}; }
@@ -80,6 +84,8 @@ export class AsyncTasksComponent extends EntityListComponent<Task> implements Af
                headerName: "Creation", field: "creationDate", width: '130px', type: 'dateTime', defaultSortCol: true, defaultAsc: false,
             }, {
                 headerName: "Last update", field: "lastUpdate", width: '130px', type: 'dateTime'
+            }, {
+                headerName: "Route", field: "route", width: '100px'
             }
         ];
     }
@@ -89,15 +95,15 @@ export class AsyncTasksComponent extends EntityListComponent<Task> implements Af
     }
 
     downloadStats(item: any) {
-        if (item instanceof Task 
-                && ["downloadStatistics.event", "copyDataset.event"].includes(item.eventType) 
+        if (item instanceof Task
+                && ["downloadStatistics.event", "copyDataset.event"].includes(item.eventType)
                 && item.progress == 1) {
-            console.log('Calling taskService.downloadStats with item:', item);
             this.taskService.downloadStats(item);
         }
     }
 
-    select(lightTask: Task) {
+    select(selectedObject: object) {
+        const lightTask: Task = selectedObject as Task;
         this.notificationsService.nbNew = 0;
         this.notificationsService.nbNewError = 0;
         this.selected = null;

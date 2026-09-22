@@ -12,24 +12,28 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component } from '@angular/core';
-import { UntypedFormGroup, Validators } from '@angular/forms';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import { Selection } from 'src/app/studies/study/tree.service';
+import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
+import { Selection } from '@app/studies/study/tree.service';
 
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { Center } from '../shared/center.model';
 import { CenterService } from '../shared/center.service';
 import {ShanoirValidators} from "../../shared/validators/shanoir-validators";
+import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
+import { HelpMessageComponent } from '../../shared/help-message/help-message.component';
+import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';
 
 @Component({
     selector: 'center-detail',
     templateUrl: 'center.component.html',
     styleUrls: ['center.component.css'],
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager,
+    imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, HelpMessageComponent, AcquisitionEquipmentPipe]
 })
 
 export class CenterComponent extends EntityComponent<Center> {

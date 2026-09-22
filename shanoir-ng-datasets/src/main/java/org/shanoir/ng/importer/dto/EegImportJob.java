@@ -30,10 +30,6 @@ public class EegImportJob extends ImportJob {
     private static final long serialVersionUID = 2425683448060201704L;
 
     /** List of associated datasets. */
-    @JsonProperty("subjectId")
-    private Long subjectId;
-
-    /** List of associated datasets. */
     @JsonProperty("datasets")
     private List<EegDatasetDTO> datasets;
 
@@ -45,11 +41,4 @@ public class EegImportJob extends ImportJob {
         this.datasets = datasets;
     }
 
-    public Long getSubjectId() {
-        return subjectId;
-    }
-
-    public void setSubjectId(Long subjectId) {
-        this.subjectId = subjectId;
-    }
 }

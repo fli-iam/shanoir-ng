@@ -46,8 +46,6 @@ public class ShUpOnloadConfig {
 
     private static boolean autoImportEnabled;
 
-    private static String tokenString;
-
     /** Constructeur privé */
     private ShUpOnloadConfig() {
     }
@@ -107,14 +105,6 @@ public class ShUpOnloadConfig {
 
     public static void setAutoImportEnabled(boolean autoImportEnabled) {
         ShUpOnloadConfig.autoImportEnabled = autoImportEnabled;
-    }
-
-    public static String getTokenString() throws Exception  {
-        return tokenString;
-    }
-
-    public static void setTokenString(String tokenString) {
-        ShUpOnloadConfig.tokenString = tokenString;
     }
 
     public static Pseudonymizer getPseudonymizer() {

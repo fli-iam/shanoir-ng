@@ -53,14 +53,15 @@ import org.shanoir.ng.shared.repository.CenterRepository;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.shared.service.StudyService;
+import org.shanoir.ng.shared.service.SubjectService;
 import org.shanoir.ng.solr.service.SolrService;
+import org.shanoir.ng.storage.StorageException;
 import org.shanoir.ng.study.rights.ampq.RabbitMqStudyUserService;
-import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.model.QualityCard;
-import org.shanoir.ng.studycard.repository.StudyCardRepository;
-import org.shanoir.ng.tag.model.Tag;
-import org.shanoir.ng.utils.KeycloakUtil;
+import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.repository.QualityCardRepository;
+import org.shanoir.ng.studycard.repository.StudyCardRepository;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,6 +73,7 @@ import org.springframework.amqp.rabbit.annotation.QueueBinding;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -90,6 +92,7 @@ public class RabbitMQDatasetsService {
     private static final String RABBIT_MQ_ERROR = "Something went wrong deserializing the event.";
 
     @Autowired
+    @Lazy
     private DatasetService datasetService;
 
     @Autowired
@@ -117,6 +120,7 @@ public class RabbitMQDatasetsService {
     private SolrService solrService;
 
     @Autowired
+    @Lazy
     private ExaminationService examinationService;
 
     @Autowired
@@ -141,6 +145,9 @@ public class RabbitMQDatasetsService {
     private StudyService studyService;
 
     @Autowired
+    private SubjectService subjectService;
+
+    @Autowired
     private DatasetSecurityService securityService;
 
     @Autowired
@@ -163,7 +170,7 @@ public class RabbitMQDatasetsService {
         try {
 
             Study updated = objectMapper.readValue(studyAsString, Study.class);
-            bidsService.deleteBidsFolder(updated.getId(), null);
+            bidsService.deleteBidsFolder(updated.getId());
             Study current = this.receiveAndUpdateIdNameEntity(studyAsString, Study.class, studyRepository);
             List<String> errors = studyService.validate(updated, current);
             if (!errors.isEmpty()) {
@@ -203,7 +210,7 @@ public class RabbitMQDatasetsService {
      * @throws JsonMappingException
      */
     @Transactional
-    private void manageSubjectUpdate(final String subjectStr) throws JsonProcessingException, JsonMappingException {
+    protected void manageSubjectUpdate(final String subjectStr) throws JsonProcessingException, JsonMappingException {
         Subject subject = objectMapper.readValue(subjectStr, Subject.class);
         subject = subjectRepository.save(subject);
         LOG.info("Subject replicated in MS Datasets with ID: {} and Name: {}",
@@ -215,7 +222,7 @@ public class RabbitMQDatasetsService {
             studyIds.add(exam.getStudyId());
         }
         for (Study stud : studyRepository.findAllById(studyIds)) {
-            bidsService.deleteBidsFolder(stud.getId(), stud.getName());
+            bidsService.deleteBidsFolder(stud.getId());
         }
         // Update solr references
         List<Long> subjectIdList = new ArrayList<Long>();
@@ -239,7 +246,7 @@ public class RabbitMQDatasetsService {
     }
 
     @Transactional
-    private void manageSubjectBatchUpdate(final String subjectBatchStr) throws JsonProcessingException {
+    protected void manageSubjectBatchUpdate(final String subjectBatchStr) throws JsonProcessingException {
         SubjectBatchDTO batchDTO = objectMapper.readValue(subjectBatchStr, SubjectBatchDTO.class);
         Set<Long> allStudyIds = new HashSet<>();
         List<Long> allSubjectIds = new ArrayList<>();
@@ -254,7 +261,7 @@ public class RabbitMQDatasetsService {
         }
         // Update BIDS for all affected studies
         for (Study stud : studyRepository.findAllById(allStudyIds)) {
-            bidsService.deleteBidsFolder(stud.getId(), stud.getName());
+            bidsService.deleteBidsFolder(stud.getId());
         }
         // Update Solr references in batch
         try {
@@ -278,7 +285,7 @@ public class RabbitMQDatasetsService {
     }
 
     @Transactional
-    private void saveCenter(Center center) {
+    protected void saveCenter(Center center) {
         centerRepository.save(center);
     }
 
@@ -289,7 +296,7 @@ public class RabbitMQDatasetsService {
     }
 
     @Transactional
-    private void deleteCenter(Long centerId) {
+    protected void deleteCenter(Long centerId) {
         centerRepository.deleteById(centerId);
     }
 
@@ -322,53 +329,93 @@ public class RabbitMQDatasetsService {
     }
 
     /**
-     * Receives a shanoirEvent as a json object, concerning a subject deletion
-     * @param subjectIdAsString a string of the subject's id
+     * Receives the deletion event of a subject and deletes its data, completing the task
+     * carried by the event: its progress follows the examinations, and the errors met are
+     * gathered in its report.
+     *
+     * The deletion is done on a best effort basis, an examination that cannot be deleted
+     * does not prevent the other ones from being deleted. This listener is therefore not
+     * transactional on purpose, so that each examination is deleted in its own transaction.
+     *
+     * @param eventAsString the deletion event of the subject, as a json string
      */
     @RabbitListener(queues = RabbitMQConfiguration.DELETE_SUBJECT_QUEUE, containerFactory = "singleConsumerFactory")
-    @Transactional
-    public void deleteSubject(String subjectIdAsString) throws AmqpRejectAndDontRequeueException {
-        SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
+    public void deleteSubject(String eventAsString) throws AmqpRejectAndDontRequeueException {
+        ShanoirEvent event;
+        Long subjectId;
         try {
-            Long subjectId = Long.valueOf(subjectIdAsString);
-            Set<Long> studyIds = new HashSet<>();
-
-            // Inverse order to remove copied examination before its source (if copied)
-            List<Examination> listExam = examinationRepository.findBySubjectId(subjectId);
-            Collections.reverse(listExam);
-
-            // Delete associated examinations and datasets from solr repository
-            for (Examination exam : listExam) {
-                examinationService.deleteById(exam.getId(), null);
-                studyIds.add(exam.getStudyId());
-            }
-
-            // Update BIDS folder
-            for (Study stud : studyRepository.findAllById(studyIds)) {
-                bidsService.deleteBidsFolder(stud.getId(), stud.getName());
-            }
-
-            // Delete subject from datasets database
-            Subject subject = subjectRepository.findById(subjectId).orElse(null);
-            if (subject != null) {
-                for (Tag tag : subject.getTags()) {
-                    tag.getSubjects().remove(subject);
-                }
-                subject.getTags().clear();
-                subjectRepository.save(subject);
-                subjectRepository.delete(subject);
-            }
-
+            event = objectMapper.readValue(eventAsString, ShanoirEvent.class);
+            subjectId = Long.valueOf(event.getObjectId());
         } catch (Exception e) {
             LOG.error("Something went wrong deserializing the event. {}", e.getMessage());
             throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR + e.getMessage(), e);
         }
+        // Keep the identity of the user who actually asked for the deletion, so that every
+        // event published while cascading this deletion (examinations, dataset acquisitions...)
+        // is correctly attributed to them instead of falling back to the generic system user.
+        if (event.getUserId() != null) {
+            SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN", event.getUserId());
+        } else {
+            SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
+        }
+
+        StringBuilder report = new StringBuilder();
+        Set<Long> studyIds = new HashSet<>();
+
+        // Keep the name of the subject for the messages, it is deleted below
+        String subjectLabel = subjectService.findById(subjectId)
+                .map(subject -> subject.getName() + " (id: " + subjectId + ")")
+                .orElse("(id: " + subjectId + ")");
+
+        // Inverse order to remove copied examination before its source (if copied)
+        List<Examination> listExam = examinationRepository.findBySubjectId(subjectId);
+        Collections.reverse(listExam);
+
+        // Delete associated examinations and datasets from solr repository
+        int processed = 0;
+        for (Examination exam : listExam) {
+            try {
+                examinationService.deleteById(exam.getId(), event);
+                studyIds.add(exam.getStudyId());
+            } catch (Exception e) {
+                LOG.error("Could not delete examination {} of subject {}", exam.getId(), subjectId, e);
+                report.append("Examination [").append(exam.getId()).append("] could not be deleted: ")
+                        .append(e.getMessage()).append("\n");
+            }
+            processed++;
+            eventService.publishEvent(event, "Deleting subject [" + subjectId + "] : " + processed + "/"
+                    + listExam.size() + " examinations processed.", (float) processed / listExam.size());
+        }
+
+        // Update BIDS folder
+        for (Study stud : studyRepository.findAllById(studyIds)) {
+            try {
+                bidsService.deleteBidsFolder(stud.getId());
+            } catch (Exception e) {
+                LOG.error("Could not delete BIDS folder of study {}", stud.getId(), e);
+                report.append("BIDS folder of study [").append(stud.getId()).append("] could not be deleted: ")
+                        .append(e.getMessage()).append("\n");
+            }
+        }
+
+        // Delete subject from datasets database
+        try {
+            subjectService.delete(subjectId);
+        } catch (Exception e) {
+            LOG.error("Could not delete subject {} from ms datasets", subjectId, e);
+            report.append("Subject [").append(subjectId).append("] could not be deleted from ms datasets: ")
+                    .append(e.getMessage()).append("\n");
+        }
+
+        if (report.isEmpty()) {
+            eventService.publishSuccessEvent(event, "Subject " + subjectLabel + " removed");
+        } else {
+            event.setReport(report.toString());
+            eventService.publishErrorEvent(event, "Subject " + subjectLabel
+                    + " removed, but some of its data could not be deleted.");
+        }
     }
 
-    /**
-     * Receives a shanoirEvent as a json object, concerning a subject deletion
-     * @param eventAsString the task as a json string.
-     */
     @RabbitListener(bindings = @QueueBinding(
             key = ShanoirEventType.DELETE_STUDY_EVENT,
             value = @Queue(value = RabbitMQConfiguration.DELETE_STUDY_QUEUE, durable = "true"),
@@ -376,15 +423,20 @@ public class RabbitMQDatasetsService {
             autoDelete = "false", durable = "true", type = ExchangeTypes.TOPIC)), containerFactory = "singleConsumerFactory"
             )
     @Transactional
-    public void deleteStudy(String eventAsString) throws AmqpRejectAndDontRequeueException {
+    public void deleteStudy(ShanoirEvent event) throws AmqpRejectAndDontRequeueException {
         SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
-
         try {
-            ShanoirEvent event = objectMapper.readValue(eventAsString, ShanoirEvent.class);
-
+            // Keep the identity of the user who actually asked for the deletion, so that every
+            // event published while cascading this deletion (examinations, dataset acquisitions...)
+            // is correctly attributed to them instead of falling back to the generic system user.
+            if (event.getUserId() != null) {
+                SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN", event.getUserId());
+            } else {
+                SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
+            }
             // Delete associated examinations and datasets from solr repository then from database
             for (Examination exam : examinationRepository.findByStudy_Id(Long.valueOf(event.getObjectId()))) {
-                examinationService.deleteById(exam.getId(), null);
+                examinationService.deleteById(exam.getId(), event);
             }
             // also delete associated study cards
             for (StudyCard sc : studyCardRepository.findByStudyId(Long.valueOf(event.getObjectId()))) {
@@ -406,7 +458,7 @@ public class RabbitMQDatasetsService {
     @RabbitListener(queues = RabbitMQConfiguration.STUDY_DATASETS_DETAILED_STORAGE_VOLUME, containerFactory = "multipleConsumersFactory")
     @RabbitHandler
     @Transactional
-    public String getDetailedStudyStorageVolume(Long studyId) {
+    public String getDetailedStudyStorageVolume(Long studyId) throws StorageException {
         SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
         StudyStorageVolumeDTO dto = new StudyStorageVolumeDTO(datasetService.getVolumeByFormat(studyId),
                 examinationService.getExtraDataSizeByStudyId(studyId));
@@ -425,7 +477,11 @@ public class RabbitMQDatasetsService {
         SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
         Map<Long, StudyStorageVolumeDTO> studyStorageVolumes = new HashMap<>();
         datasetService.getVolumeByFormatByStudyId(studyIds).forEach((id, volumeByFormat) -> {
-            studyStorageVolumes.put(id, new StudyStorageVolumeDTO(volumeByFormat, examinationService.getExtraDataSizeByStudyId(id)));
+            try {
+                studyStorageVolumes.put(id, new StudyStorageVolumeDTO(volumeByFormat, examinationService.getExtraDataSizeByStudyId(id)));
+            } catch (StorageException e) {
+                LOG.error(e.getMessage(), e);
+            }
         });
         try {
             return objectMapper.writeValueAsString(studyStorageVolumes);

@@ -14,53 +14,86 @@
 
 package org.shanoir.ng.vip.executionMonitoring.dto.mapper;
 
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.ObjectFactory;
-import org.shanoir.ng.dataset.dto.DatasetDTO;
-import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
-import org.shanoir.ng.dataset.model.Dataset;
-import org.shanoir.ng.dataset.service.DatasetUtils;
+import org.mapstruct.*;
 import org.shanoir.ng.processing.dto.mapper.DatasetProcessingMapper;
+import org.shanoir.ng.processing.dto.mapper.DatasetProcessingMappingConfig;
 import org.shanoir.ng.vip.executionMonitoring.model.ExecutionMonitoring;
 import org.shanoir.ng.vip.executionMonitoring.dto.ExecutionMonitoringDTO;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
-@Mapper(componentModel = "spring", uses = { DatasetProcessingMapper.class, DatasetMapper.class })
+@Mapper(componentModel = "spring", config = DatasetProcessingMappingConfig.class, uses = { DatasetProcessingMapper.class })
 public interface ExecutionMonitoringMapper {
 
-    /**
-     * Map a @ExecutionMonitoring to a @ExecutionMonitoringDTO.
-     *
-     * @param processing
-     *            dataset.
-     * @return dataset DTO.
-     */
-    @Mapping(target = "parametersResources", ignore = true)
-    ExecutionMonitoringDTO executionMonitoringToExecutionMonitoringDTO(ExecutionMonitoring processing);
+    ////// Entity to DTO
 
-    /**
-     * Map list of @ExecutionMonitoring to list of @ExecutionMonitoringDTO.
-     *
-     * @param datasetProcessings processings
-     *            list of dataset processings.
-     * @return list of dataset processings DTO.
-     */
-    List<ExecutionMonitoringDTO> executionMonitoringsToExecutionMonitoringDTOs(List<ExecutionMonitoring> datasetProcessings);
-
-    /**
-     * Map @ExecutionMonitoringDTO to @ExecutionMonitoring
-     *
-     * @param dto
-     * @return
-     */
-    ExecutionMonitoring executionMonitoringDTOToExecutionMonitoring(ExecutionMonitoringDTO dto);
-
-    @ObjectFactory
-    default Dataset createDataset(DatasetDTO dto) {
-        return DatasetUtils.buildDatasetFromType(dto.getType());
+    @Named("id")
+    default Long monitoringToLongId(ExecutionMonitoring monitoring) {
+        if (monitoring == null) {
+            return null;
+        }
+        return monitoring.getId();
     }
 
+    @Named("id")
+    default List<Long> monitoringListToLongIds(List<ExecutionMonitoring> monitorings) {
+        if (monitorings == null) {
+            return null;
+        }
+        return monitorings.stream().filter(Objects::nonNull).map(ExecutionMonitoring::getId).collect(Collectors.toList());
+    }
 
+    @Named("idOnly")
+    default ExecutionMonitoringDTO monitoringToId(ExecutionMonitoring monitoring) {
+        if (monitoring == null) {
+            return null;
+        }
+        ExecutionMonitoringDTO dto = new ExecutionMonitoringDTO();
+        dto.setId(monitoring.getId());
+        return dto;
+    }
+
+    @Named("idOnly")
+    default List<ExecutionMonitoringDTO> monitoringListToIds(List<ExecutionMonitoring> monitorings) {
+        if (monitorings == null) {
+            return null;
+        }
+        return monitorings.stream().filter(Objects::nonNull).map(proc -> {
+            ExecutionMonitoringDTO dto = new ExecutionMonitoringDTO();
+            dto.setId(proc.getId());
+            return dto;
+        }).collect(Collectors.toList());
+    }
+
+    //Single entity
+
+    /**
+     * Some context of usage :
+     */
+    @Named("nullRelations")
+    @InheritConfiguration(name = "processingToProcessingDTOWithNullRelationsPrototype")
+    ExecutionMonitoringDTO executionMonitoringToExecutionMonitoringDTOWithNullRelations(ExecutionMonitoring processing);
+
+    /**
+     * Some context of usage :
+     */
+    @Named("idRelations")
+    @InheritConfiguration(name = "processingToProcessingDTOWithIdRelationsPrototype")
+    ExecutionMonitoringDTO executionMonitoringToExecutionMonitoringDTOWithIdRelations(ExecutionMonitoring processing);
+
+    //Entity list
+
+    /**
+     * Some context of usage :
+     */
+    @IterableMapping(qualifiedByName = "nullRelations")
+    List<ExecutionMonitoringDTO> executionMonitoringsToExecutionMonitoringDTOListWithNullRelations(List<ExecutionMonitoring> datasetProcessings);
+
+    /**
+     * Some context of usage :
+     */
+    @IterableMapping(qualifiedByName = "idRelations")
+    List<ExecutionMonitoringDTO> executionMonitoringsToExecutionMonitoringDTOListWithIdRelations(List<ExecutionMonitoring> datasetProcessings);
 }

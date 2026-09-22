@@ -1948,8 +1948,8 @@
     "starttls": "SHANOIR_SMTP_STARTTLS_ENABLE",
     "password": "SHANOIR_SMTP_PASSWORD",
     "user": "SHANOIR_SMTP_USERNAME",
-    "from": "SHANOIR_ADMIN_EMAIL",
-    "fromDisplayName": "SHANOIR_ADMIN_NAME",
+    "from": "SHANOIR_NOTIFICATION_EMAIL",
+    "fromDisplayName": "SHANOIR_NOTIFICATION_NAME",
     "envelopeFrom": "SHANOIR_SMTP_FROM",
     "port": "SHANOIR_SMTP_PORT"
   },

@@ -26,11 +26,11 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
-import org.dcm4che3.data.UID;
 import org.dcm4che3.emf.MultiframeExtractor;
 import org.dcm4che3.io.DicomInputStream;
 import org.shanoir.ng.anonymization.uid.generation.UIDGeneration;
 import org.shanoir.ng.importer.model.Image;
+import org.shanoir.ng.importer.model.ImportJobBase;
 import org.shanoir.ng.importer.model.Instance;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
@@ -42,7 +42,6 @@ import org.shanoir.ng.shared.dicom.EquipmentDicom;
 import org.shanoir.ng.shared.dicom.InstitutionDicom;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
-import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,8 +73,6 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 
     private static final String SUFFIX_DCM = ".dcm";
 
-    private static final String UNKNOWN = "unknown";
-
     private static final String YES = "YES";
 
     private static final String SERIES_NUMBER_0 = "0";
@@ -83,51 +80,52 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
     @Autowired
     private ShanoirEventService eventService;
 
-    public void createImagesAndAnalyzeDicomFiles(List<Patient> patients, String folderFileAbsolutePath, boolean isImportFromPACS, ShanoirEvent event, boolean isFromShUpQualityControl)
+    public void createImagesAndAnalyzeDicomFiles(
+            ImportJobBase importJob, String folderFileAbsolutePath, boolean isImportFromPACS, ShanoirEvent event, boolean isFromShUpQualityControl)
             throws FileNotFoundException {
-        // patient level
-        for (Iterator<Patient> patientsIt = patients.iterator(); patientsIt.hasNext();) {
-            Patient patient = patientsIt.next();
-            // study level
-            List<Study> studies = patient.getStudies();
-            for (Iterator<Study> studiesIt = studies.iterator(); studiesIt.hasNext();) {
-                Study study = studiesIt.next();
-                // serie level
-                List<Serie> series = study.getSeries();
-                int nbSeries = series.size();
-                int cpt = 1;
-                for (Iterator<Serie> seriesIt = series.iterator(); seriesIt.hasNext();) {
-                    Serie serie = seriesIt.next();
-                    if (!serie.isIgnored()) {
-                        if (event != null) {
-                            event.setMessage("Creating images and analyzing DICOM files for serie [" + (serie.getSeriesDescription() == null ? serie.getSeriesInstanceUID() : serie.getSeriesDescription()) + "] " + cpt + "/" + nbSeries + ")");
-                            eventService.publishEvent(event);
-                        }
-                        try {
-                            filterAndCreateImages(folderFileAbsolutePath, serie, isImportFromPACS, isFromShUpQualityControl);
-                        } catch (Exception e) { // one serie/file could cause problems, log and mark as erroneous, but continue with next serie
-                            handleError(event, nbSeries, cpt, serie, e);
-                        }
-                        if (!serie.isIgnored()) {
-                            // use a second try here, in case error is on serie, to get at least the serie name for error tracing
-                            try {
-                                getAdditionalMetaDataFromFirstInstanceOfSerie(folderFileAbsolutePath, patient, study, serie, isImportFromPACS);
-                            } catch (Exception e) {
-                                handleError(event, nbSeries, cpt, serie, e);
-                            }
-                        }
-                    }
-                    cpt++;
+        int cpt = 1;
+        int nbSeries = importJob.getSeries().size();
+        for (Iterator<Serie> seriesIt = importJob.getSeries().iterator(); seriesIt.hasNext();) {
+            Serie serie = seriesIt.next();
+            if (!serie.isIgnored()) {
+                if (event != null) {
+                    event.setMessage("Creating images and analyzing DICOM files for serie [" + (serie.getSeriesDescription() == null ? serie.getSeriesInstanceUID() : serie.getSeriesDescription()) + "] " + cpt + "/" + nbSeries + ")");
+                    eventService.publishEvent(event);
                 }
-                /*
-                 * We apply an additional sort here on the series list to base everything on seriesNumbers finally.
-                 * It might happen, while using ShanoirUploader, that some PACS will not share the seriesNumber, so
-                 * we can not correctly sort in ShanoirUploader without going into the files itself, what we do not
-                 * do, therefore we have the ImagesCreatorAndDicomFileAnalyzerService, that is called on the server.
-                 */
-                series.sort(new SeriesNumberOrAcquisitionTimeOrDescriptionSorter());
+                try {
+                    filterAndCreateImages(folderFileAbsolutePath, serie, isImportFromPACS, isFromShUpQualityControl);
+                } catch (Exception e) { // one serie/file could cause problems, log and mark as erroneous, but continue with next serie
+                    handleError(event, nbSeries, cpt, serie, e);
+                }
+                if (!serie.isIgnored()) {
+                    // use a second try here, in case error is on serie, to get at least the serie name for error tracing
+                    try {
+                        getAdditionalMetaDataFromFirstInstanceOfSerie(folderFileAbsolutePath, importJob.getPatient(), importJob.getStudy(), serie, isImportFromPACS);
+                    } catch (Exception e) {
+                        handleError(event, nbSeries, cpt, serie, e);
+                    }
+                }
+                // We clean instances here, as now transformed to images. Skip this for the
+                // local ShanoirUploader quality-control : the same importJob/Serie set
+                // is analyzed again server-side once the real import starts, and that second
+                // pass needs the original instances to rebuild the image list with
+                // server-side paths (the local pass keeps client-local absolute paths, which
+                // are meaningless once the files are uploaded to the server).
+                if (!isFromShUpQualityControl) {
+                    serie.setInstances(null);
+                }
             }
+            cpt++;
         }
+        /**
+         * We apply an additional sort here on the series list to base everything on
+         * seriesNumbers finally. It might happen, while using ShanoirUploader, that
+         * some PACS will not share the seriesNumber, so we can not correctly sort in
+         * ShanoirUploader without going into the files itself, what we do not do,
+         * therefore we have the ImagesCreatorAndDicomFileAnalyzerService, that is
+         * called on the server.
+         */
+        importJob.getSeries().sort(new SeriesNumberOrAcquisitionTimeOrDescriptionSorter());
     }
 
     private void handleError(ShanoirEvent event, int nbSeries, int cpt, Serie serie, Exception e) {
@@ -277,8 +275,8 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
             checkPatientData(patient, attributes);
             checkStudyData(study, attributes);
             checkSerieData(serie, attributes);
+            addSeriesInstitution(serie, attributes);
             addSeriesEquipment(serie, attributes);
-            addSeriesCenter(serie, attributes);
         } catch (IOException e) {
             LOG.error("Error during processing of DICOM file " + dicomFile.getAbsolutePath() + ":", e);
         }
@@ -293,10 +291,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
      */
     private void addImageSeparateDatasetsInfo(Image image, Attributes attributes) throws Exception {
         final String sopClassUID = attributes.getString(Tag.SOPClassUID);
-        if (UID.EnhancedMRImageStorage.equals(sopClassUID)
-                || UID.EnhancedMRColorImageStorage.equals(sopClassUID)
-                || UID.EnhancedCTImageStorage.equals(sopClassUID)
-                || UID.EnhancedPETImageStorage.equals(sopClassUID)) {
+        if (MultiframeExtractor.isSupportedSOPClass(sopClassUID)) {
             MultiframeExtractor emf = new MultiframeExtractor();
             attributes = emf.extract(attributes, 0);
         }
@@ -347,13 +342,8 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
      * @param attributes
      */
     private void addSeriesEquipment(Serie serie, Attributes attributes) {
-        if (serie.getEquipment() == null || !serie.getEquipment().isComplete()) {
-            String manufacturer = Utils.getOrSetToDefault(attributes, Tag.Manufacturer, UNKNOWN);
-            String manufacturerModelName = Utils.getOrSetToDefault(attributes, Tag.ManufacturerModelName, UNKNOWN);
-            String deviceSerialNumber = Utils.getOrSetToDefault(attributes, Tag.DeviceSerialNumber, UNKNOWN);
-            String stationName = Utils.getOrSetToDefault(attributes, Tag.StationName, UNKNOWN);
-            String magneticFieldStrength = Utils.getOrSetToDefault(attributes, Tag.MagneticFieldStrength, UNKNOWN);
-            serie.setEquipment(new EquipmentDicom(manufacturer, manufacturerModelName, serie.getModality(), deviceSerialNumber, stationName, magneticFieldStrength));
+        if (!serie.getEquipment().isKnown()) {
+            serie.setEquipment(new EquipmentDicom(attributes));
         }
     }
 
@@ -364,8 +354,8 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
      * @param serie
      * @param datasetAttributes
      */
-    public void addSeriesCenter(Serie serie, Attributes attributes) {
-        if (serie.getInstitution() == null) {
+    public void addSeriesInstitution(Serie serie, Attributes attributes) {
+        if (!serie.getInstitution().isKnown()) {
             InstitutionDicom institution = new InstitutionDicom(attributes);
             serie.setInstitution(institution);
         }

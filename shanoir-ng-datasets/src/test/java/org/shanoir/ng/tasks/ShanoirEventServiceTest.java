@@ -14,6 +14,9 @@
 
 package org.shanoir.ng.tasks;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -26,9 +29,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
-
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Test class for AsyncTaskService.
@@ -61,13 +61,19 @@ public class ShanoirEventServiceTest {
         // WHEN we add the task
         service.publishEvent(t);
 
-        // THEN the task is sent using RabbitMQ and sent to the front
-        ArgumentCaptor<String> argumentCatcher = ArgumentCaptor.forClass(String.class);
-        Mockito.verify(rabbitTemplate).convertAndSend(Mockito.eq(RabbitMQConfiguration.EVENTS_EXCHANGE), Mockito.eq(t.getEventType()), argumentCatcher.capture());
-        String message = argumentCatcher.getValue();
-        assertNotNull(message);
-        assertTrue(message.contains(t.getId().toString()));
-        assertTrue(message.contains(t.getMessage()));
-        assertTrue(message.contains("" + t.getUserId()));
+        // THEN the event is sent using RabbitMQ
+        ArgumentCaptor<String> argumentCaptor =
+                ArgumentCaptor.forClass(String.class);
+        Mockito.verify(rabbitTemplate).convertAndSend(
+                Mockito.eq(RabbitMQConfiguration.EVENTS_EXCHANGE),
+                Mockito.eq(t.getEventType()),
+                argumentCaptor.capture()
+        );
+
+        String json = argumentCaptor.getValue();
+        assertNotNull(json);
+        assertTrue(json.contains("\"id\":123"));
+        assertTrue(json.contains("\"userId\":456"));
+        assertTrue(json.contains("\"message\":\"uio\""));
     }
 }

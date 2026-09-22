@@ -19,7 +19,7 @@ import java.util.List;
 import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.studycard.model.assignment.StudyCardAssignment;
-import org.shanoir.ng.studycard.model.condition.StudyCardCondition;
+import org.shanoir.ng.studycard.model.condition.CardCondition;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -48,15 +48,15 @@ import jakarta.validation.constraints.NotNull;
     @JsonSubTypes.Type(value = DatasetAcquisitionRule.class, name = "DatasetAcquisition") })
 public abstract class StudyCardRule<T> extends AbstractEntity {
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "rule_id")
     private List<StudyCardAssignment<?>> assignments;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     // there is a join table because a rule_id fk would lead to an ambiguity and bugs
     // because it could refer to a study card or quality card rule
     @JoinTable(name = "study_card_condition_join", joinColumns = {@JoinColumn(name = "study_card_rule_id")}, inverseJoinColumns = {@JoinColumn(name = "condition_id")})
-    private List<StudyCardCondition> conditions;
+    private List<CardCondition> conditions;
 
     @NotNull
     private boolean orConditions;
@@ -69,11 +69,11 @@ public abstract class StudyCardRule<T> extends AbstractEntity {
         this.assignments = assignments;
     }
 
-    public List<StudyCardCondition> getConditions() {
+    public List<CardCondition> getConditions() {
         return conditions;
     }
 
-    public void setConditions(List<StudyCardCondition> conditions) {
+    public void setConditions(List<CardCondition> conditions) {
         this.conditions = conditions;
     }
 
