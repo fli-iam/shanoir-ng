@@ -169,6 +169,9 @@ public interface DatasetProcessingRepository extends CrudRepository<DatasetProce
     @Transactional(readOnly = true)
     default List<DatasetProcessing> findByIdsWithInputsAndOutputs(List<Long> ids) {
         List<DatasetProcessing> processings = findByIdsWithInputs(ids);
+        // Return value intentionally unused: this fetch-join query populates outputDatasets
+        // directly on the managed entities already held in `processings` (same persistence
+        // context / identity map), it doesn't need to be re-assigned.
         findByIdsWithOutputs(ids);
         return processings;
     }
