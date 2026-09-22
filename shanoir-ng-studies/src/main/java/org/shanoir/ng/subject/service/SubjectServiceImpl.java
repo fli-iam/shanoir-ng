@@ -316,36 +316,6 @@ public class SubjectServiceImpl implements SubjectService {
         }
     }
 
-    private Subject mapSubjectStudyAttributesToSubject(Subject subject, SubjectStudy subjectStudy) {
-        subject.setStudy(subjectStudy.getStudy());
-        subject.setStudyIdentifier(subjectStudy.getSubjectStudyIdentifier());
-        subject.setSubjectType(subjectStudy.getSubjectType());
-        subject.setPhysicallyInvolved(subjectStudy.isPhysicallyInvolved());
-        subject.setQualityTag(subjectStudy.getQualityTag());
-        mapSubjectStudyTagListToSubjectTagList(subject, subjectStudy);
-        return subject;
-    }
-
-    private void mapSubjectStudyTagListToSubjectTagList(Subject subject, SubjectStudy subjectStudy) {
-        Set<Tag> tags;
-        if (subject.getTags() == null) {
-            tags = new HashSet<Tag>();
-        } else {
-            tags = subject.getTags();
-        }
-        tags.clear(); // always update with new state
-        if (subjectStudy.getSubjectStudyTags() != null) {
-            subjectStudy.getSubjectStudyTags().stream().forEach(st -> {
-                Optional<Tag> tagOpt = tagRepository.findById(st.getTag().getId());
-                if (tagOpt.isPresent()) {
-                    Tag tag = tagOpt.get();
-                    tags.add(tag);
-                }
-            });
-        }
-        subject.setTags(tags);
-    }
-
     @Override
     @Transactional
     public Subject update(final Subject subjectNew) throws ShanoirException {
