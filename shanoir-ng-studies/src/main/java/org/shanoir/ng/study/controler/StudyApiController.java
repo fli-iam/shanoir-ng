@@ -196,8 +196,17 @@ public class StudyApiController implements StudyApi {
         if (studies.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
+        Long userId = KeycloakUtil.getTokenUserId();
+        boolean isAdmin = KeycloakUtil.isAdmin();
         for (Study study : studies) {
-            studiesDTO.add(studyMapper.studyToExtendedIdNameDTO(study));
+            IdNameCenterStudyDTO studyDTO = studyMapper.studyToExtendedIdNameDTO(study);
+            if (!isAdmin) {
+                study.getStudyUserList().stream()
+                        .filter(studyUser -> userId.equals(studyUser.getUserId()))
+                        .findFirst()
+                        .ifPresent(studyUser -> studyDTO.setRestrictedCenterIds(studyUser.getCenterIds()));
+            }
+            studiesDTO.add(studyDTO);
         }
         return new ResponseEntity<>(studiesDTO, HttpStatus.OK);
     }

@@ -345,7 +345,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                             </span>
                                         </span>
                                     } @else if (mode == 'view') {
-                                        <a href="/study/details/{{ study?.id }}" class="left-icon link">
+                                        <a [routerLink]="['/study/details/', study?.id]" class="left-icon link">
                                             <i class="fa-regular fa-folder-open"></i>{{ study?.name }}
                                         </a>
                                     }

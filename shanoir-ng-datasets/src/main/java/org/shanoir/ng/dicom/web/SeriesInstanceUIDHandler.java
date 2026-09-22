@@ -209,7 +209,7 @@ public class SeriesInstanceUIDHandler {
         // dataset series as well (DICOM-in-PACS outputs only: NIfTI
         // outputs have no series and are skipped by the UID extraction)
         if (!datasetIds.isEmpty()) {
-            for (DatasetProcessing processing : datasetProcessingRepository.findAllByInputDatasets_IdIn(datasetIds)) {
+            for (DatasetProcessing processing : datasetProcessingRepository.findAllByInputDatasets_IdInWithOutputsAndDatasetFile(datasetIds)) {
                 for (Dataset outputDataset : processing.getOutputDatasets()) {
                     addSeriesOfDataset(outputDataset, seriesToVirtualUIDs);
                 }

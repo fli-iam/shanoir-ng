@@ -81,9 +81,13 @@ export class SimpleDatasetNodeComponent extends TreeNodeAbstractComponent<Datase
     }
 
     hasChildren(): boolean | 'unknown' {
-        if (!this.node.processings) return false;
-        else if (this.node.processings == 'UNLOADED') return 'unknown';
-        else return this.node.processings.length > 0;
+        if (this.node.inPacs) {
+            return true;
+        } else {
+            if (!this.node.processings) return false;
+            else if (this.node.processings == 'UNLOADED') return 'unknown';
+            else return this.node.processings.length > 0;
+        }
     }
 
     deleteDataset() {
