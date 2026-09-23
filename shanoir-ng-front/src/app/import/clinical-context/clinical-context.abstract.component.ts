@@ -243,21 +243,22 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
             });
         });
         /* build the studycards options and set their compatibilies */
-        return this.centerService.getCentersByStudyId(study.id).then(centers => {
+        return Promise.all([
+            this.centerService.getCentersByStudyId(study.id),
+            this.studycardService.getAllForStudy(study.id)
+        ]).then(([centers, studyCards]) => {
             const accessibleCenterIds = centers.map(center => center.id);
-            return this.studycardService.getAllForStudy(study.id).then(studyCards => {
-                if (!studyCards) studyCards = [];
+            if (!studyCards) studyCards = [];
 
-                studyCards?.sort((a, b) => a.name?.trim().localeCompare(b.name.trim()));
+            studyCards.sort((a, b) => a.name?.trim().localeCompare(b.name.trim()));
 
-                return studyCards.filter(studyCard => {
-                    return accessibleCenterIds.includes(studyCard.acquisitionEquipment.center.id);
-                }).map(studyCard => {
-                    const opt = new Option(studyCard, studyCard.name);
-                    const scEq = studyCard.acquisitionEquipment ? studyEquipments.find(se => se.id == studyCard.acquisitionEquipment.id) : null;
-                    opt.compatible = this.acqEqCompatible(scEq);
-                    return opt;
-                });
+            return studyCards.filter(studyCard => {
+                return accessibleCenterIds.includes(studyCard.acquisitionEquipment.center.id);
+            }).map(studyCard => {
+                const opt = new Option(studyCard, studyCard.name);
+                const scEq = studyCard.acquisitionEquipment ? studyEquipments.find(se => se.id == studyCard.acquisitionEquipment.id) : null;
+                opt.compatible = this.acqEqCompatible(scEq);
+                return opt;
             });
         });
     }
