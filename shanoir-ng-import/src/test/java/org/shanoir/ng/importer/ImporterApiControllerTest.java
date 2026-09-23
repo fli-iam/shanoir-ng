@@ -59,7 +59,10 @@ import org.springframework.web.client.RestTemplate;
  * @author atouboul
  *
  */
-@WebMvcTest(controllers = ImporterApiController.class)
+@WebMvcTest(controllers = ImporterApiController.class,
+        excludeAutoConfiguration = {
+                org.springframework.boot.security.oauth2.server.resource.autoconfigure.servlet.OAuth2ResourceServerAutoConfiguration.class
+        })
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
 public class ImporterApiControllerTest {
