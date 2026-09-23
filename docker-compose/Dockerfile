@@ -126,8 +126,8 @@ COPY --link import/entrypoint /usr/bin/
 COPY --link import/shanoir-ng-import.jar shanoir-ng-import.jar
 
 # Use the below line for remote debugging
-#CMD ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:9913", "-jar", "/shanoir-ng-import.jar"]
-CMD ["-jar", "/shanoir-ng-import.jar"]
+#CMD ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:9913", "-Dspring.aot.enabled=true", "-jar", "/shanoir-ng-import.jar"]
+CMD ["-Dspring.aot.enabled=true", "-jar", "/shanoir-ng-import.jar"]
 
 
 
