@@ -14,8 +14,11 @@
 
 package org.shanoir.ng.configuration.amqp;
 
+import java.util.List;
+
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.study.rights.ampq.RabbitMqStudyUserService;
+import org.shanoir.ng.study.rights.command.StudyUserCommand;
 import org.springframework.amqp.core.ExchangeTypes;
 import org.springframework.amqp.rabbit.annotation.Exchange;
 import org.springframework.amqp.rabbit.annotation.Queue;
@@ -38,8 +41,8 @@ public class RabbitMQImportService {
             exchange = @Exchange(value = RabbitMQConfiguration.STUDY_USER_EXCHANGE, ignoreDeclarationExceptions = "true",
                 autoDelete = "false", durable = "true", type = ExchangeTypes.FANOUT)), containerFactory = "multipleConsumersFactory"
     )
-    public void receiveMessage(String commandArrStr) {
-        listener.receiveStudyUsers(commandArrStr);
+    public void receiveMessage(List<StudyUserCommand> commands) {
+        listener.receiveStudyUsers(commands);
     }
 
 }
