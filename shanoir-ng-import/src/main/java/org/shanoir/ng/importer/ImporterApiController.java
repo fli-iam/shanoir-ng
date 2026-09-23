@@ -85,8 +85,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
+import tools.jackson.core.JacksonException;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
@@ -928,7 +929,7 @@ public class ImporterApiController implements ImporterApi {
 
             // STEP 5 delete temporary file
             FileUtils.deleteQuietly(importJobDir);
-        } catch (IOException e) {
+        } catch (JacksonException | IOException e) {
             throw new RestServiceException(new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(),
                     "The file could not be correctly unziped on the server. Please check consistency.", e));
         }
