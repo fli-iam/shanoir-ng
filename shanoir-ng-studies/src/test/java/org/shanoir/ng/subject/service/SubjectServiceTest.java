@@ -40,6 +40,7 @@ import org.shanoir.ng.subject.model.Sex;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.model.UserPersonalCommentSubject;
 import org.shanoir.ng.subject.repository.SubjectRepository;
+import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -138,6 +139,23 @@ public class SubjectServiceTest {
         } catch (ShanoirException exception) {
             assertEquals(HttpStatus.FORBIDDEN.value(), exception.getErrorCode());
             assertEquals("You can not update the subject name.", exception.getMessage());
+            return;
+        }
+        fail();
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    public void updateTestChangeStudy() {
+        try {
+            Subject updated = createSubjectToUpdate();
+            Study otherStudy = ModelsUtil.createStudy();
+            otherStudy.setId(2L);
+            updated.setStudy(otherStudy);
+            subjectService.update(updated);
+        } catch (ShanoirException exception) {
+            assertEquals(HttpStatus.FORBIDDEN.value(), exception.getErrorCode());
+            assertEquals("You can not update the subject study.", exception.getMessage());
             return;
         }
         fail();
