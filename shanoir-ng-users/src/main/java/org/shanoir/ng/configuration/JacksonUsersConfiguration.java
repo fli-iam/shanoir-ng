@@ -18,6 +18,7 @@ import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserInterface;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.domain.Page;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -34,9 +35,10 @@ import tools.jackson.databind.module.SimpleModule;
 import tools.jackson.databind.ser.ValueSerializerModifier;
 
 @Configuration(proxyBeanMethods = false)
-public class JacksonConfiguration {
+public class JacksonUsersConfiguration {
 
     @Bean
+    @Primary
     JsonMapper jsonMapper() {
         SimpleModule studyUserModule = new SimpleModule();
         studyUserModule.addAbstractTypeMapping(StudyUserInterface.class, StudyUser.class);
