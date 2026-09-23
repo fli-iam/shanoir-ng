@@ -24,7 +24,6 @@ public class StudyUserCommand {
 
     private Long studyUserId;
 
-
     /**
      * Default constructor
      */
@@ -57,7 +56,6 @@ public class StudyUserCommand {
         this.studyUser = studyUser;
         this.studyUserId = null;
     }
-
 
     public CommandType getType() {
         return type;
