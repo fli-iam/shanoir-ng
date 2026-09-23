@@ -51,9 +51,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
-import tools.jackson.databind.ObjectMapper;
-
 import io.swagger.v3.oas.annotations.Parameter;
+import tools.jackson.databind.ObjectMapper;
 
 @Controller
 public class BidsImporterApiController implements BidsImporterApi {
@@ -226,7 +225,7 @@ public class BidsImporterApiController implements BidsImporterApi {
             }
         }
         importJobStatusService.setFinished(tempDirId, importJob);
-        return new ResponseEntity<>(null, HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     /**
