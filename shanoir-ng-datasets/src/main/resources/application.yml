@@ -170,6 +170,10 @@ dcm4chee-arc:
   dicom.web.rs.upload: /dcm4chee-arc/aets/DCM4CHEE/rs/studies
   dicom.web.http.client.max.total: 500
   dicom.web.http.client.max.per.route: 500
+  # number of dicom files downloaded in advance from the PACS while the previous ones are
+  # being written into the zip of a massive download. Raising it costs one buffered file
+  # in memory per unit, and one more parallel request to the PACS per concurrent download.
+  dicom.wado.prefetch: 10
 
 # VIP
 vip:
@@ -179,6 +183,9 @@ vip:
   file-formats: .nii.gz, .nii
   result-file-name: input_params.json
   shanoir-vip-host: ${SHANOIR_URL_HOST:local}
+  download:
+    max-concurrent: 60
+    permit-wait-seconds: 20
 
 # Service account
 service-account:
