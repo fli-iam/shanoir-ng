@@ -14,7 +14,7 @@
 
 package org.shanoir.ng.configuration.amqp;
 
-import java.util.List;
+import java.util.Arrays;
 
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.study.rights.ampq.RabbitMqStudyUserService;
@@ -27,6 +27,8 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import tools.jackson.databind.ObjectMapper;
+
 /**
  * RabbitMQ configuration.
  */
@@ -36,13 +38,17 @@ public class RabbitMQImportService {
     @Autowired
     private RabbitMqStudyUserService listener;
 
+    @Autowired
+    private ObjectMapper mapper;
+
     @RabbitListener(bindings = @QueueBinding(
             value = @Queue(value = RabbitMQConfiguration.STUDY_USER_QUEUE_IMPORT, durable = "true"),
             exchange = @Exchange(value = RabbitMQConfiguration.STUDY_USER_EXCHANGE, ignoreDeclarationExceptions = "true",
                 autoDelete = "false", durable = "true", type = ExchangeTypes.FANOUT)), containerFactory = "multipleConsumersFactory"
     )
-    public void receiveMessage(List<StudyUserCommand> commands) {
-        listener.receiveStudyUsers(commands);
+    public void receiveMessage(String commandArrStr) {
+        StudyUserCommand[] commands = mapper.readValue(commandArrStr, StudyUserCommand[].class);
+        listener.receiveStudyUsers(Arrays.asList(commands));
     }
 
 }
