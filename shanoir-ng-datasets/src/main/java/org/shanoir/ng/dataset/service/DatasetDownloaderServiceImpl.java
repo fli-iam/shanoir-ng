@@ -228,6 +228,7 @@ public class DatasetDownloaderServiceImpl {
     @Transactional(readOnly = true)
     protected Map<Long, DownloadPathParts> resolveDownloadPathParts(List<Dataset> datasets, String sorting) {
         Map<Long, DownloadPathParts> parts = new HashMap<>();
+        long startTime = System.currentTimeMillis();
 
         for (Dataset dataset : datasets) {
             String path = "";
@@ -264,6 +265,9 @@ public class DatasetDownloaderServiceImpl {
 
             parts.put(dataset.getId(), new DownloadPathParts(path, relevantDataset.getDatasetAcquisition().getId(), dateTime, metadataUrl));
         }
+        long elapsedTime = System.currentTimeMillis() - startTime;
+        long elapsedSeconds = elapsedTime / 1000;
+        LOG.info("Download path parts: {}s for {} datasets.", elapsedSeconds, datasets.size());
         return parts;
     }
 
