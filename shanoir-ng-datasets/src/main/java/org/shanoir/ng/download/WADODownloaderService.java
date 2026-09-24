@@ -134,7 +134,7 @@ public class WADODownloaderService {
     private static final String CONTENT_TYPE = "&contentType";
 
     /** Number of PACS responses fetched in advance, while the current one is written into the zip. */
-    @Value("${dcm4chee-arc.dicom.wado.prefetch:4}")
+    @Value("${dcm4chee-arc.dicom.wado.prefetch:10}")
     private int wadoPrefetch;
 
     @Autowired
