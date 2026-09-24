@@ -29,6 +29,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.zip.Deflater;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -37,6 +38,7 @@ import org.joda.time.DateTime;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.download.DatasetDownloadError;
+import org.shanoir.ng.download.PacsTransferStats;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
@@ -143,7 +145,8 @@ public class DatasetDownloaderServiceImpl {
         // the (potentially slow) per-dataset DB/PACS work below produces any bytes,
         // otherwise a client-side read timeout can fire while nothing has been sent yet.
 
-        try (ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream())) {
+        try (ZipOutputStream zipOutputStream = new ZipOutputStream(PacsTransferStats.withNetworkTiming(response.getOutputStream()))) {
+            zipOutputStream.setLevel(Deflater.BEST_SPEED);
             response.flushBuffer();
             Map<String, List<String>> datasetDownloadNameListPerPath = new HashMap<>();
             datasetDownloadPath = new HashMap<>();

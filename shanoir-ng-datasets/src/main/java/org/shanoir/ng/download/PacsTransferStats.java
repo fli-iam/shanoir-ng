@@ -14,6 +14,9 @@
 
 package org.shanoir.ng.download;
 
+import java.io.FilterOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.concurrent.atomic.LongAdder;
 
 /**
@@ -34,6 +37,12 @@ public final class PacsTransferStats {
 
     private final LongAdder totalResponseNanos = new LongAdder();
 
+    private final LongAdder waitNanos = new LongAdder();
+
+    private final LongAdder zipNanos = new LongAdder();
+
+    private final LongAdder networkNanos = new LongAdder();
+
     private PacsTransferStats() {
     }
 
@@ -53,6 +62,35 @@ public final class PacsTransferStats {
         return CURRENT.get();
     }
 
+    public static OutputStream withNetworkTiming(OutputStream out) {
+        PacsTransferStats stats = CURRENT.get();
+        if (stats == null) {
+            return out;
+        }
+        return new FilterOutputStream(out) {
+            @Override
+            public void write(int b) throws IOException {
+                long start = System.nanoTime();
+                out.write(b);
+                stats.networkNanos.add(System.nanoTime() - start);
+            }
+
+            @Override
+            public void write(byte[] b, int off, int len) throws IOException {
+                long start = System.nanoTime();
+                out.write(b, off, len);
+                stats.networkNanos.add(System.nanoTime() - start);
+            }
+
+            @Override
+            public void flush() throws IOException {
+                long start = System.nanoTime();
+                out.flush();
+                stats.networkNanos.add(System.nanoTime() - start);
+            }
+        };
+    }
+
     /**
      * Records one fully received PACS response.
      *
@@ -65,12 +103,32 @@ public final class PacsTransferStats {
         totalResponseNanos.add(nanos);
     }
 
+    void recordWait(long nanos) {
+        waitNanos.add(nanos);
+    }
+
+    void recordZip(long nanos) {
+        zipNanos.add(nanos);
+    }
+
     public long getResponseCount() {
         return responseCount.sum();
     }
 
     public long getTotalBytes() {
         return totalBytes.sum();
+    }
+
+    public long getWaitMillis() {
+        return waitNanos.sum() / 1_000_000;
+    }
+
+    public long getZipMillis() {
+        return zipNanos.sum() / 1_000_000;
+    }
+
+    public long getNetworkMillis() {
+        return networkNanos.sum() / 1_000_000;
     }
 
     public double getAverageResponseMillis() {
