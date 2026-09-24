@@ -192,11 +192,21 @@ public class WADODownloaderService {
 
         List<String> urlsToDownload = urls.stream().map(URL::toString).distinct().toList();
 
+        PacsTransferStats stats = PacsTransferStats.current();
+
         // Flux allows to download asynchronously (up to 4,w hich is the first iteration of the wadoPrefetch)
         try (Stream<PacsResponse> responses = Flux.fromIterable(urlsToDownload)
-                .flatMap(url -> downloadFileFromPACSAsync(url)
-                                .map(body -> new PacsResponse(url, body, null))
-                                .onErrorResume(e -> Mono.just(new PacsResponse(url, null, e))),
+                .flatMap(url -> {
+                    long startNanos = System.nanoTime();
+                    return downloadFileFromPACSAsync(url)
+                            .map(body -> new PacsResponse(url, body, null))
+                            .onErrorResume(e -> Mono.just(new PacsResponse(url, null, e)))
+                            .doOnNext(r -> {
+                                if (stats != null) {
+                                    stats.record(r.body() != null ? r.body().length : 0, System.nanoTime() - startNanos);
+                                }
+                            });
+                },
                         wadoPrefetch)
                 .toStream(wadoPrefetch)) {
             // Then we put each file one by one in the zip
