@@ -67,11 +67,15 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
     @Autowired
     private DatasetRepository datasetRepository;
 
+    @Autowired
+    private ProcessingFetchService processingFetchService;
+
     @PersistenceContext
     private EntityManager em;
 
+
     public void massiveDownloadByProcessingIds(List<Long> processingIds, boolean resultOnly, String format, HttpServletResponse response, boolean withManifest, Long converterId) throws RestServiceException {
-        massiveDownload(datasetProcessingRepository.findByIdsWithInputsAndOutputsAndDatasetFiles(processingIds), resultOnly, format, response, withManifest, converterId);
+        massiveDownload(processingFetchService.findProcessingsWithInputsOutputsAndDatasetFiles(processingIds), resultOnly, format, response, withManifest, converterId);
     }
 
     public void massiveDownload(List<DatasetProcessing> processingList, boolean resultOnly, String format, HttpServletResponse response, boolean withManifest, Long converterId) throws RestServiceException {
@@ -142,7 +146,7 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
 
     public void massiveDownloadByExaminations(List<Examination> examinationList, String processingComment, boolean resultOnly, String format, HttpServletResponse response, boolean withManifest, Long converterId) throws RestServiceException {
         List<Long> processingIdsList = datasetProcessingRepository.findAllIdsByExaminationIds(examinationList.stream().map(Examination::getId).toList());
-        List<DatasetProcessing> processingList = datasetProcessingRepository.findByIdsWithInputsAndOutputsAndDatasetFiles(processingIdsList);
+        List<DatasetProcessing> processingList = processingFetchService.findProcessingsWithInputsOutputsAndDatasetFiles(processingIdsList);
         if (!Objects.isNull(processingComment)) {
             processingList = processingList.stream().filter(it -> Objects.equals(it.getComment(), processingComment)).toList();
         }

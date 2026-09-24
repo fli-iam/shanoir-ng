@@ -16,7 +16,6 @@ package org.shanoir.ng.processing.repository;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import org.hibernate.Hibernate;
 import org.shanoir.ng.processing.model.DatasetProcessing;
@@ -153,10 +152,16 @@ public interface DatasetProcessingRepository extends CrudRepository<DatasetProce
             + "WHERE processing.id IN :ids")
     List<DatasetProcessing> findByIdsWithInputs(List<Long> ids);
 
+    @Query("SELECT DISTINCT processing FROM DatasetProcessing processing "
+            + "LEFT JOIN FETCH processing.outputDatasets "
+            + "WHERE processing.id IN :ids")
+    List<DatasetProcessing> findByIdsWithOutputs(List<Long> ids);
+
     /**
      * inputDatasets and outputDatasets are both bags, so Hibernate refuses to fetch them both
-     * within a single query (MultipleBagFetchException) : inputDatasets is fetched by the query,
-     * outputDatasets is initialized right after, while the session is still open.
+     * within a single query (MultipleBagFetchException) : inputDatasets is fetched by the first
+     * query, outputDatasets by the second, both querying by processing.id so within the same
+     * persistence context they populate the same managed entities - no per-row query needed.
      *
      * @param ids
      * @return
@@ -164,25 +169,10 @@ public interface DatasetProcessingRepository extends CrudRepository<DatasetProce
     @Transactional(readOnly = true)
     default List<DatasetProcessing> findByIdsWithInputsAndOutputs(List<Long> ids) {
         List<DatasetProcessing> processings = findByIdsWithInputs(ids);
-        processings.forEach(processing -> Hibernate.initialize(processing.getOutputDatasets()));
-        return processings;
-    }
-
-    /**
-     * Same as findByIdsWithInputsAndOutputs, with the expressions and files of every input and
-     * output dataset initialized too. OSIV being disabled, the returned processings are detached :
-     * everything the download walks through has to be loaded here.
-     *
-     * @param ids
-     * @return
-     */
-    @Transactional(readOnly = true)
-    default List<DatasetProcessing> findByIdsWithInputsAndOutputsAndDatasetFiles(List<Long> ids) {
-        List<DatasetProcessing> processings = findByIdsWithInputsAndOutputs(ids);
-        processings.forEach(processing ->
-                Stream.concat(processing.getInputDatasets().stream(), processing.getOutputDatasets().stream())
-                        .forEach(dataset -> dataset.getDatasetExpressions()
-                                .forEach(expression -> Hibernate.initialize(expression.getDatasetFiles()))));
+        // Return value intentionally unused: this fetch-join query populates outputDatasets
+        // directly on the managed entities already held in `processings` (same persistence
+        // context / identity map), it doesn't need to be re-assigned.
+        findByIdsWithOutputs(ids);
         return processings;
     }
 
