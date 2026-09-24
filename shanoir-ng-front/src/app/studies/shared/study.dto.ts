@@ -251,6 +251,9 @@ export class StudyDTOService {
         } else {
           study.tags = [];
         }
+        // 1=MANDATORY, 2=DISABLED, conversion here for Angular compatibility
+        // without changing ShanoirUploader's interpretation of the ordinal value
+        study.studyCardPolicy = dto.studyCardPolicy === 1 ? 'MANDATORY' : 'DISABLED';
         return study;
     }
 }
@@ -347,6 +350,7 @@ export class CenterStudyDTO {
     studyCenterList: StudyCenterDTO[];
     profile: Profile;
     tags: Tag[];
+    studyCardPolicy: number;
 }
 
 export class StudyLight {

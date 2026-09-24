@@ -189,7 +189,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
     }
 
     private completeStudyCenters(): Promise<void> {
-        return Promise.all([this.studyService.getAll(), this.centerService.getAll()])
+        return Promise.all([this.studyService.getStudyNamesAndCenters(), this.centerService.getAll()])
             .then(([allStudies, allCenters]) => {
                 this.studyOptions = [];
                 this.allCenters = allCenters;
@@ -234,20 +234,22 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
     }
 
     private getStudyCardOptions(study: Study): Promise<Option<StudyCard>[]> {
-        const studyEquipments: AcquisitionEquipment[] = [];
         if (!study) return Promise.resolve([]);
-        /* find equipments for this study - needed for checking studycards compatibilities */
-        study.studyCenterList.forEach(studyCenter => {
-            studyCenter.center.acquisitionEquipments.forEach(eq => {
-                if (studyEquipments.findIndex(se => se.id == eq.id) == -1) studyEquipments.push(eq);
-            });
-        });
         /* build the studycards options and set their compatibilies */
         return Promise.all([
             this.centerService.getCentersByStudyId(study.id),
             this.studycardService.getAllForStudy(study.id)
         ]).then(([centers, studyCards]) => {
             const accessibleCenterIds = centers.map(center => center.id);
+            /* find equipments for this study - needed for checking studycards compatibilities.
+            study.studyCenterList doesn't carry acquisitionEquipments (lightweight study list),
+            so it's derived here instead, from the centers just fetched above. */
+            const studyEquipments: AcquisitionEquipment[] = [];
+            centers.forEach(center => {
+                center.acquisitionEquipments?.forEach(eq => {
+                    if (studyEquipments.findIndex(se => se.id == eq.id) == -1) studyEquipments.push(eq);
+                });
+            });
             if (!studyCards) studyCards = [];
 
             studyCards.sort((a, b) => a.name?.trim().localeCompare(b.name.trim()));
