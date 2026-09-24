@@ -20,6 +20,7 @@ import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.subject.model.Subject;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
@@ -37,6 +38,7 @@ public class StudyExamination extends AbstractEntity {
 
     private static final long serialVersionUID = -6040639164236575228L;
 
+    @Column(unique = true)
     private Long examinationId;
 
     @ManyToOne(fetch = FetchType.EAGER)
