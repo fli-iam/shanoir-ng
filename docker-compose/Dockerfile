@@ -260,6 +260,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
 
 COPY --link users/shanoir-ng-users.jar shanoir-ng-users.jar
 COPY --link users/entrypoint /usr/bin/
+RUN chmod +x /usr/bin/entrypoint /usr/bin/entrypoint_common
 
 ENV	\
 	kc.admin.client.client.id="admin-cli"	\
