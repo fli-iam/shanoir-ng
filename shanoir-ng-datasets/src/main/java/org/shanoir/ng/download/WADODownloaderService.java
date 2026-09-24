@@ -208,7 +208,7 @@ public class WADODownloaderService {
                             });
                 },
                         wadoPrefetch)
-                .toStream(wadoPrefetch)) {
+                .toStream(1)) {
             // Then we put each file one by one in the zip
             Iterator<PacsResponse> iterator = responses.iterator();
             long waitStart = System.nanoTime();
