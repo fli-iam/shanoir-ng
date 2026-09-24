@@ -14,8 +14,8 @@
 
 package org.shanoir.ng.study.dto;
 
-import org.shanoir.ng.study.model.StudyExtraDetails;
 import org.shanoir.ng.study.model.InclusionRateUnit;
+import org.shanoir.ng.study.model.StudyExtraDetails;
 
 /**
  * DTO for studyExtraDetails.
@@ -53,6 +53,9 @@ public class StudyExtraDetailsDTO {
     /** Scientific advisor ID. */
     private String scientificAdvisor;
 
+    /** Regex pattern the commonName of a new subject must respect if set. */
+    private String subjectNamePattern;
+
     public StudyExtraDetailsDTO(StudyExtraDetails extraDetails) {
         if (extraDetails == null) {
             return;
@@ -66,6 +69,7 @@ public class StudyExtraDetailsDTO {
         this.sponsor = extraDetails.getSponsor();
         this.principalInvestigator = extraDetails.getPrincipalInvestigator();
         this.scientificAdvisor = extraDetails.getScientificAdvisor();
+        this.subjectNamePattern = extraDetails.getSubjectNamePattern();
     }
 
     public Long getExpectedNbOfSubjects() {
@@ -138,5 +142,13 @@ public class StudyExtraDetailsDTO {
 
     public void setScientificAdvisor(String scientificAdvisor) {
         this.scientificAdvisor = scientificAdvisor;
+    }
+
+    public String getSubjectNamePattern() {
+        return subjectNamePattern;
+    }
+
+    public void setSubjectNamePattern(String subjectNamePattern) {
+        this.subjectNamePattern = subjectNamePattern;
     }
 }
