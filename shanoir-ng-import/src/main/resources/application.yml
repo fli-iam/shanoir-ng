@@ -75,7 +75,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${SHANOIR_KEYCLOAK_URL}/realms/shanoir-ng
+          issuer-uri: ${SHANOIR_KEYCLOAK_URL:localhost}/realms/shanoir-ng
           jwk-set-uri: ${SHANOIR_KEYCLOAK_INTERNAL_URL:http://keycloak:8080/auth}/realms/shanoir-ng/protocol/openid-connect/certs
   web:
     error:
