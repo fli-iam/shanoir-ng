@@ -1,0 +1,44 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
+<div class="date-range-slider">
+    <div class="bound-label">{{ minDate | localDateFormatPipe }}</div>
+    <div class="slider-track" #track>
+        <div class="track-base"></div>
+        <div class="track-selected" [style.left.%]="startPercent()" [style.right.%]="100 - endPercent()"></div>
+        <div class="handle"
+            [style.left.%]="startPercent()"
+            role="slider" tabindex="0"
+            [attr.aria-label]="'Start date'"
+            [attr.aria-valuemin]="minDate?.getTime()"
+            [attr.aria-valuemax]="maxDate?.getTime()"
+            [attr.aria-valuenow]="draftStart?.getTime()"
+            (pointerdown)="onHandlePointerDown('start', $event)"
+            (keydown)="onHandleKeyDown('start', $event)">
+            <div class="handle-tooltip">{{ draftStart | localDateFormatPipe }}</div>
+        </div>
+        <div class="handle"
+            [style.left.%]="endPercent()"
+            role="slider" tabindex="0"
+            [attr.aria-label]="'End date'"
+            [attr.aria-valuemin]="minDate?.getTime()"
+            [attr.aria-valuemax]="maxDate?.getTime()"
+            [attr.aria-valuenow]="draftEnd?.getTime()"
+            (pointerdown)="onHandlePointerDown('end', $event)"
+            (keydown)="onHandleKeyDown('end', $event)">
+            <div class="handle-tooltip">{{ draftEnd | localDateFormatPipe }}</div>
+        </div>
+    </div>
+    <div class="bound-label">{{ maxDate | localDateFormatPipe }}</div>
+    <button type="button" class="reset-link" (click)="reset()">Reset</button>
+</div>
