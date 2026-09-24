@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.shared.configuration;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -28,7 +29,8 @@ import tools.jackson.databind.module.SimpleModule;
 public class JacksonConfiguration {
 
     @Bean
-    JsonMapper jsonMapper() {
+    @ConditionalOnMissingBean(name = "jsonMapper")
+    public JsonMapper jsonMapper() {
         SimpleModule studyUserModule = new SimpleModule();
         SimpleModule pageModule = new SimpleModule();
         var builder = JsonMapper.builder();
