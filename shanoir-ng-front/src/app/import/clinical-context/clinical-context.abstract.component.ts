@@ -47,7 +47,6 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
     public studyOptions: Option<Study>[] = [];
     public studycardOptions: Option<StudyCard>[] = [];
     public centerOptions: Option<Center>[] = [];
-    private allCenters: Center[];
     public acquisitionEquipmentOptions: Option<AcquisitionEquipment>[] = [];
     public subjects: Subject[] = [];
     public examinations: SubjectExamination[] = [];
@@ -189,29 +188,33 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
     }
 
     private completeStudyCenters(): Promise<void> {
-        return Promise.all([this.studyService.getStudyNamesAndCenters(), this.centerService.getAll()])
-            .then(([allStudies, allCenters]) => {
-                this.studyOptions = [];
-                this.allCenters = allCenters;
-                for (const study of allStudies) {
-                    const studyOption: Option<Study> = new Option(study, study.name);
-                    studyOption.compatible = false;
-                    if (study.studyCenterList) {
-                        for (const studyCenter of study.studyCenterList) {
-                            const center: Center = allCenters.find(center => center.id === studyCenter.center.id);
-                            if (center) {
-                                studyCenter.center = center;
-                                studyOption.compatible = true;
-                            }
-                        }
-                        this.studyOptions.push(studyOption);
-                        // update the selected study as well
-                        if (this.study && this.study.id == study.id) {
-                            this.study.studyCenterList = study.studyCenterList;
-                        }
+        return this.studyService.getStudyNamesAndCenters().then(allStudies => {
+            this.studyOptions = [];
+            for (const study of allStudies) {
+                const studyOption: Option<Study> = new Option(study, study.name);
+                if (study.studyCenterList) {
+                    // "compatible" here just means "this study has at least one center" -
+                    // unlike centers/equipments/studycards, study options aren't matched
+                    // against the imported data's equipment.
+                    studyOption.compatible = study.studyCenterList.length > 0;
+                    this.studyOptions.push(studyOption);
+                    // update the selected study as well
+                    if (this.study && this.study.id == study.id) {
+                        this.study.studyCenterList = study.studyCenterList;
                     }
                 }
-            });
+            }
+        });
+    }
+
+    /* study.studyCenterList only carries light {id, name} centers (from the lightweight study
+    list) - this fills in the full Center (with acquisitionEquipments) for the given study, from
+    a centers list already fetched for that same study (getCentersByStudyId). */
+    private enrichStudyCenters(study: Study, centers: Center[]): void {
+        study?.studyCenterList?.forEach(studyCenter => {
+            const center = centers.find(c => c.id === studyCenter.center.id);
+            if (center) studyCenter.center = center;
+        });
     }
 
     /* Please return undefined if you don't know */
@@ -240,6 +243,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
             this.centerService.getCentersByStudyId(study.id),
             this.studycardService.getAllForStudy(study.id)
         ]).then(([centers, studyCards]) => {
+            this.enrichStudyCenters(study, centers);
             const accessibleCenterIds = centers.map(center => center.id);
             /* find equipments for this study - needed for checking studycards compatibilities.
             study.studyCenterList doesn't carry acquisitionEquipments (lightweight study list),
@@ -279,6 +283,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
     private getCenterOptions(study: Study): Promise<Option<Center>[]> {
         if (study && study.id && study.studyCenterList) {
             return this.centerService.getCentersByStudyId(study.id).then(centers => {
+                this.enrichStudyCenters(study, centers);
                 centers.sort((a, b) => a.name?.trim().localeCompare(b.name.trim()));
                 return centers.map(center => {
                     const centerOption = new Option<Center>(center, center.name);
@@ -383,9 +388,6 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
             const subjectsPromise: Promise<void> = this.getSubjectList(this.study?.id).then(subjects => {
                 this.subjects = subjects ? subjects : [];
                 this.subjects?.sort((a, b) => a.name?.trim().localeCompare(b.name.trim()));
-            });
-            this.studyService.getTagsFromStudyId(this.study?.id).then(tags => {
-                this.study.tags = tags ? tags : [];
             });
             return Promise.all([studycardsOrCentersPromise, subjectsPromise]).finally(() => this.loading--)
                 .then(() => this.onContextChange());
