@@ -103,11 +103,16 @@ public class ProcessingResourceApiController implements ProcessingResourceApi {
                             datasetDownloaderService.massiveDownload(format, datasets, response, true, converterId, true, sorting);
                         } finally {
                             PacsTransferStats.stop();
-                            LOG.info("VIP download [{}]: {} PACS responses, average PACS response time: {} ms, bytes received: {}, flow rate: {} MB/s",
+                            LOG.info("VIP download [{}]: {} PACS responses, average PACS response time: {} ms, bytes received: {}, flow rate: {} MB/s, "
+                                    + "waiting for PACS: {} ms, zip writing: {} ms (compression: {} ms, network: {} ms)",
                                     completePath, pacsStats.getResponseCount(),
                                     String.format("%.1f", pacsStats.getAverageResponseMillis()),
                                     pacsStats.getTotalBytes(),
-                                    String.format("%.2f", pacsStats.getBytesPerSecond() / 1_000_000));
+                                    String.format("%.2f", pacsStats.getBytesPerSecond() / 1_000_000),
+                                    pacsStats.getWaitMillis(),
+                                    pacsStats.getZipMillis(),
+                                    Math.max(0, pacsStats.getZipMillis() - pacsStats.getNetworkMillis()),
+                                    pacsStats.getNetworkMillis());
                         }
                         return new ResponseEntity<Void>(HttpStatus.OK);
                     } finally {

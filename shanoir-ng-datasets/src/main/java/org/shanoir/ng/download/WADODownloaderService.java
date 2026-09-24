@@ -211,8 +211,13 @@ public class WADODownloaderService {
                 .toStream(wadoPrefetch)) {
             // Then we put each file one by one in the zip
             Iterator<PacsResponse> iterator = responses.iterator();
+            long waitStart = System.nanoTime();
             while (iterator.hasNext()) {
                 PacsResponse response = iterator.next();
+                long zipStart = System.nanoTime();
+                if (stats != null) {
+                    stats.recordWait(zipStart - waitStart);
+                }
                 String name = namePrefix + sanitize(wadoURLHandler.extractUIDs(response.url())[2]);
                 try {
                     files.add(writeFileInZip(response, zipOutputStream, name, anonymizedSubjectName));
@@ -223,6 +228,10 @@ public class WADODownloaderService {
                 } catch (ZipPacsFileException e) {
                     LOG.error("Could not download dataset [{}] as dicom", dataset.getId(), e);
                     downloadResult.update("Could not download dataset [" + dataset.getId() + "] as dicom : " + e.getMessage(), DatasetDownloadError.PARTIAL_FAILURE);
+                }
+                waitStart = System.nanoTime();
+                if (stats != null) {
+                    stats.recordZip(waitStart - zipStart);
                 }
             }
         }
