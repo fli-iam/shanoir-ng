@@ -417,15 +417,18 @@ CMD ["solr-precreate", "shanoir", "/etc/shanoir-core-template"]
 
 ################ BIDS validator #####################################################
 # ---- stage: cache validator deps
-FROM denoland/deno:debian AS deno_cache
+# Deno version pinned: npm resolution behaviour changes between Deno releases
+FROM denoland/deno:debian-2.9.7 AS deno_cache
 
 # Force Deno to store its cache here
 ENV DENO_DIR=/deno
 
 ARG BIDS_VALIDATOR_VERSION=2.2.10
 
-# Pre-fetch into Deno cache
-RUN deno cache jsr:@bids/validator@${BIDS_VALIDATOR_VERSION}
+# Pre-fetch into Deno cache. "deno cache" alone misses npm packages that "deno run" resolves
+# (e.g. a newer which-typed-array), so also run the validator once with the worker's exact flags
+RUN deno cache jsr:@bids/validator@${BIDS_VALIDATOR_VERSION} \
+    && deno run --node-modules-dir=none -ERWN jsr:@bids/validator@${BIDS_VALIDATOR_VERSION} --version
 
 
 # ---- stage: runtime
