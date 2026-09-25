@@ -192,6 +192,8 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_started
+      keycloak:
+        condition: service_started
   #
   # Studies microservice
   #
