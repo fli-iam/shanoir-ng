@@ -80,6 +80,12 @@
             <groupId>org.shanoir-ng</groupId>
             <artifactId>shanoir-ng-exchange</artifactId>
             <version>3.4.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
@@ -111,6 +117,11 @@
             <version>1.18.5</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.dcm4che</groupId>
+            <artifactId>dcm4che-emf</artifactId>
+            <version>${dcm4che.version}</version>
+        </dependency>
         <!-- DICOM Weasis Tools, based on dcm4che3 -->
         <dependency>
             <groupId>org.weasis</groupId>
@@ -228,6 +239,14 @@
             </snapshots>
             <id>mvn-repo-master</id>
             <url>https://raw.github.com/nroduit/mvn-repo/master/</url>
+        </repository>
+        <repository>
+            <id>dcm4che</id>
+            <name>dcm4che</name>
+            <url>https://www.dcm4che.org/maven2/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
         </repository>
     </repositories>
 

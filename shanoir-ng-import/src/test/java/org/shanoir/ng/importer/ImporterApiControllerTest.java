@@ -37,7 +37,6 @@ import org.shanoir.ng.importer.dicom.query.QueryPACSService;
 import org.shanoir.ng.importer.model.EegDataset;
 import org.shanoir.ng.importer.model.EegImportJob;
 import org.shanoir.ng.shared.event.ShanoirEventService;
-import org.shanoir.ng.shared.jackson.JacksonUtils;
 import org.shanoir.ng.utils.ImportUtils;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -51,6 +50,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.client.RestTemplate;
+
+import tools.jackson.databind.json.JsonMapper;
 
 
 /**
@@ -101,6 +102,9 @@ public class ImporterApiControllerTest {
     @MockitoBean
     private ImportJobStatusService importJobStatusService;
 
+    @Autowired
+    private JsonMapper mapper;
+
     public MockMultipartFile createFile(boolean withParticipants, boolean studyDescription,
             boolean sourceData, boolean importJson) throws IOException {
         File importDir = new File("/tmp/test-import-as-bids");
@@ -149,7 +153,7 @@ public class ImporterApiControllerTest {
         mvc.perform(MockMvcRequestBuilders.post(START_EEG_JOB_PATH)
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(JacksonUtils.serialize(importJob)));
+                .content(mapper.writeValueAsString(importJob)));
 
         // Just check that the name is well transmitted and that the call is made
         verify(rabbitTemplate).convertSendAndReceive(Mockito.any(String.class), captor.capture());
