@@ -15,12 +15,14 @@
 package org.shanoir.ng.importer.eeg.edf;
 
 import java.io.IOException;
+import java.io.Serial;
 
 /**
  * This exception is thrown if the file format is not according to EDF.
  */
 public class EDFParserException extends IOException {
 
+    @Serial
     private static final long serialVersionUID = 3807109927368496625L;
 
     public EDFParserException() {

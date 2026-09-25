@@ -16,7 +16,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.4.0</version>
+        <version>4.0.2</version>
         <relativePath />
     </parent>
 
@@ -29,7 +29,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <java.version>21</java.version>
+        <java.version>25</java.version>
         <dcm4che.version>5.31.1</dcm4che.version>
         <checkstyle.header.file>${project.basedir}/../shanoir-ng-back/java-header</checkstyle.header.file>
         <checkstyle.config.file>${project.basedir}/../shanoir-ng-back/checkstyle.xml</checkstyle.config.file>
@@ -40,11 +40,7 @@
         <!-- Spring Boot -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-security</artifactId>
+            <artifactId>spring-boot-starter-webmvc</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -67,13 +63,13 @@
         <!-- Shanoir dependencies -->
         <dependency>
             <groupId>org.shanoir-ng</groupId>
-            <artifactId>shanoir-ng-ms-common</artifactId>
-            <version>3.4.0</version>
+            <artifactId>shanoir-ng-ms-common-jackson3</artifactId>
+            <version>4.0.2</version>
         </dependency>
         <dependency>
             <groupId>org.shanoir-ng</groupId>
-            <artifactId>shanoir-ng-study-rights</artifactId>
-            <version>3.4.0</version>
+            <artifactId>shanoir-ng-study-rights-jackson3</artifactId>
+            <version>4.0.2</version>
         </dependency>
         <dependency>
             <groupId>org.shanoir.anonymization</groupId>
@@ -84,21 +80,36 @@
             <groupId>org.shanoir-ng</groupId>
             <artifactId>shanoir-ng-exchange</artifactId>
             <version>3.4.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
             <groupId>org.mariadb.jdbc</groupId>
             <artifactId>mariadb-java-client</artifactId>
-            <version>3.5.2</version>
         </dependency>
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-            <version>2.8.5</version>
+            <version>3.0.3</version>
         </dependency>
         <dependency>
-            <groupId>com.fasterxml.jackson.module</groupId>
+            <groupId>tools.jackson.module</groupId>
             <artifactId>jackson-module-kotlin</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-restclient-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webmvc-test</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>net.bytebuddy</groupId>
@@ -106,6 +117,11 @@
             <version>1.18.5</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.dcm4che</groupId>
+            <artifactId>dcm4che-emf</artifactId>
+            <version>${dcm4che.version}</version>
+        </dependency>
         <!-- DICOM Weasis Tools, based on dcm4che3 -->
         <dependency>
             <groupId>org.weasis</groupId>
@@ -119,15 +135,8 @@
             </exclusions>
         </dependency>
 
-        <!-- mvnrepository.com/artifact/org.apache.httpcomponents/httpmime -->
         <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpmime</artifactId>
-            <version>4.5.14</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <groupId>tools.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-csv</artifactId>
         </dependency>
     </dependencies>
@@ -163,6 +172,10 @@
                     </classpathDependencyExcludes>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.graalvm.buildtools</groupId>
+                <artifactId>native-maven-plugin</artifactId>
+            </plugin>
             <!-- Package shanoir-ng-import.jar as Spring Boot executable: Avoid error:
 				no main manifest attribute, in /shanoir-ng-import.jar -->
             <!-- Used here for ShanoirUploader: create an additional single jar to be used by ShUp -->
@@ -171,13 +184,36 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
                     <classifier>exec</classifier>
+                    <profiles>
+                        <profile>default</profile>
+                    </profiles>
+                    <image>
+                        <name>${project.name}-native</name>
+                        <builder>paketobuildpacks/builder-jammy-base:latest</builder>
+                        <env>
+                            <BP_NATIVE_IMAGE>true</BP_NATIVE_IMAGE>
+                            <BP_NATIVE_IMAGE_BUILD_ARGUMENTS>-H:+AddAllCharsets</BP_NATIVE_IMAGE_BUILD_ARGUMENTS>
+                        </env>
+                    </image>
                 </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>process-aot</id>
+                        <goals>
+                            <goal>process-aot</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             <!-- Copy shanoir-ng-import.jar for docker-compose up running -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.7</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -203,6 +239,14 @@
             </snapshots>
             <id>mvn-repo-master</id>
             <url>https://raw.github.com/nroduit/mvn-repo/master/</url>
+        </repository>
+        <repository>
+            <id>dcm4che</id>
+            <name>dcm4che</name>
+            <url>https://www.dcm4che.org/maven2/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
         </repository>
     </repositories>
 

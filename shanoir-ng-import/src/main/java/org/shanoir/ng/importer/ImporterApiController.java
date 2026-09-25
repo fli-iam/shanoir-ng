@@ -86,10 +86,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.swagger.v3.oas.annotations.Parameter;
-import jakarta.validation.Valid;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * This is the main component of the import of Shanoir-NG. The front-end in
@@ -267,8 +266,7 @@ public class ImporterApiController implements ImporterApi {
     }
 
     @Override
-    public ResponseEntity<Void> startImportJob(
-            @Parameter(name = "ImportJob", required = true) @Valid @RequestBody final ImportJob importJob)
+    public ResponseEntity<Void> startImportJob(final ImportJob importJob)
                     throws RestServiceException {
         File userImportDir = ImportUtils.getUserImportDir(importDir);
         final Long userId = KeycloakUtil.getTokenUserId();
@@ -308,8 +306,7 @@ public class ImporterApiController implements ImporterApi {
     }
 
     @Override
-    public ResponseEntity<Void> startImportJobBase(
-            @Parameter(name = "ImportJob", required = true) @Valid @RequestBody final ImportJobBase importJob)
+    public ResponseEntity<Void> startImportJobBase(final ImportJobBase importJob)
             throws RestServiceException {
         File userImportDir = ImportUtils.getUserImportDir(importDir);
         final Long userId = KeycloakUtil.getTokenUserId();
@@ -342,9 +339,7 @@ public class ImporterApiController implements ImporterApi {
     }
 
     @Override
-    public ResponseEntity<ImportJob> queryPACS(
-            @Parameter(name = "DicomQuery", required = true) @Valid @RequestBody final DicomQuery dicomQuery)
-                    throws RestServiceException {
+    public ResponseEntity<ImportJob> queryPACS(final DicomQuery dicomQuery) throws RestServiceException {
         ImportJob importJob;
         try {
             importJob = queryPACSService.queryCFIND(dicomQuery);
@@ -691,8 +686,7 @@ public class ImporterApiController implements ImporterApi {
      * subject, ect...) so we make a call to dataset API to create it.
      */
     @Override
-    public ResponseEntity<Void> startImportEEGJob(
-            @Parameter(name = "EegImportJob", required = true) @Valid @RequestBody final EegImportJob importJob)
+    public ResponseEntity<Void> startImportEEGJob(final EegImportJob importJob)
             throws RestServiceException {
         final String tempDirId = ImportJobStatusService.keyOf(importJob.getWorkFolder());
         importJobStatusService.setInProgress(tempDirId, "Import job received, queued for processing.");
@@ -928,7 +922,7 @@ public class ImporterApiController implements ImporterApi {
 
             // STEP 5 delete temporary file
             FileUtils.deleteQuietly(importJobDir);
-        } catch (IOException e) {
+        } catch (JacksonException | IOException e) {
             throw new RestServiceException(new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(),
                     "The file could not be correctly unziped on the server. Please check consistency.", e));
         }

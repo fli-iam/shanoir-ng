@@ -24,6 +24,7 @@ public enum TypeEnum {
 
     private String value;
 
+    @JsonCreator
     TypeEnum(String value) {
         this.value = value;
     }
