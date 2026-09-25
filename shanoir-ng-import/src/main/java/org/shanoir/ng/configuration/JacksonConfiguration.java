@@ -34,9 +34,9 @@ import tools.jackson.databind.module.SimpleModule;
 import tools.jackson.databind.ser.ValueSerializerModifier;
 
 @Configuration(proxyBeanMethods = false)
-public class JacksonConfigurationUsers {
+public class JacksonConfiguration {
 
-    @Bean(name = "jsonMapper")
+    @Bean
     public JsonMapper jsonMapper() {
         SimpleModule studyUserModule = new SimpleModule();
         studyUserModule.addAbstractTypeMapping(StudyUserInterface.class, StudyUser.class);
