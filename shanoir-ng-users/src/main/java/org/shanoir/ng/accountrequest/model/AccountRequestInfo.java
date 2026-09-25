@@ -39,6 +39,7 @@ public class AccountRequestInfo extends AbstractEntity {
 
     private String function;
 
+    @NotNull
     private String institution;
 
     @NotNull
