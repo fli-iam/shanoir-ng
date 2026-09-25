@@ -185,9 +185,6 @@ public class RabbitMQConfiguration {
     /** Queue to get the study card from a equipment code. */
     public static final String IMPORT_STUDY_CARD_QUEUE = "import-study-card-queue";
 
-    /** User delete event to notify to studies. To be overriden by an event ?*/
-    public static final String MS_USERS_TO_MS_STUDIES_USER_DELETE = "ms_users_to_ms_studies_user_delete";
-
     /** Queue to re-convert using a different nifti converter */
     public static final String NIFTI_CONVERSION_QUEUE = "nifti-conversion-queue";
 
@@ -416,11 +413,6 @@ public class RabbitMQConfiguration {
     @Bean
     public static Queue findStudyCardQueue() {
         return new Queue(FIND_STUDY_CARD_QUEUE, true);
-    }
-
-    @Bean
-    public static Queue getMSUsersToMSStudiesUserDelete() {
-        return new Queue(MS_USERS_TO_MS_STUDIES_USER_DELETE, true);
     }
 
     @Bean
