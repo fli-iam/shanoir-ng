@@ -106,9 +106,6 @@ public class RabbitMQConfiguration {
     /** Queue to make anima to nifti conversion. */
     public static final String ANIMA_CONVERSION_QUEUE = "anima-conversion-queue";
 
-    /** Queue to consume BIDS related events */
-    public static final String BIDS_EVENT_QUEUE = "bids-event-queue";
-
     /** Queue to make bruker to dicom conversion. */
     public static final String BRUKER_CONVERSION_QUEUE = "bruker-conversion-queue";
 
@@ -123,9 +120,6 @@ public class RabbitMQConfiguration {
 
     /** Copy datasets from one study to another. */
     public static final String COPY_DATASETS_TO_STUDY_QUEUE = "copy-datasets-to-study-queue";
-
-    /** Create DS acquisition => Index datasets in solr. */
-    public static final String CREATE_DATASET_ACQUISITION_QUEUE = "create-dataset-acquisition-queue";
 
     /** Get the list of subjects for a given study. */
     public static final String DATASET_SUBJECT_QUEUE = "dataset-subjects-queue";
@@ -199,18 +193,10 @@ public class RabbitMQConfiguration {
     /** Queue for all shanoir events. */
     public static final String SHANOIR_EVENTS_QUEUE = "shanoir-events-queue";
 
-    /** Specific queue for import dataset events. */
-    public static final String SHANOIR_EVENTS_QUEUE_IMPORT = "shanoir-events-queue-import";
-
     public static final String STUDY_ADMINS_QUEUE = "study-admin-queue";
 
     /** Queue used to get anonymisation profile of a study. */
     public static final String STUDY_ANONYMISATION_PROFILE_QUEUE = "study-anonymisation-profile-queue";
-
-    public static final String STUDY_CENTER_QUEUE = "study-center-queue";
-
-    /** Get the type of dataset from a given study. */
-    public static final String STUDY_DATASET_TYPE = "study-dataset-type";
 
     /** Calculate storage volume for datasets linked to a study. */
     public static final String STUDY_DATASETS_DETAILED_STORAGE_VOLUME = "study-datasets-detailed-storage-volume";
@@ -220,9 +206,6 @@ public class RabbitMQConfiguration {
 
     /** Queue used to get the list of studies I can Admin. */
     public static final String STUDY_I_CAN_ADMIN_QUEUE = "study-i-can-admin";
-
-    /** Queue used to send invitation email for a given study. */
-    public static final String STUDY_INVITATION_QUEUE = "study-invitation-queue";
 
     /** Queue used to get the name of a study from ID */
     public static final String STUDY_NAME_QUEUE = "study-name-queue";
@@ -311,11 +294,6 @@ public class RabbitMQConfiguration {
     }
 
     @Bean
-    public static Queue bidsEventQueue() {
-        return new Queue(BIDS_EVENT_QUEUE, true);
-    }
-
-    @Bean
     public static Queue brukerConversionQueue() {
         return new Queue(BRUKER_CONVERSION_QUEUE, true);
     }
@@ -338,11 +316,6 @@ public class RabbitMQConfiguration {
     @Bean
     public static Queue copyDatasetToStudyQueue() {
         return new Queue(COPY_DATASETS_TO_STUDY_QUEUE, true);
-    }
-
-    @Bean
-    public static Queue createDatasetAcquisitionQueue() {
-        return new Queue(CREATE_DATASET_ACQUISITION_QUEUE, true);
     }
 
     @Bean
@@ -426,11 +399,6 @@ public class RabbitMQConfiguration {
     }
 
     @Bean
-    public static Queue getShanoirEventsQueueImport() {
-        return new Queue(SHANOIR_EVENTS_QUEUE_IMPORT, true);
-    }
-
-    @Bean
     public static Queue importBidsDatasetQueue() {
         return new Queue(IMPORTER_BIDS_DATASET_QUEUE, true);
     }
@@ -486,11 +454,6 @@ public class RabbitMQConfiguration {
     }
 
     @Bean
-    public static Queue studyCenterQueue() {
-        return new Queue(STUDY_CENTER_QUEUE, true);
-    }
-
-    @Bean
     public static Queue studyDatasetsDetailedStorageVolumeQueue() {
         return new Queue(STUDY_DATASETS_DETAILED_STORAGE_VOLUME, true);
     }
@@ -501,18 +464,8 @@ public class RabbitMQConfiguration {
     }
 
     @Bean
-    public static Queue studyDatasetTypeQueue() {
-        return new Queue(STUDY_DATASET_TYPE, true);
-    }
-
-    @Bean
     public static Queue studyICanAdminQueue() {
         return new Queue(STUDY_I_CAN_ADMIN_QUEUE, true);
-    }
-
-    @Bean
-    public static Queue studyInvitationQueue() {
-        return new Queue(STUDY_INVITATION_QUEUE, true);
     }
 
     @Bean
