@@ -162,8 +162,7 @@ class RabbitMQDatasetsServiceTest {
             return null;
         }).when(examinationService).deleteById(eq(EXAM_ID), eq(event));
 
-        event.setMessage("{\"irrelevant\":\"payload, objectMapper.readValue() is mocked\"}");
-        rabbitMQDatasetsService.deleteStudy(event);
+        rabbitMQDatasetsService.deleteStudy("{\"irrelevant\":\"payload, objectMapper.readValue() is mocked\"}");
 
         verify(examinationService).deleteById(EXAM_ID, event);
         assertEquals(REQUESTING_USER_ID, userIdSeenDuringCascade.get());
