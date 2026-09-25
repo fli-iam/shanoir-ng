@@ -36,13 +36,6 @@ public class BidsValidationPublisher {
     @Autowired
     private BidsValidationAwaiter awaiter;
 
-    public void requestValidationAsync(String filePath) throws AmqpException {
-        if (filePath == null) {
-            throw new IllegalArgumentException("filePath cannot be null");
-        }
-        rabbit.send("", BidsValidationConfiguration.BIDS_VALIDATION_REQUEST_QUEUE, buildRequest(filePath, null));
-    }
-
     public String requestValidationSync(String filePath) throws AmqpException {
         if (filePath == null) {
             throw new IllegalArgumentException("filePath cannot be null");
