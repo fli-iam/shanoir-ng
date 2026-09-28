@@ -39,6 +39,7 @@ import org.shanoir.ng.utils.ModelsUtil;
 import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessAuthorized;
 import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithAnonymousUser;
@@ -78,6 +79,8 @@ public class SubjectApiSecurityTest {
     @MockitoBean
     private StudyRepository studyRepository;
 
+    @MockitoBean
+    private ConnectionFactory connectionFactory;
 
     @BeforeEach
     public void setup() {

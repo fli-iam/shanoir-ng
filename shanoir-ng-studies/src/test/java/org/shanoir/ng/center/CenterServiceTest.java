@@ -14,17 +14,17 @@
 
 package org.shanoir.ng.center;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.BDDMockito.given;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Assertions;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import static org.mockito.BDDMockito.given;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.shanoir.ng.center.dto.mapper.CenterMapper;
 import org.shanoir.ng.center.model.Center;
@@ -34,9 +34,11 @@ import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.studycenter.StudyCenter;
 import org.shanoir.ng.utils.ModelsUtil;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import tools.jackson.databind.ObjectMapper;
 
@@ -53,20 +55,23 @@ public class CenterServiceTest {
     private static final Long CENTER_ID = 1L;
     private static final String UPDATED_CENTER_NAME = "test";
 
-    @Mock
+    @MockitoBean
     private CenterMapper centerMapper;
 
-    @Mock
+    @MockitoBean
     private CenterRepository centerRepository;
 
-    @Mock
+    @MockitoBean
     private RabbitTemplate rabbitTemplate;
 
     @InjectMocks
     private CenterServiceImpl centerService;
 
-    @Mock
+    @MockitoBean
     private ObjectMapper objectMapper;
+
+    @MockitoBean
+    private ConnectionFactory connectionFactory;
 
     @BeforeEach
     public void setup() {

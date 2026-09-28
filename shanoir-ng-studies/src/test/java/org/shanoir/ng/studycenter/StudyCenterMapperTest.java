@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.shanoir.ng.acquisitionequipment.dto.mapper.AcquisitionEquipmentMapper;
 import org.shanoir.ng.center.dto.mapper.CenterMapper;
 import org.shanoir.ng.study.model.Study;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -46,6 +47,9 @@ public class StudyCenterMapperTest {
 
     @MockitoBean
     private CenterMapper centerMapperMock;
+
+    @MockitoBean
+    private ConnectionFactory connectionFactory;
 
     @Autowired
     private StudyCenterMapper studyCenterMapper;

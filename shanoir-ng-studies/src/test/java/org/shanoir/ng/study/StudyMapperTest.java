@@ -24,6 +24,7 @@ import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.dto.mapper.StudyMapper;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.timepoint.TimepointMapper;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -49,6 +50,9 @@ public class StudyMapperTest {
 
     @MockitoBean
     private TimepointMapper timepointMapperMock;
+
+    @MockitoBean
+    private ConnectionFactory connectionFactory;
 
     @Test
     public void studiesToStudyDTOsTest() {

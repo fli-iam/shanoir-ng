@@ -24,6 +24,7 @@ import org.shanoir.ng.center.dto.CenterDTO;
 import org.shanoir.ng.center.dto.mapper.CenterMapper;
 import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.shared.core.model.IdName;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -49,6 +50,9 @@ public class CenterMapperTest {
 
     @Autowired
     private CenterMapper centerMapper;
+
+    @MockitoBean
+    private ConnectionFactory connectionFactory;
 
     @Test
     public void centersToCenterDTOsTest() {

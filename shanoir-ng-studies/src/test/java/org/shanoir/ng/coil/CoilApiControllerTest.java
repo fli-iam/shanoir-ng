@@ -53,7 +53,10 @@ import tools.jackson.databind.json.JsonMapper;
  *
  */
 
-@WebMvcTest(CoilApiController.class)
+@WebMvcTest(controllers = CoilApiController.class,
+        excludeAutoConfiguration = {
+                org.springframework.boot.security.oauth2.server.resource.autoconfigure.servlet.OAuth2ResourceServerAutoConfiguration.class
+        })
 @AutoConfigureMockMvc(addFilters = false)
 @WithMockKeycloakUser(id = 123)
 @ActiveProfiles("test")
