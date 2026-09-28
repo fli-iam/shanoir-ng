@@ -91,7 +91,7 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    FilterRegistrationBean shanoirCorsFilter() {
+    public FilterRegistrationBean shanoirCorsFilter() {
         final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         final CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);

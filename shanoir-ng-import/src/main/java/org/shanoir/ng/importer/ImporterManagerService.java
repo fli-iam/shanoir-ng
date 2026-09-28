@@ -51,9 +51,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import tools.jackson.core.JacksonException;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 
 /**
@@ -271,7 +271,7 @@ public class ImporterManagerService {
         email.setRecipients(recipients);
         try {
             rabbitTemplate.convertAndSend(RabbitMQConfiguration.IMPORT_DATASET_FAILED_MAIL_QUEUE, objectMapper.writeValueAsString(email));
-        } catch (AmqpException | JsonProcessingException e) {
+        } catch (AmqpException | JacksonException e) {
             LOG.error("Could not send email for this import. ", e);
         }
     }
