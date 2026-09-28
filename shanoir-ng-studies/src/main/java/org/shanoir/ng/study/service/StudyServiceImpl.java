@@ -99,7 +99,7 @@ public class StudyServiceImpl implements StudyService {
 
     private static final Logger LOG = LoggerFactory.getLogger(StudyServiceImpl.class);
 
-    @Value("${shanoir.userDefaultExpirationDays}")
+    @Value("${shanoir.userDefaultExpirationDays:183}")
     private int userDefaultExpirationDays;
 
     @Autowired

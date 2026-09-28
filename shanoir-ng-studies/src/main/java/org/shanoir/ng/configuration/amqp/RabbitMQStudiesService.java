@@ -76,7 +76,7 @@ public class RabbitMQStudiesService {
 
     private static final String DELIMITER = ":";
 
-    @Value("${shanoir.userDefaultExpirationDays}")
+    @Value("${shanoir.userDefaultExpirationDays:183}")
     private int userDefaultExpirationDays;
 
     @Autowired
