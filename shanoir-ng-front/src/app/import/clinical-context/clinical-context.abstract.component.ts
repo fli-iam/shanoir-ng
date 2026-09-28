@@ -34,6 +34,7 @@ import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 import { Study } from '../../studies/shared/study.model';
 import { StudyService } from '../../studies/shared/study.service';
+import { StudyCardDTOServiceAbstract } from '../../study-cards/shared/study-card.dto.abstract';
 import { StudyCard } from '../../study-cards/shared/study-card.model';
 import { StudyCardService } from '../../study-cards/shared/study-card.service';
 import { Subject } from '../../subjects/shared/subject.model';
@@ -241,8 +242,8 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         /* build the studycards options and set their compatibilies */
         return Promise.all([
             this.centerService.getCentersByStudyId(study.id),
-            this.studycardService.getAllForStudy(study.id)
-        ]).then(([centers, studyCards]) => {
+            this.studycardService.getAllForStudyRaw(study.id)
+        ]).then(([centers, studyCardDTOs]) => {
             this.enrichStudyCenters(study, centers);
             const accessibleCenterIds = centers.map(center => center.id);
             /* find equipments for this study - needed for checking studycards compatibilities.
@@ -254,16 +255,22 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
                     if (studyEquipments.findIndex(se => se.id == eq.id) == -1) studyEquipments.push(eq);
                 });
             });
-            if (!studyCards) studyCards = [];
+
+            const studyCards: StudyCard[] = (studyCardDTOs || []).map(dto => {
+                const studyCard = StudyCardDTOServiceAbstract.mapSyncFields(dto, new StudyCard());
+                if (studyCard.acquisitionEquipment) {
+                    studyCard.acquisitionEquipment = studyEquipments.find(eq => eq.id == studyCard.acquisitionEquipment.id);
+                }
+                return studyCard;
+            });
 
             studyCards.sort((a, b) => a.name?.trim().localeCompare(b.name.trim()));
 
             return studyCards.filter(studyCard => {
-                return accessibleCenterIds.includes(studyCard.acquisitionEquipment.center.id);
+                return studyCard.acquisitionEquipment && accessibleCenterIds.includes(studyCard.acquisitionEquipment.center.id);
             }).map(studyCard => {
                 const opt = new Option(studyCard, studyCard.name);
-                const scEq = studyCard.acquisitionEquipment ? studyEquipments.find(se => se.id == studyCard.acquisitionEquipment.id) : null;
-                opt.compatible = this.acqEqCompatible(scEq);
+                opt.compatible = this.acqEqCompatible(studyCard.acquisitionEquipment);
                 return opt;
             });
         });
