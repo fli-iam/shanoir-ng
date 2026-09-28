@@ -42,9 +42,9 @@ import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
 
@@ -70,13 +70,13 @@ public class StudyApiSecurityTest {
     @Autowired
     private StudyApi api;
 
-    @MockBean
+    @MockitoBean
     private SubjectRepository subjectRepository;
 
-    @MockBean
+    @MockitoBean
     private StudyRepository repository;
 
-    @MockBean
+    @MockitoBean
     private StudyUserRepository studyUserRepository;
 
 

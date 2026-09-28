@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.subject.model;
 
+import java.io.Serial;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -31,10 +32,10 @@ import org.shanoir.ng.tag.model.Tag;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
+import tools.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.annotation.JsonSerialize;
+import tools.jackson.databind.ext.javatime.deser.LocalDateDeserializer;
+import tools.jackson.databind.ext.javatime.ser.LocalDateSerializer;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -62,6 +63,7 @@ import jakarta.validation.constraints.NotNull;
         @ColumnResult(name = "id", type = Long.class), @ColumnResult(name = "name") }) })
 public class Subject extends HalEntity {
 
+    @Serial
     private static final long serialVersionUID = 6844259659282875507L;
 
     @JsonSerialize(using = LocalDateSerializer.class)

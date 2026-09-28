@@ -27,8 +27,8 @@ import org.shanoir.ng.shared.core.model.IdName;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 /**
  * Center mapper test.
@@ -44,7 +44,7 @@ public class CenterMapperTest {
     private static final Long CENTER_ID = 1L;
     private static final String CENTER_NAME = "test";
 
-    @MockBean
+    @MockitoBean
     private AcquisitionEquipmentMapper acquisitionEquipmentMapperMock;
 
     @Autowired

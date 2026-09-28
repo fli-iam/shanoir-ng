@@ -59,10 +59,8 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.util.ReflectionTestUtils;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.DatabindException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Study service test.
@@ -159,7 +157,7 @@ public class StudyServiceTest {
     }
 
     @Test
-    public void saveTest() throws MicroServiceCommunicationException, JsonMappingException, JsonProcessingException {
+    public void saveTest() throws MicroServiceCommunicationException, DatabindException {
         studyService.create(createStudy());
         Mockito.verify(studyRepository, Mockito.times(1)).save(Mockito.any(Study.class));
     }

@@ -37,9 +37,9 @@ import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 /**
  * User security service test.
@@ -62,7 +62,7 @@ public class CenterSecurityTest {
     @Autowired
     private CenterService service;
 
-    @MockBean
+    @MockitoBean
     private CenterRepository repository;
 
     @BeforeEach

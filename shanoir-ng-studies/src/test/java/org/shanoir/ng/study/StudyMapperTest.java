@@ -27,8 +27,8 @@ import org.shanoir.ng.timepoint.TimepointMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 /**
  * Study mapper test.
@@ -47,7 +47,7 @@ public class StudyMapperTest {
     @Autowired
     private StudyMapper studyMapper;
 
-    @MockBean
+    @MockitoBean
     private TimepointMapper timepointMapperMock;
 
     @Test

@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.study.model;
 
+import java.io.Serial;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -53,6 +54,7 @@ public class StudyUser extends AbstractEntity implements StudyUserInterface {
     /**
      * UID
      */
+    @Serial
     private static final long serialVersionUID = 5813071870148636187L;
 
     /** Inform an user about changes on study_user: creation */

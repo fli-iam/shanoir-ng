@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
+import tools.jackson.databind.json.JsonMapper;
 import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
 import org.shanoir.ng.acquisitionequipment.service.AcquisitionEquipmentService;
 import org.shanoir.ng.bids.service.BIDSService;
@@ -63,10 +63,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 @Service
 public class RabbitMQStudiesService {
@@ -195,7 +194,7 @@ public class RabbitMQStudiesService {
     public void deleteExaminationStudy(final String eventStr) {
         SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
         try {
-            ObjectMapper objectMapper = new ObjectMapper();
+            ObjectMapper objectMapper = new JsonMapper();
             ShanoirEvent event =  objectMapper.readValue(eventStr, ShanoirEvent.class);
             Long examinationId = Long.valueOf(event.getObjectId());
             Long studyId = Long.valueOf(event.getStudyId());
@@ -356,7 +355,7 @@ public class RabbitMQStudiesService {
                 LOG.error("Error while creating a new equipment.");
                 return null;
             }
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             LOG.error("Error while creating a new equipment: ", e);
             throw new AmqpRejectAndDontRequeueException(e);
         }

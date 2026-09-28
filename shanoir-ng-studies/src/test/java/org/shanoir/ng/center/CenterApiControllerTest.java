@@ -42,12 +42,12 @@ import org.shanoir.ng.study.service.StudyService;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
@@ -70,25 +70,25 @@ public class CenterApiControllerTest {
     @Autowired
     private MockMvc mvc;
 
-    @MockBean
+    @MockitoBean
     private CenterMapper centerMapperMock;
 
-    @MockBean
+    @MockitoBean
     private CenterService centerServiceMock;
 
-    @MockBean
+    @MockitoBean
     private StudyService studyServiceMock;
 
-    @MockBean
+    @MockitoBean
     private CenterFieldEditionSecurityManager fieldEditionSecurityManager;
 
-    @MockBean
+    @MockitoBean
     private CenterUniqueConstraintManager uniqueConstraintManager;
 
-    @MockBean
+    @MockitoBean
     private ShanoirEventService eventService;
 
-    @MockBean(name = "controllerSecurityService")
+    @MockitoBean(name = "controllerSecurityService")
     private ControllerSecurityService controllerSecurityService;
 
     @BeforeEach

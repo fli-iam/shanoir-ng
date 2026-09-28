@@ -28,9 +28,7 @@ import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Test class for RabbitMQSubjectService class.
@@ -56,7 +54,7 @@ public class RabbitMQSubjectServiceTest {
     private Long studyId = 1L;
 
     @Test
-    public void testGetSubjetsForStudy() throws JsonProcessingException {
+    public void testGetSubjetsForStudy() {
         SimpleSubjectDTO dto = new SimpleSubjectDTO();
         String ident = "subjectIdentifier";
         dto.setIdentifier(ident);
@@ -69,7 +67,7 @@ public class RabbitMQSubjectServiceTest {
     }
 
     @Test
-    public void testGetSubjetsForStudyFail() throws JsonProcessingException {
+    public void testGetSubjetsForStudyFail() {
         assertThrows(AmqpRejectAndDontRequeueException.class, () -> {
         // GIVEN a study ID, retrieve all associated subjects
             rabbitMQSubjectService.getSubjectsForStudy("non parsable long");

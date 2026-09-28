@@ -117,7 +117,6 @@ public class StudyApiController implements StudyApi {
 
     private final HttpServletRequest request;
 
-    @org.springframework.beans.factory.annotation.Autowired
     public StudyApiController(final HttpServletRequest request) {
         this.request = request;
     }

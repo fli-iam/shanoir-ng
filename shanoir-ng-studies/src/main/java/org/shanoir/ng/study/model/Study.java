@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.study.model;
 
+import java.io.Serial;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -88,6 +89,7 @@ public class Study extends HalEntity {
     /**
      * UID
      */
+    @Serial
     private static final long serialVersionUID = 2182323766659913794L;
 
     /** Is clinical. */
