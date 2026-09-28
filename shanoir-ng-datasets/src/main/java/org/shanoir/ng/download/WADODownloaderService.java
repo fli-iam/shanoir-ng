@@ -60,6 +60,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.springframework.web.util.DisconnectedClientHelper;
 
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.resources.ConnectionProvider;
@@ -219,9 +220,12 @@ public class WADODownloaderService {
                     files.add(writeFileInZip(response, zipOutputStream, name, anonymizedSubjectName));
                     zipOutputStream.flush();
                 } catch (IOException e) {
-                    LOG.error("Could not flush dataset [{}] to the client", dataset.getId(), e);
-                    downloadResult.update("Could not flush dataset [" + dataset.getId() + "] to the client : " + e.getMessage(), DatasetDownloadError.PARTIAL_FAILURE);
+                    // Client gone: stop here, closing the stream cancels the pending PACS requests
+                    throw new DownloadAbortedException("Could not flush dataset [" + dataset.getId() + "] to the client", e);
                 } catch (ZipPacsFileException e) {
+                    if (DisconnectedClientHelper.isClientDisconnectedException(e)) {
+                        throw new DownloadAbortedException("Client disconnected while downloading dataset [" + dataset.getId() + "]", e);
+                    }
                     LOG.error("Could not download dataset [{}] as dicom", dataset.getId(), e);
                     downloadResult.update("Could not download dataset [" + dataset.getId() + "] as dicom : " + e.getMessage(), DatasetDownloadError.PARTIAL_FAILURE);
                 }
