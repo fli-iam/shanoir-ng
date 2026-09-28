@@ -48,7 +48,10 @@ import tools.jackson.databind.json.JsonMapper;
  *
  */
 
-@WebMvcTest(ManufacturerModelApiController.class)
+@WebMvcTest(controllers = ManufacturerModelApiController.class,
+        excludeAutoConfiguration = {
+                org.springframework.boot.security.oauth2.server.resource.autoconfigure.servlet.OAuth2ResourceServerAutoConfiguration.class
+        })
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
 public class ManufacturerModelApiControllerTest {
