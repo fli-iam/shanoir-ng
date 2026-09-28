@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -63,7 +62,6 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
-import io.netty.handler.timeout.ReadTimeoutHandler;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.resources.ConnectionProvider;
 
@@ -154,15 +152,14 @@ public class WADODownloaderService {
     public void initWebClient() {
         ConnectionProvider provider = ConnectionProvider.builder("pacs-wado")
                 .maxConnections(500)
+                .pendingAcquireMaxCount(-1)
+                .pendingAcquireTimeout(Duration.ofMinutes(5))
                 .maxIdleTime(Duration.ofSeconds(15))
-                .maxLifeTime(Duration.ofMinutes(5))
                 .evictInBackground(Duration.ofSeconds(30))
                 .build();
 
         HttpClient httpClient = HttpClient.create(provider)
-                .responseTimeout(Duration.ofSeconds(30))
-                .doOnConnected(conn -> conn.addHandlerLast(
-                        new ReadTimeoutHandler(Duration.ofSeconds(30).toSeconds(), TimeUnit.SECONDS)));
+                .responseTimeout(Duration.ofSeconds(30));
 
         this.webClient = WebClient.builder()
                 .clientConnector(new ReactorClientHttpConnector(httpClient))
@@ -194,7 +191,7 @@ public class WADODownloaderService {
 
         PacsTransferStats stats = PacsTransferStats.current();
 
-        // Flux allows to download asynchronously (up to 4,w hich is the first iteration of the wadoPrefetch)
+        // Flux allows to download asynchronously and in advance (up to :wadoPrefetch for :wadoPrefetch threads)
         try (Stream<PacsResponse> responses = Flux.fromIterable(urlsToDownload)
                 .flatMap(url -> {
                     long startNanos = System.nanoTime();
