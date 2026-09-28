@@ -19,7 +19,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.shanoir.ng.configuration.amqp.RabbitMQSubjectService;
 import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
@@ -27,11 +26,12 @@ import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Test class for RabbitMQSubjectService class.
@@ -49,9 +49,9 @@ public class RabbitMQSubjectServiceTest {
     private SubjectService subjectService;
 
     @MockitoBean
-    private ObjectMapper mapper;
+    private JsonMapper mapper;
 
-    @InjectMocks
+    @Autowired
     private RabbitMQSubjectService rabbitMQSubjectService;
 
     @MockitoBean
