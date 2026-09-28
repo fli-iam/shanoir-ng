@@ -19,6 +19,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
+import org.shanoir.ng.download.DownloadAbortedException;
 import org.shanoir.ng.download.PacsTransferStats;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
@@ -32,6 +33,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import jakarta.annotation.PostConstruct;
 
@@ -93,7 +95,7 @@ public class ProcessingResourceApiController implements ProcessingResourceApi {
 
                     PacsTransferStats pacsStats = PacsTransferStats.start();
                     try {
-                        datasetDownloaderService.massiveDownload(format, datasets, response, true, converterId, true, sorting);
+                        datasetDownloaderService.massiveDownload(format, datasets, response, true, converterId, true, sorting, true);
                     } finally {
                         PacsTransferStats.stop();
                         LOG.info("VIP download [{}]: {} PACS responses, average PACS response time: {} ms, bytes received: {}, flow rate: {} MB/s, "
@@ -131,5 +133,15 @@ public class ProcessingResourceApiController implements ProcessingResourceApi {
         } finally {
             dbPermits.release();
         }
+    }
+
+    /**
+     * Rethrown on purpose: checked before GlobalExceptionHandler, which would otherwise append a JSON
+     * error body to the already committed zip and end the response normally. Reaching Tomcat, the
+     * exception makes it cut the connection, so the client sees a failed transfer.
+     */
+    @ExceptionHandler(DownloadAbortedException.class)
+    public void rethrowDownloadAborted(DownloadAbortedException e) {
+        throw e;
     }
 }
