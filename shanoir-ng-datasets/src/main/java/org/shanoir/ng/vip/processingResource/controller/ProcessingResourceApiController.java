@@ -38,7 +38,6 @@ import jakarta.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Controller
@@ -61,17 +60,15 @@ public class ProcessingResourceApiController implements ProcessingResourceApi {
 
     private static final AtomicInteger NUMBER_OF_DOWNLOAD = new AtomicInteger(0);
 
-    @Value("${vip.download.max-concurrent:60}")
-    private int maxConcurrentDownloads;
+    @Value("${vip.download.db-permits:60}")
+    private int dbPermitCount;
 
-    @Value("${vip.download.permit-wait-seconds:20}")
-    private long permitWaitSeconds;
-
-    private Semaphore downloadPermits;
+    /** Caps the connections VIP downloads take from the Hikari pool, leaving the rest for other traffic. */
+    private Semaphore dbPermits;
 
     @PostConstruct
-    void initDownloadPermits() {
-        downloadPermits = new Semaphore(maxConcurrentDownloads, true);
+    void initDbPermits() {
+        dbPermits = new Semaphore(dbPermitCount, true);
     }
 
     @Override
@@ -87,37 +84,30 @@ public class ProcessingResourceApiController implements ProcessingResourceApi {
                 case "properties":
                     return new ResponseEntity<Void>(HttpStatus.NOT_IMPLEMENTED);
                 case "content":
-                    if (!acquireDownloadPermit(completePath)) {
-                        return new ResponseEntity<Void>(HttpStatus.SERVICE_UNAVAILABLE);
+                    List<Dataset> datasets = findDatasetsWithSemaphore(completePath);
+                    NUMBER_OF_DOWNLOAD.incrementAndGet();
+                    if (datasets.isEmpty()) {
+                        LOG.error("No dataset found for resource id [{}]", completePath);
+                        return new ResponseEntity<Void>(HttpStatus.BAD_REQUEST);
                     }
-                    try {
-                        List<Dataset> datasets = datasetRepository.findByResourceIdWithDatasetFiles(completePath);
-                        NUMBER_OF_DOWNLOAD.incrementAndGet();
-                        if (datasets.isEmpty()) {
-                            LOG.error("No dataset found for resource id [{}]", completePath);
-                            return new ResponseEntity<Void>(HttpStatus.BAD_REQUEST);
-                        }
 
-                        PacsTransferStats pacsStats = PacsTransferStats.start();
-                        try {
-                            datasetDownloaderService.massiveDownload(format, datasets, response, true, converterId, true, sorting);
-                        } finally {
-                            PacsTransferStats.stop();
-                            LOG.info("VIP download [{}]: {} PACS responses, average PACS response time: {} ms, bytes received: {}, flow rate: {} MB/s, "
-                                    + "waiting for PACS: {} ms, zip writing: {} ms (compression: {} ms, network: {} ms)",
-                                    completePath, pacsStats.getResponseCount(),
-                                    String.format("%.1f", pacsStats.getAverageResponseMillis()),
-                                    pacsStats.getTotalBytes(),
-                                    String.format("%.2f", pacsStats.getBytesPerSecond() / 1_000_000),
-                                    pacsStats.getWaitMillis(),
-                                    pacsStats.getZipMillis(),
-                                    Math.max(0, pacsStats.getZipMillis() - pacsStats.getNetworkMillis()),
-                                    pacsStats.getNetworkMillis());
-                        }
-                        return new ResponseEntity<Void>(HttpStatus.OK);
+                    PacsTransferStats pacsStats = PacsTransferStats.start();
+                    try {
+                        datasetDownloaderService.massiveDownload(format, datasets, response, true, converterId, true, sorting);
                     } finally {
-                        downloadPermits.release();
+                        PacsTransferStats.stop();
+                        LOG.info("VIP download [{}]: {} PACS responses, average PACS response time: {} ms, bytes received: {}, flow rate: {} MB/s, "
+                                + "waiting for PACS: {} ms, zip writing: {} ms (compression: {} ms, network: {} ms)",
+                                completePath, pacsStats.getResponseCount(),
+                                String.format("%.1f", pacsStats.getAverageResponseMillis()),
+                                pacsStats.getTotalBytes(),
+                                String.format("%.2f", pacsStats.getBytesPerSecond() / 1_000_000),
+                                pacsStats.getWaitMillis(),
+                                pacsStats.getZipMillis(),
+                                Math.max(0, pacsStats.getZipMillis() - pacsStats.getNetworkMillis()),
+                                pacsStats.getNetworkMillis());
                     }
+                    return new ResponseEntity<Void>(HttpStatus.OK);
                 default:
                     ErrorModel errorModel = new ErrorModel(HttpStatus.BAD_REQUEST.value(), "Action " + action + " not supported");
                     throw new RestServiceException(errorModel);
@@ -128,17 +118,18 @@ public class ProcessingResourceApiController implements ProcessingResourceApi {
         }
     }
 
-    private boolean acquireDownloadPermit(String completePath) {
+    private List<Dataset> findDatasetsWithSemaphore(String resourceId) throws RestServiceException {
         try {
-            if (downloadPermits.tryAcquire(permitWaitSeconds, TimeUnit.SECONDS)) {
-                return true;
-            }
-            LOG.warn("VIP download [{}] rejected: no download slot freed within {} seconds ({} downloads max)",
-                    completePath, permitWaitSeconds, maxConcurrentDownloads);
+            dbPermits.acquire();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            LOG.warn("VIP download [{}] interrupted while waiting for a download slot", completePath);
+            throw new RestServiceException(new ErrorModel(HttpStatus.SERVICE_UNAVAILABLE.value(),
+                    "Interrupted while waiting for a database connection"));
         }
-        return false;
+        try {
+            return datasetRepository.findByResourceIdWithDatasetFiles(resourceId);
+        } finally {
+            dbPermits.release();
+        }
     }
 }
