@@ -14,7 +14,6 @@
 
 package org.shanoir.ng.vip.processingResource.controller;
 
-import com.zaxxer.hikari.HikariDataSource;
 import jakarta.servlet.http.HttpServletResponse;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
@@ -24,7 +23,6 @@ import org.shanoir.ng.download.PacsTransferStats;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
-import org.shanoir.ng.vip.processingResource.repository.ProcessingResourceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +38,6 @@ import jakarta.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Controller
 public class ProcessingResourceApiController implements ProcessingResourceApi {
@@ -52,15 +49,7 @@ public class ProcessingResourceApiController implements ProcessingResourceApi {
     private DatasetDownloaderServiceImpl datasetDownloaderService;
 
     @Autowired
-    private ProcessingResourceRepository processingResourceRepository;
-
-    @Autowired
     private DatasetRepository  datasetRepository;
-
-    @Autowired
-    private HikariDataSource dataSource;
-
-    private static final AtomicInteger NUMBER_OF_DOWNLOAD = new AtomicInteger(0);
 
     @Value("${vip.download.db-permits:60}")
     private int dbPermitCount;
@@ -78,45 +67,39 @@ public class ProcessingResourceApiController implements ProcessingResourceApi {
             throws IOException, RestServiceException, EntityNotFoundException {
         LOG.debug("completePath: {}, action: {}, format: {}, converterId: {}, response: {}", completePath, action, format, converterId, response);
         // TODO implement those actions
-        try {
-            switch (action) {
-                case "exists":
-                case "list":
-                case "md5":
-                case "properties":
-                    return new ResponseEntity<Void>(HttpStatus.NOT_IMPLEMENTED);
-                case "content":
-                    List<Dataset> datasets = findDatasetsWithSemaphore(completePath);
-                    NUMBER_OF_DOWNLOAD.incrementAndGet();
-                    if (datasets.isEmpty()) {
-                        LOG.error("No dataset found for resource id [{}]", completePath);
-                        return new ResponseEntity<Void>(HttpStatus.BAD_REQUEST);
-                    }
+        switch (action) {
+            case "exists":
+            case "list":
+            case "md5":
+            case "properties":
+                return new ResponseEntity<Void>(HttpStatus.NOT_IMPLEMENTED);
+            case "content":
+                List<Dataset> datasets = findDatasetsWithSemaphore(completePath);
+                if (datasets.isEmpty()) {
+                    LOG.error("No dataset found for resource id [{}]", completePath);
+                    return new ResponseEntity<Void>(HttpStatus.BAD_REQUEST);
+                }
 
-                    PacsTransferStats pacsStats = PacsTransferStats.start();
-                    try {
-                        datasetDownloaderService.massiveDownload(format, datasets, response, true, converterId, true, sorting, true);
-                    } finally {
-                        PacsTransferStats.stop();
-                        LOG.info("VIP download [{}]: {} PACS responses, average PACS response time: {} ms, bytes received: {}, flow rate: {} MB/s, "
-                                + "waiting for PACS: {} ms, zip writing: {} ms (compression: {} ms, network: {} ms)",
-                                completePath, pacsStats.getResponseCount(),
-                                String.format("%.1f", pacsStats.getAverageResponseMillis()),
-                                pacsStats.getTotalBytes(),
-                                String.format("%.2f", pacsStats.getBytesPerSecond() / 1_000_000),
-                                pacsStats.getWaitMillis(),
-                                pacsStats.getZipMillis(),
-                                Math.max(0, pacsStats.getZipMillis() - pacsStats.getNetworkMillis()),
-                                pacsStats.getNetworkMillis());
-                    }
-                    return new ResponseEntity<Void>(HttpStatus.OK);
-                default:
-                    ErrorModel errorModel = new ErrorModel(HttpStatus.BAD_REQUEST.value(), "Action " + action + " not supported");
-                    throw new RestServiceException(errorModel);
-            }
-        } catch (Exception e) {
-            LOG.error("Error while VIP downloading data", e);
-            throw e;
+                PacsTransferStats pacsStats = PacsTransferStats.start();
+                try {
+                    datasetDownloaderService.massiveDownload(format, datasets, response, true, converterId, true, sorting, true);
+                } finally {
+                    PacsTransferStats.stop();
+                    LOG.info("VIP download [{}]: {} PACS responses, average PACS response time: {} ms, bytes received: {}, flow rate: {} MB/s, "
+                            + "waiting for PACS: {} ms, zip writing: {} ms (compression: {} ms, network: {} ms)",
+                            completePath, pacsStats.getResponseCount(),
+                            String.format("%.1f", pacsStats.getAverageResponseMillis()),
+                            pacsStats.getTotalBytes(),
+                            String.format("%.2f", pacsStats.getBytesPerSecond() / 1_000_000),
+                            pacsStats.getWaitMillis(),
+                            pacsStats.getZipMillis(),
+                            Math.max(0, pacsStats.getZipMillis() - pacsStats.getNetworkMillis()),
+                            pacsStats.getNetworkMillis());
+                }
+                return new ResponseEntity<Void>(HttpStatus.OK);
+            default:
+                ErrorModel errorModel = new ErrorModel(HttpStatus.BAD_REQUEST.value(), "Action " + action + " not supported");
+                throw new RestServiceException(errorModel);
         }
     }
 
