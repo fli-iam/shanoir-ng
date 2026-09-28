@@ -423,9 +423,10 @@ public class RabbitMQDatasetsService {
             autoDelete = "false", durable = "true", type = ExchangeTypes.TOPIC)), containerFactory = "singleConsumerFactory"
             )
     @Transactional
-    public void deleteStudy(ShanoirEvent event) throws AmqpRejectAndDontRequeueException {
+    public void deleteStudy(String eventAsString) throws AmqpRejectAndDontRequeueException {
         SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
         try {
+            ShanoirEvent event = objectMapper.readValue(eventAsString, ShanoirEvent.class);
             // Keep the identity of the user who actually asked for the deletion, so that every
             // event published while cascading this deletion (examinations, dataset acquisitions...)
             // is correctly attributed to them instead of falling back to the generic system user.
