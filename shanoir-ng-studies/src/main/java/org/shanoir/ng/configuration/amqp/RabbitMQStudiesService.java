@@ -135,7 +135,7 @@ public class RabbitMQStudiesService {
             Long examinationId = Long.valueOf(event.getObjectId());
             Long studyId = event.getStudyId();
             String message = event.getMessage();
-            Pattern pat = Pattern.compile("centerId:(\\d+);subjectId:(\\d+)");
+            Pattern pat = Pattern.compile(".*?centerId:(\\d+);subjectId:(\\d+)");
             Matcher mat = pat.matcher(message);
 
             Long centerId = null;
@@ -147,9 +147,7 @@ public class RabbitMQStudiesService {
                 LOG.error("Something wrong happend while updating study examination list.");
                 throw new ShanoirException("Could not read subject ID and center ID from event message");
             }
-
             this.studyService.addExaminationToStudy(examinationId, studyId, centerId, subjectId);
-
         } catch (Exception e) {
             LOG.error("Could not index examination on given study ", e);
             throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event." + e.getMessage());

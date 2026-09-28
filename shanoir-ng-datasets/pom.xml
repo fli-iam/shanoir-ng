@@ -14,26 +14,61 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.shanoir-ng</groupId>
-        <artifactId>shanoir-ng-back</artifactId>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
         <version>3.4.0</version>
-        <relativePath>../shanoir-ng-back</relativePath>
+        <relativePath />
     </parent>
 
+    <groupId>org.shanoir-ng</groupId>
     <artifactId>shanoir-ng-datasets</artifactId>
     <packaging>jar</packaging>
 
     <name>shanoir-ng-datasets</name>
-    <description>Dataset microservice</description>
+    <description>Datasets microservice</description>
 
     <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <java.version>21</java.version>
+        <mapstruct.version>1.5.3.Final</mapstruct.version>
         <solrj.version>9.4.1</solrj.version>
         <spring.data.solr.version>4.3.15</spring.data.solr.version>
         <opencsv.version>5.7.1</opencsv.version>
+        <dcm4che.version>5.31.1</dcm4che.version>
+        <checkstyle.header.file>${project.basedir}/../shanoir-ng-back/java-header</checkstyle.header.file>
+        <checkstyle.config.file>${project.basedir}/../shanoir-ng-back/checkstyle.xml</checkstyle.config.file>
+        <checkstyle.suppressions.file>${project.basedir}/../shanoir-ng-back/suppressions.xml</checkstyle.suppressions.file>
     </properties>
 
     <dependencies>
-        <!-- Shanoir dependencies -->
+        <!-- Spring Boot -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-amqp</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <!-- do not put scope test here: compile errors: org.json package will be missing -->
+        </dependency>
+
+        <!-- Shanoir -->
         <dependency>
             <groupId>org.shanoir-ng</groupId>
             <artifactId>shanoir-ng-ms-common</artifactId>
@@ -55,13 +90,30 @@
             <version>3.4.0</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.mariadb.jdbc</groupId>
+            <artifactId>mariadb-java-client</artifactId>
+            <version>3.5.2</version>
+        </dependency>
+        <!-- DCM4CHEE -->
+        <dependency>
+            <groupId>org.dcm4che</groupId>
+            <artifactId>dcm4che-json</artifactId>
+            <version>${dcm4che.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.dcm4che</groupId>
+            <artifactId>dcm4che-emf</artifactId>
+            <version>${dcm4che.version}</version>
+        </dependency>
+
         <!-- gson -->
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
         </dependency>
 
-        <!-- Apache dependencies -->
+        <!-- Apache -->
         <dependency>
             <groupId>org.apache.httpcomponents.client5</groupId>
             <artifactId>httpclient5</artifactId>
@@ -106,11 +158,64 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.mapstruct/mapstruct-processor -->
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct</artifactId>
+            <version>${mapstruct.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.bytebuddy</groupId>
+            <artifactId>byte-buddy</artifactId>
+            <version>1.18.5</version>
+        </dependency>
 
+        <!-- Testing -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>3.6.0</version>
+                <configuration>
+                    <configLocation>${checkstyle.config.file}</configLocation>
+                    <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                    <suppressionsLocation>${checkstyle.suppressions.file}</suppressionsLocation>
+                    <excludes>**/target/**/*</excludes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>checkstyle-verify</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                    <parameters>true</parameters>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.mapstruct</groupId>
+                            <artifactId>mapstruct-processor</artifactId>
+                            <version>${mapstruct.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
             <!-- Package shanoir-ng-datasets.jar as Spring Boot executable: Avoid
 				error: no main manifest attribute, in /shanoir-ng-datasets.jar -->
             <plugin>
@@ -152,5 +257,16 @@
             </plugin>
         </plugins>
     </build>
+
+    <repositories>
+        <repository>
+            <id>dcm4che</id>
+            <name>dcm4che</name>
+            <url>https://www.dcm4che.org/maven2/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
 
 </project>

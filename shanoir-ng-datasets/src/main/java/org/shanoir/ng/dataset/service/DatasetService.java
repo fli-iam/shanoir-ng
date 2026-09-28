@@ -56,10 +56,19 @@ public interface DatasetService {
     @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnDataset(#id, 'CAN_ADMINISTRATE'))")
     void deleteById(Long id) throws EntityNotFoundException, ShanoirException, SolrServerException, IOException, RestServiceException;
 
-    void deleteByIdCascade(Long id) throws EntityNotFoundException, ShanoirException, SolrServerException, IOException, RestServiceException;
-
-    @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnDataset(#dataset.getId(), 'CAN_ADMINISTRATE'))")
-    void deleteDatasetFilesFromDiskAndPacs(Dataset dataset) throws ShanoirException;
+    /**
+     * Delete a dataset.
+     *
+     * @param id dataset id.
+     * @param parentEvent the event of the parent deletion (acquisition, examination, subject...)
+     *                    driving this one, which already reports its own progress: no deletion
+     *                    event is then published for this dataset. Null when the dataset is
+     *                    deleted on its own, and reports itself.
+     * @throws EntityNotFoundException
+     * @throws ShanoirException
+     */
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnDataset(#id, 'CAN_ADMINISTRATE'))")
+    void deleteById(Long id, ShanoirEvent parentEvent) throws EntityNotFoundException, ShanoirException, SolrServerException, IOException, RestServiceException;
 
     /**
      * Delete several datasets.

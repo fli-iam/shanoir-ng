@@ -39,6 +39,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 
 import java.lang.reflect.Field;
@@ -91,6 +92,7 @@ public class StudyCardServiceImpl implements StudyCardService {
         }
     }
 
+    @Transactional
     public void applyStudyCard(StudyCard studyCard, StudyCardApply studyCardApplyObject) throws PacsException, EntityNotFoundException {
         LOG.debug("re-apply studycard n° " + studyCard.getId());
 

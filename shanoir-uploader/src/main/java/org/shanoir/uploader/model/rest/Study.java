@@ -30,6 +30,12 @@ public class Study implements Comparable<Study> {
 
     private String studyCardPolicy;
 
+    /**
+     * Ids of the centers the connected user is restricted to on this study.
+     * Null or empty means the user has no center restriction.
+     */
+    private List<Long> restrictedCenterIds;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Europe/Paris")
     private Date startDate;
 
@@ -102,6 +108,14 @@ public class Study implements Comparable<Study> {
 
     public void setStudyCardPolicy(String studyCardPolicy) {
         this.studyCardPolicy = studyCardPolicy;
+    }
+
+    public List<Long> getRestrictedCenterIds() {
+        return restrictedCenterIds;
+    }
+
+    public void setRestrictedCenterIds(List<Long> restrictedCenterIds) {
+        this.restrictedCenterIds = restrictedCenterIds;
     }
 
     public String toString() {

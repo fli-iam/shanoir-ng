@@ -16,71 +16,61 @@ package org.shanoir.ng.shared.email;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public abstract class EmailBase {
 
-    // userId of the user, that executed an action: import, add member to study
+    @JsonProperty
     private Long userId;
 
+    @JsonProperty
     private List<Long> recipients;
 
-    private String studyId;
+    @JsonProperty
+    private Long studyId;
 
+    @JsonProperty
     private String studyCardId;
 
+    @JsonProperty
     private String studyName;
 
-    /**
-     * @return the userId
-     */
     public Long getUserId() {
         return userId;
     }
 
-    /**
-     * @param userId the userId to set
-     */
     public void setUserId(Long userId) {
         this.userId = userId;
     }
 
-    /**
-     * @return the recipients
-     */
     public List<Long> getRecipients() {
         return recipients;
     }
 
-    /**
-     * @param recipients the recipients to set
-     */
     public void setRecipients(List<Long> recipients) {
         this.recipients = recipients;
     }
 
-    /**
-     * @return the studyId
-     */
-    public String getStudyId() {
+    public Long getStudyId() {
         return studyId;
     }
 
-    /**
-     * @param studyId the studyId to set
-     */
-    public void setStudyId(String studyId) {
+    public void setStudyId(Long studyId) {
         this.studyId = studyId;
     }
 
-    /**
-     * @return the studyName
-     */
+    public String getStudyCardId() {
+        return studyCardId;
+    }
+
+    public void setStudyCardId(String studyCardId) {
+        this.studyCardId = studyCardId;
+    }
+
     public String getStudyName() {
         return studyName;
     }
 
-    /**
-     * @param studyName the studyName to set
-     */
     public void setStudyName(String studyName) {
         this.studyName = studyName;
     }

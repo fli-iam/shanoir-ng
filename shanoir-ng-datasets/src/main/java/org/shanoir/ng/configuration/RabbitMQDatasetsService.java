@@ -416,10 +416,6 @@ public class RabbitMQDatasetsService {
         }
     }
 
-    /**
-     * Receives a shanoirEvent as a json object, concerning a subject deletion
-     * @param eventAsString the task as a json string.
-     */
     @RabbitListener(bindings = @QueueBinding(
             key = ShanoirEventType.DELETE_STUDY_EVENT,
             value = @Queue(value = RabbitMQConfiguration.DELETE_STUDY_QUEUE, durable = "true"),
@@ -428,6 +424,7 @@ public class RabbitMQDatasetsService {
             )
     @Transactional
     public void deleteStudy(String eventAsString) throws AmqpRejectAndDontRequeueException {
+        SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
         try {
             ShanoirEvent event = objectMapper.readValue(eventAsString, ShanoirEvent.class);
             // Keep the identity of the user who actually asked for the deletion, so that every
@@ -438,7 +435,6 @@ public class RabbitMQDatasetsService {
             } else {
                 SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
             }
-
             // Delete associated examinations and datasets from solr repository then from database
             for (Examination exam : examinationRepository.findByStudy_Id(Long.valueOf(event.getObjectId()))) {
                 examinationService.deleteById(exam.getId(), event);
@@ -572,9 +568,9 @@ public class RabbitMQDatasetsService {
                 eventService.publishEvent(event);
 
                 LOG.info("[CopyDatasets] Start copy for dataset " + datasetParentId + " to study " + studyId);
-                Long dsCount = datasetRepository.countDatasetsBySourceIdAndStudyId(datasetParentId, studyId);
+                boolean dsExists = datasetRepository.existsBySourceIdAndStudyId(datasetParentId, studyId) != 0;
 
-                if (dsCount != 0) {
+                if (dsExists) {
                     LOG.info("[CopyDatasets] Dataset already exists in this study, copy aborted.");
                     countAlreadyExist++;
                 } else {

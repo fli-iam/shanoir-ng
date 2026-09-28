@@ -14,14 +14,14 @@
 
 package org.shanoir.ng.role.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-
-import org.hibernate.validator.constraints.NotBlank;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.springframework.security.core.GrantedAuthority;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.validation.constraints.NotBlank;
 
 /**
  * Role

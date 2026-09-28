@@ -17,7 +17,6 @@ package org.shanoir.ng.configuration.amqp;
 import java.util.Arrays;
 
 import org.shanoir.ng.email.EmailService;
-import org.shanoir.ng.events.ShanoirEvent;
 import org.shanoir.ng.events.ShanoirEventsService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.email.DuaDraftWrapper;
@@ -25,8 +24,8 @@ import org.shanoir.ng.shared.email.EmailDatasetImportFailed;
 import org.shanoir.ng.shared.email.EmailDatasetsImported;
 import org.shanoir.ng.shared.email.EmailStudy;
 import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
+import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserInterface;
 import org.shanoir.ng.study.rights.ampq.RabbitMqStudyUserService;
 import org.shanoir.ng.study.rights.command.CommandType;
@@ -44,12 +43,13 @@ import org.springframework.amqp.rabbit.annotation.QueueBinding;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
+import tools.jackson.databind.ObjectMapper;
 
 @Component
+@Profile("!test")
 public class RabbitMQUserService {
 
     private static final Logger LOG = LoggerFactory.getLogger(RabbitMQUserService.class);
@@ -68,6 +68,7 @@ public class RabbitMQUserService {
 
     @Autowired
     private RabbitMqStudyUserService listener;
+
     @RabbitListener(bindings = @QueueBinding(
             value = @Queue(value = RabbitMQConfiguration.STUDY_USER_QUEUE_USERS, durable = "true"),
             exchange = @Exchange(value = RabbitMQConfiguration.STUDY_USER_EXCHANGE, ignoreDeclarationExceptions = "true",
@@ -75,9 +76,6 @@ public class RabbitMQUserService {
     )
     public void receiveMessage(String commandArrStr) throws AmqpRejectAndDontRequeueException {
         try {
-            SimpleModule module = new SimpleModule();
-            module.addAbstractTypeMapping(StudyUserInterface.class, StudyUser.class);
-            mapper.registerModule(module);
             StudyUserCommand[] commands = mapper.readValue(commandArrStr, StudyUserCommand[].class);
             listener.receiveStudyUsers(Arrays.asList(commands));
             updateAccountExpirationDate(commands);
@@ -101,7 +99,15 @@ public class RabbitMQUserService {
                 StudyUserInterface studyUser = command.getStudyUser();
                 if (studyUser.getExpirationDate() != null) {
                     User user = userService.findById(studyUser.getUserId());
-                    if (user != null && studyUser.getExpirationDate().isAfter(user.getExpirationDate())) {
+                    if (user == null) {
+                        LOG.error("User in StudyUserCommand(s) not found.");
+                        continue;
+                    }
+                    if (user.getExpirationDate() == null) {
+                        LOG.error("User found with ExpirationDate == null.");
+                        continue;
+                    }
+                    if (studyUser.getExpirationDate().isAfter(user.getExpirationDate())) {
                         user.setExpirationDate(studyUser.getExpirationDate());
                         try {
                             userService.update(user);
@@ -115,10 +121,6 @@ public class RabbitMQUserService {
         }
     }
 
-    /**
-     * Receives a shanoirEvent as a json object, thus create a event in the queue
-     * @param commandArrStr the task as a json string.
-     */
     @RabbitListener(bindings = @QueueBinding(
             key = "*.event",
             value = @Queue(value = RabbitMQConfiguration.SHANOIR_EVENTS_QUEUE, durable = "true"),
@@ -231,4 +233,5 @@ public class RabbitMQUserService {
             throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the dua draft event.", e);
         }
     }
+
 }

@@ -77,6 +77,15 @@ public interface DatasetProcessingMapper {
     /**
      * Some context of usage :
      */
+    @Named("withParentId")
+    @Mapping(target = "inputDatasets", expression = "java(null)")
+    @Mapping(target = "outputDatasets", expression = "java(null)")
+    @Mapping(target = "parentId", source = "parent", qualifiedByName = "id")
+    DatasetProcessingDTO processingToProcessingDTOWithParentId(DatasetProcessing processing);
+
+    /**
+     * Some context of usage :
+     */
     @Named("withInputIds")
     @Mapping(target = "inputDatasets", source = "inputDatasets", qualifiedByName = "id")
     @Mapping(target = "outputDatasets", expression = "java(null)")
@@ -115,4 +124,11 @@ public interface DatasetProcessingMapper {
      */
     @IterableMapping(qualifiedByName = "nullRelations")
     List<DatasetProcessingDTO> processingListToProcessingDTOListWithNullRelations(List<DatasetProcessing> processings);
+
+    /**
+     * Some context of usage : listing the processings a dataset is input of, where the caller
+     * only needs to know the parent monitoring of each processing.
+     */
+    @IterableMapping(qualifiedByName = "withParentId")
+    List<DatasetProcessingDTO> processingListToProcessingDTOListWithParentId(List<DatasetProcessing> processings);
 }

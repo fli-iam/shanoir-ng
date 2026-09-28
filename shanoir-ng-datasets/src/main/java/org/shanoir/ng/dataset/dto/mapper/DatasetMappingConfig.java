@@ -55,7 +55,6 @@ public interface DatasetMappingConfig {
     @Mapping(target = "copies", expression = "java(null)")
     @Mapping(target = "originMetadata", source = "originMetadata", qualifiedByName = "standard")
     @Mapping(target = "updatedMetadata", source = "updatedMetadata", qualifiedByName = "standard")
-    @Mapping(target = "inPacs", expression = "java(null)")
     @Mapping(target = "centerId", expression = "java(null)")
     DatasetDTO datasetToDatasetDTOWithProcessingPrototype(Dataset dataset);
 

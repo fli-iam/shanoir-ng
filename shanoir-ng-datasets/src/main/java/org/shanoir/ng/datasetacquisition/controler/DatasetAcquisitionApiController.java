@@ -53,7 +53,6 @@ import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
-import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -65,7 +64,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -139,9 +137,9 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 
     @RabbitListener(queues = RabbitMQConfiguration.IMPORT_EEG_QUEUE, containerFactory = "multipleConsumersFactory")
     @RabbitHandler
-    public int createNewEegDatasetAcquisition(Message importJobAsString) throws IOException {
+    public int createNewEegDatasetAcquisition(String importJobAsString) throws IOException {
         SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
-        EegImportJob importJob = objectMapper.readValue(importJobAsString.getBody(), EegImportJob.class);
+        EegImportJob importJob = objectMapper.readValue(importJobAsString, EegImportJob.class);
         eegImporterService.createEegDataset(importJob);
         try {
             importerService.cleanTempFiles(importJob.getWorkFolder());
@@ -153,10 +151,9 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 
     @RabbitListener(queues = RabbitMQConfiguration.IMPORTER_QUEUE_DATASET, containerFactory = "multipleConsumersFactory")
     @RabbitHandler
-    @Transactional
     @WithMockKeycloakUser(authorities = { "ROLE_ADMIN" })
-    public void createNewDatasetAcquisition(Message importJobStr) throws IOException, AmqpRejectAndDontRequeueException {
-        ImportJob importJob = objectMapper.readValue(importJobStr.getBody(), ImportJob.class);
+    public void createNewDatasetAcquisition(String importJobStr) throws IOException, AmqpRejectAndDontRequeueException {
+        ImportJob importJob = objectMapper.readValue(importJobStr, ImportJob.class);
         try {
             createAllDatasetAcquisitions(importJob, importJob.getUserId());
         } catch (Exception e) {

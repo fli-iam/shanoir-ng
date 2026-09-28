@@ -53,6 +53,8 @@ import org.shanoir.ng.studycard.repository.StudyCardRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.vip.execution.dto.ExecutionCandidateDTO;
 import org.shanoir.ng.vip.shared.dto.DatasetParameterDTO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -62,6 +64,8 @@ import jakarta.transaction.Transactional;
 
 @Service
 public class DatasetSecurityService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(DatasetSecurityService.class);
 
     @Autowired
     private DatasetRepository datasetRepository;
