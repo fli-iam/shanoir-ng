@@ -72,8 +72,8 @@
         </dependency>
         <dependency>
             <groupId>org.shanoir-ng</groupId>
-            <artifactId>shanoir-ng-storage</artifactId>
-            <version>3.4.0</version>
+            <artifactId>shanoir-ng-storage-jackson3</artifactId>
+            <version>4.0.2</version>
         </dependency>
 
         <dependency>

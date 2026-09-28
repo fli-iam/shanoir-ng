@@ -36,6 +36,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <module>../shanoir-ng-exchange</module>
         <module>../shanoir-ng-keycloak-auth</module>
         <module>../shanoir-ng-storage</module>
+        <module>../shanoir-ng-storage-jackson3</module>
         <!-- Microservices -->
         <module>../shanoir-ng-users</module>
         <module>../shanoir-ng-studies</module>
