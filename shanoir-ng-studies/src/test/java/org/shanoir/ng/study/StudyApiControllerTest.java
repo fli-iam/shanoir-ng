@@ -34,7 +34,6 @@ import org.mockito.Mockito;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEventService;
-import org.shanoir.ng.shared.jackson.JacksonUtils;
 import org.shanoir.ng.storage.StorageService;
 import org.shanoir.ng.study.controler.StudyApiController;
 import org.shanoir.ng.study.dto.StudyDTO;
@@ -66,6 +65,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import tools.jackson.databind.json.JsonMapper;
+
 /**
  * Unit tests for study controller.
  *
@@ -87,6 +88,9 @@ public class StudyApiControllerTest {
 
     @Autowired
     private MockMvc mvc;
+
+    @Autowired
+    private JsonMapper mapper;
 
     @MockitoBean
     private StudyMapper studyMapperMock;
@@ -155,7 +159,7 @@ public class StudyApiControllerTest {
     // @Test
     public void addMember() throws Exception {
         mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_FOR_MEMBERS).accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(ModelsUtil.createStudyUser())))
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(ModelsUtil.createStudyUser())))
                 .andExpect(status().isNoContent());
     }
 

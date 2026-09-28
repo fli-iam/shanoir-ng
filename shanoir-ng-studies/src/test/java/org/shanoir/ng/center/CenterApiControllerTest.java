@@ -36,7 +36,6 @@ import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.shared.jackson.JacksonUtils;
 import org.shanoir.ng.shared.security.ControllerSecurityService;
 import org.shanoir.ng.study.service.StudyService;
 import org.shanoir.ng.utils.ModelsUtil;
@@ -50,6 +49,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Unit tests for center controller.
@@ -69,6 +70,9 @@ public class CenterApiControllerTest {
 
     @Autowired
     private MockMvc mvc;
+
+    @Autowired
+    private JsonMapper mapper;
 
     @MockitoBean
     private CenterMapper centerMapperMock;
@@ -155,7 +159,7 @@ public class CenterApiControllerTest {
     @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
     public void saveNewCenterTest() throws Exception {
         mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(ModelsUtil.createCenter())))
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(ModelsUtil.createCenter())))
                 .andExpect(status().isOk());
     }
 
@@ -165,7 +169,7 @@ public class CenterApiControllerTest {
         Center existingCenter = ModelsUtil.createCenter();
         existingCenter.setId(1L);
         mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(existingCenter)))
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(existingCenter)))
                 .andExpect(status().isNoContent());
     }
 
