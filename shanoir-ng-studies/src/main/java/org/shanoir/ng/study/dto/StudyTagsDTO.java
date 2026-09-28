@@ -11,21 +11,35 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { SimpleStudy } from '../../studies/shared/study.model';
-import { QualityTag } from '../../study-cards/shared/quality-card.model';
-import { Tag } from '../../tags/tag.model';
 
-import { Subject } from './subject.model';
+package org.shanoir.ng.study.dto;
 
+import java.util.List;
 
-export class SubjectStudy {
-    id: number;
-    subject: Subject;
-    subjectId: number;
-    study: SimpleStudy;
-    studyId: number;
-    studyIdentifier: string;
-    physicallyInvolved: boolean;
-    tags: Tag[];
-    qualityTag: QualityTag;
+import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.tag.model.TagDTO;
+
+/**
+ * DTO for subject of a study.
+ *
+ * @author msimon
+ *
+ */
+public class StudyTagsDTO extends IdName {
+
+    private List<TagDTO> tags;
+
+    /**
+     * @return the tags
+     */
+    public List<TagDTO> getTags() {
+        return tags;
+    }
+
+    /**
+     * @param tags the tags to set
+     */
+    public void setTags(List<TagDTO> tags) {
+        this.tags = tags;
+    }
 }
