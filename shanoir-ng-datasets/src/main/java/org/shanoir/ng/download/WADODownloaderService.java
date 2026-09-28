@@ -132,10 +132,10 @@ public class WADODownloaderService {
     private static final String CONTENT_TYPE = "&contentType";
 
     /** Number of PACS responses fetched in advance, while the current one is written into the zip. */
-    @Value("${dcm4chee-arc.dicom.wado.prefetch:10}")
+    @Value("${dcm4chee-arc.dicom.wado.prefetch:3}")
     private int wadoPrefetch;
 
-    @Autowired
+    /** No need to autowire since we build in initWebClient(). */
     private WebClient webClient;
 
     @Autowired
@@ -151,7 +151,7 @@ public class WADODownloaderService {
     @PostConstruct
     public void initWebClient() {
         ConnectionProvider provider = ConnectionProvider.builder("pacs-wado")
-                .maxConnections(500)
+                .maxConnections(128)
                 .pendingAcquireMaxCount(-1)
                 .pendingAcquireTimeout(Duration.ofMinutes(5))
                 .maxIdleTime(Duration.ofSeconds(15))
@@ -464,27 +464,25 @@ public class WADODownloaderService {
      * @throws MessagingException
      */
     private void extractDICOMFilesFromMHTMLFile(final byte[] responseBody, final String instanceUID, final File workFolder, String subjectName)
-            throws IOException, MessagingException {
-        try (ByteArrayInputStream bIS = new ByteArrayInputStream(responseBody)) {
-            ByteArrayDataSource datasource = new ByteArrayDataSource(bIS, CONTENT_TYPE_MULTIPART);
-            MimeMultipart multipart = new MimeMultipart(datasource);
-            int count = multipart.getCount();
-            for (int i = 0; i < count; i++) {
-                BodyPart bodyPart = multipart.getBodyPart(i);
-                if (isNotOnlyDicom(bodyPart)) {
-                    throw new IOException("Answer file from PACS contains other content-type than DICOM, stop here.");
-                }
-                File extractedDicomFile = null;
-                if (count == 1) {
-                    extractedDicomFile = new File(workFolder.getPath() + File.separator + instanceUID + DCM);
-                } else {
-                    extractedDicomFile = new File(workFolder.getPath() + File.separator + instanceUID + UNDER_SCORE + i + DCM);
-                }
-                if (subjectName != null && !subjectName.trim().isEmpty()) {
-                    modifyAndSaveDicomFile(bodyPart.getInputStream(), extractedDicomFile, subjectName);
-                } else {
-                    Files.copy(bodyPart.getInputStream(), extractedDicomFile.toPath());
-                }
+        throws IOException, MessagingException {
+        ByteArrayDataSource datasource = new ByteArrayDataSource(responseBody, CONTENT_TYPE_MULTIPART);
+        MimeMultipart multipart = new MimeMultipart(datasource);
+        int count = multipart.getCount();
+        for (int i = 0; i < count; i++) {
+            BodyPart bodyPart = multipart.getBodyPart(i);
+            if (isNotOnlyDicom(bodyPart)) {
+                throw new IOException("Answer file from PACS contains other content-type than DICOM, stop here.");
+            }
+            File extractedDicomFile = null;
+            if (count == 1) {
+                extractedDicomFile = new File(workFolder.getPath() + File.separator + instanceUID + DCM);
+            } else {
+                extractedDicomFile = new File(workFolder.getPath() + File.separator + instanceUID + UNDER_SCORE + i + DCM);
+            }
+            if (subjectName != null && !subjectName.trim().isEmpty()) {
+                modifyAndSaveDicomFile(bodyPart.getInputStream(), extractedDicomFile, subjectName);
+            } else {
+                Files.copy(bodyPart.getInputStream(), extractedDicomFile.toPath());
             }
         }
     }
@@ -534,7 +532,7 @@ public class WADODownloaderService {
                 zipOutputStream.closeEntry();
                 return;
             }
-            ByteArrayDataSource datasource = new ByteArrayDataSource(bIS, CONTENT_TYPE_MULTIPART);
+            ByteArrayDataSource datasource = new ByteArrayDataSource(responseBody, CONTENT_TYPE_MULTIPART);
             MimeMultipart multipart = new MimeMultipart(datasource);
             int count = multipart.getCount();
             // Multipart but with a single body part
