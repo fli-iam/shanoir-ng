@@ -34,10 +34,12 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.joda.time.DateTime;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.download.DatasetDownloadError;
+import org.shanoir.ng.download.DownloadAbortedException;
 import org.shanoir.ng.download.PacsTransferStats;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
@@ -134,6 +136,11 @@ public class DatasetDownloaderServiceImpl {
     }
 
     public void massiveDownload(String outputFormat, List<Dataset> datasets, HttpServletResponse response, boolean withManifest, Long converterId, Boolean withShanoirId, String sorting) throws RestServiceException {
+        massiveDownload(outputFormat, datasets, response, withManifest, converterId, withShanoirId, sorting, false);
+    }
+
+
+    public void massiveDownload(String outputFormat, List<Dataset> datasets, HttpServletResponse response, boolean withManifest, Long converterId, Boolean withShanoirId, String sorting, boolean abordOnPACSError) throws RestServiceException {
         Map<Long, List<String>> filesByAcquisitionId = new HashMap<>();
         Map<Long, DatasetDownloadError> downloadResults = new HashMap<>();
         Map<Long, String> datasetDownloadPath;
@@ -141,11 +148,10 @@ public class DatasetDownloaderServiceImpl {
         // Prepare the HTTP response for a zip download
         response.setContentType("application/zip");
         response.setHeader("Content-Disposition", "attachment;filename=\"" + getFileName(datasets) + "\"");
-        // Flush headers immediately so the client sees the response start before
-        // the (potentially slow) per-dataset DB/PACS work below produces any bytes,
-        // otherwise a client-side read timeout can fire while nothing has been sent yet.
 
-        try (ZipOutputStream zipOutputStream = new ZipOutputStream(PacsTransferStats.withNetworkTiming(response.getOutputStream()))) {
+        ZipOutputStream zipOutputStream = null;
+        try {
+            zipOutputStream = new ZipOutputStream(PacsTransferStats.withNetworkTiming(response.getOutputStream()));
             zipOutputStream.setLevel(Deflater.BEST_SPEED);
             response.flushBuffer();
             Map<String, List<String>> datasetDownloadNameListPerPath = new HashMap<>();
@@ -186,6 +192,10 @@ public class DatasetDownloaderServiceImpl {
                         converterId,
                         datasetDownloadNameListPerPath
                 );
+                if (abordOnPACSError && downloadResults.containsKey(dataset.getId())) {
+                    throw new DownloadAbortedException("Dataset [" + dataset.getId() + "] could not be fully downloaded: "
+                            + downloadResults.get(dataset.getId()).getMessages());
+                }
             }
 
             // Write manifest if any files exist
@@ -217,7 +227,15 @@ public class DatasetDownloaderServiceImpl {
             );
             event.setStatus(ShanoirEvent.SUCCESS);
             eventService.publishEvent(event);
+            zipOutputStream.close();
         } catch (Exception e) {
+            if (abordOnPACSError && zipOutputStream != null) {
+                // Leave the zip unfinished (no central directory) and let the exception reach Tomcat,
+                // which cuts the connection: the client sees a broken transfer, not a valid incomplete zip.
+                throw e instanceof DownloadAbortedException aborted ? aborted
+                        : new DownloadAbortedException("Download aborted: " + e.getMessage(), e);
+            }
+            IOUtils.closeQuietly(zipOutputStream);
             response.setContentType(null);
             LOG.error("Unexpected error while downloading dataset files.", e);
             throw new RestServiceException(new ErrorModel(

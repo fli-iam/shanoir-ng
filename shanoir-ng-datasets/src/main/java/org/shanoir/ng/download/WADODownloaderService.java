@@ -53,7 +53,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -432,8 +431,6 @@ public class WADODownloaderService {
                 .uri(url)
                 .header(HttpHeaders.ACCEPT, CONTENT_TYPE_MULTIPART + "; type=" + CONTENT_TYPE_DICOM + ";")
                 .retrieve()
-                .onStatus(HttpStatusCode::isError,
-                        response -> Mono.error(new IOException("Download did not work: wrong status code received.")))
                 .bodyToMono(byte[].class)
                 .timeout(Duration.ofMinutes(5));
     }
@@ -443,10 +440,8 @@ public class WADODownloaderService {
                 .uri(url)
                 .header(HttpHeaders.ACCEPT, CONTENT_TYPE_DICOM_JSON)
                 .retrieve()
-                .onStatus(HttpStatusCode::isError,
-                        response -> Mono.error(new IOException("Download did not work: wrong status code received.")))
                 .bodyToMono(String.class)
-                .timeout(Duration.ofSeconds(30));
+                .timeout(Duration.ofMinutes(5));
     }
 
     /**
