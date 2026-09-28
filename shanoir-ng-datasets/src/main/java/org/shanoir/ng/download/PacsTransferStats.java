@@ -43,6 +43,8 @@ public final class PacsTransferStats {
 
     private final LongAdder networkNanos = new LongAdder();
 
+    private final long startNanos = System.nanoTime();
+
     private PacsTransferStats() {
     }
 
@@ -136,9 +138,9 @@ public final class PacsTransferStats {
         return count == 0 ? 0 : totalResponseNanos.sum() / 1_000_000.0 / count;
     }
 
-    /** Bytes received per second of PACS response time. */
+    /** Bytes received from the PACS per second of download, measured in wall-clock time since start(). */
     public double getBytesPerSecond() {
-        long nanos = totalResponseNanos.sum();
+        long nanos = System.nanoTime() - startNanos;
         return nanos == 0 ? 0 : totalBytes.sum() * 1_000_000_000.0 / nanos;
     }
 
