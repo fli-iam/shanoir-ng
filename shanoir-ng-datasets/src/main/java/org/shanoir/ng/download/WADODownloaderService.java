@@ -15,6 +15,7 @@
 package org.shanoir.ng.download;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -30,8 +31,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
@@ -182,7 +181,7 @@ public class WADODownloaderService {
      * @throws RestServiceException
      *
      */
-    public List<String> downloadDicomFilesForURLsAsZip(final List<URL> urls, final ZipOutputStream zipOutputStream, String subjectName, Dataset dataset, String datasetFilePath, DatasetDownloadError downloadResult) {
+    public List<String> downloadDicomFilesForURLsIntoArchive(final List<URL> urls, final ArchiveWriter archive, String subjectName, Dataset dataset, String datasetFilePath, DatasetDownloadError downloadResult) {
         List<String> files = new ArrayList<>();
         String namePrefix = buildFileNamePrefix(subjectName, dataset, datasetFilePath);
         String anonymizedSubjectName = dataset.getSource() != null ? subjectName : null;
@@ -206,6 +205,7 @@ public class WADODownloaderService {
                                 }
                             });
                 },
+                        3,
                         wadoPrefetch)
                 .toStream(1)) {
             // Then we put each file one by one in the zip
@@ -219,8 +219,8 @@ public class WADODownloaderService {
                 }
                 String name = namePrefix + sanitize(wadoURLHandler.extractUIDs(response.url())[2]);
                 try {
-                    files.add(writeFileInZip(response, zipOutputStream, name, anonymizedSubjectName));
-                    zipOutputStream.flush();
+                    files.add(writeFileInArchive(response, archive, name, anonymizedSubjectName));
+                    archive.flush();
                 } catch (IOException e) {
                     // Client gone: stop here, closing the stream cancels the pending PACS requests
                     throw new DownloadAbortedException("Could not flush dataset [" + dataset.getId() + "] to the client", e);
@@ -255,14 +255,14 @@ public class WADODownloaderService {
     }
 
     /**
-     * Writes the PACS response for one file into zipOutputStream, using name + .DCM as filename.
+     * Writes the PACS response for one file into the archive, using name + .DCM as filename.
      * @param response the PACS response, or the error that replaced it
-     * @param zipOutputStream
+     * @param archive
      * @param name the filename without extension
      * @return the added file name
      * @throws ZipPacsFileException when the download failed or could not be written into the stream
      */
-    private String writeFileInZip(PacsResponse response, ZipOutputStream zipOutputStream, String name, String subjectName) throws ZipPacsFileException {
+    private String writeFileInArchive(PacsResponse response, ArchiveWriter archive, String name, String subjectName) throws ZipPacsFileException {
         if (response.error() != null) {
             if (response.error() instanceof WebClientResponseException e) {
                 throw new ZipPacsFileException("Received " + e.getStatusCode() + " from PACS", e);
@@ -270,7 +270,7 @@ public class WADODownloaderService {
             throw new ZipPacsFileException("Download failed: " + response.error().getMessage(), response.error());
         }
         try {
-            extractDICOMZipFromMHTMLFile(response.body(), name, zipOutputStream, response.url().contains(WADO_REQUEST_TYPE_WADO_RS), subjectName);
+            extractDICOMArchiveFromMHTMLFile(response.body(), name, archive, response.url().contains(WADO_REQUEST_TYPE_WADO_RS), subjectName);
             return name + DCM;
         } catch (IOException | MessagingException e) {
             LOG.error("Error in downloading/writing file [{}] from pacs to zip", name, e);
@@ -518,56 +518,45 @@ public class WADODownloaderService {
      * @throws IOException
      * @throws MessagingException
      */
-    private void extractDICOMZipFromMHTMLFile(final byte[] responseBody, String name, ZipOutputStream zipOutputStream,
+    private void extractDICOMArchiveFromMHTMLFile(final byte[] responseBody, String name, ArchiveWriter archive,
             boolean isMultipart, String subjectName)
             throws IOException, MessagingException {
-        try (ByteArrayInputStream bIS = new ByteArrayInputStream(responseBody)) {
-            // Not multipart
-            if (!isMultipart) {
-                ZipEntry entry = new ZipEntry(name + DCM);
-                zipOutputStream.putNextEntry(entry);
-                if (subjectName != null && !subjectName.trim().isEmpty()) {
-                    modifyAndWriteDicomToStream(bIS, zipOutputStream, subjectName);
-                } else {
-                    bIS.transferTo(zipOutputStream);
-                }
-                zipOutputStream.closeEntry();
-                return;
+        // Not multipart
+        if (!isMultipart) {
+            try (ByteArrayInputStream bIS = new ByteArrayInputStream(responseBody)) {
+                addEntry(archive, subjectName, bIS, name + DCM);
             }
-            ByteArrayDataSource datasource = new ByteArrayDataSource(responseBody, CONTENT_TYPE_MULTIPART);
-            MimeMultipart multipart = new MimeMultipart(datasource);
-            int count = multipart.getCount();
-            // Multipart but with a single body part
-            if (count == 1) {
-                BodyPart bodyPart = multipart.getBodyPart(0);
-                if (isNotOnlyDicom(bodyPart)) {
-                    throw new IOException("Answer file from PACS contains other content-type than DICOM, stop here.");
-                }
-                ZipEntry entry = new ZipEntry(name + DCM);
-                addEntry(zipOutputStream, subjectName, bodyPart, entry);
-                return;
+            return;
+        }
+        ByteArrayDataSource datasource = new ByteArrayDataSource(responseBody, CONTENT_TYPE_MULTIPART);
+        MimeMultipart multipart = new MimeMultipart(datasource);
+        int count = multipart.getCount();
+        for (int i = 0; i < count; i++) {
+            BodyPart bodyPart = multipart.getBodyPart(i);
+            if (isNotOnlyDicom(bodyPart)) {
+                throw new IOException("Answer file from PACS contains other content-type than DICOM, stop here.");
             }
-            // Multipart with multiple parts
-            for (int i = 0; i < count; i++) {
-                BodyPart bodyPart = multipart.getBodyPart(i);
-                if (isNotOnlyDicom(bodyPart)) {
-                    throw new IOException("Answer file from PACS contains other content-type than DICOM, stop here.");
-                }
-                ZipEntry entry = new ZipEntry(name + UNDER_SCORE + i + DCM);
-                addEntry(zipOutputStream, subjectName, bodyPart, entry);
+            // Multipart but with a single body part: no index in the name
+            String entryName = count == 1 ? name + DCM : name + UNDER_SCORE + i + DCM;
+            try (InputStream in = bodyPart.getInputStream()) {
+                addEntry(archive, subjectName, in, entryName);
             }
         }
     }
 
-    private void addEntry(ZipOutputStream zipOutputStream, String subjectName, BodyPart bodyPart, ZipEntry entry)
-            throws IOException, MessagingException {
-        zipOutputStream.putNextEntry(entry);
+    /**
+     * Adds one DICOM file to the archive, with the patient name and id replaced when subjectName is given.
+     * The rewritten file is buffered, as its size is only known once written.
+     */
+    private void addEntry(ArchiveWriter archive, String subjectName, InputStream dicom, String entryName)
+            throws IOException {
         if (subjectName != null && !subjectName.trim().isEmpty()) {
-            modifyAndWriteDicomToStream(bodyPart.getInputStream(), zipOutputStream, subjectName);
+            ByteArrayOutputStream modified = new ByteArrayOutputStream();
+            modifyAndWriteDicomToStream(dicom, modified, subjectName);
+            archive.addEntry(entryName, modified.toByteArray());
         } else {
-            bodyPart.getInputStream().transferTo(zipOutputStream);
+            archive.addEntry(entryName, dicom, -1);
         }
-        zipOutputStream.closeEntry();
     }
 
     private void modifyAndWriteDicomToStream(InputStream inputStream, OutputStream outputStream, String subjectName)

@@ -29,15 +29,13 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import java.util.zip.Deflater;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.joda.time.DateTime;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
+import org.shanoir.ng.download.ArchiveWriter;
 import org.shanoir.ng.download.DatasetDownloadError;
 import org.shanoir.ng.download.DownloadAbortedException;
 import org.shanoir.ng.download.PacsTransferStats;
@@ -78,8 +76,6 @@ public class DatasetDownloaderServiceImpl {
     protected static final String NII = "nii";
 
     protected static final String DCM = "dcm";
-
-    protected static final String ZIP = ".zip";
 
     protected static final Logger LOG = LoggerFactory.getLogger(DatasetDownloaderServiceImpl.class);
 
@@ -136,23 +132,27 @@ public class DatasetDownloaderServiceImpl {
     }
 
     public void massiveDownload(String outputFormat, List<Dataset> datasets, HttpServletResponse response, boolean withManifest, Long converterId, Boolean withShanoirId, String sorting) throws RestServiceException {
-        massiveDownload(outputFormat, datasets, response, withManifest, converterId, withShanoirId, sorting, false);
+        massiveDownload(outputFormat, datasets, response, withManifest, converterId, withShanoirId, sorting, ArchiveWriter.Format.ZIP, false);
     }
 
-
-    public void massiveDownload(String outputFormat, List<Dataset> datasets, HttpServletResponse response, boolean withManifest, Long converterId, Boolean withShanoirId, String sorting, boolean abordOnPACSError) throws RestServiceException {
+    /**
+     * @param archiveFormat format of the archive streamed to the client
+     * @param abordOnPACSError abort the transfer on the first dataset that is not fully downloaded,
+     *                         instead of listing it in ERRORS.json and ending with a valid archive
+     */
+    public void massiveDownload(String outputFormat, List<Dataset> datasets, HttpServletResponse response, boolean withManifest, Long converterId, Boolean withShanoirId, String sorting,
+            ArchiveWriter.Format archiveFormat, boolean abordOnPACSError) throws RestServiceException {
         Map<Long, List<String>> filesByAcquisitionId = new HashMap<>();
         Map<Long, DatasetDownloadError> downloadResults = new HashMap<>();
         Map<Long, String> datasetDownloadPath;
 
-        // Prepare the HTTP response for a zip download
-        response.setContentType("application/zip");
-        response.setHeader("Content-Disposition", "attachment;filename=\"" + getFileName(datasets) + "\"");
+        // Prepare the HTTP response for an archive download
+        response.setContentType(archiveFormat.getContentType());
+        response.setHeader("Content-Disposition", "attachment;filename=\"" + getFileName(datasets, archiveFormat) + "\"");
 
-        ZipOutputStream zipOutputStream = null;
+        ArchiveWriter archive = null;
         try {
-            zipOutputStream = new ZipOutputStream(PacsTransferStats.withNetworkTiming(response.getOutputStream()));
-            zipOutputStream.setLevel(Deflater.BEST_SPEED);
+            archive = ArchiveWriter.open(archiveFormat, PacsTransferStats.withNetworkTiming(response.getOutputStream()));
             response.flushBuffer();
             Map<String, List<String>> datasetDownloadNameListPerPath = new HashMap<>();
             datasetDownloadPath = new HashMap<>();
@@ -179,11 +179,11 @@ public class DatasetDownloaderServiceImpl {
                 }
 
 
-                // Download the dataset into the zip
+                // Download the dataset into the archive
                 manageDatasetDownload(
                         dataset,
                         downloadResults,
-                        zipOutputStream,
+                        archive,
                         subjectName,
                         datasetFilePath,
                         outputFormat,
@@ -200,17 +200,11 @@ public class DatasetDownloaderServiceImpl {
 
             // Write manifest if any files exist
             if (!filesByAcquisitionId.isEmpty())
-                DatasetFileUtils.writeManifestForExport(zipOutputStream, filesByAcquisitionId);
+                DatasetFileUtils.writeManifestForExport(archive, filesByAcquisitionId);
 
-            // Write download errors into a JSON file in the zip
+            // Write download errors into a JSON file in the archive
             if (!downloadResults.isEmpty()) {
-                ZipEntry zipEntry = new ZipEntry(JSON_RESULT_FILENAME);
-                zipEntry.setTime(System.currentTimeMillis());
-                zipOutputStream.putNextEntry(zipEntry);
-
-                String errorsJson = objectMapper.writeValueAsString(downloadResults);
-                zipOutputStream.write(errorsJson.getBytes());
-                zipOutputStream.closeEntry();
+                archive.addEntry(JSON_RESULT_FILENAME, objectMapper.writeValueAsBytes(downloadResults));
             }
 
             // Publish download event
@@ -227,15 +221,15 @@ public class DatasetDownloaderServiceImpl {
             );
             event.setStatus(ShanoirEvent.SUCCESS);
             eventService.publishEvent(event);
-            zipOutputStream.close();
+            archive.close();
         } catch (Exception e) {
-            if (abordOnPACSError && zipOutputStream != null) {
-                // Leave the zip unfinished (no central directory) and let the exception reach Tomcat,
-                // which cuts the connection: the client sees a broken transfer, not a valid incomplete zip.
+            if (abordOnPACSError && archive != null) {
+                // Leave the archive unfinished and let the exception reach Tomcat, which cuts the connection:
+                // the client sees a broken transfer, not a valid incomplete archive.
                 throw e instanceof DownloadAbortedException aborted ? aborted
                         : new DownloadAbortedException("Download aborted: " + e.getMessage(), e);
             }
-            IOUtils.closeQuietly(zipOutputStream);
+            IOUtils.closeQuietly(archive);
             response.setContentType(null);
             LOG.error("Unexpected error while downloading dataset files.", e);
             throw new RestServiceException(new ErrorModel(
@@ -346,7 +340,7 @@ public class DatasetDownloaderServiceImpl {
         return dateTime;
     }
 
-    protected void manageDatasetDownload(Dataset dataset, Map<Long, DatasetDownloadError> downloadResults, ZipOutputStream zipOutputStream, String subjectName, String datasetFilePath, String outputFormat, boolean withManifest, Map<Long, List<String>> filesByAcquisitionId, Long converterId, Map<String, List<String>> datasetDownloadNameListPerPath) throws Exception {
+    protected void manageDatasetDownload(Dataset dataset, Map<Long, DatasetDownloadError> downloadResults, ArchiveWriter archive, String subjectName, String datasetFilePath, String outputFormat, boolean withManifest, Map<Long, List<String>> filesByAcquisitionId, Long converterId, Map<String, List<String>> datasetDownloadNameListPerPath) throws Exception {
         if (!dataset.isDownloadable()) {
             downloadResults.put(dataset.getId(), new DatasetDownloadError("Dataset not downloadable", DatasetDownloadError.ERROR));
             return;
@@ -359,7 +353,7 @@ public class DatasetDownloaderServiceImpl {
 
         if (format == DatasetExpressionFormat.DICOM && Objects.equals(DCM, outputFormat)) { // Download DICOM dataset
             DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, format, downloadResult);
-            List<String> files = downloader.downloadDicomFilesForURLsAsZip(pathURLs, zipOutputStream, subjectName, dataset, datasetFilePath, downloadResult);
+            List<String> files = downloader.downloadDicomFilesForURLsIntoArchive(pathURLs, archive, subjectName, dataset, datasetFilePath, downloadResult);
             if (withManifest) {
                 filesByAcquisitionId.putIfAbsent(dataset.getDatasetAcquisition().getId(), new ArrayList<>());
                 filesByAcquisitionId.get(dataset.getDatasetAcquisition().getId()).addAll(files);
@@ -369,7 +363,7 @@ public class DatasetDownloaderServiceImpl {
             try {
                 Long converterToUse = (converterId != null) ? converterId : DEFAULT_NIFTI_CONVERTER_ID;
                 tempDir = convertToNifti(dataset, pathURLs, converterToUse, downloadResult, subjectName);
-                DatasetFileUtils.copyFilesForDownload(storageService, pathURLs, zipOutputStream, dataset, subjectName, true, datasetFilePath, datasetDownloadNameListPerPath);
+                DatasetFileUtils.copyFilesForDownload(storageService, pathURLs, archive, dataset, subjectName, true, datasetFilePath, datasetDownloadNameListPerPath);
             } finally {
                 LOG.info("Deleting temporary conversion folder [{}]", tempDir.getAbsolutePath());
                 FileUtils.deleteQuietly(tempDir);
@@ -377,7 +371,7 @@ public class DatasetDownloaderServiceImpl {
         } else { // Download the other types
             DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, format, downloadResult);
             DatasetFileUtils.copyFilesForDownload(storageService,
-                    pathURLs, zipOutputStream, dataset, subjectName, true, datasetFilePath, datasetDownloadNameListPerPath);
+                    pathURLs, archive, dataset, subjectName, true, datasetFilePath, datasetDownloadNameListPerPath);
         }
         if (downloadResult.getStatus() == null)
             downloadResults.remove(dataset.getId());
@@ -429,13 +423,13 @@ public class DatasetDownloaderServiceImpl {
         return subjectName;
     }
 
-    protected String getFileName(List<Dataset> datasets) {
+    protected String getFileName(List<Dataset> datasets, ArchiveWriter.Format archiveFormat) {
         SimpleDateFormat fileDateformatter = new SimpleDateFormat("yyyyMMddHHmmss");
         if (datasets != null && datasets.size() == 1) {
             String datasetName = getDatasetFileName(datasets.get(0));
-            return "Dataset_" + datasetName + "_" + fileDateformatter.format(new DateTime().toDate()) + ZIP;
+            return "Dataset_" + datasetName + "_" + fileDateformatter.format(new DateTime().toDate()) + archiveFormat.getExtension();
         } else {
-            return "Datasets_" + fileDateformatter.format(new DateTime().toDate()) + ZIP;
+            return "Datasets_" + fileDateformatter.format(new DateTime().toDate()) + archiveFormat.getExtension();
         }
     }
 
