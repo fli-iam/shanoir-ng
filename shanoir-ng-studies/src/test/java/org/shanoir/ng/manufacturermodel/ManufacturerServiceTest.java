@@ -21,23 +21,25 @@ import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Assertions;
-import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.shanoir.ng.acquisitionequipment.repository.AcquisitionEquipmentRepository;
 import org.shanoir.ng.manufacturermodel.model.Manufacturer;
 import org.shanoir.ng.manufacturermodel.repository.ManufacturerModelRepository;
 import org.shanoir.ng.manufacturermodel.repository.ManufacturerRepository;
 import org.shanoir.ng.manufacturermodel.service.ManufacturerServiceImpl;
-import org.shanoir.ng.utils.ModelsUtil;
-
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.utils.ModelsUtil;
+import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Manufacturer service test.
@@ -50,24 +52,28 @@ import org.springframework.test.context.ActiveProfiles;
 public class ManufacturerServiceTest {
 
     private static final Long MANUFACTURER_ID = 1L;
+
     private static final String UPDATED_MANUFACTURER_NAME = "test";
 
-    @Mock
+    @MockitoBean
     private ManufacturerRepository repository;
 
-    @Mock
+    @MockitoBean
     private RabbitTemplate rabbitTemplate;
 
-    @Mock
-    private ObjectMapper objectMapper;
-
-    @Mock
+    @MockitoBean
     private ManufacturerModelRepository manufacturerModelRepository;
 
-    @Mock
+    @MockitoBean
     private AcquisitionEquipmentRepository acquisitionEquipmentRepository;
 
-    @InjectMocks
+    @MockitoBean
+    private JsonMapper jsonMapper;
+
+    @MockitoBean
+    private ConnectionFactory connectionFactory;
+
+    @Autowired
     private ManufacturerServiceImpl manufacturerService;
 
     @BeforeEach
@@ -79,6 +85,7 @@ public class ManufacturerServiceTest {
 
 
     @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_EXPERT" })
     public void findAllTest() {
         final List<Manufacturer> manufacturers = manufacturerService.findAll();
         Assertions.assertNotNull(manufacturers);
@@ -87,6 +94,7 @@ public class ManufacturerServiceTest {
     }
 
     @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_EXPERT" })
     public void findByIdTest() {
         final Manufacturer manufacturer = manufacturerService.findById(MANUFACTURER_ID).orElseThrow();
         Assertions.assertNotNull(manufacturer);
@@ -96,13 +104,16 @@ public class ManufacturerServiceTest {
     }
 
     @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_EXPERT" })
     public void saveTest() {
-        manufacturerService.create(createManufacturer());
-
+        Manufacturer manufacturer = createManufacturer();
+        manufacturer.setId(null);
+        manufacturerService.create(manufacturer);
         Mockito.verify(repository, Mockito.times(1)).save(Mockito.any(Manufacturer.class));
     }
 
     @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_EXPERT" })
     public void updateTest() throws EntityNotFoundException {
         final Manufacturer manufacturer = createManufacturer();
         final Manufacturer updatedManufacturer = manufacturerService.update(createManufacturer());
