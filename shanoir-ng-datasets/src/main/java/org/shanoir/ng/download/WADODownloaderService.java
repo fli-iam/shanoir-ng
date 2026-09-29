@@ -191,7 +191,9 @@ public class WADODownloaderService {
 
         PacsTransferStats stats = PacsTransferStats.current();
 
-        // Flux allows to download asynchronously and in advance (up to :wadoPrefetch for :wadoPrefetch threads)
+        // Downloads up to wadoPrefetch files from the PACS in parallel and in advance, while the calling thread
+        // zips the ones received. toStream(1) keeps only one received file waiting for the zip-writing loop: a larger value
+        // would free flatMap slots early and let the buffered files grow beyond wadoPrefetch.
         try (Stream<PacsResponse> responses = Flux.fromIterable(urlsToDownload)
                 .flatMap(url -> {
                     long startNanos = System.nanoTime();
