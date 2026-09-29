@@ -32,9 +32,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.RequestBody;
-
-import jakarta.validation.Valid;
 
 @Controller
 public class ManufacturerApiController implements ManufacturerApi {
@@ -74,8 +71,7 @@ public class ManufacturerApiController implements ManufacturerApi {
     }
 
     @Override
-    public ResponseEntity<Void> updateManufacturer(final Long manufacturerId,
-            @RequestBody @Valid final Manufacturer manufacturer, final BindingResult result) throws RestServiceException {
+    public ResponseEntity<Void> updateManufacturer(final Long manufacturerId, final Manufacturer manufacturer, final BindingResult result) throws RestServiceException {
 
         validate(manufacturer, result);
         try {
