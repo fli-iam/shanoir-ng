@@ -25,6 +25,7 @@ import org.shanoir.ng.bids.service.BidsTreeSemaphore;
 import org.shanoir.ng.bids.service.BidsValidationPublisher;
 import org.shanoir.ng.importer.service.DicomImporterService;
 import org.shanoir.ng.importer.service.DicomSEGAndSRImporterService;
+import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.service.StudyService;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,6 +62,9 @@ public class BidsApiControllerTest {
     @MockBean
     private StudyService studyService;
 
+    @MockBean
+    private StudyRepository studyRepository;
+
     @Autowired
     private MockMvc mvc;
 
@@ -85,7 +89,7 @@ public class BidsApiControllerTest {
         mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_GENERATE)).andExpect(status().isOk());
 
         // THEN the service is called
-        Mockito.verify(bidsService).exportAsBids(1L, "Name");
+        Mockito.verify(bidsService).exportAsBids(1L);
     }
 
     @Test
@@ -105,7 +109,7 @@ public class BidsApiControllerTest {
         // GIVEN a study with a bids folder to generate
 
         // WHEN we call the API to generate the folder
-        mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_EXPORT).param("filePath", "/var/datasets-data/bids-data/stud-1_NATIVE/truc.pdf")).andExpect(status().isNoContent());
+        mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_EXPORT).param("filePath", "/var/bids-data/study-1_NATIVE/truc.pdf")).andExpect(status().isNoContent());
 
         // THEN the service is called
     }

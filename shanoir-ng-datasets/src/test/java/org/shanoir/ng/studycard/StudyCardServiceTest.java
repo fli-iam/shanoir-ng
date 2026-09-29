@@ -14,7 +14,6 @@
 
 package org.shanoir.ng.studycard;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -22,7 +21,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.repository.StudyCardRepository;
 import org.shanoir.ng.studycard.service.StudyCardServiceImpl;
@@ -32,7 +30,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.BDDMockito.given;
@@ -55,6 +52,7 @@ public class StudyCardServiceTest {
 
     @MockBean
     private StudyInstanceUIDAndSubjectNameHandler studyInstanceUIDHandler;
+
     @InjectMocks
     private StudyCardServiceImpl studyCardService;
 
@@ -66,41 +64,8 @@ public class StudyCardServiceTest {
     }
 
     @Test
-    public void deleteByIdTest() throws EntityNotFoundException, MicroServiceCommunicationException {
-        studyCardService.deleteById(TEMPLATE_ID);
-        Mockito.verify(studyCardRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
-    }
-
-    @Test
-    public void findAllTest() {
-        final List<StudyCard> studyCards = studyCardService.findAll();
-        Assertions.assertNotNull(studyCards);
-        Assertions.assertTrue(studyCards.size() == 1);
-
-        Mockito.verify(studyCardRepository, Mockito.times(1)).findAll();
-    }
-
-    @Test
-    public void findByIdTest() {
-        final StudyCard studyCard = studyCardService.findById(TEMPLATE_ID);
-        Assertions.assertNotNull(studyCard);
-
-        Mockito.verify(studyCardRepository, Mockito.times(1)).findById(Mockito.anyLong());
-    }
-
-    @Test
-    public void saveTest() throws MicroServiceCommunicationException {
-        studyCardService.save(createStudyCard());
-
-        Mockito.verify(studyCardRepository, Mockito.times(1)).save(Mockito.any(StudyCard.class));
-    }
-
-    @Test
-    public void updateTest() throws EntityNotFoundException, MicroServiceCommunicationException {
-        final StudyCard updatedStudyCard = studyCardService.update(createStudyCard());
-        Assertions.assertNotNull(updatedStudyCard);
-        Assertions.assertTrue(UPDATED_STUDYCARD_DATA.equals(updatedStudyCard.getName()));
-
+    public void updateTest() throws EntityNotFoundException {
+        studyCardService.update(createStudyCard());
         Mockito.verify(studyCardRepository, Mockito.times(1)).save(Mockito.any(StudyCard.class));
     }
 

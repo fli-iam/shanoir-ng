@@ -14,8 +14,10 @@
 
 package org.shanoir.ng.examination.repository;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.persistence.criteria.*;
 import org.apache.commons.lang3.StringUtils;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.paging.PageImpl;
@@ -190,4 +192,23 @@ public class ExaminationRepositoryImpl implements ExaminationRepositoryCustom {
         return Pair.of(query.getResultList(), total);
     }
 
+    public List<Examination> findAllWithAcqAndDatasetsByStudyCenterOrStudyIdIn(Iterable<Pair<Long, Long>> studyCenterIds, Iterable<Long> studyIds) {
+
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Examination> cq = cb.createQuery(Examination.class);
+        Root<Examination> e = cq.from(Examination.class);
+        e.fetch("datasetAcquisitions", JoinType.LEFT).fetch("datasets", JoinType.LEFT);
+
+        List<Predicate> predicates = new ArrayList<>();
+        for (Pair<Long, Long> pair : studyCenterIds) {
+            predicates.add(cb.and(
+                    cb.equal(e.get("study").get("id"), pair.getFirst()),
+                    cb.equal(e.get("centerId"), pair.getSecond())
+            ));
+        }
+        predicates.add(e.get("study").get("id").in(studyIds));
+
+        cq.where(cb.or(predicates.toArray(new Predicate[0]))).distinct(true);
+        return entityManager.createQuery(cq).getResultList();
+    }
 }

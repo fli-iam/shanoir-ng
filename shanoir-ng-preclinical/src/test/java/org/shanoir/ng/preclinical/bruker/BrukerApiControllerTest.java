@@ -67,7 +67,7 @@ public class BrukerApiControllerTest {
     @BeforeEach
     public void beforeClass() {
         tempFolderPath = tempFolder.getAbsolutePath() + "/tmp/";
-        System.setProperty("preclinical.uploadBrukerFolder", tempFolderPath);
+        System.setProperty("storage.file-system.uploadBrukerFolder", tempFolderPath);
     }
 
     @Test

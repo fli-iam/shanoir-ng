@@ -18,7 +18,7 @@ export SHANOIR_URL_SCHEME=https
 export SHANOIR_VIEWER_OHIF_URL_HOST=viewer
 export SHANOIR_VIEWER_OHIF_URL_SCHEME=https
 export SHANOIR_PREFIX=
-export SHANOIR_ADMIN_EMAIL="nobody@inria.fr"
+export SHANOIR_NOTIFICATION_EMAIL="notification@inria.fr"
 export SHANOIR_KEYCLOAK_USER=admin
 export SHANOIR_KEYCLOAK_PASSWORD="&a1A&a1A"
 

@@ -15,6 +15,7 @@
 package org.shanoir.ng.preclinical.extra_data.physiological_data;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.shanoir.ng.preclinical.extra_data.ExtraDataService;
 import org.shanoir.ng.shared.exception.ShanoirException;
@@ -55,6 +56,11 @@ public class PhysiologicalDataServiceImpl implements ExtraDataService<Physiologi
     }
 
     @Override
+    public List<PhysiologicalData> findAll() {
+        return Utils.toList(physioDataRepository.findAll());
+    }
+
+    @Override
     public PhysiologicalData findById(final Long id) {
         return physioDataRepository.findById(id).orElse(null);
     }
@@ -88,7 +94,7 @@ public class PhysiologicalDataServiceImpl implements ExtraDataService<Physiologi
             final PhysiologicalData physioData) {
         physioDataDb.setExaminationId(physioData.getExaminationId());
         physioDataDb.setExtraDataType(physioData.getExtraDataType());
-        if (!physioDataDb.getFilename().equals(physioData.getFilename())) {
+        if (!Objects.equals(physioDataDb.getFilename(), physioData.getFilename())) {
             physioDataDb.setFilename(physioData.getFilename());
             physioDataDb.setFilepath(physioData.getFilepath());
         }

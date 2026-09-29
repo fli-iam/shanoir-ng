@@ -10,17 +10,6 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
--- Manually create this table
-CREATE TABLE `card_condition` (
-                                        `id` bigint(20) NOT NULL AUTO_INCREMENT,
-                                        `dicom_tag` int(11) DEFAULT NULL,
-                                        `operation` int(11) NOT NULL,
-                                        `shanoir_field` int(11) DEFAULT NULL,
-                                        `scope` varchar(47) DEFAULT NULL,
-                                        `cardinality` int(11) DEFAULT NULL,
-                                        PRIMARY KEY (`id`)
-);
-
 -- Populates database for test
 
 INSERT INTO study
@@ -175,9 +164,9 @@ VALUES
 	(3);
 
 INSERT INTO study_user
-	(id, confirmed, receive_study_user_report, receive_new_import_report, study_id, user_id, user_name)
+	(id, confirmed, receive_study_user_report, receive_new_import_report, study_id, user_id, user_name, expiration_date, received_expiration_notification)
 VALUES
-	(1, 1, 0, 1, 1, 1, 'admin'),
-	(2, 1, 0, 1, 3, 1, 'admin'),
-	(3, 1, 0, 0, 1, 2, 'jlouis'),
-	(4, 1, 0, 1, 2, 1, 'admin');
+	(1, 1, 0, 1, 1, 1, 'admin', null, 0),
+	(2, 1, 0, 1, 3, 1, 'admin', null, 0),
+	(3, 1, 0, 0, 1, 2, 'jlouis', null, 0),
+	(4, 1, 0, 1, 2, 1, 'admin', null, 0);

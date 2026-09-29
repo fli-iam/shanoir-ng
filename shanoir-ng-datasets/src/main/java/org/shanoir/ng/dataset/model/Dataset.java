@@ -31,6 +31,7 @@ import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.modality.ParameterQuantificationDataset;
 import org.shanoir.ng.dataset.modality.PetDataset;
 import org.shanoir.ng.dataset.modality.RegistrationDataset;
+import org.shanoir.ng.dataset.modality.RtDataset;
 import org.shanoir.ng.dataset.modality.SegmentationDataset;
 import org.shanoir.ng.dataset.modality.SpectDataset;
 import org.shanoir.ng.dataset.modality.StatisticalDataset;
@@ -90,7 +91,8 @@ import jakarta.persistence.Transient;
         @JsonSubTypes.Type(value = BidsDataset.class, name = DatasetType.Names.BIDS),
         @JsonSubTypes.Type(value = MeasurementDataset.class, name = DatasetType.Names.MEASUREMENT),
         @JsonSubTypes.Type(value = XaDataset.class, name = DatasetType.Names.XA),
-        @JsonSubTypes.Type(value = SrDataset.class, name = DatasetType.Names.SR)})
+        @JsonSubTypes.Type(value = SrDataset.class, name = DatasetType.Names.SR),
+        @JsonSubTypes.Type(value = RtDataset.class, name = DatasetType.Names.RT)})
 public abstract class Dataset extends AbstractEntity {
 
     /**
@@ -103,6 +105,9 @@ public abstract class Dataset extends AbstractEntity {
      */
     @LocalDateAnnotations
     private LocalDate creationDate;
+
+    /** Id of the user who imported the dataset. */
+    private Long userId;
 
     /**
      * Dataset Acquisition.
@@ -205,11 +210,18 @@ public abstract class Dataset extends AbstractEntity {
     @Transient
     private String sopInstanceUID;
 
+    @Transient
+    private Boolean inPacs;
+
+    @Transient
+    private Long centerId;
+
     public Dataset() {
     }
 
     public Dataset(Dataset d) {
         this.creationDate = d.getCreationDate();
+        this.userId = d.getUserId();
         this.datasetAcquisition = d.getDatasetAcquisition();
         this.datasetExpressions = new ArrayList<>(d.getDatasetExpressions().size());
         for (DatasetExpression ds : d.getDatasetExpressions()) {
@@ -252,6 +264,20 @@ public abstract class Dataset extends AbstractEntity {
      */
     public void setCreationDate(LocalDate creationDate) {
         this.creationDate = creationDate;
+    }
+
+    /**
+     * @return the id of the user who imported the dataset
+     */
+    public Long getUserId() {
+        return userId;
+    }
+
+    /**
+     * @param userId the userId to set
+     */
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 
     /**
@@ -420,31 +446,12 @@ public abstract class Dataset extends AbstractEntity {
         return getDatasetAcquisition().getExamination().getStudyId();
     }
 
-    /**
-     * @return the centerId
-     */
-    @Transient
     public Long getCenterId() {
-        if (getDatasetAcquisition() == null || getDatasetAcquisition().getExamination() == null) {
-            if (getDatasetProcessing() != null && getDatasetProcessing().getInputDatasets() != null) {
-                return getDatasetProcessing().getInputDatasets().get(0).getCenterId();
-            }
-            return null;
-        }
-        return getDatasetAcquisition().getExamination().getCenterId();
+        return centerId;
     }
 
-    /**
-     * @return The first original (non-derived) Dataset in the chain.
-     */
-    @JsonIgnore
-    @Transient
-    public Dataset getFirstRealInput() {
-        if (this.datasetProcessing != null) {
-            return this.datasetProcessing.getInputDatasets().get(0).getFirstRealInput();
-        } else {
-            return this;
-        }
+    public void setCenterId(Long centerId) {
+        this.centerId = centerId;
     }
 
     /**
@@ -535,7 +542,14 @@ public abstract class Dataset extends AbstractEntity {
     }
 
     public boolean getInPacs() {
-        return getDatasetExpressions() != null && getDatasetExpressions().size() > 0;
+        if (inPacs != null) {
+            return inPacs;
+        }
+        return datasetExpressions != null && !datasetExpressions.isEmpty();
+    }
+
+    public void setInPacs(Boolean inPacs) {
+        this.inPacs = inPacs;
     }
 
     public List<StudyTag> getTags() {

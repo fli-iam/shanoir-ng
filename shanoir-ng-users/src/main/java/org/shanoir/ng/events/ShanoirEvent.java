@@ -23,6 +23,7 @@ import jakarta.persistence.Table;
 @Table(name = "events",
         indexes = {
             @Index(name = "i_user_type", columnList = "userId, eventType"),
+            @Index(name = "i_last_update", columnList = "lastUpdate")
         }
     )
 public class ShanoirEvent extends ShanoirEventLight {
@@ -54,6 +55,14 @@ public class ShanoirEvent extends ShanoirEventLight {
         light.setHasReport(getReport() != null && !getReport().isEmpty());
         setReport(null);
         return light;
+    }
+
+    @Override
+    public String toString() {
+        return "ShanoirEvent [getId()=" + getId() + ", getEventType()=" + getEventType() + ", getObjectId()="
+                + getObjectId() + ", getUserId()=" + getUserId() + ", getMessage()=" + getMessage()
+                + ", getCreationDate()=" + getCreationDate() + ", getLastUpdate()=" + getLastUpdate() + ", getStatus()="
+                + getStatus() + ", getProgress()=" + getProgress() + ", getStudyId()=" + getStudyId() + "]";
     }
 
 }

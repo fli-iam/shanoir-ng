@@ -25,7 +25,6 @@ import org.mapstruct.Named;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.shanoir.ng.subject.dto.SubjectDTO;
 import org.shanoir.ng.subject.model.Subject;
-import org.shanoir.ng.subjectstudy.dto.mapper.SubjectStudyMapper;
 import org.springframework.data.domain.Page;
 
 /**
@@ -34,18 +33,13 @@ import org.springframework.data.domain.Page;
  * @author msimon
  *
  */
-@Mapper(componentModel = "spring", uses = { SubjectStudyMapper.class })
+@Mapper(componentModel = "spring")
 @DecoratedWith(SubjectDecorator.class)
 public interface SubjectMapper {
 
     @Named("subjectWithStudyList")
-    @Mappings({ @Mapping(target = "studyId", source = "study.id")})
+    @Mappings({ @Mapping(target = "studyId", source = "study.id"), @Mapping(target = "study", ignore = true)})
     SubjectDTO subjectToSubjectDTO(Subject subject);
-
-    @Named("subjectWithoutStudyList")
-    @Mappings({ @Mapping(target = "studyId", source = "study.id"),
-        @Mapping(target = "subjectStudyList", ignore = true) })
-    SubjectDTO subjectToSubjectDTONoStudies(Subject subject);
 
     @IterableMapping(qualifiedByName = "subjectWithStudyList")
     List<SubjectDTO> subjectsToSubjectDTOs(List<Subject> subjects);

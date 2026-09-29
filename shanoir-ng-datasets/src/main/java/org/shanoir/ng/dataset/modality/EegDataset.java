@@ -18,8 +18,6 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
 
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.eeg.model.Channel;
 import org.shanoir.ng.eeg.model.Event;
@@ -54,11 +52,9 @@ public class EegDataset extends Dataset {
 
     private String coordinatesSystem;
 
-    @LazyCollection(LazyCollectionOption.FALSE)
     @OneToMany(mappedBy = "dataset", cascade = CascadeType.ALL)
     private List<Channel> channels;
 
-    @LazyCollection(LazyCollectionOption.FALSE)
     @OneToMany(mappedBy = "dataset", cascade = CascadeType.ALL)
     private List<Event> events;
 

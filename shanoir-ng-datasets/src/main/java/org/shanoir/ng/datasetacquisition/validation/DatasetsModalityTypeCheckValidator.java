@@ -16,12 +16,14 @@ package org.shanoir.ng.datasetacquisition.validation;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
+import org.hibernate.Hibernate;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetType;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.ct.CtDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.pet.PetDatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.rt.RtDatasetAcquisition;
 
 /**
  * Validates if all datasets of an acquisition have same modality type than the
@@ -30,8 +32,7 @@ import org.shanoir.ng.datasetacquisition.model.pet.PetDatasetAcquisition;
  * @author msimon
  *
  */
-public class DatasetsModalityTypeCheckValidator
-        implements ConstraintValidator<DatasetsModalityTypeCheck, DatasetAcquisition> {
+public class DatasetsModalityTypeCheckValidator implements ConstraintValidator<DatasetsModalityTypeCheck, DatasetAcquisition> {
 
     @Override
     public void initialize(final DatasetsModalityTypeCheck constraintAnnotation) {
@@ -40,6 +41,9 @@ public class DatasetsModalityTypeCheckValidator
 
     @Override
     public boolean isValid(final DatasetAcquisition datasetAcquisition, final ConstraintValidatorContext context) {
+        if (!Hibernate.isInitialized(datasetAcquisition.getDatasets())) {
+            return true;
+        }
         if (datasetAcquisition.getDatasets() != null && !datasetAcquisition.getDatasets().isEmpty()) {
             if (datasetAcquisition instanceof MrDatasetAcquisition) {
                 for (Dataset dataset : datasetAcquisition.getDatasets()) {
@@ -56,6 +60,12 @@ public class DatasetsModalityTypeCheckValidator
             } else if (datasetAcquisition instanceof CtDatasetAcquisition) {
                 for (Dataset dataset : datasetAcquisition.getDatasets()) {
                     if (!(dataset.getType().equals(DatasetType.CT))) {
+                        return false;
+                    }
+                }
+            } else if (datasetAcquisition instanceof RtDatasetAcquisition) {
+                for (Dataset dataset : datasetAcquisition.getDatasets()) {
+                    if (!(dataset.getType().equals(DatasetType.RT))) {
                         return false;
                     }
                 }

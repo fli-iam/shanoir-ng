@@ -44,8 +44,10 @@ import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.dataset.service.CreateStatisticsService;
 import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
 import org.shanoir.ng.dataset.service.DatasetService;
+import org.shanoir.ng.datasetacquisition.dto.mapper.ExaminationDatasetAcquisitionMapper;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
@@ -64,6 +66,7 @@ import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.shared.security.ControllerSecurityService;
 import org.shanoir.ng.shared.service.SubjectService;
 import org.shanoir.ng.solr.service.SolrService;
+import org.shanoir.ng.storage.StorageService;
 import org.shanoir.ng.tag.mapper.StudyTagMapper;
 import org.shanoir.ng.tag.service.StudyTagService;
 import org.shanoir.ng.utils.ModelsUtil;
@@ -177,6 +180,15 @@ public class StudyTagApiControllerTest {
     @MockBean
     private SolrService solrService;
 
+    @MockBean
+    private StorageService storageService;
+
+    @MockBean
+    private DatasetAcquisitionService datasetAcquisitionService;
+
+    @MockBean
+    private ExaminationDatasetAcquisitionMapper examinationDatasetAcquisitionMapper;
+
     @Autowired
     private ObjectMapper mapper;
 
@@ -194,7 +206,7 @@ public class StudyTagApiControllerTest {
         datasetToReturn.getDatasetAcquisition().setExamination(exam);
         datasetToReturn.getDatasetAcquisition().getExamination().setStudy(study);
 
-        given(datasetServiceMock.findById(1L)).willReturn(datasetToReturn);
+        given(datasetServiceMock.findByIdWithProcessingAncestorsAndExaminationAndMetadata(1L)).willReturn(datasetToReturn);
         doNothing().when(datasetServiceMock).deleteById(1L);
         given(datasetServiceMock.create(Mockito.mock(MrDataset.class))).willReturn(new MrDataset());
         given(studyRepo.findById(Mockito.anyLong())).willReturn(Optional.of(study));
@@ -283,7 +295,7 @@ public class StudyTagApiControllerTest {
         for (int i = 0; i < 501; i++) {
             hugeList.add(new MrDataset());
         }
-        Mockito.when(datasetServiceMock.findByStudyId(1L)).thenReturn(hugeList);
+        Mockito.when(datasetServiceMock.findByStudyIdWithDatasetFilesAndExaminationAndMetadata(1L)).thenReturn(hugeList);
 
         try {
         // WHEN we export all the datasets

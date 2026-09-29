@@ -39,6 +39,10 @@ div {
     padding: 1px;
 }
 
+div.false-times {
+    color: var(--color-error);
+}
+
 div i {
     vertical-align: super;
     text-align: center;

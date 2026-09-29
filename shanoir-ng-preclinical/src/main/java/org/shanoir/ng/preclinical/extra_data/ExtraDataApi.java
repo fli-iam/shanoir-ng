@@ -16,14 +16,15 @@ package org.shanoir.ng.preclinical.extra_data;
 
 import java.util.List;
 
-import jakarta.servlet.http.HttpServletResponse;
-
 import org.shanoir.ng.preclinical.extra_data.bloodgas_data.BloodGasData;
 import org.shanoir.ng.preclinical.extra_data.examination_extra_data.ExaminationExtraData;
 import org.shanoir.ng.preclinical.extra_data.physiological_data.PhysiologicalData;
+import org.shanoir.ng.shared.dto.FileEntryDTO;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.storage.StorageException;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,11 +36,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
-import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Tag(name = "extra_data")
 @RequestMapping("")
@@ -97,7 +99,7 @@ public interface ExtraDataApi {
 
     @Operation(summary = "Deletes a extradata", description = "")
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Successful operation"),
-            @ApiResponse(responseCode = "400", description = "Invalid Examination Extra Data  id"),
+            @ApiResponse(responseCode = "400", description = "Invalid Examination Extra Data id"),
             @ApiResponse(responseCode = "500", description = "Unexpected Error") })
     @DeleteMapping(value = "/examination/{id}/extradata/{eid}", produces = {
             "application/json" })
@@ -135,7 +137,7 @@ public interface ExtraDataApi {
     void downloadExtraData(
             @Parameter(name = "Examination extra data id to download", required = true) @PathVariable("id") Long id,
             HttpServletResponse response)
-            throws RestServiceException;
+            throws RestServiceException, StorageException;
 
     @Operation(summary = "Update an existing physiologicalData", description = "")
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Successful operation"),
@@ -162,5 +164,15 @@ public interface ExtraDataApi {
             @Parameter(name = "ID of bloodgasdata that needs to be updated", required = true) @PathVariable("eid") Long eid,
             @Parameter(name = "BloodGasData object that needs to be updated", required = true) @RequestBody BloodGasData bloodGasData,
             final BindingResult result) throws RestServiceException;
+
+    @Operation(summary = "", description = "Returns a JSON table of all extra-data files indexed by study ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "file list returned"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @GetMapping(value = "/examination/extradata/files", produces = { "application/json" })
+    @PreAuthorize("hasRole('ADMIN')")
+    ResponseEntity<List<FileEntryDTO>> getAllFiles() throws StorageException;
 
 }

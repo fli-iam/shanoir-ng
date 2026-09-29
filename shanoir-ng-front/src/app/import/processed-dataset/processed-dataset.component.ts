@@ -12,14 +12,15 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
-import { slideDown } from '../../shared/animations/animations';
 import { ImportDataService } from '../shared/import.data-service';
 import { ImportService } from '../shared/import.service';
 import { ProcessedDatasetImportJob } from '../shared/processed-dataset-data.model';
+import { UploaderComponent } from '../../shared/components/uploader/uploader.component';
+
 
 type Status = 'none' | 'uploading' | 'uploaded' | 'error';
 
@@ -27,8 +28,8 @@ type Status = 'none' | 'uploading' | 'uploaded' | 'error';
     selector: 'processed-dataset',
     templateUrl: 'processed-dataset.component.html',
     styleUrls: ['processed-dataset.component.css', '../shared/import.step.css'],
-    animations: [slideDown],
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager,
+    imports: [UploaderComponent]
 })
 export class ImportProcessedDatasetComponent {
     

@@ -17,10 +17,10 @@ package org.shanoir.ng.importer.service;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -53,16 +53,15 @@ import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
+import org.shanoir.ng.storage.StorageService;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
-import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -73,9 +72,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Service
 public class BidsImporterService {
 
-    private static final String SUBJECT_PREFIX = "sub-";
-
-    private static final String SESSION_PREFIX = "ses-";
+    private static final Logger LOG = LoggerFactory.getLogger(BidsImporterService.class);
 
     @Autowired
     private ShanoirEventService eventService;
@@ -92,15 +89,12 @@ public class BidsImporterService {
     @Autowired
     private DatasetAcquisitionService datasetAcquisitionService;
 
-    @Value("${datasets-data}")
-    private String niftiStorageDir;
-
-    private static final Logger LOG = LoggerFactory.getLogger(BidsImporterService.class);
+    @Autowired
+    private StorageService storageService;
 
     /**
      * Create BIDS dataset.
-     * @param importJob the import job
-     * @param userId the user id
+     * @param importJobStr the import job as string
      * @throws IOException
      * @throws JsonMappingException
      * @throws JsonParseException
@@ -108,11 +102,11 @@ public class BidsImporterService {
     @RabbitListener(queues = RabbitMQConfiguration.IMPORTER_BIDS_DATASET_QUEUE, containerFactory = "multipleConsumersFactory")
     @RabbitHandler
     @Transactional
-    public void createAllBidsDatasetAcquisition(Message importJobStr) throws AmqpRejectAndDontRequeueException {
+    public void createAllBidsDatasetAcquisition(String importJobStr) throws AmqpRejectAndDontRequeueException {
         ShanoirEvent event = null;
         try {
             SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
-            ImportJob importJob = objectMapper.readValue(importJobStr.getBody(), ImportJob.class);
+            ImportJob importJob = objectMapper.readValue(importJobStr, ImportJob.class);
             Long userId = importJob.getUserId();
             event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getExaminationId().toString(), userId, "Starting import...", ShanoirEvent.IN_PROGRESS, importJob.getStudyId());
             eventService.publishEvent(event);
@@ -188,10 +182,10 @@ public class BidsImporterService {
 
     /**
      * Import some nifti datasets
+     * @param importJob
      * @param bidsDataType
      * @param modalityType
      * @param event
-     * @param workfolder the work folder we are working in
      * @throws IOException
      * @throws ParseException
      * @throws JSONException
@@ -203,6 +197,7 @@ public class BidsImporterService {
         // Get examination
         Examination examination = examinationRepository.findById(importJob.getExaminationId()).get();
         datasetAcquisition.setExamination(examination);
+        Long subjectId = examination.getSubject() != null ? examination.getSubject().getId() : null;
 
         Set<Dataset> datasets = new HashSet<>();
         float progress = 0f;
@@ -223,7 +218,19 @@ public class BidsImporterService {
             event.setProgress(progress);
             eventService.publishEvent(event);
 
-            String name = importedFile.getName().replaceAll("\\.", "_");
+            String name = importedFile.getName();
+            name = name
+                    .replaceAll("\\.", "_")
+                    .replaceFirst("sub-[^_]+", "sub-" + subjectId)
+                    .replaceFirst(
+                            "(sub-[^_]+_)ses-[^_]+_",
+                            "$1ses-" + examination.getId() + "_"
+                    );
+            if (!name.contains("ses-")) {
+                name = name.replaceFirst(
+                        "(sub-[^_]+_)",
+                        "$1ses-" + examination.getId() + "_");
+            }
 
             // Parse name to get acquisition / session / run / task
 
@@ -236,7 +243,7 @@ public class BidsImporterService {
             } else {
                 // Create the dataset with informations from job
                 datasetToCreate = new BidsDataset();
-                datasetToCreate.setSubjectId(examination.getSubject() != null ? examination.getSubject().getId() : null);
+                datasetToCreate.setSubjectId(subjectId);
                 datasetToCreate.setCreationDate(LocalDate.now());
                 datasetToCreate.setDatasetAcquisition(datasetAcquisition);
 
@@ -261,27 +268,34 @@ public class BidsImporterService {
 
             List<DatasetFile> files = expression.getDatasetFiles();
 
-            // Copy the data to "BIDS" folder
-            final String subLabel = SUBJECT_PREFIX + importJob.getSubjectName();
-            final String sesLabel = SESSION_PREFIX + importJob.getExaminationId();
-
-            final File outDir = new File(niftiStorageDir + File.separator + subLabel + File.separator + sesLabel + File.separator + bidsDataType.getFolderName());
-            outDir.mkdirs();
-
-            // remove old subject and session names from files names
-            String filename = importedFile.getName()
+            // remove old subject label and old session label from file name
+            String fileName = importedFile.getName()
                     .replaceFirst("sub-[^_]+_", "")
                     .replaceFirst("ses-[^_]+_", "");
 
-            String outPath = outDir.getAbsolutePath() + File.separator + filename;
-            Path importedFileFinalLocation = Files.copy(importedFile.toPath(), Paths.get(outPath), StandardCopyOption.REPLACE_EXISTING);
+            try (InputStream is = Files.newInputStream(importedFile.toPath())) {
+                String contentType = Files.probeContentType(importedFile.toPath());
+                if (contentType == null) {
+                    contentType = URLConnection.guessContentTypeFromName(importedFile.getName());
+                }
+                if (contentType == null) {
+                    contentType = "application/octet-stream";
+                }
+                String path = storageService.storeDatasetsData(
+                        importJob.getStudyId(), subjectId, importJob.getExaminationId(),
+                        bidsDataType.getFolderName(), fileName,
+                        is, contentType, importedFile.length());
+                DatasetFile dsFile = new DatasetFile();
+                dsFile.setDatasetExpression(expression);
+                dsFile.setPacs(false);
+                dsFile.setPath(path);
+                files.add(dsFile);
+            } catch (Exception e) {
+                throw new RuntimeException("Error with storage of file: " + importedFile.getName(), e);
+            }
 
-            DatasetFile dsFile = new DatasetFile();
-            dsFile.setDatasetExpression(expression);
-            dsFile.setPacs(false);
-            dsFile.setPath(importedFileFinalLocation.toUri().toString().replaceAll(" ", "%20"));
-            files.add(dsFile);
-            if (equipmentId == 0L && importedFile.getName().endsWith(".json") && Files.size(Path.of(importedFile.getPath())) < 1000000) {
+            if (equipmentId == 0L && importedFile.getName().endsWith(".json")
+                    && Files.size(Path.of(importedFile.getPath())) < 1000000) {
                 // Check equipment in json file
                 //JSONParser json = new JSONParser(new FileReader(importedFile));
                 // LinkedHashMap jsonObject = (LinkedHashMap) json.parse();
@@ -293,9 +307,8 @@ public class BidsImporterService {
                     equipmentId = equipments.get(code) != null ? Long.valueOf(equipments.get(code)) : 0L;
                 }
             }
-
             expression.setDatasetFiles(files);
-            expression.setSize(Files.size(importedFileFinalLocation));
+            expression.setSize(importedFile.length());
             datasets.add(datasetToCreate);
             datasetsByName.put(name, datasetToCreate);
         }
@@ -308,7 +321,7 @@ public class BidsImporterService {
 
         event.setStatus(ShanoirEvent.SUCCESS);
         event.setMessage("[" + importJob.getStudyName() + " (n°" + importJob.getStudyId() + ")]"
-                + " Successfully created datasets for subject [" + importJob.getSubjectName()
+                + " Successfully created " + datasets.size() + " dataset(s) for subject [" + importJob.getSubjectName()
                 + "] in examination [" + examination.getId() + "]");
         event.setProgress(1f);
         eventService.publishEvent(event);

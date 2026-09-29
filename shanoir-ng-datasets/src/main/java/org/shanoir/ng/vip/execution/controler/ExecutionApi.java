@@ -34,6 +34,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * @author Alae Es-saki
@@ -52,9 +53,9 @@ public interface ExecutionApi {
             produces = {"application/json"},
             consumes = {"application/json"},
             method = RequestMethod.POST)
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExecutionCandidate(#candidate))")
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExecutionCandidates(#candidates))")
     ResponseEntity<IdName> createExecution(
-            @Parameter(description = "execution", required = true) @RequestBody final ExecutionCandidateDTO candidate) throws EntityNotFoundException, SecurityException, RestServiceException;
+            @Parameter(description = "execution", required = true) @RequestBody final List<ExecutionCandidateDTO> candidates) throws EntityNotFoundException, SecurityException, RestServiceException;
 
     @Operation(summary = "Get VIP execution for the given identifier", description = "Returns the VIP execution that has the given identifier in parameter.", tags = { })
     @ApiResponses(value = {
@@ -67,27 +68,27 @@ public interface ExecutionApi {
             method = RequestMethod.GET)
     ResponseEntity<VipExecutionDTO> getExecution(@Parameter(description = "The execution identifier", required = true) @PathVariable("identifier") String identifier) throws IOException, RestServiceException, EntityNotFoundException, SecurityException;
 
-    @Operation(summary = "Get stderr logs for the given VIP execution identifier", description = "Returns the stderr logs of the VIP execution that has the given identifier in parameter.", tags = { })
+    @Operation(summary = "Get stderr logs for the given VIP execution identifier", description = "Returns the stderr logs of the VIP processing that has the given id in parameter.", tags = { })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "successful response, returns the status"),
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "500", description = "unexpected error"),
             @ApiResponse(responseCode = "503", description = "error from VIP API")})
-    @RequestMapping(value = "/{identifier}/stderr",
+    @RequestMapping(value = "/{processingId}/stderr",
             produces = { "application/json", "application/octet-stream" },
             method = RequestMethod.GET)
-    ResponseEntity<String> getExecutionStderr(@Parameter(description = "The execution identifier", required = true) @PathVariable("identifier") String identifier) throws IOException, RestServiceException, EntityNotFoundException, SecurityException;
+    ResponseEntity<String> getExecutionStderr(@Parameter(description = "The processing idd", required = true) @PathVariable("processingId") Long processingId) throws IOException, RestServiceException, EntityNotFoundException, SecurityException;
 
-    @Operation(summary = "Get stdout logs for the given VIP execution identifier", description = "Returns the stdout logs of the VIP execution that has the given identifier in parameter.", tags = { })
+    @Operation(summary = "Get stdout logs for the given VIP proecssing", description = "Returns the stdout logs of the VIP processing that has the given id in parameter.", tags = { })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "successful response, returns the status"),
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "500", description = "unexpected error"),
             @ApiResponse(responseCode = "503", description = "error from VIP API")})
-    @RequestMapping(value = "/{identifier}/stdout",
+    @RequestMapping(value = "/{processingId}/stdout",
             produces = { "application/json", "application/octet-stream" },
             method = RequestMethod.GET)
-    ResponseEntity<String> getExecutionStdout(@Parameter(description = "The execution identifier", required = true) @PathVariable("identifier") String identifier) throws IOException, RestServiceException, EntityNotFoundException, SecurityException;
+    ResponseEntity<String> getExecutionStdout(@Parameter(description = "The processing id", required = true) @PathVariable("processingId") Long processingId) throws IOException, RestServiceException, EntityNotFoundException, SecurityException;
 
 
     @Operation(summary = "Get status for the given VIP execution identifier", description = "Returns the status of the VIP execution that has the given identifier in parameter.", tags = { })

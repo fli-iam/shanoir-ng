@@ -12,15 +12,17 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
 
 import { FooterState } from './footer-state.model';
+
 
 @Component({
     selector: 'form-footer',
     templateUrl: 'form-footer.component.html',
     styleUrls: ['./form-footer.component.css'],
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager,
+    imports: []
 })
 
 export class FormFooterComponent {

@@ -35,6 +35,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotNull;
+import org.shanoir.ng.vip.executionTemplate.model.ExecutionTemplate;
 
 /**
  * @author yyao
@@ -78,6 +79,9 @@ public class Study extends IdName {
     @OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<StudyCenter> studyCenterList;
 
+    @OneToMany(mappedBy = "study", fetch = FetchType.LAZY,  cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ExecutionTemplate> executionTemplates;
+
     /**
      * @return the tags
      */
@@ -119,16 +123,16 @@ public class Study extends IdName {
     }
 
     /**
-     * @return the subjectStudyList
+     * @return the subjectList
      */
     public List<Subject> getSubjectList() {
         return subjectList;
     }
 
     /**
-     * @param subjectStudyList the subjectStudyList to set
+     * @param subjectList the subjectList to set
      */
-    public void setSubjectStudyList(List<Subject> subjectList) {
+    public void setSubjectList(List<Subject> subjectList) {
         this.subjectList = subjectList;
     }
 

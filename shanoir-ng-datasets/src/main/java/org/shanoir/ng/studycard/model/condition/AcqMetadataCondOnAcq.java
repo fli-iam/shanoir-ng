@@ -14,15 +14,17 @@
 
 package org.shanoir.ng.studycard.model.condition;
 
-import com.fasterxml.jackson.annotation.JsonTypeName;
-import jakarta.persistence.DiscriminatorValue;
-import jakarta.persistence.Entity;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.shared.exception.CheckedIllegalClassException;
 import org.shanoir.ng.studycard.model.field.DatasetAcquisitionMetadataField;
 import org.shanoir.ng.studycard.model.field.MetadataFieldInterface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.annotation.JsonTypeName;
+
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
 
 /**
  * Condition valid for the given DatasetAcquisition if the acquisition metadata fulfill the condition
@@ -44,6 +46,11 @@ public class AcqMetadataCondOnAcq extends StudyCardMetadataCondition<DatasetAcqu
         shanoirField = field.getId();
     }
 
+    /**
+     * Check if the condition is fulfilled for the given acquisition
+     * @param acquisition the acquisition to check
+     * @return true if the condition is fulfilled, false otherwise
+     */
     public boolean fulfilled(DatasetAcquisition acquisition) {
         DatasetAcquisitionMetadataField field = this.getShanoirField();
         if (field != null) {
@@ -54,14 +61,46 @@ public class AcqMetadataCondOnAcq extends StudyCardMetadataCondition<DatasetAcqu
                 valueFromDb = null;
             }
             if (valueFromDb != null) {
-                // get all possible values, that can fulfill the condition
-                for (String value : this.getValues()) {
-                    LOG.info("condition fulfilled: acq.name = " + valueFromDb + ", value=" + value);
-                    return true; // as condition values are combined by OR: return if one is true
+                boolean matches = field.isNumeric()
+                        ? numericalCompare(this.getOperation(), valueFromDb)
+                        : textualCompare(this.getOperation(), valueFromDb);
+                if (matches) {
+                    LOG.info("Condition fulfilled: acquisition metadata field value = " + valueFromDb);
+                    return true;
                 }
             }
         }
         return false;
+    }
+
+    /**
+     * Check if the condition is fulfilled for the given acquisition and append a message describing
+     * the outcome (fulfilled or not) - the caller (QualityCardServiceImpl.conditionsfulfilled()) relies
+     * on this message being non-empty in both cases to build the quality card report.
+     * @param acquisition the acquisition to check
+     * @param report the message to append, describing whether/why the condition was fulfilled
+     * @return true if the condition is fulfilled, false otherwise
+     * @throws CheckedIllegalClassException
+     */
+    public boolean fulfilled(DatasetAcquisition acquisition, StringBuffer report) {
+        boolean fulfilled = fulfilled(acquisition);
+        try {
+            String fieldValue = this.getShanoirField().get(acquisition);
+            if (fulfilled) {
+                report.append("field ").append(this.getShanoirField().name()).append(", the found value ").append(fieldValue)
+                        .append(" satisfies operator ").append(this.getOperation())
+                        .append(" against the expected value(s) ").append(this.getValues());
+            } else {
+                report.append("Condition not fulfilled for acquisition id ").append(acquisition.getId()).append(" : ");
+                report.append("field ").append(this.getShanoirField().name()).append(", the found value ").append(fieldValue)
+                        .append(" does not satisfy operator ").append(this.getOperation())
+                        .append(" against the expected value(s) ").append(this.getValues());
+            }
+        } catch (CheckedIllegalClassException e) {
+            report.append("Error occurred while checking condition for acquisition ").append(acquisition.getId());
+            LOG.error("Error occurred while checking condition for acquisition {}", acquisition.getId(), e);
+        }
+        return fulfilled;
     }
 
 }

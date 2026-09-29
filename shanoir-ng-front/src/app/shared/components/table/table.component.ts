@@ -12,31 +12,38 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges } from '@angular/core';
-import { Router } from "@angular/router";
 import { fromEvent, Subscription } from 'rxjs';
+import { Router, RouterLink, RouterLinkActive } from "@angular/router";
 import shajs from 'sha.js';
+import { NgTemplateOutlet } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+
+import { VarDirective } from '@app/utils/ng-var.directive';
 
 import { Task, TaskStatus } from '../../../async-tasks/task.model';
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
 import * as AppUtils from '../../../utils/app.utils';
 import { isDarkColor } from "../../../utils/app.utils";
-import { slideDown } from '../../animations/animations';
 import { KeycloakService } from '../../keycloak/keycloak.service';
 import { NotificationsService } from '../../notifications/notifications.service';
 import { GlobalService } from '../../services/global.service';
 import { SessionService } from '../../services/session.service';
 import { ConfirmDialogService } from '../confirm-dialog/confirm-dialog.service';
+import { CheckboxComponent } from '../../checkbox/checkbox.component';
+import { MultiSelectComponent } from '../../multi-select/multi-select.component';
+import { LoadingBarComponent } from '../loading-bar/loading-bar.component';
 
-import { ColumnDefinition } from './column.definition.type';
 import { Filter, FilterablePageable, Order, Page, Pageable, Sort } from './pageable.model';
+import { ColumnDefinition } from './column.definition.type';
+import { TableSearchComponent } from './search/search.component';
+import { PagerComponent } from './pager/pager.component';
 
 @Component({
     selector: 'shanoir-table',
     templateUrl: 'table.component.html',
     styleUrls: ['table.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    animations: [slideDown],
-    standalone: false
+    imports: [VarDirective, RouterLink, RouterLinkActive, CheckboxComponent, FormsModule, MultiSelectComponent, LoadingBarComponent, TableSearchComponent, NgTemplateOutlet, PagerComponent]
 })
 export class TableComponent implements OnInit, OnChanges, OnDestroy {
     @Input() getPage: (pageable: Pageable, forceRefresh?: boolean, eager?: boolean) => Promise<Page<any>> | Page<any>;
@@ -69,7 +76,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     currentPage: number = 1;
     loaderImageUrl: string = "assets/images/loader.gif";
     isError: boolean = false;
-    filter: Filter = new Filter(null, null);
+    @Input() filter: Filter = new Filter(null, null);
     firstLoading: boolean = true;
     currentDrag: {columns: any; leftOrigin: number, totalWidth: number, leftColIndex: number};
     private subscriptions: Subscription[] = [];
@@ -111,6 +118,11 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
                 if (this.subRowsDefs) this.nbColumns++;
             });
         }
+        if (changes.filter) {
+            if (!this.filter) {
+                this.filter = new Filter(null, null);
+            }
+        }
     }
 
     ngOnDestroy(): void {
@@ -150,7 +162,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
         if (savedState) {
             this.lastSortedCol = this.columnDefs.find(col => col && savedState.lastSortedCol && col.field == savedState.lastSortedCol.field);
             this.lastSortedAsc = savedState.lastSortedAsc;
-            this.filter = savedState.filter;
+            this.filter = savedState.filter || new Filter(null, null);
             this.maxResults = savedState.maxResults;
             if (savedState.selection && Symbol.iterator in Object(savedState.selection)) {
                 this.selection = new Set();
@@ -189,7 +201,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
 
 
     onRowClick(item: any) {
-        if (this.rowClick.observers.length > 0 && !this.rowDisabled(item)) this.rowClick.emit(item);
+        if (this.rowClick.observed && !this.rowDisabled(item)) this.rowClick.emit(item);
         else if (this.selectionAllowed) this.onSelectChange(item, !this.isSelected(item));
     }
 
@@ -275,7 +287,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
         const result: any = this.getCellValue(item, col);
         if (result == null || this.isValueBoolean(result)) {
             return "";
-        } else if ((col.type == 'date' || col.type == 'dateTime') && !col.cellRenderer) {
+        } else if ((col.type == 'date' || col.type == 'dateTime')) {
             const date: Date = TableComponent.harmonizeToDate(result);
             let dateFormat;
             if (col.type == 'dateTime') dateFormat = {year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false };
@@ -660,8 +672,8 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
                 pageable.pageNumber = i + 1;
                 completion = completion.then(() => { // load pages sequentially
                     const getPage: Page<any> | Promise<Page<any>> = this.getPage(pageable, false, true)
-                    if (!task 
-                            && (performance.now() - startTs > 5000) 
+                    if (!task
+                            && (performance.now() - startTs > 5000)
                             && (i / this.page.totalPages < 0.8)) {
                         task = this.startNofification(i / this.page.totalPages);
                     } else if (task) {

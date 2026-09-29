@@ -23,7 +23,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author JcomeD
  *
  */
-public class EegImportJob extends ImportJob {
+public class EegImportJob extends ImportJobBase {
 
     private static final long serialVersionUID = -5482473150099609081L;
 

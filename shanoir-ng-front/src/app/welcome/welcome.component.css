@@ -28,6 +28,8 @@ body {
 .shanoir-text {
 	display: block;
 	color: white;
+	word-spacing: 1em;
+	letter-spacing: 0.3em;
 }
 
 .stats {

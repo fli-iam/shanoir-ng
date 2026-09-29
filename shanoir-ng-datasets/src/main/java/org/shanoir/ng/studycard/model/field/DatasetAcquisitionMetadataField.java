@@ -300,6 +300,54 @@ public enum DatasetAcquisitionMetadataField implements MetadataFieldInterface<Da
                 throw new CheckedIllegalClassException(MrDatasetAcquisition.class, datasetAcquisition);
             }
         }
+    },
+    NUMBER_OF_SLICES(16) {
+        @Override
+        public String get(DatasetAcquisition datasetAcquisition) throws CheckedIllegalClassException {
+            if (datasetAcquisition instanceof MrDatasetAcquisition) {
+                MrDatasetAcquisition mrDsAcq = (MrDatasetAcquisition) datasetAcquisition;
+                if (mrDsAcq.getMrProtocol() != null && mrDsAcq.getMrProtocol().getNumberOfSlices() != null) {
+                    return mrDsAcq.getMrProtocol().getNumberOfSlices().toString();
+                }
+                return null;
+            } else {
+                throw new CheckedIllegalClassException(MrDatasetAcquisition.class, datasetAcquisition);
+            }
+        }
+
+        @Override
+        public void update(DatasetAcquisition datasetAcquisition, String updatedValue) throws CheckedIllegalClassException {
+            throw new UnsupportedOperationException("NUMBER_OF_SLICES is computed at import and can not be assigned by a study card");
+        }
+
+        @Override
+        public boolean isNumeric() {
+            return true;
+        }
+    },
+    SLICE_THICKNESS(17) {
+        @Override
+        public String get(DatasetAcquisition datasetAcquisition) throws CheckedIllegalClassException {
+            if (datasetAcquisition instanceof MrDatasetAcquisition) {
+                MrDatasetAcquisition mrDsAcq = (MrDatasetAcquisition) datasetAcquisition;
+                if (mrDsAcq.getMrProtocol() != null && mrDsAcq.getMrProtocol().getSliceThickness() != null) {
+                    return mrDsAcq.getMrProtocol().getSliceThickness().toString();
+                }
+                return null;
+            } else {
+                throw new CheckedIllegalClassException(MrDatasetAcquisition.class, datasetAcquisition);
+            }
+        }
+
+        @Override
+        public void update(DatasetAcquisition datasetAcquisition, String updatedValue) throws CheckedIllegalClassException {
+            throw new UnsupportedOperationException("SLICE_THICKNESS is read from DICOM metadata and can not be assigned by a study card");
+        }
+
+        @Override
+        public boolean isNumeric() {
+            return true;
+        }
     };
 
     private int id;

@@ -56,13 +56,13 @@ public class ImporterMailService {
     private ObjectMapper objectMapper;
 
     /**
-     * Sens the import email through rabbitMQ to user MS
+     * Sends the import email through rabbitMQ to user MS
      * @param importJob the import job
      * @param userId the userID
      * @param examination the exam ID
      * @param generatedAcquisitions
      */
-    public void sendImportEmail(ImportJob importJob, Long userId, Examination examination, Set<DatasetAcquisition> generatedAcquisitions) {
+    public void sendImportEmail(ImportJob importJob, Long userId, Examination examination, Set<DatasetAcquisition> generatedAcquisitions, List<String> qualityCardNames) {
         EmailDatasetsImported generatedMail = new EmailDatasetsImported();
 
         LinkedHashMap<Long, String> datasets = new LinkedHashMap<>();
@@ -71,11 +71,12 @@ public class ImporterMailService {
         }
         generatedMail.setExamDate(examination.getExaminationDate().toString());
         generatedMail.setExaminationId(examination.getId().toString());
-        generatedMail.setStudyId(importJob.getStudyId().toString());
+        generatedMail.setStudyId(importJob.getStudyId());
         generatedMail.setSubjectName(importJob.getSubjectName());
         generatedMail.setStudyName(importJob.getStudyName());
         generatedMail.setUserId(userId);
         generatedMail.setStudyCard(importJob.getStudyCardName());
+        generatedMail.setQualityCards(qualityCardNames);
 
         for (DatasetAcquisition acq : generatedAcquisitions.stream().sorted(Comparator.comparingInt(DatasetAcquisition::getSortingIndex)).toList()) {
             if (!CollectionUtils.isEmpty(acq.getDatasets())) {
@@ -92,7 +93,7 @@ public class ImporterMailService {
     public void sendFailureMail(ImportJob importJob, Long userId, String errorMessage) {
         EmailDatasetImportFailed generatedMail = new EmailDatasetImportFailed();
         generatedMail.setExaminationId(importJob.getExaminationId().toString());
-        generatedMail.setStudyId(importJob.getStudyId().toString());
+        generatedMail.setStudyId(importJob.getStudyId());
         generatedMail.setStudyCardId(importJob.getStudyCardId() != null ? importJob.getStudyCardId().toString() : "");
         generatedMail.setSubjectName(importJob.getSubjectName());
         generatedMail.setStudyName(importJob.getStudyName());

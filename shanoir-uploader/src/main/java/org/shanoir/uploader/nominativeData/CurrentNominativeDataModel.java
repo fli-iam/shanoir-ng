@@ -19,7 +19,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Observable;
 
-import org.shanoir.ng.importer.model.ImportJob;
+import org.shanoir.ng.importer.model.ImportJobBase;
 import org.shanoir.ng.importer.model.UploadState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,26 +36,27 @@ import org.slf4j.LoggerFactory;
 public class CurrentNominativeDataModel extends Observable {
 
     private static final Logger LOG = LoggerFactory.getLogger(CurrentNominativeDataModel.class);
+    
     // Hash key = folder name;
-    Map<String, ImportJob> currentUploads = null;
+    Map<String, ImportJobBase> currentUploads = null;
 
     String hashKey = null;
 
-    public HashMap<String, ImportJob> getCurrentUploads() {
+    public HashMap<String, ImportJobBase> getCurrentUploads() {
         if (currentUploads == null) {
-            return new LinkedHashMap<String, ImportJob>();
+            return new LinkedHashMap<String, ImportJobBase>();
         }
-        return (LinkedHashMap<String, ImportJob>) currentUploads;
+        return (LinkedHashMap<String, ImportJobBase>) currentUploads;
     }
 
-    public void setCurrentUploads(Map<String, ImportJob> currentUploads) {
+    public void setCurrentUploads(Map<String, ImportJobBase> currentUploads) {
         this.currentUploads = currentUploads;
         String[] msg = {"fill"};
         setChanged();
         notifyObservers(msg);
     }
 
-    public void addUpload(String absolutePath, ImportJob nominativeDataImportJob) {
+    public void addUpload(String absolutePath, ImportJobBase nominativeDataImportJob) {
         getCurrentUploads().put(absolutePath, nominativeDataImportJob);
         if (nominativeDataImportJob.getUploadPercentage().equals(UploadState.FINISHED.toString())) { // TODO : delete this
             nominativeDataImportJob.setUploadPercentage(UploadState.FINISHED.toString());
@@ -71,7 +72,14 @@ public class CurrentNominativeDataModel extends Observable {
         setChanged();
         notifyObservers(msg);
     }
-
+    
+    public void setSubjectName(String absolutePath, String subjectName) {
+        currentUploads.get(absolutePath).setSubjectName(subjectName);
+        String[] msg = {"SubjectName", absolutePath, subjectName};
+        setChanged();
+        notifyObservers(msg);
+    }
+    
     public String getHashKey() {
         return hashKey;
     }
