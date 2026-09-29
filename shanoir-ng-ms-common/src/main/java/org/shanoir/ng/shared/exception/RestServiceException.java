@@ -62,6 +62,14 @@ public class RestServiceException extends Exception {
     }
 
     @Override
+    public String getMessage() {
+        if (errorModel != null && errorModel.getMessage() != null) {
+            return errorModel.getMessage();
+        }
+        return super.getMessage();
+    }
+
+    @Override
     public String toString() {
         try {
             return objectMapper != null ? objectMapper.writeValueAsString(errorModel) : errorModel.toString();
