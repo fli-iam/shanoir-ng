@@ -240,7 +240,7 @@ public class ImporterApiController implements ImporterApi {
             if (tempFile != null) {
                 FileUtils.deleteQuietly(tempFile);
             }
-            LOG.error(e.getMessage(), e);
+            LOG.error("DICOM zip upload failed (userId={})", KeycloakUtil.getTokenUserId(), e);
             throw new RestServiceException(
                     new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), ERROR_WHILE_SAVING_UPLOADED_FILE, null));
         }
