@@ -210,7 +210,7 @@
                         <phase>package</phase>
                         <configuration>
                             <target>
-                                <copy file="target/${project.build.finalName}.jar"
+                                <copy file="target/${project.build.finalName}-exec.jar"
                                     tofile="${basedir}/../docker-compose/studies/${project.artifactId}.jar" />
                             </target>
                         </configuration>
