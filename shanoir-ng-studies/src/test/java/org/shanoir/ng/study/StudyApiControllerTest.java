@@ -73,7 +73,10 @@ import tools.jackson.databind.json.JsonMapper;
  * @author msimon
  *
  */
-@WebMvcTest(controllers = StudyApiController.class)
+@WebMvcTest(controllers = StudyApiController.class,
+        excludeAutoConfiguration = {
+                org.springframework.boot.security.oauth2.server.resource.autoconfigure.servlet.OAuth2ResourceServerAutoConfiguration.class
+        })
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
 public class StudyApiControllerTest {
@@ -81,10 +84,12 @@ public class StudyApiControllerTest {
     private static final Logger LOG = LoggerFactory.getLogger(StudyApiControllerTest.class);
 
     private static final String REQUEST_PATH = "/studies";
+
     private static final String REQUEST_PATH_FOR_NAMES = REQUEST_PATH + "/names";
+
     private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
+
     private static final String REQUEST_PATH_FOR_MEMBERS = REQUEST_PATH_WITH_ID + "/members";
-    private static final String REQUEST_PATH_FOR_MEMBER_WITH_ID = REQUEST_PATH_FOR_MEMBERS + "/1";
 
     @Autowired
     private MockMvc mvc;
