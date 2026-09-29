@@ -14,14 +14,15 @@
 
 package org.shanoir.ng.study.repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.study.model.Study;
 import org.springframework.data.jpa.repository.EntityGraph;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
@@ -39,6 +40,9 @@ public interface StudyRepository extends JpaRepository<Study, Long>, StudyReposi
 
     @EntityGraph(attributePaths = { "studyTags", "profile" })
     List<Study> findByVisibleByDefaultTrueAndIsDraftFalse();
+
+    @EntityGraph(attributePaths = { "studyTags", "profile" })
+    List<Study> findDistinctByStudyUserListUserIdAndStudyUserListExpirationDateBefore(Long userId, LocalDate date);
 
     List<Study> findByIsDraftTrue();
 
@@ -98,5 +102,5 @@ public interface StudyRepository extends JpaRepository<Study, Long>, StudyReposi
     List<Long> findStudyIdsBySubjectIds(List<Long> subjectIds);
 
     @Query("SELECT s.isDraft FROM Study s WHERE s.id = :studyId")
-    Boolean findIsDraftById(@Param("studyId") Long id);
+    Optional<Boolean> findIsDraftById(@Param("studyId") Long id);
 }

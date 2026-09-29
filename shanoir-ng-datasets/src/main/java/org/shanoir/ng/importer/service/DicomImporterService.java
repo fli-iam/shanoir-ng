@@ -42,6 +42,7 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.repository.DatasetExpressionRepository;
+import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
@@ -72,7 +73,8 @@ import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.AcquisitionEquipmentRepository;
 import org.shanoir.ng.shared.repository.CenterRepository;
 import org.shanoir.ng.shared.repository.StudyCenterRepository;
-import org.shanoir.ng.shared.service.StudyService;
+import org.shanoir.ng.shared.repository.StudyRepository;
+import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.shared.service.SubjectService;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.utils.KeycloakUtil;
@@ -124,6 +126,8 @@ public class DicomImporterService {
 
     private static final String EQUIPMENT_CREATION_ERROR = "An error occured during the equipment creation, please check your rights.";
 
+    private static final String MISSING_CAN_IMPORT_RIGHT_ERROR = "Missing right CAN_IMPORT on study, import refused: ";
+
     private static final String DOUBLE_EQUAL = "==";
 
     private static final String SEMI_COLON = ";";
@@ -134,7 +138,10 @@ public class DicomImporterService {
     private String seriesProperties;
 
     @Autowired
-    private StudyService studyService;
+    private StudyRepository studyRepository;
+
+    @Autowired
+    private DatasetSecurityService datasetSecurityService;
 
     @Autowired
     private SubjectService subjectService;
@@ -210,7 +217,7 @@ public class DicomImporterService {
     }
 
     @Transactional
-    public boolean importDicom(Attributes metaInformationAttributes, Attributes attributes, String modality)
+    public boolean importDicom(Attributes metaInformationAttributes, Attributes attributes)
             throws Exception {
         String deIdentificationMethod = attributes.getString(Tag.DeidentificationMethod);
         Sequence deIdentificationMethodCodeSequence = attributes.getSequence(Tag.DeidentificationMethodCodeSequence);
@@ -221,15 +228,21 @@ public class DicomImporterService {
             return false;
         }
         Long studyId = Long.parseLong(attributes.getString(Tag.ClinicalTrialProtocolID));
-        Study study = studyService.findById(studyId);
+        Study study = studyRepository.findById(studyId).orElse(null);
         if (study == null) {
             LOG.error("Shanoir study (research project) not found with ID: {}", studyId);
             return false;
         }
+        if (!datasetSecurityService.hasRightOnStudy(studyId, StudyUserRight.CAN_IMPORT.name())) {
+            LOG.error("User {} misses the right CAN_IMPORT on study with ID: {}, import refused.",
+                    KeycloakUtil.getTokenUserName(), studyId);
+            throw new RestServiceException(
+                    new ErrorModel(HttpStatus.FORBIDDEN.value(), MISSING_CAN_IMPORT_RIGHT_ERROR + studyId, null));
+        }
         Serie serie = new Serie(attributes);
         if (!DicomUtils.checkSerieIsIgnored(attributes)) { // do nothing for files of ignored series
             Long subjectId = manageSubject(attributes, study);
-            Long centerId = manageCenter(attributes, study.getId());
+            Long centerId = manageCenter(serie.getInstitution(), study.getId());
             Examination examination = manageExamination(attributes, study, subjectId, centerId);
             DatasetAcquisition acquisition = manageAcquisitionAndEquipment(attributes, examination, centerId, serie);
             Dataset dataset = manageDataset(attributes, studyId, subjectId, acquisition, serie);
@@ -442,18 +455,17 @@ public class DicomImporterService {
      * center, we only keep it in MS Datasets to increase performance
      * and not too lose any significant value.
      *
-     * @param institutionDicom
+     * @param institution
      * @param studyId
      * @return
      * @throws JsonProcessingException
      * @throws AmqpException
      * @throws RestServiceException
      */
-    private Long manageCenter(Attributes attributes, Long studyId) throws JsonProcessingException, AmqpException, RestServiceException {
-        InstitutionDicom institutionDicom = new InstitutionDicom(attributes);
+    private Long manageCenter(InstitutionDicom institution, Long studyId) throws JsonProcessingException, AmqpException, RestServiceException {
         Center center = null;
         Optional<StudyCenter> studyCenterOpt = null;
-        Optional<Center> centerOpt = centerRepository.findFirstByNameContainingOrderByIdAsc(institutionDicom.getInstitutionName());
+        Optional<Center> centerOpt = centerRepository.findFirstByNameContainingOrderByIdAsc(institution.getInstitutionName());
         if (!centerOpt.isEmpty()) {
             center = centerOpt.get();
             studyCenterOpt = studyCenterRepository.findByStudy_IdAndCenter_Id(studyId, center.getId());
@@ -462,7 +474,7 @@ public class DicomImporterService {
             // Communicate with MS Studies here, if not existing or not yet in study
             CreateCenterForStudyMessage message = new CreateCenterForStudyMessage();
             message.setStudyId(studyId);
-            message.setInstitutionDicom(institutionDicom);
+            message.setInstitutionDicom(institution);
             String returnMessage = (String) rabbitTemplate.convertSendAndReceive(
                     RabbitMQConfiguration.CENTER_CREATE_QUEUE,
                     objectMapper.writeValueAsString(message));
@@ -473,11 +485,11 @@ public class DicomImporterService {
             String[] parts = returnMessage.split(DELIMITER);
             Long centerId = Long.parseLong(parts[0]);
             Long studyCenterId = Long.parseLong(parts[1]);
-            LOG.info("Center created or added to MS Studies with ID: {}, Name: {}, Study ID: {}", centerId, institutionDicom.getInstitutionName(), studyId);
+            LOG.info("Center created or added to MS Studies with ID: {}, Name: {}, Study ID: {}", centerId, institution.getInstitutionName(), studyId);
             if (center == null) {
                 center = new Center();
                 center.setId(centerId);
-                center.setName(institutionDicom.getInstitutionName());
+                center.setName(institution.getInstitutionName());
                 isCenterInStudy(studyId, center, studyCenterId);
                 centerRepository.save(center);
             } else {
@@ -485,7 +497,7 @@ public class DicomImporterService {
                     centerRepository.save(center);
                 }
             }
-            LOG.info("Center created or added to MS Datasets with ID: {}, Name: {}, Study ID: {}", centerId, institutionDicom.getInstitutionName(), studyId);
+            LOG.info("Center created or added to MS Datasets with ID: {}, Name: {}, Study ID: {}", centerId, institution.getInstitutionName(), studyId);
             return centerId;
         } else {
             return studyCenterOpt.get().getCenter().getId();
@@ -507,7 +519,7 @@ public class DicomImporterService {
         }
         StudyCenter studyCenter = new StudyCenter();
         studyCenter.setId(studyCenterId);
-        Study study = studyService.findById(studyId);
+        Study study = studyRepository.findById(studyId).orElse(null);
         studyCenter.setStudy(study);
         studyCenter.setCenter(center);
         center.getStudyCenterList().add(studyCenter);
@@ -636,7 +648,8 @@ public class DicomImporterService {
      * Create the necessary dataset expression.
      *
      * @param attributes
-     * @param measurementDataset
+     * @param dataset
+     *
      * @throws MalformedURLException
      * @throws ShanoirException
      */

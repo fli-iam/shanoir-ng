@@ -49,7 +49,6 @@ public final class DicomSerieAndInstanceAnalyzer {
     private static final String IS_SPECTROSCOPY = "seriesDescription==*CSI*;seriesDescription==*csi*;seriesDescription==*SPECTRO*;seriesDescription==*spectro*;";
 
     private static final Set<String> SOP_CLASS_UIDS_IGNORED = Set.of(
-            UID.RawDataStorage,
             UID.SpatialRegistrationStorage,
             UID.SpatialFiducialsStorage,
             UID.DeformableSpatialRegistrationStorage,

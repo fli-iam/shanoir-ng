@@ -18,6 +18,11 @@ import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.support.converter.ContentTypeDelegatingMessageConverter;
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.amqp.support.converter.MessageConverter;
+import org.springframework.amqp.support.converter.SimpleMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -48,6 +53,7 @@ public class RabbitMQConfiguration {
         factory.setConsecutiveActiveTrigger(1);
         factory.setAutoStartup(true);
         factory.setPrefetchCount(1);
+        factory.setMessageConverter(rabbitMessageConverter());
         return factory;
     }
 
@@ -56,7 +62,32 @@ public class RabbitMQConfiguration {
         SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
         factory.setConnectionFactory(connectionFactory);
         factory.setConcurrentConsumers(1);
+        factory.setMessageConverter(rabbitMessageConverter());
         return factory;
+    }
+
+    @Bean
+    public MessageConverter rabbitMessageConverter() {
+        ContentTypeDelegatingMessageConverter converter =
+                new ContentTypeDelegatingMessageConverter(
+                        new Jackson2JsonMessageConverter());
+        converter.addDelegate(
+                "text/plain",
+                new SimpleMessageConverter());
+        converter.addDelegate(
+                "application/json",
+                new Jackson2JsonMessageConverter());
+        converter.addDelegate(
+                "text/x-json",
+                new Jackson2JsonMessageConverter());
+        return converter;
+    }
+
+    @Bean
+    public RabbitTemplate rabbitTemplate() {
+        RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
+        rabbitTemplate.setMessageConverter(rabbitMessageConverter());
+        return rabbitTemplate;
     }
 
     ////////////////// QUEUES //////////////////
@@ -98,9 +129,6 @@ public class RabbitMQConfiguration {
 
     /** Get the list of subjects for a given study. */
     public static final String DATASET_SUBJECT_QUEUE = "dataset-subjects-queue";
-
-    /** Create a subject study for a given subject and study. */
-    public static final String DATASET_SUBJECT_STUDY_QUEUE = "dataset-subject-study-queue";
 
     /** Delete animal subject => Delete associated subject. */
     public static final String DELETE_ANIMAL_SUBJECT_QUEUE = "delete-animal-subject-queue";
@@ -323,11 +351,6 @@ public class RabbitMQConfiguration {
     @Bean
     public static Queue datasetSubjectQueue() {
         return new Queue(DATASET_SUBJECT_QUEUE, true);
-    }
-
-    @Bean
-    public static Queue datasetSubjectStudyQueue() {
-        return new Queue(DATASET_SUBJECT_STUDY_QUEUE, true);
     }
 
     @Bean

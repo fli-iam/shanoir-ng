@@ -12,16 +12,18 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, HostBinding, Input } from '@angular/core';
+import { Component, HostBinding, Input, ChangeDetectionStrategy } from '@angular/core';
 
-import { getSizeStr } from 'src/app/utils/app.utils';
+import { getSizeStr } from '@app/utils/app.utils';
+
 
 
 @Component({
     selector: 'progress-bar',
     templateUrl: 'loading-bar.component.html',
     styleUrls: ['loading-bar.component.css'],
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager,
+    imports: []
 })
 
 export class LoadingBarComponent {

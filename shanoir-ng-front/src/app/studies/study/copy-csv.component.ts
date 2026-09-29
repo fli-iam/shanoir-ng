@@ -11,9 +11,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, ElementRef, HostBinding, HostListener, inject, Input, ViewChild } from '@angular/core';
+import { Component, ElementRef, HostBinding, HostListener, inject, Input, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 
-import { ConfirmDialogService } from 'src/app/shared/components/confirm-dialog/confirm-dialog.service';
+import { ConfirmDialogService } from '@app/shared/components/confirm-dialog/confirm-dialog.service';
 
 import { CopyData, CopyDataService } from '../shared/copy-data.service';
 
@@ -22,6 +22,7 @@ import { TreeService } from './tree.service';
 
 @Component({
     selector: 'copy-from-csv',
+    changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         <button class="right-icon" type="button">
             Copy from mapping file
@@ -29,11 +30,10 @@ import { TreeService } from './tree.service';
             <input #input hidden type="file" (change)="copyDatasetsTo($event)" accept=".csv, .tsv"/>
         </button>
     `,
-    standalone: false
 })
 
 export class CopyFromCsvComponent {
-    
+
     @Input() studyId: any;
     @ViewChild('input') inputEl: ElementRef;
     private copyDataService: CopyDataService = inject(CopyDataService);
@@ -41,7 +41,6 @@ export class CopyFromCsvComponent {
     private confirmService = inject(ConfirmDialogService);
 
     @HostListener('click') onClick() {
-        console.log("CopyFromCsvComponent clicked");
         this.inputEl?.nativeElement.click();
     }
 
@@ -76,9 +75,8 @@ export class CopyFromCsvComponent {
     private parseCsvTsv(input: string): string[][] {
         const lines = input
             .trim()
-            .split(/\r?\n/)
+            .split(/\r\n|\r|\n/)
             .filter(l => l.trim().length > 0);
-
         if (lines.length === 0) return [];
         const firstLine = lines[0];
         const delimiter = firstLine.includes("\t") ? "\t" : ",";

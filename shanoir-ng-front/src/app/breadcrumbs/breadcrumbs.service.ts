@@ -38,7 +38,7 @@ export class BreadcrumbsService implements OnDestroy {
         locationStrategy: LocationStrategy,
         private titleService: Title) {
 
-        locationStrategy.onPopState((event: PopStateEvent) => {
+        locationStrategy.onPopState(event => {
             /* detect back & forward browser events and find the target step using its timestamp */
             for (let i=this.steps.length-1; i>=0; i--) {
                 if(this.steps[i].timestamp == event.state) {
@@ -58,7 +58,7 @@ export class BreadcrumbsService implements OnDestroy {
                     return;
                 }
                 const timestamp: number = new Date().getTime();
-                if (this.router.getCurrentNavigation().extras?.replaceUrl) {
+                if (this.router.lastSuccessfulNavigation()?.extras?.replaceUrl) {
                     this.steps.pop();
                     this.onUpdateSteps.next({steps: this.steps, operation: 'REMOVE'});
                 }

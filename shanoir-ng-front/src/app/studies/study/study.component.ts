@@ -11,57 +11,76 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { KeyValue } from "@angular/common";
-import { Component, ElementRef, ViewChild } from '@angular/core';
-import { UntypedFormGroup, ValidationErrors, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { KeyValue, NgClass, KeyValuePipe } from "@angular/common";
+import { ChangeDetectionStrategy, Component, ElementRef, ViewChild } from '@angular/core';
+import { UntypedFormGroup, ValidationErrors, Validators, FormsModule, ReactiveFormsModule, AbstractControl, ValidatorFn } from '@angular/forms';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 
-import { TaskState } from 'src/app/async-tasks/task.model';
-import { DUAAssistantComponent } from 'src/app/dua/dua-assistant.component';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
-import { Tag } from 'src/app/tags/tag.model';
-import { AccessRequest } from 'src/app/users/access-request/access-request.model';
-import { AccessRequestService } from 'src/app/users/access-request/access-request.service';
+import { TaskState } from '@app/async-tasks/task.model';
+import { DUAAssistantComponent } from '@app/dua/dua-assistant.component';
+import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
+import { MassDownloadService } from '@app/shared/mass-download/mass-download.service';
+import { Tag } from '@app/tags/tag.model';
+import { AccessRequest } from '@app/users/access-request/access-request.model';
+import { AccessRequestService } from '@app/users/access-request/access-request.service';
+import { ExecutionTemplateListComponent } from "@app/vip/execution-template/execution-template-list.component";
 
 import { Center } from '../../centers/shared/center.model';
 import { CenterService } from '../../centers/shared/center.service';
 import { DatasetExpressionFormat } from "../../enum/dataset-expression-format.enum";
 import { dateDisplay } from "../../shared/./localLanguage/localDate.abstract";
-import { slideDown } from '../../shared/animations/animations';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
+import { BrowserPaging } from '../../shared/components/table/browser-paging.model';
+import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
+import { FilterablePageable, Page } from '../../shared/components/table/pageable.model';
 import { TableComponent } from '../../shared/components/table/table.component';
 import { DatepickerComponent } from '../../shared/date-picker/date-picker.component';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { IdName } from '../../shared/models/id-name.model';
 import { Profile } from "../../shared/models/profile.model";
-import { Option } from '../../shared/select/select.component';
+import { Option, SelectBoxComponent } from '../../shared/select/select.component';
 import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { StudyCardService } from '../../study-cards/shared/study-card.service';
 import { Subject } from '../../subjects/shared/subject.model';
 import { SubjectService } from '../../subjects/shared/subject.service';
 import { User } from '../../users/shared/user.model';
 import { UserService } from '../../users/shared/user.service';
-import { capitalsAndUnderscoresToDisplayable } from '../../utils/app.utils';
+import { capitalsAndUnderscoresToDisplayable, isDarkColor } from '../../utils/app.utils';
 import { SuperPromise } from "../../utils/super-promise";
 import { StudyCenter } from '../shared/study-center.model';
 import { StudyUserRight } from '../shared/study-user-right.enum';
 import { StudyUser } from '../shared/study-user.model';
 import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
+import { FormFooterComponent } from "../../shared/components/form-footer/form-footer.component";
+import { CheckboxComponent } from "../../shared/checkbox/checkbox.component";
+import { TooltipComponent } from "../../shared/components/tooltip/tooltip.component";
+import { LoadingBarComponent } from "../../shared/components/loading-bar/loading-bar.component";
+import { TagCreatorComponent } from "../../tags/tag.creator.component";
+import { StudyUserListComponent } from "../studyuser/studyuser-list.component";
+import { StudyEmailMembersComponent } from "../email-members/study-email-members.component";
+import { QualityControlComponent } from "../../quality-control/quality-control.component";
+import { BidsTreeComponent } from "../../bids/tree/bids-tree.component";
+import { StudyHistoryComponent } from "../study-history/study-history.component";
+import { LocalDateFormatPipe } from "../../shared/localLanguage/localDateFormat.pipe";
+import { SizePipe } from "../../shared/utils/size.pipe";
+import { DaysLeftPipe } from "../../shared/localLanguage/daysLeft.pipe";
 
 import { Selection } from './tree.service';
+import { CopyFromCsvComponent } from "./copy-csv.component";
 
 @Component({
     selector: 'study-detail',
     templateUrl: 'study.component.html',
     styleUrls: ['study.component.css'],
-    animations: [slideDown],
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager,
+    imports: [NgClass, FormsModule, ReactiveFormsModule, FormFooterComponent, RouterLink, DatepickerComponent, SelectBoxComponent, CheckboxComponent, TooltipComponent, LoadingBarComponent, TagCreatorComponent, TableComponent, StudyUserListComponent, QualityControlComponent,
+        BidsTreeComponent, StudyHistoryComponent, KeyValuePipe, LocalDateFormatPipe, DaysLeftPipe, SizePipe, CopyFromCsvComponent, ExecutionTemplateListComponent, StudyEmailMembersComponent]
 })
 
 export class StudyComponent extends EntityComponent<Study> {
     @ViewChild('memberTable', { static: false }) table: TableComponent;
+    @ViewChild('subjectTable', { static: false }) private subjectTable: TableComponent;
     @ViewChild('input', { static: false }) private fileInput: ElementRef;
     @ViewChild('duaInput', { static: false }) private duaFileInput: ElementRef;
     protected pdfDownloadState: TaskState = new TaskState();
@@ -79,10 +98,13 @@ export class StudyComponent extends EntityComponent<Study> {
     public selectedDatasetIds: number[];
     protected hasDownloadRight: boolean;
     protected hasCopyRight: boolean;
+    protected hasEmailMembersRight: boolean;
     accessRequests: AccessRequest[];
     isStudyAdmin: boolean;
     subjectTagsInUse: Tag[] = [];
-
+    subjectColumnDefs: ColumnDefinition[];
+    protected userExpiration: Date;
+    protected userExpirationColor: string;
     public openPrefix: boolean = false;
 
     centerOptions: Option<IdName>[];
@@ -113,10 +135,11 @@ export class StudyComponent extends EntityComponent<Study> {
             private userService: UserService,
             private studyRightsService: StudyRightsService,
             private studyCardService: StudyCardService,
-            private accessRequestService: AccessRequestService,
+            protected accessRequestService: AccessRequestService,
             protected downloadService: MassDownloadService) {
         super(route);
         this.activeTab = 'general';
+
     }
 
     protected getRoutingName(): string {
@@ -143,6 +166,8 @@ export class StudyComponent extends EntityComponent<Study> {
     public set entity(study: Study) {
         super.entity = study;
         this.updateSubjectTagsInUse();
+        this.updateSubjectColumnDefs();
+        this.computeExpirationDate(study);
     }
 
     public get entity(): Study {
@@ -172,9 +197,12 @@ export class StudyComponent extends EntityComponent<Study> {
     initView(): Promise<void> {
         this.studyRightsService.getMyRightsForStudy(this.id).then(rights => {
             this.hasDownloadRight = this.keycloakService.isUserAdmin()
-                || (this.keycloakService.isUserExpert() && rights.includes(StudyUserRight.CAN_DOWNLOAD));
+                || rights.includes(StudyUserRight.CAN_DOWNLOAD);
             this.hasCopyRight = this.keycloakService.isUserAdmin()
                 || (this.keycloakService.isUserExpert() && rights.includes(StudyUserRight.CAN_ADMINISTRATE));
+            // mirrors the backend rule: an administrator, or any study administrator, for their own study
+            this.hasEmailMembersRight = this.keycloakService.isUserAdmin()
+                || rights.includes(StudyUserRight.CAN_ADMINISTRATE);
         })
 
         this.setLabeledSizes(this.study);
@@ -277,25 +305,33 @@ export class StudyComponent extends EntityComponent<Study> {
             'protocolFile': [],
             'dataUserAgreement': [],
             'studyUserList': [this.study.studyUserList],
-            'expectedNbOfSubjects': [this.study.expectedNbOfSubjects, [Validators.required, Validators.min(1)]],
+            'expectedNbOfSubjects': [this.study.expectedNbOfSubjects, [Validators.min(1)]],
             'averageExaminationSize': [this.study.averageExaminationSize, [Validators.min(1)]],
             'estimatedTotalVolume': [this.study.estimatedTotalVolume, [Validators.min(1)]],
-            'expectedNbOfCenters': [this.study.expectedNbOfCenters, [Validators.required, Validators.min(1)]],
+            'expectedNbOfCenters': [this.study.expectedNbOfCenters, [Validators.min(1)]],
             'inclusionRate': [this.study.inclusionRate, [Validators.min(1)]],
             'inclusionRateUnit': [this.study.inclusionRateUnit],
-            'sponsor': [this.study.sponsor, [Validators.required, Validators.minLength(2), Validators.maxLength(200)]],
-            'principalInvestigator': [this.study.principalInvestigator, [Validators.required, Validators.minLength(2), Validators.maxLength(200)]],
+            'sponsor': [this.study.sponsor, [Validators.minLength(2), Validators.maxLength(200)]],
+            'principalInvestigator': [this.study.principalInvestigator, [Validators.minLength(2), Validators.maxLength(200)]],
             'scientificAdvisor': [this.study.scientificAdvisor, [Validators.minLength(2), Validators.maxLength(200)]]
         });
 
         formGroup.setValidators(this.inclusionRatePairValidator.bind(this));
 
+        // Mark as touched right away so the "at least one center is required" messages
+        // are visible from the start on a study with no center yet.
+        formGroup.get('studyCenterList')?.markAsTouched();
+
+        formGroup.get('startDate')?.valueChanges.subscribe(() => {
+            formGroup.get('endDate')?.updateValueAndValidity();
+        });
+
         return formGroup;
     }
 
-    private inclusionRatePairValidator(group: UntypedFormGroup) {
-        const rate = group.get('inclusionRate')?.value;
-        const unit = group.get('inclusionRateUnit')?.value;
+    private inclusionRatePairValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
+        const rate = control.get('inclusionRate')?.value;
+        const unit = control.get('inclusionRateUnit')?.value;
 
         if ((rate && !unit) || (!rate && unit)) return { inclusionRatePair: true };
 
@@ -328,11 +364,37 @@ export class StudyComponent extends EntityComponent<Study> {
         });
     }
 
-    private dateOrdervalidator = (): ValidationErrors | null => {
-        if (this.study.startDate && this.study.endDate && this.study.startDate >= this.study.endDate) {
-            return { order: true}
-        }
+    /** Uses form control values (not study entity) to avoid stale dates when the end date picker changes. */
+    private dateOrdervalidator = (control: AbstractControl): ValidationErrors | null => {
+        const form = control.parent;
+        if (!form) return null;
+        const start = form.get('startDate')?.value;
+        const end = control.value;
+        if (!start || !end || start === 'invalid' || end === 'invalid') return null;
+        const startDay = this.toDateOnlyTimestamp(start);
+        const endDay = this.toDateOnlyTimestamp(end);
+        if (startDay === null || endDay === null) return null;
+        if (endDay <= startDay) return { order: true };
         return null;
+    }
+
+    private computeExpirationDate(study: Study) {
+        this.userExpiration = study?.studyUserList?.find(su => su.userId == KeycloakService.auth.userId)?.expirationDate;
+        if (this.userExpiration && this.userExpiration > new Date()) {
+            if (this.userExpiration && this.userExpiration < new Date(new Date().getTime() + 30 * 24 * 60 * 60 * 1000)) {
+                this.userExpirationColor = 'darkorange';
+            } else {
+                this.userExpirationColor = 'green';
+            }
+        } else {
+            this.userExpirationColor = 'red';
+        }
+    }
+
+    private toDateOnlyTimestamp(value: Date | string): number | null {
+        const date = value instanceof Date ? value : new Date(value);
+        if (isNaN(date.getTime())) return null;
+        return Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
     }
 
     public async hasStudyAdminRight(): Promise<boolean> {
@@ -404,7 +466,7 @@ export class StudyComponent extends EntityComponent<Study> {
         this.subjectService
             .getAllSubjectsNames()
             .then(subjects => {
-                this.subjects = subjects?.sort(function(a:Subject, b:Subject){
+                this.subjects = subjects?.sort((a:IdName, b:IdName) => {
                     return a.name.localeCompare(b.name);
                 });
             });
@@ -424,13 +486,18 @@ export class StudyComponent extends EntityComponent<Study> {
             this.study.studyCenterList = [...this.study.studyCenterList];
             this.centerOptions.forEach(option => option.disabled = this.study.studyCenterList.findIndex(studyCenter => studyCenter.center.id == option.value.id) != -1);
         }
-        this.form.get('studyCenterList').markAsDirty();
-        this.form.get('studyCenterList').updateValueAndValidity();
+        const studyCenterListControl = this.form.get('studyCenterList');
+        studyCenterListControl.setValue([...this.study.studyCenterList]);
+        studyCenterListControl.markAsDirty();
+        studyCenterListControl.markAsTouched();
+        studyCenterListControl.updateValueAndValidity();
     }
 
     onPrefixChange() {
-        this.form.get('studyCenterList').markAsDirty();
-        this.form.get('studyCenterList').updateValueAndValidity();
+        const studyCenterListControl = this.form.get('studyCenterList');
+        studyCenterListControl.markAsDirty();
+        studyCenterListControl.markAsTouched();
+        studyCenterListControl.updateValueAndValidity();
     }
 
     private validateCenter = (): ValidationErrors | null => {
@@ -444,8 +511,11 @@ export class StudyComponent extends EntityComponent<Study> {
         if (!this.study.studyCenterList) return;
         this.study.studyCenterList = this.study.studyCenterList.filter(item => item.center.id !== centerId);
         this.centerOptions.forEach(option => option.disabled = this.study.studyCenterList.findIndex(studyCenter => studyCenter.center.id == option.value.id) != -1);
-        this.form.get('studyCenterList').markAsDirty();
-        this.form.get('studyCenterList').updateValueAndValidity();
+        const studyCenterListControl = this.form.get('studyCenterList');
+        studyCenterListControl.setValue([...this.study.studyCenterList]);
+        studyCenterListControl.markAsDirty();
+        studyCenterListControl.markAsTouched();
+        studyCenterListControl.updateValueAndValidity();
     }
 
     isMe(user: User): boolean {
@@ -632,16 +702,12 @@ export class StudyComponent extends EntityComponent<Study> {
         this.study.tags = [].concat(this.study.tags);
         this.study.subjects = [].concat(this.study.subjects);
         this.updateSubjectTagsInUse();
+        this.updateSubjectColumnDefs();
     }
 
     onStudyTagListChange() {
         // hack : force change detection
         this.study.studyTags = [].concat(this.study.studyTags);
-        // hack : force change detection for the subject-study tag list
-        this.study.subjects.forEach(subjects => {
-            subjects.study.studyTags = this.study.studyTags;
-        });
-        this.study.subjects = [].concat(this.study.subjects);
     }
 
     goToAccessRequest(accessRequest : AccessRequest) {
@@ -652,8 +718,69 @@ export class StudyComponent extends EntityComponent<Study> {
         setTimeout(() => {
             this.studyService.get(this.id).then(study => {
                 this.study.subjects = study.subjects;
+                this.updateSubjectColumnDefs();
+                this.subjectTable?.refresh();
             });
         }, 1000);
+    }
+
+    /**
+     * Table of the subjects of this study, on the "subjects" tab. The tag and quality
+     * columns only show up when there is something to display in them.
+     */
+    private updateSubjectColumnDefs() {
+        const subjects: Subject[] = this.study?.subjects;
+        const hasTags: boolean = !!subjects?.find(subject => subject.study?.tags?.length > 0)
+                || this.study?.tags?.length > 0;
+        const hasQualityTags: boolean = !!subjects?.find(subject => !!subject.qualityTag);
+        const columnDefs: ColumnDefinition[] = [{ headerName: 'Subject', field: 'name', defaultSortCol: true }];
+        if (hasTags) {
+            columnDefs.push(
+                { headerName: 'Tags', field: 'tags', editable: true, multi: true,
+                    possibleValues: () => {
+                        return this.study?.tags?.map(tag => {
+                            const opt = new Option(tag, tag.name);
+                            if (tag.color) {
+                                opt.backgroundColor = tag.color;
+                                opt.color = isDarkColor(tag.color) ? 'white' : 'black';
+                            }
+                            return opt;
+                        });
+                    }
+                }
+            );
+        }
+        if (hasQualityTags) {
+            columnDefs.push(
+                { headerName: 'Quality', field: 'qualityTag', editable: false, width: '90px', cellGraphics: (item) => {
+                    if (item.qualityTag == 'VALID') return {color: 'green', tag: true, awesome: 'fas fa-check-circle'};
+                    else if (item.qualityTag == 'WARNING') return {color: 'chocolate', tag: true, awesome: 'fas fa-exclamation-triangle'};
+                    else if (item.qualityTag == 'ERROR') return {color: 'red', tag: true, awesome: 'fas fa-times-circle'};
+                }}
+            );
+        }
+        columnDefs.push(
+            { headerName: 'Subject id for this study', field: 'studyIdentifier', editable: true },
+            { headerName: 'Physically Involved', field: 'physicallyInvolved', type: 'boolean', editable: true, width: '54px', disableSorting: true },
+            { headerName: 'Subject Type', field: 'subjectType', editable: true, possibleValues: [new Option(null, ''), new Option('HEALTHY_VOLUNTEER', 'Healthy Volunteer'), new Option('PATIENT', 'Patient'), new Option('PHANTOM', 'Phantom')] }
+        );
+        this.subjectColumnDefs = columnDefs;
+    }
+
+    getSubjectsPage(pageable: FilterablePageable): Promise<Page<Subject>> {
+        return Promise.resolve(new BrowserPaging<Subject>(this.study.subjects, this.subjectColumnDefs).getPage(pageable));
+    }
+
+    getSubjectRoute(subject: Subject): string {
+        return '/subject/details/' + subject.id;
+    }
+
+    onSubjectEdit() {
+        const subjectsControl: AbstractControl = this.form?.get('subjects');
+        subjectsControl?.setValue(this.study.subjects);
+        subjectsControl?.markAsDirty();
+        subjectsControl?.markAsTouched();
+        subjectsControl?.updateValueAndValidity();
     }
 
     studyCardPolicyStr() {

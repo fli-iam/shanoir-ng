@@ -14,7 +14,6 @@
 
 package org.shanoir.ng.vip.pipeline.service;
 
-import jakarta.annotation.PostConstruct;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.utils.KeycloakUtil;
@@ -23,6 +22,7 @@ import org.shanoir.ng.vip.shared.service.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -38,22 +38,21 @@ public class PipelineServiceImpl implements PipelineService {
 
     @Value("${vip.uri}")
     private String vipUrl;
+
     private final String vipPipelineUri = "/pipelines";
-    private WebClient webClient;
 
     @Autowired
     private Utils utils;
 
-    @PostConstruct
-    public void init() {
-        this.webClient = WebClient.create(vipUrl);
-    }
+    @Autowired
+    @Qualifier("buffer500")
+    private WebClient webClient;
 
     public Mono<String> getPipelineAll() {
         String username = KeycloakUtil.getTokenUserName();
 
         return webClient.get()
-            .uri(vipPipelineUri)
+            .uri(vipUrl + vipPipelineUri)
             .headers(headers -> ((HttpHeaders) headers).addAll(utils.getUserHttpHeaders()))
             .retrieve()
             .onStatus(HttpStatusCode::is4xxClientError, response -> {
@@ -71,7 +70,7 @@ public class PipelineServiceImpl implements PipelineService {
     }
 
     public Mono<String> getPipeline(String identifier, String version) {
-        String url = vipPipelineUri + "/" + identifier + "/" + version;
+        String url = vipUrl + vipPipelineUri + "/" + identifier + "/" + version;
         return webClient.get()
             .uri(url)
             .headers(headers -> headers.addAll(utils.getUserHttpHeaders()))

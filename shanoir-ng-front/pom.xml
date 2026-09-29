@@ -21,8 +21,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 	<parent>
 		<groupId>org.shanoir-ng</groupId>
 		<artifactId>shanoir-ng</artifactId>
-        <version>3.4.0</version>
-		<relativePath>../shanoir-ng-parent</relativePath>
+    <version>1.0.0</version>
+    <relativePath>../shanoir-ng-parent</relativePath>
 	</parent>
 
 	<artifactId>shanoir-ng-front</artifactId>
@@ -78,8 +78,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							<goal>install-node-and-npm</goal>
 						</goals>
 						<configuration>
-							<nodeVersion>v20.19.0</nodeVersion>
-							<npmVersion>10.8.2</npmVersion>
+							<nodeVersion>v22.23.2</nodeVersion>
+							<npmVersion>10.9.2</npmVersion>
 						</configuration>
 					</execution>
 

@@ -23,7 +23,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotNull;
 
 /**
  * Study Extra Details.
@@ -46,7 +45,6 @@ public class StudyExtraDetails extends HalEntity {
     private Study study;
 
     /** Expected number of subjects. */
-    @NotNull
     @Column(name = "expected_nb_of_subjects")
     private Long expectedNbOfSubjects;
 
@@ -59,7 +57,6 @@ public class StudyExtraDetails extends HalEntity {
     private Float estimatedTotalVolume;
 
     /** Expected number of centers. */
-    @NotNull
     @Column(name = "expected_nb_of_centers")
     private Long expectedNbOfCenters;
 
@@ -72,12 +69,10 @@ public class StudyExtraDetails extends HalEntity {
     private Integer inclusionRateUnit;
 
     /** Sponsor ID. */
-    @NotNull
     @Column(name = "sponsor")
     private String sponsor;
 
     /** Principal investigator ID. */
-    @NotNull
     @Column(name = "principal_investigator")
     private String principalInvestigator;
 

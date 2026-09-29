@@ -11,22 +11,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, EventEmitter, forwardRef, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { Component, EventEmitter, forwardRef, Input, OnChanges, Output, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
 import shajs from 'sha.js';
 import { Router } from '@angular/router';
+import { NgTemplateOutlet } from '@angular/common';
 
-import { slideDown, slideRight } from '../../shared/animations/animations';
 import { FacetResultPage, FacetField, FacetPageable } from '../solr.document.model';
 import { Page } from '../../shared/components/table/pageable.model';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
+import { CheckboxComponent } from '../../shared/checkbox/checkbox.component';
 
 
 @Component({
     selector: 'solr-paging-criterion',
     templateUrl: 'solr.paging-criterion.component.html',
     styleUrls: ['solr.criterion.component.css', 'solr.paging-criterion.component.css'],
-    animations: [slideDown, slideRight],
     providers: [
         {
             provide: NG_VALUE_ACCESSOR,
@@ -34,7 +34,8 @@ import { KeycloakService } from '../../shared/keycloak/keycloak.service';
             multi: true,
         }
     ],
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager,
+    imports: [FormsModule, NgTemplateOutlet, CheckboxComponent]
 })
 
 export class SolrPagingCriterionComponent implements ControlValueAccessor, OnChanges {

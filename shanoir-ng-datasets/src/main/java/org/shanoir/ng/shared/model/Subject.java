@@ -40,7 +40,7 @@ import jakarta.validation.constraints.NotNull;
  */
 @Entity
 @Table(name = "subject")
-@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonIgnoreProperties(value = "study", ignoreUnknown = true, allowGetters = true)
 public class Subject extends IdName {
 
     @Id

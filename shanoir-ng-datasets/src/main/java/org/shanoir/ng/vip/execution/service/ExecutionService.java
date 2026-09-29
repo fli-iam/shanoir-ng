@@ -23,6 +23,7 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.vip.execution.dto.ExecutionCandidateDTO;
 import org.shanoir.ng.vip.execution.dto.VipExecutionDTO;
+import org.shanoir.ng.vip.executionMonitoring.model.ExecutionStatus;
 import org.shanoir.ng.vip.output.exception.ResultHandlerException;
 import org.shanoir.ng.vip.shared.dto.DatasetParameterDTO;
 
@@ -33,12 +34,11 @@ public interface ExecutionService {
     /**
      * Update monitoring with vip execution details and persist it in DB
      *
-     * @param candidate
-     * @param inputDatasets
+     * @param candidates list of the exec candidates
      * @return Id and Name of execution
      * @throws EntityNotFoundException
      */
-    IdName createExecution(ExecutionCandidateDTO candidate, List<Dataset> inputDatasets) throws SecurityException, EntityNotFoundException, RestServiceException;
+    IdName createExecutions(List<ExecutionCandidateDTO> candidates) throws SecurityException, EntityNotFoundException, RestServiceException;
 
     /**
      * Get datasets from JSON id values
@@ -58,20 +58,20 @@ public interface ExecutionService {
     Mono<VipExecutionDTO> getExecution(String identifier);
 
     /**
-     * Get execution stderr logs from <a href="https://app.swaggerhub.com/apis/CARMIN/carmin-common_api_for_research_medical_imaging_network/0.3.1#/default/getStderr">VIP API</a>
+     * Get processing stderr logs from <a href="https://app.swaggerhub.com/apis/CARMIN/carmin-common_api_for_research_medical_imaging_network/0.3.1#/default/getStderr">VIP API</a>
      *
-     * @param identifier
+     * @param processingId
      * @return string
      */
-    Mono<String> getExecutionStderr(String identifier);
+    Mono<String> getExecutionStderr(Long processingId);
 
     /**
-     * Get execution stdout logs from <a href="https://app.swaggerhub.com/apis/CARMIN/carmin-common_api_for_research_medical_imaging_network/0.3.1#/default/getStdout">VIP API</a>
+     * Get processing stdout logs from <a href="https://app.swaggerhub.com/apis/CARMIN/carmin-common_api_for_research_medical_imaging_network/0.3.1#/default/getStdout">VIP API</a>
      *
-     * @param identifier
+     * @param processingId
      * @return string
      */
-    Mono<String> getExecutionStdout(String identifier);
+    Mono<String> getExecutionStdout(Long processingId);
 
     /**
      * Try to get execution from <a href="https://app.swaggerhub.com/apis/CARMIN/carmin-common_api_for_research_medical_imaging_network/0.3.1#/default/getExecution">VIP API</a>
@@ -82,4 +82,12 @@ public interface ExecutionService {
      * @throws ResultHandlerException
      */
     Mono<VipExecutionDTO> getExecutionAsServiceAccount(int attempts, String identifier) throws ResultHandlerException, SecurityException;
+
+    /**
+     * Try to get execution status from <a href="https://app.swaggerhub.com/apis/CARMIN/carmin-common_api_for_research_medical_imaging_network/0.3.1#/default/getExecution">VIP API</a>
+     * Authenticate as service account
+     * @param identifier
+     * @return ExecutionStatus
+     */
+    ExecutionStatus getExecutionStatusFromVipIdentifier(String identifier);
 }

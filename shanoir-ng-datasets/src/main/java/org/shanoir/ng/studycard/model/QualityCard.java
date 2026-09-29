@@ -18,14 +18,10 @@ import java.util.List;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.validator.constraints.NotBlank;
-import org.shanoir.ng.download.ExaminationAttributes;
-import org.shanoir.ng.download.WADODownloaderService;
-import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
 import org.shanoir.ng.shared.validation.Unique;
-import org.shanoir.ng.studycard.dto.QualityCardResult;
-import org.shanoir.ng.studycard.model.rule.QualityExaminationRule;
+import org.shanoir.ng.studycard.model.rule.QualityCardRule;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
@@ -48,7 +44,7 @@ import jakarta.validation.constraints.NotNull;
 @Entity
 @JsonPropertyOrder({ "_links", "id", "name", "isDisabled" })
 @GenericGenerator(name = "IdOrGenerate", strategy = "org.shanoir.ng.shared.model.UseIdOrGenerate")
-public class QualityCard extends HalEntity implements Card {
+public class QualityCard extends HalEntity {
 
     /** The name of the study card. */
     @NotBlank
@@ -62,16 +58,16 @@ public class QualityCard extends HalEntity implements Card {
     @NotNull
     private boolean toCheckAtImport;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "quality_card_id")
-    private List<QualityExaminationRule> rules;
+    private List<QualityCardRule> rules;
 
     /**
      * Init HATEOAS links
      */
     @PostLoad
     public void initLinks() {
-        this.addLink(Links.REL_SELF, "studycard/" + getId());
+        this.addLink(Links.REL_SELF, "qualitycard/" + getId());
     }
 
     public String getName() {
@@ -90,74 +86,12 @@ public class QualityCard extends HalEntity implements Card {
         this.studyId = studyId;
     }
 
-    public List<QualityExaminationRule> getRules() {
+    public List<QualityCardRule> getRules() {
         return rules;
     }
 
-    public void setRules(List<QualityExaminationRule> rules) {
+    public void setRules(List<QualityCardRule> rules) {
         this.rules = rules;
-    }
-
-    /**
-    * Application during import, when dicoms are present in tmp directory.
-    * @param examination
-    * @param studyCard
-    * @param dicomAttributes
-    */
-    public QualityCardResult apply(Examination examination, ExaminationAttributes<?> dicomAttributes, WADODownloaderService downloader) {
-        QualityCardResult result = new QualityCardResult();
-        if (this.getRules() != null) {
-            for (QualityExaminationRule rule : this.getRules()) {
-                rule.apply(examination, dicomAttributes, result, downloader);
-            }
-        }
-        return result;
-    }
-
-    /**
-    * Application during import, when dicoms are present in tmp directory.
-    * @param examination
-    * @param studyCard
-    * @param dicomAttributes
-    */
-    public QualityCardResult apply(ExaminationData examination, ExaminationAttributes<?> dicomAttributes, WADODownloaderService downloader) {
-        QualityCardResult result = new QualityCardResult();
-        if (this.getRules() != null) {
-            for (QualityExaminationRule rule : this.getRules()) {
-                rule.apply(examination, dicomAttributes, result, downloader);
-            }
-        }
-        return result;
-    }
-
-    /**
-    * Application during import, when dicoms are present in tmp directory.
-    * @param examination
-    * @param studyCard
-    */
-    public QualityCardResult apply(Examination examination, WADODownloaderService downloader) {
-        QualityCardResult result = new QualityCardResult();
-        if (this.getRules() != null) {
-            for (QualityExaminationRule rule : this.getRules()) {
-                rule.apply(examination, result, downloader);
-            }
-        }
-        return result;
-    }
-
-    /**
-    * Application during import, when dicoms are present in tmp directory.
-    * @param examination
-    * @param studyCard
-    */
-    public QualityCardResult apply(ExaminationData examination, WADODownloaderService downloader) {
-        QualityCardResult result = new QualityCardResult();
-        if (this.getRules() != null) {
-            for (QualityExaminationRule rule : this.getRules()) {
-                rule.apply(examination, result, downloader);
-            }
-        }
-        return result;
     }
 
     public boolean isToCheckAtImport() {
@@ -166,16 +100,5 @@ public class QualityCard extends HalEntity implements Card {
 
     public void setToCheckAtImport(boolean toCheckAtImport) {
         this.toCheckAtImport = toCheckAtImport;
-    }
-
-    public boolean hasDicomConditions() {
-        if (getRules() != null) {
-            for (QualityExaminationRule rule : getRules()) {
-                if (rule.hasDicomConditions()) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 }

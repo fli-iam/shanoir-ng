@@ -11,14 +11,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 
-import { TaskState } from 'src/app/async-tasks/task.model';
-import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
-import { StudyUserRight } from 'src/app/studies/shared/study-user-right.enum';
-import { TreeService } from 'src/app/studies/study/tree.service';
+import { TaskState } from '@app/async-tasks/task.model';
+import { TreeNodeAbstractComponent } from '@app/shared/components/tree/tree-node.abstract.component';
+import { StudyUserRight } from '@app/studies/shared/study-user-right.enum';
+import { TreeService } from '@app/studies/study/tree.service';
 
 import { DatasetService } from '../../datasets/shared/dataset.service';
+import { DatasetNodeComponent } from '../../datasets/tree/dataset-node.component';
+import { DropdownMenuComponent } from '../../shared/components/dropdown-menu/dropdown-menu.component';
+import { MenuItemComponent } from '../../shared/components/dropdown-menu/menu-item/menu-item.component';
+import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
+import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
 import { ConsoleService } from "../../shared/console/console.service";
 import { MassDownloadService } from "../../shared/mass-download/mass-download.service";
 import { DatasetAcquisitionNode, DatasetNode, ShanoirNode, UNLOADED } from '../../tree/tree.model';
@@ -29,7 +36,8 @@ import { DatasetAcquisitionService } from "../shared/dataset-acquisition.service
 @Component({
     selector: 'dataset-acquisition-node',
     templateUrl: 'dataset-acquisition-node.component.html',
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager,
+    imports: [LoadingBarComponent, TreeNodeComponent, FormsModule, DropdownMenuComponent, RouterLink, MenuItemComponent, DatasetNodeComponent]
 })
 
 export class DatasetAcquisitionNodeComponent extends TreeNodeAbstractComponent<DatasetAcquisitionNode> implements OnChanges {
@@ -53,6 +61,13 @@ export class DatasetAcquisitionNodeComponent extends TreeNodeAbstractComponent<D
             protected treeService: TreeService,
             elementRef: ElementRef) {
         super(elementRef);
+        // the deletion of the last dataset of this acquisition removes the acquisition itself
+        this.subscriptions.push(
+            this.datasetService.onAcquisitionsRemoved.subscribe(ids => {
+                if (this.node && ids.includes(this.node.id)) {
+                    this.acquisitionDelete.emit();
+                }
+            }));
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -69,6 +84,8 @@ export class DatasetAcquisitionNodeComponent extends TreeNodeAbstractComponent<D
                     this.input.datasetAcquisition.id,
                     label,
                     UNLOADED,
+                    null,
+                    this.input.datasetAcquisition.extraDataFilePathList,
                     this.input.studyRights.includes(StudyUserRight.CAN_ADMINISTRATE),
                     this.input.studyRights.includes(StudyUserRight.CAN_DOWNLOAD)
                 );
@@ -79,11 +96,16 @@ export class DatasetAcquisitionNodeComponent extends TreeNodeAbstractComponent<D
     }
 
     hasChildren(): boolean | 'unknown' {
-        if (!this.node.datasets) return false;
-        else if (this.node.datasets == 'UNLOADED') return 'unknown';
-        else return this.node.datasets.length > 0;
+        if (!this.node.datasets && !this.node.extraDataFilePathList) return false;
+        else if (this.node.datasets == 'UNLOADED' || this.node.extraDataFilePathList == 'UNLOADED') return 'unknown';
+        else return (this.node.datasets && this.node.datasets.length > 0)
+                || (this.node.extraDataFilePathList && this.node.extraDataFilePathList.length > 0);
     }
-    
+
+    downloadFile(file) {
+        this.datasetAcquisitionService.downloadFile(file, this.node.id, this.downloadState);
+    }
+
     loadDatasets() {
         if (this.node.datasets == UNLOADED) {
             this.loading = true;

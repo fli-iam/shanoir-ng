@@ -12,9 +12,9 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
 
 import { BrowserPaginEntityListComponent } from '../../shared/components/entity/entity-list.browser.component.abstract';
 import { TableComponent } from '../../shared/components/table/table.component';
@@ -29,7 +29,8 @@ import { StudyUser } from '../../studies/shared/study-user.model';
     selector: 'user-list',
     templateUrl: 'user-list.component.html',
     styleUrls: ['user-list.component.css'],
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager,
+    imports: [TableComponent]
 })
 
 export class UserListComponent extends BrowserPaginEntityListComponent<User>{
@@ -97,7 +98,7 @@ export class UserListComponent extends BrowserPaginEntityListComponent<User>{
             {headerName: "Role", field: "role.displayName", width: "63px"},
             {headerName: "Creation", field: "creationDate", type: "date"},
             {headerName: "Expiration", field: "expirationDate", type: "date"},
-            {headerName: "Active", field: "valid", type: "boolean", cellRenderer: function (params: any) {
+            {headerName: "Expired", field: "valid", type: "boolean", cellRenderer: function (params: any) {
                 return !params.data.expirationDate || params.data.expirationDate >= new Date();
             }},
             {headerName: "Last Login", field: "lastLogin", type: "date"}

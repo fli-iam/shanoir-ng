@@ -28,6 +28,7 @@ import org.shanoir.ng.datasetacquisition.model.GenericDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.ct.CtDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.pet.PetDatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.rt.RtDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.xa.XaDatasetAcquisition;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.examination.model.Examination;
@@ -41,8 +42,10 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 
 import jakarta.annotation.PostConstruct;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * The StudyInstanceUIDAndSubjectNameHandler component manages the translation
@@ -80,6 +83,8 @@ public class StudyInstanceUIDAndSubjectNameHandler {
     private static final String DICOM_TAG_STUDY_INSTANCE_UID = "0020000D";
 
     private static final String DICOM_TAG_RETRIEVE_URL = "00081190";
+
+    private static final String DICOM_TAG_REFERENCED_SOP_INSTANCE_UID = "00081155";
 
     private static final String DICOM_TAG_PATIENT_NAME = "00100010";
 
@@ -165,6 +170,59 @@ public class StudyInstanceUIDAndSubjectNameHandler {
         }
     }
 
+    /**
+     * Recursively replaces one real StudyInstanceUID with the examinationUID in
+     * all StudyInstanceUID (0020000D), ReferencedSOPInstanceUID (00081155) and
+     * RetrieveURL (00081190) values, including nested sequences.
+     *
+     * replaceStudyInstanceUIDAndPatientInfo only rewrites the tags at the top
+     * level of each metadata object, but a study is referenced from within
+     * sequences as well, e.g. an RT Structure Set references its source study in
+     * ReferencedFrameOfReferenceSequence (30060010) -> RTReferencedStudySequence
+     * (30060012), where the ReferencedSOPInstanceUID carries a StudyInstanceUID.
+     * Such a reference is not addressable through the DICOMWeb facade, that
+     * expects an examinationUID, so the viewer cannot resolve it.
+     *
+     * Only values, that match the real StudyInstanceUID, are replaced. A
+     * ReferencedSOPInstanceUID, that carries a SOP Instance UID, e.g. in the
+     * ContourImageSequence (30060016), therefore never matches and is left
+     * untouched: SOP Instance UIDs are not virtualised.
+     *
+     * @param root
+     * @param studyInstanceUID
+     * @param examinationUID
+     */
+    public void replaceStudyInstanceUID(JsonNode root, String studyInstanceUID, String examinationUID) {
+        if (root.isArray()) {
+            for (JsonNode element : root) {
+                replaceStudyInstanceUID(element, studyInstanceUID, examinationUID);
+            }
+        } else if (root.isObject()) {
+            replaceInValues(root.get(DICOM_TAG_STUDY_INSTANCE_UID), studyInstanceUID, examinationUID);
+            replaceInValues(root.get(DICOM_TAG_REFERENCED_SOP_INSTANCE_UID), studyInstanceUID, examinationUID);
+            replaceInValues(root.get(DICOM_TAG_RETRIEVE_URL), studyInstanceUID, examinationUID);
+            for (JsonNode child : root) {
+                if (child.isContainerNode()) {
+                    replaceStudyInstanceUID(child, studyInstanceUID, examinationUID);
+                }
+            }
+        }
+    }
+
+    private void replaceInValues(JsonNode tagNode, String studyInstanceUID, String examinationUID) {
+        if (tagNode == null || !tagNode.path(VALUE).isArray()) {
+            return;
+        }
+        ArrayNode values = (ArrayNode) tagNode.path(VALUE);
+        for (int i = 0; i < values.size(); i++) {
+            JsonNode value = values.get(i);
+            if (value.isTextual() && value.asText().contains(studyInstanceUID)) {
+                String replaced = value.asText().replace(studyInstanceUID, examinationUID);
+                values.set(i, TextNode.valueOf(replaced));
+            }
+        }
+    }
+
     public void replacePatientInfo(JsonNode root, String subjectName) {
         if (root.isObject()) {
             replacePatientInfoValues(root, subjectName);
@@ -236,6 +294,7 @@ public class StudyInstanceUIDAndSubjectNameHandler {
      * @param examinationUID
      * @return
      */
+    @Transactional(readOnly = true)
     public String findStudyInstanceUIDFromCacheOrDatabase(String examinationUID) {
         String studyInstanceUID = examinationUIDToStudyInstanceUIDCache.get(examinationUID);
         if (studyInstanceUID == null) {
@@ -300,6 +359,7 @@ public class StudyInstanceUIDAndSubjectNameHandler {
                     || acquisition instanceof CtDatasetAcquisition
                     || acquisition instanceof PetDatasetAcquisition
                     || acquisition instanceof XaDatasetAcquisition
+                    || acquisition instanceof RtDatasetAcquisition
                     || acquisition instanceof GenericDatasetAcquisition) {
                 List<Dataset> datasets = acquisition.getDatasets();
                 if (!datasets.isEmpty()) {

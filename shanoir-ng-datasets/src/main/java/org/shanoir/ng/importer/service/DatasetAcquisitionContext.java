@@ -25,6 +25,7 @@ import org.shanoir.ng.importer.strategies.datasetacquisition.DatasetAcquisitionS
 import org.shanoir.ng.importer.strategies.datasetacquisition.GenericDatasetAcquisitionStrategy;
 import org.shanoir.ng.importer.strategies.datasetacquisition.MrDatasetAcquisitionStrategy;
 import org.shanoir.ng.importer.strategies.datasetacquisition.PetDatasetAcquisitionStrategy;
+import org.shanoir.ng.importer.strategies.datasetacquisition.RtDatasetAcquisitionStrategy;
 import org.shanoir.ng.importer.strategies.datasetacquisition.XaDatasetAcquisitionStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -51,6 +52,9 @@ public class DatasetAcquisitionContext implements DatasetAcquisitionStrategy {
 
     @Autowired
     private XaDatasetAcquisitionStrategy xaDatasetAcquisitionStrategy;
+
+    @Autowired
+    private RtDatasetAcquisitionStrategy rtDatasetAcquisitionStrategy;
 
     @Autowired
     private GenericDatasetAcquisitionStrategy genericDatasetAcquisitionStrategy;
@@ -86,6 +90,8 @@ public class DatasetAcquisitionContext implements DatasetAcquisitionStrategy {
             datasetAcquisitionStrategy = petDatasetAcquisitionStrategy;
         } else if ("XA".equals(modality)) {
             datasetAcquisitionStrategy = xaDatasetAcquisitionStrategy;
+        } else if ("RTSTRUCT".equals(modality) || "RTDOSE".equals(modality) || "RTPLAN".equals(modality)) {
+            datasetAcquisitionStrategy = rtDatasetAcquisitionStrategy;
         } else {
             // By default we just create a generic dataset acquisition
             datasetAcquisitionStrategy = genericDatasetAcquisitionStrategy;

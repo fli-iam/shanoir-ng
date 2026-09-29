@@ -32,15 +32,10 @@ public class SubjectDecorator implements SubjectMapper {
     public PageImpl<SubjectDTO> subjectsToSubjectDTOs(Page<Subject> page) {
         Page<SubjectDTO> mappedPage = page.map(new Function<Subject, SubjectDTO>() {
             public SubjectDTO apply(Subject entity) {
-                return subjectToSubjectDTONoStudies(entity);
+                return subjectToSubjectDTO(entity);
             }
         });
         return new PageImpl<>(mappedPage);
-    }
-
-    @Override
-    public SubjectDTO subjectToSubjectDTONoStudies(Subject subject) {
-        return delegate.subjectToSubjectDTONoStudies(subject);
     }
 
     @Override
