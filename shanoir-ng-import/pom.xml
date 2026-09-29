@@ -183,7 +183,6 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <classifier>exec</classifier>
                     <profiles>
                         <profile>default</profile>
                     </profiles>
@@ -219,7 +218,7 @@
                         <phase>package</phase>
                         <configuration>
                             <target>
-                                <copy file="target/${project.build.finalName}-exec.jar"
+                                <copy file="target/${project.build.finalName}.jar"
                                     tofile="${basedir}/../docker-compose/import/${project.artifactId}.jar" />
                             </target>
                         </configuration>
