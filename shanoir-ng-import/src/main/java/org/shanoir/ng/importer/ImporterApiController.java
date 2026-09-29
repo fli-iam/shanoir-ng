@@ -143,6 +143,7 @@ public class ImporterApiController implements ImporterApi {
                     "Wrong content type of file upload, .zip required.", null));
         }
         File tempFile = null;
+        File importJobDir = null;
         try {
             /**
              * 1. STEP: Handle file management. Always create a userId specific folder in
@@ -156,7 +157,7 @@ public class ImporterApiController implements ImporterApi {
                 createDicomDir = true;
             }
 
-            File importJobDir = ImportUtils.saveTempFileCreateFolderAndUnzip(tempFile, dicomZipFile, true);
+            importJobDir = ImportUtils.saveTempFileCreateFolderAndUnzip(tempFile, dicomZipFile, true);
 
             if (createDicomDir) {
                 LOG.info("DICOMDIR missing from zip file, generating one.");
@@ -190,9 +191,11 @@ public class ImporterApiController implements ImporterApi {
             importJob.setPatients(patients);
             return new ResponseEntity<>(importJob, HttpStatus.OK);
         } catch (Exception e) {
-            // If there is an exception, we should delete the temporary folder
             if (tempFile != null) {
                 FileUtils.deleteQuietly(tempFile);
+            }
+            if (importJobDir != null) {
+                FileUtils.deleteQuietly(importJobDir);
             }
             LOG.error(e.getMessage(), e);
             throw new RestServiceException(
