@@ -125,7 +125,11 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
                  * we can not correctly sort in ShanoirUploader without going into the files itself, what we do not
                  * do, therefore we have the ImagesCreatorAndDicomFileAnalyzerService, that is called on the server.
                  */
-                series.sort(new SeriesNumberOrAcquisitionTimeOrDescriptionSorter());
+                try {
+                    series.sort(new SeriesNumberOrAcquisitionTimeOrDescriptionSorter());
+                } catch (RuntimeException e) {
+                    LOG.warn("Could not sort series list after DICOM analysis, keeping current order: {}", e.getMessage());
+                }
             }
         }
     }
