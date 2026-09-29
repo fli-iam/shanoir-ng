@@ -30,12 +30,9 @@ import org.shanoir.ng.shared.subjectstudy.SubjectType;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.tag.model.Tag;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import tools.jackson.databind.annotation.JsonDeserialize;
-import tools.jackson.databind.annotation.JsonSerialize;
-import tools.jackson.databind.ext.javatime.deser.LocalDateDeserializer;
-import tools.jackson.databind.ext.javatime.ser.LocalDateSerializer;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -53,6 +50,10 @@ import jakarta.persistence.PostLoad;
 import jakarta.persistence.SqlResultSetMapping;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
+import tools.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.annotation.JsonSerialize;
+import tools.jackson.databind.ext.javatime.deser.LocalDateDeserializer;
+import tools.jackson.databind.ext.javatime.ser.LocalDateSerializer;
 
 @Entity
 @Table(indexes = @Index(name = "subject_name_study_id_idx", columnList = "name, study_id", unique = true))
@@ -123,6 +124,7 @@ public class Subject extends HalEntity {
 
     private Integer qualityTag;
 
+    @JsonCreator
     public Subject() { }
 
     public Subject(Subject other, Study study) {

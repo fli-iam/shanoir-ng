@@ -132,6 +132,11 @@ public class SubjectApiControllerTest {
     public void saveNewSubjectTest() throws Exception {
         mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(ModelsUtil.createSubject())))
+                .andDo(result -> {
+                    if (result.getResolvedException() != null) {
+                        result.getResolvedException().printStackTrace();
+                    }
+                })
                 .andExpect(status().isOk());
     }
 
