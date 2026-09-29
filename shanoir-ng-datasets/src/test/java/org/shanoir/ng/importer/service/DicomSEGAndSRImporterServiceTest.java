@@ -45,10 +45,12 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.modality.MrDataset;
+import org.shanoir.ng.dataset.modality.RtDataset;
 import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetfile.DatasetFile;
+import org.shanoir.ng.dicom.web.STOWRSMultipartRequestFilter;
 import org.shanoir.ng.dicom.web.SeriesInstanceUIDHandler;
 import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
 import org.shanoir.ng.examination.model.Examination;
@@ -236,6 +238,19 @@ public class DicomSEGAndSRImporterServiceTest {
      * Wires the examination with a source dataset and adds the matching SEG
      * references to the DICOM attributes, so the import reaches dataset creation.
      */
+    @Test
+    public void importDicomRTStructProceedsWithCanAnnotateRight() throws Exception {
+        wireSourceDatasetAndRtStructReferences();
+        when(datasetSecurityService.hasRightOnStudy(STUDY_ID, StudyUserRight.CAN_ANNOTATE.name())).thenReturn(true);
+        when(datasetService.create(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        ArgumentCaptor<Dataset> datasetCaptor = ArgumentCaptor.forClass(Dataset.class);
+        boolean result = dicomSEGAndSRImporterService.importDicomSEGAndSR(metaInformationAttributes, datasetAttributes,
+                STOWRSMultipartRequestFilter.DICOM_MODALITY_RTSTRUCT, true);
+        assertTrue(result);
+        verify(datasetService).create(datasetCaptor.capture());
+        assertTrue(datasetCaptor.getValue() instanceof RtDataset);
+    }
+
     private void wireSourceDatasetAndSegReferences() {
         Subject subject = new Subject();
         subject.setId(SUBJECT_ID);
@@ -263,6 +278,32 @@ public class DicomSEGAndSRImporterServiceTest {
         referencedInstanceSequence.add(instanceItem);
         Sequence referencedSeriesSequence = datasetAttributes.newSequence(Tag.ReferencedSeriesSequence, 1);
         referencedSeriesSequence.add(seriesItem);
+    }
+
+    private void wireSourceDatasetAndRtStructReferences() {
+        wireSourceDatasetAndSegReferences();
+        datasetAttributes.setString(Tag.Modality, VR.CS, STOWRSMultipartRequestFilter.DICOM_MODALITY_RTSTRUCT);
+        datasetAttributes.remove(Tag.ReferencedSeriesSequence);
+
+        Attributes contourItem = new Attributes();
+        contourItem.setString(Tag.ReferencedSOPInstanceUID, VR.UI, SOP_INSTANCE_UID);
+
+        Attributes rtReferencedSeriesItem = new Attributes();
+        rtReferencedSeriesItem.setString(Tag.SeriesInstanceUID, VR.UI, SERIES_INSTANCE_UID);
+        Sequence contourImageSequence = rtReferencedSeriesItem.newSequence(Tag.ContourImageSequence, 1);
+        contourImageSequence.add(contourItem);
+
+        Attributes rtReferencedStudyItem = new Attributes();
+        Sequence rtReferencedSeriesSequence = rtReferencedStudyItem.newSequence(Tag.RTReferencedSeriesSequence, 1);
+        rtReferencedSeriesSequence.add(rtReferencedSeriesItem);
+
+        Attributes frameOfReferenceItem = new Attributes();
+        Sequence rtReferencedStudySequence = frameOfReferenceItem.newSequence(Tag.RTReferencedStudySequence, 1);
+        rtReferencedStudySequence.add(rtReferencedStudyItem);
+
+        Sequence referencedFrameOfReferenceSequence = datasetAttributes.newSequence(Tag.ReferencedFrameOfReferenceSequence,
+                1);
+        referencedFrameOfReferenceSequence.add(frameOfReferenceItem);
     }
 
 }
