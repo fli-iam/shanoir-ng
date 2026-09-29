@@ -17,9 +17,17 @@ package org.shanoir.uploader.action;
 import java.awt.Color;
 import java.io.File;
 import java.text.ParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Objects;
+import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
-import org.shanoir.ng.importer.model.ImportJob;
+import org.shanoir.ng.importer.model.ImportJobBase;
+import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.shared.dicom.EquipmentDicom;
 import org.shanoir.ng.shared.dicom.InstitutionDicom;
 import org.shanoir.uploader.ShUpConfig;
@@ -63,7 +71,7 @@ public class ImportDialogOpener {
         this.shanoirUploaderServiceClient = shanoirUploaderServiceClient;
     }
 
-    public void openImportDialog(ImportJob importJob, File importFolder) {
+    public void openImportDialog(ImportJobBase importJob, File importFolder) {
         try {
             Date studyDate = ShUpConfig.FORMATTER.parse(Util.convertLocalDateToString(importJob.getStudy().getStudyDate()));
             Subject subject = null;
@@ -76,10 +84,17 @@ public class ImportDialogOpener {
             List<Study> studiesWithStudyCards = getStudiesWithStudyCards(importJob, acquisitionEquipments);
             // Init components of GUI and listeners
             ImportStudyCardFilterDocumentListener importStudyCardFilterDocumentListener = new ImportStudyCardFilterDocumentListener(this.mainWindow);
-            InstitutionDicom institutionDicom = importJob.getFirstSelectedSerie().getInstitution();
-            EquipmentDicom equipmentDicom = importJob.getFirstSelectedSerie().getEquipment();
+            InstitutionDicom institutionDicom = null;
+            EquipmentDicom equipmentDicom = null;
+            Serie serieWithInstitutionAndEquipment = importJob.getFirstSerieWithInstitutionAndEquipment();
+            if (serieWithInstitutionAndEquipment != null) {
+                institutionDicom = serieWithInstitutionAndEquipment.getInstitution();
+                equipmentDicom = serieWithInstitutionAndEquipment.getEquipment();
+            } else {
+                LOG.warn("None of the selected series contains both institution and equipment information.");
+            }
             ImportStudyAndStudyCardCBItemListener importStudyAndStudyCardCBIL = new ImportStudyAndStudyCardCBItemListener(this.mainWindow, institutionDicom, equipmentDicom, subject, studyDate, importStudyCardFilterDocumentListener, shanoirUploaderServiceClient);
-            ImportFinishActionListener importFinishAL = new ImportFinishActionListener(this.mainWindow, importFolder, subject, importStudyAndStudyCardCBIL);
+            ImportFinishActionListener importFinishAL = new ImportFinishActionListener(this.mainWindow, importFolder, subject);
             importDialog = new ImportDialog(this.mainWindow,
                     ShUpConfig.resourceBundle.getString("shanoir.uploader.preImportDialog.title"), true, resourceBundle,
                     importStudyAndStudyCardCBIL, importFinishAL, importStudyCardFilterDocumentListener);
@@ -103,11 +118,16 @@ public class ImportDialogOpener {
      * @param equipmentDicom
      * @throws Exception
      */
-    private List<Study> getStudiesWithStudyCards(final ImportJob importJob, List<AcquisitionEquipment> acquisitionEquipments) throws Exception {
+    private List<Study> getStudiesWithStudyCards(final ImportJobBase importJob,
+            List<AcquisitionEquipment> acquisitionEquipments) throws Exception {
         List<Study> studies = shanoirUploaderServiceClient.findStudiesNamesAndCenters();
         if (studies != null) {
             LOG.info("getStudiesWithStudyCards: " + studies.size() + " studies found.");
             List<StudyCard> studyCards = ImportUtils.getAllStudyCards(studies);
+            Serie serieWithInstitutionAndEquipment = importJob.getFirstSerieWithInstitutionAndEquipment();
+            EquipmentDicom equipmentDicomForCompatibility = serieWithInstitutionAndEquipment != null
+                    ? serieWithInstitutionAndEquipment.getEquipment()
+                    : null;
             if (studyCards != null) {
                 LOG.info("getAllStudyCards for studies: " + studyCards.size() + " studycards found.");
                 for (Iterator<Study> iterator = studies.iterator(); iterator.hasNext();) {
@@ -120,18 +140,32 @@ public class ImportDialogOpener {
                             StudyCard studyCard = (StudyCard) itStudyCards.next();
                             // filter all study cards related to the selected study
                             if (study.getId().equals(studyCard.getStudyId())) {
-                                studyCardsStudy.add(studyCard);
                                 for (AcquisitionEquipment acquisitionEquipment : acquisitionEquipments) {
                                     // find the correct equipment for each study card and add it
                                     if (acquisitionEquipment.getId().equals(studyCard.getAcquisitionEquipmentId())) {
                                         studyCard.setAcquisitionEquipment(acquisitionEquipment);
                                     }
                                 }
-                                // If at least one study card is compatible, then study is compatible
-                                if (ImportUtils.flagStudyCardCompatible(
-                                        studyCard, importJob.getFirstSelectedSerie().getEquipment())) {
-                                    compatibleStudyCard = true;
-                                }
+                                studyCardsStudy.add(studyCard);
+                            }
+                        }
+                        // Only propose study cards whose acquisition center actually belongs to this
+                        // study, mirroring getStudyCardOptions() in clinical-context.abstract.component.ts
+                        studyCardsStudy = filterStudyCardsByAccessibleCenters(study, studyCardsStudy);
+                        // Display first, if it exists, the study card whose acquisition equipment serial
+                        // number matches the DICOM "informations DICOM" of the exam being imported, so
+                        // it's the one pre-selected first in the form.
+                        if (equipmentDicomForCompatibility != null) {
+                            final String dicomSerialNumber = equipmentDicomForCompatibility.getDeviceSerialNumber();
+                            studyCardsStudy.sort(Comparator.comparing(studyCard ->
+                                    !ImportUtils.matchesSerialNumber(studyCard.getAcquisitionEquipment(), dicomSerialNumber)));
+                        }
+                        for (StudyCard studyCard : studyCardsStudy) {
+                            // If at least one study card is compatible, then study is compatible
+                            if (equipmentDicomForCompatibility != null
+                                    && ImportUtils.flagStudyCardCompatible(studyCard,
+                                            equipmentDicomForCompatibility)) {
+                                compatibleStudyCard = true;
                             }
                         }
                         if (compatibleStudyCard) {
@@ -147,6 +181,38 @@ public class ImportDialogOpener {
         } else {
             return null;
         }
+    }
+
+    /**
+     * Filters out study cards from a center that isn't attached to the study, then, if the
+     * connected user is restricted to specific centers on this study, further filters down to
+     * only those centers (mirroring UserRights.hasStudyCenterRights on the backend). A study
+     * card whose equipment couldn't be resolved is excluded defensively, since its center can't
+     * be verified.
+     *
+     * @param study the study the study cards belong to
+     * @param studyCards the study's own study cards, with their acquisitionEquipment already set
+     * @return the study cards whose center belongs to the study and, if applicable, to the
+     *         connected user's own center restriction; or the input list unfiltered if the
+     *         study's centers could not be determined
+     */
+    private List<StudyCard> filterStudyCardsByAccessibleCenters(Study study, List<StudyCard> studyCards) {
+        if (study.getStudyCenterList() == null) {
+            return studyCards;
+        }
+        List<Long> accessibleCenterIds = study.getStudyCenterList().stream()
+                .map(studyCenter -> studyCenter.getCenter().getId())
+                .toList();
+        if (study.getRestrictedCenterIds() != null && !study.getRestrictedCenterIds().isEmpty()) {
+            accessibleCenterIds = accessibleCenterIds.stream()
+                    .filter(study.getRestrictedCenterIds()::contains)
+                    .toList();
+        }
+        final List<Long> accessibleCenterIdsFinal = accessibleCenterIds;
+        return studyCards.stream()
+                .filter(studyCard -> studyCard.getAcquisitionEquipment() != null
+                        && accessibleCenterIdsFinal.contains(studyCard.getAcquisitionEquipment().getCenter().getId()))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -191,7 +257,7 @@ public class ImportDialogOpener {
         importDialog.studyCB.setValueSet(false);
     }
 
-    private Subject getSubject(final ImportJob importJob) throws Exception {
+    private Subject getSubject(final ImportJobBase importJob) throws Exception {
         String identifier = importJob.getSubject().getIdentifier();
         if (identifier != null) {
             return shanoirUploaderServiceClient

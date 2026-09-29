@@ -18,7 +18,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Future;
 
+import jakarta.mail.MessagingException;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.dto.DatasetDownloadData;
 import org.shanoir.ng.dataset.dto.DatasetLight;
@@ -27,6 +29,7 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.OverallStatistics;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.examination.model.Examination;
+import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
@@ -53,10 +56,19 @@ public interface DatasetService {
     @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnDataset(#id, 'CAN_ADMINISTRATE'))")
     void deleteById(Long id) throws EntityNotFoundException, ShanoirException, SolrServerException, IOException, RestServiceException;
 
-    void deleteByIdCascade(Long id) throws EntityNotFoundException, ShanoirException, SolrServerException, IOException, RestServiceException;
-
-    @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnDataset(#dataset.getId(), 'CAN_ADMINISTRATE'))")
-    void deleteDatasetFilesFromDiskAndPacs(Dataset dataset) throws ShanoirException;
+    /**
+     * Delete a dataset.
+     *
+     * @param id dataset id.
+     * @param parentEvent the event of the parent deletion (acquisition, examination, subject...)
+     *                    driving this one, which already reports its own progress: no deletion
+     *                    event is then published for this dataset. Null when the dataset is
+     *                    deleted on its own, and reports itself.
+     * @throws EntityNotFoundException
+     * @throws ShanoirException
+     */
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnDataset(#id, 'CAN_ADMINISTRATE'))")
+    void deleteById(Long id, ShanoirEvent parentEvent) throws EntityNotFoundException, ShanoirException, SolrServerException, IOException, RestServiceException;
 
     /**
      * Delete several datasets.
@@ -75,7 +87,45 @@ public interface DatasetService {
      */
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     @PostAuthorize("hasRole('ADMIN') or returnObject == null or @datasetSecurityService.hasRightOnTrustedDataset(returnObject, 'CAN_SEE_ALL')")
-    Dataset findById(Long id);
+    Dataset findByIdWithProcessingAncestorsAndExaminationAndMetadata(Long id) throws EntityNotFoundException;
+
+    /**
+     * Find dataset by its id.
+     *
+     * @param id dataset id.
+     * @return a dataset or null.
+     */
+    Dataset findByIdWithDatasetFilesAndExaminationAndMetadata(Long id) throws EntityNotFoundException;
+
+    /**
+     * Find dataset by its id.
+     *
+     * @param id dataset id.
+     * @return a dataset or null.
+     */
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    @PostAuthorize("hasRole('ADMIN') or returnObject == null or @datasetSecurityService.hasRightOnTrustedDataset(returnObject, 'CAN_SEE_ALL')")
+    List<Dataset> findByAcquisitionIdWithDatasetFilesAndExaminationAndMetadata(final Long id);
+
+    /**
+     * Find dataset by its id.
+     *
+     * @param id dataset id.
+     * @return a dataset or null.
+     */
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    @PostAuthorize("hasRole('ADMIN') or returnObject == null or @datasetSecurityService.hasRightOnTrustedDataset(returnObject, 'CAN_SEE_ALL')")
+    List<Dataset> findByStudyIdWithDatasetFilesAndExaminationAndMetadata(final Long id);
+
+    /**
+     * Find dataset by its id.
+     *
+     * @param id dataset id.
+     * @return a dataset or null.
+     */
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    @PostAuthorize("hasRole('ADMIN') or returnObject == null or @datasetSecurityService.hasRightOnTrustedDataset(returnObject, 'CAN_SEE_ALL')")
+    List<Dataset> findByExaminationIdWithDatasetFilesAndExaminationAndMetadata(final Long id);
 
     /**
      * Find datasets by their ids.
@@ -85,7 +135,7 @@ public interface DatasetService {
      */
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetList(returnObject, 'CAN_SEE_ALL')")
-    List<Dataset> findByIdIn(List<Long> id);
+    List<Dataset> findByIdIn(List<Long> ids);
 
     /**
      * Find datasets by their ids.
@@ -131,6 +181,8 @@ public interface DatasetService {
     @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetList(returnObject, 'CAN_SEE_ALL')")
     List<Dataset> findByStudyId(Long studyId);
 
+    List<Dataset> findBySubjectId(Long studyId);
+
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#studyId, 'CAN_SEE_ALL'))")
     int countByStudyId(Long studyId);
 
@@ -149,6 +201,7 @@ public interface DatasetService {
     List<Dataset> findDatasetAndOutputByExaminationId(Long examinationId);
 
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnDatasetAcquisition(#acquisitionId, 'CAN_SEE_ALL'))")
+    @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterAnnotationDatasetList(returnObject)")
     List<Dataset> findByAcquisition(Long acquisitionId);
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
@@ -158,7 +211,7 @@ public interface DatasetService {
     boolean existsById(Long id);
 
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT','USER') and @datasetSecurityService.hasRightOnDataset(#dataset.id, 'CAN_SEE_ALL'))")
-    Long getStudyId(Dataset dataset);
+    Long getStudyId(Dataset dataset) throws EntityNotFoundException;
 
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT','USER') and @datasetSecurityService.hasRightOnDataset(#dataset.id, 'CAN_SEE_ALL'))")
     Examination getExamination(Dataset dataset);
@@ -174,4 +227,33 @@ public interface DatasetService {
 
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT','USER') and @datasetSecurityService.hasRightOnEveryDataset(#datasetIds, 'CAN_SEE_ALL'))")
     File extractDicomMetadata(List<Long> datasetIds, List<String> metadataKeys) throws Exception;
+
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT','USER') and @datasetSecurityService.hasRightOnDataset(#dataset.getId(), 'CAN_SEE_ALL'))")
+    Map<String, String> getSpecificDicomMetadataValues(Dataset dataset, List<String> metadataKeys);
+
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT','USER') and @datasetSecurityService.hasRightOnEveryDataset(#datasetIds, 'CAN_ADMINISTRATE'))")
+    Future<Void> deletePartitionOfNiftis(List<Long> partition, float total, ShanoirEvent event);
+
+    String getDicomMetadataByDatasetId(Long datasetId) throws IOException, MessagingException, EntityNotFoundException;
+
+    /**
+     * Populate a list of datasets with their presence in PACS or not
+     *
+     * @param datasets a list of datasets
+     */
+    void populateInPacs(List<Dataset> datasets);
+
+    /**
+     * Populate a list of datasets with their realted center id
+     *
+     * @param datasets a list of datasets
+     */
+    void populateCenterId(List<Dataset> datasets);
+
+    /**
+     * Return the first ancestor which has not been produced by a pipeline
+     *
+     * @param dataset a dataset
+     */
+    Dataset getFirstRealInput(Dataset dataset);
 }

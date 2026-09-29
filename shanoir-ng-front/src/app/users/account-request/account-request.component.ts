@@ -13,36 +13,32 @@
  */
 
 import { Location } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
-import {
-    AbstractControl,
-    UntypedFormBuilder,
-    UntypedFormGroup,
-    ValidationErrors,
-    ValidatorFn,
-    Validators
-} from '@angular/forms';
+import { Component, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { UntypedFormBuilder, UntypedFormGroup, ValidationErrors, Validators, FormsModule, ReactiveFormsModule, AbstractControl, ValidatorFn } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
-import { ConsoleService } from 'src/app/shared/console/console.service';
-import { ServiceLocator } from 'src/app/utils/locator.service';
+import { ConsoleService } from '@app/shared/console/console.service';
 
 import * as AppUtils from '../../utils/app.utils';
 import { AccountRequestInfo } from '../account-request-info/account-request-info.model';
 import { User } from '../shared/user.model';
 import { UserService } from '../shared/user.service';
+import { HeaderComponent } from '../../shared/header/header.component';
+import { AccountRequestInfoComponent } from '../account-request-info/account-request-info.component';
+import { ConsoleComponent } from '../../shared/console/console.component';
 
 @Component({
     selector: 'accountRequest',
     templateUrl: 'account-request.component.html',
     styleUrls: ['account-request.component.css'],
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager,
+    imports: [HeaderComponent, FormsModule, ReactiveFormsModule, AccountRequestInfoComponent, ConsoleComponent]
 })
 
 export class AccountRequestComponent implements OnInit {
 
     public form: UntypedFormGroup;
-
+    public dpoMail: string = AppUtils.SHANOIR_DPO_EMAIL;
     public requestSent: boolean = false;
     public errorOnRequest: boolean = false;
     infoValid: boolean = false;
@@ -59,7 +55,7 @@ export class AccountRequestComponent implements OnInit {
             private location: Location,
             private route: ActivatedRoute,
             private consoleService: ConsoleService) {
-                this.router = ServiceLocator.injector.get(Router)
+                this.router = inject(Router)
                 this.studyName = this.route.snapshot.queryParams['study'];
                 this.invitationIssuer = this.route.snapshot.queryParams['from'];
                 this.function = this.route.snapshot.queryParams['function'];
@@ -75,7 +71,7 @@ export class AccountRequestComponent implements OnInit {
             'firstName': ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50), this.nonSpecialCharsValidator()]],
             'lastName': ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50), this.nonSpecialCharsValidator()]],
             'email': ['', [Validators.required, Validators.pattern(emailRegex)]],
-            'accountRequestInfo': ['', [this.validateARInfo]]
+            'accountRequestInfo': [new AccountRequestInfo(), [this.validateARInfo]]
         });
     }
 

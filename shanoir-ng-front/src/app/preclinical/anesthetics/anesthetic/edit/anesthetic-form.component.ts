@@ -12,11 +12,10 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ViewChild } from '@angular/core';
-import { UntypedFormGroup, Validators } from '@angular/forms';
+import { Component, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
-import { slideDown } from '../../../../shared/animations/animations';
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
 import { BrowserPaging } from '../../../../shared/components/table/browser-paging.model';
 import { ColumnDefinition } from '../../../../shared/components/table/column.definition.type';
@@ -31,13 +30,16 @@ import { AnestheticIngredientService } from '../../ingredients/shared/anesthetic
 import { Anesthetic } from '../shared/anesthetic.model';
 import { AnestheticService } from '../shared/anesthetic.service';
 import { EntityService } from '../../../../shared/components/entity/entity.abstract.service';
+import { FormFooterComponent } from '../../../../shared/components/form-footer/form-footer.component';
+import { SelectBoxComponent } from '../../../../shared/select/select.component';
+import { AnestheticIngredientFormComponent } from '../../ingredients/edit/anestheticIngredient-form.component';
 
 @Component({
     selector: 'anesthetic-form',
     templateUrl: 'anesthetic-form.component.html',
     styleUrls: ['anesthetic-form.component.css'],
-    animations: [slideDown],
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager,
+    imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, SelectBoxComponent, AnestheticIngredientFormComponent, TableComponent]
 })
 export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
 

@@ -56,7 +56,7 @@ public class DatasetLight {
         this.hasProcessings = hasProcessings;
         this.id = id;
         this.name = name;
-        this.type = type.getDeclaredConstructor().newInstance().getType().name();
+        this.type = type.getDeclaredConstructor().newInstance().getType().toString();
         this.study = new IdName(studyId, studyName);
         this.subject = new IdName(subjectId, subjectName);
         this.centerId = centerId;

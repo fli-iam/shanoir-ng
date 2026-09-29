@@ -14,6 +14,7 @@
 
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 
 import * as AppUtils from '../utils/app.utils';
 
@@ -25,8 +26,7 @@ export class RoleService {
     constructor(private http: HttpClient) { }
 
     getRoles(): Promise<Role[]> {
-        return this.http.get<Role[]>(AppUtils.BACKEND_API_ROLE_ALL_URL)
-            .toPromise()
+        return firstValueFrom(this.http.get<Role[]>(AppUtils.BACKEND_API_ROLE_ALL_URL))
             .then(response => response)
             .catch((error) => {
                 console.error('Error while getting roles', error);

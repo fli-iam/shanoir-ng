@@ -1,0 +1,74 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
+package org.shanoir.ng.shared.exception;
+
+import org.springframework.beans.factory.annotation.Autowired;
+
+import tools.jackson.databind.ObjectMapper;
+
+import tools.jackson.core.JacksonException;
+
+/**
+ * REST service exception.
+ *
+ * @author msimon
+ *
+ */
+public class RestServiceException extends Exception {
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    /**
+     * Serial version uid
+     */
+    private static final long serialVersionUID = 2796153429277618391L;
+
+    private ErrorModel errorModel;
+
+    /**
+     * @param cause
+     * @param code
+     */
+    public RestServiceException(Throwable cause, ErrorModel errorModel) {
+        super(cause);
+        this.errorModel = errorModel;
+    }
+
+    /**
+     * @param code
+     */
+    public RestServiceException(ErrorModel errorModel) {
+        super();
+        this.errorModel = errorModel;
+    }
+
+    /**
+     * @return the errorModel
+     */
+    public ErrorModel getErrorModel() {
+        return errorModel;
+    }
+
+    @Override
+    public String toString() {
+        try {
+            return objectMapper != null ? objectMapper.writeValueAsString(errorModel) : errorModel.toString();
+        } catch (JacksonException e) {
+            return "error while serializing errorModel : " + e.toString();
+        }
+    }
+
+}

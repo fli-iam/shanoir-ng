@@ -33,6 +33,7 @@ import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.model.DatasetMetadata;
 import org.shanoir.ng.dataset.model.DatasetModalityType;
+import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.ct.CtDatasetAcquisition;
@@ -41,17 +42,23 @@ import org.shanoir.ng.datasetacquisition.model.pet.PetDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.xa.XaDatasetAcquisition;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.dicom.web.STOWRSMultipartRequestFilter;
+import org.shanoir.ng.dicom.web.SeriesInstanceUIDHandler;
 import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
+import org.shanoir.ng.shared.exception.ErrorModel;
+import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.SubjectRepository;
+import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -75,6 +82,8 @@ public class DicomSEGAndSRImporterService {
 
     private static final String IMAGING_MEASUREMENT_REPORT = "Imaging Measurement Report";
 
+    private static final String MISSING_DICOMWEB_IMPORT_RIGHT_ERROR = "Missing DICOMWeb importation rights on study, import refused: ";
+
     @Autowired
     private ExaminationRepository examinationRepository;
 
@@ -82,7 +91,11 @@ public class DicomSEGAndSRImporterService {
     private SolrService solrService;
 
     @Autowired
+    @Lazy
     private DatasetService datasetService;
+
+    @Autowired
+    private DatasetSecurityService datasetSecurityService;
 
     @Autowired
     private SubjectRepository subjectRepository;
@@ -91,18 +104,30 @@ public class DicomSEGAndSRImporterService {
     private StudyInstanceUIDAndSubjectNameHandler studyInstanceUIDHandler;
 
     @Autowired
+    private SeriesInstanceUIDHandler seriesInstanceUIDHandler;
+
+    @Autowired
     private DicomImporterService dicomImporterService;
 
     @Transactional
-    public boolean importDicomSEGAndSR(Attributes metaInformationAttributes, Attributes datasetAttributes, String modality, boolean nonOhifRequest) {
+    public boolean importDicomSEGAndSR(Attributes metaInformationAttributes, Attributes datasetAttributes, String modality, boolean nonOhifRequest) throws RestServiceException {
         // Retrieve examination; adjust datasetAttributes if received from OHIF
         String studyInstanceUID = datasetAttributes.getString(Tag.StudyInstanceUID);
         Examination examination = nonOhifRequest
                 ? examinationRepository.findByStudyInstanceUID(studyInstanceUID).orElse(null)
-                : modifyDicom(datasetAttributes);
+                : modifyDicom(datasetAttributes, modality);
         if (examination == null) {
             LOG.error("Error: importDicomSEGAndSR: examination not found for StudyInstanceUID: {}", studyInstanceUID);
             return false;
+        }
+        boolean canAnnotate = datasetSecurityService.hasRightOnStudy(examination.getStudyId(), StudyUserRight.CAN_ANNOTATE.name());
+        boolean canImport = datasetSecurityService.hasRightOnStudy(examination.getStudyId(), StudyUserRight.CAN_IMPORT.name());
+        boolean canAdministrate = datasetSecurityService.hasRightOnStudy(examination.getStudyId(), StudyUserRight.CAN_ADMINISTRATE.name());
+        if (!canAnnotate && !canImport && !canAdministrate) {
+            LOG.error("User {} misses DICOMWeb importation rights on study with ID: {}, import refused.",
+                    KeycloakUtil.getTokenUserName(), examination.getStudyId());
+            throw new RestServiceException(
+                    new ErrorModel(HttpStatus.FORBIDDEN.value(), MISSING_DICOMWEB_IMPORT_RIGHT_ERROR + examination.getStudyId(), null));
         }
 
         // Find related dataset
@@ -112,7 +137,7 @@ public class DicomSEGAndSRImporterService {
             return false;
         }
         try {
-            createDataset(modality, examination, dataset, datasetAttributes);
+            createDataset(modality, examination, dataset, datasetAttributes, canAnnotate);
             dicomImporterService.sendToPacs(metaInformationAttributes, datasetAttributes);
         } catch (Exception e) {
             LOG.error("Error during import of DICOM SEG/SR.", e);
@@ -126,7 +151,9 @@ public class DicomSEGAndSRImporterService {
      * and searches the corresponding examination and returns it:
      * - use user name as person name, who created the measurement
      * - replace with correct study instance UID from pacs for correct storage
-     * - add subject name according to shanoir, as viewer sends a strange P-000001.
+     * - add subject name according to shanoir, as viewer sends a strange P-000001
+     * - replace virtual series UIDs in source series references with the real
+     *   SeriesInstanceUIDs from pacs, for correct storage and dataset lookup.
      *
      * Note: the approach to replace the newly created SeriesInstanceUID
      * with the referenced SeriesInstanceUID, available via CurrentRequested-
@@ -135,8 +162,9 @@ public class DicomSEGAndSRImporterService {
      * an error in the viewer.
      *
      * @param datasetAttributes
+     * @param modality
      */
-    private Examination modifyDicom(Attributes datasetAttributes) {
+    private Examination modifyDicom(Attributes datasetAttributes, String modality) {
         String studyInstanceUID = datasetAttributes.getString(Tag.StudyInstanceUID);
         Examination examination = null;
         if (studyInstanceUID.contains(StudyInstanceUIDAndSubjectNameHandler.PREFIX)) {
@@ -169,6 +197,10 @@ public class DicomSEGAndSRImporterService {
             Attributes itemContentSequence = contentSequence.get(1);
             itemContentSequence.setString(Tag.PersonName, VR.PN, userName);
         }
+        // the viewer only knows virtual series UIDs (acquisitionUID/datasetUID)
+        // and references the source series with them: replace with the real
+        // SeriesInstanceUIDs, as in the PACS, before storage and dataset lookup
+        resolveVirtualSeriesReferences(datasetAttributes, modality);
         return examination;
     }
 
@@ -235,6 +267,42 @@ public class DicomSEGAndSRImporterService {
     }
 
     /**
+     * Replaces each virtual series UID (acquisitionUID/datasetUID), referenced
+     * as source series by a DICOM SEG or SR created in the viewer, with the
+     * real SeriesInstanceUID in the PACS.
+     *
+     * @param datasetAttributes
+     * @param modality
+     */
+    private void resolveVirtualSeriesReferences(Attributes datasetAttributes, String modality) {
+        if (STOWRSMultipartRequestFilter.DICOM_MODALITY_SEG.equals(modality)) {
+            // DICOM SEG: ReferencedSeriesSequence on top level
+            resolveVirtualSeriesReferences(datasetAttributes.getSequence(Tag.ReferencedSeriesSequence));
+        } else {
+            // DICOM SR: CurrentRequestedProcedureEvidenceSequence -> ReferencedSeriesSequence
+            Sequence evidenceSequence = datasetAttributes.getSequence(Tag.CurrentRequestedProcedureEvidenceSequence);
+            if (evidenceSequence != null) {
+                for (Attributes itemEvidenceSequence : evidenceSequence) {
+                    resolveVirtualSeriesReferences(itemEvidenceSequence.getSequence(Tag.ReferencedSeriesSequence));
+                }
+            }
+        }
+    }
+
+    private void resolveVirtualSeriesReferences(Sequence referencedSeriesSequence) {
+        if (referencedSeriesSequence == null) {
+            return;
+        }
+        for (Attributes itemReferencedSeriesSequence : referencedSeriesSequence) {
+            String seriesInstanceUID = itemReferencedSeriesSequence.getString(Tag.SeriesInstanceUID);
+            String realSeriesInstanceUID = seriesInstanceUIDHandler.resolveSeriesInstanceUID(seriesInstanceUID);
+            if (realSeriesInstanceUID != null && !realSeriesInstanceUID.equals(seriesInstanceUID)) {
+                itemReferencedSeriesSequence.setString(Tag.SeriesInstanceUID, VR.UI, realSeriesInstanceUID);
+            }
+        }
+    }
+
+    /**
      * Find origin dataset using the 3 UIDs in dataset_file.path attribute.
      *
      * @param examination
@@ -280,10 +348,11 @@ public class DicomSEGAndSRImporterService {
      * @param examination
      * @param dataset
      * @param datasetAttributes
+     * @param canAnnotate whether the importing user holds the CAN_ANNOTATE right
      * @throws MalformedURLException
      * @throws ShanoirException
      */
-    private void createDataset(String modality, Examination examination, Dataset dataset, Attributes datasetAttributes) throws MalformedURLException, IOException, SolrServerException, ShanoirException {
+    private void createDataset(String modality, Examination examination, Dataset dataset, Attributes datasetAttributes, boolean canAnnotate) throws MalformedURLException, IOException, SolrServerException, ShanoirException {
         Dataset newMsOrSegDataset = null;
         if (STOWRSMultipartRequestFilter.DICOM_MODALITY_SEG.equals(modality)) {
             newMsOrSegDataset = new SegmentationDataset();
@@ -295,6 +364,10 @@ public class DicomSEGAndSRImporterService {
         newMsOrSegDataset.setStudyId(examination.getStudyId());
         newMsOrSegDataset.setSubjectId(examination.getSubject().getId());
         newMsOrSegDataset.setCreationDate(LocalDate.now());
+        // record the annotator as owner, but only when imported with the CAN_ANNOTATE right
+        if (canAnnotate) {
+            newMsOrSegDataset.setUserId(KeycloakUtil.getTokenUserId());
+        }
         // for rights check: keep link to original acquisition
         newMsOrSegDataset.setDatasetAcquisition(dataset.getDatasetAcquisition());
         createMetadata(datasetAttributes, dataset.getOriginMetadata().getDatasetModalityType(), newMsOrSegDataset);

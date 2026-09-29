@@ -53,7 +53,7 @@ public class DatasetExpression extends AbstractEntity {
     private LocalDateTime creationDate;
 
     /** Expressed dataset. */
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "dataset_id")
     private Dataset dataset;
 
@@ -82,7 +82,7 @@ public class DatasetExpression extends AbstractEntity {
      * Original dataset expression from which this dataset expression comes
      * from.
      */
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "original_dataset_expression_id")
     private DatasetExpression originalDatasetExpression;
 

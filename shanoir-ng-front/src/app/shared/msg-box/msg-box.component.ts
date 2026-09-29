@@ -12,18 +12,17 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component } from '@angular/core';
-
-import { slideLeft} from '../animations/animations';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 
 import { MsgBoxService } from './msg-box.service';
+
 
 @Component({
     selector: 'msg-box',
     templateUrl: './msg-box.component.html',
     styleUrls: ['./msg-box.component.css'],
-    animations: [slideLeft],
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager,
+    imports: []
 })
 export class MsgBoxComponent {
 

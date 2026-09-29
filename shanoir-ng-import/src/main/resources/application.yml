@@ -43,7 +43,7 @@ spring:
         connection:
           charset: UTF-8
         hbm2ddl:
-          import_files_sql_extractor: org.hibernate.tool.hbm2ddl.MultipleLinesSqlCommandExtractor
+          import_files_sql_extractor: org.hibernate.tool.schema.internal.script.MultiLineSqlScriptExtractor
   main:
     allow-circular-references: true
   mvc:
@@ -78,8 +78,8 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/auth/realms/shanoir-ng
-
+          issuer-uri: ${SHANOIR_KEYCLOAK_URL}/realms/shanoir-ng
+          jwk-set-uri: ${SHANOIR_KEYCLOAK_INTERNAL_URL}/realms/shanoir-ng/protocol/openid-connect/certs
 springdoc:
   api-docs:
     path: '/api-docs'

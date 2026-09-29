@@ -82,7 +82,7 @@ public class DicomPushTest {
                 }
             }
         } catch (Exception e) {
-            LOG.error("Error in testDicomPush", e);
+            LOG.error("Error in testDicomPush: " + e.getMessage());
         }
     }
 

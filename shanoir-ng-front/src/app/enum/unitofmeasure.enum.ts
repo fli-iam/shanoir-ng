@@ -62,7 +62,7 @@ export enum UnitOfMeasure {
     }
 
     export function getLabelByKey(key: string){
-        return this.getLabel(UnitOfMeasure[key]);
+        return getLabel(UnitOfMeasure[key]);
     }
 
     export function getLabel(type: UnitOfMeasure): string {

@@ -24,10 +24,12 @@ import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.storage.StorageException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -51,6 +53,16 @@ public interface ExaminationService {
     @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_ADMINISTRATE'))")
     void deleteExaminationAsync(Long examinationId, Long studyId, ShanoirEvent event);
 
+      /*
+     * Delete an empty examination without checking rights,
+     * used during quality control to delete any empty examination created during import.
+     *
+     * @param id examination id.
+     * @throws EntityNotFoundException
+     */
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    void deleteEmptyExamination(Long id) throws EntityNotFoundException;
+
     /**
      * Get all examinations for a specific user to support DICOMweb.
      *
@@ -59,6 +71,15 @@ public interface ExaminationService {
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterExaminationList(returnObject, 'CAN_SEE_ALL')")
     List<Examination> findAll();
+
+    /**
+     * Get all examinations for a specific user to support DICOMweb.
+     *
+     * @return
+     */
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterExaminationList(returnObject, 'CAN_SEE_ALL')")
+    List<Examination> findAllWithAcqAndDatasets();
 
     /**
      * Get a paginated list of examinations reachable by connected user.
@@ -148,9 +169,9 @@ public interface ExaminationService {
      * @throws ShanoirException
      */
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examination.getId(), 'CAN_IMPORT'))")
-    Examination update(Examination examination) throws EntityNotFoundException, ShanoirException;
+    Examination update(Examination examination) throws EntityNotFoundException, ShanoirException, StorageException;
 
-    Long getExtraDataSizeByStudyId(Long studyId);
+    Long getExtraDataSizeByStudyId(Long studyId) throws StorageException;
 
     /**
      * Add an extra data file to examination
@@ -161,9 +182,6 @@ public interface ExaminationService {
     String addExtraData(Long examinationId, MultipartFile file);
 
     String addExtraDataFromFile(Long examinationId, File file);
-
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and (@datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_DOWNLOAD') or @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_ADMINISTRATE')))")
-    String getExtraDataFilePath(Long examinationId, String fileName);
 
     /**
      * Retrieves the DICOM StudyInstanceUID from the backup PACS for the given examination
@@ -177,4 +195,20 @@ public interface ExaminationService {
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_IMPORT'))")
     void syncStudyInstanceUIDFromPacs(Long examinationId) throws EntityNotFoundException, ShanoirException;
 
+    /**
+     * This method generates during the examination creation a DICOM
+     * StudyInstanceUID, that will be used for all DICOM files of this
+     * examination (== DICOM study).
+     *
+     * @param examination
+     */
+    void generateStudyInstanceUID(Examination examination);
+
+    /**
+     * Validate a dataset
+     *
+     * @param result
+     * @throws RestServiceException
+     */
+    void validate(BindingResult result) throws RestServiceException;
 }

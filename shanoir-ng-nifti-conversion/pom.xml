@@ -18,32 +18,91 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.shanoir-ng</groupId>
-        <artifactId>shanoir-ng-back</artifactId>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
         <version>3.4.0</version>
-        <relativePath>../shanoir-ng-back</relativePath>
+        <relativePath />
     </parent>
 
+    <groupId>org.shanoir-ng</groupId>
     <artifactId>nifti-conversion</artifactId>
     <packaging>jar</packaging>
 
     <name>shanoir-ng-nifti-conversion</name>
     <description>NIfTI conversion microservice</description>
 
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <java.version>21</java.version>
+        <checkstyle.header.file>${project.basedir}/../shanoir-ng-back/java-header</checkstyle.header.file>
+        <checkstyle.config.file>${project.basedir}/../shanoir-ng-back/checkstyle.xml</checkstyle.config.file>
+        <checkstyle.suppressions.file>${project.basedir}/../shanoir-ng-back/suppressions.xml</checkstyle.suppressions.file>
+    </properties>
+
     <dependencies>
+        <!-- Spring Boot -->
         <dependency>
-            <groupId>org.shanoir-ng</groupId>
-            <artifactId>shanoir-ng-ms-common</artifactId>
-            <version>3.4.0</version>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-amqp</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <!-- do not put scope test here: compile errors: org.json package will be missing -->
+        </dependency>
+
+        <!-- Shanoir -->
+        <dependency>
+            <groupId>org.shanoir-ng</groupId>
+            <artifactId>shanoir-ng-ms-common</artifactId>
+            <version>3.4.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>2.8.5</version>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>3.6.0</version>
+                <configuration>
+                    <configLocation>${checkstyle.config.file}</configLocation>
+                    <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                    <suppressionsLocation>${checkstyle.suppressions.file}</suppressionsLocation>
+                    <excludes>**/target/**/*</excludes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>checkstyle-verify</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
             <!-- Package shanoir-ng-nifti-conversion.jar as Spring Boot executable: Avoid error:
             no main manifest attribute, in /shanoir-ng-nifti-converter.jar -->
             <plugin>
@@ -84,4 +143,5 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </plugin>
         </plugins>
     </build>
+
 </project>

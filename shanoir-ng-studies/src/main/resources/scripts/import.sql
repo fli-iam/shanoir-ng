@@ -19,9 +19,9 @@ use studies;
 INSERT INTO profile (id, profile_name) VALUES (1,'Profile Neurinfo'), (2,'Profile OFSEP');
 
 INSERT INTO study
-	(id, clinical, coordinator_id, downloadable_by_default, end_date, name, start_date, study_status, study_type, visible_by_default, with_examination, challenge, profile_id, is_draft)
+	(id, clinical, coordinator_id, downloadable_by_default, end_date, name, start_date, study_status, study_type, visible_by_default, with_examination, challenge, profile_id, is_draft, study_card_policy)
 VALUES
-	(1, '\0', NULL, '\0', '2021-11-02 00:00:00', 'DemoStudy', '2020-11-02 00:00:00', 1, 3, '\0', 1, 0, 1, 0);
+	(1, '\0', NULL, '\0', '2021-11-02 00:00:00', 'DemoStudy', '2020-11-02 00:00:00', 1, 3, '\0', 1, 0, 1, 0, 1);
 
 INSERT INTO study_extra_details
 	(id, expected_nb_of_subjects, average_examination_size, estimated_total_volume, expected_nb_of_centers, inclusion_rate, inclusion_rate_unit, sponsor, principal_investigator, scientific_advisor, study_id)
@@ -43,11 +43,6 @@ INSERT INTO subject
 VALUES
 	(1,'DemoSubject', 'sub1', '2013/01/01', 2, 1, 1, 2, NULL, 1);
 
-
-INSERT INTO subject_study
-	(id, physically_involved, study_id, subject_id, subject_study_identifier, subject_type)
-VALUES
-	(1, 0, 1, 1, 'Subject 1 for study 1', 1);
 
 INSERT INTO `manufacturer`
 	(id, name)

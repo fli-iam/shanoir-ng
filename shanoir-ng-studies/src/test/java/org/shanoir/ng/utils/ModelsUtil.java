@@ -147,7 +147,7 @@ public final class ModelsUtil {
         study.getStudyCenterList().add(sc);
         study.setStudyUserList(new ArrayList<>());
         study.setTags(new ArrayList<>());
-        study.setSubjectStudyList(new ArrayList<>());
+        study.setSubjects(new ArrayList<>());
         return study;
     }
 
@@ -171,9 +171,21 @@ public final class ModelsUtil {
     }
 
     public static Subject createSubject() {
+        return createSubject(null);
+    }
+
+    public static Subject createSubject(Long id) {
         final Subject subject = new Subject();
         subject.setName(SUBJECT_NAME);
+        subject.setId(id);
         return subject;
     }
 
+    public static Subject createSubjectWithStudy(Long id) {
+        final Subject subject = new Subject();
+        subject.setName(SUBJECT_NAME);
+        subject.setId(id);
+        subject.setStudy(createStudy(id));
+        return subject;
+    }
 }

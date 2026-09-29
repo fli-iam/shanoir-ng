@@ -56,6 +56,8 @@ public class ExaminationDTO {
 
     private Boolean dataReuseAgreement = Boolean.FALSE;
 
+    private String studyInstanceUID;
+
     /**
      * @return the id
      */
@@ -212,6 +214,14 @@ public class ExaminationDTO {
 
     public void setDataReuseAgreement(Boolean dataReuseAgreement) {
         this.dataReuseAgreement = dataReuseAgreement;
+    }
+
+    public String getStudyInstanceUID() {
+        return studyInstanceUID;
+    }
+
+    public void setStudyInstanceUID(String studyInstanceUID) {
+        this.studyInstanceUID = studyInstanceUID;
     }
 
 }

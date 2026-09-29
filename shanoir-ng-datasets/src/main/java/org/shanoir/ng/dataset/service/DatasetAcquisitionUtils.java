@@ -21,6 +21,7 @@ import org.shanoir.ng.datasetacquisition.model.ct.CtDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.eeg.EegDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.pet.PetDatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.rt.RtDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.xa.XaDatasetAcquisition;
 
 
@@ -51,6 +52,9 @@ public final class DatasetAcquisitionUtils {
                 break;
             case XaDatasetAcquisition.DATASET_ACQUISITION_TYPE:
                 acq = new XaDatasetAcquisition(other);
+                break;
+            case RtDatasetAcquisition.DATASET_ACQUISITION_TYPE:
+                acq = new RtDatasetAcquisition(other);
                 break;
             default:
                 acq = new GenericDatasetAcquisition(other);

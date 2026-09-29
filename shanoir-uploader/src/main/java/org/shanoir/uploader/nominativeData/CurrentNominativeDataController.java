@@ -38,14 +38,11 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 
-import org.shanoir.ng.importer.model.ImportJob;
-import org.shanoir.ng.importer.model.Patient;
-import org.shanoir.ng.importer.model.Study;
+import org.shanoir.ng.importer.model.ImportJobBase;
 import org.shanoir.ng.importer.model.UploadState;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.action.DeleteDirectory;
 import org.shanoir.uploader.gui.CurrentUploadsWindowTable;
-import org.shanoir.uploader.utils.ImportUtils;
 import org.shanoir.uploader.utils.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -147,7 +144,7 @@ public class CurrentNominativeDataController {
                         String importJobFilePath = (String) cuw.table.getModel().getValueAt(modelRow, 0) + File.separator + ShUpConfig.IMPORT_JOB_JSON;
                         File importJobFile = new File(importJobFilePath);
                         importJobManager = new NominativeDataImportJobManager(importJobFile);
-                        ImportJob importJob = importJobManager.readImportJob();
+                        ImportJobBase importJob = importJobManager.readImportJob();
                         cuw.frame.getImportDialogOpener().openImportDialog(importJob, importJobFile.getParentFile());
                     }
                 }
@@ -176,8 +173,7 @@ public class CurrentNominativeDataController {
                         cuw.frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.delete.confirmation.title"), 1)
                         == JOptionPane.YES_OPTION) {
                     String uploadState = (String) cuw.table.getModel().getValueAt(row, cuw.uploadStateColumn);
-                    if (!uploadState.startsWith(cuw.startUploadState)
-                            && !uploadState.startsWith(cuw.startAutoImportUploadState)) {
+                    if (!uploadState.startsWith(cuw.startImportJobUploadState)) {
                         DeleteDirectory dt = new DeleteDirectory();
                         model.getValueAt(row, 0);
                         dt.delete((String) model.getValueAt(row, 0));
@@ -225,9 +221,9 @@ public class CurrentNominativeDataController {
     private void processWorkFolder(File workFolder) throws IOException {
         List<File> folders = Util.listFolders(workFolder);
         LOG.info("Found " + folders.size() + " folders in workFolder.");
-        Map<String, ImportJob> currentUploads = new LinkedHashMap<String, ImportJob>();
+        Map<String, ImportJobBase> currentUploads = new LinkedHashMap<String, ImportJobBase>();
         for (File f : folders) {
-            ImportJob nominativeDataImportJob = processFolder(f);
+            ImportJobBase nominativeDataImportJob = processFolder(f);
             if (nominativeDataImportJob != null)
                 currentUploads.put(f.getAbsolutePath(), nominativeDataImportJob);
         }
@@ -239,28 +235,13 @@ public class CurrentNominativeDataController {
      *
      * @param folder
      */
-    private ImportJob processFolder(final File folder) throws IOException {
+    private ImportJobBase processFolder(final File folder) throws IOException {
         LOG.info("Started processing folder " + folder.getName());
         // Check if the folder contains an import-job.json file
         initNominativeDataImportJobManager(folder);
         if (importJobManager != null) {
-            final ImportJob importJob = importJobManager.readImportJob();
+            final ImportJobBase importJob = importJobManager.readImportJob();
             if (importJob != null) {
-                // In case of previous ShUp version imports, Patient and Study data were stored in xml files
-                if (importJob.getPatient() == null || importJob.getStudy() == null) {
-                    Patient patient = ImportUtils.getPatientFromNominativeDataJob(importJob.getWorkFolder());
-                    importJob.setPatient(patient);
-                    Study study = ImportUtils.getStudyFromNominativeDataJob(importJob.getWorkFolder());
-                    importJob.setStudy(study);
-                    // We write the json file so that we can open ImportDialog for this old import
-                    importJobManager.writeImportJob(importJob);
-                }
-                // In case of previous version importJobs
-                // (without uploadState) we look for uploadState value from upload-job.xml file
-                if (importJob.getUploadState() == null) {
-                    String uploadJobState = ImportUtils.getUploadStateFromUploadJob(folder);
-                    importJob.setUploadState(UploadState.fromString(uploadJobState));
-                }
                 final UploadState uploadState = importJob.getUploadState();
                 String uploadPercentage = importJob.getUploadPercentage();
                 if (uploadPercentage == null || uploadPercentage.equals("")) {
@@ -268,8 +249,7 @@ public class CurrentNominativeDataController {
                 }
                 if (uploadState.toString().equals(UploadState.FINISHED.toString())) {
                     importJob.setUploadPercentage(UploadState.FINISHED.toString());
-                } else if (uploadState.toString().equals(UploadState.START.toString())
-                        || uploadState.toString().equals(UploadState.START_AUTOIMPORT.toString())) {
+                } else if (uploadState.toString().equals(UploadState.START_IMPORT_JOB.toString())) {
                     importJob.setUploadPercentage(uploadPercentage);
                 } else {
                     importJob.setUploadPercentage((String) uploadState.toString());
@@ -305,12 +285,18 @@ public class CurrentNominativeDataController {
     public void updateNominativeDataPercentage(File folder, String uploadPercentage) {
         if (uploadPercentage.equals(UploadState.FINISHED.toString())) {
             uploadPercentage = UploadState.FINISHED.toString();
+        } else if (uploadPercentage.equals(UploadState.SERVER_PROCESSING.toString())) {
+            uploadPercentage = UploadState.SERVER_PROCESSING.toString();
         }
         currentNominativeDataModel.updateUploadPercentage(folder.getAbsolutePath(), uploadPercentage);
     }
 
-    public void addNewNominativeData(File folder, ImportJob nominativeDataImportJob) {
+    public void addNewNominativeData(File folder, ImportJobBase nominativeDataImportJob) {
         currentNominativeDataModel.addUpload(folder.getAbsolutePath(), nominativeDataImportJob);
+    }
+
+    public void setNominativeDataSubjectName(File folder, String subjectName) {
+        currentNominativeDataModel.setSubjectName(folder.getAbsolutePath(), subjectName);
     }
 
     public class DeleteRenderer extends DefaultTableCellRenderer {

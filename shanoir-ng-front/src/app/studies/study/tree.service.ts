@@ -16,26 +16,26 @@ import { Injectable } from "@angular/core";
 import { ActivatedRoute, ActivationStart, Router } from '@angular/router';
 import { Subject as RxjsSubject } from 'rxjs';
 
-import { AcquisitionEquipment } from 'src/app/acquisition-equipments/shared/acquisition-equipment.model';
-import { AcquisitionEquipmentService } from 'src/app/acquisition-equipments/shared/acquisition-equipment.service';
-import { Center } from 'src/app/centers/shared/center.model';
-import { Coil } from "src/app/coils/shared/coil.model";
-import { CoilService } from "src/app/coils/shared/coil.service";
-import { DatasetAcquisition } from 'src/app/dataset-acquisitions/shared/dataset-acquisition.model';
-import { DatasetAcquisitionService } from 'src/app/dataset-acquisitions/shared/dataset-acquisition.service';
-import { DatasetProcessing } from 'src/app/datasets/shared/dataset-processing.model';
-import { DatasetProcessingService } from 'src/app/datasets/shared/dataset-processing.service';
-import { Dataset } from 'src/app/datasets/shared/dataset.model';
-import { DatasetService } from 'src/app/datasets/shared/dataset.service';
-import { Examination } from 'src/app/examinations/shared/examination.model';
-import { ExaminationService } from 'src/app/examinations/shared/examination.service';
-import { Entity } from "src/app/shared/components/entity/entity.abstract";
-import { KeycloakService } from "src/app/shared/keycloak/keycloak.service";
-import { QualityCard } from 'src/app/study-cards/shared/quality-card.model';
-import { StudyCard } from 'src/app/study-cards/shared/study-card.model';
-import { Subject } from "src/app/subjects/shared/subject.model";
-import { User } from 'src/app/users/shared/user.model';
-import { AnimalSubject } from "src/app/preclinical/animalSubject/shared/animalSubject.model";
+import { AcquisitionEquipment } from '@app/acquisition-equipments/shared/acquisition-equipment.model';
+import { AcquisitionEquipmentService } from '@app/acquisition-equipments/shared/acquisition-equipment.service';
+import { Center } from '@app/centers/shared/center.model';
+import { Coil } from "@app/coils/shared/coil.model";
+import { CoilService } from "@app/coils/shared/coil.service";
+import { DatasetAcquisition } from '@app/dataset-acquisitions/shared/dataset-acquisition.model';
+import { DatasetAcquisitionService } from '@app/dataset-acquisitions/shared/dataset-acquisition.service';
+import { DatasetProcessing } from '@app/datasets/shared/dataset-processing.model';
+import { DatasetProcessingService } from '@app/datasets/shared/dataset-processing.service';
+import { Dataset } from '@app/datasets/shared/dataset.model';
+import { DatasetService } from '@app/datasets/shared/dataset.service';
+import { Examination } from '@app/examinations/shared/examination.model';
+import { ExaminationService } from '@app/examinations/shared/examination.service';
+import { Entity } from "@app/shared/components/entity/entity.abstract";
+import { KeycloakService } from "@app/shared/keycloak/keycloak.service";
+import { QualityCard } from '@app/study-cards/shared/quality-card.model';
+import { StudyCard } from '@app/study-cards/shared/study-card.model';
+import { Subject } from "@app/subjects/shared/subject.model";
+import { User } from '@app/users/shared/user.model';
+import { AnimalSubject } from "@app/preclinical/animalSubject/shared/animalSubject.model";
 
 import { AcquisitionEquipmentNode, CenterNode, CentersNode, ClinicalSubjectNode, CoilNode, DatasetAcquisitionNode, DatasetNode, ExaminationNode, MemberNode, MembersNode, MetadataNode, AnimalSubjectNode, ProcessingNode, QualityCardNode, RightNode, ShanoirNode, StudyCardNode, StudyNode, SubjectNode, SubjectsNode, UNLOADED } from '../../tree/tree.model';
 import { SuperPromise } from '../../utils/super-promise';
@@ -240,9 +240,11 @@ export class TreeService {
             return Promise.all([studyLoaded]).then(() => {
                 return this.selectNode(this.selection)
             }).then(node => {
-                this.selectedNode = node;
-                this.treeAvailable = !!this.selectedNode;
-                return node;
+                if (node != null) {
+                    this.selectedNode = node;
+                    this.treeAvailable = !!this.selectedNode;
+                    return node;
+                }
             });
 
         }
@@ -269,6 +271,9 @@ export class TreeService {
         } else if (selection?.type == 'acquisition') {
             node = this.selectAcquisition(selection.entity as DatasetAcquisition);
         } else if (selection?.type == 'processing') {
+            if ((selection.entity as DatasetProcessing).parentId == null) {
+                return Promise.resolve(null);
+            }
             node = this.selectProcessing(selection.entity as DatasetProcessing);
         } else if (selection?.type == 'examination') {
             node = this.selectExamination(selection.entity as Examination);
@@ -406,10 +411,16 @@ export class TreeService {
         } else {
             processingPromise = Promise.resolve(processing);
         }
-        return processingPromise.then(proc => {
-            return this.selectDataset(proc.inputDatasets[0]?.id).then(parentDsNode => {
+
+        return processingPromise.then(async proc => {
+            const firstRealInput = await this.datasetProcessingService.getFirstRealInput(proc);
+            return this.selectDataset(firstRealInput).then(parentDsNode => {
                 return parentDsNode?.open().then(() => {
                     if (parentDsNode.processings != UNLOADED) {
+                        if (proc.parentId === null) {
+                            return parentDsNode.processings?.filter(pnode => pnode.id > proc.id)
+                                .sort((a, b) => a.id - b.id)[0];
+                        }
                         return parentDsNode.processings?.find(pnode => pnode.id == proc.id);
                     }
                 });
@@ -581,7 +592,7 @@ export class TreeService {
                 this.studyPromise.resolve(study);
             });
 
-            const rightsPromise: Promise<StudyUserRight[]> = (this.keycloakService.isUserAdmin
+            const rightsPromise: Promise<StudyUserRight[]> = (this.keycloakService.isUserAdmin()
                 ? Promise.resolve(StudyUserRight.all())
                 : this.studyRightsService.getMyRightsForStudy(id)
             ).then(rights => {

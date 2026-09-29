@@ -1,0 +1,54 @@
+# Shanoir NG - Import, manage and share neuroimaging data
+# Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+# Contact us on https://project.inria.fr/shanoir/
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+
+services:
+  #
+  # Users microservice - native
+  #
+  users:
+    container_name: "${SHANOIR_PREFIX}users"
+    build: !reset null
+    image: "shanoir-ng-users-native:latest"
+    entrypoint: ["/workspace/org.shanoir.ng.ShanoirUsersApplication",
+                 "-Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts",
+                 "-Djavax.net.ssl.trustStorePassword=changeit",
+                 "-Djavax.net.ssl.trustStoreType=JKS"]
+    environment:
+      - SHANOIR_PREFIX
+      - SHANOIR_URL_SCHEME
+      - SHANOIR_URL_HOST
+      - SHANOIR_KEYCLOAK_USER
+      - SHANOIR_KEYCLOAK_PASSWORD
+      - SHANOIR_ADMIN_EMAIL
+      - SHANOIR_CERTIFICATE
+      - SHANOIR_CERTIFICATE_PEM_CRT
+      - SHANOIR_CERTIFICATE_PEM_KEY
+      - SHANOIR_MIGRATION
+      - VIP_SERVICE_EMAIL
+      - SHANOIR_SMTP_HOST
+      - SHANOIR_SMTP_PORT
+      - SPRING_AMQP_DESERIALIZATION_TRUST_ALL=true
+    volumes:
+      - "logs:/var/log/shanoir-ng-logs"
+      - "certificate-share-data:/etc/ssl/certs/java:ro"
+    networks:
+      - shanoir_ng_network
+    ports:
+      - "9901:9901"
+      - "9911:9911"
+    depends_on:
+      init-cert-and-logs:
+        condition: service_completed_successfully
+      database:
+        condition: service_started
+      rabbitmq:
+        condition: service_started

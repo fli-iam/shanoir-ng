@@ -39,19 +39,6 @@ public abstract class ExaminationDatasetAcquisitionDecorator implements Examinat
     private ExaminationDatasetAcquisitionMapper delegate;
 
     @Override
-    public List<ExaminationDatasetAcquisitionDTO> datasetAcquisitionsToExaminationDatasetAcquisitionDTOs(
-            final List<DatasetAcquisition> datasetAcquisitions) {
-        if (datasetAcquisitions == null) {
-            return null;
-        }
-        final List<ExaminationDatasetAcquisitionDTO> datasetAcquisitionDTOs = new ArrayList<>();
-        for (DatasetAcquisition datasetAcquisition : datasetAcquisitions) {
-            datasetAcquisitionDTOs.add(datasetAcquisitionToExaminationDatasetAcquisitionDTO(datasetAcquisition));
-        }
-        return datasetAcquisitionDTOs;
-    }
-
-    @Override
     public ExaminationDatasetAcquisitionDTO datasetAcquisitionToExaminationDatasetAcquisitionDTO(
             final DatasetAcquisition datasetAcquisition) {
         final ExaminationDatasetAcquisitionDTO datasetAcquisitionDTO = delegate
@@ -60,6 +47,19 @@ public abstract class ExaminationDatasetAcquisitionDecorator implements Examinat
         datasetAcquisitionDTO.setStudyId(datasetAcquisition.getExamination().getStudyId());
         datasetAcquisitionDTO.setExaminationId(datasetAcquisition.getExamination().getId());
         return datasetAcquisitionDTO;
+    }
+
+    @Override
+    public List<ExaminationDatasetAcquisitionDTO> datasetAcquisitionsToExaminationDatasetAcquisitionDTOs(
+            final List<DatasetAcquisition> datasetAcquisitions) {
+        if (datasetAcquisitions == null) {
+            return null;
+        }
+        final List<ExaminationDatasetAcquisitionDTO> list = new ArrayList<>(datasetAcquisitions.size());
+        for (final DatasetAcquisition datasetAcquisition : datasetAcquisitions) {
+            list.add(datasetAcquisitionToExaminationDatasetAcquisitionDTO(datasetAcquisition));
+        }
+        return list;
     }
 
     /**

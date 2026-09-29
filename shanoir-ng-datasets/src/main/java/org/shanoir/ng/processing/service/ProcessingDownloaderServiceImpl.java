@@ -14,15 +14,26 @@
 
 package org.shanoir.ng.processing.service;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
+
 import org.apache.commons.collections4.ListUtils;
 import org.apache.solr.common.util.Pair;
 import org.assertj.core.util.Lists;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.download.DatasetDownloadError;
@@ -31,6 +42,7 @@ import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.processing.repository.DatasetProcessingRepository;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventType;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.utils.DatasetFileUtils;
@@ -39,15 +51,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
+import com.fasterxml.jackson.databind.JsonNode;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 
 @Service
 public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImpl implements ProcessingDownloaderService {    /** Number of downloadable datasets. */
@@ -56,24 +65,26 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
     private DatasetProcessingRepository datasetProcessingRepository;
 
     @Autowired
-    private DatasetProcessingServiceImpl datasetProcessingService;
+    private DatasetRepository datasetRepository;
 
     @PersistenceContext
     private EntityManager em;
 
-    public void massiveDownload(List<DatasetProcessing> processingList, boolean resultOnly, String format, HttpServletResponse response, boolean withManifest, Long converterId) throws RestServiceException {
-        manageResultOnly(processingList, resultOnly);
+    public void massiveDownloadByProcessingIds(List<Long> processingIds, boolean resultOnly, String format, HttpServletResponse response, boolean withManifest, Long converterId) throws RestServiceException {
+        massiveDownload(datasetProcessingRepository.findByIdsWithInputsAndOutputsAndDatasetFiles(processingIds), resultOnly, format, response, withManifest, converterId);
+    }
 
+    public void massiveDownload(List<DatasetProcessing> processingList, boolean resultOnly, String format, HttpServletResponse response, boolean withManifest, Long converterId) throws RestServiceException {
         response.setContentType("application/zip");
-        response.setHeader("Content-Disposition", "attachment;filename=Processings_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")));
+        response.setHeader("Content-Disposition", "attachment;filename=\"Processings_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")) + "\"");
         Map<Long, DatasetDownloadError> downloadResults = new HashMap<Long, DatasetDownloadError>();
         Map<Long, List<String>> filesByAcquisitionId = new HashMap<>();
 
         try (ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream())) {
-            manageProcessingsDownload(processingList, downloadResults, zipOutputStream, format, withManifest, filesByAcquisitionId, converterId);
+            manageProcessingsDownload(processingList, downloadResults, zipOutputStream, format, withManifest, filesByAcquisitionId, converterId, resultOnly);
 
             String ids = Stream.concat(
-                            processingList.stream().flatMap(p -> p.getInputDatasets().stream()),
+                            resultOnly ? Stream.empty() : processingList.stream().flatMap(p -> p.getInputDatasets().stream()),
                             processingList.stream().flatMap(p -> p.getOutputDatasets().stream())
                     )
                     .map(dataset -> dataset.getId().toString())
@@ -131,18 +142,18 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
 
     public void massiveDownloadByExaminations(List<Examination> examinationList, String processingComment, boolean resultOnly, String format, HttpServletResponse response, boolean withManifest, Long converterId) throws RestServiceException {
         List<Long> processingIdsList = datasetProcessingRepository.findAllIdsByExaminationIds(examinationList.stream().map(Examination::getId).toList());
-        List<DatasetProcessing> processingList = datasetProcessingService.findAllById(processingIdsList);
+        List<DatasetProcessing> processingList = datasetProcessingRepository.findByIdsWithInputsAndOutputsAndDatasetFiles(processingIdsList);
         if (!Objects.isNull(processingComment)) {
             processingList = processingList.stream().filter(it -> Objects.equals(it.getComment(), processingComment)).toList();
         }
         massiveDownload(processingList, resultOnly, format, response, withManifest, converterId);
     }
 
-    protected void manageProcessingsDownload(List<DatasetProcessing> processingList, Map<Long, DatasetDownloadError> downloadResults, ZipOutputStream zipOutputStream, String format, boolean withManifest, Map<Long, List<String>> filesByAcquisitionId, Long converterId) throws RestServiceException, IOException {
+    protected void manageProcessingsDownload(List<DatasetProcessing> processingList, Map<Long, DatasetDownloadError> downloadResults, ZipOutputStream zipOutputStream, String format, boolean withManifest, Map<Long, List<String>> filesByAcquisitionId, Long converterId, boolean resultOnly) throws Exception {
         for (DatasetProcessing processing : processingList) {
             String processingFilePath = getExecFilepath(processing.getId(), getExaminationDatas(processing.getInputDatasets()));
             String subjectName = getProcessingSubject(processing);
-            List<Dataset> inputs = processing.getInputDatasets();
+            List<Dataset> inputs = resultOnly ? Collections.emptyList() : processing.getInputDatasets();
             List<Dataset> outputs = processing.getOutputDatasets();
 
             for (Dataset dataset : inputs) {
@@ -170,18 +181,11 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
         }
     }
 
-    protected void manageResultOnly(List<DatasetProcessing> processingList, boolean resultOnly) {
-        if (resultOnly) {
-            processingList.forEach(it -> {
-                it.setInputDatasets(new ArrayList<>());
-            });
-        }
-    }
-
-    protected String getProcessingSubject(DatasetProcessing processing) {
+    protected String getProcessingSubject(DatasetProcessing processing) throws EntityNotFoundException {
         Examination exam = null;
         for (Dataset dataset : processing.getInputDatasets()) {
-            exam = Optional.ofNullable(dataset)
+            Dataset loadedDataset = datasetRepository.findByIdWithProcessingAncestorsAndExaminationAndMetadata(dataset.getId()).orElseThrow(() -> new EntityNotFoundException(DatasetProcessing.class, processing.getId()));
+            exam = Optional.ofNullable(loadedDataset)
                     .map(Dataset::getDatasetAcquisition)
                     .map(DatasetAcquisition::getExamination)
                     .orElse(null);
