@@ -92,9 +92,6 @@ public class RabbitMQConfiguration {
 
     ////////////////// QUEUES //////////////////
 
-    /** Queue to retrieve the center ID from an acquisition equipment ID. */
-    public static final String ACQUISITION_EQUIPMENT_CENTER_QUEUE = "acquisition-equipment-center-queue";
-
     /** Queue to create get equipment ID from code. */
     public static final String ACQUISITION_EQUIPMENT_CODE_QUEUE = "acquisition-equipment-code-queue";
 
@@ -120,9 +117,6 @@ public class RabbitMQConfiguration {
 
     /** Copy datasets from one study to another. */
     public static final String COPY_DATASETS_TO_STUDY_QUEUE = "copy-datasets-to-study-queue";
-
-    /** Get the list of subjects for a given study. */
-    public static final String DATASET_SUBJECT_QUEUE = "dataset-subjects-queue";
 
     /** Delete animal subject => Delete associated subject. */
     public static final String DELETE_ANIMAL_SUBJECT_QUEUE = "delete-animal-subject-queue";
@@ -162,9 +156,6 @@ public class RabbitMQConfiguration {
 
     /** Queue used to get information for study_examination deletion relationship.*/
     public static final String EXAMINATION_STUDY_DELETE_QUEUE = "examination-study-delete-queue";
-
-    /** Queue to retrieve informations about studyc cards. */
-    public static final String FIND_STUDY_CARD_QUEUE = "find-study-card-queue";
 
     /** Queue to create all bids dataset acquisitions */
     public static final String IMPORTER_BIDS_DATASET_QUEUE = "importer-bids-dataset-queue";
@@ -266,11 +257,6 @@ public class RabbitMQConfiguration {
     ////////////////// BEANS //////////////////
 
     @Bean
-    public static Queue acquisitionEquipmentCenterQueue() {
-        return new Queue(ACQUISITION_EQUIPMENT_CENTER_QUEUE, true);
-    }
-
-    @Bean
     public static Queue acquisitionEquipmentCodeQueue() {
         return new Queue(ACQUISITION_EQUIPMENT_CODE_QUEUE, true);
     }
@@ -313,11 +299,6 @@ public class RabbitMQConfiguration {
     @Bean
     public static Queue copyDatasetToStudyQueue() {
         return new Queue(COPY_DATASETS_TO_STUDY_QUEUE, true);
-    }
-
-    @Bean
-    public static Queue datasetSubjectQueue() {
-        return new Queue(DATASET_SUBJECT_QUEUE, true);
     }
 
     @Bean
@@ -383,11 +364,6 @@ public class RabbitMQConfiguration {
     @Bean
     public FanoutExchange fanout() {
         return new FanoutExchange(STUDY_USER_EXCHANGE, true, false);
-    }
-
-    @Bean
-    public static Queue findStudyCardQueue() {
-        return new Queue(FIND_STUDY_CARD_QUEUE, true);
     }
 
     @Bean
