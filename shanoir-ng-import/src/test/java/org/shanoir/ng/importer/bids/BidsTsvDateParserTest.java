@@ -65,9 +65,11 @@ class BidsTsvDateParserTest {
     void readEarliestAcqTimeFromScansFolder(@TempDir Path tempDir) throws IOException {
         Path sessionDir = tempDir.resolve("ses-t0");
         Files.createDirectories(sessionDir);
-        String tsv = "filename\tacq_time\n"
-                + "anat/sub-117_ses-t0_run-02_T1w.nii.gz\t2024-12-14T10:00:00\n"
-                + "anat/sub-117_ses-t0_run-01_T1w.nii.gz\t2024-12-13T17:48:00\n";
+        String tsv = """
+                filename\tacq_time
+                anat/sub-117_ses-t0_run-02_T1w.nii.gz\t2024-12-14T10:00:00
+                anat/sub-117_ses-t0_run-01_T1w.nii.gz\t2024-12-13T17:48:00
+                """;
         Files.writeString(sessionDir.resolve("sub-117_ses-t0_scans.tsv"), tsv);
 
         Optional<LocalDate> date = BidsTsvDateParser.readEarliestAcqTimeFromScansFolder(sessionDir.toFile());
@@ -79,8 +81,10 @@ class BidsTsvDateParserTest {
     void readDatesFromSessionsFileNormalizesSessionId(@TempDir Path tempDir) throws IOException {
         Path subjectDir = tempDir.resolve("sub-117");
         Files.createDirectories(subjectDir);
-        String tsv = "session_id\tacq_time\n"
-                + "ses-t0\t2024-12-13T08:00:00\n";
+        String tsv = """
+                session_id\tacq_time
+                ses-t0\t2024-12-13T08:00:00
+                """;
         Files.writeString(subjectDir.resolve("sub-117_sessions.tsv"), tsv);
 
         Map<String, LocalDate> dates = BidsTsvDateParser.readDatesFromSessionsFile(subjectDir.toFile());
