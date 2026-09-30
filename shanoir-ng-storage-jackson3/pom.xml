@@ -23,7 +23,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <version>4.0.2</version>
 	<packaging>jar</packaging>
 
-	<name>shanoir-ng-storage</name>
+	<name>shanoir-ng-storage-jackson3</name>
 	<description>Shanoir persistent storage: file system or S3</description>
 
     <properties>
