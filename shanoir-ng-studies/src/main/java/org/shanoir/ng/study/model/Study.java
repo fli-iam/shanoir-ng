@@ -109,6 +109,7 @@ public class Study extends HalEntity {
 
     @Column(unique = true)
     @Unique
+    @NotNull
     @EditableOnlyBy(roles = { "ROLE_ADMIN", "ROLE_EXPERT" })
     private String name;
 
