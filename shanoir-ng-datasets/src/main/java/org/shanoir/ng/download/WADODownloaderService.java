@@ -130,9 +130,9 @@ public class WADODownloaderService {
 
     private static final String CONTENT_TYPE = "&contentType";
 
-    /** Number of PACS responses fetched in advance, while the current one is written into the zip. */
-    @Value("${dcm4chee-arc.dicom.wado.prefetch:3}")
-    private int wadoPrefetch;
+    /** number of PACS connections used for a unique download thread. */
+    @Value("${dcm4chee-arc.dicom.wado.concurrent.PACS.connections:4}")
+    private int concurrentPACSConnections;
 
     /** No need to autowire since we build in initWebClient(). */
     private WebClient webClient;
@@ -190,9 +190,6 @@ public class WADODownloaderService {
 
         PacsTransferStats stats = PacsTransferStats.current();
 
-        // Downloads up to wadoPrefetch files from the PACS in parallel and in advance, while the calling thread
-        // zips the ones received. toStream(1) keeps only one received file waiting for the zip-writing loop: a larger value
-        // would free flatMap slots early and let the buffered files grow beyond wadoPrefetch.
         try (Stream<PacsResponse> responses = Flux.fromIterable(urlsToDownload)
                 .flatMap(url -> {
                     long startNanos = System.nanoTime();
@@ -205,8 +202,7 @@ public class WADODownloaderService {
                                 }
                             });
                 },
-                        3,
-                        wadoPrefetch)
+                        concurrentPACSConnections)
                 .toStream(1)) {
             // Then we put each file one by one in the zip
             Iterator<PacsResponse> iterator = responses.iterator();
