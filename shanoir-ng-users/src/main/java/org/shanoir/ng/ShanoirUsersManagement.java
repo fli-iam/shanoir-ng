@@ -155,7 +155,7 @@ public class ShanoirUsersManagement implements ApplicationRunner {
                             + ")";
                     LOG.error(msg, e);
                     System.out.println(msg);
-                    TimeUnit.SECONDS.sleep(5);
+                    TimeUnit.SECONDS.sleep(10);
                 }
             }
             if (!success) {

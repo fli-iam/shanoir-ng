@@ -60,13 +60,11 @@ public class NativeImageHintsConfiguration {
             hints.reflection().registerType(
                     RabbitTemplate.class,
                     MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
-                    MemberCategory.INVOKE_DECLARED_METHODS,
-                    MemberCategory.DECLARED_FIELDS);
+                    MemberCategory.INVOKE_DECLARED_METHODS);
             hints.reflection().registerType(
                     SimpleRabbitListenerContainerFactory.class,
                     MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
-                    MemberCategory.INVOKE_DECLARED_METHODS,
-                    MemberCategory.DECLARED_FIELDS);
+                    MemberCategory.INVOKE_DECLARED_METHODS);
             hints.reflection().registerType(
                     ContentTypeDelegatingMessageConverter.class,
                     MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
