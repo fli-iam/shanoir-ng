@@ -170,9 +170,8 @@ dcm4chee-arc:
   dicom.web.rs.upload: /dcm4chee-arc/aets/DCM4CHEE/rs/studies
   dicom.web.http.client.max.total: 500
   dicom.web.http.client.max.per.route: 500
-  # number of dicom files downloaded in advance from the PACS while the previous ones are
-  # being written into the zip of a massive download.
-  dicom.wado.prefetch: 3
+  # number of PACS connections used for a unique download thread
+  dicom.wado.concurrent.PACS.connections: 4
 
 # VIP
 vip:
@@ -185,6 +184,8 @@ vip:
   download:
     # connections VIP downloads may use from the Hikari pool (maximum-pool-size 70, 10 kept for other traffic)
     db-permits: 60
+    parallel-count: 1
+
 
 # Service account
 service-account:

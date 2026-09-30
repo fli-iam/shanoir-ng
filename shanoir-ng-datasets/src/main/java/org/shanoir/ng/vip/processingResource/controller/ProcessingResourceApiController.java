@@ -52,6 +52,12 @@ public class ProcessingResourceApiController implements ProcessingResourceApi {
     @Autowired
     private DatasetRepository  datasetRepository;
 
+    @Value("${vip.download.parallel-count:4}")
+    private int parallelCount;
+
+    /** Caps the download thread count, to avoid PACS saturation. */
+    private Semaphore dlPermits;
+
     @Value("${vip.download.db-permits:60}")
     private int dbPermitCount;
 
@@ -59,8 +65,9 @@ public class ProcessingResourceApiController implements ProcessingResourceApi {
     private Semaphore dbPermits;
 
     @PostConstruct
-    void initDbPermits() {
+    void initSemaphore() {
         dbPermits = new Semaphore(dbPermitCount, true);
+        dlPermits = new Semaphore(parallelCount, true);
     }
 
     @Override
@@ -83,7 +90,13 @@ public class ProcessingResourceApiController implements ProcessingResourceApi {
 
                 PacsTransferStats pacsStats = PacsTransferStats.start();
                 try {
+                    dlPermits.acquire();
                     datasetDownloaderService.massiveDownload(format, datasets, response, true, converterId, true, sorting, ArchiveWriter.Format.TAR_ZST, true);
+                    dlPermits.release();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new RestServiceException(new ErrorModel(HttpStatus.SERVICE_UNAVAILABLE.value(),
+                            "Interrupted while waiting for a download thread."));
                 } finally {
                     PacsTransferStats.stop();
                     LOG.info("VIP download [{}]: {} PACS responses, average PACS response time: {} ms, bytes received: {}, flow rate: {} MB/s, "
