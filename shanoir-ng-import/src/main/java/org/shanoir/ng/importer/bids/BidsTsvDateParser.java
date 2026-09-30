@@ -36,10 +36,10 @@ import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.dataformat.csv.CsvReadFeature;
 
-import com.fasterxml.jackson.databind.MappingIterator;
-import com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvParser;
+import tools.jackson.databind.MappingIterator;
+import tools.jackson.dataformat.csv.CsvMapper;
 
 /**
  * Parses BIDS {@code acq_time} values from {@code *_sessions.tsv} and {@code *_scans.tsv} files.
@@ -114,8 +114,9 @@ public final class BidsTsvDateParser {
             return examDates;
         }
         File sessionFile = sessionFiles[0];
-        CsvMapper mapper = new CsvMapper();
-        mapper.enable(CsvParser.Feature.WRAP_AS_ARRAY);
+        CsvMapper mapper = CsvMapper.builder()
+                .enable(CsvReadFeature.WRAP_AS_ARRAY)
+                .build();
         try (MappingIterator<String[]> it = mapper.readerFor(String[].class).readValues(sessionFile)) {
             if (!it.hasNext()) {
                 return examDates;
@@ -159,8 +160,9 @@ public final class BidsTsvDateParser {
             return Optional.empty();
         }
         File scanFile = scansFiles[0];
-        CsvMapper mapper = new CsvMapper();
-        mapper.enable(CsvParser.Feature.WRAP_AS_ARRAY);
+        CsvMapper mapper = CsvMapper.builder()
+                .enable(CsvReadFeature.WRAP_AS_ARRAY)
+                .build();
         try (MappingIterator<String[]> it = mapper.readerFor(String[].class).readValues(scanFile)) {
             if (!it.hasNext()) {
                 return Optional.empty();
