@@ -18,7 +18,7 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -51,10 +51,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.swagger.v3.oas.annotations.Parameter;
+import tools.jackson.databind.ObjectMapper;
 
 @Controller
 public class BidsImporterApiController implements BidsImporterApi {
@@ -162,7 +160,7 @@ public class BidsImporterApiController implements BidsImporterApi {
             // Iterate over session files
             boolean examCreated = false;
             for (File sessionFile : examFiles) {
-                FileTime creationTime = (FileTime) Files.getAttribute(Paths.get(sessionFile.getAbsolutePath()), "creationTime");
+                FileTime creationTime = (FileTime) Files.getAttribute(Path.of(sessionFile.getAbsolutePath()), "creationTime");
                 ExaminationDTO examination;
                 Long examId;
 
