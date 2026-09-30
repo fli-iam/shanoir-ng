@@ -19,10 +19,13 @@ import org.junit.jupiter.api.Test;
 import org.shanoir.ng.examination.dto.ExaminationDTO;
 import org.shanoir.ng.examination.dto.mapper.ExaminationMapper;
 import org.shanoir.ng.examination.model.Examination;
+import org.shanoir.ng.shared.paging.PageImpl;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Arrays;
@@ -65,6 +68,30 @@ public class ExaminationMapperTest {
         final Examination examination = new Examination();
         examination.setId(EXAMINATION_ID);
         return examination;
+    }
+
+    /**
+     * Guards against a regression where the "Found"/"Total"/"Page size" counters shown
+     * below the examinations grid stayed stuck at 0 despite the table itself rendering
+     * correctly: MapStruct's generated code for a Page-returning mapper method has no
+     * setter to target on PageImpl for totalElements/number/size (Spring's PageImpl
+     * computes them from immutable constructor args), so it fell back to the no-arg
+     * constructor + content.add() in a loop, silently losing the source Page's real
+     * pagination metadata.
+     */
+    @Test
+    public void examinationListToExaminationListDTOPageWithStudyKeepsPagingMetadataTest() {
+        Page<Examination> page = new org.springframework.data.domain.PageImpl<>(
+                Arrays.asList(createExamination()), PageRequest.of(1, 5), 42);
+
+        final PageImpl<ExaminationDTO> examinationDTOPage = examinationMapper
+                .examinationListToExaminationListDTOPageWithStudy(page);
+
+        Assertions.assertNotNull(examinationDTOPage);
+        Assertions.assertEquals(1, examinationDTOPage.getNumberOfElements());
+        Assertions.assertEquals(42, examinationDTOPage.getTotalElements());
+        Assertions.assertEquals(5, examinationDTOPage.getSize());
+        Assertions.assertEquals(1, examinationDTOPage.getNumber());
     }
 
 }
