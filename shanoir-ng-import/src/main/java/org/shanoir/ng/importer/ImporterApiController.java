@@ -87,7 +87,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
 import io.swagger.v3.oas.annotations.Parameter;
-import tools.jackson.core.JacksonException;
+import jakarta.validation.Valid;
 import tools.jackson.databind.ObjectMapper;
 
 /**
