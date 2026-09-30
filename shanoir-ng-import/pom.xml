@@ -183,6 +183,7 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
+                    <!-- classifier below for ShUp -->
                     <classifier>exec</classifier>
                     <profiles>
                         <profile>default</profile>
