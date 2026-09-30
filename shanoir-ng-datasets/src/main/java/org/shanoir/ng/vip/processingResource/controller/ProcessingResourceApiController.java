@@ -18,9 +18,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
-import org.shanoir.ng.download.ArchiveWriter;
 import org.shanoir.ng.download.DownloadAbortedException;
 import org.shanoir.ng.download.PacsTransferStats;
+import org.shanoir.ng.download.TarWriter;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
@@ -91,7 +91,7 @@ public class ProcessingResourceApiController implements ProcessingResourceApi {
                 PacsTransferStats pacsStats = PacsTransferStats.start();
                 try {
                     dlPermits.acquire();
-                    datasetDownloaderService.massiveDownload(format, datasets, response, true, converterId, true, sorting, ArchiveWriter.Format.TAR_ZST, true);
+                    datasetDownloaderService.massiveDownload(format, datasets, response, true, converterId, true, sorting, new TarWriter(response.getOutputStream()), true);
                     dlPermits.release();
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();

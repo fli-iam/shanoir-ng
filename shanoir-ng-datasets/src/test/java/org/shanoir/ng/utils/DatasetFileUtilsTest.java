@@ -17,6 +17,7 @@ package org.shanoir.ng.utils;
 import org.junit.jupiter.api.Test;
 import org.shanoir.ng.download.ArchiveWriter;
 import org.junit.jupiter.api.io.TempDir;
+import org.shanoir.ng.download.ZipWriter;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.io.ByteArrayInputStream;
@@ -57,7 +58,7 @@ public class DatasetFileUtilsTest {
         files2AcquisitionId.put(2L, Arrays.asList(files2));
 
         ByteArrayOutputStream bytesOutputStream = new ByteArrayOutputStream();
-        ArchiveWriter out = ArchiveWriter.open(ArchiveWriter.Format.ZIP, bytesOutputStream);
+        ArchiveWriter out = new ZipWriter(bytesOutputStream);
 
         DatasetFileUtils.writeManifestForExport(out, files2AcquisitionId);
 

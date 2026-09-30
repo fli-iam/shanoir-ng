@@ -35,11 +35,7 @@ import org.apache.commons.io.IOUtils;
 import org.joda.time.DateTime;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
-import org.shanoir.ng.download.ArchiveWriter;
-import org.shanoir.ng.download.DatasetDownloadError;
-import org.shanoir.ng.download.DownloadAbortedException;
-import org.shanoir.ng.download.PacsTransferStats;
-import org.shanoir.ng.download.WADODownloaderService;
+import org.shanoir.ng.download.*;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.event.ShanoirEvent;
@@ -132,27 +128,24 @@ public class DatasetDownloaderServiceImpl {
     }
 
     public void massiveDownload(String outputFormat, List<Dataset> datasets, HttpServletResponse response, boolean withManifest, Long converterId, Boolean withShanoirId, String sorting) throws RestServiceException {
-        massiveDownload(outputFormat, datasets, response, withManifest, converterId, withShanoirId, sorting, ArchiveWriter.Format.ZIP, false);
+        try {
+            massiveDownload(outputFormat, datasets, response, withManifest, converterId, withShanoirId, sorting, new ZipWriter(response.getOutputStream()), false);
+        } catch (IOException e) {
+            throw new RuntimeException("Impossible to open a ZIP writer, aborting download", e);
+        }
     }
 
-    /**
-     * @param archiveFormat format of the archive streamed to the client
-     * @param abordOnPACSError abort the transfer on the first dataset that is not fully downloaded,
-     *                         instead of listing it in ERRORS.json and ending with a valid archive
-     */
     public void massiveDownload(String outputFormat, List<Dataset> datasets, HttpServletResponse response, boolean withManifest, Long converterId, Boolean withShanoirId, String sorting,
-            ArchiveWriter.Format archiveFormat, boolean abordOnPACSError) throws RestServiceException {
+                                ArchiveWriter archiveWriter, boolean abordOnPACSError) throws RestServiceException {
         Map<Long, List<String>> filesByAcquisitionId = new HashMap<>();
         Map<Long, DatasetDownloadError> downloadResults = new HashMap<>();
         Map<Long, String> datasetDownloadPath;
 
         // Prepare the HTTP response for an archive download
-        response.setContentType(archiveFormat.getContentType());
-        response.setHeader("Content-Disposition", "attachment;filename=\"" + getFileName(datasets, archiveFormat) + "\"");
+        response.setContentType(archiveWriter.getContentType());
+        response.setHeader("Content-Disposition", "attachment;filename=\"" + getFileName(datasets, archiveWriter.getExtension()) + "\"");
 
-        ArchiveWriter archive = null;
         try {
-            archive = ArchiveWriter.open(archiveFormat, PacsTransferStats.withNetworkTiming(response.getOutputStream()));
             response.flushBuffer();
             Map<String, List<String>> datasetDownloadNameListPerPath = new HashMap<>();
             datasetDownloadPath = new HashMap<>();
@@ -183,7 +176,7 @@ public class DatasetDownloaderServiceImpl {
                 manageDatasetDownload(
                         dataset,
                         downloadResults,
-                        archive,
+                        archiveWriter,
                         subjectName,
                         datasetFilePath,
                         outputFormat,
@@ -200,11 +193,11 @@ public class DatasetDownloaderServiceImpl {
 
             // Write manifest if any files exist
             if (!filesByAcquisitionId.isEmpty())
-                DatasetFileUtils.writeManifestForExport(archive, filesByAcquisitionId);
+                DatasetFileUtils.writeManifestForExport(archiveWriter, filesByAcquisitionId);
 
             // Write download errors into a JSON file in the archive
             if (!downloadResults.isEmpty()) {
-                archive.addEntry(JSON_RESULT_FILENAME, objectMapper.writeValueAsBytes(downloadResults));
+                archiveWriter.addEntry(JSON_RESULT_FILENAME, objectMapper.writeValueAsBytes(downloadResults));
             }
 
             // Publish download event
@@ -221,15 +214,16 @@ public class DatasetDownloaderServiceImpl {
             );
             event.setStatus(ShanoirEvent.SUCCESS);
             eventService.publishEvent(event);
-            archive.close();
+            archiveWriter.close();
         } catch (Exception e) {
-            if (abordOnPACSError && archive != null) {
+            if (abordOnPACSError) {
                 // Leave the archive unfinished and let the exception reach Tomcat, which cuts the connection:
                 // the client sees a broken transfer, not a valid incomplete archive.
+                archiveWriter.abort();
                 throw e instanceof DownloadAbortedException aborted ? aborted
                         : new DownloadAbortedException("Download aborted: " + e.getMessage(), e);
             }
-            IOUtils.closeQuietly(archive);
+            IOUtils.closeQuietly(archiveWriter);
             response.setContentType(null);
             LOG.error("Unexpected error while downloading dataset files.", e);
             throw new RestServiceException(new ErrorModel(
@@ -423,13 +417,13 @@ public class DatasetDownloaderServiceImpl {
         return subjectName;
     }
 
-    protected String getFileName(List<Dataset> datasets, ArchiveWriter.Format archiveFormat) {
+    protected String getFileName(List<Dataset> datasets, String archiveExtension) {
         SimpleDateFormat fileDateformatter = new SimpleDateFormat("yyyyMMddHHmmss");
         if (datasets != null && datasets.size() == 1) {
             String datasetName = getDatasetFileName(datasets.get(0));
-            return "Dataset_" + datasetName + "_" + fileDateformatter.format(new DateTime().toDate()) + archiveFormat.getExtension();
+            return "Dataset_" + datasetName + "_" + fileDateformatter.format(new DateTime().toDate()) + archiveExtension;
         } else {
-            return "Datasets_" + fileDateformatter.format(new DateTime().toDate()) + archiveFormat.getExtension();
+            return "Datasets_" + fileDateformatter.format(new DateTime().toDate()) + archiveExtension;
         }
     }
 
