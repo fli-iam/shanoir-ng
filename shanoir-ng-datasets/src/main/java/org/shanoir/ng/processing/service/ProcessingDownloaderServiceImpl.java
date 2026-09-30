@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.processing.service;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -36,6 +37,7 @@ import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.download.ArchiveWriter;
 import org.shanoir.ng.download.DatasetDownloadError;
+import org.shanoir.ng.download.ZipWriter;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.processing.repository.DatasetProcessingRepository;
@@ -79,8 +81,8 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
         Map<Long, DatasetDownloadError> downloadResults = new HashMap<Long, DatasetDownloadError>();
         Map<Long, List<String>> filesByAcquisitionId = new HashMap<>();
 
-        try (ArchiveWriter archive = ArchiveWriter.open(ArchiveWriter.Format.ZIP, response.getOutputStream())) {
-            manageProcessingsDownload(processingList, downloadResults, archive, format, withManifest, filesByAcquisitionId, converterId, resultOnly);
+        try (ArchiveWriter archiveWriter = new ZipWriter(response.getOutputStream())) {
+            manageProcessingsDownload(processingList, downloadResults, archiveWriter, format, withManifest, filesByAcquisitionId, converterId, resultOnly);
 
             String ids = Stream.concat(
                             resultOnly ? Stream.empty() : processingList.stream().flatMap(p -> p.getInputDatasets().stream()),
@@ -97,6 +99,8 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
             );
             event.setStatus(ShanoirEvent.SUCCESS);
             eventService.publishEvent(event);
+        }  catch (IOException e) {
+            throw new RuntimeException("Impossible to open a TAR writer, aborting download", e);
         } catch (Exception e) {
             response.setContentType(null);
             LOG.error("Unexpected error while downloading dataset files.", e);
