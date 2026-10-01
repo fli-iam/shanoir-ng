@@ -126,8 +126,8 @@ COPY --link import/entrypoint /usr/bin/
 COPY --link import/shanoir-ng-import.jar shanoir-ng-import.jar
 
 # Use the below line for remote debugging
-#CMD ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:9913", "-jar", "/shanoir-ng-import.jar"]
-CMD ["-jar", "/shanoir-ng-import.jar"]
+#CMD ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:9913", "-Dspring.aot.enabled=true", "-jar", "/shanoir-ng-import.jar"]
+CMD ["-Dspring.aot.enabled=true", "-jar", "/shanoir-ng-import.jar"]
 
 
 
@@ -260,6 +260,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
 
 COPY --link users/shanoir-ng-users.jar shanoir-ng-users.jar
 COPY --link users/entrypoint /usr/bin/
+RUN chmod +x /usr/bin/entrypoint /usr/bin/entrypoint_common
 
 ENV	\
 	kc.admin.client.client.id="admin-cli"	\
@@ -416,15 +417,18 @@ CMD ["solr-precreate", "shanoir", "/etc/shanoir-core-template"]
 
 ################ BIDS validator #####################################################
 # ---- stage: cache validator deps
-FROM denoland/deno:debian AS deno_cache
+# Deno version pinned: npm resolution behaviour changes between Deno releases
+FROM denoland/deno:debian-2.9.7 AS deno_cache
 
 # Force Deno to store its cache here
 ENV DENO_DIR=/deno
 
 ARG BIDS_VALIDATOR_VERSION=2.2.10
 
-# Pre-fetch into Deno cache
-RUN deno cache jsr:@bids/validator@${BIDS_VALIDATOR_VERSION}
+# Pre-fetch into Deno cache. "deno cache" alone misses npm packages that "deno run" resolves
+# (e.g. a newer which-typed-array), so also run the validator once with the worker's exact flags
+RUN deno cache jsr:@bids/validator@${BIDS_VALIDATOR_VERSION} \
+    && deno run --node-modules-dir=none -ERWN jsr:@bids/validator@${BIDS_VALIDATOR_VERSION} --version
 
 
 # ---- stage: runtime
