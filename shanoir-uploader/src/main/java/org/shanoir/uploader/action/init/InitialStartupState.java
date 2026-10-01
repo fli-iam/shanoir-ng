@@ -246,6 +246,12 @@ public class InitialStartupState implements State {
 
     private static final int SEED_LENGTH = 43;
 
+    /**
+     * Generate RandomSeed and store locally in basic.properties.
+     * @return
+     * @throws FileNotFoundException
+     * @throws IOException
+     */
     private String generateRandomSeed() throws FileNotFoundException, IOException {
         String randomSeed = ShUpConfig.basicProperties.getProperty(ShUpConfig.RANDOM_SEED);
         if (randomSeed != null && randomSeed.length() >= SEED_LENGTH) {
@@ -265,6 +271,7 @@ public class InitialStartupState implements State {
         }
         return newSeed;
     }
+
     /**
      * Reads properties from .su folder into memory, or copies property file if not existing.
      */

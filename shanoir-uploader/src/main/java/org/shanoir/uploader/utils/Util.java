@@ -262,14 +262,6 @@ public final class Util {
     }
 
     /**
-     * This method copies the content of the dicom.server.properties in the .jar
-     * file to the same file in the user.home.
-     *
-     * @param propertiesFile
-     * @throws IOException
-     * @throws FileNotFoundException
-     */
-    /**
      * Encrypts the given password property with AES-256-GCM and stores the
      * properties file in the shanoirUploaderFolder.
      *
