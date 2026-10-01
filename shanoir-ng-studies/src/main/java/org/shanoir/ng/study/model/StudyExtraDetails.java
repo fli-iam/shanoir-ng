@@ -46,7 +46,6 @@ public class StudyExtraDetails extends HalEntity {
     @JsonBackReference
     @OneToOne
     @JoinColumn(name = "study_id")
-    @NotNull
     private Study study;
 
     /** Expected number of subjects. */
