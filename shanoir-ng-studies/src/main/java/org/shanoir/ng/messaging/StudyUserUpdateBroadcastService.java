@@ -41,7 +41,7 @@ public class StudyUserUpdateBroadcastService {
     public void broadcast(Iterable<StudyUserCommand> commands) throws MicroServiceCommunicationException {
         try {
             String str = objectMapper.writeValueAsString(commands);
-            rabbitTemplate.convertAndSend(RabbitMQConfiguration.STUDY_USER_EXCHANGE, RabbitMQConfiguration.STUDY_USER_QUEUE, str);
+            rabbitTemplate.convertAndSend(RabbitMQConfiguration.STUDY_USER_EXCHANGE, "", str);
             LOG.debug("Brodcasted study-user changes : {}", str);
         } catch (AmqpException | JsonProcessingException e) {
             throw new MicroServiceCommunicationException("Could not send data to study-user-exchange");
