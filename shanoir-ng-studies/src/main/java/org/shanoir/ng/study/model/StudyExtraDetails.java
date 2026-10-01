@@ -14,18 +14,18 @@
 
 package org.shanoir.ng.study.model;
 
-import org.shanoir.ng.shared.hateoas.HalEntity;
+import java.io.Serial;
 
+import org.shanoir.ng.shared.hateoas.HalEntity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
-import java.io.Serial;
-
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 
 /**
  * Study Extra Details.
@@ -46,6 +46,7 @@ public class StudyExtraDetails extends HalEntity {
     @JsonBackReference
     @OneToOne
     @JoinColumn(name = "study_id")
+    @NotNull
     private Study study;
 
     /** Expected number of subjects. */

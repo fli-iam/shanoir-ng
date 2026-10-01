@@ -100,6 +100,7 @@ public class Study extends HalEntity {
     private Long coordinatorId;
 
     /** Is with downloadable by default. */
+    @NotNull
     private boolean downloadableByDefault;
 
     /** End date. */
@@ -169,13 +170,16 @@ public class Study extends HalEntity {
     private List<Timepoint> timepoints = new ArrayList<>();
 
     /** Is visible by default. */
+    @NotNull
     private boolean visibleByDefault;
 
     /** Is with examination. */
+    @NotNull
     private boolean withExamination;
 
     private StudyCardPolicy studyCardPolicy;
 
+    @NotNull
     private boolean challenge;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "study", cascade = CascadeType.ALL, orphanRemoval = true)
