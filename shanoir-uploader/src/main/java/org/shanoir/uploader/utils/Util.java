@@ -269,27 +269,35 @@ public final class Util {
      * @throws IOException
      * @throws FileNotFoundException
      */
+    /**
+     * Encrypts the given password property with AES-256-GCM and stores the
+     * properties file in the shanoirUploaderFolder.
+     *
+     * If the password is empty it is stored as empty string. If encryption fails,
+     * nothing is written, so an existing file is never overwritten with an empty password.
+     *
+     * @param shanoirUploaderFolder
+     * @param propertyObject
+     * @param propertyFile
+     * @param passwordPropertyName
+     */
     public static void encryptPasswordAndCopyPropertiesFile(File shanoirUploaderFolder, Properties propertyObject,
             String propertyFile, final String passwordPropertyName) {
-        if (propertyObject.getProperty(passwordPropertyName) != null
-                && !propertyObject.getProperty(passwordPropertyName).equals("")) {
-            propertyObject.setProperty(passwordPropertyName,
-                    ShUpConfig.encryption.cryptEncryptedString(propertyObject.getProperty(passwordPropertyName)));
+        final String clearPassword = propertyObject.getProperty(passwordPropertyName);
+        if (clearPassword != null && !clearPassword.isEmpty()) {
+            final String encryptedPassword = ShUpConfig.encryption.cryptEncryptedString(clearPassword);
+            if (encryptedPassword.isEmpty()) {
+                LOG.error("Password property '" + passwordPropertyName
+                        + "' could not be encrypted, properties file '" + propertyFile + "' was not written.");
+                return;
+            }
+            propertyObject.setProperty(passwordPropertyName, encryptedPassword);
         } else {
             propertyObject.setProperty(passwordPropertyName, "");
         }
-        final File propertiesFile = new File(shanoirUploaderFolder + File.separator + propertyFile);
-        OutputStream out;
-        try {
-            out = new FileOutputStream(propertiesFile);
-            try {
-                propertyObject.store(out, "Configuration");
-            } catch (IOException e) {
-                LOG.error(e.getMessage(), e);
-            }
-            out.close();
-        } catch (FileNotFoundException e) {
-            LOG.error(e.getMessage(), e);
+        final File propertiesFile = new File(shanoirUploaderFolder, propertyFile);
+        try (OutputStream out = new FileOutputStream(propertiesFile)) {
+            propertyObject.store(out, "Configuration");
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
         }

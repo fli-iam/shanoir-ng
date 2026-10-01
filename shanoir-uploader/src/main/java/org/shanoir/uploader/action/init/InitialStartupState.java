@@ -22,12 +22,13 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.SecureRandom;
 import java.time.ZoneId;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Comparator;
 import java.util.Locale;
 import java.util.Properties;
-import java.util.Random;
 import java.util.ResourceBundle;
 import java.util.TimeZone;
 
@@ -226,40 +227,44 @@ public class InitialStartupState implements State {
         LOG.info("random.seed successfully initialized.");
 
         initProperties(ShUpConfig.PROXY_PROPERTIES, ShUpConfig.proxyProperties);
-        if (ShUpConfig.proxyProperties.getProperty("proxy.password") != null
-                && !ShUpConfig.proxyProperties.getProperty("proxy.password").equals("")) {
-            File proxyProperties = new File(ShUpConfig.shanoirUploaderFolder, ShUpConfig.PROXY_PROPERTIES);
-            ShUpConfig.encryption.decryptIfEncryptedString(proxyProperties,
-                    ShUpConfig.proxyProperties, "proxy.password");
-        }
+        // Handles null/empty itself. Unsupported or undecryptable values are logged
+        // and removed from memory, so proxy.password may be null afterwards.
+        File proxyProperties = new File(ShUpConfig.shanoirUploaderFolder, ShUpConfig.PROXY_PROPERTIES);
+        ShUpConfig.encryption.decryptIfEncryptedString(proxyProperties,
+                ShUpConfig.proxyProperties, "proxy.password");
         LOG.info("proxy.properties successfully initialized.");
 
-        initProperties(ShUpConfig.DICOM_SERVER_PROPERTIES,
-                ShUpConfig.dicomServerProperties);
+        initProperties(ShUpConfig.DICOM_SERVER_PROPERTIES, ShUpConfig.dicomServerProperties);
         LOG.info("dicom_server.properties successfully initialized.");
 
-        initProperties(ShUpConfig.ENDPOINT_PROPERTIES,
-                ShUpConfig.endpointProperties);
+        initProperties(ShUpConfig.ENDPOINT_PROPERTIES, ShUpConfig.endpointProperties);
         LOG.info("endpoint.properties successfully initialized.");
     }
 
+    /** A valid seed is 32 random bytes, Base64url-encoded without padding (43 chars). */
+    private static final int SEED_BYTES = 32;
+
+    private static final int SEED_LENGTH = 43;
+
     private String generateRandomSeed() throws FileNotFoundException, IOException {
         String randomSeed = ShUpConfig.basicProperties.getProperty(ShUpConfig.RANDOM_SEED);
-        if (randomSeed != null && !randomSeed.isEmpty() && !randomSeed.equals("0")) {
+        if (randomSeed != null && randomSeed.length() >= SEED_LENGTH) {
             return randomSeed;
-        } else {
-            Random r = new Random();
-            int num = r.nextInt(10000);
-            String knum = String.valueOf(num);
-            ShUpConfig.basicProperties.setProperty(ShUpConfig.RANDOM_SEED, knum);
-            final File basicProps = new File(ShUpConfig.shanoirUploaderFolder + File.separator + ShUpConfig.BASIC_PROPERTIES);
-            OutputStream out = new FileOutputStream(basicProps);
-            ShUpConfig.basicProperties.store(out, "basic.properties");
-            out.close();
-            return knum;
         }
+        if (randomSeed != null && !randomSeed.isEmpty() && !randomSeed.equals("0")) {
+            LOG.warn("Weak legacy random seed found and replaced by a strong one. "
+                    + "Passwords encrypted with it have to be reset.");
+        }
+        byte[] bytes = new byte[SEED_BYTES];
+        new SecureRandom().nextBytes(bytes);
+        String newSeed = Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
+        ShUpConfig.basicProperties.setProperty(ShUpConfig.RANDOM_SEED, newSeed);
+        final File basicProps = new File(ShUpConfig.shanoirUploaderFolder, ShUpConfig.BASIC_PROPERTIES);
+        try (OutputStream out = new FileOutputStream(basicProps)) {
+            ShUpConfig.basicProperties.store(out, "basic.properties");
+        }
+        return newSeed;
     }
-
     /**
      * Reads properties from .su folder into memory, or copies property file if not existing.
      */
