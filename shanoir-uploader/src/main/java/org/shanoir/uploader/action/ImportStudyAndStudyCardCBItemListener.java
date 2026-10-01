@@ -18,6 +18,8 @@ import java.awt.Color;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.text.ParseException;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -254,8 +256,10 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
             for (Iterator iterator = examinationsFilteredByStudy.iterator(); iterator.hasNext();) {
                 Examination examination = (Examination) iterator.next();
                 mainWindow.importDialog.mrExaminationExistingExamCB.addItem(examination); // I did not achieve to call this from within Lambda
-                // Existing exam found with the same study date: preselect and do not propose new exam per default
-                if (examination.getExaminationDate().compareTo(studyDate) == 0) {
+                // Existing exam found with the same study date: preselect and do not propose new exam per default.
+                LocalDate examinationLocalDate = examination.getExaminationDate().toInstant().atZone(ZoneId.of("Europe/Paris")).toLocalDate();
+                LocalDate studyLocalDate = studyDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+                if (examinationLocalDate.isEqual(studyLocalDate)) {
                     mainWindow.importDialog.mrExaminationExistingExamCB.setEnabled(true);
                     mainWindow.importDialog.mrExaminationExistingExamCB.setSelectedItem(examination);
                     mainWindow.importDialog.mrExaminationNewExamCB.setSelected(false);
