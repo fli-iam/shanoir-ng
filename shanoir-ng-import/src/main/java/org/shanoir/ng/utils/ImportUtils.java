@@ -99,8 +99,8 @@ public final class ImportUtils {
         if (o2 == null) {
             return o1 == null;
         }
-        if (o1 instanceof AbstractEntity && o2 instanceof AbstractEntity) {
-            return ((AbstractEntity) o1).getId().equals(((AbstractEntity) o2).getId());
+        if (o1 instanceof AbstractEntity entity && o2 instanceof AbstractEntity entity1) {
+            return entity.getId().equals(entity1.getId());
         }
         return o1.equals(o2) || o2.equals(o1);
         // o1.equals(o2) is not equivalent to o2.equals(o1) ! For instance with
