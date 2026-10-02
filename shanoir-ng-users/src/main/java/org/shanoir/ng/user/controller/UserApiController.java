@@ -14,14 +14,20 @@
 
 package org.shanoir.ng.user.controller;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 
+import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.lang3.StringUtils;
 import org.shanoir.ng.accessrequest.controller.AccessRequestService;
 import org.shanoir.ng.accessrequest.model.AccessRequest;
+import org.shanoir.ng.download.CreateUserStatisticsService;
 import org.shanoir.ng.shared.controller.AbstractUserRequestApiController;
 import org.shanoir.ng.shared.core.model.IdList;
 import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.AccountNotOnDemandException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
@@ -31,6 +37,7 @@ import org.shanoir.ng.shared.exception.PasswordPolicyException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.user.model.User;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -46,6 +53,9 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 
     @Autowired
     private AccessRequestService accessRequestService;
+
+    @Autowired
+    private CreateUserStatisticsService createUserStatisticsService;
 
     @Override
     public ResponseEntity<Void> deleteUser(final Long userId) throws ForbiddenException {
@@ -183,4 +193,8 @@ public class UserApiController extends AbstractUserRequestApiController implemen
         }
     }
 
+    public ResponseEntity<?> downloadUserStatistics(HttpServletResponse response) throws IOException {
+        createUserStatisticsService.downloadUserStatistics(response);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }

@@ -21,12 +21,12 @@ import { TooltipComponent } from '../../shared/components/tooltip/tooltip.compon
 
 @Component({
     selector: 'download-statistics',
-    templateUrl: 'download-statistics.component.html',
+    templateUrl: 'download-dataset-statistics.component.html',
     changeDetection: ChangeDetectionStrategy.Eager,
     imports: [FormsModule, ReactiveFormsModule, TooltipComponent]
 })
 
-export class DownloadStatisticsComponent{
+export class DownloadDatasetStatisticsComponent {
 
     public form: UntypedFormGroup;
 
