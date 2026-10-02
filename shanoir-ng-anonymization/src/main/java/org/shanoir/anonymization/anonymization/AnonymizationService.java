@@ -35,7 +35,7 @@ public interface AnonymizationService {
      * @throws Exception
      */
 
-    void anonymize(ArrayList<File> dicomFiles, String profile) throws Exception;
+    AnonymizationResult anonymize(ArrayList<File> dicomFiles, String profile, File importJobDir) throws Exception;
 
     /**
      * Anonymize a list of DICOM files taking into account Shanoir's constraints to use and store anonymized data
@@ -52,9 +52,9 @@ public interface AnonymizationService {
      *          the new patient id
      * @throws Exception
      */
-    void anonymizeForShanoir(ArrayList<File> dicomFiles, String profile, String patientFirstName,
-            String patientLastName, String patientID, String studyInstanceUID) throws Exception;
+    AnonymizationResult anonymizeForShanoir(ArrayList<File> dicomFiles, String profile, String patientFirstName,
+            String patientLastName, String patientID, String studyInstanceUID, File importJobDir) throws Exception;
 
-    void anonymizeForShanoir(ArrayList<File> dicomFiles, String profile, String patientName, String patientID, String studyInstanceUID) throws Exception;
+    AnonymizationResult anonymizeForShanoir(ArrayList<File> dicomFiles, String profile, String patientName, String patientID, String studyInstanceUID, File importJobDir) throws Exception;
 
 }

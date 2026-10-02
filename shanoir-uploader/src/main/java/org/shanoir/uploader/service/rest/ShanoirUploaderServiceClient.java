@@ -42,6 +42,7 @@ import org.shanoir.ng.importer.model.ImportJobBase;
 import org.shanoir.ng.importer.model.ImportJobStatus;
 import org.shanoir.ng.shared.dicom.EquipmentDicom;
 import org.shanoir.ng.shared.dicom.InstitutionDicom;
+import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.model.QualityCard;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.uploader.ShUpConfig;
@@ -102,6 +103,12 @@ public class ShanoirUploaderServiceClient {
     private static final String SERVICE_STUDYCARDS_FIND_BY_STUDY_IDS = "service.studycards.find.by.study.ids";
 
     private static final String SERVICE_STUDYCARDS_APPLY_ON_STUDY = "service.studycards.apply.on.study";
+    
+    private static final String SERVICE_QUALITYCARDS_CREATE = "service.qualitycards.create";
+
+    private static final String SERVICE_QUALITYCARDS_APPLY_ON_STUDY = "service.qualitycards.apply.on.study";
+
+    private static final String SERVICE_QUALITYCARDS_TEST_ON_STUDY = "service.qualitycards.test.on.study";
 
     private static final String SERVICE_QUALITYCARDS_FIND_BY_STUDY_ID = "service.qualitycards.find.by.study.id";
 
@@ -190,6 +197,12 @@ public class ShanoirUploaderServiceClient {
     private String serviceURLStudyCardsByStudyIds;
 
     private String serviceURLStudyCardsApplyOnStudy;
+    
+    private String serviceURLQualityCardsCreate;
+
+    private String serviceURLQualityCardsApplyOnStudy;
+
+    private String serviceURLQualityCardsTestOnStudy;
 
     private String serviceURLQualityCardsByStudyId;
 
@@ -292,6 +305,12 @@ public class ShanoirUploaderServiceClient {
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_STUDYCARDS_FIND_BY_STUDY_IDS);
         this.serviceURLStudyCardsApplyOnStudy = this.serverURL
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_STUDYCARDS_APPLY_ON_STUDY);
+        this.serviceURLQualityCardsCreate = this.serverURL
+                + ShUpConfig.endpointProperties.getProperty(SERVICE_QUALITYCARDS_CREATE);
+        this.serviceURLQualityCardsApplyOnStudy = this.serverURL
+                + ShUpConfig.endpointProperties.getProperty(SERVICE_QUALITYCARDS_APPLY_ON_STUDY);
+        this.serviceURLQualityCardsTestOnStudy = this.serverURL
+                + ShUpConfig.endpointProperties.getProperty(SERVICE_QUALITYCARDS_TEST_ON_STUDY);
         this.serviceURLQualityCardsByStudyId = this.serverURL
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_QUALITYCARDS_FIND_BY_STUDY_ID);
         this.serviceURLCentersCreate = this.serverURL
@@ -912,6 +931,23 @@ public class ShanoirUploaderServiceClient {
         }
     }
 
+    /**
+     * New upload variant used by newer ShanoirUploader versions: uploads the file directly into a
+     * seriesInstanceUID sub-folder on the server.
+     */
+    public void uploadFile(String tempDirId, String seriesInstanceUID, File file) throws Exception {
+        String url = this.serviceURLImporterCreateTempDir + "/" + tempDirId + "/series/" + seriesInstanceUID;
+        try (CloseableHttpResponse response = httpService.postFile(url, file)) {
+            int code = response.getCode();
+            if (code != HttpStatus.SC_OK) {
+                LOG.error("Error in uploadFile (series): tempDirId={}, seriesInstanceUID={}, file (path: {}, size in bytes: {}), status code: {}, message: {}",
+                        tempDirId, seriesInstanceUID, file.getAbsolutePath(), Files.size(file.toPath()), code,
+                        apiResponseMessages.getOrDefault(code, "unknown status code"));
+                throw new Exception("Error in uploadFile (series).");
+            }
+        }
+    }
+
     public ImportJobBase uploadDicom(File file) throws Exception {
         try (CloseableHttpResponse response = httpService.postFile(this.serviceURLImporterUploadDicom, file)) {
             try (response) {
@@ -1012,12 +1048,12 @@ public class ShanoirUploaderServiceClient {
         }
     }
 
-    public void startImportJob(String tempDirId, String importJobJsonStr) throws Exception {
+    public void startImportJob(String id, String importJobJsonStr) throws Exception {
         try (CloseableHttpResponse response = httpService.post(this.serviceURLImporterStartImportJob, importJobJsonStr,
                 false)) {
             int code = response.getCode();
             if (code == HttpStatus.SC_OK) {
-                LOG.info("Import job started on server: {}", tempDirId);
+                LOG.info("ImportJob {} started on server.", id);
             } else {
                 LOG.error("Error in startImportJob: with json " + importJobJsonStr + " (status code: " + code
                         + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
@@ -1026,15 +1062,15 @@ public class ShanoirUploaderServiceClient {
         }
     }
 
-    public ImportJobStatus getImportJobStatus(String tempDirId) throws Exception {
-        try (CloseableHttpResponse response = httpService.get(this.serviceURLImporterStatus + tempDirId)) {
+    public ImportJobStatus getImportJobStatus(String id) throws Exception {
+        try (CloseableHttpResponse response = httpService.get(this.serviceURLImporterStatus + id)) {
             int code = response.getCode();
             if (code == HttpStatus.SC_OK) {
                 return Util.getMappedObject(response, ImportJobStatus.class);
             } else if (code == HttpStatus.SC_NOT_FOUND) {
                 return null;
             } else {
-                LOG.error("Could not get import job status for tempDirId " + tempDirId
+                LOG.error("Could not get import job status for id " + id
                         + " (status code: " + code + ", message: "
                         + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
                 throw new Exception("Error in getImportJobStatus");
@@ -1400,7 +1436,58 @@ public class ShanoirUploaderServiceClient {
             }
         }
     }
+    
+    public QualityCard createQualityCard(final QualityCard qualityCard) {
+        try {
+            String json = Util.objectWriter.writeValueAsString(qualityCard);
+            try (CloseableHttpResponse response = httpService.post(this.serviceURLQualityCardsCreate, json, false)) {
+                int code = response.getCode();
+                if (code == HttpStatus.SC_OK) {
+                    return Util.getMappedObject(response, QualityCard.class);
+                } else {
+                    LOG.error("Error in createQualityCard: with quality card " + qualityCard.getName()
+                            + " (status code: " + code + ", message: "
+                            + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+                }
+            }
+        } catch (JsonProcessingException e) {
+            LOG.error(e.getMessage(), e);
+        } catch (Exception ioE) {
+            LOG.error(ioE.getMessage(), ioE);
+        }
+        return null;
+    }
 
+    public QualityCardResult applyQualityCardOnStudy(Long qualityCardId) throws Exception {
+        LOG.info("Apply quality card on study, started on server.");
+        try (CloseableHttpResponse response =
+                httpService.get(this.serviceURLQualityCardsApplyOnStudy + qualityCardId)) {
+            int code = response.getCode();
+            if (code == HttpStatus.SC_OK) {
+                return Util.getMappedObject(response, QualityCardResult.class);
+            } else {
+                LOG.error("Error in applyQualityCardOnStudy: (status code: " + code
+                        + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+                throw new Exception("Error in applyQualityCardOnStudy");
+            }
+        }
+    }
+
+    public QualityCardResult testQualityCardOnStudy(Long qualityCardId) throws Exception {
+        LOG.info("Test quality card on study (dry-run), started on server.");
+        try (CloseableHttpResponse response =
+                httpService.get(this.serviceURLQualityCardsTestOnStudy + qualityCardId)) {
+            int code = response.getCode();
+            if (code == HttpStatus.SC_OK) {
+                return Util.getMappedObject(response, QualityCardResult.class);
+            } else {
+                LOG.error("Error in testQualityCardOnStudy: (status code: " + code
+                        + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+                throw new Exception("Error in testQualityCardOnStudy");
+            }
+        }
+    }
+    
     public List<QualityCard> findQualityCardsByStudyId(Long studyId) throws Exception {
         LOG.info("Retrieving qualitycards for the study : " + studyId);
         try {
@@ -1483,27 +1570,23 @@ public class ShanoirUploaderServiceClient {
     }
 
     /**
-     * Uploads a BIDS-formatted subject folder (zipped) for import. This hits
-     * the datasets microservice directly (org.shanoir.ng.importer.bids.BidsImporterApi),
-     * not the importer microservice used by the other upload* methods.
+     * Imports a BIDS-formatted subject folder (zipped). This hits
+     * the import microservice (org.shanoir.ng.importer.bids.BidsImporterApi).
      *
-     * Note: the server-side controller always returns a null body with 200 OK
-     * and processes the import asynchronously via RabbitMQ, without exposing a
-     * workFolder/tempDirId we could poll via ImporterStatus. So this method (and
-     * any test using it) can only confirm the upload was accepted, not that the
-     * subject/examination/datasets were actually created server-side.
      */
-    public void uploadBIDSDataset(File file, Long studyId, String studyName, Long centerId) throws Exception {
+    public ImportJobBase importBIDSDataset(File file, Long studyId, String studyName, Long centerId) throws Exception {
         StringBuilder url = new StringBuilder(this.serviceURLImporterBids);
         url.append(studyId)
                 .append("/").append(URLEncoder.encode(studyName, "UTF-8"))
                 .append("/").append(centerId);
         try (CloseableHttpResponse response = httpService.postFile(url.toString(), file)) {
             int code = response.getCode();
-            if (code != HttpStatus.SC_OK) {
-                LOG.error("Error in uploadBIDSDataset: studyId={} (status code: {}, message: {})",
+            if (code == HttpStatus.SC_OK) {
+                return Util.getMappedObject(response, ImportJobBase.class);
+            } else {
+                LOG.error("Error in importBIDSDataset: studyId={} (status code: {}, message: {})",
                         studyId, code, apiResponseMessages.getOrDefault(code, "unknown status code"));
-                throw new Exception("Error in uploadBIDSDataset");
+                throw new Exception("Error in importBIDSDataset");
             }
         }
     }
@@ -1537,7 +1620,53 @@ public class ShanoirUploaderServiceClient {
             }
         }
     }
-    
+
+    /**
+     * Lightweight "ping" of one DICOM instance on the server: fetches only its
+     * DICOMWeb metadata (application/dicom+json, no PixelData), to check fast
+     * that the instance actually made it through the import pipeline. Much
+     * cheaper than {@link #getDicomInstance}, used by
+     * DicomInstanceConsistencyChecker for the full pixel-by-pixel comparison.
+     */
+    public boolean checkDicomInstanceMetadata(String examinationUID, String seriesInstanceUID, String sopInstanceUID)
+            throws Exception {
+        URIBuilder b = new URIBuilder(this.serviceURLDatasetsDicomWebStudies
+                + "/" + examinationUID
+                + "/series/" + seriesInstanceUID
+                + "/instances/" + sopInstanceUID
+                + "/metadata");
+        URL url = b.build().toURL();
+        try (CloseableHttpResponse response = httpService.get(url.toString())) {
+            int code = response.getCode();
+            if (code == HttpStatus.SC_OK) {
+                return true;
+            } else if (code == HttpStatus.SC_NOT_FOUND) {
+                return false;
+            } else {
+                LOG.error("Error in checkDicomInstanceMetadata: examinationUID={}, seriesInstanceUID={}, "
+                        + "sopInstanceUID={} (status code: {}, message: {})",
+                        examinationUID, seriesInstanceUID, sopInstanceUID, code,
+                        apiResponseMessages.getOrDefault(code, "unknown status code"));
+                return false;
+            }
+        }
+    }
+
+    public boolean checkSeriesInstanceCounts(String examinationUID, Map<String, Integer> localCountsBySeriesInstanceUID)
+            throws Exception {
+        String json = Util.objectWriter.writeValueAsString(localCountsBySeriesInstanceUID);
+        try (CloseableHttpResponse response = httpService.post(
+                this.serviceURLDatasetsDicomWebStudies + "/" + examinationUID + "/series/instanceCount/check", json, false)) {
+            int code = response.getCode();
+            if (code == HttpStatus.SC_OK) {
+                String body = EntityUtils.toString(response.getEntity());
+                return new org.json.JSONObject(body).getBoolean("consistent");
+            }
+            LOG.error("Error in checkSeriesInstanceCounts: examinationUID={} (status code: {})", examinationUID, code);
+            throw new Exception("Error in checkSeriesInstanceCounts");
+        }
+    }
+
     public Long getUserId() {
         return userId;
     }

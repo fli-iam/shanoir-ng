@@ -128,11 +128,14 @@ public class DicomServerClient implements IDicomServerClient {
         query.setStudyDescription(studyDescription);
         query.setStudyDate(studyDate);
         query.setModality(modality);
-        return queryPACSService.queryCFIND(query).getPatients();
+        return queryPACSService.queryCFIND(query);
     }
 
+    /**
+     * Used by ImportFromTableRunner.java
+     */
     public List<Patient> queryDicomServer(DicomQuery query) throws Exception {
-        return queryPACSService.queryCFIND(query).getPatients();
+        return queryPACSService.queryCFIND(query);
     }
 
     /*
@@ -149,7 +152,7 @@ public class DicomServerClient implements IDicomServerClient {
             try {
                 FileUtil.cleanTempFolders(workFolder, studyInstanceUID);
                 downloadFromDicomServer(studyInstanceUID, selectedSeries, progressBar, downloadOrCopyReport);
-                FileUtil.readAndCopyDicomFilesToUploadFolder(workFolder, studyInstanceUID, selectedSeries, uploadFolder, retrievedDicomFiles, downloadOrCopyReport);
+                FileUtil.readAndCopyDicomFilesToImportJobFolder(workFolder, studyInstanceUID, selectedSeries, uploadFolder, retrievedDicomFiles, downloadOrCopyReport);
                 FileUtil.deleteFolderDownloadFromDicomServer(workFolder, studyInstanceUID, selectedSeries);
             } catch (Exception e) {
                 LOG.error(":\n\n Download of "
@@ -177,6 +180,13 @@ public class DicomServerClient implements IDicomServerClient {
     @Override
     public File getWorkFolder() {
         return workFolder;
+    }
+    
+    /**
+     * Stops the local DICOM SCP server (mini-pacs) started by this client.
+     */
+    public void stopSCPServer() {
+        dcmRcvManager.stopSCPServer();
     }
 
 }

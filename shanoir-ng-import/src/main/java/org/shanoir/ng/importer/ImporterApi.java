@@ -53,7 +53,7 @@ public interface ImporterApi {
         @ApiResponse(responseCode = "500", description = "unexpected error")})
     @GetMapping(value = {"", "/"}, produces = {"application/json"})
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT'))")
-    ResponseEntity<String> createTempDir() throws RestServiceException;
+    ResponseEntity<String> createTempDir() throws RestServiceException, IOException;
 
     // used by ShanoirUploader!!! 2. step: called for each DICOM file
     @Operation(summary = "Upload a file into a specific temp dir", description = "Upload a file into a specific temp dir")
@@ -62,17 +62,34 @@ public interface ImporterApi {
         @ApiResponse(responseCode = "401", description = "unauthorized"),
         @ApiResponse(responseCode = "403", description = "forbidden"),
         @ApiResponse(responseCode = "500", description = "unexpected error")})
-    @PostMapping(value = "/{tempDirId}", consumes = {"multipart/form-data"})
+    @PostMapping(value = "/{tempDirId}", consumes = { "multipart/form-data" })
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT'))")
     ResponseEntity<Void> uploadFile(
             @Parameter(name = "tempDirId", required = true) @PathVariable("tempDirId") String tempDirId,
-            @Parameter(name = "file") @RequestParam("file") MultipartFile file) throws RestServiceException, IOException;
+            @Parameter(name = "file") @RequestParam("file") MultipartFile file)
+            throws RestServiceException, IOException;
+
+    // used by ShanoirUploader!!! 2. step (new): called for each DICOM file, uploads
+    // it directly into a series sub-folder (named after the DICOM seriesInstanceUID)
+    // of the tempDirId, so the server does not have to separate files into series folders
+    // afterwards anymore.
+    @Operation(summary = "Upload a file into a series sub-folder of a specific temp dir", description = "Upload a file into a temp dir, sorted directly into a seriesInstanceUID sub-folder")
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "file uploaded"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @PostMapping(value = "/{tempDirId}/series/{seriesInstanceUID}", consumes = { "multipart/form-data" })
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT'))")
+    ResponseEntity<Void> uploadFileToSeries(
+            @Parameter(name = "tempDirId", required = true) @PathVariable("tempDirId") String tempDirId,
+            @Parameter(name = "seriesInstanceUID", required = true) @PathVariable("seriesInstanceUID") String seriesInstanceUID,
+            @Parameter(name = "file") @RequestParam("file") MultipartFile file)
+            throws RestServiceException, IOException;
 
     @Operation(summary = "Upload one DICOM .zip file", description = "Upload DICOM .zip file")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "success returns file path"),
-        @ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
-        @ApiResponse(responseCode = "409", description = "Already exists - conflict"),
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "success returns file path"),
+            @ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
+            @ApiResponse(responseCode = "409", description = "Already exists - conflict"),
         @ApiResponse(responseCode = "200", description = "Unexpected Error")})
     @PostMapping(value = "/upload_dicom/",
             produces = {"application/json"},
@@ -176,10 +193,10 @@ public interface ImporterApi {
             @ApiResponse(responseCode = "404", description = "no status found for this id"),
             @ApiResponse(responseCode = "401", description = "unauthorized"),
             @ApiResponse(responseCode = "403", description = "forbidden")})
-    @GetMapping(value = "/status/{tempDirId}", produces = {"application/json"})
+    @GetMapping(value = "/status/{id}", produces = {"application/json"})
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT'))")
     ResponseEntity<ImportJobStatus> getImportJobStatus(
-            @Parameter(name = "tempDirId", required = true) @PathVariable("tempDirId") String tempDirId);
+            @Parameter(name = "id", required = true) @PathVariable("id") String id);
 
     @Operation(summary = "Start analysis of EEG job", description = "Start analysis eeg job")
     @ApiResponses(value = {
@@ -215,7 +232,7 @@ public interface ImporterApi {
             produces = {"application/json"},
             consumes = {"application/json"})
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT') and @importSecurityService.canImportFromPACS())")
-    ResponseEntity<ImportJob> queryPACS(@Parameter(name = "DicomQuery", required = true) @RequestBody DicomQuery dicomQuery) throws RestServiceException;
+    ResponseEntity<ImportJob> queryPACS(@Parameter(name = "DicomQuery", required = true) @RequestBody DicomQuery dicomQuery) throws RestServiceException, IOException;
 
     @Operation(summary = "Get dicom image", description = "Get dicom image")
     @ApiResponses(value = {
