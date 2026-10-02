@@ -61,7 +61,7 @@ import tools.jackson.databind.json.JsonMapper;
 
 @WebMvcTest(controllers = CenterApiController.class,
         excludeAutoConfiguration = {
-                org.springframework.boot.security.oauth2.server.resource.autoconfigure.servlet.OAuth2ResourceServerAutoConfiguration.class
+                org.springframework.boot.security.oauth2.server.resource.autoconfigure.OAuth2ResourceServerAutoConfiguration.class
         })
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")

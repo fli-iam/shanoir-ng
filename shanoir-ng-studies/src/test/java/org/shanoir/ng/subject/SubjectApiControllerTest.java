@@ -62,7 +62,7 @@ import tools.jackson.databind.json.JsonMapper;
 
 @WebMvcTest(controllers = SubjectApiController.class,
         excludeAutoConfiguration = {
-                org.springframework.boot.security.oauth2.server.resource.autoconfigure.servlet.OAuth2ResourceServerAutoConfiguration.class
+                org.springframework.boot.security.oauth2.server.resource.autoconfigure.OAuth2ResourceServerAutoConfiguration.class
         })
 @ContextConfiguration(classes = {SubjectApiController.class, RestTemplate.class})
 @AutoConfigureMockMvc(addFilters = false)
