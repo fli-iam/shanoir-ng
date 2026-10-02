@@ -179,7 +179,7 @@ public class ImporterServiceTest {
         examination.setSubject(subject);
         examination.setStudy(new org.shanoir.ng.shared.model.Study());
         examination.getStudy().setId(1L);
-        examination.getStudy().setSubjectStudyList(new ArrayList<>());
+        examination.getStudy().setSubjectList(new ArrayList<>());
         DatasetAcquisition datasetAcq = new MrDatasetAcquisition();
         org.shanoir.ng.dataset.modality.GenericDataset createdDataset = new org.shanoir.ng.dataset.modality.GenericDataset();
         createdDataset.setId(100L);
