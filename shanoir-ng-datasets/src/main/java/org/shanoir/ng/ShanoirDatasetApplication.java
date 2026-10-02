@@ -19,7 +19,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
-import org.springframework.data.web.config.EnableSpringDataWebSupport.PageSerializationMode;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 import com.fasterxml.jackson.core.Version;
@@ -35,8 +34,7 @@ import io.swagger.v3.oas.annotations.servers.Server;
  * Datasets microservice.
  */
 @SpringBootApplication
-// Sets pageSerializationMode to DIRECT even if it is the default value for safety reason
-@EnableSpringDataWebSupport(pageSerializationMode = PageSerializationMode.DIRECT)
+@EnableSpringDataWebSupport
 @EnableScheduling
 @OpenAPIDefinition(
         info = @Info(title = "Shanoir datasets API", version = "1.0"),
