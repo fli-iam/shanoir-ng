@@ -46,7 +46,7 @@ SELECT u.username AS username,
             WHEN 6 then 'CAN_ANNOTATE'
             WHEN 7 then 'CAN_ANNOTATE_REVIEW'
            END) AS study_user_right
-    FROM user u
+    FROM users u
     JOIN study_user su on su.user_id = u.id
     JOIN studies.study s on su.study_id = s.id
     JOIN study_user_study_user_rights sur on sur.study_user_id = su.id;
