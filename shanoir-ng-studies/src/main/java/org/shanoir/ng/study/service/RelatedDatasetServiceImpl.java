@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
 
 import org.shanoir.ng.center.model.Center;
@@ -39,6 +41,7 @@ import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.studycenter.StudyCenter;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.repository.SubjectRepository;
+import org.shanoir.ng.subject.service.SubjectNamePatternUtils;
 import org.shanoir.ng.subject.service.SubjectService;
 import org.shanoir.ng.tag.model.Tag;
 import org.shanoir.ng.utils.KeycloakUtil;
@@ -47,6 +50,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -107,13 +111,14 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
         }
         eventService.publishEvent(event);
         Study targetStudy = studyService.findById(copyData.getTargetStudyId());
-        Map<Long, IdName> subjectMapping = createSubjectsInTargetStudy(copyData.getSubjects(), targetStudy, event);
+        Map<Long, IdName> subjectMapping = createSubjectsInTargetStudy(copyData.getSubjects(), copyData.getCenterIds(), targetStudy, event);
         addCentersInTargetStudy(copyData.getCenterIds(), targetStudy, event);
         copyDatasetsToStudy(copyData.getDatasetIds(), copyData.getTargetStudyId(), subjectMapping, event);
         return event.getId();
     }
 
-    private Map<Long, IdName> createSubjectsInTargetStudy(List<CopyData.SubjectCopy> subjects, Study targetStudy, ShanoirEvent event) throws ShanoirException {
+    private Map<Long, IdName> createSubjectsInTargetStudy(List<CopyData.SubjectCopy> subjects, List<Long> copiedCenterIds,
+            Study targetStudy, ShanoirEvent event) throws ShanoirException {
         LOG.info("Starting createSubjectsInTargetStudy");
         eventService.publishEvent(event, "Creating subjects in target study", 0f);
         long startTime = System.currentTimeMillis();
@@ -131,11 +136,23 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
         Map<String, Subject> existingByName = subjectRepository.findByStudyIdAndNameIn(targetStudy.getId(), names).stream()
                 .collect(Collectors.toMap(Subject::getName, s -> s));
 
+        String namePattern = usableSubjectNamePattern(targetStudy);
+        Map<String, Long> lastIdByNameBase = new HashMap<>();
+
         for (CopyData.SubjectCopy subjectCopy : subjects) {
             Subject sourceSubject = sourceSubjects.get(subjectCopy.getId()); // cannot be null because of checkInputSubjects
-            Subject targetSubject = existingByName.get(subjectCopy.getNewName());
+            String newName = subjectCopy.getNewName();
+            boolean generatedName = false;
+            if (namePattern != null && (newName == null || newName.trim().isEmpty())) {
+                // without a name, the source subject's name would be kept, which can't satisfy the target pattern
+                Long centerId = subjectCopy.getCenterId() != null ? subjectCopy.getCenterId()
+                        : (copiedCenterIds != null && copiedCenterIds.size() == 1 ? copiedCenterIds.get(0) : null);
+                newName = generateSubjectName(targetStudy, namePattern, centerId, lastIdByNameBase);
+                generatedName = true;
+            }
+            Subject targetSubject = generatedName ? null : existingByName.get(newName);
             if (targetSubject == null) {
-                Subject createdSubject = createNewSubjectInTargetStudy(targetStudy, sourceSubject, subjectCopy.getNewName(), false);
+                Subject createdSubject = createNewSubjectInTargetStudy(targetStudy, sourceSubject, newName, false);
                 existingByName.put(createdSubject.getName(), createdSubject);
                 subjectMapping.put(sourceSubject.getId(), new IdName(createdSubject.getId(), createdSubject.getName()));
                 createdSubjects.add(createdSubject);
@@ -171,6 +188,75 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
                     "Copy dataset(s): source subject with ID " + subjectCopy.getId() + " not found.");
             }
         }
+    }
+
+    /** The target study's subject name pattern, or null if none or malformed (SubjectServiceImpl ignores it then too). */
+    private String usableSubjectNamePattern(Study targetStudy) {
+        String pattern = targetStudy.getExtraDetails() != null ? targetStudy.getExtraDetails().getSubjectNamePattern() : null;
+        if (pattern == null || pattern.isEmpty()) {
+            return null;
+        }
+        try {
+            Pattern.compile(pattern);
+            return pattern;
+        } catch (PatternSyntaxException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Next free name matching the target study's pattern: first custom name prefix (or study name),
+     * the center index when the pattern lists it, then the next unused identifier.
+     *
+     * @param lastIdByNameBase last identifier given per name base during this copy, so subjects of the
+     *                         same batch don't get the same name
+     */
+    private String generateSubjectName(Study targetStudy, String namePattern, Long centerId,
+            Map<String, Long> lastIdByNameBase) throws ShanoirException {
+        String centerPrefix = null;
+        if (centerId != null && targetStudy.getStudyCenterList() != null) {
+            centerPrefix = targetStudy.getStudyCenterList().stream()
+                    .filter(studyCenter -> studyCenter.getCenter() != null && centerId.equals(studyCenter.getCenter().getId()))
+                    .map(StudyCenter::getSubjectNamePrefix)
+                    .findFirst().orElse(null);
+        }
+        SubjectNamePatternUtils.NameBase nameBase = SubjectNamePatternUtils.computeNameBase(namePattern, centerPrefix);
+        if (nameBase == null) {
+            throw new ShanoirException("A subject name matching the subject name pattern of study \"" + targetStudy.getName()
+                    + "\" can't be generated automatically, please enter the subject name.", HttpStatus.UNPROCESSABLE_ENTITY.value());
+        }
+        String base = nameBase.base();
+        Long lastId = lastIdByNameBase.get(base);
+        if (lastId == null) {
+            lastId = 0L;
+            for (String name : subjectRepository.findNamesByStudyIdAndNameStartingWith(targetStudy.getId(), base)) {
+                // LIKE treats "_" and "%" as wildcards, so re-check the exact prefix
+                String id = name.startsWith(base) ? name.substring(base.length()) : "";
+                if (id.length() == nameBase.idLength() && id.chars().allMatch(Character::isDigit)) {
+                    try {
+                        lastId = Math.max(lastId, Long.parseLong(id));
+                    } catch (NumberFormatException e) {
+                        // identifier too long for a long: not one we could have generated, ignore it
+                    }
+                }
+            }
+        }
+        long nextId = lastId + 1;
+        String id = String.format("%0" + nameBase.idLength() + "d", nextId);
+        if (id.length() > nameBase.idLength()) {
+            throw new ShanoirException("No subject name left for the subject name pattern of study \"" + targetStudy.getName()
+                    + "\", please enter the subject name.", HttpStatus.UNPROCESSABLE_ENTITY.value());
+        }
+        String name = base + id;
+        if (!name.matches(namePattern)) {
+            // the pattern requires a center index, but this center has none listed in it
+            throw new ShanoirException("The subject name pattern of study \"" + targetStudy.getName()
+                    + "\" requires a center index that the center of the copied datasets doesn't have in this study:"
+                    + " please set its subject name prefix in the study, or enter the subject name.",
+                    HttpStatus.UNPROCESSABLE_ENTITY.value());
+        }
+        lastIdByNameBase.put(base, nextId);
+        return name;
     }
 
     private Subject createNewSubjectInTargetStudy(Study targetStudy, Subject sourceSubject, String newSubjectName,

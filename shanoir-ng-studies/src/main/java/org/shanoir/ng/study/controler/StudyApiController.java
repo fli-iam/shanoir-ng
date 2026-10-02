@@ -297,6 +297,11 @@ public class StudyApiController implements StudyApi {
             Long taskId = relatedDatasetService.copyData(copyData);
             return new ResponseEntity<>(taskId, HttpStatus.OK);
         } catch (ShanoirException e) {
+            // client errors (e.g. no subject name satisfying the target study's pattern) keep
+            // their code and message so the copy dialog can show them
+            if (e.getErrorCode() >= 400 && e.getErrorCode() < 500) {
+                throw new RestServiceException(new ErrorModel(e.getErrorCode(), e.getMessage(), null));
+            }
             throw new RestServiceException(
                     new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(),
                             "Error while copying study datasets.", e));
