@@ -16,7 +16,7 @@ print_help()
 	cat <<EOF
 Build and deploy Shanoir
 usage:
-	$0 --clean|--force|--no-deploy [--no-build] [--no-keycloak] [--no-dcm4chee] [--no-infra] [--native] [-h|--help]
+	$0 --clean|--force|--no-deploy [--no-build] [--no-keycloak] [--no-dcm4chee] [--no-infra] [--native] [--prune] [-h|--help]
 
 CAUTION: THIS COMMAND IS DESTRUCTIVE, do not use it on an existing production
 instance. It will overwrite the data hosted in the external volumes declared in
@@ -38,6 +38,10 @@ Options:
 		microservices run as regular (AOT-processed) JVM fat jars.
 		The JVM images are always built: they run the one-shot
 		SHANOIR_MIGRATION=init schema bootstrap, which native images cannot.
+--prune		free disk space at key points (dangling images, Docker build cache,
+		stopped containers) and print 'docker system df'. Docker images are
+		then built one at a time, pruning superseded images after each.
+		Never touches volumes or tagged images.
 -h|--help	print this help
 
 EOF
@@ -63,11 +67,36 @@ NATIVE_COMPOSE=docker-compose-dev-native.yml
 NATIVE_SERVICES="users studies import"
 # All Shanoir microservices
 MICROSERVICES="users studies datasets import preclinical nifti-conversion"
+# Compose services built from docker-compose/Dockerfile (image-only ones such
+# as rabbitmq or dcm4chee are pulled, not built)
+BUILD_SERVICES="keycloak-database keycloak database database-migrations $MICROSERVICES solr nginx bids-validator"
 
 # Always the plain JVM config (build + one-shot init)
 dc_jvm()
 {
 	docker compose -f "$BASE_COMPOSE" "$@"
+}
+
+# Free disk space (only with --prune). Safe: dangling images, build cache and
+# stopped containers only; no volumes, no tagged/in-use images.
+free_space()
+{
+	[ -n "$prune" ] || return 0
+	step "free disk space ($*)"
+	docker container prune -f
+	docker image prune -f
+	docker builder prune -f
+	docker system df
+}
+
+# Light variant, cheap enough to run after every image build: a rebuilt tag
+# leaves the previous image dangling, which is the main source of waste.
+# Deliberately does NOT prune the BuildKit cache, which the next targets of the
+# same multi-stage Dockerfile still need.
+free_space_light()
+{
+	[ -n "$prune" ] || return 0
+	docker image prune -f
 }
 
 wait_tcp_ready()
@@ -98,6 +127,7 @@ infra=1
 clean=
 force=
 native=
+prune=
 while [ $# -ne 0 ] ; do
 	case "$1" in
 		-h|--help)	print_help	;;
@@ -109,6 +139,7 @@ while [ $# -ne 0 ] ; do
 		--no-infra)	infra=		;;
 		--no-deploy)	deploy=		;;
 		--native)	native=1	;;
+		--prune)	prune=1		;;
 		*)		die "unknown option '$1'"
 	esac
 	shift
@@ -149,6 +180,7 @@ if [ -n "$build" ] ; then
 	step "Compile all Maven projects (inside a Docker image)"
 	DEV_IMG=shanoir-ng-dev
 	docker build -t "$DEV_IMG" --target=jdk docker-compose
+	free_space_light
 	mkdir -p tmp/home
 	docker run --rm -t -i -v "$PWD:/src" -u "`id -u`:`id -g`" -e HOME="/src/tmp/home" \
 		-e MAVEN_OPTS="-Dmaven.repo.local=/src/tmp/home/.m2/repository" \
@@ -157,7 +189,18 @@ if [ -n "$build" ] ; then
 
 	# JVM images: always built (used for the whole stack, or at least for 'init')
 	step "Build JVM docker images"
-	dc_jvm build
+	if [ -n "$prune" ] ; then
+		# one image at a time (slower than the parallel build), so that the
+		# layers of each superseded image are freed before the next build
+		for svc in $BUILD_SERVICES ; do
+			step "Build $svc"
+			dc_jvm build "$svc"
+			free_space_light
+		done
+	else
+		dc_jvm build
+	fi
+	free_space "after JVM images"
 
 	if [ -n "$native" ] ; then
 		for ms in $NATIVE_SERVICES ; do
@@ -165,6 +208,7 @@ if [ -n "$build" ] ; then
 			MAVEN_OPTS="-Dmaven.repo.local=$PWD/tmp/home/.m2/repository" \
 				mvn -f "./shanoir-ng-$ms/pom.xml" \
 				-Pnative spring-boot:build-image -DskipTests
+			free_space "after $ms native image"
 		done
 	fi
 fi
@@ -183,6 +227,7 @@ if [ -n "$deploy" ] ; then
 		step "stop shanoir"
 		docker compose down
 	fi
+	free_space "after stop"
 
 	# 1. database
 	step "init: database"
@@ -240,4 +285,5 @@ if [ -n "$deploy" ] ; then
 	# 6. nginx
 	step "start: nginx"
 	docker compose up -d nginx
+	free_space "deployment done"
 fi
