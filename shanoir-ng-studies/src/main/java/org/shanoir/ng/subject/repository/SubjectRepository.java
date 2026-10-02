@@ -82,6 +82,9 @@ public interface SubjectRepository extends JpaRepository<Subject, Long>, Subject
 
     boolean existsByStudyIdAndName(Long studyId, String name);
 
+    @Query("SELECT s.name FROM Subject s WHERE s.study.id = :studyId AND s.name LIKE CONCAT(:prefix, '%')")
+    List<String> findNamesByStudyIdAndNameStartingWith(@Param("studyId") Long studyId, @Param("prefix") String prefix);
+
     List<Subject> findByStudy_Id(Long studyId);
 
     List<Subject> findByStudyIdAndStudy_StudyUserList_UserId(Long studyId, Long userId);

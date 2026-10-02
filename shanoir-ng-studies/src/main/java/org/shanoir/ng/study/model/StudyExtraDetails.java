@@ -18,10 +18,10 @@ import org.shanoir.ng.shared.hateoas.HalEntity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 /**
@@ -79,6 +79,10 @@ public class StudyExtraDetails extends HalEntity {
     /** Scientific advisor ID. */
     @Column(name = "scientific_advisor")
     private String scientificAdvisor;
+
+    /** Regex pattern the commonName of a new subject must respect if set. */
+    @Column(name = "subject_name_pattern")
+    private String subjectNamePattern;
 
     /**
      * @return the expectedNbOfSubjects
@@ -206,5 +210,19 @@ public class StudyExtraDetails extends HalEntity {
      */
     public void setScientificAdvisor(String scientificAdvisor) {
         this.scientificAdvisor = scientificAdvisor;
+    }
+
+    /**
+     * @return the subjectNamePattern
+     */
+    public String getSubjectNamePattern() {
+        return subjectNamePattern;
+    }
+
+    /**
+     * @param subjectNamePattern the subjectNamePattern to set
+     */
+    public void setSubjectNamePattern(String subjectNamePattern) {
+        this.subjectNamePattern = subjectNamePattern;
     }
 }

@@ -20,6 +20,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
 
 import org.hibernate.Hibernate;
@@ -270,6 +271,7 @@ public class SubjectServiceImpl implements SubjectService {
                     "Cannot create subjects in draft studies. Study must be approved first.",
                     HttpStatus.FORBIDDEN.value());
             }
+            checkSubjectNamePattern(subject, studyId);
         }
 
         if (subject.getTags() != null && !subject.getTags().isEmpty()) {
@@ -282,6 +284,36 @@ public class SubjectServiceImpl implements SubjectService {
             subject.setTags(managedTags);
         }
         return subject;
+    }
+
+    /**
+     * Checks the subject's commonName (name) against the study's subjectNamePattern, if one is
+     * configured. Only applies to manual subject creation from the Shanoir web interface, not
+     * to subjects created by ShanoirUploader (see the "createAutoIncrement" case, which
+     * generates the name itself and never goes through this method).
+     */
+    private void checkSubjectNamePattern(Subject subject, Long studyId) throws ShanoirException {
+        Study study = studyRepository.findById(studyId).orElse(null);
+        if (study == null || study.getExtraDetails() == null) {
+            return;
+        }
+        String pattern = study.getExtraDetails().getSubjectNamePattern();
+        if (pattern == null || pattern.isEmpty()) {
+            return;
+        }
+        boolean matches;
+        try {
+            matches = subject.getName() != null && subject.getName().matches(pattern);
+        } catch (PatternSyntaxException e) {
+            // a malformed stored pattern should not block subject creation study-wide
+            LOG.warn("Study {} has an invalid subjectNamePattern, ignoring it: {}", studyId, pattern, e);
+            return;
+        }
+        if (!matches) {
+            throw new ShanoirException(
+                "Subject name \"" + subject.getName() + "\" does not match the pattern required by this study.",
+                HttpStatus.UNPROCESSABLE_ENTITY.value());
+        }
     }
 
     @Override

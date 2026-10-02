@@ -322,6 +322,7 @@ public class StudyServiceImpl implements StudyService {
                 existing.setSponsor(incoming.getSponsor());
                 existing.setPrincipalInvestigator(incoming.getPrincipalInvestigator());
                 existing.setScientificAdvisor(incoming.getScientificAdvisor());
+                existing.setSubjectNamePattern(incoming.getSubjectNamePattern());
             }
         }
 
