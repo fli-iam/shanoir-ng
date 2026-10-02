@@ -23,6 +23,7 @@ import { VERSION } from '../../../environments/version';
 import { DatasetAcquisitionService } from '../../dataset-acquisitions/shared/dataset-acquisition.service';
 import { SolrService } from '../../solr/solr.service';
 import { StudyService } from '../../studies/shared/study.service';
+import { UserService } from '../../users/shared/user.service';
 import { ConfirmDialogService } from "../components/confirm-dialog/confirm-dialog.service";
 import { LoadingBarComponent } from '../components/loading-bar/loading-bar.component';
 import { ConsoleService } from '../console/console.service';
@@ -60,6 +61,7 @@ export class SideMenuComponent {
             private studyService: StudyService,
             private accessRequestService: AccessRequestService,
             private confirmDialogService: ConfirmDialogService,
+            private userService: UserService,
             private destroyRef: DestroyRef) {
 
         if (KeycloakService.auth.authz && KeycloakService.auth.authz.tokenParsed) {
@@ -134,6 +136,10 @@ export class SideMenuComponent {
                     }
                 });
         });
+    }
+
+    downloadUserStatistics() {
+        this.userService.downloadUserStatistics();
     }
 
     duasToSign(): number {

@@ -33,6 +33,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @Service
 public class CreateUserStatisticsService {
@@ -48,8 +50,8 @@ public class CreateUserStatisticsService {
     @Transactional
     public void downloadUserStatistics(HttpServletResponse response) throws IOException {
 
-        response.setContentType("text/csv; charset=UTF-8");
-        response.setHeader("Content-Disposition", "attachment;filename=\"UserStatistics.csv\"");
+        response.setContentType("application/zip");
+        response.setHeader("Content-Disposition", "attachment;filename=\"UserStatistics.zip\"");
 
         ShanoirEvent event = new ShanoirEvent(
                 ShanoirEventType.DOWNLOAD_USER_STATISTICS_EVENT,
@@ -70,8 +72,10 @@ public class CreateUserStatisticsService {
             @SuppressWarnings("unchecked")
             List<Object[]> results = query.getResultList();
 
+            ZipOutputStream zos = new ZipOutputStream(response.getOutputStream());
+            zos.putNextEntry(new ZipEntry("UserStatistics.csv"));
             BufferedWriter writer = new BufferedWriter(
-                    new OutputStreamWriter(response.getOutputStream(), StandardCharsets.UTF_8));
+                    new OutputStreamWriter(zos, StandardCharsets.UTF_8));
             for (Object[] row : results) {
                 writer.write(Arrays.stream(row)
                         .map(CreateUserStatisticsService::escapeCsv)
@@ -79,6 +83,8 @@ public class CreateUserStatisticsService {
                 writer.write("\n");
             }
             writer.flush();
+            zos.closeEntry();
+            zos.finish();
 
             event.setProgress(1f);
             event.setStatus(ShanoirEvent.SUCCESS);
