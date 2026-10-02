@@ -21,29 +21,30 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.dto.mapper.DatasetAcquisitionMapper;
+import org.shanoir.ng.datasetacquisition.dto.mapper.DatasetAcquisitionMapperImpl;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
+import org.shanoir.ng.examination.dto.mapper.ExaminationMapperImpl;
 import org.shanoir.ng.examination.model.Examination;
+import org.shanoir.ng.shared.mapper.StudyMapperImpl;
+import org.shanoir.ng.shared.mapper.SubjectMapperImpl;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 /**
- * Guards against a regression where the "Found"/"Total"/"Page size" counters shown
- * below the dataset acquisitions grid stayed stuck at 0 despite the table itself
- * rendering correctly: MapStruct's generated code for a Page-returning mapper method
- * has no setter to target on PageImpl for totalElements/number/size (Spring's PageImpl
- * computes them from immutable constructor args), so it fell back to the no-arg
- * constructor + content.add() in a loop, silently losing the source Page's real
- * pagination metadata.
+ * Checks that the "Found"/"Total"/"Page size" counters shown
+ * below the dataset acquisitions table display correct values.
  */
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("test")
+@SpringJUnitConfig(classes = {
+    DatasetAcquisitionMapperImpl.class,
+    ExaminationMapperImpl.class,
+    SubjectMapperImpl.class,
+    StudyMapperImpl.class
+})
 public class DatasetAcquisitionMapperPagingTest {
 
     @Autowired
