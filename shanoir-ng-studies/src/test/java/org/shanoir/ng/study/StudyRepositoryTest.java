@@ -121,6 +121,17 @@ public class StudyRepositoryTest {
     }
 
     @Test
+    public void findStudiesOfUserLoadsAllMembers() {
+        // user 2 has CAN_SEE_ALL (4) on study 1, which has 2 members: the whole member list must be
+        // loaded, not only the queried user's StudyUser ("Members" column of the study list)
+        final List<Study> studies = studyRepository
+                .findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(2L, 4, true);
+        assertEquals(1, studies.size());
+        assertEquals(STUDY_TEST_1_ID, studies.get(0).getId());
+        assertEquals(2, studies.get(0).getStudyUserList().size());
+    }
+
+    @Test
     public void testRights() {
         Study studyFound = studyRepository.findById(1L).orElseThrow();
         assertEquals(2, studyFound.getStudyUserList().size());
