@@ -80,6 +80,14 @@ export class WelcomeComponent implements OnInit {
         const localIri = (name: string): string => shanoirUrl + '/shanoir-ng/welcome#' + name;
         const fliIri = 'https://www.francelifeimaging.fr';
         const inriaIri = 'https://inria.fr';
+        const softwareLicenseIri = 'https://www.gnu.org/licenses/gpl-3.0.en.html';
+        // Access policy: public metadata, data access granted by the study admins
+        const accessRights = { '@id': 'http://publications.europa.eu/resource/authority/access-right/RESTRICTED' };
+        const rights = 'Metadata of public studies are openly available. Access to the data requires a Shanoir account '
+            + 'and the approval of the study managers, requested with the "Request an access" button of the study.';
+        // license given as absolute IRI, otherwise kept as text
+        const licenseValue = (license: string): string | { '@id': string } =>
+            /^[a-z][a-z0-9+.-]*:\S+$/i.test(license.trim()) ? { '@id': license.trim() } : license;
 
         const datasets: Record<string, unknown>[] = (this.publicStudies ?? []).filter(study => study != null).map(study => {
             const studyUrl: string = shanoirUrl + '/shanoir-ng/study/details/' + study.id;
@@ -91,7 +99,9 @@ export class WelcomeComponent implements OnInit {
                 'dct:identifier': studyUrl,
                 'schema:url': studyUrl,
                 'schema:name': study.name,
-                'dct:title': study.name
+                'dct:title': study.name,
+                'dct:accessRights': accessRights,
+                'dct:rights': rights
             };
             if (study.description) {
                 dataset['schema:description'] = study.description;
@@ -99,6 +109,7 @@ export class WelcomeComponent implements OnInit {
             }
             if (study.license) {
                 dataset['schema:license'] = study.license;
+                dataset['dct:license'] = licenseValue(study.license);
             }
             const keywords: string[] = (study.studyTags ?? []).filter(tag => tag?.name).map(tag => tag.name);
             if (keywords.length > 0) {
@@ -123,7 +134,10 @@ export class WelcomeComponent implements OnInit {
             'schema:description': 'Shanoir-NG (SHAring NeurOImaging Resources, Next Generation) is a web platform (open-source) for clinical and preclinical research, designed to import, share, archive, search and visualize all kind of medical imaging data (BIDS, MR, CT, PT, EEG, Bruker). Its origin goes back to neuroimaging, but its usage is now open for all kind of organs. It provides a user-friendly, secure web access and offers an intuitive workflow to facilitate the collecting and retrieving of imaging data from multiple sources and a wizzard to make the completion of metadata easy. Shanoir-NG comes along with many features such as pseudonymization of data for all imports, automatic NIfTI conversion and support for multi-centres clinical studies.',
             'schema:url': shanoirUrl,
             'schema:keywords': ['Medical Imaging', 'Neuroimaging', 'Neuroinformatics', 'MRI', 'Research', 'DICOM', 'BIDS', 'Data Sharing'],
-            'schema:license': 'https://www.gnu.org/licenses/gpl-3.0.en.html',
+            'schema:license': softwareLicenseIri,
+            'dct:license': { '@id': softwareLicenseIri },
+            'dct:accessRights': accessRights,
+            'dct:rights': rights,
             'dct:language': { '@id': 'http://id.loc.gov/vocabulary/iso639-1/en' },
             'dct:title': titles,
             'rdfs:label': titles,
