@@ -28,7 +28,8 @@ SELECT 'username',
        'study_user_right'
 
 UNION ALL
-SELECT u.username AS username,
+SELECT u.id AS user_id,
+       u.username AS username,
        u.email AS email,
        u.first_name AS first_name,
        u.last_name AS last_name,
