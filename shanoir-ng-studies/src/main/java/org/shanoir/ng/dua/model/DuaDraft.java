@@ -16,6 +16,7 @@ package org.shanoir.ng.dua.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 public class DuaDraft {
@@ -23,8 +24,10 @@ public class DuaDraft {
     @Id
     private String id;
 
+    @NotNull
     private Long studyId;
 
+    @NotNull
     private String studyName;
 
     private String url;

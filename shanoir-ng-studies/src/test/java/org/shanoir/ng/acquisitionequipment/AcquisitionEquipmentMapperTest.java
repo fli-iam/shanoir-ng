@@ -22,9 +22,11 @@ import org.junit.jupiter.api.Test;
 import org.shanoir.ng.acquisitionequipment.dto.AcquisitionEquipmentDTO;
 import org.shanoir.ng.acquisitionequipment.dto.mapper.AcquisitionEquipmentMapper;
 import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 /**
  * Center service test.
@@ -42,6 +44,9 @@ public class AcquisitionEquipmentMapperTest {
 
     @Autowired
     private AcquisitionEquipmentMapper acquisitionEquipmentMapper;
+
+    @MockitoBean
+    private ConnectionFactory connectionFactory;
 
     @Test
     public void acquisitionEquipmentsToAcquisitionEquipmentDTOsTest() {

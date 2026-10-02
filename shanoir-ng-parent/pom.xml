@@ -36,6 +36,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <module>../shanoir-ng-exchange</module>
         <module>../shanoir-ng-keycloak-auth</module>
         <module>../shanoir-ng-storage</module>
+        <module>../shanoir-ng-storage-jackson3</module>
         <!-- Microservices -->
         <module>../shanoir-ng-users</module>
         <module>../shanoir-ng-studies</module>
@@ -50,7 +51,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <java.version>21</java.version>
+        <java.version>25</java.version>
         <sonar.core.codeCoveragePlugin>jacoco</sonar.core.codeCoveragePlugin>
         <sonar.jacoco.reportPath>${project.basedir}/../target/jacoco.exec</sonar.jacoco.reportPath>
         <sonar.language>java</sonar.language>

@@ -18,7 +18,10 @@ import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.study.model.Study;
 
+
 import jakarta.persistence.Entity;
+
+import java.io.Serial;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -37,6 +40,7 @@ public class Timepoint extends AbstractEntity {
     /**
      * UID
      */
+    @Serial
     private static final long serialVersionUID = 7218326283361790541L;
 
     /** Personnal comment. */

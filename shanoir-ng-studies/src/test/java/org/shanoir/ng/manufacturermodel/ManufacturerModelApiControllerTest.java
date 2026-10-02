@@ -27,18 +27,19 @@ import org.mockito.Mockito;
 import org.shanoir.ng.manufacturermodel.controler.ManufacturerModelApiController;
 import org.shanoir.ng.manufacturermodel.model.ManufacturerModel;
 import org.shanoir.ng.manufacturermodel.service.ManufacturerModelService;
-import org.shanoir.ng.shared.jackson.JacksonUtils;
 import org.shanoir.ng.shared.security.ControllerSecurityService;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Unit tests for manufacturer model controller.
@@ -47,7 +48,10 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
  *
  */
 
-@WebMvcTest(ManufacturerModelApiController.class)
+@WebMvcTest(controllers = ManufacturerModelApiController.class,
+        excludeAutoConfiguration = {
+                org.springframework.boot.security.oauth2.server.resource.autoconfigure.OAuth2ResourceServerAutoConfiguration.class
+        })
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
 public class ManufacturerModelApiControllerTest {
@@ -58,10 +62,13 @@ public class ManufacturerModelApiControllerTest {
     @Autowired
     private MockMvc mvc;
 
-    @MockBean
+    @Autowired
+    private JsonMapper mapper;
+
+    @MockitoBean
     private ManufacturerModelService manufacturerModelServiceMock;
 
-    @MockBean(name = "controllerSecurityService")
+    @MockitoBean(name = "controllerSecurityService")
     private ControllerSecurityService controllerSecurityService;
 
     @BeforeEach
@@ -93,7 +100,7 @@ public class ManufacturerModelApiControllerTest {
     @WithMockUser(authorities = { "ROLE_ADMIN" })
     public void saveNewManufacturerModelTest() throws Exception {
         mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(ModelsUtil.createManufacturerModel())))
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(ModelsUtil.createManufacturerModel())))
                 .andExpect(status().isOk());
     }
 
@@ -101,7 +108,7 @@ public class ManufacturerModelApiControllerTest {
     @WithMockUser(authorities = { "ROLE_ADMIN" })
     public void updateManufacturerModelTTest() throws Exception {
         mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(ModelsUtil.createManufacturerModel())))
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(ModelsUtil.createManufacturerModel())))
                 .andExpect(status().isNoContent());
     }
 
