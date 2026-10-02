@@ -14,8 +14,10 @@
 
 package org.shanoir.ng.user.controller;
 
+import java.io.IOException;
 import java.util.List;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.shanoir.ng.shared.core.model.IdList;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.ForbiddenException;
@@ -25,10 +27,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -157,4 +156,14 @@ public interface UserApi {
             BindingResult result)
             throws RestServiceException;
 
+    @Operation(summary = "downloadUserStatistics", description = "Download user statistics.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "exported statistics"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "404", description = "no dataset found"),
+            @ApiResponse(responseCode = "500", description = "unexpected error")})
+    @GetMapping(value = "/downloadUserStatistics")
+    @PreAuthorize("hasRole('ADMIN')")
+    ResponseEntity<?> downloadUserStatistics(HttpServletResponse response) throws IOException;
 }
