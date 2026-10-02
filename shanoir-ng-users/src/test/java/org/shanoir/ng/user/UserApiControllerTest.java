@@ -28,6 +28,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.shanoir.ng.accessrequest.controller.AccessRequestService;
+import org.shanoir.ng.download.CreateUserStatisticsService;
 import org.shanoir.ng.shared.core.model.IdList;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -107,6 +108,9 @@ public class UserApiControllerTest {
 
     @MockitoBean
     private VIPUserService vipUserService;
+
+    @MockitoBean
+    private CreateUserStatisticsService createUserStatisticsService;
 
     @Autowired
     private JsonMapper mapper;
