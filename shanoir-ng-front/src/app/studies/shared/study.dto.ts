@@ -252,6 +252,7 @@ export class StudyDTOService {
         } else {
           study.tags = [];
         }
+        study.subjectNamePattern = dto.subjectNamePattern;
         return study;
     }
 }
@@ -349,6 +350,7 @@ export class CenterStudyDTO {
     studyCenterList: StudyCenterDTO[];
     profile: Profile;
     tags: Tag[];
+    subjectNamePattern: string;
 }
 
 export class StudyLight {
