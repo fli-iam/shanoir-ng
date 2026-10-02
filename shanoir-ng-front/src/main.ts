@@ -9,6 +9,8 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { bootstrapApplication, BrowserModule } from '@angular/platform-browser';
 import { RouterModule } from '@angular/router';
 import { NgxJsonViewerModule } from 'ngx-json-viewer';
+import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
+import zoomPlugin from 'chartjs-plugin-zoom';
 
 import { AcquisitionEquipmentPipe } from './app/acquisition-equipments/shared/acquisition-equipment.pipe';
 import { AcquisitionEquipmentService } from './app/acquisition-equipments/shared/acquisition-equipment.service';
@@ -199,7 +201,8 @@ const options = {
         ExecutionTemplateService,
         ExecutionTemplateFilterService,
         { provide: HTTP_INTERCEPTORS, useClass: ShanoirHttpInterceptor, multi: true },
-        provideHttpClient(withXhr(), withInterceptorsFromDi()),
+        provideCharts(withDefaultRegisterables(zoomPlugin)),
+        provideHttpClient(withXhr(), withInterceptorsFromDi())
     ]
 }
 
