@@ -24,6 +24,10 @@ require  SHANOIR_SHUTDOWN_HOUR
 # Rabbit MQ default environnement variable to set
 export SPRING_AMQP_DESERIALIZATION_TRUST_ALL=true
 
+# Use the zstd-jni native lib extracted at build time (zstd-jni would otherwise
+# extract it into /tmp, which fails when /tmp is mounted noexec)
+set -- "$1" -DZstdNativePath=/opt/zstd/libzstd-jni.so "${@:2}"
+
 handle_microservice_migration
 
 abort_if_error
