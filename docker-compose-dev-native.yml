@@ -52,3 +52,91 @@ services:
         condition: service_started
       rabbitmq:
         condition: service_started
+  #
+  # Studies microservice - native
+  #
+  studies:
+    container_name: "${SHANOIR_PREFIX}studies"
+    build: !reset null
+    image: "shanoir-ng-studies-native:latest"
+    entrypoint: ["/workspace/org.shanoir.ng.ShanoirStudiesApplication",
+                 "-Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts",
+                 "-Djavax.net.ssl.trustStorePassword=changeit",
+                 "-Djavax.net.ssl.trustStoreType=JKS"]
+    environment:
+      - SHANOIR_PREFIX
+      - SHANOIR_URL_SCHEME
+      - SHANOIR_URL_HOST
+      - SHANOIR_KEYCLOAK_URL
+      - SHANOIR_KEYCLOAK_INTERNAL_URL
+      - SHANOIR_MIGRATION
+      - SHANOIR_STORAGE_TYPE
+      - S3_ENDPOINT
+      - S3_REGION
+      - S3_ACCESS_KEY_ID
+      - S3_SECRET_ACCESS_KEY
+      - S3_BUCKET_STUDIES
+    volumes:
+      - "logs:/var/log/shanoir-ng-logs"
+      - certificate-share-data:/etc/ssl/certs/java:ro
+      - "studies-data:/var/studies-data" # persistent
+      - "bids-data:/var/bids-data" # temporary, participants.tsv
+      - "tmp:/tmp"
+    networks:
+      - shanoir_ng_network
+    ports:
+     - "9902:9902"
+     - "9912:9912"
+    depends_on:
+      init-cert-and-logs:
+        condition: service_completed_successfully
+      database-migrations:
+        condition: service_completed_successfully
+      database:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+      users:
+        condition: service_started
+  #
+  # Import microservice - native
+  #
+  import:
+    container_name: "${SHANOIR_PREFIX}import"
+    build: !reset null
+    image: "shanoir-ng-import-native:latest"
+    entrypoint: ["/workspace/org.shanoir.ng.ShanoirImportApplication",
+                 "-Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts",
+                 "-Djavax.net.ssl.trustStorePassword=changeit",
+                 "-Djavax.net.ssl.trustStoreType=JKS"]
+    environment:
+      - SHANOIR_PREFIX
+      - SHANOIR_URL_SCHEME
+      - SHANOIR_URL_HOST
+      - SHANOIR_KEYCLOAK_URL
+      - SHANOIR_KEYCLOAK_INTERNAL_URL
+      - SHANOIR_MIGRATION
+    volumes:
+      - "logs:/var/log/shanoir-ng-logs"
+      - certificate-share-data:/etc/ssl/certs/java:ro
+      - "tmp:/tmp"
+    networks:
+      - shanoir_ng_network
+    ports:
+     - "9903:9903"
+     - "9913:9913"
+     # uncomment below for local testing of import-from-pacs, enable:
+     # pacs-to-ms-import: c-move from dcm4chee arc light to ms import
+     # do not add by default, as it blocks local ShUp from using 44105
+     # - "44105:44105"
+    depends_on:
+      init-cert-and-logs:
+        condition: service_completed_successfully
+      database-migrations:
+        condition: service_completed_successfully
+      database:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+      users:
+        condition: service_started
