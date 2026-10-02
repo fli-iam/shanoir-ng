@@ -91,8 +91,11 @@ public class ProcessingResourceApiController implements ProcessingResourceApi {
                 PacsTransferStats pacsStats = PacsTransferStats.start();
                 try {
                     dlPermits.acquire();
-                    datasetDownloaderService.massiveDownload(format, datasets, response, true, converterId, true, sorting, new TarWriter(response.getOutputStream()), true);
-                    dlPermits.release();
+                    try {
+                        datasetDownloaderService.massiveDownload(format, datasets, response, true, converterId, true, sorting, new TarWriter(response.getOutputStream()), true);
+                    } finally {
+                        dlPermits.release();
+                    }
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     throw new RestServiceException(new ErrorModel(HttpStatus.SERVICE_UNAVAILABLE.value(),

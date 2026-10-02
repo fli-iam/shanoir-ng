@@ -60,9 +60,9 @@ public class TarWriter implements ArchiveWriter {
 
     /** Only using Zstandard compression algo atm **/
     public TarWriter(OutputStream out) throws IOException {
-        this.network = new FilterOutputStream(out);
+        this.network = new FilterOutputStreamShanoir(out);
         this.zstd = new ZstdOutputStream(network, 1);
-        this.tar = new TarArchiveOutputStreamShanoir(new FilterOutputStream(zstd));
+        this.tar = new TarArchiveOutputStreamShanoir(zstd);
 
         // DICOM paths are longer than the 100 characters of a basic tar header
         tar.setLongFileMode(TarArchiveOutputStream.LONGFILE_POSIX);
@@ -174,10 +174,10 @@ public class TarWriter implements ArchiveWriter {
         }
 
         @Override
-        public void write(int b) throws IOException {
+        public void putArchiveEntry(TarArchiveEntry entry) throws IOException {
             lock.lock();
             try {
-                zstd.write(b);
+                super.putArchiveEntry(entry);
             } finally {
                 lock.unlock();
             }
@@ -187,8 +187,28 @@ public class TarWriter implements ArchiveWriter {
         public void write(byte[] b, int off, int len) throws IOException {
             lock.lock();
             try {
-                zstd.write(b, off, len);
+                super.write(b, off, len);
             } finally {
+                lock.unlock();
+            }
+        }
+
+        @Override
+        public void closeArchiveEntry() throws IOException {
+            lock.lock();
+            try {
+                super.closeArchiveEntry();
+            }  finally {
+                lock.unlock();
+            }
+        }
+
+        @Override
+        public void finish() throws IOException {
+            lock.lock();
+            try {
+                super.finish();
+            }  finally {
                 lock.unlock();
             }
         }
@@ -197,7 +217,7 @@ public class TarWriter implements ArchiveWriter {
         public void flush() throws IOException {
             lock.lock();
             try {
-                zstd.flush();
+                super.flush();
             } finally {
                 lock.unlock();
             }
@@ -207,7 +227,7 @@ public class TarWriter implements ArchiveWriter {
         public void close() throws IOException {
             lock.lock();
             try {
-                zstd.close();
+                super.close();
             } finally {
                 lock.unlock();
             }
