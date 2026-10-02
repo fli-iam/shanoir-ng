@@ -209,37 +209,57 @@ if [ -n "$deploy" ] ; then
 		  docker compose -f docker-compose-dev.yml up -d "$infra_ms"
 	  done
   fi
-	
+
+	# Microservices that have a native image variant (used when --native is set).
+	# Each entry <name> assumes:
+	#   - module directory:       ./shanoir-ng-<name>
+	#   - native compose service: <name>-native (in docker-compose-dev-native.yml)
+	native_services="users studies import"
+
+	is_native_service() {
+		case " $native_services " in
+			*" $1 "*) return 0 ;;
+			*)        return 1 ;;
+		esac
+	}
+
 	# 5. Shanoir microservices
 	step "start: shanoir microservices"
+
+	if [ -n "$native" ]; then
+		# build-image requires a Docker engine to run and produce the native image.
+		# Mounting the host-docker inside the image resulted in permissions denied
+		# or clean cache problems with the re-execution of the script, so we build locally.
+		command -v mvn >/dev/null 2>&1 \
+			|| die "mvn not found on PATH: --native builds the native images ($native_services) locally (see comment above); install a local Maven + matching JDK, or drop --native"
+		m2repo="$PWD/tmp/home/.m2/repository"
+	fi
+
 	for ms in users studies datasets import preclinical nifti-conversion
 	do
 		step "init: $ms microservice"
 		docker compose -f docker-compose-dev.yml run --rm -e SHANOIR_MIGRATION=init "$ms"
-		if [ -n "$native" ] && [ "$ms" = "users" ] ; then
-			# Build the native images (paketo/buildpacks), if requested;
-	    # build-image requires a Docker engine to run and produce the native image.
-	    # Mounting the host-docker inside the image resulted in permissions denied
-	    # or clean cache problems with the re-execution of the script, so we do it locally
-      step "Compile Shanoir native images locally"
-      command -v mvn >/dev/null 2>&1 \
-          || die "mvn not found on PATH: --native builds the 'users' native image locally (see comment above); install a local Maven + matching JDK, or drop --native"
-        m2repo="$PWD/tmp/home/.m2/repository"
-        MAVEN_OPTS="-Dmaven.repo.local=$m2repo" \
-            mvn -f ./shanoir-ng-users/pom.xml \
-            -Pnative spring-boot:build-image \
-            -DskipTests
-      step "Build users-native, use referenced image from local Docker"
-			docker compose -f docker-compose-dev.yml -f docker-compose-dev-native.yml build users
+
+		if [ -n "$native" ] && is_native_service "$ms" ; then
+			step "Compile $ms native image locally"
+			MAVEN_OPTS="-Dmaven.repo.local=$m2repo" \
+				mvn -f "./shanoir-ng-$ms/pom.xml" \
+				-Pnative spring-boot:build-image \
+				-DskipTests
+
+			step "Build $ms-native, use referenced image from local Docker"
+			docker compose -f docker-compose-dev.yml -f docker-compose-dev-native.yml build "$ms-native"
+
 			step "start: $ms microservice (native)"
-			docker compose -f docker-compose-dev.yml -f docker-compose-dev-native.yml up -d users
+			docker compose -f docker-compose-dev.yml -f docker-compose-dev-native.yml up -d "$ms-native"
 			continue
 		fi
-		  step "start: $ms microservice"
+
+		step "start: $ms microservice"
 		if [ -n "$native" ]; then
-		  docker compose -f docker-compose-dev.yml -f docker-compose-dev-native.yml up -d "$ms"
-    else
-		  docker compose -f docker-compose-dev.yml up -d "$ms"
+			docker compose -f docker-compose-dev.yml -f docker-compose-dev-native.yml up -d "$ms"
+		else
+			docker compose -f docker-compose-dev.yml up -d "$ms"
 		fi
 	done
 

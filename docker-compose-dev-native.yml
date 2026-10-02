@@ -15,8 +15,7 @@ services:
   # Users microservice - native
   #
   users:
-    container_name: "${SHANOIR_PREFIX}users"
-    build: !reset null
+    container_name: "${SHANOIR_PREFIX}users-native"
     image: "shanoir-ng-users-native:latest"
     entrypoint: ["/workspace/org.shanoir.ng.ShanoirUsersApplication",
                  "-Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts",
@@ -56,8 +55,7 @@ services:
   # Studies microservice - native
   #
   studies:
-    container_name: "${SHANOIR_PREFIX}studies"
-    build: !reset null
+    container_name: "${SHANOIR_PREFIX}studies-native"
     image: "shanoir-ng-studies-native:latest"
     entrypoint: ["/workspace/org.shanoir.ng.ShanoirStudiesApplication",
                  "-Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts",
@@ -102,8 +100,7 @@ services:
   # Import microservice - native
   #
   import:
-    container_name: "${SHANOIR_PREFIX}import"
-    build: !reset null
+    container_name: "${SHANOIR_PREFIX}import-native"
     image: "shanoir-ng-import-native:latest"
     entrypoint: ["/workspace/org.shanoir.ng.ShanoirImportApplication",
                  "-Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts",
