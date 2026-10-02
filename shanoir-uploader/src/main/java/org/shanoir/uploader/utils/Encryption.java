@@ -15,83 +15,67 @@
 package org.shanoir.uploader.utils;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.security.GeneralSecurityException;
 import java.util.Properties;
 
-import org.apache.commons.codec.binary.Hex;
-import org.shanoir.uploader.cryptography.BlowfishAlgorithm;
+import org.shanoir.uploader.cryptography.AesGcmAlgorithm;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class is used to crypt/uncrypt the user and proxy passwords
+ * Encrypts/decrypts the user and proxy passwords stored in the properties files
+ * using AES-256-GCM (see {@link AesGcmAlgorithm}).
+ *
+ * Values in any other format (e.g. legacy Blowfish or plain text) are not
+ * supported anymore: they are rejected with an error and must be reset.
  *
  * @author ifakhfak
- *
  */
 public class Encryption {
 
     private static final Logger LOG = LoggerFactory.getLogger(Encryption.class);
 
-    private BlowfishAlgorithm blow;
+    private final AesGcmAlgorithm aes;
 
     public Encryption(String key) {
-        this.blow = new BlowfishAlgorithm(key);
+        this.aes = new AesGcmAlgorithm(key);
     }
 
     /**
-     * decrypt password
-     * @param shanoirUploaderFolder
-     * @param propertyObject
-     * @param propertyString
-     * @param propertyFile
+     * Replaces the property value in memory by its clear text.
+     * If the value is not in the current encrypted format, or cannot be
+     * decrypted, an error is logged and the property is removed from memory.
+     *
+     * @param propertiesFile unused, kept for API compatibility
      */
     public void decryptIfEncryptedString(File propertiesFile, Properties propertyObject, String propertyString) {
-        String unknownString = propertyObject.getProperty(propertyString);
+        String stored = propertyObject.getProperty(propertyString);
+        if (stored == null || stored.isEmpty()) {
+            return;
+        }
+
+        if (!AesGcmAlgorithm.isEncrypted(stored)) {
+            LOG.error("Property '" + propertyString + "' is not in the supported encrypted format "
+                    + "(legacy Blowfish or plain text is no longer supported). "
+                    + "The property has to be reset: please enter the value again.");
+            propertyObject.remove(propertyString);
+            return;
+        }
+
         try {
-            LOG.debug("Start decrypting string " + propertyString);
-            byte[] ibyte = Hex.decodeHex(unknownString.toCharArray());
-            byte[] dbyte = blow.decrypt(ibyte);
-            String uncryptedString = new String(dbyte);
-            propertyObject.setProperty(propertyString, uncryptedString);
-            LOG.debug("End decrypt encrypted string");
-        } catch (RuntimeException e) {
-            LOG.warn(propertyString + " is not well configured : the string is not crypted");
-            LOG.debug("Start encrypting string");
-            try {
-                String encryptedPassword = cryptEncryptedString(unknownString);
-                propertyObject.setProperty(propertyString, encryptedPassword);
-                // store encrypted pass
-                OutputStream out = new FileOutputStream(propertiesFile);
-                propertyObject.store(out, "SHANOIR Server Configuration");
-                // get non crypted password
-                propertyObject.setProperty(propertyString, unknownString);
-                LOG.debug("End encrypt String");
-                out.close();
-            } catch (FileNotFoundException e1) {
-                LOG.error(e1.getMessage());
-            } catch (IOException e1) {
-                LOG.error(e1.getMessage());
-            }
-        } catch (Exception e) {
-            LOG.error(e.getMessage());
+            propertyObject.setProperty(propertyString, aes.decrypt(stored));
+            LOG.debug("Decrypted " + propertyString);
+        } catch (GeneralSecurityException | RuntimeException e) {
+            LOG.error("Property '" + propertyString + "' could not be decrypted (wrong key or corrupted value). "
+                    + "The property has to be reset: please enter the value again. Cause: " + e.getMessage());
+            propertyObject.remove(propertyString);
         }
     }
 
-    /**
-     * encrypt password
-     * @param stringToEncrypt
-     * @return
-     */
+    /** Encrypts a string with the current algorithm. Returns "" on failure. */
     public String cryptEncryptedString(String stringToEncrypt) {
         try {
-            byte[] ibyte = stringToEncrypt.getBytes();
-            byte[] encryptedPasswordByte;
-            encryptedPasswordByte = blow.encrypt(ibyte);
-            return String.valueOf(Hex.encodeHex(encryptedPasswordByte));
+            return aes.encrypt(stringToEncrypt);
         } catch (Exception e) {
             LOG.error("Issue during encryption", e);
             return "";
