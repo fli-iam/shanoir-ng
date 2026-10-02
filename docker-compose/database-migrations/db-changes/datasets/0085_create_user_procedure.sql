@@ -35,7 +35,11 @@ SELECT u.username AS username,
        u.creation_date AS creation_date,
        u.expiration_date AS expiration_date,
        u.last_login AS last_login,
-       u.role_id AS role_id,
+       (CASE u.role_id
+            WHEN 1 then 'Administrator'
+            WHEN 2 then 'Expert'
+            WHEN 3 then 'User'
+        END) AS role_id,
        s.name AS study_name,
        (CASE sur.study_user_rights
             WHEN 1 then 'CAN_ADMINISTRATE'
@@ -45,7 +49,7 @@ SELECT u.username AS username,
             WHEN 5 then 'CAN_EXECUTE'
             WHEN 6 then 'CAN_ANNOTATE'
             WHEN 7 then 'CAN_ANNOTATE_REVIEW'
-           END) AS study_user_right
+        END) AS study_user_right
     FROM users u
     JOIN study_user su on su.user_id = u.id
     JOIN studies.study s on su.study_id = s.id
