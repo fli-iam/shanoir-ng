@@ -12,11 +12,27 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-@if (pipeline) {
-    <div class="pipeline">
+@if (pickedVersion) {
+    <div class="pipeline" [class.selected]="selected" [title]="pickedVersion.pipeline.identifier" (click)="select()">
         <div class="icon">
             <img [src]="ImagesUrlUtil.PIPELINE_IMAGE_ICON_PATH" alt="" />
         </div>
+        <div class="labels">
+            <span class="name">{{ group.name }}</span>
+            @if (group.versions.length > 1) {
+                <select class="version-picker"
+                        [attr.aria-label]="'Version of ' + group.name"
+                        (click)="$event.stopPropagation()"
+                        (change)="pickVersion($any($event.target).value)">
+                    @for (version of group.versions; track version.label) {
+                        <option [value]="version.label" [selected]="version.label === pickedVersion.label">
+                            v{{ version.label }}
+                        </option>
+                    }
+                </select>
+            } @else {
+                <span class="version">v{{ pickedVersion.label }}</span>
+            }
+        </div>
     </div>
-    <p class="name">{{pipeline.identifier}}</p>
 }
