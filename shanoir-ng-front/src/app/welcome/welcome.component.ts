@@ -65,9 +65,9 @@ export class WelcomeComponent implements OnInit {
     }
 
     /**
-     * Adds a JSON-LD description of the platform and its public studies (Bioschemas DataCatalog /
-     * Dataset profiles), read by FAIR evaluators such as FAIR-Checker. Built as an object and
-     * serialized with JSON.stringify, so that it is always valid JSON whatever the studies contain.
+     * Adds a JSON-LD description of the platform, its public studies (Bioschemas DataCatalog /
+     * Dataset profiles) and the exposed public statistics according to standard ontologies. 
+     * Built as an object and serialized with JSON.stringify.
      */
     addSchemaToDOM(): void {
         const isTerabyte = this.storageSize >= 1000;
@@ -258,7 +258,7 @@ export class WelcomeComponent implements OnInit {
             '@graph': [catalog, ...datasets, ...organizations, ...qualityNodes]
         };
 
-        // replace the description if it was already added (e.g. when coming back to this page)
+        // avoid multiple addition of the JSON-LD script
         this._document.getElementById(WelcomeComponent.JSON_LD_SCRIPT_ID)?.remove();
         const script = this._renderer2.createElement('script');
         script.id = WelcomeComponent.JSON_LD_SCRIPT_ID;
@@ -276,7 +276,7 @@ export class WelcomeComponent implements OnInit {
             this.subjectsCount = stats.subjectsCount;
             this.datasetAcquisitionsCount = stats.datasetAcquisitionsCount;
             this.storageSize = stats.storageSize;
-            // the public studies are part of the JSON-LD description, wait for them too
+            // the public studies are part of the JSON-LD description, so we wait for them too
             Promise.all([this.fetchUsersCount(), this.fetchEventsCount(), publicStudiesPromise])
                 .then(() => this.addSchemaToDOM());
         });
