@@ -10,45 +10,43 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
+#
+# Overlay for docker-compose-dev.yml: run users, studies and import as native images.
+#
+# The services keep the SAME NAMES as in docker-compose-dev.yml (users, studies,
+# import), so that container names, DNS aliases (nginx, other microservices),
+# published ports, volumes and depends_on are all inherited and nothing can
+# conflict. The overlay only swaps the image and the entrypoint.
+#
+# Usage (done by bootstrap.sh --native):
+#   docker compose -f docker-compose-dev.yml -f docker-compose-dev-native.yml up -d
+#
+# Requires Docker Compose >= 2.24 (for "!reset").
+#
 services:
-  #
-  # Users microservice - native
-  #
   users:
-    container_name: "${SHANOIR_PREFIX}users"
-    build: !reset null
     image: "shanoir-ng-users-native:latest"
+    pull_policy: never          # image is built locally by bootstrap.sh
+    build: !reset null          # never rebuild/overwrite it with the JVM image
     entrypoint: ["/workspace/org.shanoir.ng.ShanoirUsersApplication",
                  "-Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts",
                  "-Djavax.net.ssl.trustStorePassword=changeit",
                  "-Djavax.net.ssl.trustStoreType=JKS"]
     environment:
-      - SHANOIR_PREFIX
-      - SHANOIR_URL_SCHEME
-      - SHANOIR_URL_HOST
-      - SHANOIR_KEYCLOAK_USER
-      - SHANOIR_KEYCLOAK_PASSWORD
-      - SHANOIR_ADMIN_EMAIL
-      - SHANOIR_CERTIFICATE
-      - SHANOIR_CERTIFICATE_PEM_CRT
-      - SHANOIR_CERTIFICATE_PEM_KEY
-      - SHANOIR_MIGRATION
-      - VIP_SERVICE_EMAIL
-      - SHANOIR_SMTP_HOST
-      - SHANOIR_SMTP_PORT
       - SPRING_AMQP_DESERIALIZATION_TRUST_ALL=true
-    volumes:
-      - "logs:/var/log/shanoir-ng-logs"
-      - "certificate-share-data:/etc/ssl/certs/java:ro"
-    networks:
-      - shanoir_ng_network
-    ports:
-      - "9901:9901"
-      - "9911:9911"
-    depends_on:
-      init-cert-and-logs:
-        condition: service_completed_successfully
-      database:
-        condition: service_started
-      rabbitmq:
-        condition: service_started
+  studies:
+    image: "shanoir-ng-studies-native:latest"
+    pull_policy: never
+    build: !reset null
+    entrypoint: ["/workspace/org.shanoir.ng.ShanoirStudiesApplication",
+                 "-Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts",
+                 "-Djavax.net.ssl.trustStorePassword=changeit",
+                 "-Djavax.net.ssl.trustStoreType=JKS"]
+  import:
+    image: "shanoir-ng-import-native:latest"
+    pull_policy: never
+    build: !reset null
+    entrypoint: ["/workspace/org.shanoir.ng.ShanoirImportApplication",
+                 "-Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts",
+                 "-Djavax.net.ssl.trustStorePassword=changeit",
+                 "-Djavax.net.ssl.trustStoreType=JKS"]
