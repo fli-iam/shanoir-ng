@@ -16,7 +16,7 @@ print_help()
 	cat <<EOF
 Build and deploy Shanoir
 usage:
-	$0 --clean|--force|--no-deploy [--no-build] [--no-keycloak] [--no-dcm4chee] [--no-infra] [--native] [--core] [--prune] [-h|--help]
+	$0 --clean|--force|--no-deploy [--no-build] [--no-keycloak] [--no-dcm4chee] [--native] [--core] [--prune] [-h|--help]
 
 CAUTION: THIS COMMAND IS DESTRUCTIVE, do not use it on an existing production
 instance. It will overwrite the data hosted in the external volumes declared in
@@ -31,7 +31,6 @@ Options:
 --no-build	skip the build stage
 --no-keycloak	do not run Keycloak (used if Keycloak is external)
 --no-dcm4chee	do not run dcm4chee (used if dcm4chee is external)
---no-infra	do not run infra-service (solr, rabbitmq, bids-validator)
 --core		minimal stack: do not run nifti-conversion, bids-validator,
 		preclinical, solr nor the dcm4chee images (ldap, dcm4chee-database,
 		dcm4chee-arc). Those services form the compose profile 'full'.
@@ -133,7 +132,6 @@ build=1
 deploy=1
 keycloak=1
 dcm4chee=1
-infra=1
 clean=
 force=
 native=
@@ -147,7 +145,6 @@ while [ $# -ne 0 ] ; do
 		--no-build)	build=		;;
 		--no-keycloak)	keycloak=	;;
 		--no-dcm4chee)	dcm4chee=	;;
-		--no-infra)	infra=		;;
 		--no-deploy)	deploy=		;;
 		--native)	native=1	;;
 		--prune)	prune=1		;;
@@ -291,12 +288,10 @@ if [ -n "$deploy" ] ; then
 	fi
 
 	# 4. other infrastructure services
-	if [ -n "$infra" ] ; then
-		for svc in $INFRA_SERVICES ; do
-			step "start: $svc"
-			docker compose up -d "$svc"
-		done
-	fi
+	for svc in $INFRA_SERVICES ; do
+		step "start: $svc"
+		docker compose up -d "$svc"
+	done
 
 	# 5. Shanoir microservices
 	# One-shot schema init: always with the JVM image/config, since native
