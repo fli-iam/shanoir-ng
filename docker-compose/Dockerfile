@@ -221,7 +221,7 @@ ENV LANG=fr_FR.UTF-8
 ENV LANGUAGE=fr_FR.UTF-8
 ENV PATH="/opt/miniconda3/bin:${PATH}"
 
-CMD ["-jar", "/nifti-conversion.jar"]
+CMD ["-Dspring.aot.enabled=true", "-jar", "/nifti-conversion.jar"]
 
 
 
