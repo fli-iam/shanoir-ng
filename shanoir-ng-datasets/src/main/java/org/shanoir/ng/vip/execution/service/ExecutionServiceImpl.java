@@ -293,7 +293,7 @@ public class ExecutionServiceImpl implements ExecutionService {
      * Get input values of exec as URI
      */
     private String getInputValueUri(ExecutionCandidateDTO sample, String groupBy, String exportFormat, String resourceId, String authenticationToken) {
-        String entityName = "resource_id+" + resourceId + "+" + groupBy + ("dcm".equals(exportFormat) ? ".tar.zst" : ".nii.gz");
+        String entityName = "resource_id+" + resourceId + "+" + groupBy + ("dcm".equals(exportFormat) ? ".zip" : ".nii.gz");
         return shanoirURIScheme + entityName
                 + "?format=" + exportFormat
                 + "&resourceId=" + resourceId
