@@ -135,18 +135,23 @@ public class DatasetDownloaderServiceImpl {
         }
     }
 
+    public void prepareArchiveResponse(HttpServletResponse response, List<Dataset> datasets, ArchiveWriter archiveWriter) throws IOException {
+        if (response.isCommitted()) {
+            return;
+        }
+        response.setContentType(archiveWriter.getContentType());
+        response.setHeader("Content-Disposition", "attachment;filename=\"" + getFileName(datasets, archiveWriter.getExtension()) + "\"");
+        response.flushBuffer();
+    }
+
     public void massiveDownload(String outputFormat, List<Dataset> datasets, HttpServletResponse response, boolean withManifest, Long converterId, Boolean withShanoirId, String sorting,
                                 ArchiveWriter archiveWriter, boolean abordOnPACSError) throws RestServiceException {
         Map<Long, List<String>> filesByAcquisitionId = new HashMap<>();
         Map<Long, DatasetDownloadError> downloadResults = new HashMap<>();
         Map<Long, String> datasetDownloadPath;
 
-        // Prepare the HTTP response for an archive download
-        response.setContentType(archiveWriter.getContentType());
-        response.setHeader("Content-Disposition", "attachment;filename=\"" + getFileName(datasets, archiveWriter.getExtension()) + "\"");
-
         try {
-            response.flushBuffer();
+            prepareArchiveResponse(response, datasets, archiveWriter);
             Map<String, List<String>> datasetDownloadNameListPerPath = new HashMap<>();
             datasetDownloadPath = new HashMap<>();
             if (Objects.nonNull(sorting)) {

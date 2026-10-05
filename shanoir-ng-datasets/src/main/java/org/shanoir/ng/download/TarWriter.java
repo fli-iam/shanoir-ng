@@ -58,6 +58,9 @@ public class TarWriter implements ArchiveWriter {
     /** Guarded by lock. */
     private boolean stopped;
 
+    /** Set when a keep-alive could not be written. */
+    private volatile boolean clientGone;
+
     /** Only using Zstandard compression algo atm **/
     public TarWriter(OutputStream out) throws IOException {
         this.network = new FilterOutputStreamShanoir(out);
@@ -100,6 +103,10 @@ public class TarWriter implements ArchiveWriter {
 
     public void flush() throws IOException {
         tar.flush();
+    }
+
+    public boolean isClientGone() {
+        return clientGone;
     }
 
     public void abort() {
@@ -151,6 +158,7 @@ public class TarWriter implements ArchiveWriter {
         } catch (IOException e) {
             // client gone: the archive thread gets its own error on its next write
             stopped = true;
+            clientGone = true;
         } finally {
             lock.unlock();
         }

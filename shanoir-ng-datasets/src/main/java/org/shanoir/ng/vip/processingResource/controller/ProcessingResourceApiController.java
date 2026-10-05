@@ -89,18 +89,23 @@ public class ProcessingResourceApiController implements ProcessingResourceApi {
                 }
 
                 PacsTransferStats pacsStats = PacsTransferStats.start();
+                TarWriter archiveWriter = new TarWriter(response.getOutputStream());
                 try {
+                    datasetDownloaderService.prepareArchiveResponse(response, datasets, archiveWriter);
                     dlPermits.acquire();
                     try {
-                        datasetDownloaderService.massiveDownload(format, datasets, response, true, converterId, true, sorting, new TarWriter(response.getOutputStream()), true);
+                        if (archiveWriter.isClientGone()) {
+                            throw new DownloadAbortedException("Client disconnected while waiting for a download thread.");
+                        }
+                        datasetDownloaderService.massiveDownload(format, datasets, response, true, converterId, true, sorting, archiveWriter, true);
                     } finally {
                         dlPermits.release();
                     }
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
-                    throw new RestServiceException(new ErrorModel(HttpStatus.SERVICE_UNAVAILABLE.value(),
-                            "Interrupted while waiting for a download thread."));
+                    throw new DownloadAbortedException("Interrupted while waiting for a download thread.", e);
                 } finally {
+                    archiveWriter.abort();
                     PacsTransferStats.stop();
                     LOG.info("VIP download [{}]: {} PACS responses, average PACS response time: {} ms, bytes received: {}, flow rate: {} MB/s, "
                             + "waiting for PACS: {} ms, zip writing: {} ms (compression: {} ms, network: {} ms)",
