@@ -28,10 +28,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <java.version>21</java.version>
+        <java.version>25</java.version>
         <!-- attention: the below Spring IoC container should match Spring Boot -->
         <!-- current version of Spring Boot 3.4.0 uses Spring Framework 6.2.0 -->
-        <spring.version>6.2.0</spring.version>
+        <spring.version>7.0.3</spring.version>
         <logback.version>1.5.3</logback.version>
         <lombok.version>1.18.26</lombok.version>
         <dcm4che.version>5.31.1</dcm4che.version>
@@ -452,6 +452,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </plugin>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.8.0</version>
                 <executions>
                     <execution>
                         <id>jar-with-dependencies</id>
