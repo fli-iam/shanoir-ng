@@ -49,9 +49,8 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -219,7 +218,7 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
             rabbitTemplate.convertAndSend(
                     RabbitMQConfiguration.COPY_ANIMAL_SUBJECT_QUEUE,
                     objectMapper.writeValueAsString(new CopyRequest(sourceSubjectId, targetSubjectId)));
-        } catch (AmqpException | JsonProcessingException e) {
+        } catch (AmqpException | JacksonException e) {
             throw new MicroServiceCommunicationException(
                     "Error while communicating with datasets MS to copy datasets to study.", e);
         }
@@ -269,7 +268,7 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
         dto.setSubjectMapping(subjectMapping);
         try {
             rabbitTemplate.convertAndSend(RabbitMQConfiguration.COPY_DATASETS_TO_STUDY_QUEUE, objectMapper.writeValueAsString(dto));
-        } catch (AmqpException | JsonProcessingException e) {
+        } catch (AmqpException | JacksonException e) {
             throw new MicroServiceCommunicationException(
                     "Error while communicating with datasets MS to copy datasets to study.", e);
         }

@@ -22,11 +22,12 @@ import org.junit.jupiter.api.Test;
 import org.shanoir.ng.acquisitionequipment.dto.mapper.AcquisitionEquipmentMapper;
 import org.shanoir.ng.center.dto.mapper.CenterMapper;
 import org.shanoir.ng.study.model.Study;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 /**
  * Subject - study mapper test.
@@ -41,11 +42,14 @@ public class StudyCenterMapperTest {
 
     private static final Long STUDY_ID = 1L;
 
-    @MockBean
+    @MockitoBean
     private AcquisitionEquipmentMapper acquisitionEquipmentMapperMock;
 
-    @MockBean
+    @MockitoBean
     private CenterMapper centerMapperMock;
+
+    @MockitoBean
+    private ConnectionFactory connectionFactory;
 
     @Autowired
     private StudyCenterMapper studyCenterMapper;
