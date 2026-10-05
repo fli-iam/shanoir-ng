@@ -258,8 +258,8 @@ COPY --link studies/shanoir-ng-studies.jar shanoir-ng-studies.jar
 COPY --link studies/entrypoint /usr/bin/
 
 # Use the below line for remote debugging
-#CMD ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:9912", "-jar", "/shanoir-ng-studies.jar"]
-CMD ["-jar", "/shanoir-ng-studies.jar"]
+#CMD ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:9912", "-Dspring.aot.enabled=true", "-jar", "/shanoir-ng-studies.jar"]
+CMD ["-Dspring.aot.enabled=true", "-jar", "/shanoir-ng-studies.jar"]
 
 
 

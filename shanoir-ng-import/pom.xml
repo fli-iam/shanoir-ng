@@ -176,13 +176,14 @@
                 <groupId>org.graalvm.buildtools</groupId>
                 <artifactId>native-maven-plugin</artifactId>
             </plugin>
-            <!-- Package shanoir-ng-import.jar as Spring Boot executable: Avoid error:
-				no main manifest attribute, in /shanoir-ng-import.jar -->
+            <!-- Package shanoir-ng-import.jar as Spring Boot executable:
+                 Avoid error: no main manifest attribute, in /shanoir-ng-import.jar -->
             <!-- Used here for ShanoirUploader: create an additional single jar to be used by ShUp -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
+                    <!-- classifier below for ShUp -->
                     <classifier>exec</classifier>
                     <profiles>
                         <profile>default</profile>
