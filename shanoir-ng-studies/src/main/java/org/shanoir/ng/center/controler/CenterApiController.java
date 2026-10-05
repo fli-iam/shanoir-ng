@@ -42,12 +42,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 
-import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
 
 @Controller
 public class CenterApiController implements CenterApi {
@@ -68,8 +64,7 @@ public class CenterApiController implements CenterApi {
     private ShanoirEventService eventService;
 
     @Override
-    public ResponseEntity<Void> deleteCenter(
-            @Parameter(description = "id of the center", required = true) @PathVariable("centerId") final Long centerId)
+    public ResponseEntity<Void> deleteCenter(final Long centerId)
                     throws RestServiceException {
         try {
             if (centerId.equals(0L)) {
@@ -88,8 +83,7 @@ public class CenterApiController implements CenterApi {
 
     @Override
     @Transactional
-    public ResponseEntity<CenterDTO> findCenterById(
-            @Parameter(description = "id of the center", required = true) @PathVariable("centerId") final Long centerId) {
+    public ResponseEntity<CenterDTO> findCenterById(final Long centerId) {
         final Optional<Center> center = centerService.findById(centerId);
         if (center.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -105,10 +99,7 @@ public class CenterApiController implements CenterApi {
      */
     @Override
     @Transactional
-    public ResponseEntity<CenterDTO> findOrCreateOrAddCenterByInstitutionDicom(
-            @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
-            @Parameter(description = "institution dicom to find or create a center", required = true)
-            @RequestBody InstitutionDicom institutionDicom, BindingResult result) throws RestServiceException {
+    public ResponseEntity<CenterDTO> findOrCreateOrAddCenterByInstitutionDicom(Long studyId, InstitutionDicom institutionDicom, BindingResult result) throws RestServiceException {
         if (institutionDicom.getInstitutionName() == null || institutionDicom.getInstitutionName().isBlank()) {
             return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
         }
@@ -135,8 +126,7 @@ public class CenterApiController implements CenterApi {
 
     @Override
     @Transactional
-    public ResponseEntity<List<CenterDTO>> findCentersByStudy(
-            @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
+    public ResponseEntity<List<CenterDTO>> findCentersByStudy(Long studyId) {
         final List<Center> centers = centerService.findByStudy(studyId);
         if (centers.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -156,8 +146,7 @@ public class CenterApiController implements CenterApi {
     }
 
     @Override
-    public ResponseEntity<List<IdName>> findCentersNames(
-            @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
+    public ResponseEntity<List<IdName>> findCentersNames(Long studyId) {
         final List<IdName> centers = centerService.findIdsAndNames(studyId);
         if (centers.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -167,8 +156,7 @@ public class CenterApiController implements CenterApi {
 
     @Override
     @Transactional
-    public ResponseEntity<CenterDTO> saveNewCenter(
-            @Parameter(description = "the center to create", required = true) @RequestBody @Valid final Center center,
+    public ResponseEntity<CenterDTO> saveNewCenter(final Center center,
             final BindingResult result) throws RestServiceException {
         forceCentersOfStudyCenterList(center);
         validate(center, result);
@@ -179,9 +167,7 @@ public class CenterApiController implements CenterApi {
     }
 
     @Override
-    public ResponseEntity<Void> updateCenter(
-            @Parameter(description = "id of the center", required = true) @PathVariable("centerId") final Long centerId,
-            @Parameter(description = "the center to update", required = true) @RequestBody @Valid final Center center,
+    public ResponseEntity<Void> updateCenter(final Long centerId, final Center center,
             final BindingResult result) throws RestServiceException {
         try {
             if (centerId.equals(0L)) {
