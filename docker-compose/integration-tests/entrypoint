@@ -22,7 +22,7 @@ if [ "$#" -eq 0 ]; then
 fi
 
 exec java -Djava.security.egd=file:/dev/urandom \
-    -cp /config:/app/shanoir-uploader-test.jar \
+    -cp /config:/app/shanoir-uploader-tests.jar \
     org.junit.platform.console.ConsoleLauncher \
     --reports-dir /reports \
     "$@"
