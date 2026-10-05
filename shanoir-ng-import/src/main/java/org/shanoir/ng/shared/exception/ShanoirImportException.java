@@ -14,6 +14,8 @@
 
 package org.shanoir.ng.shared.exception;
 
+import java.io.Serial;
+
 /**
  * Import microservice exception.
  *
@@ -25,6 +27,7 @@ public class ShanoirImportException extends ShanoirException {
     /**
      * Serial version uid
      */
+    @Serial
     private static final long serialVersionUID = 4867137215681474376L;
 
     /**

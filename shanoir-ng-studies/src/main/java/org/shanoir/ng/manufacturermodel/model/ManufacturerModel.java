@@ -23,7 +23,10 @@ import org.shanoir.ng.shared.dataset.DatasetModalityType;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
 
+
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
+import java.io.Serial;
 
 import jakarta.persistence.ColumnResult;
 import jakarta.persistence.ConstructorResult;
@@ -53,6 +56,7 @@ public class ManufacturerModel extends HalEntity {
     /**
      * UID
      */
+    @Serial
     private static final long serialVersionUID = -99873038897196966L;
 
     @NotNull

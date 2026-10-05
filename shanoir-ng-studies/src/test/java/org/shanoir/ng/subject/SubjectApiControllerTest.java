@@ -30,7 +30,6 @@ import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.ShanoirException;
-import org.shanoir.ng.shared.jackson.JacksonUtils;
 import org.shanoir.ng.study.service.StudyService;
 import org.shanoir.ng.subject.controler.SubjectApiController;
 import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
@@ -43,14 +42,16 @@ import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.client.RestTemplate;
+
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Unit tests for subject controller.
@@ -59,7 +60,10 @@ import org.springframework.web.client.RestTemplate;
  *
  */
 
-@WebMvcTest(controllers = SubjectApiController.class)
+@WebMvcTest(controllers = SubjectApiController.class,
+        excludeAutoConfiguration = {
+                org.springframework.boot.security.oauth2.server.resource.autoconfigure.OAuth2ResourceServerAutoConfiguration.class
+        })
 @ContextConfiguration(classes = {SubjectApiController.class, RestTemplate.class})
 @AutoConfigureMockMvc(addFilters = false)
 public class SubjectApiControllerTest {
@@ -70,22 +74,25 @@ public class SubjectApiControllerTest {
     @Autowired
     private MockMvc mvc;
 
-    @MockBean
+    @Autowired
+    private JsonMapper mapper;
+
+    @MockitoBean
     private SubjectService subjectServiceMock;
 
-    @MockBean
+    @MockitoBean
     private StudyService studyService;
 
-    @MockBean
+    @MockitoBean
     private SubjectMapper subjectMapperMock;
 
-    @MockBean
+    @MockitoBean
     private RabbitTemplate rabbitTemplate;
 
-    @MockBean
+    @MockitoBean
     private SubjectUniqueConstraintManager uniqueConstraintManager;
 
-    @MockBean
+    @MockitoBean
     private ShanoirEventService eventService;
 
     @BeforeEach
@@ -124,7 +131,12 @@ public class SubjectApiControllerTest {
     @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
     public void saveNewSubjectTest() throws Exception {
         mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(ModelsUtil.createSubject())))
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(ModelsUtil.createSubject())))
+                .andDo(result -> {
+                    if (result.getResolvedException() != null) {
+                        result.getResolvedException().printStackTrace();
+                    }
+                })
                 .andExpect(status().isOk());
     }
 
@@ -134,7 +146,7 @@ public class SubjectApiControllerTest {
         Subject subject = ModelsUtil.createSubject();
         subject.setId(1L);
         mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(subject)))
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(subject)))
                 .andExpect(status().isNoContent());
     }
 
@@ -156,7 +168,7 @@ public class SubjectApiControllerTest {
         given(subjectServiceMock.findAllSubjectsOfStudyId(1L)).willReturn(list);
 
         mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/1/allSubjects").param("preclinical", "null").accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(subject)))
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(subject)))
                 .andExpect(status().isOk());
     }
 
@@ -179,7 +191,7 @@ public class SubjectApiControllerTest {
         given(subjectServiceMock.findAllSubjectsOfStudyId(1L)).willReturn(list);
 
         mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/1/allSubjects").param("preclinical", "null").accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(subject)))
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(subject)))
                 .andExpect(status().isOk());
     }
 

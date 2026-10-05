@@ -199,9 +199,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <artifactId>native-maven-plugin</artifactId>
             </plugin>
             <!--
-				Package shanoir-ng-users.jar as Spring Boot executable:
-				Avoid error: no main manifest attribute, in /shanoir-ng-users.jar
-			-->
+                Package shanoir-ng-users.jar as Spring Boot executable:
+                Avoid error: no main manifest attribute, in /shanoir-ng-users.jar
+            -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>

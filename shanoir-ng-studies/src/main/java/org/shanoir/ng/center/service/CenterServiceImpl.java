@@ -45,9 +45,8 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * center service implementation.
@@ -181,7 +180,7 @@ public class CenterServiceImpl implements CenterService {
         try {
             rabbitTemplate.convertAndSend(RabbitMQConfiguration.CENTER_UPDATE_QUEUE,
                     objectMapper.writeValueAsString(centerMapper.centerToCenterDTOFlat(center)));
-        } catch (AmqpException | JsonProcessingException e) {
+        } catch (AmqpException | JacksonException e) {
             LOG.error("Could not send center change to MS Datasets !", e);
         }
     }
@@ -190,7 +189,7 @@ public class CenterServiceImpl implements CenterService {
         try {
             rabbitTemplate.convertAndSend(RabbitMQConfiguration.CENTER_DELETE_QUEUE,
                     objectMapper.writeValueAsString(centerId));
-        } catch (AmqpException | JsonProcessingException e) {
+        } catch (AmqpException | JacksonException e) {
             LOG.error("Could not send center change to MS Datasets !", e);
         }
     }

@@ -14,14 +14,16 @@
 
 package org.shanoir.ng.study.model;
 
+import java.io.Serial;
+
 import org.shanoir.ng.shared.hateoas.HalEntity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 /**
@@ -37,6 +39,7 @@ public class StudyExtraDetails extends HalEntity {
     /**
      * UID
      */
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @JsonBackReference
