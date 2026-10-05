@@ -23,6 +23,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.NativeQuery;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -60,7 +61,7 @@ public interface SubjectRepository extends JpaRepository<Subject, Long>, Subject
     @EntityGraph(attributePaths = {"study.tags"})
     Subject findFirstByIdentifierAndStudyIdIn(String identifier, Iterable<Long> studyIds);
 
-    @Query(value = "SELECT * FROM subject WHERE name LIKE :centerCode AND name REGEXP '^[0-9]+$' AND CHAR_LENGTH(name) IN (7, 8) ORDER BY name DESC LIMIT 1", nativeQuery = true)
+    @NativeQuery("SELECT * FROM subject WHERE name LIKE :centerCode AND name REGEXP '^[0-9]+$' AND CHAR_LENGTH(name) IN (7, 8) ORDER BY name DESC LIMIT 1")
     Subject findSubjectFromCenterCode(@Param("centerCode") String centerCode);
 
     Page<Subject> findByNameContaining(String name, Pageable pageable);

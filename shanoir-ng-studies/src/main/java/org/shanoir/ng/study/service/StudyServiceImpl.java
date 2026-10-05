@@ -81,10 +81,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 import jakarta.transaction.Transactional;
 
@@ -100,7 +99,7 @@ public class StudyServiceImpl implements StudyService {
 
     private static final Logger LOG = LoggerFactory.getLogger(StudyServiceImpl.class);
 
-    @Value("${shanoir.userDefaultExpirationDays}")
+    @Value("${shanoir.userDefaultExpirationDays:183}")
     private int userDefaultExpirationDays;
 
     @Autowired
@@ -729,7 +728,7 @@ public class StudyServiceImpl implements StudyService {
             try {
                 rabbitTemplate.convertAndSend(RabbitMQConfiguration.STUDY_USER_MAIL_QUEUE,
                         objectMapper.writeValueAsString(emailStudyUserAdded));
-            } catch (AmqpException | JsonProcessingException e) {
+            } catch (AmqpException | JacksonException e) {
                 LOG.error("Could not send email for study user report. ", e);
             }
         }
@@ -852,7 +851,7 @@ public class StudyServiceImpl implements StudyService {
         try {
             return (String) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_UPDATE_QUEUE,
                     objectMapper.writeValueAsString(study));
-        } catch (AmqpException | JsonProcessingException e) {
+        } catch (AmqpException | JacksonException e) {
             throw new MicroServiceCommunicationException(
                     "Error while communicating with datasets MS to update study name.", e);
         }
@@ -939,7 +938,7 @@ public class StudyServiceImpl implements StudyService {
             } else {
                 dto = new StudyStorageVolumeDTO();
             }
-        } catch (AmqpException | JsonProcessingException e) {
+        } catch (AmqpException | JacksonException e) {
             LOG.error("Error while fetching study [{}] datasets volume storage details.", studyId, e);
             return null;
         }
@@ -963,7 +962,7 @@ public class StudyServiceImpl implements StudyService {
             } else {
                 return new HashMap<>();
             }
-        } catch (AmqpException | JsonProcessingException e) {
+        } catch (AmqpException | JacksonException e) {
             LOG.error("Error while fetching studies [{}] datasets volume storage details.", studyIds, e);
             return null;
         }

@@ -183,7 +183,7 @@ vip:
 # Service account
 service-account:
   token:
-    uri: ${SHANOIR_KEYCLOAK_URL}/realms/shanoir-ng/protocol/openid-connect/token
+    uri: ${SHANOIR_KEYCLOAK_INTERNAL_URL}/realms/shanoir-ng/protocol/openid-connect/token
   client:
     id: service-account
     credential-secret: ${VIP_CLIENT_SECRET}

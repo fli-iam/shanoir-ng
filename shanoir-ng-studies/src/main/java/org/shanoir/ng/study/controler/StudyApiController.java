@@ -83,7 +83,7 @@ public class StudyApiController implements StudyApi {
 
     private static final String PDF_EXTENSION = ".pdf";
 
-    @Value("${shanoir.userDefaultExpirationDays}")
+    @Value("${shanoir.userDefaultExpirationDays:183}")
     private int userDefaultExpirationDays;
 
     @Autowired
@@ -117,7 +117,6 @@ public class StudyApiController implements StudyApi {
 
     private final HttpServletRequest request;
 
-    @org.springframework.beans.factory.annotation.Autowired
     public StudyApiController(final HttpServletRequest request) {
         this.request = request;
     }

@@ -12,17 +12,12 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng;
+package org.shanoir.ng.storage;
 
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.ActiveProfiles;
+public class StorageException extends Exception {
 
-@Configuration
-@ActiveProfiles("test")
-public class TestConfiguration {
+    public StorageException(String message, Throwable cause) {
+        super(message, cause);
+    }
 
-    @MockBean
-    private RabbitTemplate rabbitTemplate;
 }

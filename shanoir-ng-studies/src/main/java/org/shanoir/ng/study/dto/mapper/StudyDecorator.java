@@ -26,6 +26,7 @@ import org.shanoir.ng.subject.dto.mapper.SubjectMapper;
 import org.shanoir.ng.tag.model.StudyTagMapper;
 import org.shanoir.ng.tag.model.TagMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 /**
  * Decorator for study.
@@ -36,7 +37,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 public abstract class StudyDecorator implements StudyMapper {
 
     @Autowired
-    private StudyMapper delegate;
+    @Qualifier("delegate")
+    private StudyMapper studyMapperDelegate;
 
     @Autowired
     private StudyCenterMapper studyCenterMapper;
@@ -71,7 +73,7 @@ public abstract class StudyDecorator implements StudyMapper {
 
     @Override
     public IdNameCenterStudyDTO studyToExtendedIdNameDTO(final Study study) {
-        final IdNameCenterStudyDTO simpleStudyDTO = delegate.studyToExtendedIdNameDTO(study);
+        final IdNameCenterStudyDTO simpleStudyDTO = studyMapperDelegate.studyToExtendedIdNameDTO(study);
         simpleStudyDTO.setStudyCenterList(studyCenterMapper.studyCenterListToStudyCenterDTOList(study.getStudyCenterList()));
         //simpleStudyDTO.setTags(tagMapper.tagListToTagDTOList(study.getTags()));
         simpleStudyDTO.setProfile(study.getProfile());
@@ -101,7 +103,7 @@ public abstract class StudyDecorator implements StudyMapper {
      * @return study DTO.
      */
     private StudyDTO convertStudyToStudyDTO(final Study study, final boolean withData) {
-        final StudyDTO studyDTO = delegate.studyToStudyDTO(study);
+        final StudyDTO studyDTO = studyMapperDelegate.studyToStudyDTO(study);
         studyDTO.setStudyCenterList(
                 studyCenterMapper.studyCenterListToStudyCenterDTOList(study.getStudyCenterList()));
         if (withData) {
@@ -115,7 +117,7 @@ public abstract class StudyDecorator implements StudyMapper {
 
     @Override
     public StudyLightDTO studyToStudyLightDTO(final Study study) {
-        final StudyLightDTO studyLightDTO = delegate.studyToStudyLightDTO(study);
+        final StudyLightDTO studyLightDTO = studyMapperDelegate.studyToStudyLightDTO(study);
         studyLightDTO.setNbSubjects(study.getNbSubjects());
         studyLightDTO.setNbExaminations(study.getNbExaminations());
         if (study.getStudyTags() != null) {

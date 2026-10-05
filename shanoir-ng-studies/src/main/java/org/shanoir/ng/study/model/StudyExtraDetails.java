@@ -14,6 +14,8 @@
 
 package org.shanoir.ng.study.model;
 
+import java.io.Serial;
+
 import org.shanoir.ng.shared.hateoas.HalEntity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -37,6 +39,7 @@ public class StudyExtraDetails extends HalEntity {
     /**
      * UID
      */
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @JsonBackReference

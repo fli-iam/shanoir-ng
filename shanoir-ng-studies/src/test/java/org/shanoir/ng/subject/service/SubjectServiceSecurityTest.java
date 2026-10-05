@@ -35,11 +35,12 @@ import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 /**
  * User security service test.
@@ -62,14 +63,17 @@ public class SubjectServiceSecurityTest {
     @Autowired
     private SubjectService service;
 
-    @MockBean
+    @MockitoBean
     private SubjectRepository repository;
 
-    @MockBean
+    @MockitoBean
     private StudyRepository studyRepository;
 
-    @MockBean
+    @MockitoBean
     private StudyUserRepository studyUserRepository;
+
+    @MockitoBean
+    private ConnectionFactory connectionFactory;
 
     @BeforeEach
     public void setup() {
