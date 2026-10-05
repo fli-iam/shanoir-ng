@@ -17,7 +17,7 @@ package org.shanoir.ng.bids.service;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
@@ -39,10 +39,11 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.exc.StreamReadException;
+import tools.jackson.databind.DatabindException;
+import tools.jackson.databind.ObjectMapper;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 @Service
 public class BIDSServiceImpl implements BIDSService {
 
@@ -113,7 +114,7 @@ public class BIDSServiceImpl implements BIDSService {
         StringBuilder buffer = participantsSerializer(subjs);
 
         try {
-            Files.write(Paths.get(csvFile.getAbsolutePath()), buffer.toString().getBytes());
+            Files.write(Path.of(csvFile.getAbsolutePath()), buffer.toString().getBytes());
         } catch (IOException e) {
             LOG.error("Error while creating particpants.tsv file: {}", e);
         }
@@ -142,7 +143,7 @@ public class BIDSServiceImpl implements BIDSService {
         return buffer;
     }
 
-    private List<Subject> getSubjectsForStudy(final Long studyId) throws JsonParseException, JsonMappingException, IOException {
+    private List<Subject> getSubjectsForStudy(final Long studyId) throws StreamReadException, DatabindException, IOException {
         // Get the list of subjects
         List<Subject> subjects = subjectRepository.findByStudy_Id(studyId);
         return subjects;
@@ -161,7 +162,7 @@ public class BIDSServiceImpl implements BIDSService {
         try {
             objectMapper.writeValue(new File(workFolder.getAbsolutePath() + File.separator + DATASET_DESCRIPTION_FILE), datasetDescription);
             objectMapper.writeValue(new File(workFolder.getAbsolutePath() + File.separator + README_FILE), studyName);
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             LOG.error(e.getMessage());
         }
         return workFolder;
