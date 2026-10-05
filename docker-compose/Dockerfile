@@ -56,16 +56,15 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     apt-get update -qq \
     && apt-get install -qqy temurin-25-jre ca-certificates-java \
     && update-ca-certificates
-
 COPY --link \
     common/entrypoint_common \
     common/oneshot \
     /usr/bin/
-
 ENTRYPOINT ["/bin/entrypoint", "java", "-Djava.security.egd=file:/dev/urandom", \
     "-Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts", \
     "-Djavax.net.ssl.trustStorePassword=changeit"]
 
+################ init-cert-and-logs ########################################
 FROM base-microservice AS init-cert-and-logs
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     apt-get update -qq && apt-get install -qqy openssl
@@ -74,6 +73,19 @@ COPY --link common/entrypoint_common    /usr/bin/
 RUN chmod +x /usr/bin/entrypoint_cert_init /usr/bin/entrypoint_common
 ENTRYPOINT ["/usr/bin/entrypoint_cert_init"]
 
+################ integration-tests ########################################
+FROM base-microservice AS integration-tests
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    apt-get update -qq && apt-get install -qqy openssl
+COPY --link --chmod=0755 integration-tests/entrypoint /usr/local/bin/run-integration-tests
+COPY --link integration-tests/shanoir-uploader-tests.jar /app/shanoir-uploader-tests.jar
+RUN mkdir -p /config /reports
+WORKDIR /app
+ENV SHANOIR_PROFILE=dev
+# credentials are provided at runtime, e.g. via --env-file docker.env
+# replaces the ENTRYPOINT inherited from base-microservice
+ENTRYPOINT ["/usr/local/bin/run-integration-tests"]
+CMD []
 
 ################ datasets ##################################################
 

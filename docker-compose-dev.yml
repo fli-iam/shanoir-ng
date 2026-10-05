@@ -537,6 +537,16 @@ services:
     networks:
       - shanoir_ng_network
 
+  integration-tests:
+    container_name: "${SHANOIR_PREFIX}integration-tests"
+    build:
+      context: docker-compose
+      target: integration-tests
+    depends_on:
+      - nginx
+    networks:
+      - shanoir_ng_network
+
 volumes:
   keycloak-database-data:
   rabbitmq-data:
