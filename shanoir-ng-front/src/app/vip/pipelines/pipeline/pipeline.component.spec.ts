@@ -27,12 +27,13 @@ describe('PipelineComponent', () => {
   let component: PipelineComponent;
   let fixture: ComponentFixture<PipelineComponent>;
 
-  const group: PipelineGroup = {
-    name: 'landmarkDetection',
+  /** Hand-built input for the component: any pipeline name works, nothing here is pipeline-specific. */
+  const threeVersionGroup: PipelineGroup = {
+    name: 'somePipeline',
     versions: [
-      { label: '0.8', pipeline: pipeline('landmarkDetection', '0.8') },
-      { label: '0.3', pipeline: pipeline('landmarkDetection', '0.3') },
-      { label: '0.2', pipeline: pipeline('landmarkDetection', '0.2') }
+      { label: '0.8', pipeline: pipeline('somePipeline', '0.8') },
+      { label: '0.3', pipeline: pipeline('somePipeline', '0.3') },
+      { label: '0.2', pipeline: pipeline('somePipeline', '0.2') }
     ]
   };
 
@@ -65,50 +66,50 @@ describe('PipelineComponent', () => {
   });
 
   it('should show one tile per name and default to the first (latest) version', () => {
-    init(group);
+    init(threeVersionGroup);
 
     expect(fixture.nativeElement.querySelectorAll('.pipeline').length).toBe(1);
-    expect(fixture.nativeElement.querySelector('.name').textContent.trim()).toBe('landmarkDetection');
+    expect(fixture.nativeElement.querySelector('.name').textContent.trim()).toBe('somePipeline');
     expect(component.pickedVersion.label).toBe('0.8');
   });
 
   it('should offer every version of the group in the picker', () => {
-    init(group);
+    init(threeVersionGroup);
 
     const options: HTMLOptionElement[] = Array.from(fixture.nativeElement.querySelectorAll('.version-picker option'));
     expect(options.map(option => option.value)).toEqual(['0.8', '0.3', '0.2']);
   });
 
   it('should show a plain label instead of a picker when there is a single version', () => {
-    init({ name: 'Sienax', versions: [{ label: '1.3', pipeline: pipeline('Sienax', '1.3') }] });
+    init({ name: 'otherPipeline', versions: [{ label: '1.3', pipeline: pipeline('otherPipeline', '1.3') }] });
 
     expect(fixture.nativeElement.querySelector('.version-picker')).toBeNull();
     expect(fixture.nativeElement.querySelector('.version').textContent.trim()).toBe('v1.3');
   });
 
   it('should emit the picked version when the tile is clicked', () => {
-    init(group);
+    init(threeVersionGroup);
     const emitted: Pipeline[] = [];
     component.pipelineSelected.subscribe(selected => emitted.push(selected));
 
     fixture.nativeElement.querySelector('.pipeline').click();
 
-    expect(emitted.map(selected => selected.identifier)).toEqual(['landmarkDetection/0.8']);
+    expect(emitted.map(selected => selected.identifier)).toEqual(['somePipeline/0.8']);
   });
 
   it('should emit the newly picked version when the picker changes', () => {
-    init(group);
+    init(threeVersionGroup);
     const emitted: Pipeline[] = [];
     component.pipelineSelected.subscribe(selected => emitted.push(selected));
 
     component.pickVersion('0.3');
 
     expect(component.pickedVersion.label).toBe('0.3');
-    expect(emitted.map(selected => selected.identifier)).toEqual(['landmarkDetection/0.3']);
+    expect(emitted.map(selected => selected.identifier)).toEqual(['somePipeline/0.3']);
   });
 
   it('should keep the current version when the picker is given an unknown label', () => {
-    init(group);
+    init(threeVersionGroup);
 
     component.pickVersion('does-not-exist');
 
@@ -116,17 +117,17 @@ describe('PipelineComponent', () => {
   });
 
   it('should only look selected when the selected identifier is the picked version', () => {
-    init(group);
+    init(threeVersionGroup);
 
-    component.selectedIdentifier = 'landmarkDetection/0.8';
+    component.selectedIdentifier = 'somePipeline/0.8';
     expect(component.selected).toBeTrue();
 
     // another version of the same group is selected elsewhere
-    component.selectedIdentifier = 'landmarkDetection/0.3';
+    component.selectedIdentifier = 'somePipeline/0.3';
     expect(component.selected).toBeFalse();
 
     // another pipeline entirely
-    component.selectedIdentifier = 'Sienax/1.3';
+    component.selectedIdentifier = 'otherPipeline/1.3';
     expect(component.selected).toBeFalse();
   });
 });
