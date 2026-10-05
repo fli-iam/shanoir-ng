@@ -337,7 +337,6 @@ services:
     build:
       context: docker-compose
       target: preclinical
-    profiles: [full]
     environment:
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
