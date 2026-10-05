@@ -314,5 +314,9 @@ if [ -n "$deploy" ] ; then
 	# 6. nginx
 	step "start: nginx"
 	docker compose up -d nginx
+	
+	# 7. integration tests: code within shanoir-uploader project
+	step "start: integration tests"
+	docker compose up -d integration-tests
 	free_space "deployment done"
 fi
