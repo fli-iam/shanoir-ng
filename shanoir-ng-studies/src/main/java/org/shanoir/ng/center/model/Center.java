@@ -14,10 +14,12 @@
 
 package org.shanoir.ng.center.model;
 
+import jakarta.validation.constraints.NotBlank;
+
+import java.io.Serial;
 import java.util.List;
 
 import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.validator.constraints.NotBlank;
 import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.hateoas.HalEntity;
@@ -57,6 +59,7 @@ public class Center extends HalEntity {
     /**
      * UID
      */
+    @Serial
     private static final long serialVersionUID = -1965594174611746591L;
 
     /** List of the acquisition equipments related to this center. */
