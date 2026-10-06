@@ -24,11 +24,16 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
+import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -52,6 +57,9 @@ class NeurobagelServiceTest {
 
     @Mock
     private RabbitTemplate rabbitTemplate;
+
+    @TempDir
+    private File bidsDataDir;
 
     @InjectMocks
     private NeurobagelService service;
@@ -159,6 +167,47 @@ class NeurobagelServiceTest {
         StudyTag tag = new StudyTag();
         tag.setName(name);
         return tag;
+    }
+
+    private static final String IMAGING_FILE = "study-1-imaging-3f2a1c9e-8b7d-4e6f-a1b2-c3d4e5f6a7b8.tsv";
+
+    @Test
+    void imagingTableOfAStudyNotExportedIsNeverRequested() {
+        given(studyRepository.existsByIdAndNeurobagelExportTrueAndIsDraftFalse(2L)).willReturn(false);
+
+        assertFalse(service.findImagingTsv(2L).isPresent());
+        verify(rabbitTemplate, never()).convertSendAndReceive(anyString(), any(Object.class));
+    }
+
+    @Test
+    void imagingTableWrittenByDatasetsIsReadThenDeleted() throws Exception {
+        ReflectionTestUtils.setField(service, "bidsDataDir", bidsDataDir.getAbsolutePath());
+        Path file = bidsDataDir.toPath().resolve("neurobagel").resolve(IMAGING_FILE);
+        Files.createDirectories(file.getParent());
+        Files.writeString(file, "sub\tses\tsuffix\tpath\n", StandardCharsets.UTF_8);
+        given(studyRepository.existsByIdAndNeurobagelExportTrueAndIsDraftFalse(1L)).willReturn(true);
+        given(rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.NEUROBAGEL_IMAGING_TSV, "1")).willReturn(IMAGING_FILE);
+
+        assertEquals(Optional.of("sub\tses\tsuffix\tpath\n"), service.findImagingTsv(1L));
+        assertFalse(Files.exists(file));
+    }
+
+    @Test
+    void unexpectedFileNameFromDatasetsIsNeverRead() {
+        ReflectionTestUtils.setField(service, "bidsDataDir", bidsDataDir.getAbsolutePath());
+        given(studyRepository.existsByIdAndNeurobagelExportTrueAndIsDraftFalse(1L)).willReturn(true);
+        given(rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.NEUROBAGEL_IMAGING_TSV, "1"))
+                .willReturn("../../etc/passwd");
+
+        assertFalse(service.findImagingTsv(1L).isPresent());
+    }
+
+    @Test
+    void noAnswerFromDatasetsMeansNoImagingTable() {
+        given(studyRepository.existsByIdAndNeurobagelExportTrueAndIsDraftFalse(1L)).willReturn(true);
+        given(rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.NEUROBAGEL_IMAGING_TSV, "1")).willReturn(null);
+
+        assertFalse(service.findImagingTsv(1L).isPresent());
     }
 
     private static Study study(Long id, String name) {
