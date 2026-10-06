@@ -140,6 +140,22 @@ class NeurobagelTokenSecurityTest {
     }
 
     @Test
+    void neurobagelTokenGetsTheImagingTableOfAnExportedStudy() throws Exception {
+        String tsv = "sub\tses\tsuffix\tpath\nsub-1\tses-2\tT1w\t/shanoir/examination/2/dataset/3\n";
+        given(neurobagelService.findImagingTsv(1L)).willReturn(Optional.of(tsv));
+        mvc.perform(asNeurobagel(get("/neurobagel/study/1/imaging.tsv")))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith("text/tab-separated-values"))
+                .andExpect(content().string(tsv));
+    }
+
+    @Test
+    void imagingTableOfAStudyNotExportedIsNotFound() throws Exception {
+        given(neurobagelService.findImagingTsv(2L)).willReturn(Optional.empty());
+        mvc.perform(asNeurobagel(get("/neurobagel/study/2/imaging.tsv"))).andExpect(status().isNotFound());
+    }
+
+    @Test
     void shanoirUsersCannotCallNeurobagelEndpoints() throws Exception {
         for (String role : List.of("ROLE_USER", "ROLE_EXPERT", "ROLE_ADMIN")) {
             mvc.perform(as(role, get("/neurobagel/studies"))).andExpect(status().isForbidden());
@@ -147,6 +163,7 @@ class NeurobagelTokenSecurityTest {
             mvc.perform(as(role, get("/neurobagel/study/1/participants.tsv"))).andExpect(status().isForbidden());
             mvc.perform(as(role, get("/neurobagel/participants.json"))).andExpect(status().isForbidden());
             mvc.perform(as(role, get("/neurobagel/study/1/dataset_description.json"))).andExpect(status().isForbidden());
+            mvc.perform(as(role, get("/neurobagel/study/1/imaging.tsv"))).andExpect(status().isForbidden());
         }
     }
 
