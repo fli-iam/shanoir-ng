@@ -21,13 +21,17 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 
+import org.shanoir.ng.neurobagel.dto.NeurobagelDatasetDescriptionDTO;
 import org.shanoir.ng.neurobagel.dto.NeurobagelStudyDTO;
+import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.repository.StudyRepository;
+import org.shanoir.ng.tag.model.StudyTag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
@@ -52,6 +56,10 @@ public class NeurobagelService {
 
     @Autowired
     private RabbitTemplate rabbitTemplate;
+
+    /** Public base URL of the Shanoir front, e.g. https://shanoir.example.org/shanoir-ng/ */
+    @Value("${front.server.address}")
+    private String frontServerAddress;
 
     public List<NeurobagelStudyDTO> findExportedStudies() {
         return studyRepository.findByNeurobagelExportTrueAndIsDraftFalseOrderByIdAsc().stream()
@@ -99,6 +107,31 @@ public class NeurobagelService {
             }
         }
         return participantsDictionary;
+    }
+
+    /**
+     * Neurobagel dataset description of an exported study. Empty when the study is not exported.
+     */
+    public Optional<NeurobagelDatasetDescriptionDTO> findDatasetDescription(Long studyId) {
+        if (!isExported(studyId)) {
+            return Optional.empty();
+        }
+        return studyRepository.findByIdWithStudyTags(studyId).map(this::toDatasetDescription);
+    }
+
+    private NeurobagelDatasetDescriptionDTO toDatasetDescription(Study study) {
+        String front = frontServerAddress.endsWith("/") ? frontServerAddress : frontServerAddress + "/";
+        String accessLink = front + "access-request/study/" + study.getId();
+        NeurobagelDatasetDescriptionDTO description = new NeurobagelDatasetDescriptionDTO();
+        description.setName(study.getName());
+        description.setKeywords(study.getStudyTags() == null ? List.of()
+                : study.getStudyTags().stream().map(StudyTag::getName).sorted().toList());
+        description.setReferencesAndLinks(List.of(front + "study/details/" + study.getId()));
+        description.setAccessType(NeurobagelDatasetDescriptionDTO.ACCESS_TYPE_RESTRICTED);
+        description.setAccessInstructions("The data is hosted in Shanoir. Request access to the study at " + accessLink
+                + " (a Shanoir account is needed).");
+        description.setAccessLink(accessLink);
+        return description;
     }
 
 }
