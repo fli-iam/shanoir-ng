@@ -55,10 +55,8 @@ class BIDSServiceImplTest {
 
         String tsv = service.participantsTsv(STUDY_ID);
 
-        String[] lines = tsv.split("\n");
-        assertEquals(2, lines.length);
-        assertEquals("participant_id\tsubject_identifier\tsubject_age\tsubject_sex", lines[0].strip());
-        assertEquals("sub-12\t12\tn/a\tF", lines[1].strip());
+        assertEquals("participant_id\tsubject_identifier\tsubject_age\tsubject_sex\n"
+                + "sub-12\t12\tn/a\tF\n", tsv);
         assertEquals(0, bidsStorageDir.list().length);
     }
 
