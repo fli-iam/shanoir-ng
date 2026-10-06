@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
+import org.shanoir.ng.neurobagel.dto.NeurobagelDatasetDescriptionDTO;
 import org.shanoir.ng.neurobagel.dto.NeurobagelStudyDTO;
 import org.shanoir.ng.neurobagel.service.NeurobagelService;
 import org.shanoir.ng.shared.security.NeurobagelAccess;
@@ -117,12 +118,35 @@ class NeurobagelTokenSecurityTest {
     }
 
     @Test
+    void neurobagelTokenGetsTheDatasetDescriptionWithNeurobagelKeys() throws Exception {
+        NeurobagelDatasetDescriptionDTO description = new NeurobagelDatasetDescriptionDTO();
+        description.setName("My study");
+        description.setKeywords(List.of("mri"));
+        description.setAccessType("restricted");
+        given(neurobagelService.findDatasetDescription(1L)).willReturn(Optional.of(description));
+        mvc.perform(asNeurobagel(get("/neurobagel/study/1/dataset_description.json")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.Name").value("My study"))
+                .andExpect(jsonPath("$.Keywords[0]").value("mri"))
+                .andExpect(jsonPath("$.AccessType").value("restricted"))
+                .andExpect(jsonPath("$.name").doesNotExist())
+                .andExpect(jsonPath("$.AccessLink").doesNotExist());
+    }
+
+    @Test
+    void datasetDescriptionOfAStudyNotExportedIsNotFound() throws Exception {
+        given(neurobagelService.findDatasetDescription(2L)).willReturn(Optional.empty());
+        mvc.perform(asNeurobagel(get("/neurobagel/study/2/dataset_description.json"))).andExpect(status().isNotFound());
+    }
+
+    @Test
     void shanoirUsersCannotCallNeurobagelEndpoints() throws Exception {
         for (String role : List.of("ROLE_USER", "ROLE_EXPERT", "ROLE_ADMIN")) {
             mvc.perform(as(role, get("/neurobagel/studies"))).andExpect(status().isForbidden());
             mvc.perform(as(role, get("/neurobagel/study/1"))).andExpect(status().isForbidden());
             mvc.perform(as(role, get("/neurobagel/study/1/participants.tsv"))).andExpect(status().isForbidden());
             mvc.perform(as(role, get("/neurobagel/participants.json"))).andExpect(status().isForbidden());
+            mvc.perform(as(role, get("/neurobagel/study/1/dataset_description.json"))).andExpect(status().isForbidden());
         }
     }
 
