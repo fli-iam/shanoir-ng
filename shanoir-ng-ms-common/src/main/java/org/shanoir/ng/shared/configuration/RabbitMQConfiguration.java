@@ -228,6 +228,13 @@ public class RabbitMQConfiguration {
     /** Neurobagel export: participants.tsv of an exported study, without writing any file: ms datasets -> ms studies */
     public static final String NEUROBAGEL_PARTICIPANTS_TSV = "neurobagel-participants-tsv";
 
+    /**
+     * Neurobagel export: ms datasets writes the imaging table of a study into the shared bids-data volume
+     * and replies with the file name: ms studies -> ms datasets. The table can be several MB, so it does not
+     * travel through RabbitMQ.
+     */
+    public static final String NEUROBAGEL_IMAGING_TSV = "neurobagel-imaging-tsv";
+
     /** Send a mail from studies microservice to ms users */
     public static final String STUDY_USER_MAIL_QUEUE = "study-user-mail-queue";
 
@@ -501,6 +508,11 @@ public class RabbitMQConfiguration {
     @Bean
     public static Queue neurobagelParticipantsTsvQueue() {
         return new Queue(NEUROBAGEL_PARTICIPANTS_TSV, true);
+    }
+
+    @Bean
+    public static Queue neurobagelImagingTsvQueue() {
+        return new Queue(NEUROBAGEL_IMAGING_TSV, true);
     }
 
     @Bean

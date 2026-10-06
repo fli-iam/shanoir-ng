@@ -18,8 +18,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 import org.shanoir.ng.neurobagel.dto.NeurobagelDatasetDescriptionDTO;
 import org.shanoir.ng.neurobagel.dto.NeurobagelStudyDTO;
@@ -60,6 +63,15 @@ public class NeurobagelService {
     /** Public base URL of the Shanoir front, e.g. https://shanoir.example.org/shanoir-ng/ */
     @Value("${front.server.address}")
     private String frontServerAddress;
+
+    /** bids-data volume shared with ms datasets, which writes the imaging tables into its neurobagel folder. */
+    @Value("${storage.file-system.bids-data}")
+    private String bidsDataDir;
+
+    private static final String IMAGING_FOLDER = "neurobagel";
+
+    /** File names ms datasets produces: anything else in its reply is refused, never used as a path. */
+    private static final Pattern IMAGING_FILE_NAME = Pattern.compile("study-\\d+-imaging-[0-9a-f-]{36}\\.tsv");
 
     public List<NeurobagelStudyDTO> findExportedStudies() {
         return studyRepository.findByNeurobagelExportTrueAndIsDraftFalseOrderByIdAsc().stream()
@@ -132,6 +144,37 @@ public class NeurobagelService {
                 + " (a Shanoir account is needed).");
         description.setAccessLink(accessLink);
         return description;
+    }
+
+    /**
+     * Imaging table of an exported study (input of 'bagel bids --bids-table'), built by ms datasets from its
+     * datasets. ms datasets writes it into the shared bids-data volume and replies with the file name: the
+     * table can be several MB and does not travel through RabbitMQ. The file is deleted once read.
+     * Empty when the study is not exported, or when ms datasets could not build the table.
+     */
+    public Optional<String> findImagingTsv(Long studyId) {
+        if (!isExported(studyId)) {
+            return Optional.empty();
+        }
+        Object reply = rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.NEUROBAGEL_IMAGING_TSV,
+                String.valueOf(studyId));
+        if (!(reply instanceof String fileName) || !IMAGING_FILE_NAME.matcher(fileName).matches()) {
+            LOG.warn("No Neurobagel imaging table received from ms datasets for exported study {}: {}", studyId, reply);
+            return Optional.empty();
+        }
+        Path file = Path.of(bidsDataDir, IMAGING_FOLDER, fileName);
+        try {
+            return Optional.of(Files.readString(file, StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            LOG.error("Cannot read the Neurobagel imaging table {} of study {}", file, studyId, e);
+            return Optional.empty();
+        } finally {
+            try {
+                Files.deleteIfExists(file);
+            } catch (IOException e) {
+                LOG.warn("Cannot delete the Neurobagel imaging table {}", file, e);
+            }
+        }
     }
 
 }
