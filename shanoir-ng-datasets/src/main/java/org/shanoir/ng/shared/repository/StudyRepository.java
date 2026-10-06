@@ -32,6 +32,13 @@ import org.springframework.transaction.annotation.Transactional;
  */
 public interface StudyRepository extends JpaRepository<Study, Long> {
 
+    /**
+     * Studies exposed to the Neurobagel federation: flagged by an admin and no longer drafts.
+     */
+    List<Study> findByNeurobagelExportTrueAndIsDraftFalseOrderByIdAsc();
+
+    boolean existsByIdAndNeurobagelExportTrueAndIsDraftFalse(Long id);
+
     @Query("SELECT study FROM Study study LEFT JOIN FETCH study.studyTags WHERE study.id = :id")
     Optional<Study> findByIdWithStudyTags(Long id);
 
