@@ -120,9 +120,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </dependency>
 
         <!-- Testing -->
+        <!-- Below usage of 2.3.232 avoids a regression bug in h2 2.4.240 -->
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
+            <version>2.3.232</version>
             <scope>test</scope>
         </dependency>
         <dependency>
