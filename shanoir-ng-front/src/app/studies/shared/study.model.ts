@@ -57,6 +57,7 @@ export class Study extends Entity {
     @Field() description: string;
     @Field() license: string;
     @Field() isDraft: boolean = false;
+    @Field() neurobagelExport: boolean = false;
     @Field() expectedNbOfSubjects: number = null;
     @Field() averageExaminationSize: number = null;
     @Field() estimatedTotalVolume: number = null;
