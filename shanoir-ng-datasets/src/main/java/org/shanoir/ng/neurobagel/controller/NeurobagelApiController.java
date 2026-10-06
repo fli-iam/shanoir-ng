@@ -49,4 +49,9 @@ public class NeurobagelApiController implements NeurobagelApi {
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
+    @Override
+    public ResponseEntity<String> getParticipantsDictionary() {
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(neurobagelService.getParticipantsDictionary());
+    }
+
 }
