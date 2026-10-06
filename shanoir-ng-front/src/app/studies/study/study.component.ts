@@ -296,6 +296,7 @@ export class StudyComponent extends EntityComponent<Study> {
             'description': [this.study.description],
             'license': [this.study.license],
             'visibleByDefault': [this.study.visibleByDefault],
+            'neurobagelExport': [this.study.neurobagelExport],
             'downloadableByDefault': [this.study.downloadableByDefault],
             'studyCenterList': [{value: this.study.studyCenterList}, [Validators.required, this.validateCenter]],
             'subjects': [this.study.subjects],
