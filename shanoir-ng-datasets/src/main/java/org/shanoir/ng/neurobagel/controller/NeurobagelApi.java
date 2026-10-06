@@ -70,4 +70,13 @@ public interface NeurobagelApi {
     ResponseEntity<String> findParticipantsTsv(
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId);
 
+    @Operation(summary = "getParticipantsDictionary", description = "Returns the Neurobagel data dictionary of participants.tsv, the same for every study")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "the data dictionary"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden") })
+    @GetMapping(value = "/participants.json", produces = { "application/json" })
+    @PreAuthorize("hasRole('NEUROBAGEL')")
+    ResponseEntity<String> getParticipantsDictionary();
+
 }
