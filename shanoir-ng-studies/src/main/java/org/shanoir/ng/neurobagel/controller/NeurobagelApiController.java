@@ -16,6 +16,7 @@ package org.shanoir.ng.neurobagel.controller;
 
 import java.util.List;
 
+import org.shanoir.ng.neurobagel.dto.NeurobagelDatasetDescriptionDTO;
 import org.shanoir.ng.neurobagel.dto.NeurobagelStudyDTO;
 import org.shanoir.ng.neurobagel.service.NeurobagelService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +53,13 @@ public class NeurobagelApiController implements NeurobagelApi {
     @Override
     public ResponseEntity<String> getParticipantsDictionary() {
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(neurobagelService.getParticipantsDictionary());
+    }
+
+    @Override
+    public ResponseEntity<NeurobagelDatasetDescriptionDTO> findDatasetDescription(Long studyId) {
+        return neurobagelService.findDatasetDescription(studyId)
+                .map(description -> new ResponseEntity<>(description, HttpStatus.OK))
+                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
 }
