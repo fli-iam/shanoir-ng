@@ -14,6 +14,10 @@
 
 package org.shanoir.ng.neurobagel.service;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 /**
@@ -36,6 +41,11 @@ import org.springframework.stereotype.Service;
 public class NeurobagelService {
 
     private static final Logger LOG = LoggerFactory.getLogger(NeurobagelService.class);
+
+    /** Neurobagel data dictionary of participants.tsv: its columns are the same for every study. */
+    private static final String PARTICIPANTS_DICTIONARY = "neurobagel/participants.json";
+
+    private String participantsDictionary;
 
     @Autowired
     private StudyRepository studyRepository;
@@ -75,6 +85,20 @@ public class NeurobagelService {
             return Optional.empty();
         }
         return Optional.of((String) tsv);
+    }
+
+    /**
+     * Neurobagel data dictionary annotating the columns of every participants.tsv.
+     */
+    public String getParticipantsDictionary() {
+        if (participantsDictionary == null) {
+            try (InputStream in = new ClassPathResource(PARTICIPANTS_DICTIONARY).getInputStream()) {
+                participantsDictionary = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+            } catch (IOException e) {
+                throw new UncheckedIOException("Cannot read " + PARTICIPANTS_DICTIONARY, e);
+            }
+        }
+        return participantsDictionary;
     }
 
 }
