@@ -164,20 +164,39 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     </execution>
                 </executions>
             </plugin>
-            <!-- Package shanoir-ng-preclinical.jar as Spring Boot executable: Avoid
-				error: no main manifest attribute, in /shanoir-ng-preclinical.jar -->
+            <plugin>
+                <groupId>org.graalvm.buildtools</groupId>
+                <artifactId>native-maven-plugin</artifactId>
+            </plugin>
+            <!--
+                Package shanoir-ng-preclinical.jar as Spring Boot executable: Avoid
+                error: no main manifest attribute, in /shanoir-ng-preclinical.jar -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
                     <profiles>
-                        <profile>${spring.active.profile}</profile>
+                        <profile>default</profile>
                     </profiles>
+                    <image>
+                        <name>${project.name}-native</name>
+                        <builder>paketobuildpacks/builder-jammy-base:latest</builder>
+                        <env>
+                            <BP_NATIVE_IMAGE>true</BP_NATIVE_IMAGE>
+                            <BP_NATIVE_IMAGE_BUILD_ARGUMENTS>-H:+AddAllCharsets</BP_NATIVE_IMAGE_BUILD_ARGUMENTS>
+                        </env>
+                    </image>
                 </configuration>
                 <executions>
                     <execution>
                         <goals>
                             <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>process-aot</id>
+                        <goals>
+                            <goal>process-aot</goal>
                         </goals>
                     </execution>
                 </executions>
