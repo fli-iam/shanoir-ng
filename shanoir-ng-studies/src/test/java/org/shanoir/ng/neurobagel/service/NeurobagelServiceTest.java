@@ -38,6 +38,9 @@ import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.repository.StudyRepository;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+
 @ExtendWith(MockitoExtension.class)
 class NeurobagelServiceTest {
 
@@ -108,6 +111,18 @@ class NeurobagelServiceTest {
         given(rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.NEUROBAGEL_PARTICIPANTS_TSV, "1")).willReturn(null);
 
         assertFalse(service.findParticipantsTsv(1L).isPresent());
+    }
+
+    @Test
+    void participantsDictionaryAnnotatesTheParticipantsColumns() throws Exception {
+        JsonNode dictionary = new ObjectMapper().readTree(service.getParticipantsDictionary());
+
+        assertEquals(List.of("participant_id", "subject_identifier", "subject_age", "subject_sex"),
+                List.copyOf(dictionary.propertyNames()));
+        assertEquals("nb:ParticipantID", dictionary.at("/participant_id/Annotations/IsAbout/TermURL").asString());
+        assertEquals("nb:Age", dictionary.at("/subject_age/Annotations/IsAbout/TermURL").asString());
+        assertEquals("nb:Sex", dictionary.at("/subject_sex/Annotations/IsAbout/TermURL").asString());
+        assertEquals(List.of("M", "F", "O"), List.copyOf(dictionary.at("/subject_sex/Annotations/Levels").propertyNames()));
     }
 
     private static Study study(Long id, String name) {
