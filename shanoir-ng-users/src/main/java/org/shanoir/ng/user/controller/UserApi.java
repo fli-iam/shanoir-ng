@@ -27,13 +27,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "user", description = "the user API")
 @RequestMapping("/users")
@@ -158,12 +158,11 @@ public interface UserApi {
 
     @Operation(summary = "downloadUserStatistics", description = "Download user statistics.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "exported statistics"),
+            @ApiResponse(responseCode = "200", description = "exported statistics as .csv file"),
             @ApiResponse(responseCode = "401", description = "unauthorized"),
             @ApiResponse(responseCode = "403", description = "forbidden"),
-            @ApiResponse(responseCode = "404", description = "no dataset found"),
             @ApiResponse(responseCode = "500", description = "unexpected error")})
-    @GetMapping(value = "/downloadUserStatistics")
+    @GetMapping(value = "/downloadUserStatistics", produces = { "application/zip" })
     @PreAuthorize("hasRole('ADMIN')")
     ResponseEntity<?> downloadUserStatistics(HttpServletResponse response) throws IOException;
 }
