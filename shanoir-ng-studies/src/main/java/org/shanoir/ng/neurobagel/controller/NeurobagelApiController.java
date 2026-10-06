@@ -20,6 +20,7 @@ import org.shanoir.ng.neurobagel.dto.NeurobagelStudyDTO;
 import org.shanoir.ng.neurobagel.service.NeurobagelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 
@@ -38,6 +39,13 @@ public class NeurobagelApiController implements NeurobagelApi {
     public ResponseEntity<NeurobagelStudyDTO> findExportedStudy(Long studyId) {
         return neurobagelService.findExportedStudy(studyId)
                 .map(study -> new ResponseEntity<>(study, HttpStatus.OK))
+                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
+    @Override
+    public ResponseEntity<String> findParticipantsTsv(Long studyId) {
+        return neurobagelService.findParticipantsTsv(studyId)
+                .map(tsv -> ResponseEntity.ok().contentType(MediaType.parseMediaType(TSV + ";charset=UTF-8")).body(tsv))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
