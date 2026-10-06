@@ -16,6 +16,7 @@ package org.shanoir.ng.neurobagel.controller;
 
 import java.util.List;
 
+import org.shanoir.ng.neurobagel.dto.NeurobagelDatasetDescriptionDTO;
 import org.shanoir.ng.neurobagel.dto.NeurobagelStudyDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -78,5 +79,16 @@ public interface NeurobagelApi {
     @GetMapping(value = "/participants.json", produces = { "application/json" })
     @PreAuthorize("hasRole('NEUROBAGEL')")
     ResponseEntity<String> getParticipantsDictionary();
+
+    @Operation(summary = "findDatasetDescription", description = "Returns the Neurobagel dataset description of a study exposed to the Neurobagel federation")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "the Neurobagel dataset description"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "404", description = "no such study, or not exported") })
+    @GetMapping(value = "/study/{studyId}/dataset_description.json", produces = { "application/json" })
+    @PreAuthorize("hasRole('NEUROBAGEL')")
+    ResponseEntity<NeurobagelDatasetDescriptionDTO> findDatasetDescription(
+            @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId);
 
 }
