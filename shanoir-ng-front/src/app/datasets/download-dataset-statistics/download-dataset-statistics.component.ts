@@ -20,7 +20,7 @@ import { DatasetService } from '../shared/dataset.service';
 import { TooltipComponent } from '../../shared/components/tooltip/tooltip.component';
 
 @Component({
-    selector: 'download-statistics',
+    selector: 'download-dataset-statistics',
     templateUrl: 'download-dataset-statistics.component.html',
     changeDetection: ChangeDetectionStrategy.Eager,
     imports: [FormsModule, ReactiveFormsModule, TooltipComponent]

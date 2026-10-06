@@ -248,7 +248,7 @@ const routes: Routes = [
         path: 'preclinical-contrastagent',
         component: ContrastAgentFormComponent
     },{
-        path: 'download-statistics',
+        path: 'download-dataset-statistics',
         component: DownloadDatasetStatisticsComponent
     },{
         path: 'send-email',
@@ -552,7 +552,7 @@ const routes: Routes = [
 		data: { mode: 'create' },
 		canActivate: [AuthAdminOrExpertGuard],
 	},{
-        path: 'download-statistics',
+        path: 'download-dataset-statistics',
         component: DownloadDatasetStatisticsComponent
     },{
 		path: 'study-card',
