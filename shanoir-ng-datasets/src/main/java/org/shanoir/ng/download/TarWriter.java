@@ -63,7 +63,7 @@ public class TarWriter implements ArchiveWriter {
 
     /** Only using Zstandard compression algo atm **/
     public TarWriter(OutputStream out) throws IOException {
-        this.network = new FilterOutputStreamShanoir(out);
+        this.network = new FilterOutputStreamShanoir(PacsTransferStats.withNetworkTiming(out));
         this.zstd = new ZstdOutputStream(network, 1);
         this.tar = new TarArchiveOutputStreamShanoir(zstd);
 
