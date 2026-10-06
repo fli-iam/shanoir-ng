@@ -36,8 +36,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import tools.jackson.core.JacksonException;
-import tools.jackson.core.exc.StreamReadException;
-import tools.jackson.databind.DatabindException;
 import tools.jackson.databind.ObjectMapper;
 
 @Service
@@ -87,20 +85,23 @@ public class BIDSServiceImpl implements BIDSService {
         File baseDir = createBaseBidsFolder(workFolder, study.getName());
         File csvFile = new File(baseDir.getAbsolutePath() + File.separator + "participants.tsv");
 
-        List<Subject> subjs = getSubjectsForStudy(studyId);
-
         if (csvFile.exists()) {
             // Recreate it everytime
             FileUtils.deleteQuietly(csvFile);
         }
-        StringBuilder buffer = participantsSerializer(subjs);
+        String participants = participantsTsv(studyId);
 
         try {
-            Files.write(Path.of(csvFile.getAbsolutePath()), buffer.toString().getBytes());
+            Files.write(Path.of(csvFile.getAbsolutePath()), participants.getBytes());
         } catch (IOException e) {
             LOG.error("Error while creating particpants.tsv file: {}", e);
         }
-        return buffer.toString();
+        return participants;
+    }
+
+    @Override
+    public String participantsTsv(Long studyId) {
+        return participantsSerializer(subjectRepository.findByStudy_Id(studyId)).toString();
     }
 
     public StringBuilder participantsSerializer(List<Subject> subjects) {
@@ -123,12 +124,6 @@ public class BIDSServiceImpl implements BIDSService {
         }
 
         return buffer;
-    }
-
-    private List<Subject> getSubjectsForStudy(final Long studyId) throws StreamReadException, DatabindException, IOException {
-        // Get the list of subjects
-        List<Subject> subjects = subjectRepository.findByStudy_Id(studyId);
-        return subjects;
     }
 
     public File getBidsFolderPath(final Long studyId) {
