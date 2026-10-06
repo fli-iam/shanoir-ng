@@ -20,4 +20,9 @@ public interface BIDSService {
 
     String generateParticipantsTsvFile(Long studyId) throws IOException;
 
+    /**
+     * Content of the participants.tsv of a study, without writing any file.
+     */
+    String participantsTsv(Long studyId);
+
 }
