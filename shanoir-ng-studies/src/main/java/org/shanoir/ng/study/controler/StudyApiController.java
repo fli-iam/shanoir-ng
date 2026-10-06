@@ -235,6 +235,9 @@ public class StudyApiController implements StudyApi {
         Study createdStudy;
         try {
             study.setIsDraft(!KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN"));
+            if (!KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+                study.setNeurobagelExport(false);
+            }
             addCurrentUserAsStudyUserIfEmptyStudyUsers(study);
             setDefaultStudyUserExpirationDates(study);
             createdStudy = studyService.create(study);

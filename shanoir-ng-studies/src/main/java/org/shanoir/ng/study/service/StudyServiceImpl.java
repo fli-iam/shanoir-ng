@@ -302,6 +302,10 @@ public class StudyServiceImpl implements StudyService {
         studyDb.setVisibleByDefault(study.isVisibleByDefault());
         studyDb.setStudyCardPolicy(study.getStudyCardPolicy());
         studyDb.setWithExamination(study.isWithExamination());
+        // Exposing a study to Neurobagel publishes its metadata outside the institution: admins only
+        if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+            studyDb.setNeurobagelExport(study.isNeurobagelExport());
+        }
 
         if (study.getExtraDetails() != null) {
             StudyExtraDetails incoming = study.getExtraDetails();
