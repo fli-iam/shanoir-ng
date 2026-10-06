@@ -102,6 +102,7 @@ require()
             VIP_URL_SCHEME)         match "$name" '^(http|https)$'                      ;;
             VIP_URL_HOST)           match "$name" '^([a-z0-9.:-]+)$'                     ;;
             VIP_CLIENT_SECRET)      ;;
+            NEUROBAGEL_CLIENT_SECRET) match "$name" '^[A-Za-z0-9]+$' ;;
             SHANOIR_SHUTDOWN_HOUR)      ;;
             SHANOIR_CONTINUANCE_HOUR)      ;;
             DEV_USERS_DEFAULT_PASSWORD)      ;;
