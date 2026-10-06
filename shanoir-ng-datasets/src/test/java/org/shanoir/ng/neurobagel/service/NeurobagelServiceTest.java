@@ -17,7 +17,9 @@ package org.shanoir.ng.neurobagel.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -31,14 +33,19 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.shanoir.ng.neurobagel.dto.NeurobagelStudyDTO;
+import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.repository.StudyRepository;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
 @ExtendWith(MockitoExtension.class)
 class NeurobagelServiceTest {
 
     @Mock
     private StudyRepository studyRepository;
+
+    @Mock
+    private RabbitTemplate rabbitTemplate;
 
     @InjectMocks
     private NeurobagelService service;
@@ -76,6 +83,31 @@ class NeurobagelServiceTest {
     @Test
     void nullStudyIdIsNotExported() {
         assertFalse(service.isExported(null));
+    }
+
+    @Test
+    void participantsOfAnExportedStudyComeFromStudies() {
+        given(studyRepository.existsByIdAndNeurobagelExportTrueAndIsDraftFalse(1L)).willReturn(true);
+        given(rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.NEUROBAGEL_PARTICIPANTS_TSV, "1"))
+                .willReturn("participant_id\nsub-1\n");
+
+        assertEquals(Optional.of("participant_id\nsub-1\n"), service.findParticipantsTsv(1L));
+    }
+
+    @Test
+    void participantsOfAStudyNotExportedAreNeverRequested() {
+        given(studyRepository.existsByIdAndNeurobagelExportTrueAndIsDraftFalse(2L)).willReturn(false);
+
+        assertFalse(service.findParticipantsTsv(2L).isPresent());
+        verify(rabbitTemplate, never()).convertSendAndReceive(anyString(), any(Object.class));
+    }
+
+    @Test
+    void noAnswerFromStudiesMeansNoParticipants() {
+        given(studyRepository.existsByIdAndNeurobagelExportTrueAndIsDraftFalse(1L)).willReturn(true);
+        given(rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.NEUROBAGEL_PARTICIPANTS_TSV, "1")).willReturn(null);
+
+        assertFalse(service.findParticipantsTsv(1L).isPresent());
     }
 
 }

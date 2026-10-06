@@ -18,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -92,10 +93,26 @@ class NeurobagelTokenSecurityTest {
     }
 
     @Test
+    void neurobagelTokenGetsTheParticipantsOfAnExportedStudy() throws Exception {
+        given(neurobagelService.findParticipantsTsv(1L)).willReturn(Optional.of("participant_id\nsub-1\n"));
+        mvc.perform(asNeurobagel(get("/neurobagel/study/1/participants.tsv")))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith("text/tab-separated-values"))
+                .andExpect(content().string("participant_id\nsub-1\n"));
+    }
+
+    @Test
+    void participantsOfAStudyNotExportedAreNotFound() throws Exception {
+        given(neurobagelService.findParticipantsTsv(2L)).willReturn(Optional.empty());
+        mvc.perform(asNeurobagel(get("/neurobagel/study/2/participants.tsv"))).andExpect(status().isNotFound());
+    }
+
+    @Test
     void shanoirUsersCannotCallNeurobagelEndpoints() throws Exception {
         for (String role : List.of("ROLE_USER", "ROLE_EXPERT", "ROLE_ADMIN")) {
             mvc.perform(as(role, get("/neurobagel/studies"))).andExpect(status().isForbidden());
             mvc.perform(as(role, get("/neurobagel/study/1"))).andExpect(status().isForbidden());
+            mvc.perform(as(role, get("/neurobagel/study/1/participants.tsv"))).andExpect(status().isForbidden());
         }
     }
 
