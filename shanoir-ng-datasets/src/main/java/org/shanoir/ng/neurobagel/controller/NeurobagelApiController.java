@@ -62,4 +62,11 @@ public class NeurobagelApiController implements NeurobagelApi {
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
+    @Override
+    public ResponseEntity<String> findImagingTsv(Long studyId) {
+        return neurobagelService.findImagingTsv(studyId)
+                .map(tsv -> ResponseEntity.ok().contentType(MediaType.parseMediaType(TSV + ";charset=UTF-8")).body(tsv))
+                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
 }

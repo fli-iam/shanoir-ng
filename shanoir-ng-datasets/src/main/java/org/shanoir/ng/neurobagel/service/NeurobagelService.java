@@ -23,6 +23,9 @@ import java.util.Optional;
 
 import org.shanoir.ng.neurobagel.dto.NeurobagelDatasetDescriptionDTO;
 import org.shanoir.ng.neurobagel.dto.NeurobagelStudyDTO;
+import org.shanoir.ng.neurobagel.repository.NeurobagelImagingRepository;
+import org.shanoir.ng.neurobagel.repository.NeurobagelImagingRow;
+import org.shanoir.ng.neurobagel.service.NeurobagelSuffix.Modality;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.repository.StudyRepository;
@@ -51,11 +54,16 @@ public class NeurobagelService {
 
     private String participantsDictionary;
 
+    private static final String IMAGING_HEADER = "sub\tses\tsuffix\tpath\n";
+
     @Autowired
     private StudyRepository studyRepository;
 
     @Autowired
     private RabbitTemplate rabbitTemplate;
+
+    @Autowired
+    private NeurobagelImagingRepository imagingRepository;
 
     /** Public base URL of the Shanoir front, e.g. https://shanoir.example.org/shanoir-ng/ */
     @Value("${front.server.address}")
@@ -132,6 +140,46 @@ public class NeurobagelService {
                 + " (a Shanoir account is needed).");
         description.setAccessLink(accessLink);
         return description;
+    }
+
+    /**
+     * Imaging table of an exported study (input of 'bagel bids --bids-table'): one row per acquired
+     * dataset with a Neurobagel suffix. Datasets without one are left out and counted in the logs.
+     * Empty when the study is not exported; header only when no dataset has a suffix.
+     */
+    public Optional<String> findImagingTsv(Long studyId) {
+        if (!isExported(studyId)) {
+            return Optional.empty();
+        }
+        StringBuilder tsv = new StringBuilder(IMAGING_HEADER);
+        int exported = 0;
+        int leftOut = 0;
+        for (NeurobagelImagingRow row : imagingRepository.findImagingRows(studyId)) {
+            Optional<String> suffix = NeurobagelSuffix.of(modality(row.getModality()),
+                    row.getMrDatasetNature(), row.getMrSequenceApplication());
+            if (suffix.isEmpty()) {
+                leftOut++;
+                continue;
+            }
+            // bagel only requires a non-empty path: the session path it publishes is built from sub and ses
+            tsv.append("sub-").append(row.getSubjectId()).append('\t')
+                    .append("ses-").append(row.getExaminationId()).append('\t')
+                    .append(suffix.get()).append('\t')
+                    .append("/shanoir/examination/").append(row.getExaminationId())
+                    .append("/dataset/").append(row.getDatasetId()).append('\n');
+            exported++;
+        }
+        LOG.info("Neurobagel imaging table of study {}: {} datasets exported, {} left out (no Neurobagel suffix)",
+                studyId, exported, leftOut);
+        return Optional.of(tsv.toString());
+    }
+
+    private static Modality modality(String name) {
+        try {
+            return Modality.valueOf(name);
+        } catch (IllegalArgumentException | NullPointerException e) {
+            return Modality.OTHER;
+        }
     }
 
 }
