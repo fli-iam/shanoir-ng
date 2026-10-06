@@ -62,8 +62,6 @@ jobs:
             "org.shanoir-ng:shanoir-ng-import"
             "org.shanoir-ng:shanoir-ng-preclinical"
             "org.shanoir-ng:nifti-conversion"
-            "org.shanoir-ng:shanoir-ng-storage"
-            "org.shanoir-ng:shanoir-ng-storage-jackson3"
           )
 
           for coord in "${modules[@]}"; do
