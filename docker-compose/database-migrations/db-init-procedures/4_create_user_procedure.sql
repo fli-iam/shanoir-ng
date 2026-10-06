@@ -16,14 +16,15 @@ DROP PROCEDURE IF EXISTS getUserStatistics;
 
 DELIMITER //
 CREATE PROCEDURE getUserStatistics() BEGIN
-SELECT 'username',
+SELECT 'user_id',
+       'username',
        'email',
        'first_name',
        'last_name',
        'creation_date',
        'expiration_date',
        'last_login',
-       'role_id',
+       'role',
        'study_name',
        'study_user_right'
 
@@ -40,7 +41,7 @@ SELECT u.id AS user_id,
             WHEN 1 then 'Administrator'
             WHEN 2 then 'Expert'
             WHEN 3 then 'User'
-        END) AS role_id,
+        END) AS role,
        s.name AS study_name,
        (CASE sur.study_user_rights
             WHEN 1 then 'CAN_ADMINISTRATE'
@@ -54,6 +55,7 @@ SELECT u.id AS user_id,
     FROM users u
     JOIN study_user su on su.user_id = u.id
     JOIN studies.study s on su.study_id = s.id
-    JOIN study_user_study_user_rights sur on sur.study_user_id = su.id;
+    JOIN study_user_study_user_rights sur on sur.study_user_id = su.id
+    JOIN role as r on r.id = u.role_id;
 END //
 DELIMITER ;
