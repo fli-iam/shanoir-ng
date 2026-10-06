@@ -40,7 +40,6 @@ import org.shanoir.ng.preclinical.therapies.subject_therapies.SubjectTherapyServ
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.ShanoirException;
-import org.shanoir.ng.shared.jackson.JacksonUtils;
 import org.shanoir.ng.utils.AnimalSubjectModelUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -53,6 +52,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Unit tests for subjects controller.
@@ -73,6 +74,9 @@ public class AnimalSubjectApiControllerTest {
 
     @Autowired
     private MockMvc mvc;
+
+    @Autowired
+    private JsonMapper jsonMapper;
 
     @MockitoBean
     private AnimalSubjectService subjectsServiceMock;
@@ -139,7 +143,7 @@ public class AnimalSubjectApiControllerTest {
     public void saveNewSubjectTest() throws Exception {
         mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(JacksonUtils.serialize(AnimalSubjectModelUtil.createAnimalSubjectDto())))
+                        .content(jsonMapper.writeValueAsString(AnimalSubjectModelUtil.createAnimalSubjectDto())))
                 .andExpect(status().isOk());
     }
 
@@ -149,7 +153,7 @@ public class AnimalSubjectApiControllerTest {
         AnimalSubjectDto dto = AnimalSubjectModelUtil.createAnimalSubjectDto();
         mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(JacksonUtils.serialize(dto)))
+                        .content(jsonMapper.writeValueAsString(dto)))
                 .andExpect(status().isOk());
     }
 
