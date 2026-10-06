@@ -34,10 +34,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import tools.jackson.core.JacksonException;
 import tools.jackson.core.exc.StreamReadException;
@@ -83,20 +79,6 @@ public class BIDSServiceImpl implements BIDSService {
     private static final String DATASET_DESCRIPTION_FILE = "dataset_description.json";
 
     private static final String README_FILE = "README";
-
-    public ResponseEntity<ByteArrayResource> generateParticipantsTsv(final Long studyId) throws IOException {
-        List<Subject> subjs = getSubjectsForStudy(studyId);
-        StringBuilder data = participantsSerializer(subjs);
-
-        ByteArrayResource resource = new ByteArrayResource(data.toString().getBytes());
-
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename" + "participants.tsv")
-                .contentType(MediaType.MULTIPART_FORM_DATA)
-                .contentLength(data.length())
-                .body(resource);
-    }
-
 
     @Override
     public String generateParticipantsTsvFile(Long studyId) throws IOException {
