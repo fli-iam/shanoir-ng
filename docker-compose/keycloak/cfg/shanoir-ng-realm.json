@@ -121,6 +121,15 @@
         "clientRole": false,
         "containerId": "shanoir-ng",
         "attributes": {}
+      },
+      {
+        "id": "846fd020-f7f2-405d-8da0-469f20c53053",
+        "name": "ROLE_NEUROBAGEL",
+        "description": "Read-only access to the /neurobagel/** export endpoints, and nothing else",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "shanoir-ng",
+        "attributes": {}
       }
     ],
     "client": {
