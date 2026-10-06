@@ -13,7 +13,7 @@
  */
 
 import { DecimalPipe } from '@angular/common';
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 import * as AppUtils from '../utils/app.utils';
@@ -47,6 +47,7 @@ import {
 @Component({
     selector: 'study-statistics',
     templateUrl: 'study-statistics.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['study-statistics.component.css'],
     imports: [LineChartComponent, BarChartComponent, DonutChartComponent, DateRangeSliderComponent, DecimalPipe, LocalDateFormatPipe, FormsModule]
 })

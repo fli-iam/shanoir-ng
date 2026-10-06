@@ -10,7 +10,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges, ViewChild } from '@angular/core';
 
 import { LocalDateFormatPipe } from '../../localLanguage/localDateFormat.pipe';
 
@@ -26,6 +26,7 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 @Component({
     selector: 'date-range-slider',
     templateUrl: 'date-range-slider.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['date-range-slider.component.css'],
     imports: [LocalDateFormatPipe]
 })

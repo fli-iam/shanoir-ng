@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, Input, OnChanges, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnChanges, ViewChild } from '@angular/core';
 import { ChartConfiguration, ChartOptions } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
 
@@ -28,6 +28,7 @@ export interface BarChartDataset {
 @Component({
     selector: 'shanoir-bar-chart',
     templateUrl: 'bar-chart.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['bar-chart.component.css'],
     imports: [BaseChartDirective]
 })
