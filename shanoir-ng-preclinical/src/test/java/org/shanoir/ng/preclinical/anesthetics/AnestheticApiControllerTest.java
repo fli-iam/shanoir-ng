@@ -47,6 +47,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.rabbitmq.client.ConnectionFactory;
 
 /**
  * Unit tests for anesthetics controller.
@@ -87,6 +88,9 @@ public class AnestheticApiControllerTest {
 
     @MockitoBean
     private AnestheticEditableByManager editableOnlyValidator;
+
+    @MockitoBean
+    private ConnectionFactory connectionFactory;
 
     @BeforeEach
     public void setup() throws ShanoirException {

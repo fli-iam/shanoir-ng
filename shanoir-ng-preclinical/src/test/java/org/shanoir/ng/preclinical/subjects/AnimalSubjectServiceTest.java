@@ -22,8 +22,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.mockito.BDDMockito.given;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.mockito.Mockito;
 import org.shanoir.ng.preclinical.references.RefsRepository;
 import org.shanoir.ng.preclinical.subjects.model.AnimalSubject;
@@ -50,16 +50,16 @@ public class AnimalSubjectServiceTest {
     private static final String UPDATED_SUBJECT_DATA = "subject73";
     private static final Long REF_ID = 1L;
 
-    @Mock
+    @MockitoBean
     private AnimalSubjectRepository subjectsRepository;
 
-    @Mock
+    @MockitoBean
     private RabbitTemplate rabbitTemplate;
 
-    @InjectMocks
+    @Autowired
     private AnimalSubjectServiceImpl subjectsService;
 
-    @Mock
+    @MockitoBean
     private RefsRepository refsRepository;
 
     @BeforeEach
