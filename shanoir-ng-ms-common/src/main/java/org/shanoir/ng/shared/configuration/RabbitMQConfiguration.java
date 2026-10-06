@@ -254,6 +254,9 @@ public class RabbitMQConfiguration {
     /** Queue used to get participants.tsv of a study. */
     public static final String STUDY_PARTICIPANTS_TSV = "study-participants-tsv";
 
+    /** Neurobagel export: participants.tsv of an exported study, without writing any file: ms datasets -> ms studies */
+    public static final String NEUROBAGEL_PARTICIPANTS_TSV = "neurobagel-participants-tsv";
+
     /** Send a mail from studies microservice to ms users */
     public static final String STUDY_USER_MAIL_QUEUE = "study-user-mail-queue";
 
@@ -580,6 +583,11 @@ public class RabbitMQConfiguration {
     @Bean
     public static Queue studyParticipantsTsvQueue() {
         return new Queue(STUDY_PARTICIPANTS_TSV, true);
+    }
+
+    @Bean
+    public static Queue neurobagelParticipantsTsvQueue() {
+        return new Queue(NEUROBAGEL_PARTICIPANTS_TSV, true);
     }
 
     @Bean
