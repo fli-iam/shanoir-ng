@@ -12,3 +12,4 @@
 
 -- Copy of studies.study.neurobagel_export, synced through the study update message.
 ALTER TABLE study ADD COLUMN neurobagel_export TINYINT(1) NOT NULL DEFAULT 0;
+UPDATE study SET neurobagel_export = 0;
