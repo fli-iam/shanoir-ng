@@ -59,10 +59,11 @@ jobs:
             "org.shanoir.anonymization:anonymization"
             "org.shanoir-ng:shanoir-ng-studies"
             "org.shanoir-ng:shanoir-ng-datasets"
-            "org.shanoir-ng:shanoir-ng-exchange"
             "org.shanoir-ng:shanoir-ng-import"
             "org.shanoir-ng:shanoir-ng-preclinical"
             "org.shanoir-ng:nifti-conversion"
+            "org.shanoir-ng:shanoir-ng-storage"
+            "org.shanoir-ng:shanoir-ng-storage-jackson3"
           )
 
           for coord in "${modules[@]}"; do
