@@ -106,20 +106,18 @@ public class BIDSServiceImpl implements BIDSService {
 
     public StringBuilder participantsSerializer(List<Subject> subjects) {
         StringBuilder buffer =  new StringBuilder();
-        // Headers
-        for (String columnHeader : CSV_PARTICIPANTS_HEADER) {
-            buffer.append(columnHeader).append(CSV_SEPARATOR);
-        }
-        buffer.append(CSV_SPLITTER);
+        // Headers. Columns are separated, not terminated, by tabs: a trailing tab would read as an empty column.
+        buffer.append(String.join(CSV_SEPARATOR, CSV_PARTICIPANTS_HEADER)).append(CSV_SPLITTER);
 
         for (Subject subject : subjects) {
             String subjectAge = ageCalculation(subject);
             String subjectSex = subject.getSex() != null ? subject.getSex().name() : "O";
             // Write in the file the values
-            buffer.append(StorageService.SUBJECT).append(subject.getId()).append(CSV_SEPARATOR)
-                    .append(subject.getId()).append(CSV_SEPARATOR)
-                    .append(subjectAge).append(CSV_SEPARATOR)
-                    .append(subjectSex).append(CSV_SEPARATOR)
+            buffer.append(String.join(CSV_SEPARATOR,
+                    StorageService.SUBJECT + subject.getId(),
+                    String.valueOf(subject.getId()),
+                    subjectAge,
+                    subjectSex))
                     .append(CSV_SPLITTER);
         }
 
