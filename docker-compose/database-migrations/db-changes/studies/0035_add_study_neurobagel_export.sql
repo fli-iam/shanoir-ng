@@ -12,3 +12,4 @@
 
 -- Opt-in exposure of the study metadata to the Neurobagel federation. Only admins set it.
 ALTER TABLE study ADD COLUMN neurobagel_export TINYINT(1) NOT NULL DEFAULT 0;
+UPDATE study SET neurobagel_export = 0;
