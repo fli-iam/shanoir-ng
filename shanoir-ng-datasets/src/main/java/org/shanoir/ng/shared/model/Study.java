@@ -55,6 +55,10 @@ public class Study extends IdName {
     @Column(name = "is_draft")
     private boolean isDraft;
 
+    /** Copy of the ms-studies flag: study metadata exposed to the Neurobagel federation. */
+    @Column(name = "neurobagel_export")
+    private boolean neurobagelExport;
+
     @ManyToMany
     @JoinTable(name = "related_datasets", joinColumns = @JoinColumn(name = "study_id"), inverseJoinColumns = @JoinColumn(name = "dataset_id"))
     private List<Dataset> relatedDatasets;
@@ -162,6 +166,14 @@ public class Study extends IdName {
 
     public void setIsDraft(boolean isDraft) {
         this.isDraft = isDraft;
+    }
+
+    public boolean isNeurobagelExport() {
+        return neurobagelExport;
+    }
+
+    public void setNeurobagelExport(boolean neurobagelExport) {
+        this.neurobagelExport = neurobagelExport;
     }
 
     public List<Examination> getExaminations() {
