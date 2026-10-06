@@ -58,6 +58,7 @@ services:
       - SHANOIR_SMTP_STARTTLS_ENABLE
       - SHANOIR_SMTP_STARTTLS_REQUIRED
       - SHANOIR_SMTP_FROM
+      - NEUROBAGEL_CLIENT_SECRET
     image: "ghcr.io/fli-iam/shanoir-ng/keycloak:NG_v2.14.0"
     volumes:
       - "keycloak-logs:/opt/keycloak/data/log"
