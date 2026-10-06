@@ -29,7 +29,7 @@ public class ZipWriter implements ArchiveWriter {
     private final ZipOutputStream zip;
 
     public ZipWriter(OutputStream out) {
-        this.zip = new ZipOutputStream(out);
+        this.zip = new ZipOutputStream(PacsTransferStats.withNetworkTiming(out));
     }
 
     public String getExtension() {
