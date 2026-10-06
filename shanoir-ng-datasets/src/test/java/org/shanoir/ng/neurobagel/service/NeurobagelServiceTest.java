@@ -37,6 +37,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.shanoir.ng.neurobagel.dto.NeurobagelDatasetDescriptionDTO;
 import org.shanoir.ng.neurobagel.dto.NeurobagelStudyDTO;
+import org.shanoir.ng.neurobagel.repository.NeurobagelImagingRepository;
+import org.shanoir.ng.neurobagel.repository.NeurobagelImagingRow;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.repository.StudyRepository;
@@ -55,6 +57,9 @@ class NeurobagelServiceTest {
 
     @Mock
     private RabbitTemplate rabbitTemplate;
+
+    @Mock
+    private NeurobagelImagingRepository imagingRepository;
 
     @InjectMocks
     private NeurobagelService service;
@@ -167,6 +172,70 @@ class NeurobagelServiceTest {
         StudyTag tag = new StudyTag();
         tag.setName(name);
         return tag;
+    }
+
+    @Test
+    void imagingTableKeepsOnlyTheDatasetsWithASuffix() {
+        given(studyRepository.existsByIdAndNeurobagelExportTrueAndIsDraftFalse(1L)).willReturn(true);
+        given(imagingRepository.findImagingRows(1L)).willReturn(List.of(
+                row(10L, 100L, 1000L, "MR", 1, 2),       // T1w
+                row(10L, 100L, 1001L, "MR", 2, 9),       // bold
+                row(10L, 100L, 1002L, "MR", 13, 9),      // field map: left out
+                row(11L, 101L, 1003L, "MR", null, null), // not classified: left out
+                row(11L, 101L, 1004L, "PET", null, null),
+                row(11L, 101L, 1005L, "OTHER", null, null))); // CT: left out
+
+        String tsv = service.findImagingTsv(1L).orElseThrow();
+
+        assertEquals("sub\tses\tsuffix\tpath\n"
+                + "sub-10\tses-100\tT1w\t/shanoir/examination/100/dataset/1000\n"
+                + "sub-10\tses-100\tbold\t/shanoir/examination/100/dataset/1001\n"
+                + "sub-11\tses-101\tpet\t/shanoir/examination/101/dataset/1004\n", tsv);
+    }
+
+    @Test
+    void imagingTableWithoutAnySuffixHasTheHeaderOnly() {
+        given(studyRepository.existsByIdAndNeurobagelExportTrueAndIsDraftFalse(1L)).willReturn(true);
+        given(imagingRepository.findImagingRows(1L)).willReturn(List.of(row(10L, 100L, 1000L, "MR", null, null)));
+
+        assertEquals(Optional.of("sub\tses\tsuffix\tpath\n"), service.findImagingTsv(1L));
+    }
+
+    @Test
+    void imagingTableOfAStudyNotExportedIsNotBuilt() {
+        given(studyRepository.existsByIdAndNeurobagelExportTrueAndIsDraftFalse(2L)).willReturn(false);
+
+        assertFalse(service.findImagingTsv(2L).isPresent());
+        verify(imagingRepository, never()).findImagingRows(anyLong());
+    }
+
+    private static NeurobagelImagingRow row(Long subjectId, Long examinationId, Long datasetId, String modality,
+            Integer nature, Integer application) {
+        return new NeurobagelImagingRow() {
+            public Long getSubjectId() {
+                return subjectId;
+            }
+
+            public Long getExaminationId() {
+                return examinationId;
+            }
+
+            public Long getDatasetId() {
+                return datasetId;
+            }
+
+            public String getModality() {
+                return modality;
+            }
+
+            public Integer getMrDatasetNature() {
+                return nature;
+            }
+
+            public Integer getMrSequenceApplication() {
+                return application;
+            }
+        };
     }
 
 }
