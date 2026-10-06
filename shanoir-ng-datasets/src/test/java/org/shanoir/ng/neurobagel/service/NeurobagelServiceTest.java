@@ -28,17 +28,21 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.shanoir.ng.neurobagel.dto.NeurobagelDatasetDescriptionDTO;
 import org.shanoir.ng.neurobagel.dto.NeurobagelStudyDTO;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.repository.StudyRepository;
+import org.shanoir.ng.tag.model.StudyTag;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -131,6 +135,38 @@ class NeurobagelServiceTest {
         List<String> list = new ArrayList<>();
         names.forEachRemaining(list::add);
         return list;
+    }
+
+    @Test
+    void datasetDescriptionOfAnExportedStudy() {
+        ReflectionTestUtils.setField(service, "frontServerAddress", "https://shanoir.example.org/shanoir-ng");
+        Study study = new Study(1L, "My study", false);
+        study.setStudyTags(Set.of(studyTag("mri"), studyTag("adhd")));
+        given(studyRepository.existsByIdAndNeurobagelExportTrueAndIsDraftFalse(1L)).willReturn(true);
+        given(studyRepository.findByIdWithStudyTags(1L)).willReturn(Optional.of(study));
+
+        NeurobagelDatasetDescriptionDTO description = service.findDatasetDescription(1L).orElseThrow();
+
+        assertEquals("My study", description.getName());
+        assertEquals(List.of("adhd", "mri"), description.getKeywords());
+        assertEquals(List.of("https://shanoir.example.org/shanoir-ng/study/details/1"), description.getReferencesAndLinks());
+        assertEquals("restricted", description.getAccessType());
+        assertEquals("https://shanoir.example.org/shanoir-ng/access-request/study/1", description.getAccessLink());
+        assertTrue(description.getAccessInstructions().contains(description.getAccessLink()));
+    }
+
+    @Test
+    void datasetDescriptionOfAStudyNotExportedIsNotBuilt() {
+        given(studyRepository.existsByIdAndNeurobagelExportTrueAndIsDraftFalse(2L)).willReturn(false);
+
+        assertFalse(service.findDatasetDescription(2L).isPresent());
+        verify(studyRepository, never()).findByIdWithStudyTags(anyLong());
+    }
+
+    private static StudyTag studyTag(String name) {
+        StudyTag tag = new StudyTag();
+        tag.setName(name);
+        return tag;
     }
 
 }
