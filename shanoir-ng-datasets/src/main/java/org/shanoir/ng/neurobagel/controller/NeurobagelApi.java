@@ -37,6 +37,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RequestMapping("/neurobagel")
 public interface NeurobagelApi {
 
+    String TSV = "text/tab-separated-values";
+
     @Operation(summary = "findExportedStudies", description = "Lists the studies exposed to the Neurobagel federation")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "exported studies, possibly none"),
@@ -55,6 +57,17 @@ public interface NeurobagelApi {
     @GetMapping(value = "/study/{studyId}", produces = { "application/json" })
     @PreAuthorize("hasRole('NEUROBAGEL')")
     ResponseEntity<NeurobagelStudyDTO> findExportedStudy(
+            @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId);
+
+    @Operation(summary = "findParticipantsTsv", description = "Returns the participants.tsv of a study exposed to the Neurobagel federation")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "participants.tsv: participant_id, subject_identifier, subject_age, subject_sex"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "404", description = "no such study, or not exported") })
+    @GetMapping(value = "/study/{studyId}/participants.tsv", produces = { NeurobagelApi.TSV })
+    @PreAuthorize("hasRole('NEUROBAGEL')")
+    ResponseEntity<String> findParticipantsTsv(
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId);
 
 }
