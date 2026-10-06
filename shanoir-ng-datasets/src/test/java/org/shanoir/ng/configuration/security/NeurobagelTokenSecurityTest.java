@@ -108,11 +108,21 @@ class NeurobagelTokenSecurityTest {
     }
 
     @Test
+    void neurobagelTokenGetsTheParticipantsDictionary() throws Exception {
+        given(neurobagelService.getParticipantsDictionary()).willReturn("{\"participant_id\": {}}");
+        mvc.perform(asNeurobagel(get("/neurobagel/participants.json")))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith("application/json"))
+                .andExpect(jsonPath("$.participant_id").exists());
+    }
+
+    @Test
     void shanoirUsersCannotCallNeurobagelEndpoints() throws Exception {
         for (String role : List.of("ROLE_USER", "ROLE_EXPERT", "ROLE_ADMIN")) {
             mvc.perform(as(role, get("/neurobagel/studies"))).andExpect(status().isForbidden());
             mvc.perform(as(role, get("/neurobagel/study/1"))).andExpect(status().isForbidden());
             mvc.perform(as(role, get("/neurobagel/study/1/participants.tsv"))).andExpect(status().isForbidden());
+            mvc.perform(as(role, get("/neurobagel/participants.json"))).andExpect(status().isForbidden());
         }
     }
 

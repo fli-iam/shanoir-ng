@@ -24,6 +24,8 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,6 +39,9 @@ import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @ExtendWith(MockitoExtension.class)
 class NeurobagelServiceTest {
@@ -108,6 +113,24 @@ class NeurobagelServiceTest {
         given(rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.NEUROBAGEL_PARTICIPANTS_TSV, "1")).willReturn(null);
 
         assertFalse(service.findParticipantsTsv(1L).isPresent());
+    }
+
+    @Test
+    void participantsDictionaryAnnotatesTheParticipantsColumns() throws Exception {
+        JsonNode dictionary = new ObjectMapper().readTree(service.getParticipantsDictionary());
+
+        assertEquals(List.of("participant_id", "subject_identifier", "subject_age", "subject_sex"),
+                iterableToList(dictionary.fieldNames()));
+        assertEquals("nb:ParticipantID", dictionary.at("/participant_id/Annotations/IsAbout/TermURL").asText());
+        assertEquals("nb:Age", dictionary.at("/subject_age/Annotations/IsAbout/TermURL").asText());
+        assertEquals("nb:Sex", dictionary.at("/subject_sex/Annotations/IsAbout/TermURL").asText());
+        assertEquals(List.of("M", "F", "O"), iterableToList(dictionary.at("/subject_sex/Annotations/Levels").fieldNames()));
+    }
+
+    private static List<String> iterableToList(Iterator<String> names) {
+        List<String> list = new ArrayList<>();
+        names.forEachRemaining(list::add);
+        return list;
     }
 
 }
