@@ -91,4 +91,15 @@ public interface NeurobagelApi {
     ResponseEntity<NeurobagelDatasetDescriptionDTO> findDatasetDescription(
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId);
 
+    @Operation(summary = "findImagingTsv", description = "Returns the imaging table of a study exposed to the Neurobagel federation")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "imaging table: sub, ses, suffix, path. Header only when no dataset has a Neurobagel suffix"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "404", description = "no such study, or not exported") })
+    @GetMapping(value = "/study/{studyId}/imaging.tsv", produces = { NeurobagelApi.TSV })
+    @PreAuthorize("hasRole('NEUROBAGEL')")
+    ResponseEntity<String> findImagingTsv(
+            @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId);
+
 }
