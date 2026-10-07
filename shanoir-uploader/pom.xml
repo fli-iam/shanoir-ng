@@ -305,7 +305,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <artifactId>flatlaf</artifactId>
             <version>3.2</version>
         </dependency>
-        <!-- dependency for unit testing of sh-ng rest api -->
+        <!-- dependency for unit testing of Shanoir rest api -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>

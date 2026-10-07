@@ -42,17 +42,6 @@ public class RabbitMqStudyCardService {
     @Autowired
     private ObjectMapper mapper;
 
-    @RabbitListener(queues = RabbitMQConfiguration.FIND_STUDY_CARD_QUEUE, containerFactory = "multipleConsumersFactory")
-    @RabbitHandler
-    @Transactional
-    public String findStudyCard(String message) {
-        try {
-            return mapper.writeValueAsString(studyCardRepository.findById(Long.valueOf(message)).orElse(null));
-        } catch (Exception e) {
-            throw new AmqpRejectAndDontRequeueException(e);
-        }
-    }
-
     @RabbitListener(queues = RabbitMQConfiguration.IMPORT_STUDY_CARD_QUEUE, containerFactory = "multipleConsumersFactory")
     @RabbitHandler
     @Transactional
