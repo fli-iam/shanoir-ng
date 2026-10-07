@@ -71,6 +71,8 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractTest {
 
+    private static final String SHANOIR_SERVER_URL = "integration.tests.shanoir.server.url";
+
     private static final Logger LOG = LoggerFactory.getLogger(AbstractTest.class);
 
     private static final String TEST_PROPERTIES = "test.properties";
@@ -165,15 +167,22 @@ public abstract class AbstractTest {
      */
     private static ShanoirUploaderServiceClient buildAuthenticatedClient(
             String nameKey, String passwordKey, String roleLabel) {
-        String name = resolveCredential(nameKey);
-        String password = resolveCredential(passwordKey);
+        String name = resolveProperty(nameKey);
+        String password = resolveProperty(passwordKey);
         if (StringUtils.isBlank(name) || StringUtils.isBlank(password)) {
             LOG.warn("Credentials for {} not configured (keys: {}, {}). Client will be null.",
                     roleLabel, nameKey, passwordKey);
             return null;
         }
+        // sets the serverURL from the ShUpConfig.profileProperties shanoir.server.url
         ShanoirUploaderServiceClient client = new ShanoirUploaderServiceClient();
         client.configure();
+        // override with env-variable, if set
+        String serverURL = resolveProperty(SHANOIR_SERVER_URL);
+        if (StringUtils.isNotBlank(serverURL)) {
+            client.setServerURL(serverURL);
+            LOG.info("Integration tests: serverURL set from env variable to {}", serverURL);
+        }
         try {
             String accessToken = client.loginWithKeycloakForToken(name, password);
             if (accessToken == null) {
@@ -208,11 +217,11 @@ public abstract class AbstractTest {
      * @param propertyKey the dotted property key (e.g. {@code "admin.password"})
      * @return the resolved value, or {@code null}/blank if neither source has it
      */
-    private static String resolveCredential(String propertyKey) {
+    private static String resolveProperty(String propertyKey) {
         String envVarName = propertyKey.toUpperCase().replace('.', '_');
         String envValue = System.getenv(envVarName);
         if (StringUtils.isNotBlank(envValue)) {
-            LOG.debug("Resolved credential for key '{}' from environment variable '{}'.",
+            LOG.info("Resolved credential for key '{}' from environment variable '{}'.",
                     propertyKey, envVarName);
             return envValue;
         }
