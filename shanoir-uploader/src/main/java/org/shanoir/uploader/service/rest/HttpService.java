@@ -39,6 +39,7 @@ import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuil
 import org.apache.hc.client5.http.impl.routing.DefaultProxyRoutePlanner;
 import org.apache.hc.client5.http.io.HttpClientConnectionManager;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
+import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
 import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
 import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactoryBuilder;
 import org.apache.hc.core5.http.ContentType;
@@ -51,7 +52,6 @@ import org.apache.hc.core5.ssl.SSLContexts;
 import org.apache.hc.core5.ssl.TrustStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.shanoir.uploader.ShUpOnloadConfig;
 
 /**
  * This class wraps the usage of Apache HttpClient, currently 5.1.
@@ -332,6 +332,7 @@ public class HttpService {
         if (sslContextDev != null) {
             sslSocketFactory = SSLConnectionSocketFactoryBuilder.create()
                     .setSslContext(sslContextDev)
+                    .setHostnameVerifier(NoopHostnameVerifier.INSTANCE)
                     .setTlsVersions(TLS.V_1_3, TLS.V_1_2)
                     .build();
             LOG.debug("DEV SSLSocketFactory used.");
