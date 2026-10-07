@@ -16,7 +16,7 @@ package org.shanoir.ng.preclinical.extra_data;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -69,7 +69,6 @@ public class ExtraDataApiController implements ExtraDataApi {
 
     private final HttpServletRequest request;
 
-    @org.springframework.beans.factory.annotation.Autowired
     public ExtraDataApiController(final HttpServletRequest request) {
         this.request = request;
     }
@@ -382,7 +381,7 @@ public class ExtraDataApiController implements ExtraDataApi {
         List<FileEntryDTO> fileEntries = allExtraData.stream()
                 .filter(extraData -> extraData.getFilepath() != null && extraData.getFilename() != null)
                 .map(extraData -> {
-                    boolean exists = Paths.get(extraData.getFilepath()).toFile().exists();
+                    boolean exists = Path.of(extraData.getFilepath()).toFile().exists();
                     return new FileEntryDTO(extraData.getId(),
                             extraData.getFilename(), extraData.getExtraDataType(), exists);
                 })

@@ -12,18 +12,19 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.exchange.imports.subject;
+package org.shanoir.ng.utils;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class IdentifierCalculatorTest {
 
     private IdentifierCalculator identifierCalculator;
@@ -38,7 +39,7 @@ public class IdentifierCalculatorTest {
 
     private static final String LAST_NAME = "lastName";
 
-    @Before
+    @BeforeEach
     public void setup() {
         identifierCalculator = new IdentifierCalculator();
     }
@@ -48,14 +49,14 @@ public class IdentifierCalculatorTest {
         String subjectIdentifier = identifierCalculator.calculateIdentifierWithHashs(FIRST_NAME_HASH1, BIRTH_NAME_HASH1,
                 BIRTH_DATE_HASH);
         // Values have been acquired during tests with ShUp v5.2
-        Assert.assertEquals("f618582aad29463cc1f4d4fc09dfdddd00584a654bcc2ae2457c338a21da5cd6", subjectIdentifier);
+        assertEquals("f618582aad29463cc1f4d4fc09dfdddd00584a654bcc2ae2457c338a21da5cd6", subjectIdentifier);
     }
 
     @Test
     public void testCalculateIdentifier() throws UnsupportedEncodingException, NoSuchAlgorithmException {
         String subjectIdentifier = identifierCalculator.calculateIdentifier(FIRST_NAME, LAST_NAME, "01/01/2020");
         // Values have been acquired during tests with master sh-old
-        Assert.assertEquals("AB-859C-100131", subjectIdentifier);
+        assertEquals("AB-859C-100131", subjectIdentifier);
     }
 
 }

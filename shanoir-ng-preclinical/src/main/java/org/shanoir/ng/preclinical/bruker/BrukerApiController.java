@@ -21,7 +21,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.zip.ZipEntry;
@@ -155,9 +154,9 @@ public class BrukerApiController implements BrukerApi {
                 + FOLDER_SEP + fileName;
         // if the folder exists, create a new folder by adding a figure at the end of
         // the folder name
-        Path path = Paths.get(pathFile + FOLDER_SEP + String.valueOf(index));
+        Path path = Path.of(pathFile + FOLDER_SEP + String.valueOf(index));
         while (path.toFile().exists()) {
-            path = Paths.get(pathFile + FOLDER_SEP + String.valueOf(index));
+            path = Path.of(pathFile + FOLDER_SEP + String.valueOf(index));
             index++;
         }
         Files.createDirectories(path);
@@ -174,7 +173,7 @@ public class BrukerApiController implements BrukerApi {
      */
     private Path saveUploadedFileTmp(MultipartFile brukerFile, Path brukerDirPath) throws IOException {
         // Path to file
-        Path pathToFile = Paths.get(brukerDirPath.toString() + FOLDER_SEP + brukerFile.getOriginalFilename());
+        Path pathToFile = Path.of(brukerDirPath.toString() + FOLDER_SEP + brukerFile.getOriginalFilename());
         File destFile = pathToFile.toFile();
         brukerFile.transferTo(destFile);
         return pathToFile;

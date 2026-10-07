@@ -233,8 +233,8 @@ COPY --link preclinical/shanoir-ng-preclinical.jar shanoir-ng-preclinical.jar
 COPY --link preclinical/entrypoint /usr/bin/
 
 # Use the below line for remote debugging
-#CMD ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:9915", "-jar", "/shanoir-ng-preclinical.jar", "-Xmx6g", "-Xms1g"]
-CMD ["-jar", "/shanoir-ng-preclinical.jar", "-Xmx6g", "-Xms1g"]
+#CMD ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:9915", "-Dspring.aot.enabled=true", "-jar", "/shanoir-ng-preclinical.jar", "-Xmx6g", "-Xms1g"]
+CMD ["-Dspring.aot.enabled=true", "-jar", "/shanoir-ng-preclinical.jar", "-Xmx6g", "-Xms1g"]
 
 
 

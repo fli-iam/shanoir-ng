@@ -92,17 +92,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>org.shanoir-ng</groupId>
-			<artifactId>shanoir-ng-exchange</artifactId>
-			<version>3.4.0</version>
-			<exclusions>
-			    <exclusion>
-			        <groupId>*</groupId>
-			        <artifactId>*</artifactId>
-			    </exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context</artifactId>
 			<version>${spring.version}</version>
