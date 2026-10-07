@@ -6,4 +6,5 @@
     window["env"]["contactMail"] = "SHANOIR_CONTACT_EMAIL";
     window["env"]["viewerUrl"] = "SHANOIR_VIEWER_OHIF_URL_SCHEME://SHANOIR_VIEWER_OHIF_URL_HOST";
     window["env"]["vipUrl"] = "VIP_URL_SCHEME://VIP_URL_HOST";
+    window["env"]["mailSupplierBlacklist"] = "MAIL_SUPPLIER_BLACK_LIST";
 })(this);
