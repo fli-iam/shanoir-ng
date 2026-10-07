@@ -20,15 +20,18 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.vip.output.exception.ResultHandlerException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Tag(name = "Post processing", description = "API for post processing")
 @RequestMapping("/vip/postProcessing")
 public interface PostProcessingApi {
 
-    @Operation(summary = "Launch every post processing according to processing name and comment", description = "Launch every post processings according to processing name and comment.", tags = {  })
+    @Operation(summary = "Launch every post processing according to processing name and comment", description = "Launch every post processing according to processing name and comment.", tags = {  })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Post processing command successfully initiated"),
             @ApiResponse(responseCode = "403", description = "forbidden"),
@@ -38,4 +41,14 @@ public interface PostProcessingApi {
     ResponseEntity<IdName> launchPostProcessing(
             @Parameter(description = "processing name", required = true) @RequestParam final String name,
             @Parameter(description = "processing comment", required = true) @RequestParam final String comment);
+
+    @Operation(summary = "Launch every post processing according to processing ids", description = "Launch every post processing according to processing ids.", tags = {  })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Post processing command successfully initiated"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "500", description = "unexpected error")})
+    @GetMapping(value = { "/ids/"}, produces = { "application/json" })
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER'))")
+    ResponseEntity<IdName> launchPostProcessingFromIds(
+            @Parameter(description = "processing ids", required = true) @RequestParam final List<Long> idList) throws ResultHandlerException;
 }
