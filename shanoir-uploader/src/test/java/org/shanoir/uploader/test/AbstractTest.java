@@ -71,9 +71,9 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractTest {
 
-    private static final String SHANOIR_SERVER_URL = "integration.tests.shanoir.server.url";
-
     private static final Logger LOG = LoggerFactory.getLogger(AbstractTest.class);
+
+    private static final String INTEGRATION_TESTS_SHANOIR_SERVER_URL = "integration.tests.shanoir.server.url";
 
     private static final String TEST_PROPERTIES = "test.properties";
 
@@ -174,15 +174,15 @@ public abstract class AbstractTest {
                     roleLabel, nameKey, passwordKey);
             return null;
         }
+        // override with env-variable, if set
+        String serverURL = resolveProperty(INTEGRATION_TESTS_SHANOIR_SERVER_URL);
+        if (StringUtils.isNotBlank(serverURL)) {
+            ShUpConfig.profileProperties.setProperty(ShanoirUploaderServiceClient.SHANOIR_SERVER_URL, serverURL);
+            LOG.info("Integration tests: serverURL set from env variable to {}", serverURL);
+        }
         // sets the serverURL from the ShUpConfig.profileProperties shanoir.server.url
         ShanoirUploaderServiceClient client = new ShanoirUploaderServiceClient();
         client.configure();
-        // override with env-variable, if set
-        String serverURL = resolveProperty(SHANOIR_SERVER_URL);
-        if (StringUtils.isNotBlank(serverURL)) {
-            client.setServerURL(serverURL);
-            LOG.info("Integration tests: serverURL set from env variable to {}", serverURL);
-        }
         try {
             String accessToken = client.loginWithKeycloakForToken(name, password);
             if (accessToken == null) {
@@ -221,7 +221,7 @@ public abstract class AbstractTest {
         String envVarName = propertyKey.toUpperCase().replace('.', '_');
         String envValue = System.getenv(envVarName);
         if (StringUtils.isNotBlank(envValue)) {
-            LOG.info("Resolved credential for key '{}' from environment variable '{}'.",
+            LOG.info("Resolved for key '{}' from environment variable '{}'.",
                     propertyKey, envVarName);
             return envValue;
         }
