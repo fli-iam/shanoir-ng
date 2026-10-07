@@ -78,6 +78,8 @@ public class HttpService {
 
     private static final String DEV_LOCAL = "https://localhost";
 
+    private static final String DEV_LOCAL_DOCKER = "https://172.17.0.1";
+
     private static final String CONTENT_TYPE_MULTIPART = "multipart/related";
 
     private static final String CONTENT_TYPE_DICOM = "application/dicom";
@@ -248,7 +250,7 @@ public class HttpService {
 
     private CloseableHttpClient buildHttpClient(String url) throws Exception {
         SSLContext sslContextDev = null;
-        if (url.equals(DEV_LOCAL)) {
+        if (url.equals(DEV_LOCAL) || url.equals(DEV_LOCAL_DOCKER)) {
             // Create special SSLContext for local development server
             sslContextDev = SSLContexts.custom()
             .loadTrustMaterial(new TrustStrategy() {
