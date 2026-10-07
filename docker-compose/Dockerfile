@@ -126,8 +126,8 @@ COPY --link import/entrypoint /usr/bin/
 COPY --link import/shanoir-ng-import.jar shanoir-ng-import.jar
 
 # Use the below line for remote debugging
-#CMD ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:9913", "-jar", "/shanoir-ng-import.jar"]
-CMD ["-jar", "/shanoir-ng-import.jar"]
+#CMD ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:9913", "-Dspring.aot.enabled=true", "-jar", "/shanoir-ng-import.jar"]
+CMD ["-Dspring.aot.enabled=true", "-jar", "/shanoir-ng-import.jar"]
 
 
 
@@ -221,7 +221,7 @@ ENV LANG=fr_FR.UTF-8
 ENV LANGUAGE=fr_FR.UTF-8
 ENV PATH="/opt/miniconda3/bin:${PATH}"
 
-CMD ["-jar", "/nifti-conversion.jar"]
+CMD ["-Dspring.aot.enabled=true", "-jar", "/nifti-conversion.jar"]
 
 
 
@@ -233,8 +233,8 @@ COPY --link preclinical/shanoir-ng-preclinical.jar shanoir-ng-preclinical.jar
 COPY --link preclinical/entrypoint /usr/bin/
 
 # Use the below line for remote debugging
-#CMD ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:9915", "-jar", "/shanoir-ng-preclinical.jar", "-Xmx6g", "-Xms1g"]
-CMD ["-jar", "/shanoir-ng-preclinical.jar", "-Xmx6g", "-Xms1g"]
+#CMD ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:9915", "-Dspring.aot.enabled=true", "-jar", "/shanoir-ng-preclinical.jar", "-Xmx6g", "-Xms1g"]
+CMD ["-Dspring.aot.enabled=true", "-jar", "/shanoir-ng-preclinical.jar", "-Xmx6g", "-Xms1g"]
 
 
 
@@ -246,8 +246,8 @@ COPY --link studies/shanoir-ng-studies.jar shanoir-ng-studies.jar
 COPY --link studies/entrypoint /usr/bin/
 
 # Use the below line for remote debugging
-#CMD ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:9912", "-jar", "/shanoir-ng-studies.jar"]
-CMD ["-jar", "/shanoir-ng-studies.jar"]
+#CMD ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:9912", "-Dspring.aot.enabled=true", "-jar", "/shanoir-ng-studies.jar"]
+CMD ["-Dspring.aot.enabled=true", "-jar", "/shanoir-ng-studies.jar"]
 
 
 

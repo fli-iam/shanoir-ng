@@ -26,7 +26,7 @@ import org.shanoir.ng.preclinical.contrast_agent.ContrastAgent;
 import org.shanoir.ng.preclinical.contrast_agent.ContrastAgentRepository;
 import org.shanoir.ng.utils.ReferenceModelUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 

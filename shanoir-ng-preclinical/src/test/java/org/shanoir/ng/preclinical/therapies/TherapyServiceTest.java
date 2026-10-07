@@ -23,8 +23,8 @@ import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.mockito.Mockito;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.TherapyModelUtil;
@@ -46,13 +46,13 @@ public class TherapyServiceTest {
     private static final String UPDATED_THERAPY_DATA = "Chimiotherapy";
     private static final String UPDATED_THERAPY_TYPE_DATA = "Drug";
 
-    @Mock
+    @MockitoBean
     private TherapyRepository therapiesRepository;
 
-    @Mock
+    @MockitoBean
     private RabbitTemplate rabbitTemplate;
 
-    @InjectMocks
+    @Autowired
     private TherapyServiceImpl therapiesService;
 
 

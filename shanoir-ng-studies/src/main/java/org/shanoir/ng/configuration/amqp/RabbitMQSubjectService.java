@@ -30,9 +30,8 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 @Service
 public class RabbitMQSubjectService {
@@ -56,7 +55,7 @@ public class RabbitMQSubjectService {
         try {
             subjectNameInStudy = mapper.readValue(subjectNameInStudyString, IdName.class);
             return this.subjectService.existsSubjectWithNameInStudy(subjectNameInStudy.getName(), subjectNameInStudy.getId());
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             LOG.error("Error while checking subject name existence", e);
             throw new AmqpRejectAndDontRequeueException(e);
         }

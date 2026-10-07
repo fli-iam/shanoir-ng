@@ -23,8 +23,8 @@ import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.mockito.Mockito;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.PathologyModelUtil;
@@ -45,13 +45,13 @@ public class PathologyServiceTest {
     private static final Long PATHOLOGY_ID = 1L;
     private static final String UPDATED_PATHOLOGY_DATA = "Alzheimer";
 
-    @Mock
+    @MockitoBean
     private PathologyRepository pathologiesRepository;
 
-    @Mock
+    @MockitoBean
     private RabbitTemplate rabbitTemplate;
 
-    @InjectMocks
+    @Autowired
     private PathologyServiceImpl pathologiesService;
 
     @BeforeEach

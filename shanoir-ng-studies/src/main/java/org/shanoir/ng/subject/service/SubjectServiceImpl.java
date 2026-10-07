@@ -58,9 +58,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Subject service implementation.
@@ -127,7 +126,7 @@ public class SubjectServiceImpl implements SubjectService {
         try {
             rabbitTemplate.convertAndSend(RabbitMQConfiguration.DELETE_SUBJECT_QUEUE,
                     objectMapper.writeValueAsString(event));
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             LOG.error("Could not request the deletion of the data of subject {}", id, e);
             throw new IllegalStateException(
                     "Error while communicating with MS Datasets to delete subject " + id, e);
@@ -339,7 +338,7 @@ public class SubjectServiceImpl implements SubjectService {
             rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECT_UPDATE_QUEUE,
                     objectMapper.writeValueAsString(subjectDTO));
             return true;
-        } catch (AmqpException | JsonProcessingException e) {
+        } catch (AmqpException | JacksonException e) {
             throw new MicroServiceCommunicationException(
                     "Error while communicating with MS Datasets to update subject.");
         }
@@ -357,7 +356,7 @@ public class SubjectServiceImpl implements SubjectService {
                     RabbitMQConfiguration.SUBJECT_BATCH_UPDATE_QUEUE,
                     objectMapper.writeValueAsString(batchDTO));
             return true;
-        } catch (AmqpException | JsonProcessingException e) {
+        } catch (AmqpException | JacksonException e) {
             throw new MicroServiceCommunicationException("Error while communicating with MS Datasets to batch update subjects.");
         }
     }

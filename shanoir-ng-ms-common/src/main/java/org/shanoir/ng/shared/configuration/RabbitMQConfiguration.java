@@ -23,7 +23,9 @@ import org.springframework.amqp.support.converter.ContentTypeDelegatingMessageCo
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.amqp.support.converter.SimpleMessageConverter;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.amqp.RabbitTemplateConfigurer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -83,9 +85,16 @@ public class RabbitMQConfiguration {
         return converter;
     }
 
+    /**
+     * Configured through Spring Boot's RabbitTemplateConfigurer, so that the
+     * spring.rabbitmq.template.* properties (e.g. reply-timeout) are applied:
+     * declaring this bean disables Boot's auto-configured RabbitTemplate.
+     * The configurer is absent when RabbitMQ auto-configuration is not loaded (tests).
+     */
     @Bean
-    public RabbitTemplate rabbitTemplate() {
+    public RabbitTemplate rabbitTemplate(ObjectProvider<RabbitTemplateConfigurer> configurer) {
         RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
+        configurer.ifAvailable(c -> c.configure(rabbitTemplate, connectionFactory));
         rabbitTemplate.setMessageConverter(rabbitMessageConverter());
         return rabbitTemplate;
     }

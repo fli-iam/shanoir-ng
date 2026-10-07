@@ -44,6 +44,7 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> i
     @ViewChild('table', { static: false }) table: TableComponent;
     private studyIdsForCurrentUser: number[];
     private requestDates: Map<number, Date>;
+    private unavailableVolumeIds: Set<number> = new Set();
     protected tableFilter: Filter;
 
     constructor(
@@ -171,8 +172,13 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> i
                         sizesByLabel.set("Other files (DUA, protocol...)", volume.extraDataSize);
                     }
                     (study as Study).detailedSizes = sizesByLabel;
+                } else {
+                    this.unavailableVolumeIds.add(study.id);
                 }
             });
+        }).catch(() => {
+            // don't block the next chunks, and don't leave these studies on "Fetching..." forever
+            studies.forEach(study => this.unavailableVolumeIds.add(study.id));
         });
     }
 
@@ -211,6 +217,8 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> i
                         return this.studyService.storageVolumePrettyPrint(params.data.totalSize);
                     } else if (params.data.locked) {
                         return "";
+                    } else if (this.unavailableVolumeIds.has(params.data?.id)) {
+                        return "N/A";
                     } else {
                         return "Fetching..."
                     }
@@ -222,6 +230,8 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> i
                             tip += label + " : " + this.studyService.storageVolumePrettyPrint(size) + "\n";
                         });
                         return tip;
+                    } else if (this.unavailableVolumeIds.has(data?.id)) {
+                        return "The study storage volume could not be computed";
                     } else {
                         return "Calculating the detailed study storage volume, this may take up to a minute"
                     }

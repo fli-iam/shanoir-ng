@@ -36,13 +36,13 @@ import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.AnestheticModelUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
@@ -56,7 +56,10 @@ import com.google.gson.GsonBuilder;
  *
  */
 
-@WebMvcTest(controllers = AnestheticIngredientApiController.class)
+@WebMvcTest(controllers = AnestheticIngredientApiController.class,
+        excludeAutoConfiguration = {
+                org.springframework.boot.security.oauth2.server.resource.autoconfigure.OAuth2ResourceServerAutoConfiguration.class
+        })
 @AutoConfigureMockMvc(addFilters = false)
 @ContextConfiguration(classes = ShanoirPreclinicalApplication.class)
 @ActiveProfiles("test")
@@ -74,20 +77,20 @@ public class AnestheticIngredientApiControllerTest {
     @Autowired
     private MockMvc mvc;
 
-    @MockBean
+    @MockitoBean
     private AnestheticIngredientService ingredientsServiceMock;
-    @MockBean
+    @MockitoBean
     private AnestheticService anestheticsServiceMock;
 
-    @MockBean
+    @MockitoBean
     private AnestheticIngredientUniqueValidator uniqueValidator;
 
-    @MockBean
+    @MockitoBean
     private AnestheticIngredientEditableByManager editableOnlyValidator;
 
 
 
-    @MockBean
+    @MockitoBean
     private RefsService referencesServiceMock;
 
     @BeforeEach

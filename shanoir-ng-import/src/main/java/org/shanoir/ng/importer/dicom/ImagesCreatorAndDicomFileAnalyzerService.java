@@ -125,7 +125,11 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
          * therefore we have the ImagesCreatorAndDicomFileAnalyzerService, that is
          * called on the server.
          */
-        importJob.getSeries().sort(new SeriesNumberOrAcquisitionTimeOrDescriptionSorter());
+        try {
+            importJob.getSeries().sort(new SeriesNumberOrAcquisitionTimeOrDescriptionSorter());
+        } catch (RuntimeException e) {
+            LOG.warn("Could not sort series list after DICOM analysis, keeping current order: {}", e.getMessage());
+        }
     }
 
     private void handleError(ShanoirEvent event, int nbSeries, int cpt, Serie serie, Exception e) {
