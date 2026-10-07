@@ -78,7 +78,7 @@ public interface SubjectRepository extends JpaRepository<Subject, Long>, Subject
 
     Iterable<Subject> findByStudyIdInAndIdIn(Iterable<Long> studyIds, Iterable<Long> ids);
 
-    @EntityGraph(attributePaths = {"study.tags", "study.studyUserList"})
+    @EntityGraph(attributePaths = {"study.studyUserList"})
     List<Subject> findByPreclinical(boolean preclinical);
 
     boolean existsByStudyIdAndName(Long studyId, String name);
