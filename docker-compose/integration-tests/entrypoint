@@ -7,7 +7,7 @@ set -eu
 
 # Generated test.properties, found first on the classpath (/config before the jar)
 cat > /config/test.properties <<EOF
-profile=${INTEGRATION_TESTS_PROFILE:-dev}
+profile=${INTEGRATION_TESTS_PROFILE:dev}
 shanoir.client.admin.name=${INTEGRATION_TESTS_SHANOIR_ADMIN_USERNAME}
 shanoir.client.admin.password=${INTEGRATION_TESTS_SHANOIR_ADMIN_PASSWORD}
 shanoir.client.expert.name=${INTEGRATION_TESTS_SHANOIR_EXPERT_USERNAME}
