@@ -24,11 +24,12 @@ import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.dto.mapper.StudyMapper;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.timepoint.TimepointMapper;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 /**
  * Study mapper test.
@@ -47,8 +48,11 @@ public class StudyMapperTest {
     @Autowired
     private StudyMapper studyMapper;
 
-    @MockBean
+    @MockitoBean
     private TimepointMapper timepointMapperMock;
+
+    @MockitoBean
+    private ConnectionFactory connectionFactory;
 
     @Test
     public void studiesToStudyDTOsTest() {
@@ -71,7 +75,7 @@ public class StudyMapperTest {
         study.setName(STUDY_NAME);
         study.setStudyCenterList(new ArrayList<>());
         study.setStudyUserList(new ArrayList<>());
-        study.setSubjectStudyList(new ArrayList<>());
+        study.setSubjects(new ArrayList<>());
         return study;
     }
 

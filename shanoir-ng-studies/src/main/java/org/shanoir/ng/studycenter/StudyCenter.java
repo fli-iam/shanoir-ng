@@ -19,7 +19,10 @@ import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.study.model.Study;
 
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import java.io.Serial;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -39,6 +42,7 @@ public class StudyCenter extends AbstractEntity {
     /**
      * UID
      */
+    @Serial
     private static final long serialVersionUID = 1007750133610651645L;
 
     /** Center. */
@@ -51,7 +55,6 @@ public class StudyCenter extends AbstractEntity {
     @JoinColumn(name = "study_id", nullable = false)
     @JsonIgnoreProperties({
         "studyCenterList",
-        "subjectStudyList",
         "subjects",
         "studyUserList",
         "examinations",

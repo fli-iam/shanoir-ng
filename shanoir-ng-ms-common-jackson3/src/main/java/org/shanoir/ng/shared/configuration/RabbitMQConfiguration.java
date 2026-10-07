@@ -23,7 +23,9 @@ import org.springframework.amqp.support.converter.ContentTypeDelegatingMessageCo
 import org.springframework.amqp.support.converter.JacksonJsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.amqp.support.converter.SimpleMessageConverter;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.amqp.autoconfigure.RabbitTemplateConfigurer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -81,9 +83,16 @@ public class RabbitMQConfiguration {
         return factory;
     }
 
+    /**
+     * Configured through Spring Boot's RabbitTemplateConfigurer, so that the
+     * spring.rabbitmq.template.* properties (e.g. reply-timeout) are applied:
+     * declaring this bean disables Boot's auto-configured RabbitTemplate.
+     * The configurer is absent when RabbitMQ auto-configuration is not loaded (tests).
+     */
     @Bean
-    public RabbitTemplate rabbitTemplate() {
+    public RabbitTemplate rabbitTemplate(ObjectProvider<RabbitTemplateConfigurer> configurer) {
         RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
+        configurer.ifAvailable(c -> c.configure(rabbitTemplate, connectionFactory));
         rabbitTemplate.setMessageConverter(rabbitMessageConverter());
         return rabbitTemplate;
     }
@@ -128,11 +137,11 @@ public class RabbitMQConfiguration {
     /** Get the list of subjects for a given study. */
     public static final String DATASET_SUBJECT_QUEUE = "dataset-subjects-queue";
 
-    /** Create a subject study for a given subject and study. */
-    public static final String DATASET_SUBJECT_STUDY_QUEUE = "dataset-subject-study-queue";
-
     /** Delete animal subject => Delete associated subject. */
     public static final String DELETE_ANIMAL_SUBJECT_QUEUE = "delete-animal-subject-queue";
+
+    /** Copy animal subject given the subject exists. */
+    public static final String COPY_ANIMAL_SUBJECT_QUEUE = "copy-animal-subject-queue";
 
     /** Study deleted => Delete associated datasets. */
     public static final String DELETE_STUDY_QUEUE = "delete-study-queue";
@@ -160,6 +169,9 @@ public class RabbitMQConfiguration {
 
     /** Queue used to get information for study_examination relationship.*/
     public static final String EXAMINATION_STUDY_QUEUE = "examination-study-queue";
+
+    /** Queue used to get information for multiple study_examination relationships.*/
+    public static final String EXAMINATION_STUDIES_QUEUE = "examination-studies-queue";
 
     /** Queue used to get information for study_examination deletion relationship.*/
     public static final String EXAMINATION_STUDY_DELETE_QUEUE = "examination-study-delete-queue";
@@ -349,13 +361,13 @@ public class RabbitMQConfiguration {
     }
 
     @Bean
-    public static Queue datasetSubjectStudyQueue() {
-        return new Queue(DATASET_SUBJECT_STUDY_QUEUE, true);
+    public static Queue deleteAnimalSubjectQueue() {
+        return new Queue(DELETE_ANIMAL_SUBJECT_QUEUE, true);
     }
 
     @Bean
-    public static Queue deleteAnimalSubjectQueue() {
-        return new Queue(DELETE_ANIMAL_SUBJECT_QUEUE, true);
+    public static Queue copyAnimalSubjectQueue() {
+        return new Queue(COPY_ANIMAL_SUBJECT_QUEUE, true);
     }
 
     @Bean

@@ -39,13 +39,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -68,7 +68,7 @@ public interface StudyApi {
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "404", description = "no study found"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
-    @RequestMapping(value = "/{studyId}", produces = { "application/json" }, method = RequestMethod.DELETE)
+    @DeleteMapping(value = "/{studyId}", produces = { "application/json" })
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_ADMINISTRATE')")
     ResponseEntity<Void> deleteStudy(
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId);
@@ -79,7 +79,7 @@ public interface StudyApi {
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "404", description = "no study found"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
-    @RequestMapping(value = "", produces = { "application/json" }, method = RequestMethod.GET)
+    @GetMapping(value = "", produces = { "application/json" })
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     ResponseEntity<List<StudyDTO>> findStudies();
 
@@ -89,7 +89,7 @@ public interface StudyApi {
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "404", description = "no study found"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
-    @RequestMapping(value = "/draft", produces = { "application/json" }, method = RequestMethod.GET)
+    @GetMapping(value = "/draft", produces = { "application/json" })
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     ResponseEntity<List<StudyDTO>> findDraftStudies();
 
@@ -99,7 +99,7 @@ public interface StudyApi {
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "404", description = "no study found"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
-    @RequestMapping(value = "/light", produces = { "application/json" }, method = RequestMethod.GET)
+    @GetMapping(value = "/light", produces = { "application/json" })
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     ResponseEntity<List<StudyLightDTO>> findStudiesLight();
 
@@ -109,7 +109,7 @@ public interface StudyApi {
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "404", description = "no study found"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
-    @RequestMapping(value = "/public/data", produces = { "application/json" }, method = RequestMethod.GET)
+    @GetMapping(value = "/public/data", produces = { "application/json" })
     ResponseEntity<List<StudyLightDTO>> findPublicStudiesData();
 
     // find expired studies on /data
@@ -119,7 +119,7 @@ public interface StudyApi {
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "404", description = "no study found"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
-    @RequestMapping(value = "/expired", produces = { "application/json" }, method = RequestMethod.GET)
+    @GetMapping(value = "/expired", produces = { "application/json" })
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     ResponseEntity<List<StudyLightDTO>> findExpiredStudiesData();
 
@@ -130,7 +130,7 @@ public interface StudyApi {
             @ApiResponse(responseCode = "401", description = "unauthorized"),
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
-    @RequestMapping(value = "/names", produces = { "application/json" }, method = RequestMethod.GET)
+    @GetMapping(value = "/names", produces = { "application/json" })
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     ResponseEntity<List<IdName>> findStudiesNames() throws RestServiceException;
 
@@ -141,7 +141,7 @@ public interface StudyApi {
             @ApiResponse(responseCode = "401", description = "unauthorized"),
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
-    @RequestMapping(value = "/namesAndCenters", produces = { "application/json" }, method = RequestMethod.GET)
+    @GetMapping(value = "/namesAndCenters", produces = { "application/json" })
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     ResponseEntity<List<IdNameCenterStudyDTO>> findStudiesNamesAndCenters() throws RestServiceException;
 
@@ -151,7 +151,7 @@ public interface StudyApi {
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "404", description = "no study found"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
-    @RequestMapping(value = "/{studyId}", produces = { "application/json" }, method = RequestMethod.GET)
+    @GetMapping(value = "/{studyId}", produces = { "application/json" })
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     @PostAuthorize("@studySecurityService.hasRightOnTrustedStudyDTO(returnObject.getBody(), 'CAN_SEE_ALL')")
     ResponseEntity<StudyDTO> findStudyById(
@@ -166,8 +166,8 @@ public interface StudyApi {
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "422", description = "bad parameters"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
-    @RequestMapping(value = "", produces = { "application/json" }, consumes = {
-            "application/json" }, method = RequestMethod.POST)
+    @PostMapping(value = "", produces = { "application/json" }, consumes = {
+            "application/json" })
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
     ResponseEntity<StudyDTO> saveNewStudy(
             @Parameter(description = "study to create", required = true) @RequestBody Study study, BindingResult result)
@@ -179,7 +179,7 @@ public interface StudyApi {
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "404", description = "no study found"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
-    @RequestMapping(value = "/approveDraftStudy/{studyId}", produces = { "application/json" }, method = RequestMethod.PUT)
+    @PutMapping(value = "/approveDraftStudy/{studyId}", produces = { "application/json" })
     @PreAuthorize("hasRole('ADMIN')")
     ResponseEntity<StudyDTO> approveDraftStudy(
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId)
@@ -192,7 +192,7 @@ public interface StudyApi {
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "422", description = "bad parameters"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
-    @RequestMapping(value = "/copyDatasets", produces = { "application/json" }, method = RequestMethod.POST)
+    @PostMapping(value = "/copyDatasets", produces = { "application/json" })
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnCopy(#copyData))")
     ResponseEntity<Long> copyDatasetsToStudy(
             @Parameter(description = "Data to copy", required = true) @RequestBody CopyData copyData) throws RestServiceException;
@@ -227,8 +227,8 @@ public interface StudyApi {
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "422", description = "bad parameters"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
-    @RequestMapping(value = "/{studyId}", produces = { "application/json" }, consumes = {
-            "application/json" }, method = RequestMethod.PUT)
+    @PutMapping(value = "/{studyId}", produces = { "application/json" }, consumes = {
+            "application/json" })
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @controllerSecurityService.idMatches(#studyId, #study) and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_ADMINISTRATE')")
     ResponseEntity<Void> updateStudy(
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
@@ -240,8 +240,8 @@ public interface StudyApi {
             @ApiResponse(responseCode = "401", description = "unauthorized"),
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
-    @RequestMapping(value = "/rights/{studyId}", produces = { "application/json" }, consumes = {
-            "application/json" }, method = RequestMethod.GET)
+    @GetMapping(value = "/rights/{studyId}", produces = { "application/json" }, consumes = {
+            "application/json" })
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     ResponseEntity<List<StudyUserRight>> rights(
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId)
@@ -252,8 +252,8 @@ public interface StudyApi {
             @ApiResponse(responseCode = "401", description = "unauthorized"),
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
-    @RequestMapping(value = "/tags/{studyId}", produces = { "application/json" }, consumes = {
-            "application/json" }, method = RequestMethod.GET)
+    @GetMapping(value = "/tags/{studyId}", produces = { "application/json" }, consumes = {
+            "application/json" })
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasAnyRightOnStudy(#studyId, 'CAN_SEE_ALL', 'CAN_IMPORT', 'CAN_ADMINISTRATE'))")
     ResponseEntity<List<org.shanoir.ng.tag.model.Tag>> tags(
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId)
@@ -264,8 +264,8 @@ public interface StudyApi {
             @ApiResponse(responseCode = "401", description = "unauthorized"),
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
-    @RequestMapping(value = "/rights/all", produces = { "application/json" }, consumes = {
-            "application/json" }, method = RequestMethod.GET)
+    @GetMapping(value = "/rights/all", produces = { "application/json" }, consumes = {
+            "application/json" })
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     ResponseEntity<Map<Long, List<StudyUserRight>>> rights() throws RestServiceException;
 
@@ -274,8 +274,8 @@ public interface StudyApi {
             @ApiResponse(responseCode = "401", description = "unauthorized"),
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
-    @RequestMapping(value = "/hasOneStudy", produces = { "application/json" }, consumes = {
-            "application/json" }, method = RequestMethod.GET)
+    @GetMapping(value = "/hasOneStudy", produces = { "application/json" }, consumes = {
+            "application/json" })
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     ResponseEntity<Boolean> hasOneStudyToImport() throws RestServiceException;
 
@@ -314,7 +314,7 @@ public interface StudyApi {
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "404", description = "no duas found"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
-    @RequestMapping(value = "/dua", produces = { "application/json" }, method = RequestMethod.GET)
+    @GetMapping(value = "/dua", produces = { "application/json" })
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     ResponseEntity<List<DataUserAgreement>> getDataUserAgreements()
             throws RestServiceException, IOException;
@@ -379,8 +379,8 @@ public interface StudyApi {
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "404", description = "no study or user found"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
-    @RequestMapping(value = "studyUser/{studyId}/{userId}", produces = {
-            "application/json" }, method = RequestMethod.DELETE)
+    @DeleteMapping(value = "studyUser/{studyId}/{userId}", produces = {
+            "application/json" })
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_ADMINISTRATE')")
     ResponseEntity<Void> deleteStudyUser(
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
@@ -408,7 +408,7 @@ public interface StudyApi {
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "404", description = "no study found"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
-    @RequestMapping(value = "/public/connected", produces = { "application/json" }, method = RequestMethod.GET)
+    @GetMapping(value = "/public/connected", produces = { "application/json" })
     ResponseEntity<List<IdName>> findPublicStudiesConnected();
 
     @Operation(summary = "", description = "If exists, returns a list of StudyUser corresponding to the given studyId")

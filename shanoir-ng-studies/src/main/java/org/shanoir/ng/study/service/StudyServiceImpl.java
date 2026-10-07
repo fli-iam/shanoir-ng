@@ -65,9 +65,6 @@ import org.shanoir.ng.studyexamination.StudyExaminationRepository;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.shanoir.ng.subject.service.SubjectService;
-import org.shanoir.ng.subjectstudy.model.SubjectStudy;
-import org.shanoir.ng.subjectstudy.model.SubjectStudyTag;
-import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
 import org.shanoir.ng.tag.model.StudyTag;
 import org.shanoir.ng.tag.model.Tag;
 import org.shanoir.ng.tag.repository.TagRepository;
@@ -84,10 +81,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 import jakarta.transaction.Transactional;
 
@@ -103,7 +99,7 @@ public class StudyServiceImpl implements StudyService {
 
     private static final Logger LOG = LoggerFactory.getLogger(StudyServiceImpl.class);
 
-    @Value("${shanoir.userDefaultExpirationDays}")
+    @Value("${shanoir.userDefaultExpirationDays:183}")
     private int userDefaultExpirationDays;
 
     @Autowired
@@ -138,9 +134,6 @@ public class StudyServiceImpl implements StudyService {
 
     @Autowired
     private SubjectService subjectService;
-
-    @Autowired
-    private SubjectStudyRepository subjectStudyRepository;
 
     @Autowired
     private StudyExaminationRepository studyExaminationRepository;
@@ -190,12 +183,6 @@ public class StudyServiceImpl implements StudyService {
             }
         }
 
-        if (study.getSubjectStudyList() != null) {
-            for (SubjectStudy subjectStudy : study.getSubjectStudyList()) {
-                subjectStudy.setStudy(study);
-            }
-        }
-
         if (study.getTags() != null) {
             for (final Tag tag : study.getTags()) {
                 tag.setStudy(study);
@@ -228,37 +215,7 @@ public class StudyServiceImpl implements StudyService {
             }
         }
 
-        List<SubjectStudy> subjectStudyListSave = null;
-        if (study.getSubjectStudyList() != null) {
-            subjectStudyListSave = new ArrayList<SubjectStudy>(study.getSubjectStudyList());
-        }
-        Map<Long, List<SubjectStudyTag>> subjectStudyTagSave = new HashMap<>();
-        study.setSubjectStudyList(null);
         Study studyDb = studyRepository.save(study);
-
-        if (subjectStudyListSave != null && !subjectStudyListSave.isEmpty()) {
-            updateTags(subjectStudyListSave, studyDb.getTags());
-            studyDb.setSubjectStudyList(new ArrayList<>());
-            for (SubjectStudy subjectStudy : subjectStudyListSave) {
-                SubjectStudy newSubjectStudy = new SubjectStudy();
-                newSubjectStudy.setPhysicallyInvolved(subjectStudy.isPhysicallyInvolved());
-                newSubjectStudy.setSubject(subjectStudy.getSubject());
-                newSubjectStudy.setSubjectStudyIdentifier(subjectStudy.getSubjectStudyIdentifier());
-                newSubjectStudy.setSubjectType(subjectStudy.getSubjectType());
-                newSubjectStudy.setStudy(studyDb);
-                subjectStudyTagSave.put(subjectStudy.getSubject().getId(), subjectStudy.getSubjectStudyTags());
-                studyDb.getSubjectStudyList().add(newSubjectStudy);
-            }
-            studyDb = studyRepository.save(studyDb);
-
-            for (SubjectStudy subjectStudy : studyDb.getSubjectStudyList()) {
-                subjectStudy.setSubjectStudyTags(subjectStudyTagSave.get(subjectStudy.getSubject().getId()));
-                for (SubjectStudyTag ssTag : subjectStudy.getSubjectStudyTags()) {
-                    ssTag.setSubjectStudy(subjectStudy);
-                }
-            }
-            studyDb = studyRepository.save(studyDb);
-        }
 
         updateStudyName(studyMapper.studyToStudyDTODetailed(studyDb));
 
@@ -400,11 +357,8 @@ public class StudyServiceImpl implements StudyService {
             for (Subject s : oldStudy.getSubjects()) {
                 oldSubjectsMap.put(s.getId(), s);
             }
-
             for (Subject newSubject : study.getSubjects()) {
                 Subject oldSubject = oldSubjectsMap.get(newSubject.getId());
-
-                // Call update if necessary (only a few fields can be changed)
                 if (oldSubject != null && hasSubjectChanged(oldSubject, newSubject)) {
                     newSubject.setStudy(study);
                     subjectService.update(newSubject);
@@ -487,39 +441,6 @@ public class StudyServiceImpl implements StudyService {
                 || !Objects.equals(oldSub.getStudyIdentifier(), newSub.getStudyIdentifier());
     }
 
-    /**
-     * For each subject study tag of study, set the fresh tag id by looking into
-     * studyDb tags,
-     * then update db subject study tags lists with the given study
-     *
-     * @param subjectStudyList
-     * @param dbStudyTags
-     * @return updated study
-     */
-    private void updateTags(List<SubjectStudy> subjectStudyList, List<Tag> dbStudyTags) {
-        if (subjectStudyList == null || dbStudyTags == null) {
-            return;
-        }
-        for (SubjectStudy subjectStudy : subjectStudyList) {
-            if (subjectStudy.getTags() == null) {
-                continue;
-            }
-            for (Tag tag : subjectStudy.getTags()) {
-                if (tag.getId() == null) {
-                    Tag dbTag = dbStudyTags.stream().filter(
-                            upTag -> upTag.getColor().equals(tag.getColor())
-                                    && upTag.getName().equals(tag.getName()))
-                            .findFirst().orElse(null);
-                    if (dbTag == null) {
-                        throw new IllegalStateException(
-                                "Cannot link a new tag to a subject-study, this tag does not exist in the study");
-                    }
-                    tag.setId(dbTag.getId());
-                }
-            }
-        }
-    }
-
     private List<Long> getTagsToDelete(Study study, Study studyDb) {
         List<Long> tagsToDelete = new ArrayList<>();
         if (studyDb.getTags() != null && study.getTags() != null) {
@@ -596,7 +517,7 @@ public class StudyServiceImpl implements StudyService {
      * @param studies
      */
     private void setNumberOfSubjectsAndExaminations(List<Study> studies) {
-        List<Object[]> subjectsCount = subjectStudyRepository.countByStudyIdGroupBy();
+        List<Object[]> subjectsCount = subjectRepository.countByStudyIdGroupBy();
         HashMap<Long, Long> studyIdSubjectsCountMap = new HashMap<>();
         for (Object[] row : subjectsCount) {
             Long studyId = (Long) row[0];
@@ -806,7 +727,7 @@ public class StudyServiceImpl implements StudyService {
             try {
                 rabbitTemplate.convertAndSend(RabbitMQConfiguration.STUDY_USER_MAIL_QUEUE,
                         objectMapper.writeValueAsString(emailStudyUserAdded));
-            } catch (AmqpException | JsonProcessingException e) {
+            } catch (AmqpException | JacksonException e) {
                 LOG.error("Could not send email for study user report. ", e);
             }
         }
@@ -929,7 +850,7 @@ public class StudyServiceImpl implements StudyService {
         try {
             return (String) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_UPDATE_QUEUE,
                     objectMapper.writeValueAsString(study));
-        } catch (AmqpException | JsonProcessingException e) {
+        } catch (AmqpException | JacksonException e) {
             throw new MicroServiceCommunicationException(
                     "Error while communicating with datasets MS to update study name.", e);
         }
@@ -1016,7 +937,7 @@ public class StudyServiceImpl implements StudyService {
             } else {
                 dto = new StudyStorageVolumeDTO();
             }
-        } catch (AmqpException | JsonProcessingException e) {
+        } catch (AmqpException | JacksonException e) {
             LOG.error("Error while fetching study [{}] datasets volume storage details.", studyId, e);
             return null;
         }
@@ -1040,7 +961,7 @@ public class StudyServiceImpl implements StudyService {
             } else {
                 return new HashMap<>();
             }
-        } catch (AmqpException | JsonProcessingException e) {
+        } catch (AmqpException | JacksonException e) {
             LOG.error("Error while fetching studies [{}] datasets volume storage details.", studyIds, e);
             return null;
         }

@@ -17,6 +17,7 @@ package org.shanoir.ng.examination;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
@@ -28,6 +29,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Optional;
+import java.lang.reflect.Method;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -71,6 +73,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -311,6 +314,23 @@ public class ExaminationApiControllerTest {
             LOG.error(e.getMessage(), e);
             fail();
         }
+    }
+
+    /**
+     * Guards against a regression where findExaminationsBySubjectId() throws
+     * "failed to lazily initialize a collection of role:
+     * org.shanoir.ng.examination.model.Examination.copies: could not initialize
+     * proxy - no Session" once OSIV is disabled.
+     */
+    @Test
+    void findExaminationsBySubjectIdMustBeTransactional() throws NoSuchMethodException {
+        Method method = ExaminationApiController.class.getDeclaredMethod("findExaminationsBySubjectId", Long.class);
+        Transactional transactional = method.getAnnotation(Transactional.class);
+
+        assertNotNull(transactional,
+                "findExaminationsBySubjectId maps the lazy 'copies' collection and must stay "
+                        + "transactional through the mapping, not just the repository fetch");
+        assertTrue(transactional.readOnly(), "findExaminationsBySubjectId only reads data");
     }
 
 }

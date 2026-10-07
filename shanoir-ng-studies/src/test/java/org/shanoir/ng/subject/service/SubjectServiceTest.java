@@ -33,6 +33,7 @@ import org.mockito.Mockito;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.subject.model.HemisphericDominance;
 import org.shanoir.ng.subject.model.ImagedObjectCategory;
 import org.shanoir.ng.subject.model.PseudonymusHashValues;
@@ -42,6 +43,8 @@ import org.shanoir.ng.subject.model.UserPersonalCommentSubject;
 import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -66,6 +69,12 @@ public class SubjectServiceTest {
 
     @MockitoBean
     private ShanoirEventService eventService;
+
+    @MockitoBean
+    private ConnectionFactory connectionFactory;
+
+    @MockitoBean
+    private RabbitTemplate rabbitTemplate;
 
     @Autowired
     private SubjectServiceImpl subjectService;
@@ -138,6 +147,23 @@ public class SubjectServiceTest {
         } catch (ShanoirException exception) {
             assertEquals(HttpStatus.FORBIDDEN.value(), exception.getErrorCode());
             assertEquals("You can not update the subject name.", exception.getMessage());
+            return;
+        }
+        fail();
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    public void updateTestChangeStudy() {
+        try {
+            Subject updated = createSubjectToUpdate();
+            Study otherStudy = ModelsUtil.createStudy();
+            otherStudy.setId(2L);
+            updated.setStudy(otherStudy);
+            subjectService.update(updated);
+        } catch (ShanoirException exception) {
+            assertEquals(HttpStatus.FORBIDDEN.value(), exception.getErrorCode());
+            assertEquals("You can not update the subject study.", exception.getMessage());
             return;
         }
         fail();

@@ -72,7 +72,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<dependency>
 			<groupId>org.shanoir-ng</groupId>
 			<artifactId>shanoir-ng-import</artifactId>
-			<version>3.4.0</version>
+			<version>4.0.2</version>
 			<exclusions>
 			    <exclusion>
 			        <groupId>*</groupId>
@@ -83,17 +83,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<dependency>
 			<groupId>org.shanoir.anonymization</groupId>
 			<artifactId>anonymization</artifactId>
-			<version>3.4.0</version>
-			<exclusions>
-			    <exclusion>
-			        <groupId>*</groupId>
-			        <artifactId>*</artifactId>
-			    </exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.shanoir-ng</groupId>
-			<artifactId>shanoir-ng-exchange</artifactId>
 			<version>3.4.0</version>
 			<exclusions>
 			    <exclusion>
@@ -195,10 +184,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<version>${poi.version}</version>
 			<exclusions>
 				<exclusion>
-					<groupId>commons-codec</groupId>
-					<artifactId>commons-codec</artifactId>
-				</exclusion>
-				<exclusion>
 					<groupId>commons-io</groupId>
 					<artifactId>commons-io</artifactId>
 				</exclusion>
@@ -209,10 +194,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<artifactId>poi-ooxml</artifactId>
 			<version>${poi.version}</version>
 			<exclusions>
-				<exclusion>
-					<groupId>commons-codec</groupId>
-					<artifactId>commons-codec</artifactId>
-				</exclusion>
 				<exclusion>
 					<groupId>commons-io</groupId>
 					<artifactId>commons-io</artifactId>
@@ -251,11 +232,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
 			<version>3.17.0</version>
-		</dependency>
-		<dependency>
-			<groupId>commons-codec</groupId>
-			<artifactId>commons-codec</artifactId>
-			<version>1.17.1</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
 		<dependency>

@@ -19,8 +19,8 @@ import java.util.List;
 import org.shanoir.ng.profile.model.Profile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -37,7 +37,7 @@ public interface ProfileApi {
             @ApiResponse(responseCode = "401", description = "unauthorized"),
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
-    @RequestMapping(value = "/all", produces = { "application/json" }, method = RequestMethod.GET)
+    @GetMapping(value = "/all", produces = { "application/json" })
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
     ResponseEntity<List<Profile>> findProfiles();
 
