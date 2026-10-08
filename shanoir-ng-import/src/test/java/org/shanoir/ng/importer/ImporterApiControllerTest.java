@@ -164,6 +164,22 @@ public class ImporterApiControllerTest {
 
     @Test
     @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    public void testStartImportEEGJobNoReply() throws Exception {
+        EegImportJob importJob = new EegImportJob();
+        importJob.setWorkFolder("/tmp/2/12341234");
+        importJob.setExaminationId(1L);
+        importJob.setDatasets(Collections.singletonList(new EegDataset()));
+
+        // rabbitTemplate mock returns null, as on a reply timeout
+        mvc.perform(MockMvcRequestBuilders.post(START_EEG_JOB_PATH)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(importJob)))
+                .andExpect(status().isGatewayTimeout());
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
     public void testGetDicomImageNoPath() throws Exception {
 
         mvc.perform(MockMvcRequestBuilders.get(GET_DICOM)

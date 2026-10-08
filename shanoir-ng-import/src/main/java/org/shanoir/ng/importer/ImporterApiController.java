@@ -697,6 +697,12 @@ public class ImporterApiController implements ImporterApi {
             importJob.setShanoirEvent(event);
             cleanUpImportJob(importJob);
             Integer integg = (Integer) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.IMPORT_EEG_QUEUE, objectMapper.writeValueAsString(importJob));
+            // null when MS Datasets did not reply in time or failed while processing the job
+            if (integg == null) {
+                LOG.error("No reply from MS Datasets for EEG import of workFolder {}", importJob.getWorkFolder());
+                importJobStatusService.setError(tempDirId, "No reply from MS Datasets for EEG import.");
+                return new ResponseEntity<Void>(HttpStatus.GATEWAY_TIMEOUT);
+            }
             importJobStatusService.setFinished(tempDirId, importJob);
             return new ResponseEntity<Void>(HttpStatusCode.valueOf(integg.intValue()));
         } catch (Exception e) {
