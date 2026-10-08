@@ -31,6 +31,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
+import java.util.zip.ZipException;
 
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
@@ -217,6 +218,8 @@ public class WADODownloaderService {
                 try {
                     files.add(writeFileInArchive(response, archive, name, anonymizedSubjectName));
                     archive.flush();
+                } catch (ZipException e) {
+                    throw new DownloadAbortedException("Could not write dataset [" + dataset.getId() + "] into zip", e);
                 } catch (IOException e) {
                     // Client gone: stop here, closing the stream cancels the pending PACS requests
                     throw new DownloadAbortedException("Could not flush dataset [" + dataset.getId() + "] to the client", e);
@@ -258,7 +261,7 @@ public class WADODownloaderService {
      * @return the added file name
      * @throws ZipPacsFileException when the download failed or could not be written into the stream
      */
-    private String writeFileInArchive(PacsResponse response, ArchiveWriter archive, String name, String subjectName) throws ZipPacsFileException {
+    private String writeFileInArchive(PacsResponse response, ArchiveWriter archive, String name, String subjectName) throws ZipPacsFileException, ZipException {
         if (response.error() != null) {
             if (response.error() instanceof WebClientResponseException e) {
                 throw new ZipPacsFileException("Received " + e.getStatusCode() + " from PACS", e);
@@ -268,9 +271,9 @@ public class WADODownloaderService {
         try {
             extractDICOMArchiveFromMHTMLFile(response.body(), name, archive, response.url().contains(WADO_REQUEST_TYPE_WADO_RS), subjectName);
             return name + DCM;
-        } catch (IOException | MessagingException e) {
-            LOG.error("Error in downloading/writing file [{}] from pacs to zip", name, e);
-            throw new ZipPacsFileException(e);
+        } catch (IOException | MessagingException | ZipPacsFileException e) {
+            LOG.error("Error in writing file [{}] from pacs to zip", name, e);
+            throw new ZipException("Error in writing file to zip");
         }
     }
 
@@ -516,7 +519,7 @@ public class WADODownloaderService {
      */
     private void extractDICOMArchiveFromMHTMLFile(final byte[] responseBody, String name, ArchiveWriter archive,
             boolean isMultipart, String subjectName)
-            throws IOException, MessagingException {
+            throws IOException, MessagingException, ZipPacsFileException {
         // Not multipart
         if (!isMultipart) {
             try (ByteArrayInputStream bIS = new ByteArrayInputStream(responseBody)) {
@@ -530,7 +533,7 @@ public class WADODownloaderService {
         for (int i = 0; i < count; i++) {
             BodyPart bodyPart = multipart.getBodyPart(i);
             if (isNotOnlyDicom(bodyPart)) {
-                throw new IOException("Answer file from PACS contains other content-type than DICOM, stop here.");
+                throw new ZipPacsFileException(new Exception("Answer file from PACS contains other content-type than DICOM, stop here."));
             }
             // Multipart but with a single body part: no index in the name
             String entryName = count == 1 ? name + DCM : name + UNDER_SCORE + i + DCM;

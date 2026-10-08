@@ -35,7 +35,11 @@ import org.apache.commons.io.IOUtils;
 import org.joda.time.DateTime;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
-import org.shanoir.ng.download.*;
+import org.shanoir.ng.download.ArchiveWriter;
+import org.shanoir.ng.download.ZipWriter;
+import org.shanoir.ng.download.DatasetDownloadError;
+import org.shanoir.ng.download.WADODownloaderService;
+import org.shanoir.ng.download.DownloadAbortedException;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.event.ShanoirEvent;
@@ -145,7 +149,7 @@ public class DatasetDownloaderServiceImpl {
     }
 
     public void massiveDownload(String outputFormat, List<Dataset> datasets, HttpServletResponse response, boolean withManifest, Long converterId, Boolean withShanoirId, String sorting,
-                                ArchiveWriter archiveWriter, boolean abordOnPACSError) throws RestServiceException {
+                                ArchiveWriter archiveWriter, boolean abortOnAnyError) throws RestServiceException {
         Map<Long, List<String>> filesByAcquisitionId = new HashMap<>();
         Map<Long, DatasetDownloadError> downloadResults = new HashMap<>();
         Map<Long, String> datasetDownloadPath;
@@ -190,7 +194,7 @@ public class DatasetDownloaderServiceImpl {
                         converterId,
                         datasetDownloadNameListPerPath
                 );
-                if (abordOnPACSError && downloadResults.containsKey(dataset.getId())) {
+                if (abortOnAnyError && downloadResults.containsKey(dataset.getId())) {
                     throw new DownloadAbortedException("Dataset [" + dataset.getId() + "] could not be fully downloaded: "
                             + downloadResults.get(dataset.getId()).getMessages());
                 }
@@ -221,7 +225,7 @@ public class DatasetDownloaderServiceImpl {
             eventService.publishEvent(event);
             archiveWriter.close();
         } catch (Exception e) {
-            if (abordOnPACSError) {
+            if (abortOnAnyError) {
                 // Leave the archive unfinished and let the exception reach Tomcat, which cuts the connection:
                 // the client sees a broken transfer, not a valid incomplete archive.
                 archiveWriter.abort();

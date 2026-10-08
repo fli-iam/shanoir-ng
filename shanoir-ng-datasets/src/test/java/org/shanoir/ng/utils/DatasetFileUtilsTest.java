@@ -15,8 +15,8 @@
 package org.shanoir.ng.utils;
 
 import org.junit.jupiter.api.Test;
-import org.shanoir.ng.download.ArchiveWriter;
 import org.junit.jupiter.api.io.TempDir;
+import org.shanoir.ng.download.ArchiveWriter;
 import org.shanoir.ng.download.ZipWriter;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -32,7 +32,9 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ActiveProfiles("test")
 public class DatasetFileUtilsTest {
