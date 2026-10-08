@@ -20,7 +20,6 @@ import java.util.Map;
 import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
 import org.shanoir.ng.acquisitionequipment.repository.AcquisitionEquipmentRepository;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
-import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.utils.Utils;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
@@ -29,7 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Service for rabbit MQ communications concerning Center.
@@ -44,22 +43,6 @@ public class RabbitMqCenterService {
 
     @Autowired
     private ObjectMapper mapper;
-
-    @RabbitListener(queues = RabbitMQConfiguration.ACQUISITION_EQUIPMENT_CENTER_QUEUE, containerFactory = "multipleConsumersFactory")
-    @RabbitHandler
-    @Transactional
-    public String findCenterIdFromAcquisitionEquipment(String message) {
-        try {
-            AcquisitionEquipment ae = acquisitionEquipmentService.findById(Long.valueOf(message)).orElse(null);
-            if (ae == null) {
-                return null;
-            } else {
-                return mapper.writeValueAsString(new IdName(ae.getCenter().getId(), ae.getCenter().getName()));
-            }
-        } catch (Exception e) {
-            throw new AmqpRejectAndDontRequeueException(e);
-        }
-    }
 
     @RabbitListener(queues = RabbitMQConfiguration.ACQUISITION_EQUIPMENT_CODE_QUEUE, containerFactory = "multipleConsumersFactory")
     @RabbitHandler

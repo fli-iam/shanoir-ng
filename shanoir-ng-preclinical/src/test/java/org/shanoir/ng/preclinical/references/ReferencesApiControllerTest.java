@@ -30,12 +30,12 @@ import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.ReferenceModelUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
@@ -48,7 +48,10 @@ import com.google.gson.GsonBuilder;
  * @author sloury
  *
  */
-@WebMvcTest(controllers = RefsApiController.class)
+@WebMvcTest(controllers = RefsApiController.class,
+        excludeAutoConfiguration = {
+                org.springframework.boot.security.oauth2.server.resource.autoconfigure.OAuth2ResourceServerAutoConfiguration.class
+        })
 @AutoConfigureMockMvc(addFilters = false)
 @ContextConfiguration(classes = ShanoirPreclinicalApplication.class)
 @ActiveProfiles("test")
@@ -66,16 +69,16 @@ public class ReferencesApiControllerTest {
     @Autowired
     private MockMvc mvc;
 
-    @MockBean
+    @MockitoBean
     private RefsService refsServiceMock;
 
-    @MockBean
+    @MockitoBean
     private ShanoirEventService eventService;
 
-    @MockBean
+    @MockitoBean
     private ReferenceUniqueValidator uniqueValidator;
 
-    @MockBean
+    @MockitoBean
     private RefsEditableByManager editableOnlyValidator;
 
     @BeforeEach

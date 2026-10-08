@@ -23,9 +23,8 @@ import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 @Service
 public class StudyUserUpdateBroadcastService {
@@ -41,9 +40,9 @@ public class StudyUserUpdateBroadcastService {
     public void broadcast(Iterable<StudyUserCommand> commands) throws MicroServiceCommunicationException {
         try {
             String str = objectMapper.writeValueAsString(commands);
-            rabbitTemplate.convertAndSend(RabbitMQConfiguration.STUDY_USER_EXCHANGE, RabbitMQConfiguration.STUDY_USER_QUEUE, str);
+            rabbitTemplate.convertAndSend(RabbitMQConfiguration.STUDY_USER_EXCHANGE, "", str);
             LOG.debug("Brodcasted study-user changes : {}", str);
-        } catch (AmqpException | JsonProcessingException e) {
+        } catch (AmqpException | JacksonException e) {
             throw new MicroServiceCommunicationException("Could not send data to study-user-exchange");
         }
     }
