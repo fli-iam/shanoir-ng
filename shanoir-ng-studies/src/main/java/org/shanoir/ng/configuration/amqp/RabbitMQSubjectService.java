@@ -47,23 +47,6 @@ public class RabbitMQSubjectService {
     @Autowired
     private ObjectMapper mapper;
 
-    /**
-     * This methods returns a list of subjects for a given study ID
-     * @param studyId the study ID
-     * @return a list of subjects
-     */
-    @RabbitListener(queues = RabbitMQConfiguration.DATASET_SUBJECT_QUEUE, containerFactory = "multipleConsumersFactory")
-    @RabbitHandler
-    @Transactional
-    public String getSubjectsForStudy(String studyId) {
-        try {
-            return mapper.writeValueAsString(subjectService.findAllSubjectsOfStudyId(Long.valueOf(studyId)));
-        } catch (Exception e) {
-            LOG.error("Error while serializing subjects for participants.tsv file.", e);
-            throw new AmqpRejectAndDontRequeueException(e);
-        }
-    }
-
     @RabbitListener(queues = RabbitMQConfiguration.SUBJECTS_NAME_QUEUE, containerFactory = "multipleConsumersFactory")
     @RabbitHandler
     @Transactional
