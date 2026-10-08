@@ -16,6 +16,7 @@ package org.shanoir.ng.datasetacquisition;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -48,6 +49,7 @@ import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.storage.StorageService;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
+import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -116,6 +118,9 @@ public class DatasetAcquisitionApiControllerTest {
     @Autowired
     private MockMvc mvc;
 
+    @Autowired
+    private DatasetAcquisitionApiController api;
+
     private Gson gson;
 
     @TempDir
@@ -155,6 +160,22 @@ public class DatasetAcquisitionApiControllerTest {
 //        assertEquals(((EegImportJob)captor.getValue()).getDatasets().get(0).getName(), dataset.getName());
 //
 //        verify(importerService).cleanTempFiles(eq(importJob.getWorkFolder()));
+    }
+
+    @Test
+    public void testCreateNewEegDatasetAcquisitionFailureIsNotRequeued() {
+        Mockito.doThrow(new RuntimeException("Could not read file: test.vmrk"))
+                .when(eegImporterService).createEegDataset(Mockito.any(EegImportJob.class));
+
+        assertThrows(AmqpRejectAndDontRequeueException.class,
+                () -> api.createNewEegDatasetAcquisition("{\"workFolder\": \"/tmp/3/123\"}"));
+        Mockito.verify(importerService, Mockito.never()).cleanTempFiles(Mockito.any());
+    }
+
+    @Test
+    public void testCreateNewEegDatasetAcquisitionInvalidJsonIsNotRequeued() {
+        assertThrows(AmqpRejectAndDontRequeueException.class,
+                () -> api.createNewEegDatasetAcquisition("not a json"));
     }
 
     @Test
