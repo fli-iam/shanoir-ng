@@ -56,6 +56,7 @@ public class Study extends IdName {
     private boolean isDraft;
 
     /** Copy of the ms-studies flag: study metadata exposed to the Neurobagel federation. */
+    @NotNull
     @Column(name = "neurobagel_export")
     private boolean neurobagelExport;
 

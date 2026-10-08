@@ -200,6 +200,7 @@ public class Study extends HalEntity {
     private boolean isDraft;
 
     /** Metadata exposed to the Neurobagel federation. Set by admins only. */
+    @NotNull
     @Column(name = "neurobagel_export")
     private boolean neurobagelExport;
 
