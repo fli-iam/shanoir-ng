@@ -1,0 +1,200 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
+@if (error) {
+    <div class="statistics-error">Could not load statistics for this study.</div>
+} @else {
+    @if (!loading && (availableCenters.length > 0 || (dateRangeMin && dateRangeMax))) {
+        <div class="statistics-parameters">
+            @if (availableCenters.length > 0) {
+                <div class="parameter-control">
+                    <label class="parameters-label" for="center-select">Center</label>
+                    <select id="center-select" [ngModel]="selectedCenter" (ngModelChange)="onCenterChange($event)">
+                        <option [ngValue]="null">All centers</option>
+                        @for (center of availableCenters; track center) {
+                            <option [ngValue]="center">{{ center }}</option>
+                        }
+                    </select>
+                </div>
+            }
+            @if (dateRangeMin && dateRangeMax) {
+                <div class="parameter-control">
+                    <label class="parameters-label">Date range (import date, or examination date when missing)</label>
+                    <date-range-slider
+                        [minDate]="dateRangeMin"
+                        [maxDate]="dateRangeMax"
+                        [startDate]="filterStartDate"
+                        [endDate]="filterEndDate"
+                        (rangeChange)="onRangeChange($event)">
+                    </date-range-slider>
+                </div>
+            }
+            <div class="parameter-control parameter-actions">
+                <button type="button" class="apply right-icon" (click)="downloadCsv()">
+                    Export as CSV
+                    <i class="fas fa-floppy-disk"></i>
+                </button>
+            </div>
+        </div>
+    }
+    @if (!loading && globalStats) {
+        <h3 class="chart-title">Global statistics</h3>
+        <div class="stat-tiles">
+            <div class="stat-tile">
+                <i class="fa-regular fa-hospital"></i>
+                <div class="stat-tile-value">{{ globalStats.centers | number }}</div>
+                <div class="stat-tile-label">Centers</div>
+            </div>
+            <div class="stat-tile">
+                <i class="fas fa-user-injured"></i>
+                <div class="stat-tile-value">{{ globalStats.subjects | number }}</div>
+                <div class="stat-tile-label">Subjects</div>
+            </div>
+            <div class="stat-tile">
+                <i class="fas fa-stethoscope"></i>
+                <div class="stat-tile-value">{{ globalStats.examinations | number }}</div>
+                <div class="stat-tile-label">Examinations</div>
+            </div>
+        </div>
+    }
+    <h3 class="chart-title">Inclusions over time</h3>
+    <div class="statistics-chart">
+        <shanoir-line-chart
+            [loading]="loading"
+            [labels]="labels"
+            [datasets]="datasets"
+            [zoomEnabled]="true"
+            fileName="inclusions-over-time"
+            emptyMessage="No dated examinations or subjects to display yet"
+            yAxisLabel="Cumulative count">
+        </shanoir-line-chart>
+    </div>
+
+    <h3 class="chart-title">Number of examinations by center</h3>
+    <div class="statistics-chart">
+        <shanoir-bar-chart
+            [loading]="loading"
+            [labels]="examsByCenterLabels"
+            [datasets]="examsByCenterDatasets"
+            valueAxisLabel="Number of examinations"
+            fileName="examinations-by-center"
+            emptyMessage="No examinations to display yet">
+        </shanoir-bar-chart>
+    </div>
+
+    <h3 class="chart-title">Number of subjects by center</h3>
+    <div class="statistics-chart">
+        <shanoir-bar-chart
+            [loading]="loading"
+            [labels]="subjectsByCenterLabels"
+            [datasets]="subjectsByCenterDatasets"
+            valueAxisLabel="Number of subjects"
+            fileName="subjects-by-center"
+            emptyMessage="No subjects to display yet">
+        </shanoir-bar-chart>
+    </div>
+
+    <h3 class="chart-title">Distribution of DICOM modalities</h3>
+    <div class="statistics-chart">
+        <shanoir-donut-chart
+            [loading]="loading"
+            [labels]="modalityLabels"
+            [data]="modalityData"
+            [colors]="modalityColors"
+            fileName="dicom-modalities-distribution"
+            emptyMessage="No datasets to display yet">
+        </shanoir-donut-chart>
+    </div>
+
+    @if (!loading && globalStats && globalStats.centers > 1) {
+        <h3 class="chart-title">Modality distribution by center</h3>
+        <div class="statistics-chart">
+            <shanoir-bar-chart
+                [loading]="loading"
+                [labels]="modalityByCenterLabels"
+                [datasets]="modalityByCenterDatasets"
+                [stacked]="true"
+                valueAxisLabel="Number of datasets"
+                fileName="modality-distribution-by-center"
+                emptyMessage="No datasets to display yet">
+            </shanoir-bar-chart>
+        </div>
+    }
+
+    <h3 class="chart-title">Distribution of data quality</h3>
+    <div class="statistics-chart">
+        <shanoir-donut-chart
+            [loading]="loading"
+            [labels]="qualityLabels"
+            [data]="qualityData"
+            [colors]="qualityColors"
+            fileName="data-quality-distribution"
+            emptyMessage="No quality-tagged dataset acquisitions to display yet">
+        </shanoir-donut-chart>
+    </div>
+
+    @if (!loading && globalStats && globalStats.centers > 1) {
+        <h3 class="chart-title">Quality of imported data by center</h3>
+        <div class="statistics-chart">
+            <shanoir-bar-chart
+                [loading]="loading"
+                [labels]="qualityByCenterLabels"
+                [datasets]="qualityByCenterDatasets"
+                [stacked]="true"
+                valueAxisLabel="Number of DICOM series/dataset acquisition"
+                fileName="quality-by-center"
+                emptyMessage="No quality-tagged dataset acquisitions to display yet">
+            </shanoir-bar-chart>
+        </div>
+    }
+
+    <h3 class="chart-title">Latest imported examinations</h3>
+    <div class="latest-imports">
+        @if (loading) {
+            <div class="statistics-message"><i class="fas fa-spinner fa-spin"></i> Loading...</div>
+        } @else if (!latestImports.length) {
+            <div class="statistics-message">No imported examinations to display yet</div>
+        } @else {
+            <div class="latest-imports-controls">
+                <label for="latest-imports-size">Show</label>
+                <select id="latest-imports-size" [(ngModel)]="latestImportsPageSize">
+                    <option [ngValue]="10">10 results</option>
+                    <option [ngValue]="25">25 results</option>
+                    <option [ngValue]="50">50 results</option>
+                </select>
+            </div>
+            <table class="latest-imports-table">
+                <thead>
+                    <tr>
+                        <th>Patient ID</th>
+                        <th>Center</th>
+                        <th>Comment</th>
+                        <th>Examination date</th>
+                        <th>Import date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (item of displayedLatestImports; track item) {
+                        <tr>
+                            <td>{{ item.commonName }}</td>
+                            <td>{{ item.centerName }}</td>
+                            <td>{{ item.examinationComment }}</td>
+                            <td>{{ item.examinationDate | localDateFormatPipe }}</td>
+                            <td>{{ item.importDate | localDateFormatPipe }}</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+}
