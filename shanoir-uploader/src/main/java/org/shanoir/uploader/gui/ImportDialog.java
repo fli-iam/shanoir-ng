@@ -814,7 +814,7 @@ public class ImportDialog extends JDialog {
         importDialogGBC.gridwidth = 2;
         formPanel.add(exportButton, importDialogGBC);
         exportButton.addActionListener(importFinishAL);
-
+        this.getRootPane().setDefaultButton(exportButton);
         container.add(formPanel, BorderLayout.CENTER);
     }
 

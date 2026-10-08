@@ -17,6 +17,7 @@ import { DatasetType } from "../../datasets/shared/dataset-type.model";
 import { ProcessedDatasetType } from "../../enum/processed-dataset-type.enum";
 
 export class ProcessedDatasetImportJob {
+    id: string;
     studyId: number;
     studyName: string;
     subjectId: number;
