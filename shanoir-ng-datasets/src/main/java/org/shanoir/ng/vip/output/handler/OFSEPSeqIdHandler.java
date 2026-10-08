@@ -393,6 +393,10 @@ public class OFSEPSeqIdHandler extends OutputHandler {
 
             for (Dataset ds : datasets) {
                 Attributes attributes = wadoDownloaderService.getDicomAttributesForDataset(ds);
+                if (Objects.isNull(attributes)) {
+                    continue;
+                }
+
                 JSONObject vol = getMatchingVolume(ds, serie, attributes);
 
                 if (vol == null) {
