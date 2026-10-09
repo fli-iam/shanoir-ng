@@ -34,8 +34,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.shanoir.ng.messaging.StudyUserUpdateBroadcastService;
 import org.shanoir.ng.shared.exception.AccessDeniedException;
@@ -55,14 +53,16 @@ import org.shanoir.ng.study.repository.StudyUserRepository;
 import org.shanoir.ng.studycenter.StudyCenterRepository;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.DatabindException;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Study service test.
@@ -78,35 +78,38 @@ public class StudyServiceTest {
     private static final String UPDATED_STUDY_NAME = "test";
     private static final Long USER_ID = 1L;
 
-    @Mock
+    @MockitoBean
     private StudyRepository studyRepository;
 
-    @Mock
+    @MockitoBean
     private RabbitTemplate rabbitTemplate;
 
-    @InjectMocks
+    @Autowired
     private StudyServiceImpl studyService;
 
-    @Mock
+    @MockitoBean
     private StudyUserRepository studyUserRepository;
 
-    @Mock
+    @MockitoBean
     private StudyCenterRepository studyCenterRepository;
 
-    @Mock
+    @MockitoBean
     private StudyUserUpdateBroadcastService studyUserCom;
 
-    @Mock
+    @MockitoBean
     private DataUserAgreementService dataUserAgreementService;
 
-    @Mock
+    @MockitoBean
     private StudyMapper studyMapperMock;
 
-    @Mock
+    @MockitoBean
     private FileSystemStorageService fileSystemStorageService;
 
-    @Mock
-    private ObjectMapper objectMapper;
+    @MockitoBean
+    private JsonMapper jsonMapper;
+
+    @MockitoBean
+    private ConnectionFactory connectionFactory;
 
     @TempDir
     private File tempFolder;
@@ -120,6 +123,7 @@ public class StudyServiceTest {
     }
 
     @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
     public void deleteByIdTest() throws AccessDeniedException, EntityNotFoundException {
         final Study newStudy = ModelsUtil.createStudy();
         final StudyUser studyUser = new StudyUser();
@@ -134,6 +138,7 @@ public class StudyServiceTest {
     }
 
     @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
     public void findByIdTest() throws AccessDeniedException {
         final Study study = studyService.findById(STUDY_ID);
         Assertions.assertNotNull(study);
@@ -143,6 +148,7 @@ public class StudyServiceTest {
     }
 
     @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
     public void findByIdWithAccessRightTest() throws AccessDeniedException {
         final Study newStudy = ModelsUtil.createStudy();
         final StudyUser studyUser = new StudyUser();
@@ -159,7 +165,8 @@ public class StudyServiceTest {
     }
 
     @Test
-    public void saveTest() throws MicroServiceCommunicationException, JsonMappingException, JsonProcessingException {
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    public void saveTest() throws MicroServiceCommunicationException, DatabindException {
         studyService.create(createStudy());
         Mockito.verify(studyRepository, Mockito.times(1)).save(Mockito.any(Study.class));
     }
@@ -175,6 +182,8 @@ public class StudyServiceTest {
         Study dbStudy = ModelsUtil.createStudy();
         dbStudy.setId(1L);
         dbStudy.setProtocolFilePaths(Collections.singletonList("old.txt"));
+        dbStudy.setStudyUserList(new ArrayList<StudyUser>());
+        dbStudy.getStudyUserList().add(createStudyUsers(1L, 3L, dbStudy, true, StudyUserRight.CAN_ADMINISTRATE));
         Study updatedStudy = createStudy();
         updatedStudy.setId(1L);
         updatedStudy.setProtocolFilePaths(Collections.singletonList("new.txt"));
@@ -200,6 +209,8 @@ public class StudyServiceTest {
         existing.setStudyUserList(new ArrayList<StudyUser>());
         existing.getStudyUserList().add(createStudyUsers(1L, 1L, existing, true, StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_IMPORT));
         existing.getStudyUserList().add(createStudyUsers(2L, 2L, existing, true, StudyUserRight.CAN_ADMINISTRATE));
+        existing.getStudyUserList().add(createStudyUsers(1L, 3L, existing, true, StudyUserRight.CAN_ADMINISTRATE));
+
 
         Study updated = createStudy();
         updated.setStudyUserList(new ArrayList<StudyUser>());
@@ -298,7 +309,7 @@ public class StudyServiceTest {
         study.setName(UPDATED_STUDY_NAME);
         study.setStudyCenterList(new ArrayList<>());
         study.setStudyUserList(new ArrayList<>());
-        study.setSubjectStudyList(new ArrayList<>());
+        study.setSubjects(new ArrayList<>());
         return study;
     }
 

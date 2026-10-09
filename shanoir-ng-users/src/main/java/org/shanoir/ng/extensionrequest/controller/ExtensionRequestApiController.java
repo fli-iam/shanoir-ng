@@ -27,7 +27,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestBody;
 
 @Controller
 public class ExtensionRequestApiController extends AbstractUserRequestApiController implements ExtensionRequestApi {
@@ -41,7 +40,7 @@ public class ExtensionRequestApiController extends AbstractUserRequestApiControl
     private EmailService emailService;
 
     @Override
-    public ResponseEntity<Void> requestExtension(@RequestBody final ExtensionRequestInfo requestInfo) {
+    public ResponseEntity<Void> requestExtension(final ExtensionRequestInfo requestInfo) {
         try {
             User userToExtend = getUserService().
                     findByEmailForExtension(requestInfo.getEmail())
@@ -56,8 +55,6 @@ public class ExtensionRequestApiController extends AbstractUserRequestApiControl
             LOG.info("Resetting password after extension request for user {}", userToExtend.getUsername());
 
             getUserService().requestExtension(userToExtend.getId(), requestInfo);
-            String password = keycloakClient.resetPassword(userToExtend.getKeycloakId());
-            emailService.notifyUserResetPassword(userToExtend, password);
 
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (EntityNotFoundException e) {

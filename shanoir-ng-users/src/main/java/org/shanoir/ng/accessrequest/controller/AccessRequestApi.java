@@ -22,6 +22,7 @@ import org.shanoir.ng.accessrequest.model.ValidationDTO;
 import org.shanoir.ng.shared.exception.AccountNotOnDemandException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.SecurityException;
 import org.springframework.amqp.AmqpException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -35,9 +36,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-
 import io.swagger.v3.oas.annotations.Operation;
+
+import tools.jackson.core.JacksonException;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -78,7 +79,7 @@ public interface AccessRequestApi {
     ResponseEntity<Void> resolveNewAccessRequest(
             @Parameter(name = "id of the access request to resolve", required = true) @PathVariable("accessRequestId") Long accessRequestId,
             @Parameter(name = "Accept or refuse the request", required = true) @RequestBody ValidationDTO validation,
-            BindingResult result) throws RestServiceException, AccountNotOnDemandException, EntityNotFoundException, JsonProcessingException, AmqpException;
+            BindingResult result) throws RestServiceException, AccountNotOnDemandException, EntityNotFoundException, JacksonException, AmqpException, SecurityException;
 
     @Operation(summary = "extension", description = "Request an extension for the given study")
     @ApiResponses(value = {
@@ -160,6 +161,6 @@ public interface AccessRequestApi {
             @Parameter(name = "The future role of the user in the study he is invited in", required = true)
                 @RequestParam(value = "function", required = false) String function,
             @Parameter(name = "The email or login of the invited user.")
-                @RequestParam(value = "email", required = true) String emailOrLogin) throws RestServiceException, JsonProcessingException, AmqpException;
+                @RequestParam(value = "email", required = true) String emailOrLogin) throws RestServiceException, JacksonException, AmqpException;
 
 }

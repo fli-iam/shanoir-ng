@@ -15,9 +15,6 @@
 ######################################
 server:
   port: 9905
-  error:
-    whitelabel:
-      enabled: false
 ##### Database #####
 spring:
   cloud:
@@ -47,7 +44,7 @@ spring:
         connection:
           charset: UTF-8
         hbm2ddl:
-          import_files_sql_extractor: org.hibernate.tool.hbm2ddl.MultipleLinesSqlCommandExtractor
+          import_files_sql_extractor: org.hibernate.tool.schema.internal.script.MultiLineSqlScriptExtractor
   main:
     allow-circular-references: true
   mvc:
@@ -60,7 +57,7 @@ spring:
   threads:
     virtual:
       enabled: true
-##### Others #####
+  ##### Others #####
   jackson:
     mapper:
       use-getters-as-setters: false
@@ -80,8 +77,12 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${SHANOIR_KEYCLOAK_URL}/realms/shanoir-ng
-          jwk-set-uri: ${SHANOIR_KEYCLOAK_INTERNAL_URL}/realms/shanoir-ng/protocol/openid-connect/certs
+            issuer-uri: ${SHANOIR_KEYCLOAK_URL:localhost}/realms/shanoir-ng
+            jwk-set-uri: ${SHANOIR_KEYCLOAK_INTERNAL_URL:http://keycloak:8080/auth}/realms/shanoir-ng/protocol/openid-connect/certs
+  web:
+    error:
+      whitelabel:
+        enabled: false
 springdoc:
   api-docs:
     path: '/api-docs'
@@ -120,65 +121,3 @@ storage:
 ######################################
 # DO NOT COMMIT VALUES MODIFICATIONS #
 ######################################
----
-server:
-  port: 9915
-spring:
-  config.activate.on-profile: dev
-  jpa:
-    defer-datasource-initialization: true
-    generate-ddl: true
-    hibernate:
-      # Hibernate ddl auto (create, create-drop, update, validate)
-      ddl-auto: create
-    # Show or not log for each sql query
-    show-sql: true
-  autoconfigure.exclude: org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration
-  main:
-    allow-circular-references: true
-  mvc:
-    pathmatch:
-      matching-strategy: ANT_PATH_MATCHER
-  sql:
-    init:
-      mode: always
-  threads:
-    virtual:
-      enabled: true
-# logging configuration
-logging:
-  file:
-    name: /var/log/shanoir-ng-logs/shanoir-ng-preclinical.log
-  level:
-    org.springframework.web: DEBUG
-    org.hibernate: ERROR
-    org.springframework.amqp: OFF
-
-#################
-# DO NOT CHANGE #
-#################
----
-spring:
-  config.activate.on-profile: test
-  main:
-    allow-bean-definition-overriding: true
-    allow-circular-references: true
-  datasource:
-    url: jdbc:h2:mem:SHANOIR_NG_PRECLINICAL;MODE=MySQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;DATABASE_TO_UPPER=false
-    username: sa
-    password:
-    driverClassName: org.h2.Driver
-  jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
-    defer-datasource-initialization: true
-    generate-ddl: true
-    hibernate:
-      # Hibernate ddl auto (create, create-drop, update, validate)
-      ddl-auto: create-drop
-  mvc:
-    pathmatch:
-      matching-strategy: ANT_PATH_MATCHER
-  sql:
-    init:
-      data-locations: classpath:/scripts/test-data-preclinical-h2.sql
-      mode: always

@@ -14,7 +14,6 @@
 
 package org.shanoir.ng.shared.security;
 
-
 import org.keycloak.representations.AccessTokenResponse;
 import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.utils.SecurityContextUtil;
@@ -53,7 +52,6 @@ public class KeycloakServiceAccountUtils {
 
     @Autowired
     private RestTemplate restTemplate;
-
 
     /**
      * Get a fresh access token by refreshing the given refresh/offline token.
@@ -103,7 +101,8 @@ public class KeycloakServiceAccountUtils {
         HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(map, headers);
 
         try {
-            ResponseEntity<AccessTokenResponse> response = this.restTemplate.exchange(this.serverUrl, HttpMethod.POST, entity, AccessTokenResponse.class);
+            ResponseEntity<AccessTokenResponse> response = this.restTemplate.exchange(this.serverUrl, HttpMethod.POST,
+                    entity, AccessTokenResponse.class);
             return response.getBody();
         } catch (HttpStatusCodeException e) {
             // in case of error with a response payload.

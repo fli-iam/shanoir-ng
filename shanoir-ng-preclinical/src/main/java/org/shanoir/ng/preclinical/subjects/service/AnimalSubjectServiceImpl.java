@@ -32,9 +32,8 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * AnimalSubjects service implementation.
@@ -143,7 +142,7 @@ public class AnimalSubjectServiceImpl implements AnimalSubjectService {
         String request;
         try {
             request = mapper.writeValueAsString(new IdName(studyId, name));
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             // very unlikely to happen
             throw new RuntimeException("Error while serializing subject name check request", e);
         }
@@ -151,8 +150,8 @@ public class AnimalSubjectServiceImpl implements AnimalSubjectService {
     }
 
     @Override
-    public Long createSubject(SubjectDto dto) throws JsonProcessingException, ShanoirException {
-        Long subjectId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECTS_QUEUE_WITH_DATASETS, mapper.writeValueAsString(dto));
+    public Long createSubject(SubjectDto dto) throws ShanoirException {
+        Long subjectId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECTS_QUEUE_WITH_DATASETS, dto);
         if (subjectId == null) {
             throw new ShanoirException("Created subject id is null.");
         }

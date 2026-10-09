@@ -21,11 +21,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestBody;
 
-import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.ws.rs.core.Context;
 
 @Controller
 public class LastLoginDateApiController extends AbstractUserRequestApiController implements LastLoginDateApi {
@@ -36,8 +33,8 @@ public class LastLoginDateApiController extends AbstractUserRequestApiController
     private static final Logger LOG = LoggerFactory.getLogger(LastLoginDateApiController.class);
 
     public ResponseEntity<Void> lastLoginDate(
-            @Parameter(name = "username of user for last login date update", required = true) @RequestBody final String username,
-            @Context final HttpServletRequest httpRequest) {
+            final String username,
+            final HttpServletRequest httpRequest) {
         try {
             // Update user login date
             getUserService().updateLastLogin(username);

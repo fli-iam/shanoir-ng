@@ -38,11 +38,19 @@ import org.springframework.transaction.annotation.Transactional;
 
 public interface DatasetRepository extends PagingAndSortingRepository<Dataset, Long>, JpaRepository<Dataset, Long> {
 
-    @Query(value = "SELECT COUNT(*) FROM dataset as ds "
-            + "INNER JOIN dataset_acquisition as acq ON ds.dataset_acquisition_id=acq.id "
-            + "INNER JOIN examination as ex ON acq.examination_id=ex.id "
-            + "WHERE ds.source_id=:datasetParentId AND ex.study_id=:studyId", nativeQuery = true)
-    Long countDatasetsBySourceIdAndStudyId(Long datasetParentId, Long studyId);
+    @Query(value = """
+            SELECT EXISTS (
+            SELECT 1
+            FROM dataset ds
+            JOIN dataset_acquisition acq
+                    ON acq.id = ds.dataset_acquisition_id
+            JOIN examination ex
+                    ON ex.id = acq.examination_id
+            WHERE ds.source_id = :datasetParentId
+            AND ex.study_id = :studyId
+            )
+            """, nativeQuery = true)
+    Integer existsBySourceIdAndStudyId(Long datasetParentId, Long studyId);
 
     Iterable<Dataset> findByDatasetAcquisitionExaminationStudy_IdIn(Iterable<Long> studyIds, Sort sort);
 
@@ -226,6 +234,11 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
     @Query("SELECT dataset FROM Dataset dataset "
             + "WHERE dataset.datasetProcessing.id in :idList")
     List<Dataset> findByProcessingIdIn(List<Long> idList);
+
+    @Query("SELECT ds FROM DatasetProcessing dp "
+            + "JOIN dp.inputDatasets ds "
+            + "WHERE dp.id = :id AND ds.datasetAcquisition.id = :acqId")
+    List<Dataset> findInputsOfProcessingIdBySerieId(@Param("id") Long id, @Param("acqId") Long acqId);
 
     @Query("SELECT dataset FROM Dataset dataset "
             + "JOIN FETCH dataset.datasetProcessing AS dp "

@@ -16,24 +16,28 @@ package org.shanoir.ng.user.utils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.BDDMockito.given;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.keycloak.admin.client.Keycloak;
-import org.keycloak.admin.client.resource.RealmResource;
-import org.keycloak.admin.client.resource.UsersResource;
-import org.keycloak.representations.idm.UserRepresentation;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.shanoir.ng.role.repository.RoleRepository;
 import org.shanoir.ng.shared.exception.SecurityException;
 import org.springframework.test.util.ReflectionTestUtils;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpServer;
 
 /**
  * Unit tests for {@link KeycloakClient}.
@@ -43,41 +47,56 @@ import org.springframework.test.util.ReflectionTestUtils;
 @ExtendWith(MockitoExtension.class)
 public class KeycloakClientTest {
 
-    private static final String REALM = "shanoir-ng";
+    private static final String ADMIN_REALM = "master";
+
+    private static final String USER_REALM = "shanoir-ng";
 
     private static final int PAGE_SIZE = 100;
 
     @Mock
-    private Keycloak keycloak;
+    private RoleRepository roleRepository;
 
-    @Mock
-    private RealmResource realmResource;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
-    @Mock
-    private UsersResource usersResource;
+    private HttpServer server;
 
     private KeycloakClient keycloakClient;
 
+    // Configurable behaviour of the fake Keycloak "list users" endpoint, set per-test.
+    private List<Map<String, Object>> pageOneUsers = List.of();
+    private List<Map<String, Object>> pageTwoUsers = List.of();
+    private boolean usersEndpointFails = false;
+
     @BeforeEach
-    public void setup() {
-        keycloakClient = new KeycloakClient() {
-            @Override
-            protected Keycloak getKeycloak() {
-                return keycloak;
-            }
-        };
-        ReflectionTestUtils.setField(keycloakClient, "keycloakRealm", REALM);
-        given(keycloak.realm(REALM)).willReturn(realmResource);
-        given(realmResource.users()).willReturn(usersResource);
+    public void setup() throws IOException {
+        server = HttpServer.create(new InetSocketAddress("localhost", 0), 0);
+        server.createContext("/realms/" + ADMIN_REALM + "/protocol/openid-connect/token", this::handleToken);
+        server.createContext("/admin/realms/" + USER_REALM + "/users", this::handleListUsers);
+        server.start();
+
+        String serverUrl = "http://localhost:" + server.getAddress().getPort();
+        keycloakClient = new KeycloakClient(roleRepository, serverUrl);
+        ReflectionTestUtils.setField(keycloakClient, "adminRealm", ADMIN_REALM);
+        ReflectionTestUtils.setField(keycloakClient, "clientId", "admin-cli");
+        ReflectionTestUtils.setField(keycloakClient, "username", "admin");
+        ReflectionTestUtils.setField(keycloakClient, "password", "admin");
+        ReflectionTestUtils.setField(keycloakClient, "userRealm", USER_REALM);
+    }
+
+    @AfterEach
+    public void tearDown() {
+        if (server != null) {
+            server.stop(0);
+        }
     }
 
     @Test
     public void getUsersEnabledStatusTest() throws SecurityException {
-        final List<UserRepresentation> page = List.of(
+        pageOneUsers = List.of(
                 userRepresentation("enabled-id", Boolean.TRUE),
                 userRepresentation("disabled-id", Boolean.FALSE),
                 userRepresentation("undefined-id", null));
-        given(usersResource.list(0, PAGE_SIZE)).willReturn(page);
+        pageTwoUsers = List.of();
 
         final Map<String, Boolean> enabledByKeycloakId = keycloakClient.getUsersEnabledStatus();
 
@@ -89,34 +108,68 @@ public class KeycloakClientTest {
 
     @Test
     public void getUsersEnabledStatusPaginationTest() throws SecurityException {
-        final List<UserRepresentation> firstPage = new ArrayList<>();
+        final List<Map<String, Object>> firstPage = new ArrayList<>();
         for (int i = 0; i < PAGE_SIZE; i++) {
             firstPage.add(userRepresentation("first-page-id-" + i, Boolean.TRUE));
         }
-        final List<UserRepresentation> secondPage = List.of(userRepresentation("second-page-id", Boolean.FALSE));
-        given(usersResource.list(0, PAGE_SIZE)).willReturn(firstPage);
-        given(usersResource.list(PAGE_SIZE, PAGE_SIZE)).willReturn(secondPage);
+        pageOneUsers = firstPage;
+        pageTwoUsers = List.of(userRepresentation("second-page-id", Boolean.FALSE));
 
         final Map<String, Boolean> enabledByKeycloakId = keycloakClient.getUsersEnabledStatus();
 
         assertEquals(PAGE_SIZE + 1, enabledByKeycloakId.size());
         assertEquals(Boolean.TRUE, enabledByKeycloakId.get("first-page-id-0"));
         assertEquals(Boolean.FALSE, enabledByKeycloakId.get("second-page-id"));
-        Mockito.verify(usersResource, Mockito.times(2)).list(Mockito.anyInt(), Mockito.anyInt());
     }
 
     @Test
     public void getUsersEnabledStatusKeycloakErrorTest() {
-        given(usersResource.list(0, PAGE_SIZE)).willThrow(new RuntimeException("keycloak unreachable"));
-
+        usersEndpointFails = true;
         assertThrows(SecurityException.class, () -> keycloakClient.getUsersEnabledStatus());
     }
 
-    private UserRepresentation userRepresentation(final String keycloakId, final Boolean enabled) {
-        final UserRepresentation userRepresentation = new UserRepresentation();
-        userRepresentation.setId(keycloakId);
-        userRepresentation.setEnabled(enabled);
+    private Map<String, Object> userRepresentation(final String keycloakId, final Boolean enabled) {
+        final Map<String, Object> userRepresentation = new HashMap<>();
+        userRepresentation.put("id", keycloakId);
+        userRepresentation.put("enabled", enabled);
         return userRepresentation;
+    }
+
+    private void handleToken(HttpExchange exchange) throws IOException {
+        writeJson(exchange, 200, Map.of("access_token", "test-token"));
+    }
+
+    private void handleListUsers(HttpExchange exchange) throws IOException {
+        if (usersEndpointFails) {
+            exchange.sendResponseHeaders(500, -1);
+            exchange.close();
+            return;
+        }
+        int first = extractIntQueryParam(exchange.getRequestURI().getQuery(), "first");
+        List<Map<String, Object>> page = (first == 0) ? pageOneUsers : pageTwoUsers;
+        writeJson(exchange, 200, page);
+    }
+
+    private int extractIntQueryParam(String query, String name) {
+        if (query == null) {
+            return -1;
+        }
+        for (String part : query.split("&")) {
+            String[] kv = part.split("=");
+            if (kv.length == 2 && kv[0].equals(name)) {
+                return Integer.parseInt(kv[1]);
+            }
+        }
+        return -1;
+    }
+
+    private void writeJson(HttpExchange exchange, int status, Object body) throws IOException {
+        byte[] bytes = objectMapper.writeValueAsBytes(body);
+        exchange.getResponseHeaders().add("Content-Type", "application/json");
+        exchange.sendResponseHeaders(status, bytes.length);
+        try (OutputStream os = exchange.getResponseBody()) {
+            os.write(bytes);
+        }
     }
 
 }

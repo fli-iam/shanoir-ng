@@ -18,7 +18,7 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -51,10 +51,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.swagger.v3.oas.annotations.Parameter;
+import tools.jackson.databind.ObjectMapper;
 
 @Controller
 public class BidsImporterApiController implements BidsImporterApi {
@@ -75,10 +73,10 @@ public class BidsImporterApiController implements BidsImporterApi {
     private RabbitTemplate rabbitTemplate;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private ShanoirEventService eventService;
 
     @Autowired
-    private ShanoirEventService eventService;
+    private ObjectMapper objectMapper;
 
     @Autowired
     private ImportJobStatusService importJobStatusService;
@@ -139,7 +137,7 @@ public class BidsImporterApiController implements BidsImporterApi {
                 importJob.setSubjectName(subjectName);
 
                 // Create subject
-                subjectId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECTS_QUEUE_WITH_DATASETS, objectMapper.writeValueAsString(subject));
+                subjectId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECTS_QUEUE_WITH_DATASETS, subject);
                 if (subjectId == null) {
                     throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), SUBJECT_CREATION_ERROR, null));
                 }
@@ -160,7 +158,7 @@ public class BidsImporterApiController implements BidsImporterApi {
             // Iterate over session files
             boolean examCreated = false;
             for (File sessionFile : examFiles) {
-                FileTime creationTime = (FileTime) Files.getAttribute(Paths.get(sessionFile.getAbsolutePath()), "creationTime");
+                FileTime creationTime = (FileTime) Files.getAttribute(Path.of(sessionFile.getAbsolutePath()), "creationTime");
                 ExaminationDTO examination;
                 Long examId;
 
@@ -181,12 +179,12 @@ public class BidsImporterApiController implements BidsImporterApi {
                     examCreated = true;
 
                     // Create multiple examinations for every session folder
-                    examId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EXAMINATION_CREATION_QUEUE, objectMapper.writeValueAsString(examination));
+                    examId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EXAMINATION_CREATION_QUEUE, examination);
 
                     if (examId == null) {
                         throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), EXAMINATION_CREATION_ERROR, null));
                     }
-                    publishExaminationCreatedEvent(examId, examination, centerId, dateResolution);
+                    publishExaminationCreatedEvent(studyId, examId, subjectId, centerId, dateResolution);
 
                     importJob.setExaminationId(examId);
 
@@ -211,12 +209,12 @@ public class BidsImporterApiController implements BidsImporterApi {
                         }
                         examination = ImportUtils.createExam(studyId, centerId, subjectId, "",
                                 dateResolution.getDate(), subjectName);
-                        examId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EXAMINATION_CREATION_QUEUE, objectMapper.writeValueAsString(examination));
+                        examId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EXAMINATION_CREATION_QUEUE, examination);
 
                         if (examId == null) {
                             throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), EXAMINATION_CREATION_ERROR, null));
                         }
-                        publishExaminationCreatedEvent(examId, examination, centerId, dateResolution);
+                        publishExaminationCreatedEvent(studyId, examId, subjectId, centerId, dateResolution);
 
                         importJob.setExaminationId(examId);
                         examCreated = true;
@@ -227,15 +225,23 @@ public class BidsImporterApiController implements BidsImporterApi {
             }
         }
         importJobStatusService.setFinished(tempDirId, importJob);
-        return new ResponseEntity<>(null, HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    private void publishExaminationCreatedEvent(Long examId, ExaminationDTO examination, Long centerId,
+    /**
+     * This method publish an Event to link in ms-studies the
+     * new created exam with the study.
+     * @param studyId
+     * @param examId
+     * @param subjectId
+     * @param centerId
+     * @param dateResolution
+     */
+    private void publishExaminationCreatedEvent(Long studyId, Long examId, Long subjectId, Long centerId,
             BidsExaminationDateResolution dateResolution) {
-        String message = dateResolution.formatEventMessage() + ";centerId:" + centerId + ";subjectId:"
-                + examination.getSubject().getId();
+        String message = dateResolution.formatEventMessage() + ";centerId:" + centerId + ";subjectId:" + subjectId;
         eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EXAMINATION_EVENT, examId.toString(),
-                KeycloakUtil.getTokenUserId(), message, ShanoirEvent.SUCCESS, examination.getStudyId()));
+                KeycloakUtil.getTokenUserId(), message, ShanoirEvent.SUCCESS, studyId));
     }
 
     /**
@@ -243,7 +249,7 @@ public class BidsImporterApiController implements BidsImporterApi {
      * @param dataTypeFile
      * @param importJob
      */
-    private void importSession(File dataTypeFile, ImportJob importJob) throws AmqpException, JsonProcessingException {
+    private void importSession(File dataTypeFile, ImportJob importJob) throws AmqpException {
         if (dataTypeFile.isDirectory()) {
             importJob.setWorkFolder(dataTypeFile.getAbsolutePath());
             LOG.debug("We found a data folder " + dataTypeFile.getName());

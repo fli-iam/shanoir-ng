@@ -21,8 +21,6 @@ import org.shanoir.ng.preclinical.subjects.dto.SubjectDto;
 import org.shanoir.ng.preclinical.subjects.model.AnimalSubject;
 import org.shanoir.ng.shared.exception.ShanoirException;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-
 /**
  * Refs service.
  *
@@ -80,7 +78,7 @@ public interface AnimalSubjectService {
 
     boolean isSubjectNameAlreadyUsedInStudy(String name, Long studyId);
 
-    Long createSubject(SubjectDto dto) throws JsonProcessingException, ShanoirException;
+    Long createSubject(SubjectDto dto) throws ShanoirException;
 
     List<AnimalSubject> findByIds(List<Long> ids);
 

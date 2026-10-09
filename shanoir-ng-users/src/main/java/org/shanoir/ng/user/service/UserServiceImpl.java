@@ -24,7 +24,6 @@ import org.shanoir.ng.accessrequest.model.AccessRequest;
 import org.shanoir.ng.accessrequest.repository.AccessRequestRepository;
 import org.shanoir.ng.accountrequest.repository.AccountRequestInfoRepository;
 import org.shanoir.ng.email.EmailService;
-import org.shanoir.ng.events.UserDeleteEvent;
 import org.shanoir.ng.extensionrequest.model.ExtensionRequestInfo;
 import org.shanoir.ng.role.repository.RoleRepository;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
@@ -46,10 +45,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
+
 
 /**
  * User service implementation.
@@ -85,9 +84,6 @@ public class UserServiceImpl implements UserService {
     private AccessRequestRepository accessRequestRepository;
 
     @Autowired
-    private ApplicationEventPublisher publisher;
-
-    @Autowired
     private RabbitTemplate rabbitTemplate;
 
     @Autowired
@@ -100,7 +96,7 @@ public class UserServiceImpl implements UserService {
     private AccessRequestService accessRequestService;
 
     @Override
-    public User confirmAccountRequest(final User user) throws EntityNotFoundException, AccountNotOnDemandException {
+    public User confirmAccountRequest(final User user) throws EntityNotFoundException, AccountNotOnDemandException, SecurityException {
         final User userDb = userRepository.findById(user.getId()).orElse(null);
         if (userDb == null) {
             LOG.error("User with id {} not found", user.getId());
@@ -118,8 +114,12 @@ public class UserServiceImpl implements UserService {
             userDb.setFirstExpirationNotificationSent(false);
             userDb.setSecondExpirationNotificationSent(false);
             final User updatedUser = updateUserOnAllSystems(userDb, user);
+
+            String password = keycloakClient.resetPassword(userDb.getKeycloakId());
+
             // Send emails
             emailService.notifyExtensionRequestAccepted(updatedUser);
+            emailService.notifyUserResetPassword(userDb, password);
             return updatedUser;
         } else {
             // Account creation
@@ -143,7 +143,6 @@ public class UserServiceImpl implements UserService {
             this.accessRequestService.deleteById(request.getId());
         }
         userRepository.deleteById(id);
-        publisher.publishEvent(new UserDeleteEvent(id));
 
         try {
             ShanoirEvent event = new ShanoirEvent(ShanoirEventType.DELETE_USER_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS);
