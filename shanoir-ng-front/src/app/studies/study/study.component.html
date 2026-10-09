@@ -409,6 +409,21 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             </span>
                         </li>
                         <li>
+                            <label i18n="Study detail|Neurobagel export label@@studyDetailNeurobagelExport">Exposed to Neurobagel</label>
+                            <span class="right-col">
+                                @if (mode != 'view' && isAdmin()) {
+                                    <checkbox formControlName="neurobagelExport"></checkbox>
+                                } @else {
+                                    @if (study.neurobagelExport) {
+                                        <span class="bool-true"><i class="fas fa-check"></i></span>
+                                    } @else {
+                                        <span class="bool-false"><i class="fas fa-times"></i></span>
+                                    }
+                                }
+                                <tool-tip>Publishes the study's metadata (subject counts, ages, sexes, imaging modalities) to the Neurobagel federated search. Only administrators can change it.</tool-tip>
+                            </span>
+                        </li>
+                        <li>
                             <label i18n="Study detail|Expected number of subjects label@@expectedNbOfSubjects">Expected number of subjects</label>
                             <span class="right-col">
                                 @switch (mode) {

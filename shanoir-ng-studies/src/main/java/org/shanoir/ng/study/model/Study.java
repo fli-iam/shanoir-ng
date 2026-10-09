@@ -199,6 +199,10 @@ public class Study extends HalEntity {
     @Column(name = "is_draft")
     private boolean isDraft;
 
+    /** Metadata exposed to the Neurobagel federation. Set by admins only. */
+    @Column(name = "neurobagel_export")
+    private boolean neurobagelExport;
+
     @JsonManagedReference
     @OneToOne(fetch = FetchType.LAZY, mappedBy = "study", cascade = CascadeType.ALL, orphanRemoval = true)
     private StudyExtraDetails extraDetails;
@@ -567,6 +571,14 @@ public class Study extends HalEntity {
 
     public void setIsDraft(boolean isDraft) {
         this.isDraft = isDraft;
+    }
+
+    public boolean isNeurobagelExport() {
+        return neurobagelExport;
+    }
+
+    public void setNeurobagelExport(boolean neurobagelExport) {
+        this.neurobagelExport = neurobagelExport;
     }
 
     /**

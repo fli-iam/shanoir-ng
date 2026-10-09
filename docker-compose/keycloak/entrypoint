@@ -21,6 +21,11 @@ require  SHANOIR_VIEWER_OHIF_URL_HOST
 
 : ${SHANOIR_USERS_HOST:=${SHANOIR_PREFIX}users}
 
+# Secret of the 'neurobagel-export' client (Neurobagel node export job). When unset, use a random
+# secret nobody knows, so the client exists but cannot be used. Alphanumeric only (sed below).
+optional NEUROBAGEL_CLIENT_SECRET
+: ${NEUROBAGEL_CLIENT_SECRET:=$(tr -dc 'A-Za-z0-9' < /dev/urandom | head -c 48)}
+
 mkdir -p /tmp/import
 sed "	s/SHANOIR_NOTIFICATION_NAME/$SHANOIR_NOTIFICATION_NAME/g
 		s/SHANOIR_NOTIFICATION_EMAIL/$SHANOIR_NOTIFICATION_EMAIL/g
@@ -36,6 +41,7 @@ sed "	s/SHANOIR_NOTIFICATION_NAME/$SHANOIR_NOTIFICATION_NAME/g
 		s/SHANOIR_VIEWER_OHIF_URL_SCHEME/$SHANOIR_VIEWER_OHIF_URL_SCHEME/g
 		s/SHANOIR_VIEWER_OHIF_URL_HOST/$SHANOIR_VIEWER_OHIF_URL_HOST/g
 		s/VIP_CLIENT_SECRET/$VIP_CLIENT_SECRET/g
+		s/NEUROBAGEL_CLIENT_SECRET/$NEUROBAGEL_CLIENT_SECRET/g
 "		/opt/keycloak/shanoir-ng-realm.json > /tmp/import/shanoir-ng-realm.json
 
 #
