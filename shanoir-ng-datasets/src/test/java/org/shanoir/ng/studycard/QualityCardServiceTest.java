@@ -27,6 +27,8 @@ import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
 import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
+import org.shanoir.ng.examination.repository.ExaminationRepository;
+import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.model.Study;
@@ -40,6 +42,8 @@ import org.shanoir.ng.utils.SecurityContextUtil;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -66,6 +70,9 @@ public class QualityCardServiceTest {
 
     @Mock
     private StudyRepository studyRepository;
+
+    @Mock
+    private ExaminationRepository examinationRepository;
 
     @Mock
     private WADODownloaderService downloader;
@@ -96,6 +103,8 @@ public class QualityCardServiceTest {
         given(qualityCardRepository.findByName(QUALITY_CARD_NAME)).willReturn(createQualityCard());
         given(qualityCardRepository.save(Mockito.any(QualityCard.class))).willReturn(createQualityCard());
         given(downloader.getDicomAttributesForAcquisition(Mockito.any())).willReturn(new AcquisitionAttributes<>());
+        given(studyRepository.findById(STUDY_ID)).willReturn(Optional.of(createStudy()));
+        ReflectionTestUtils.setField(qualityCardService, "self", qualityCardService);
     }
 
     @Test
@@ -128,8 +137,7 @@ public class QualityCardServiceTest {
         qualityCard.setRules(Arrays.asList(
                 createRuleWithoutCondition(QualityTag.ERROR),
                 createRuleWithoutCondition(QualityTag.WARNING)));
-        given(studyRepository.findByIdWithDatasetsAndDatasetFilePaths(STUDY_ID))
-                .willReturn(Optional.of(createStudyWithAcquisition(acquisition)));
+        mockExaminations(acquisition.getExamination());
 
         qualityCardService.applyQualityCardOnStudy(qualityCard, false);
 
@@ -143,12 +151,62 @@ public class QualityCardServiceTest {
         qualityCard.setRules(Arrays.asList(
                 createRuleWithoutCondition(QualityTag.WARNING),
                 createRuleWithoutCondition(QualityTag.ERROR)));
-        given(studyRepository.findByIdWithDatasetsAndDatasetFilePaths(STUDY_ID))
-                .willReturn(Optional.of(createStudyWithAcquisition(acquisition)));
+        mockExaminations(acquisition.getExamination());
 
         qualityCardService.applyQualityCardOnStudy(qualityCard, false);
 
         Assertions.assertEquals(QualityTag.ERROR, acquisition.getQualityTag());
+    }
+
+    /**
+     * The study tree must not be loaded at once (one dataset file per DICOM instance): each
+     * examination is loaded on its own, when processed.
+     */
+    @Test
+    public void applyQualityCardOnStudyLoadsOneExaminationAtATimeTest() throws Exception {
+        final QualityCard qualityCard = createQualityCard();
+        qualityCard.setRules(List.of(createRuleWithoutCondition(QualityTag.WARNING)));
+        mockExaminations(createExamination(30L), createExamination(10L), createExamination(20L));
+
+        qualityCardService.applyQualityCardOnStudy(qualityCard, true);
+
+        Mockito.verify(studyRepository).findById(STUDY_ID);
+        Mockito.verifyNoMoreInteractions(studyRepository);
+        for (Long examinationId : List.of(10L, 20L, 30L)) {
+            Mockito.verify(examinationRepository).findByIdWithAcquisitions(examinationId);
+        }
+        Mockito.verify(datasetAcquisitionService, Mockito.times(3)).update(Mockito.anyList());
+    }
+
+    @Test
+    public void testQualityCardOnSampleOnlyLoadsSampledExaminationsTest() throws Exception {
+        final QualityCard qualityCard = createQualityCard();
+        qualityCard.setRules(List.of(createRuleWithoutCondition(QualityTag.WARNING)));
+        mockExaminations(createExamination(30L), createExamination(10L), createExamination(20L));
+
+        qualityCardService.applyQualityCardOnStudy(qualityCard, false, 1, 2);
+
+        // examinations are sorted by id: [10, 20, 30], the sample [1, 2[ is examination 20
+        Mockito.verify(examinationRepository).findByIdWithAcquisitions(20L);
+        Mockito.verify(examinationRepository, Mockito.never()).findByIdWithAcquisitions(10L);
+        Mockito.verify(examinationRepository, Mockito.never()).findByIdWithAcquisitions(30L);
+        Mockito.verify(datasetAcquisitionService, Mockito.never()).update(Mockito.anyList());
+    }
+
+    /**
+     * Testing a quality card must never save the quality tags set on the loaded acquisitions:
+     * its transaction is read-only, so Hibernate does not flush them.
+     */
+    @Test
+    public void examinationTransactionsTest() throws Exception {
+        Transactional apply = QualityCardServiceImpl.class.getMethod("applyQualityCardOnExamination",
+                QualityCard.class, Long.class, ShanoirEvent.class).getAnnotation(Transactional.class);
+        Transactional test = QualityCardServiceImpl.class.getMethod("testQualityCardOnExamination",
+                QualityCard.class, Long.class, ShanoirEvent.class).getAnnotation(Transactional.class);
+        Assertions.assertNotNull(apply);
+        Assertions.assertFalse(apply.readOnly());
+        Assertions.assertNotNull(test);
+        Assertions.assertTrue(test.readOnly());
     }
 
     private QualityCard createQualityCard() {
@@ -164,7 +222,10 @@ public class QualityCardServiceTest {
     private DatasetAcquisition createAcquisition() {
         final DatasetAcquisition acquisition = new GenericDatasetAcquisition();
         acquisition.setId(1L);
-        acquisition.setExamination(new Examination());
+        final Examination examination = new Examination();
+        examination.setId(1L);
+        examination.setDatasetAcquisitions(new ArrayList<>(List.of(acquisition)));
+        acquisition.setExamination(examination);
         return acquisition;
     }
 
@@ -174,12 +235,29 @@ public class QualityCardServiceTest {
         return rule;
     }
 
-    private Study createStudyWithAcquisition(DatasetAcquisition acquisition) {
+    private Study createStudy() {
         final Study study = new Study();
         study.setId(STUDY_ID);
-        acquisition.getExamination().setDatasetAcquisitions(new ArrayList<>(List.of(acquisition)));
-        study.setExaminations(new ArrayList<>(List.of(acquisition.getExamination())));
         return study;
+    }
+
+    private Examination createExamination(Long id) {
+        final Examination examination = new Examination();
+        examination.setId(id);
+        final DatasetAcquisition acquisition = new GenericDatasetAcquisition();
+        acquisition.setId(id * 100);
+        acquisition.setExamination(examination);
+        examination.setDatasetAcquisitions(new ArrayList<>(List.of(acquisition)));
+        return examination;
+    }
+
+    private void mockExaminations(Examination... examinations) {
+        List<Long> ids = new ArrayList<>();
+        for (Examination examination : examinations) {
+            ids.add(examination.getId());
+            given(examinationRepository.findByIdWithAcquisitions(examination.getId())).willReturn(Optional.of(examination));
+        }
+        given(examinationRepository.findIdsByStudyId(STUDY_ID)).willReturn(ids);
     }
 
 }
