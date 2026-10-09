@@ -100,6 +100,18 @@ RUN wget -qO dcm4che-bin.zip \
     && unzip /dcm4che-bin.zip && mv dcm4che-* dcm4che \
     && rm    /dcm4che-bin.zip
 
+# Extract the zstd-jni native lib at build time: at runtime zstd-jni would
+# extract it into java.io.tmpdir, which fails when /tmp is mounted noexec
+FROM alpine AS datasets-zstd
+ARG TARGETARCH
+COPY datasets/shanoir-ng-datasets.jar /ms.jar
+RUN apk add --no-cache unzip \
+    && case "$TARGETARCH" in arm64) arch=aarch64 ;; *) arch=amd64 ;; esac \
+    && unzip -p /ms.jar 'BOOT-INF/lib/zstd-jni-*.jar' > /zstd-jni.jar \
+    && mkdir -p /target/opt/zstd \
+    && unzip -p /zstd-jni.jar "linux/$arch/libzstd-jni-*.so" > /target/opt/zstd/libzstd-jni.so \
+    && test -s /target/opt/zstd/libzstd-jni.so
+
 FROM base-microservice AS datasets
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
@@ -118,8 +130,7 @@ ENV LANGUAGE=en_US.UTF-8
 
 # install the files from the 'dowloader' stage
 COPY --link --from=datasets-download /target/. /
-
-
+COPY --link --from=datasets-zstd /target/. /
 
 COPY --link datasets/entrypoint /usr/bin/
 COPY --link datasets/shanoir-ng-datasets.jar shanoir-ng-datasets.jar
