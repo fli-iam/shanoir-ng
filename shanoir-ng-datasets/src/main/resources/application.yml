@@ -170,6 +170,8 @@ dcm4chee-arc:
   dicom.web.rs.upload: /dcm4chee-arc/aets/DCM4CHEE/rs/studies
   dicom.web.http.client.max.total: 500
   dicom.web.http.client.max.per.route: 500
+  # number of PACS connections used for a unique download thread
+  dicom.wado.concurrent.PACS.connections: ${SHANOIR_PACS_CONCURRENT_DOWNLOADS:16}
 
 # VIP
 vip:
@@ -179,6 +181,11 @@ vip:
   file-formats: .nii.gz, .nii
   result-file-name: input_params.json
   shanoir-vip-host: ${SHANOIR_URL_HOST:local}
+  download:
+    # connections VIP downloads may use from the Hikari pool (maximum-pool-size 70, 10 kept for other traffic)
+    db-permits: 60
+    parallel-count: ${VIP_MAX_DOWNLOAD:4}
+
 
 # Service account
 service-account:

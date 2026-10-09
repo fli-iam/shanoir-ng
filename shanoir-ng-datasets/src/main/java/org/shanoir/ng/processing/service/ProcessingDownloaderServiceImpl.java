@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.processing.service;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -26,8 +27,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.collections4.ListUtils;
 import org.apache.solr.common.util.Pair;
@@ -36,7 +35,9 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.download.ArchiveWriter;
 import org.shanoir.ng.download.DatasetDownloadError;
+import org.shanoir.ng.download.ZipWriter;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.processing.repository.DatasetProcessingRepository;
@@ -80,8 +81,8 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
         Map<Long, DatasetDownloadError> downloadResults = new HashMap<Long, DatasetDownloadError>();
         Map<Long, List<String>> filesByAcquisitionId = new HashMap<>();
 
-        try (ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream())) {
-            manageProcessingsDownload(processingList, downloadResults, zipOutputStream, format, withManifest, filesByAcquisitionId, converterId, resultOnly);
+        try (ArchiveWriter archiveWriter = new ZipWriter(response.getOutputStream())) {
+            manageProcessingsDownload(processingList, downloadResults, archiveWriter, format, withManifest, filesByAcquisitionId, converterId, resultOnly);
 
             String ids = Stream.concat(
                             resultOnly ? Stream.empty() : processingList.stream().flatMap(p -> p.getInputDatasets().stream()),
@@ -98,6 +99,8 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
             );
             event.setStatus(ShanoirEvent.SUCCESS);
             eventService.publishEvent(event);
+        }  catch (IOException e) {
+            throw new RuntimeException("Impossible to open a TAR writer, aborting download", e);
         } catch (Exception e) {
             response.setContentType(null);
             LOG.error("Unexpected error while downloading dataset files.", e);
@@ -149,7 +152,7 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
         massiveDownload(processingList, resultOnly, format, response, withManifest, converterId);
     }
 
-    protected void manageProcessingsDownload(List<DatasetProcessing> processingList, Map<Long, DatasetDownloadError> downloadResults, ZipOutputStream zipOutputStream, String format, boolean withManifest, Map<Long, List<String>> filesByAcquisitionId, Long converterId, boolean resultOnly) throws Exception {
+    protected void manageProcessingsDownload(List<DatasetProcessing> processingList, Map<Long, DatasetDownloadError> downloadResults, ArchiveWriter archive, String format, boolean withManifest, Map<Long, List<String>> filesByAcquisitionId, Long converterId, boolean resultOnly) throws Exception {
         for (DatasetProcessing processing : processingList) {
             String processingFilePath = getExecFilepath(processing.getId(), getExaminationDatas(processing.getInputDatasets()));
             String subjectName = getProcessingSubject(processing);
@@ -159,25 +162,21 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
             for (Dataset dataset : inputs) {
                 Map<String, List<String>> datasetDownloadNameListPerPath = new HashMap<>();
 
-                manageDatasetDownload(dataset, downloadResults, zipOutputStream, subjectName, processingFilePath + "/" + shapeForPath(dataset.getName()), format, withManifest, filesByAcquisitionId, converterId, datasetDownloadNameListPerPath);
+                manageDatasetDownload(dataset, downloadResults, archive, subjectName, processingFilePath + "/" + shapeForPath(dataset.getName()), format, withManifest, filesByAcquisitionId, converterId, datasetDownloadNameListPerPath);
             }
 
             for (Dataset dataset : outputs) {
                 Map<String, List<String>> datasetDownloadNameListPerPath = new HashMap<>();
 
-                manageDatasetDownload(dataset, downloadResults, zipOutputStream, subjectName, processingFilePath + "/output", format, withManifest, filesByAcquisitionId, converterId, datasetDownloadNameListPerPath);
+                manageDatasetDownload(dataset, downloadResults, archive, subjectName, processingFilePath + "/output", format, withManifest, filesByAcquisitionId, converterId, datasetDownloadNameListPerPath);
             }
         }
         if (!filesByAcquisitionId.isEmpty())
-            DatasetFileUtils.writeManifestForExport(zipOutputStream, filesByAcquisitionId);
+            DatasetFileUtils.writeManifestForExport(archive, filesByAcquisitionId);
 
         // Write errors to the file
         if (!downloadResults.isEmpty()) {
-            ZipEntry zipEntry = new ZipEntry(JSON_RESULT_FILENAME);
-            zipEntry.setTime(System.currentTimeMillis());
-            zipOutputStream.putNextEntry(zipEntry);
-            zipOutputStream.write(objectMapper.writeValueAsString(downloadResults).getBytes());
-            zipOutputStream.closeEntry();
+            archive.addEntry(JSON_RESULT_FILENAME, objectMapper.writeValueAsBytes(downloadResults));
         }
     }
 
