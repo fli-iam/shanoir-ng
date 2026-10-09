@@ -209,7 +209,7 @@ public class RabbitMQStudiesService {
     @Transactional
     public String getStudyName(final long studyId) {
         SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
-        Study study = this.studyRepo.findById(studyId).get();
+        Study study = this.studyRepo.findById(studyId).orElse(null);
         if (study != null) {
             return study.getName();
         }
@@ -220,8 +220,8 @@ public class RabbitMQStudiesService {
     @Transactional
     public String getStudyAnonymisationProfile(final long studyId) {
         SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
-        Study study = this.studyRepo.findById(studyId).get();
-        if (study != null) {
+        Study study = this.studyRepo.findById(studyId).orElse(null);
+        if (study != null && study.getProfile() != null) {
             return study.getProfile().getProfileName();
         }
         return null;
