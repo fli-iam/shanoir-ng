@@ -48,7 +48,7 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.StoredProcedureQuery;
 
 @Service
-public class CreateStatisticsService {
+public class CreateDatasetStatisticsService {
 
     @Autowired
     private ShanoirEventService eventService;
@@ -61,7 +61,7 @@ public class CreateStatisticsService {
     private static final String ZIP = ".zip";
     private static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
     public static final String TSV_FILE_PREFIX = "shanoirExportStatistics";
-    private static final Logger LOG = LoggerFactory.getLogger(CreateStatisticsService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CreateDatasetStatisticsService.class);
 
     private File recreateFile(final String fileName) throws IOException {
         File file = new File(fileName);
