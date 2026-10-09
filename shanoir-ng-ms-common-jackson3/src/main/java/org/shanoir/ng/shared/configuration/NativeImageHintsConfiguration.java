@@ -51,12 +51,13 @@ import org.springframework.context.annotation.ImportRuntimeHints;
         StudyInvitationEmail.class,
         StudyUserCommand.class
 })
-@ImportRuntimeHints(NativeImageHintsConfiguration.RabbitMQHints.class)
+@ImportRuntimeHints(NativeImageHintsConfiguration.NativeImageHints.class)
 public class NativeImageHintsConfiguration {
 
-    static class RabbitMQHints implements RuntimeHintsRegistrar {
+    static class NativeImageHints implements RuntimeHintsRegistrar {
         @Override
         public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
+            hints.resources().registerPattern("shanoir-shared.yml");
             hints.reflection().registerType(
                     RabbitTemplate.class,
                     MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,

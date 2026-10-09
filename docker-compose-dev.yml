@@ -328,6 +328,7 @@ services:
         condition: service_started
       solr:
         condition: service_started
+        required: false
   #
   # Preclinical microservice
   #
@@ -380,6 +381,7 @@ services:
     build:
       context: docker-compose
       target: nifti-conversion
+    profiles: [full]
     environment:
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
@@ -406,6 +408,7 @@ services:
     build:
       context: docker-compose
       target: solr
+    profiles: [full]
     environment:
       - SOLR_LOG_LEVEL=SEVERE
     volumes:
@@ -421,6 +424,7 @@ services:
   ldap:
     container_name: "${SHANOIR_PREFIX}ldap"
     image: dcm4che/slapd-dcm4chee:2.6.2-27.0
+    profiles: [full]
     environment:
       LDAP_INIT_CMDS: /etc/openldap/configure.sh /opt/shanoir/ldap-first-start.sh
     logging:
@@ -439,6 +443,7 @@ services:
   dcm4chee-database:
     container_name: "${SHANOIR_PREFIX}dcm4chee-database"
     image: dcm4che/postgres-dcm4chee:14.4-27
+    profiles: [full]
     logging:
       driver: json-file
       options:
@@ -453,6 +458,7 @@ services:
   dcm4chee-arc:
     container_name: "${SHANOIR_PREFIX}dcm4chee-arc"
     image: dcm4che/dcm4chee-arc-psql:5.27.0
+    profiles: [full]
     logging:
       driver: json-file
       options:
@@ -524,6 +530,7 @@ services:
 
   bids-validator:
     container_name: "${SHANOIR_PREFIX}bids-validator"
+    profiles: [full]
     build:
       context: docker-compose
       target: bids-validator
@@ -536,6 +543,25 @@ services:
       - "bids-data:/var/bids-data" # temporary
     depends_on:
       - rabbitmq
+    networks:
+      - shanoir_ng_network
+
+  integration-tests:
+    container_name: "${SHANOIR_PREFIX}integration-tests"
+    build:
+      context: docker-compose
+      target: integration-tests
+    environment:
+      - INTEGRATION_TESTS_PROFILE
+      - INTEGRATION_TESTS_SHANOIR_SERVER_URL
+      - INTEGRATION_TESTS_SHANOIR_ADMIN_USERNAME
+      - INTEGRATION_TESTS_SHANOIR_ADMIN_PASSWORD
+      - INTEGRATION_TESTS_SHANOIR_EXPERT_USERNAME
+      - INTEGRATION_TESTS_SHANOIR_EXPERT_PASSWORD
+      - INTEGRATION_TESTS_SHANOIR_USER_USERNAME
+      - INTEGRATION_TESTS_SHANOIR_USER_PASSWORD
+    depends_on:
+      - nginx
     networks:
       - shanoir_ng_network
 
