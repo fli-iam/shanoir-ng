@@ -52,6 +52,7 @@ import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.security.oauth2.server.resource.autoconfigure.servlet.OAuth2ResourceServerAutoConfiguration;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.core.io.FileSystemResource;
@@ -75,7 +76,7 @@ import tools.jackson.databind.json.JsonMapper;
  */
 @WebMvcTest(controllers = StudyApiController.class,
         excludeAutoConfiguration = {
-                org.springframework.boot.security.oauth2.server.resource.autoconfigure.OAuth2ResourceServerAutoConfiguration.class
+                OAuth2ResourceServerAutoConfiguration.class
         })
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
