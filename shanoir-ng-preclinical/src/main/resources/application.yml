@@ -66,6 +66,8 @@ spring:
   rabbitmq:
     host: ${SHANOIR_PREFIX}rabbitmq
     port: 5672
+    template:
+      reply-timeout: 60000
     listener:
       simple:
         # a failing message is dropped, never requeued (endless redelivery)
