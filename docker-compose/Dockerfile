@@ -274,7 +274,7 @@ CMD ["-Dspring.aot.enabled=true", "-jar", "/shanoir-ng-users.jar"]
 
 ################ keycloak ##################################################
 
-FROM quay.io/keycloak/keycloak:26.7.3 AS keycloak-base
+FROM quay.io/keycloak/keycloak:26.8.0 AS keycloak-base
 
 # keycloak options (https://www.keycloak.org/server/all-config)
 #
