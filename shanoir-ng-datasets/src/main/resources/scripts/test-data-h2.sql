@@ -13,11 +13,11 @@
 -- Populates database for test
 
 INSERT INTO study
-	(id, name, is_draft)
+	(id, name, is_draft, neurobagel_export)
 VALUES
-	(1, 'DemoStudy1', false),
-	(2, 'DemoStudy2', false),
-	(3, 'DemoStudy3', true);
+	(1, 'DemoStudy1', false, false),
+	(2, 'DemoStudy2', false, false),
+	(3, 'DemoStudy3', true, false);
 
 INSERT INTO study_cards
 	(id, acquisition_equipment_id, disabled, last_edit_timestamp, name, nifti_converter_id, study_id)
