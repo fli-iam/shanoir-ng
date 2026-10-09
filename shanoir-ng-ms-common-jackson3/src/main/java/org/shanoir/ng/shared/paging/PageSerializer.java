@@ -22,14 +22,14 @@ import tools.jackson.databind.SerializationContext;
 import tools.jackson.databind.ser.std.StdSerializer;
 
 @JacksonComponent
-public class PageSerializer extends StdSerializer<PageImpl> {
+public class PageSerializer extends StdSerializer<Page<?>> {
 
     public PageSerializer() {
         super(PageImpl.class);
     }
 
     @Override
-    public void serialize(PageImpl value, JsonGenerator gen, SerializationContext context) {
+    public void serialize(Page<?> value, JsonGenerator gen, SerializationContext context) {
         gen.writeStartObject();
         gen.writeNumberProperty("number", value.getNumber());
         gen.writeNumberProperty("numberOfElements", value.getNumberOfElements());

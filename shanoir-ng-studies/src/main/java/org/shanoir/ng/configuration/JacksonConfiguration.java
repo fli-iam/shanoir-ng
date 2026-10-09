@@ -14,22 +14,16 @@
 
 package org.shanoir.ng.configuration;
 
+import org.shanoir.ng.shared.paging.PageSerializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.domain.Page;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-import tools.jackson.core.JsonGenerator;
-import tools.jackson.databind.BeanDescription;
 import tools.jackson.databind.DeserializationFeature;
-import tools.jackson.databind.SerializationConfig;
-import tools.jackson.databind.SerializationContext;
 import tools.jackson.databind.SerializationFeature;
-import tools.jackson.databind.ValueSerializer;
 import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.databind.module.SimpleModule;
-import tools.jackson.databind.ser.ValueSerializerModifier;
 
 @Configuration(proxyBeanMethods = false)
 public class JacksonConfiguration {
@@ -37,7 +31,7 @@ public class JacksonConfiguration {
     @Bean
     public JsonMapper jsonMapper() {
         SimpleModule pageModule = new SimpleModule();
-        pageModule.setSerializerModifier(new MyClassSerializerModifier());
+        pageModule.addSerializer(new PageSerializer());
         var builder = JsonMapper.builder();
         builder.changeDefaultPropertyInclusion(include -> include.withValueInclusion(JsonInclude.Include.NON_NULL))
                 .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
@@ -48,35 +42,6 @@ public class JacksonConfiguration {
                 .addModule(pageModule)
                 .findAndAddModules();
         return builder.build();
-    }
-
-    public class MyClassSerializerModifier extends ValueSerializerModifier {
-
-        @Override
-        public ValueSerializer<?> modifySerializer(SerializationConfig config, BeanDescription.Supplier beanDesc,
-                ValueSerializer<?> serializer) {
-            if (beanDesc.getBeanClass() == Page.class) {
-                return new MyClassSerializer((ValueSerializer<Object>) serializer);
-            }
-            return serializer;
-        }
-
-    }
-
-    public class MyClassSerializer extends ValueSerializer<Page> {
-
-        private final ValueSerializer<Object> defaultSerializer;
-
-        public MyClassSerializer(ValueSerializer<Object> defaultSerializer) {
-            this.defaultSerializer = defaultSerializer;
-        }
-
-        @Override
-        public void serialize(@SuppressWarnings("rawtypes") final Page page, final JsonGenerator jsonGenerator,
-                final SerializationContext serializers) {
-            defaultSerializer.serialize(page, jsonGenerator, serializers);
-        }
-
     }
 
 }
