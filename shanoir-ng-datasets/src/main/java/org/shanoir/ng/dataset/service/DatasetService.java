@@ -228,8 +228,7 @@ public interface DatasetService {
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT','USER') and @datasetSecurityService.hasRightOnEveryDataset(#datasetIds, 'CAN_SEE_ALL'))")
     File extractDicomMetadata(List<Long> datasetIds, List<String> metadataKeys) throws Exception;
 
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT','USER') and @datasetSecurityService.hasRightOnDataset(#dataset.getId(), 'CAN_SEE_ALL'))")
-    Map<String, String> getSpecificDicomMetadataValues(Dataset dataset, List<String> metadataKeys);
+    Map<String, String> extractDicomMetadataValues(String metadataJson, List<String> metadataKeys);
 
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT','USER') and @datasetSecurityService.hasRightOnEveryDataset(#datasetIds, 'CAN_ADMINISTRATE'))")
     Future<Void> deletePartitionOfNiftis(List<Long> partition, float total, ShanoirEvent event);
