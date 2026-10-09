@@ -66,6 +66,16 @@ spring:
     password: guest
     template:
       reply-timeout: 60000
+    listener:
+      simple:
+        # a failing message is dropped, never requeued (endless redelivery)
+        default-requeue-rejected: false
+        retry:
+          enabled: true
+          # Boot 4: max-retries excludes the first attempt (1 attempt + 5 retries)
+          max-retries: 5
+          initial-interval: 1000ms
+          multiplier: 1
   session:
     store-type: none
   servlet:

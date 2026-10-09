@@ -160,10 +160,17 @@ public class BIDSServiceImpl implements BIDSService {
 
     private DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
+    /**
+     * Deletes the BIDS folder of a study (not the study itself), to be regenerated on next access.
+     * The study is not loaded from database: this message is sent for each examination deleted,
+     * including when the whole study is deleted (RabbitMQDatasetsService.deleteStudy), so the
+     * study row may already be gone when it is received. Its BIDS folder must be deleted anyway.
+     *
+     * @param studyId the study id, as a string
+     */
     @RabbitListener(queues = RabbitMQConfiguration.RELOAD_BIDS)
     public void deleteBidsForStudy(String studyId) {
-        Study studyDeleted = studyRepo.findById(Long.valueOf(studyId)).orElse(null);
-        this.deleteBidsFolder(studyDeleted.getId());
+        this.deleteBidsFolder(Long.valueOf(studyId));
     }
 
     @Override

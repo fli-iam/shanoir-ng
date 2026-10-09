@@ -13,6 +13,9 @@
  */
 package org.shanoir.ng.shared.configuration;
 
+import java.util.List;
+
+import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.TopicExchange;
@@ -21,11 +24,14 @@ import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.ContentTypeDelegatingMessageConverter;
 import org.springframework.amqp.support.converter.JacksonJsonMessageConverter;
+import org.springframework.amqp.support.converter.MessageConversionException;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.amqp.support.converter.SimpleMessageConverter;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.amqp.autoconfigure.RabbitListenerRetrySettingsCustomizer;
 import org.springframework.boot.amqp.autoconfigure.RabbitTemplateConfigurer;
+import org.springframework.boot.amqp.autoconfigure.SimpleRabbitListenerContainerFactoryConfigurer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -61,26 +67,53 @@ public class RabbitMQConfiguration {
     }
 
     @Bean(name = "multipleConsumersFactory")
-    public SimpleRabbitListenerContainerFactory multipleConsumersFactory() {
-        SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
-        factory.setConnectionFactory(connectionFactory);
+    public SimpleRabbitListenerContainerFactory multipleConsumersFactory(
+            ObjectProvider<SimpleRabbitListenerContainerFactoryConfigurer> configurer) {
+        SimpleRabbitListenerContainerFactory factory = createListenerContainerFactory(configurer);
         factory.setMaxConcurrentConsumers(100);
         factory.setConcurrentConsumers(10);
         factory.setStartConsumerMinInterval(100L);
         factory.setConsecutiveActiveTrigger(1);
         factory.setAutoStartup(true);
         factory.setPrefetchCount(1);
-        factory.setMessageConverter(rabbitMessageConverter());
         return factory;
     }
 
     @Bean(name = "singleConsumerFactory")
-    public SimpleRabbitListenerContainerFactory singleConsumerFactory() {
-        SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
-        factory.setConnectionFactory(connectionFactory);
+    public SimpleRabbitListenerContainerFactory singleConsumerFactory(
+            ObjectProvider<SimpleRabbitListenerContainerFactoryConfigurer> configurer) {
+        SimpleRabbitListenerContainerFactory factory = createListenerContainerFactory(configurer);
         factory.setConcurrentConsumers(1);
-        factory.setMessageConverter(rabbitMessageConverter());
         return factory;
+    }
+
+    /**
+     * Configured through Spring Boot's SimpleRabbitListenerContainerFactoryConfigurer, so that the
+     * spring.rabbitmq.listener.simple.* properties (e.g. retry) are applied, as for Boot's default factory.
+     * A rejected message is never requeued: it would otherwise be redelivered endlessly.
+     * The configurer is absent when RabbitMQ auto-configuration is not loaded (tests).
+     */
+    private SimpleRabbitListenerContainerFactory createListenerContainerFactory(
+            ObjectProvider<SimpleRabbitListenerContainerFactoryConfigurer> configurer) {
+        SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
+        configurer.ifAvailable(c -> c.configure(factory, connectionFactory));
+        // keep the consumer threads used so far, even when spring.threads.virtual.enabled is set
+        factory.setTaskExecutor(null);
+        factory.setConnectionFactory(connectionFactory);
+        factory.setMessageConverter(rabbitMessageConverter());
+        factory.setDefaultRequeueRejected(false);
+        return factory;
+    }
+
+    /**
+     * Listener retry (spring.rabbitmq.listener.simple.retry.*) does not retry exceptions that will
+     * fail again on every attempt: the message is rejected at once. Causes are also checked, as the
+     * listener exception arrives wrapped by the container.
+     */
+    @Bean
+    public RabbitListenerRetrySettingsCustomizer listenerRetrySettingsCustomizer() {
+        return settings -> settings.setExceptionExcludes(
+                List.of(AmqpRejectAndDontRequeueException.class, MessageConversionException.class));
     }
 
     /**

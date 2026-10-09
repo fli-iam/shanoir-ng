@@ -49,6 +49,7 @@ import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
+import org.shanoir.ng.storage.StorageService;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -179,6 +180,20 @@ public class BidsServiceTest {
         File examFile = new File(subjectFile.getAbsolutePath() + "/ses-" + exam.getId());
         // No exam files as there is only one datasetAcquisition
         assertFalse(examFile.exists());
+    }
+
+    @Test
+    public void testDeleteBidsForDeletedStudy() throws IOException {
+        // GIVEN the BIDS folder of a study that no longer exists in database (study deletion)
+        File bidsFolder = new File(tempFolderPath + StorageService.STUDY + "999999");
+        new File(bidsFolder, "participants.tsv").getParentFile().mkdirs();
+        new File(bidsFolder, "participants.tsv").createNewFile();
+
+        // WHEN the reload BIDS message is received
+        service.deleteBidsForStudy("999999");
+
+        // THEN the BIDS folder is deleted, without failing on the missing study
+        assertFalse(bidsFolder.exists());
     }
 
     @AfterEach
