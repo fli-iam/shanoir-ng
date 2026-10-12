@@ -302,8 +302,10 @@ services:
       - VIP_URL_SCHEME
       - VIP_URL_HOST
       - VIP_CLIENT_SECRET
+      - VIP_MAX_DOWNLOAD
       - SHANOIR_CONTINUANCE_HOUR
       - SHANOIR_SHUTDOWN_HOUR
+      - SHANOIR_PACS_CONCURRENT_DOWNLOADS
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - certificate-share-data:/etc/ssl/certs/java:ro

@@ -147,11 +147,29 @@ public interface DatasetAcquisitionMapper {
 
     ////// Pageable
 
-    @IterableMapping(qualifiedByName = "withExamination")
-    PageImpl<DatasetAcquisitionDTO> acquisitionPageToAcquisitionWithExaminationDTOPage(Page<DatasetAcquisition> page);
+    // New default methods rather than MapStruct's own @IterableMapping
+    // generation: MapStruct has no setter to target on PageImpl for totalElements/
+    // number/size so those were stuck at their empty-page defaults (0/0/0/1)
+    // regardless of how many items were added.
+    default PageImpl<DatasetAcquisitionDTO> acquisitionPageToAcquisitionWithExaminationDTOPage(Page<DatasetAcquisition> page) {
+        if (page == null) {
+            return null;
+        }
+        List<DatasetAcquisitionDTO> content = page.getContent().stream()
+                .map(this::acquisitionToAcquisitionWithExaminationDTO)
+                .collect(Collectors.toList());
+        return new PageImpl<>(content, page.getPageable(), page.getTotalElements());
+    }
 
-    @IterableMapping(qualifiedByName = "idRelations")
-    PageImpl<DatasetAcquisitionDTO> acquisitionPageToAcquisitionIdRelationsDTOPage(Page<DatasetAcquisition> page);
+    default PageImpl<DatasetAcquisitionDTO> acquisitionPageToAcquisitionIdRelationsDTOPage(Page<DatasetAcquisition> page) {
+        if (page == null) {
+            return null;
+        }
+        List<DatasetAcquisitionDTO> content = page.getContent().stream()
+                .map(this::acquisitionToAcquisitionIdRelationsDTO)
+                .collect(Collectors.toList());
+        return new PageImpl<>(content, page.getPageable(), page.getTotalElements());
+    }
 
     ////// Miscellaneous
 
