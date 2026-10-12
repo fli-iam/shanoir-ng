@@ -23,7 +23,6 @@ import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
-import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,9 +54,8 @@ public class RabbitMqExaminationService {
     @RabbitListener(queues = RabbitMQConfiguration.EXAMINATION_CREATION_QUEUE, containerFactory = "multipleConsumersFactory")
     @RabbitHandler
     @Transactional
-    public Long createExamination(Message message) {
+    public Long createExamination(Examination exam) {
         try {
-            Examination exam = mapper.readValue(message.getBody(), Examination.class);
             Subject subj = exam.getSubject();
             subj.setStudy(exam.getStudy());
             Optional<Subject> dbSubject = subjectRepository.findById(subj.getId());

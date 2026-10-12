@@ -19,8 +19,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
- * Shanoir-NG microservice users application.
- * MK: @EnableSwagger2 removed explicitly - only for ms users - to protect the best the interface.
+ * Shanoir users microservice application.
+ * MK: @EnableSwagger2 removed explicitly - only for ms users -
+ * to protect the interface at the best possible.
  */
 @SpringBootApplication
 @EnableScheduling

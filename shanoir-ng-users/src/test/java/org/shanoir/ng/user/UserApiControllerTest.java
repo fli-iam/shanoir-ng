@@ -34,7 +34,6 @@ import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.AccountNotOnDemandException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.SecurityException;
-import org.shanoir.ng.shared.jackson.JacksonUtils;
 import org.shanoir.ng.shared.security.ControllerSecurityService;
 import org.shanoir.ng.shared.validation.FindByRepository;
 import org.shanoir.ng.user.controller.UserApiController;
@@ -50,14 +49,18 @@ import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.security.oauth2.server.resource.autoconfigure.servlet.OAuth2ResourceServerAutoConfiguration;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.aot.DisabledInAotMode;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Unit tests for user controller.
@@ -65,11 +68,16 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
  * @author msimon
  *
  */
-@WebMvcTest(controllers = {UserApiController.class, ControllerSecurityService.class, UserPrivacySecurityService.class,
-        IsMeSecurityService.class, UserFieldEditionSecurityManager.class, UserUniqueConstraintManager.class, UserRepository.class,
-        AccessRequestService.class})
+@WebMvcTest(controllers = { UserApiController.class, ControllerSecurityService.class, UserPrivacySecurityService.class,
+        IsMeSecurityService.class, UserFieldEditionSecurityManager.class, UserUniqueConstraintManager.class,
+        UserRepository.class,
+        AccessRequestService.class },
+        excludeAutoConfiguration = {
+                OAuth2ResourceServerAutoConfiguration.class
+        })
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
+@DisabledInAotMode
 public class UserApiControllerTest {
 
     private static final String REQUEST_PATH = "/users";
@@ -79,26 +87,29 @@ public class UserApiControllerTest {
     @Autowired
     private MockMvc mvc;
 
-    @MockBean
+    @MockitoBean
     private UserService userService;
 
-    @MockBean
+    @MockitoBean
     private FindByRepository<User> findByRepositoryMock;
 
-    @MockBean
+    @MockitoBean
     private UserRepository userRepository;
 
-    @MockBean
+    @MockitoBean
     private RabbitTemplate rabbitTemplate;
 
-    @MockBean
+    @MockitoBean
     private AccessRequestService accessRequestService;
 
-    @MockBean
+    @MockitoBean
     private ShanoirEventService eventService;
 
-    @MockBean
+    @MockitoBean
     private VIPUserService vipUserService;
+
+    @Autowired
+    private JsonMapper mapper;
 
     @BeforeAll
     public static void beforeClass() {
@@ -145,7 +156,7 @@ public class UserApiControllerTest {
     public void saveNewUserTest() throws Exception {
         given(findByRepositoryMock.findBy(Mockito.anyString(), Mockito.any(), Mockito.any())).willReturn(new ArrayList<User>());
         mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(ModelsUtil.createUser())))
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(ModelsUtil.createUser())))
                 .andExpect(status().isOk());
     }
 
@@ -155,7 +166,7 @@ public class UserApiControllerTest {
         final IdList list = new IdList();
         list.getIdList().add(1L);
         mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH_SEARCH).accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(list)))
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(list)))
                 .andExpect(status().isOk());
     }
 
@@ -163,7 +174,7 @@ public class UserApiControllerTest {
     @WithMockUser(authorities = { "ROLE_ADMIN" })
     public void updateUserTest() throws Exception {
         mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(ModelsUtil.createUser(1L))))
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(ModelsUtil.createUser(1L))))
                 .andExpect(status().isNoContent());
     }
 
@@ -172,12 +183,12 @@ public class UserApiControllerTest {
     public void fieldAccessTest() throws Exception {
         User user = ModelsUtil.createAdmin(1L);
         mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(user)))
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(user)))
                 .andExpect(status().isUnprocessableEntity());
         user = ModelsUtil.createUser(1L);
         user.setExpirationDate(LocalDate.now().plusYears(100));
         mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(user)))
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(user)))
                 .andExpect(status().isUnprocessableEntity());
     }
 

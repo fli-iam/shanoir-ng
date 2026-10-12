@@ -13,12 +13,16 @@
  */
 package org.shanoir.ng.bids.service;
 
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.springframework.amqp.AmqpException;
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.core.MessageBuilder;
+import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,25 +36,13 @@ public class BidsValidationPublisher {
     @Autowired
     private BidsValidationAwaiter awaiter;
 
-    public void requestValidationAsync(String filePath) throws AmqpException {
-        if (filePath == null) {
-            throw new IllegalArgumentException("filePath cannot be null");
-        }
-        rabbit.convertAndSend("", BidsValidationConfiguration.BIDS_VALIDATION_REQUEST_QUEUE, filePath);
-    }
-
     public String requestValidationSync(String filePath) throws AmqpException {
         if (filePath == null) {
             throw new IllegalArgumentException("filePath cannot be null");
         }
         String correlationId = awaiter.newCorrelationId();
         CompletableFuture<String> future = awaiter.register(correlationId);
-        rabbit.convertAndSend("", BidsValidationConfiguration.BIDS_VALIDATION_REQUEST_QUEUE, filePath, m -> {
-            m.getMessageProperties().setCorrelationId(correlationId);
-            m.getMessageProperties().setContentType("text/plain");
-            m.getMessageProperties().setContentEncoding("UTF-8");
-            return m;
-        });
+        rabbit.send("", BidsValidationConfiguration.BIDS_VALIDATION_REQUEST_QUEUE, buildRequest(filePath, correlationId));
         String resultJson;
         try {
             resultJson = future.get(30, TimeUnit.MINUTES);
@@ -58,6 +50,18 @@ public class BidsValidationPublisher {
             throw new AmqpException("Error waiting for BIDS validation result", e);
         }
         return resultJson;
+    }
+
+    /**
+     * Build the request as raw text: the external validator reads the message body as the plain path,
+     * so it must not go through the JSON message converter, which would quote it.
+     */
+    private Message buildRequest(String filePath, String correlationId) {
+        return MessageBuilder.withBody(filePath.getBytes(StandardCharsets.UTF_8))
+                .setContentType(MessageProperties.CONTENT_TYPE_TEXT_PLAIN)
+                .setContentEncoding(StandardCharsets.UTF_8.name())
+                .setCorrelationId(correlationId)
+                .build();
     }
 
 }

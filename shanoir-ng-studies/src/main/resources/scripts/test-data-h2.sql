@@ -88,9 +88,3 @@ VALUES
 	(3,'0010001', 'sub3', parsedatetime('2001/02/01', 'yyyy/MM/dd'), 2, 0),
 	(4,'0010002', 'sub4', parsedatetime('2001/02/01', 'yyyy/MM/dd'), 2, 0);
 
-INSERT INTO subject_study
-	(id, physically_involved, study_id, subject_id, subject_study_identifier, subject_type)
-VALUES
-	(1, 0, 1, 1, 'Subject 1 for study 1', 1),
-	(2, 0, 1, 2, 'Subject 2 for study 1', 2),
-	(3, 0, 2, 1, 'Subject 1 for study 2', 2);

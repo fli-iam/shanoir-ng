@@ -14,17 +14,20 @@
 
 package org.shanoir.ng;
 
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.aot.DisabledInAotMode;
+import org.springframework.web.client.RestClient;
 
 @Configuration
 @ActiveProfiles("test")
+@DisabledInAotMode
 public class TestConfiguration {
 
-    // Rabbit template is always mocked here
-    @MockBean
-    private RabbitTemplate rabbitTemplate;
+    @Bean
+    RestClient restClient() {
+        return RestClient.builder().build();
+    }
 
 }

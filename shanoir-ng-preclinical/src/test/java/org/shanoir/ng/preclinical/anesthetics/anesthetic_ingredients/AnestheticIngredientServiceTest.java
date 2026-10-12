@@ -23,8 +23,8 @@ import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.mockito.Mockito;
 import org.shanoir.ng.preclinical.anesthetics.ingredients.AnestheticIngredient;
 import org.shanoir.ng.preclinical.anesthetics.ingredients.AnestheticIngredientRepository;
@@ -50,13 +50,13 @@ public class AnestheticIngredientServiceTest {
     private static final Double UPDATED_INGREDIENT_CONCENTRATION = 2.0;
 
 
-    @Mock
+    @MockitoBean
     private AnestheticIngredientRepository ingredientsRepository;
 
-    @Mock
+    @MockitoBean
     private RabbitTemplate rabbitTemplate;
 
-    @InjectMocks
+    @Autowired
     private AnestheticIngredientServiceImpl ingredientsService;
 
 

@@ -41,7 +41,7 @@ public class SecurityService {
     /**
      * Get study center rights for the current user as two separate variable.
      *
-     * @param studyCenterIds is to be populated with the current user's study-centers
+     * @param studyCenters is to be populated with the current user's study-centers
      * @param unrestrictedStudies is to be populated with the current user's unrestricted studies
      */
     public void getStudyCentersAndUnrestrictedStudies(List<Pair<Long, Long>> studyCenters, Set<Long> unrestrictedStudies) {

@@ -21,7 +21,6 @@ import org.springframework.stereotype.Component;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.Query;
 
 /**
  * Implementation of custom repository for templates.
@@ -41,13 +40,6 @@ public class SubjectRepositoryImpl implements SubjectRepositoryCustom {
         final StringBuilder sqlQuery = new StringBuilder();
         sqlQuery.append("SELECT s FROM Subject s WHERE s.").append(fieldName).append(" LIKE :value");
         return em.createQuery(sqlQuery.toString()).setParameter("value", value).getResultList();
-    }
-
-    @Override
-    public Subject findSubjectWithSubjectStudyById(Long id) {
-        Query q = em.createQuery("SELECT s FROM Subject s LEFT JOIN FETCH s.subjectStudyList where s.id=:id", Subject.class);
-        q.setParameter("id", id);
-        return (Subject) q.getSingleResult();
     }
 
 }

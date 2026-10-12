@@ -48,7 +48,7 @@ public interface UserService {
      * @throws AccountNotOnDemandException if this account is not currently on demand.
      */
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
-    User confirmAccountRequest(User user) throws EntityNotFoundException, AccountNotOnDemandException;
+    User confirmAccountRequest(User user) throws EntityNotFoundException, AccountNotOnDemandException, SecurityException;
 
     /**
      * Delete a user

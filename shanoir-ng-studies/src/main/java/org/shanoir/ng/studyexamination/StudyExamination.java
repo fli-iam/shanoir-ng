@@ -20,7 +20,10 @@ import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.subject.model.Subject;
 
+
 import jakarta.persistence.Entity;
+
+import java.io.Serial;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -35,6 +38,7 @@ import jakarta.persistence.ManyToOne;
 @GenericGenerator(name = "IdOrGenerate", strategy = "increment")
 public class StudyExamination extends AbstractEntity {
 
+    @Serial
     private static final long serialVersionUID = -6040639164236575228L;
 
     private Long examinationId;

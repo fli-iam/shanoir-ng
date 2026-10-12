@@ -16,7 +16,10 @@ package org.shanoir.ng.shared.hateoas;
 
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import java.io.Serial;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -29,6 +32,7 @@ public abstract class HalEntity extends AbstractEntity {
     /**
      * UID
      */
+    @Serial
     private static final long serialVersionUID = -8580796056437763225L;
 
     @JsonIgnore

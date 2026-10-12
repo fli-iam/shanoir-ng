@@ -13,14 +13,20 @@ require  SHANOIR_MIGRATION
 require  SHANOIR_URL_HOST
 require  SHANOIR_URL_SCHEME
 require  SHANOIR_STORAGE_TYPE
+require  SHANOIR_PACS_CONCURRENT_DOWNLOADS
 require  VIP_URL_HOST
 require  VIP_URL_SCHEME
 require  VIP_CLIENT_SECRET
+require  VIP_MAX_DOWNLOAD
 require  SHANOIR_CONTINUANCE_HOUR
 require  SHANOIR_SHUTDOWN_HOUR
 
 # Rabbit MQ default environnement variable to set
 export SPRING_AMQP_DESERIALIZATION_TRUST_ALL=true
+
+# Use the zstd-jni native lib extracted at build time (zstd-jni would otherwise
+# extract it into /tmp, which fails when /tmp is mounted noexec)
+set -- "$1" -DZstdNativePath=/opt/zstd/libzstd-jni.so "${@:2}"
 
 handle_microservice_migration
 

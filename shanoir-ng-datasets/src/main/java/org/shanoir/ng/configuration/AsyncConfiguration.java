@@ -38,9 +38,12 @@ public class AsyncConfiguration implements AsyncConfigurer {
         return new DelegatingSecurityContextAsyncTaskExecutor(executor);
     }
 
-    @Bean
-    public WebClient.Builder webClientBuilder() {
-        return WebClient.builder();
-    }
 
+    @Bean("buffer500")
+    public WebClient webClientBuilder() {
+        return WebClient.builder().codecs(configurer -> configurer
+                        .defaultCodecs()
+                        .maxInMemorySize(500 * 1024 * 1024))
+                .build();
+    }
 }

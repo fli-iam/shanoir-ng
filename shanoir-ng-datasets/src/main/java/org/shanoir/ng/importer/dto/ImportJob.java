@@ -72,6 +72,9 @@ public class ImportJob implements Serializable {
 
     private List<Serie> series;
 
+    public ImportJob() {
+    }
+
     public long getTimestamp() {
         return timestamp;
     }

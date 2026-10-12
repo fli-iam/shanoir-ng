@@ -25,14 +25,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.ws.rs.core.Context;
 
 @Tag(name = "last_login_date", description = "the last_login_date API")
 @RequestMapping("/last_login_date")
 public interface LastLoginDateApi {
 
     @Operation(summary = "", description = "Updates login date for an user")
-    @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "login date updated"),
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "login date updated"),
             @ApiResponse(responseCode = "401", description = "unauthorized"),
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
@@ -40,6 +40,6 @@ public interface LastLoginDateApi {
             "application/json" }, method = RequestMethod.POST)
     ResponseEntity<Void> lastLoginDate(
             @Parameter(name = "username of user for last login date update", required = true) @RequestBody String username,
-            @Context HttpServletRequest httpRequest);
+            @Parameter(hidden = true) HttpServletRequest httpRequest);
 
 }

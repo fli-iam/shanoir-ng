@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
+import tools.jackson.databind.json.JsonMapper;
 import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
 import org.shanoir.ng.acquisitionequipment.service.AcquisitionEquipmentService;
 import org.shanoir.ng.bids.service.BIDSService;
@@ -63,10 +63,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 @Service
 public class RabbitMQStudiesService {
@@ -77,7 +76,7 @@ public class RabbitMQStudiesService {
 
     private static final String DELIMITER = ":";
 
-    @Value("${shanoir.userDefaultExpirationDays}")
+    @Value("${shanoir.userDefaultExpirationDays:183}")
     private int userDefaultExpirationDays;
 
     @Autowired
@@ -135,7 +134,7 @@ public class RabbitMQStudiesService {
             Long examinationId = Long.valueOf(event.getObjectId());
             Long studyId = event.getStudyId();
             String message = event.getMessage();
-            Pattern pat = Pattern.compile("centerId:(\\d+);subjectId:(\\d+)");
+            Pattern pat = Pattern.compile(".*?centerId:(\\d+);subjectId:(\\d+)");
             Matcher mat = pat.matcher(message);
 
             Long centerId = null;
@@ -147,9 +146,7 @@ public class RabbitMQStudiesService {
                 LOG.error("Something wrong happend while updating study examination list.");
                 throw new ShanoirException("Could not read subject ID and center ID from event message");
             }
-
             this.studyService.addExaminationToStudy(examinationId, studyId, centerId, subjectId);
-
         } catch (Exception e) {
             LOG.error("Could not index examination on given study ", e);
             throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event." + e.getMessage());
@@ -197,7 +194,7 @@ public class RabbitMQStudiesService {
     public void deleteExaminationStudy(final String eventStr) {
         SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
         try {
-            ObjectMapper objectMapper = new ObjectMapper();
+            ObjectMapper objectMapper = new JsonMapper();
             ShanoirEvent event =  objectMapper.readValue(eventStr, ShanoirEvent.class);
             Long examinationId = Long.valueOf(event.getObjectId());
             Long studyId = Long.valueOf(event.getStudyId());
@@ -358,7 +355,7 @@ public class RabbitMQStudiesService {
                 LOG.error("Error while creating a new equipment.");
                 return null;
             }
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             LOG.error("Error while creating a new equipment: ", e);
             throw new AmqpRejectAndDontRequeueException(e);
         }
