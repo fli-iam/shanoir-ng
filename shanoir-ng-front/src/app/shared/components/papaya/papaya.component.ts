@@ -89,6 +89,7 @@ export class PapayaComponent implements OnInit, OnDestroy, OnChanges {
         this.params["allowScroll"] = false;
         this.params["ignoreNiftiTransforms"] =  true;
         this.params['expandable'] = true;
+        this.params['fullScreen'] = true;
     }
 
 }
