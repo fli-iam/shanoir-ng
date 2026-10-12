@@ -15,7 +15,7 @@ package org.shanoir.ng.importer.bids;
 
 import java.io.IOException;
 
-import org.shanoir.ng.importer.model.ImportJob;
+import org.shanoir.ng.importer.model.ImportJobBase;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.springframework.http.ResponseEntity;
@@ -50,7 +50,7 @@ public interface BidsImporterApi {
             produces = {"application/json"},
             consumes = {"multipart/form-data"})
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER') and !@importSecurityService.isDraftStudy(#studyId)")
-    ResponseEntity<ImportJob> importAsBids(@Parameter(name = "file detail") @RequestPart("file") MultipartFile bidsZipFile,
+    ResponseEntity<ImportJobBase> importAsBids(@Parameter(name = "file detail") @RequestPart("file") MultipartFile bidsZipFile,
             @Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId,
             @Parameter(name = "name of the study", required = true) @PathVariable("studyName") String studyName,
             @Parameter(name = "id of the center", required = true) @PathVariable("centerId") Long centerId) throws RestServiceException, ShanoirException, IOException;

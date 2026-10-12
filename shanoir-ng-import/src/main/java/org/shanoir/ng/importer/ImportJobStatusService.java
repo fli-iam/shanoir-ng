@@ -39,34 +39,34 @@ public class ImportJobStatusService {
 
     private final Map<String, ImportJobStatus> statuses = new ConcurrentHashMap<>();
 
-    public void setInProgress(String tempDirId, String message) {
+    public void setInProgress(ImportJobBase importJob, String message) {
         ImportJobStatus status = new ImportJobStatus();
         status.setState(State.IN_PROGRESS);
         status.setMessage(message);
-        statuses.put(tempDirId, status);
-        LOG.debug("ImportJobStatus put: {}, message: {}", tempDirId, message);
+        statuses.put(importJob.getId(), status);
+        LOG.debug("ImportJobStatus put: {}, message: {}", importJob.getId(), message);
     }
 
-    public void setFinished(String tempDirId, ImportJobBase importJob) {
-        ImportJobStatus status = statuses.computeIfAbsent(tempDirId, k -> new ImportJobStatus());
+    public void setFinished(ImportJobBase importJob) {
+        ImportJobStatus status = statuses.computeIfAbsent(importJob.getId(), k -> new ImportJobStatus());
         status.setState(State.FINISHED);
         status.setMessage("Import finished in MS Import, handed off to MS Datasets.");
         status.setImportJob(importJob);
-        LOG.debug("ImportJobStatus finished: {}", tempDirId);
+        LOG.debug("ImportJobStatus finished: {}", importJob.getId());
     }
 
-    public void setError(String tempDirId, String message) {
-        ImportJobStatus status = statuses.computeIfAbsent(tempDirId, k -> new ImportJobStatus());
+    public void setError(ImportJobBase importJob, String message) {
+        ImportJobStatus status = statuses.computeIfAbsent(importJob.getId(), k -> new ImportJobStatus());
         status.setState(State.ERROR);
         status.setMessage(message);
     }
 
-    public ImportJobStatus getStatus(String tempDirId) {
-        return statuses.get(tempDirId);
+    public ImportJobStatus getStatus(String id) {
+        return statuses.get(id);
     }
 
-    public void remove(String tempDirId) {
-        statuses.remove(tempDirId);
+    public void remove(String id) {
+        statuses.remove(id);
     }
 
     /**
