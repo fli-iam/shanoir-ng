@@ -59,5 +59,7 @@ public interface IDicomServerClient {
      * @return
      */
     public File getWorkFolder();
+    
+    public void stopSCPServer();
 
 }

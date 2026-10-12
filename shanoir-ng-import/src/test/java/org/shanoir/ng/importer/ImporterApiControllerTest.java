@@ -53,7 +53,6 @@ import org.springframework.web.client.RestTemplate;
 
 import tools.jackson.databind.json.JsonMapper;
 
-
 /**
  * Unit tests for importer controller.
  *
@@ -186,4 +185,5 @@ public class ImporterApiControllerTest {
                 .param("path", ""))
                 .andExpect(status().is(200));
     }
+
 }
