@@ -251,6 +251,28 @@ public class DicomSEGAndSRImporterServiceTest {
         assertTrue(datasetCaptor.getValue() instanceof RtDataset);
     }
 
+    @Test
+    public void importDicomRTStructWithoutRtReferencedStudySequence() throws Exception {
+        wireSourceDatasetAndOhifRtStructReferencesDirectSeries();
+        when(datasetSecurityService.hasRightOnStudy(STUDY_ID, StudyUserRight.CAN_ANNOTATE.name())).thenReturn(true);
+        when(datasetService.create(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        boolean result = dicomSEGAndSRImporterService.importDicomSEGAndSR(metaInformationAttributes, datasetAttributes,
+                STOWRSMultipartRequestFilter.DICOM_MODALITY_RTSTRUCT, true);
+        assertTrue(result);
+        verify(datasetService).create(any());
+    }
+
+    @Test
+    public void importDicomRTStructFromRoiContourContourImageSequenceOnly() throws Exception {
+        wireSourceDatasetAndOhifRtStructReferencesRoiContoursOnly();
+        when(datasetSecurityService.hasRightOnStudy(STUDY_ID, StudyUserRight.CAN_ANNOTATE.name())).thenReturn(true);
+        when(datasetService.create(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        boolean result = dicomSEGAndSRImporterService.importDicomSEGAndSR(metaInformationAttributes, datasetAttributes,
+                STOWRSMultipartRequestFilter.DICOM_MODALITY_RTSTRUCT, true);
+        assertTrue(result);
+        verify(datasetService).create(any());
+    }
+
     private void wireSourceDatasetAndSegReferences() {
         Subject subject = new Subject();
         subject.setId(SUBJECT_ID);
@@ -304,6 +326,70 @@ public class DicomSEGAndSRImporterServiceTest {
         Sequence referencedFrameOfReferenceSequence = datasetAttributes.newSequence(Tag.ReferencedFrameOfReferenceSequence,
                 1);
         referencedFrameOfReferenceSequence.add(frameOfReferenceItem);
+    }
+
+    /**
+     * OHIF export: RT Referenced Series under Referenced Frame of Reference, without RT Referenced Study.
+     */
+    private void wireSourceDatasetAndOhifRtStructReferencesDirectSeries() {
+        wireSourceDatasetAndSegReferences();
+        datasetAttributes.setString(Tag.Modality, VR.CS, STOWRSMultipartRequestFilter.DICOM_MODALITY_RTSTRUCT);
+        datasetAttributes.remove(Tag.ReferencedSeriesSequence);
+
+        Attributes contourItem = new Attributes();
+        contourItem.setString(Tag.ReferencedSOPInstanceUID, VR.UI, SOP_INSTANCE_UID);
+
+        Attributes rtReferencedSeriesItem = new Attributes();
+        rtReferencedSeriesItem.setString(Tag.SeriesInstanceUID, VR.UI, SERIES_INSTANCE_UID);
+        Sequence contourImageSequence = rtReferencedSeriesItem.newSequence(Tag.ContourImageSequence, 1);
+        contourImageSequence.add(contourItem);
+
+        Attributes frameOfReferenceItem = new Attributes();
+        frameOfReferenceItem.setString(Tag.FrameOfReferenceUID, VR.UI, "1.2.3.4.5");
+        Sequence rtReferencedSeriesSequence = frameOfReferenceItem.newSequence(Tag.RTReferencedSeriesSequence, 1);
+        rtReferencedSeriesSequence.add(rtReferencedSeriesItem);
+
+        Sequence referencedFrameOfReferenceSequence = datasetAttributes.newSequence(Tag.ReferencedFrameOfReferenceSequence, 1);
+        referencedFrameOfReferenceSequence.add(frameOfReferenceItem);
+    }
+
+    /**
+     * OHIF export: only contour image references nested under ROI Contour Sequence.
+     */
+    private void wireSourceDatasetAndOhifRtStructReferencesRoiContoursOnly() {
+        Subject subject = new Subject();
+        subject.setId(SUBJECT_ID);
+        examination.setSubject(subject);
+
+        DatasetFile file = new DatasetFile();
+        file.setPacs(true);
+        file.setPath("pacs/" + STUDY_INSTANCE_UID + "/" + SERIES_INSTANCE_UID + "/" + SOP_INSTANCE_UID);
+        DatasetExpression expression = new DatasetExpression();
+        expression.setDatasetExpressionFormat(DatasetExpressionFormat.DICOM);
+        expression.setDatasetFiles(new ArrayList<>(List.of(file)));
+        MrDataset sourceDataset = new MrDataset();
+        sourceDataset.setDatasetExpressions(new ArrayList<>(List.of(expression)));
+        MrDatasetAcquisition acquisition = new MrDatasetAcquisition();
+        acquisition.setDatasets(new ArrayList<>(List.of(sourceDataset)));
+        sourceDataset.setDatasetAcquisition(acquisition);
+        examination.setDatasetAcquisitions(new ArrayList<>(List.of(acquisition)));
+
+        datasetAttributes.setString(Tag.Modality, VR.CS, STOWRSMultipartRequestFilter.DICOM_MODALITY_RTSTRUCT);
+
+        Attributes contourImageItem = new Attributes();
+        contourImageItem.setString(Tag.ReferencedSOPInstanceUID, VR.UI, SOP_INSTANCE_UID);
+
+        Attributes contourGeometryItem = new Attributes();
+        contourGeometryItem.newSequence(Tag.ContourImageSequence, 1).add(contourImageItem);
+
+        Attributes roiContourItem = new Attributes();
+        roiContourItem.newSequence(Tag.ContourSequence, 1).add(contourGeometryItem);
+
+        datasetAttributes.newSequence(Tag.ROIContourSequence, 1).add(roiContourItem);
+
+        Attributes frameOfReferenceItem = new Attributes();
+        frameOfReferenceItem.setString(Tag.FrameOfReferenceUID, VR.UI, "1.2.3.4.5");
+        datasetAttributes.newSequence(Tag.ReferencedFrameOfReferenceSequence, 1).add(frameOfReferenceItem);
     }
 
 }

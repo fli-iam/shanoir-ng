@@ -322,17 +322,18 @@ public class DicomSEGAndSRImporterService {
         }
         for (Attributes frameOfReferenceItem : referencedFrameOfReferenceSequence) {
             Sequence rtReferencedStudySequence = frameOfReferenceItem.getSequence(Tag.RTReferencedStudySequence);
-            if (rtReferencedStudySequence == null) {
-                continue;
+            if (rtReferencedStudySequence != null) {
+                for (Attributes rtReferencedStudyItem : rtReferencedStudySequence) {
+                    resolveVirtualSeriesReferences(rtReferencedStudyItem.getSequence(Tag.RTReferencedSeriesSequence));
+                }
             }
-            for (Attributes rtReferencedStudyItem : rtReferencedStudySequence) {
-                resolveVirtualSeriesReferences(rtReferencedStudyItem.getSequence(Tag.RTReferencedSeriesSequence));
-            }
+            // OHIF export may attach RT Referenced Series directly under Referenced Frame of Reference
+            resolveVirtualSeriesReferences(frameOfReferenceItem.getSequence(Tag.RTReferencedSeriesSequence));
         }
     }
 
     /**
-     * @return [seriesInstanceUID, sopInstanceUID] of the contoured source series, or null
+     * @return [seriesInstanceUID, sopInstanceUID] of the contoured source series; series may be null if only SOP refs exist
      */
     private String[] extractRtStructSourceReference(Attributes datasetAttributes) {
         Sequence referencedFrameOfReferenceSequence = datasetAttributes.getSequence(Tag.ReferencedFrameOfReferenceSequence);
@@ -340,31 +341,89 @@ public class DicomSEGAndSRImporterService {
             LOG.error("Error: missing ReferencedFrameOfReferenceSequence in DICOM RTSTRUCT.");
             return null;
         }
-        Attributes frameOfReferenceItem = referencedFrameOfReferenceSequence.get(0);
+        for (Attributes frameOfReferenceItem : referencedFrameOfReferenceSequence) {
+            String[] fromStudyChain = extractRtStructReferenceFromFrameOfReferenceItem(frameOfReferenceItem);
+            if (fromStudyChain != null) {
+                return fromStudyChain;
+            }
+            String[] fromDirectSeries = extractRtStructReferenceFromRtReferencedSeriesSequence(
+                    frameOfReferenceItem.getSequence(Tag.RTReferencedSeriesSequence));
+            if (fromDirectSeries != null) {
+                return fromDirectSeries;
+            }
+        }
+        String sopInstanceUID = findFirstReferencedSopInContourImageSequences(datasetAttributes);
+        if (sopInstanceUID != null) {
+            LOG.debug("RTSTRUCT: resolved source SOP {} from ContourImageSequence (no RT Referenced Study/Series chain).",
+                    sopInstanceUID);
+            return new String[] {null, sopInstanceUID};
+        }
+        LOG.error("Error: could not resolve source series/SOP reference in DICOM RTSTRUCT.");
+        return null;
+    }
+
+    private String[] extractRtStructReferenceFromFrameOfReferenceItem(Attributes frameOfReferenceItem) {
         Sequence rtReferencedStudySequence = frameOfReferenceItem.getSequence(Tag.RTReferencedStudySequence);
         if (rtReferencedStudySequence == null || rtReferencedStudySequence.isEmpty()) {
-            LOG.error("Error: missing RTReferencedStudySequence in DICOM RTSTRUCT.");
             return null;
         }
         Attributes rtReferencedStudyItem = rtReferencedStudySequence.get(0);
-        Sequence rtReferencedSeriesSequence = rtReferencedStudyItem.getSequence(Tag.RTReferencedSeriesSequence);
+        return extractRtStructReferenceFromRtReferencedSeriesSequence(
+                rtReferencedStudyItem.getSequence(Tag.RTReferencedSeriesSequence));
+    }
+
+    private String[] extractRtStructReferenceFromRtReferencedSeriesSequence(Sequence rtReferencedSeriesSequence) {
         if (rtReferencedSeriesSequence == null || rtReferencedSeriesSequence.isEmpty()) {
-            LOG.error("Error: missing RTReferencedSeriesSequence in DICOM RTSTRUCT.");
             return null;
         }
         Attributes rtReferencedSeriesItem = rtReferencedSeriesSequence.get(0);
         String seriesInstanceUID = rtReferencedSeriesItem.getString(Tag.SeriesInstanceUID);
-        Sequence contourImageSequence = rtReferencedSeriesItem.getSequence(Tag.ContourImageSequence);
-        if (contourImageSequence == null || contourImageSequence.isEmpty()) {
-            LOG.error("Error: missing ContourImageSequence in DICOM RTSTRUCT.");
-            return null;
-        }
-        String sopInstanceUID = contourImageSequence.get(0).getString(Tag.ReferencedSOPInstanceUID);
-        if (seriesInstanceUID == null || sopInstanceUID == null) {
-            LOG.error("Error: missing series or SOP reference in DICOM RTSTRUCT.");
+        String sopInstanceUID = firstReferencedSopInstanceUid(rtReferencedSeriesItem.getSequence(Tag.ContourImageSequence));
+        if (sopInstanceUID == null) {
             return null;
         }
         return new String[] {seriesInstanceUID, sopInstanceUID};
+    }
+
+    private String firstReferencedSopInstanceUid(Sequence contourImageSequence) {
+        if (contourImageSequence == null || contourImageSequence.isEmpty()) {
+            return null;
+        }
+        String sopInstanceUID = contourImageSequence.get(0).getString(Tag.ReferencedSOPInstanceUID);
+        if (sopInstanceUID == null || sopInstanceUID.isEmpty()) {
+            return null;
+        }
+        return sopInstanceUID;
+    }
+
+    /**
+     * OHIF-authored RTSTRUCT may only reference source instances inside ROI contour sequences.
+     */
+    private String findFirstReferencedSopInContourImageSequences(Attributes datasetAttributes) {
+        return findFirstReferencedSopInContourImageSequencesRecursive(datasetAttributes);
+    }
+
+    private String findFirstReferencedSopInContourImageSequencesRecursive(Attributes datasetAttributes) {
+        String sop = firstReferencedSopInstanceUid(datasetAttributes.getSequence(Tag.ContourImageSequence));
+        if (sop != null) {
+            return sop;
+        }
+        for (int tag : datasetAttributes.tags()) {
+            if (datasetAttributes.getVR(tag) != VR.SQ) {
+                continue;
+            }
+            Sequence sequence = datasetAttributes.getSequence(tag);
+            if (sequence == null) {
+                continue;
+            }
+            for (Attributes item : sequence) {
+                sop = findFirstReferencedSopInContourImageSequencesRecursive(item);
+                if (sop != null) {
+                    return sop;
+                }
+            }
+        }
+        return null;
     }
 
     /**
@@ -393,7 +452,10 @@ public class DicomSEGAndSRImporterService {
                             for (DatasetFile file : files) {
                                 if (file.isPacs()) {
                                     String path = file.getPath();
-                                    if (path.contains(studyInstanceUID) && path.contains(seriesInstanceUID) && path.contains(sOPInstanceUID)) {
+                                    if (!path.contains(studyInstanceUID) || !path.contains(sOPInstanceUID)) {
+                                        continue;
+                                    }
+                                    if (seriesInstanceUID == null || path.contains(seriesInstanceUID)) {
                                         return dataset;
                                     }
                                 }
