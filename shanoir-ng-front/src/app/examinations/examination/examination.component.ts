@@ -212,6 +212,10 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
         window.open(environment.ohifUrl + '/segmentation?StudyInstanceUIDs=1.4.9.12.34.1.8527.' + this.entity.id, '_blank');
     }
 
+    openVidepeViewer() {
+        window.open(environment.videpeUrl + '/videpe/?examinationId=' + this.entity.id, '_blank');
+    }
+
     getCenters(studyId: number): void {
         this.centerService
             .getCentersNamesByStudyId(studyId)

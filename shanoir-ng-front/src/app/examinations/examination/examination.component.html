@@ -35,6 +35,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <i class="fa fa-eye"></i>
                         </button>
                     }
+                    @if (mode == 'view' && hasDownloadRight) {
+                        <button type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="openVidepeViewer()">
+                            View EEG
+                            <i class="fa fa-eye"></i>
+                        </button>
+                    }
                 </form-footer>
                 <span>
                     @switch (mode) {
