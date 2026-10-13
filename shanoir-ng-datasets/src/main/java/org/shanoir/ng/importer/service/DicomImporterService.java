@@ -175,6 +175,9 @@ public class DicomImporterService {
     private DatasetExpressionRepository datasetExpressionRepository;
 
     @Autowired
+    private StowImportCounters stowImportCounters;
+
+    @Autowired
     private AcquisitionEquipmentRepository acquisitionEquipmentRepository;
 
     @Autowired
@@ -251,8 +254,11 @@ public class DicomImporterService {
             DatasetExpression expression = manageDatasetExpression(attributes, dataset);
             datasetExpressionRepository.save(expression);
             solrService.indexDataset(dataset.getId());
-            sendToPacs(metaInformationAttributes, attributes);
+            long bytes = sendToPacs(metaInformationAttributes, attributes);
             countNumberOfFiles(examination, acquisition, serie.getSeriesDescription());
+            // Last, so the row locks they take are held for as short a time as possible.
+            stowImportCounters.addInstanceToAcquisition(acquisition);
+            stowImportCounters.addBytesToExpression(expression, bytes);
         } else {
             LOG.error("DICOM file of serie {} ignored.", serie.getSeriesDescription());
             return false;
@@ -632,10 +638,11 @@ public class DicomImporterService {
      *
      * @param metaInformationAttributes
      * @param datasetAttributes
+     * @return the size in bytes of the DICOM file that was sent
      * @throws IOException
      * @throws Exception
      */
-    public void sendToPacs(Attributes metaInformationAttributes, Attributes datasetAttributes)
+    public long sendToPacs(Attributes metaInformationAttributes, Attributes datasetAttributes)
             throws IOException, Exception {
         /**
          * Create a new output stream to write the changes into and use its bytes
@@ -653,6 +660,7 @@ public class DicomImporterService {
                 dicomWebService.sendDicomInputStreamToPacs(finalInputStream);
             }
         }
+        return bAOS.size();
     }
 
     /**
