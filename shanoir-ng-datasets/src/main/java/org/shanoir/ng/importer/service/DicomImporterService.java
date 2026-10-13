@@ -57,6 +57,9 @@ import org.shanoir.ng.shared.dicom.DicomUtils;
 import org.shanoir.ng.shared.dicom.EchoTime;
 import org.shanoir.ng.shared.dicom.EquipmentDicom;
 import org.shanoir.ng.shared.dicom.InstitutionDicom;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.dicom.SerieToDatasetsSeparator;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
@@ -88,6 +91,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -176,7 +181,11 @@ public class DicomImporterService {
     private DatasetExpressionRepository datasetExpressionRepository;
 
     @Autowired
+    @Autowired
     private StowImportCounters stowImportCounters;
+
+    @Autowired
+    private ShanoirEventService eventService;
 
     @Autowired
     private AcquisitionEquipmentRepository acquisitionEquipmentRepository;
@@ -553,8 +562,36 @@ public class DicomImporterService {
             examination.setCenterId(centerId);
             examination = examinationService.save(examination);
             LOG.info("Examination created: {}", examination.toString());
-        } // Avoid, that the examination creation makes RabbitMQ calls
+            announceNewExamination(examination, study.getId(), subjectId, centerId);
+        }
         return examination;
+    }
+
+    /**
+     * MS Studies keeps its own list of the examinations of a study (study_examination)
+     * and learns of one only from a CREATE_EXAMINATION_EVENT: the ZIP import sends it,
+     * the study list's "Examinations" column counts those rows. Without it a study
+     * filled by STOW-RS shows no examination at all.
+     *
+     * One event per new examination, never per instance, so it adds nothing to the
+     * per-instance cost. It is sent after the import transaction commits: an import
+     * that rolls back must not leave MS Studies counting an examination that does
+     * not exist.
+     */
+    void announceNewExamination(Examination examination, Long studyId, Long subjectId, Long centerId) {
+        ShanoirEvent event = new ShanoirEvent(ShanoirEventType.CREATE_EXAMINATION_EVENT,
+                examination.getId().toString(), KeycloakUtil.getTokenUserId(),
+                "centerId:" + centerId + ";subjectId:" + subjectId, ShanoirEvent.SUCCESS, studyId);
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    eventService.publishEvent(event);
+                }
+            });
+        } else {
+            eventService.publishEvent(event);
+        }
     }
 
     private Long manageSubject(Attributes attributes, Study study)
