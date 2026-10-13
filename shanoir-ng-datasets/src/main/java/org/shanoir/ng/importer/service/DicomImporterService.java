@@ -318,6 +318,7 @@ public class DicomImporterService {
             echoTime.setEchoTime(attributes.getDouble(Tag.EchoTime, 0.0));
             echoTimes.add(echoTime);
             dataset.setEchoTimes(echoTimes);
+            addMrTimingParameters(dataset, attributes);
             currentDataset = acquisitionContext.generateFlatDataset(
                     serie, dataset, datasetIndex, subjectId,
                     attributes);
@@ -327,6 +328,27 @@ public class DicomImporterService {
             currentDataset = datasetService.create(currentDataset);
         }
         return currentDataset;
+    }
+
+    /**
+     * The ZIP import reads repetition time, inversion time and flip angle from every
+     * image of a dataset and hands the sets to the dataset strategy; a STOW-RS import
+     * only ever set the echo time, so those three stayed empty on every MR dataset.
+     * They come from the instance that creates the dataset, which is what the echo
+     * time already does: a dataset groups the instances that share echo, acquisition
+     * number and orientation. Absent tags give 0 / "0", as in the ZIP import.
+     */
+    static void addMrTimingParameters(org.shanoir.ng.importer.dto.Dataset dataset, Attributes attributes) {
+        Set<Double> repetitionTimes = new HashSet<>();
+        repetitionTimes.add(attributes.getDouble(Tag.RepetitionTime, 0));
+        dataset.setRepetitionTimes(repetitionTimes);
+        Set<Double> inversionTimes = new HashSet<>();
+        inversionTimes.add(attributes.getDouble(Tag.InversionTime, 0));
+        dataset.setInversionTimes(inversionTimes);
+        String flipAngle = attributes.getString(Tag.FlipAngle);
+        Set<String> flipAngles = new HashSet<>();
+        flipAngles.add(flipAngle != null ? flipAngle : "0");
+        dataset.setFlipAngles(flipAngles);
     }
 
     private Dataset manageDatasetSeparation(Attributes attributes, DatasetAcquisition acquisition,
