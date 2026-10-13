@@ -35,7 +35,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <i class="fa fa-eye"></i>
                         </button>
                     }
-                    @if (mode == 'view' && hasDownloadRight) {
+                    @if (mode == 'view' && hasDownloadRight && hasEEG) {
                         <button type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="openVidepeViewer()">
                             View EEG
                             <i class="fa fa-eye"></i>
