@@ -251,7 +251,9 @@ Name                  | Value             | Description                         
 `SHANOIR_KEYCLOAK_ADAPTER_MODE` | `check-sso\|login-required` | authentication mode of the javascript adapter. `check-sso` (default) is fast but relies on a hidden iframe and tends to break when Keycloak is served from a different hostname; `login-required` redirects and is slower but reliable. |
 `SHANOIR_KEYCLOAK_API` | `limited\|full`   | which parts of the Keycloak API nginx exposes under `/auth/`. `limited` (default) exposes only what ordinary users of the `shanoir-ng` realm need; `full` also exposes the master realm and the admin console. |
 `SHANOIR_VIEWER_OHIF_URL_SCHEME`  | `http\|https`      | https (over TLS), http (plain text, NOT RECOMMENDED)                                                                                                                                |
+`SHANOIR_VIEWER_VIDEPE_URL_SCHEME`| `http\|https`      | https (over TLS), http (plain text, NOT RECOMMENDED)                                                                                                                                |
 `SHANOIR_VIEWER_OHIF_URL_HOST`    | *hostname*         | hostname where the OHFI-Viewer is reachable                                                                                                                                         |
+`SHANOIR_VIEWER_VIDEPE_URL_HOST`  | *hostname*         | hostname where the VIDEPE viewer is reachable                                                                                                                                       |
 
 **Notes**
 * You must ensure that the hostname `SHANOIR_URL_HOST` can be resolved from the

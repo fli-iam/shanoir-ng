@@ -182,9 +182,9 @@ export class StudyTreeComponent implements OnDestroy {
             this.selectedAcquisitionNodes.forEach(acq => studies.add('1.4.9.12.34.1.8527.' + acq.parent.id));
         }
         if ((series.size == 0 && studies.size > 0) || studies.size > 1) {
-            window.open(environment.viewerUrl + '/viewer?StudyInstanceUIDs=' + Array.from(studies).join(','), '_blank');
+            window.open(environment.ohifUrl + '/viewer?StudyInstanceUIDs=' + Array.from(studies).join(','), '_blank');
         } else if (series.size > 0 && studies.size == 1) {
-            window.open(environment.viewerUrl + '/viewer?StudyInstanceUIDs=' + Array.from(studies).join(',') + '&SeriesInstanceUIDs=' + Array.from(series).join(','), '_blank');
+            window.open(environment.ohifUrl + '/viewer?StudyInstanceUIDs=' + Array.from(studies).join(',') + '&SeriesInstanceUIDs=' + Array.from(series).join(','), '_blank');
         }
     }
 

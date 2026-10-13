@@ -205,11 +205,11 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
     }
 
     openViewer() {
-	    window.open(environment.viewerUrl + '/viewer?StudyInstanceUIDs=1.4.9.12.34.1.8527.' + this.entity.id, '_blank');
+	    window.open(environment.ohifUrl + '/viewer?StudyInstanceUIDs=1.4.9.12.34.1.8527.' + this.entity.id, '_blank');
     }
 
     openSegmentationViewer() {
-        window.open(environment.viewerUrl + '/segmentation?StudyInstanceUIDs=1.4.9.12.34.1.8527.' + this.entity.id, '_blank');
+        window.open(environment.ohifUrl + '/segmentation?StudyInstanceUIDs=1.4.9.12.34.1.8527.' + this.entity.id, '_blank');
     }
 
     getCenters(studyId: number): void {
