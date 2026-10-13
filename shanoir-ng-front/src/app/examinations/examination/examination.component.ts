@@ -204,11 +204,11 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
         this.downloadService.downloadAllByExaminationId(this.examination?.id,this.downloadState);
     }
 
-    openViewer() {
+    openOhifViewer() {
 	    window.open(environment.ohifUrl + '/viewer?StudyInstanceUIDs=1.4.9.12.34.1.8527.' + this.entity.id, '_blank');
     }
 
-    openSegmentationViewer() {
+    openOhifSegmentation() {
         window.open(environment.ohifUrl + '/segmentation?StudyInstanceUIDs=1.4.9.12.34.1.8527.' + this.entity.id, '_blank');
     }
 
