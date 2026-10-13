@@ -42,8 +42,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Unit tests for subject therapy controller.
@@ -72,7 +71,8 @@ public class SubjectTherapyApiControllerTest {
     private static final String REQUEST_PATH_THERAPY_BY_SUBJECT = REQUEST_PATH_ANIMAL_SUBJECT + SUBJECT_ID
             + REQUEST_PATH_THERAPY + "/all";
 
-    private Gson gson;
+    @Autowired
+    private JsonMapper mapper;
 
     @Autowired
     private MockMvc mvc;
@@ -91,8 +91,6 @@ public class SubjectTherapyApiControllerTest {
 
     @BeforeEach
     public void setup() throws ShanoirException {
-        gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
-
         doNothing().when(subTherapiesServiceMock).deleteById(1L);
         given(subTherapiesServiceMock.findAll()).willReturn(Arrays.asList(new SubjectTherapy()));
         given(subjectsServiceMock.getById(1L)).willReturn(new AnimalSubject());
@@ -136,7 +134,7 @@ public class SubjectTherapyApiControllerTest {
     @WithMockUser
     public void saveNewSubjectTherapyTest() throws Exception {
         mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON).content(gson.toJson(TherapyModelUtil.createSubjectTherapy())))
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(TherapyModelUtil.createSubjectTherapy())))
                 .andExpect(status().isOk());
     }
 
@@ -144,7 +142,7 @@ public class SubjectTherapyApiControllerTest {
     @WithMockUser
     public void updateSubjectTherapyTest() throws Exception {
         mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON).content(gson.toJson(TherapyModelUtil.createSubjectTherapy())))
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(TherapyModelUtil.createSubjectTherapy())))
                 .andExpect(status().isOk());
     }
 
