@@ -122,7 +122,6 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
             this.hasDownloadRight = true;
             this.hasImportRight = true;
             this.checkEEG();
-            console.log(this.hasEEG)
             return Promise.resolve();
         } else {
             return this.studyRightsService.getMyRightsForStudy(this.examination.study.id).then(rights => {
