@@ -53,13 +53,15 @@ public interface StudyRepository extends JpaRepository<Study, Long>, StudyReposi
     List<IdName> findAllIdAndName();
 
     @Query("""
-        SELECT s
+        SELECT DISTINCT s
         FROM Study s
-        JOIN FETCH s.studyUserList su
-        WHERE su.study.id = s.id
-        AND su.userId = :userId and :studyUserRightId in elements(su.studyUserRights)
-        AND su.confirmed = :confirmed""")
-
+        LEFT JOIN FETCH s.studyUserList
+        WHERE EXISTS (
+            SELECT su FROM StudyUser su
+            WHERE su.study = s
+            AND su.userId = :userId AND :studyUserRightId IN elements(su.studyUserRights)
+            AND su.confirmed = :confirmed)
+        ORDER BY s.name ASC""")
     List<Study> findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(
             @Param("userId") Long userId,
             @Param("studyUserRightId") Integer studyUserRightId,

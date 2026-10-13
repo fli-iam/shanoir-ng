@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.importer.model;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Iterator;
 import java.util.List;
@@ -46,6 +47,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  */
 public class ImportJob extends ImportJobBase implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     // @todo: remove this list here later

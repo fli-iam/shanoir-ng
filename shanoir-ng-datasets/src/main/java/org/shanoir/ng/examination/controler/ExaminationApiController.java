@@ -51,6 +51,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -219,6 +220,8 @@ public class ExaminationApiController implements ExaminationApi {
     }
 
     @Override
+    // @Transactional added to allow the mapper below to read the lazy "copies" collection.
+    @Transactional(readOnly = true)
     public ResponseEntity<List<ExaminationDTO>> findExaminationsBySubjectId(@Parameter(description = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId) {
         final List<Examination> examinations = examinationService.findBySubjectId(subjectId);
         if (examinations.isEmpty()) {

@@ -28,8 +28,8 @@ import org.shanoir.ng.study.model.StudyStatus;
 import org.shanoir.ng.study.repository.StudyRepository;
 import org.shanoir.ng.studycenter.StudyCenter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.web.WebAppConfiguration;
 
@@ -118,6 +118,17 @@ public class StudyRepositoryTest {
         final Study studyFound = studyRepository.findById(Long.valueOf(3)).orElseThrow();
 
         assertEquals("StudyTest", studyFound.getName());
+    }
+
+    @Test
+    public void findStudiesOfUserLoadsAllMembers() {
+        // user 2 has CAN_SEE_ALL (4) on study 1, which has 2 members: the whole member list must be
+        // loaded, not only the queried user's StudyUser ("Members" column of the study list)
+        final List<Study> studies = studyRepository
+                .findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(2L, 4, true);
+        assertEquals(1, studies.size());
+        assertEquals(STUDY_TEST_1_ID, studies.get(0).getId());
+        assertEquals(2, studies.get(0).getStudyUserList().size());
     }
 
     @Test

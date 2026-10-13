@@ -23,7 +23,9 @@ import org.springframework.amqp.support.converter.ContentTypeDelegatingMessageCo
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.amqp.support.converter.SimpleMessageConverter;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.amqp.RabbitTemplateConfigurer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -83,17 +85,21 @@ public class RabbitMQConfiguration {
         return converter;
     }
 
+    /**
+     * Configured through Spring Boot's RabbitTemplateConfigurer, so that the
+     * spring.rabbitmq.template.* properties (e.g. reply-timeout) are applied:
+     * declaring this bean disables Boot's auto-configured RabbitTemplate.
+     * The configurer is absent when RabbitMQ auto-configuration is not loaded (tests).
+     */
     @Bean
-    public RabbitTemplate rabbitTemplate() {
+    public RabbitTemplate rabbitTemplate(ObjectProvider<RabbitTemplateConfigurer> configurer) {
         RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
+        configurer.ifAvailable(c -> c.configure(rabbitTemplate, connectionFactory));
         rabbitTemplate.setMessageConverter(rabbitMessageConverter());
         return rabbitTemplate;
     }
 
     ////////////////// QUEUES //////////////////
-
-    /** Queue to retrieve the center ID from an acquisition equipment ID. */
-    public static final String ACQUISITION_EQUIPMENT_CENTER_QUEUE = "acquisition-equipment-center-queue";
 
     /** Queue to create get equipment ID from code. */
     public static final String ACQUISITION_EQUIPMENT_CODE_QUEUE = "acquisition-equipment-code-queue";
@@ -105,9 +111,6 @@ public class RabbitMQConfiguration {
 
     /** Queue to make anima to nifti conversion. */
     public static final String ANIMA_CONVERSION_QUEUE = "anima-conversion-queue";
-
-    /** Queue to consume BIDS related events */
-    public static final String BIDS_EVENT_QUEUE = "bids-event-queue";
 
     /** Queue to make bruker to dicom conversion. */
     public static final String BRUKER_CONVERSION_QUEUE = "bruker-conversion-queue";
@@ -123,12 +126,6 @@ public class RabbitMQConfiguration {
 
     /** Copy datasets from one study to another. */
     public static final String COPY_DATASETS_TO_STUDY_QUEUE = "copy-datasets-to-study-queue";
-
-    /** Create DS acquisition => Index datasets in solr. */
-    public static final String CREATE_DATASET_ACQUISITION_QUEUE = "create-dataset-acquisition-queue";
-
-    /** Get the list of subjects for a given study. */
-    public static final String DATASET_SUBJECT_QUEUE = "dataset-subjects-queue";
 
     /** Delete animal subject => Delete associated subject. */
     public static final String DELETE_ANIMAL_SUBJECT_QUEUE = "delete-animal-subject-queue";
@@ -169,9 +166,6 @@ public class RabbitMQConfiguration {
     /** Queue used to get information for study_examination deletion relationship.*/
     public static final String EXAMINATION_STUDY_DELETE_QUEUE = "examination-study-delete-queue";
 
-    /** Queue to retrieve informations about studyc cards. */
-    public static final String FIND_STUDY_CARD_QUEUE = "find-study-card-queue";
-
     /** Queue to create all bids dataset acquisitions */
     public static final String IMPORTER_BIDS_DATASET_QUEUE = "importer-bids-dataset-queue";
 
@@ -190,9 +184,6 @@ public class RabbitMQConfiguration {
     /** Queue to get the study card from a equipment code. */
     public static final String IMPORT_STUDY_CARD_QUEUE = "import-study-card-queue";
 
-    /** User delete event to notify to studies. To be overriden by an event ?*/
-    public static final String MS_USERS_TO_MS_STUDIES_USER_DELETE = "ms_users_to_ms_studies_user_delete";
-
     /** Queue to re-convert using a different nifti converter */
     public static final String NIFTI_CONVERSION_QUEUE = "nifti-conversion-queue";
 
@@ -202,18 +193,10 @@ public class RabbitMQConfiguration {
     /** Queue for all shanoir events. */
     public static final String SHANOIR_EVENTS_QUEUE = "shanoir-events-queue";
 
-    /** Specific queue for import dataset events. */
-    public static final String SHANOIR_EVENTS_QUEUE_IMPORT = "shanoir-events-queue-import";
-
     public static final String STUDY_ADMINS_QUEUE = "study-admin-queue";
 
     /** Queue used to get anonymisation profile of a study. */
     public static final String STUDY_ANONYMISATION_PROFILE_QUEUE = "study-anonymisation-profile-queue";
-
-    public static final String STUDY_CENTER_QUEUE = "study-center-queue";
-
-    /** Get the type of dataset from a given study. */
-    public static final String STUDY_DATASET_TYPE = "study-dataset-type";
 
     /** Calculate storage volume for datasets linked to a study. */
     public static final String STUDY_DATASETS_DETAILED_STORAGE_VOLUME = "study-datasets-detailed-storage-volume";
@@ -223,9 +206,6 @@ public class RabbitMQConfiguration {
 
     /** Queue used to get the list of studies I can Admin. */
     public static final String STUDY_I_CAN_ADMIN_QUEUE = "study-i-can-admin";
-
-    /** Queue used to send invitation email for a given study. */
-    public static final String STUDY_INVITATION_QUEUE = "study-invitation-queue";
 
     /** Queue used to get the name of a study from ID */
     public static final String STUDY_NAME_QUEUE = "study-name-queue";
@@ -253,9 +233,6 @@ public class RabbitMQConfiguration {
 
     /** Send a mail from studies microservice when a study is created */
     public static final String APPROVE_STUDY_MAIL_QUEUE = "approve-study-mail-queue";
-
-    /** Queue to notify when a user / study is updated / deleted. */
-    public static final String STUDY_USER_QUEUE = "study-user";
 
     /** Update / create a study user to dataset MS. */
     public static final String STUDY_USER_QUEUE_DATASET = "study-user-queue-dataset";
@@ -289,11 +266,6 @@ public class RabbitMQConfiguration {
     ////////////////// BEANS //////////////////
 
     @Bean
-    public static Queue acquisitionEquipmentCenterQueue() {
-        return new Queue(ACQUISITION_EQUIPMENT_CENTER_QUEUE, true);
-    }
-
-    @Bean
     public static Queue acquisitionEquipmentCodeQueue() {
         return new Queue(ACQUISITION_EQUIPMENT_CODE_QUEUE, true);
     }
@@ -311,11 +283,6 @@ public class RabbitMQConfiguration {
     @Bean
     public static Queue animaConversionQueue() {
         return new Queue(ANIMA_CONVERSION_QUEUE, true);
-    }
-
-    @Bean
-    public static Queue bidsEventQueue() {
-        return new Queue(BIDS_EVENT_QUEUE, true);
     }
 
     @Bean
@@ -341,16 +308,6 @@ public class RabbitMQConfiguration {
     @Bean
     public static Queue copyDatasetToStudyQueue() {
         return new Queue(COPY_DATASETS_TO_STUDY_QUEUE, true);
-    }
-
-    @Bean
-    public static Queue createDatasetAcquisitionQueue() {
-        return new Queue(CREATE_DATASET_ACQUISITION_QUEUE, true);
-    }
-
-    @Bean
-    public static Queue datasetSubjectQueue() {
-        return new Queue(DATASET_SUBJECT_QUEUE, true);
     }
 
     @Bean
@@ -419,23 +376,8 @@ public class RabbitMQConfiguration {
     }
 
     @Bean
-    public static Queue findStudyCardQueue() {
-        return new Queue(FIND_STUDY_CARD_QUEUE, true);
-    }
-
-    @Bean
-    public static Queue getMSUsersToMSStudiesUserDelete() {
-        return new Queue(MS_USERS_TO_MS_STUDIES_USER_DELETE, true);
-    }
-
-    @Bean
     public static Queue getShanoirEventsQueue() {
         return new Queue(SHANOIR_EVENTS_QUEUE, true);
-    }
-
-    @Bean
-    public static Queue getShanoirEventsQueueImport() {
-        return new Queue(SHANOIR_EVENTS_QUEUE_IMPORT, true);
     }
 
     @Bean
@@ -494,11 +436,6 @@ public class RabbitMQConfiguration {
     }
 
     @Bean
-    public static Queue studyCenterQueue() {
-        return new Queue(STUDY_CENTER_QUEUE, true);
-    }
-
-    @Bean
     public static Queue studyDatasetsDetailedStorageVolumeQueue() {
         return new Queue(STUDY_DATASETS_DETAILED_STORAGE_VOLUME, true);
     }
@@ -509,18 +446,8 @@ public class RabbitMQConfiguration {
     }
 
     @Bean
-    public static Queue studyDatasetTypeQueue() {
-        return new Queue(STUDY_DATASET_TYPE, true);
-    }
-
-    @Bean
     public static Queue studyICanAdminQueue() {
         return new Queue(STUDY_I_CAN_ADMIN_QUEUE, true);
-    }
-
-    @Bean
-    public static Queue studyInvitationQueue() {
-        return new Queue(STUDY_INVITATION_QUEUE, true);
     }
 
     @Bean
@@ -561,11 +488,6 @@ public class RabbitMQConfiguration {
     @Bean
     public static Queue studyDraftStateMailQueue() {
         return new Queue(APPROVE_STUDY_MAIL_QUEUE, true);
-    }
-
-    @Bean
-    public static Queue studyUserQueue() {
-        return new Queue(STUDY_USER_QUEUE, true);
     }
 
     @Bean

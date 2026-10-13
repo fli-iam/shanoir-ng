@@ -88,6 +88,18 @@ RUN wget -qO dcm4che-bin.zip \
     && unzip /dcm4che-bin.zip && mv dcm4che-* dcm4che \
     && rm    /dcm4che-bin.zip
 
+# Extract the zstd-jni native lib at build time: at runtime zstd-jni would
+# extract it into java.io.tmpdir, which fails when /tmp is mounted noexec
+FROM alpine AS datasets-zstd
+ARG TARGETARCH
+COPY datasets/shanoir-ng-datasets.jar /ms.jar
+RUN apk add --no-cache unzip \
+    && case "$TARGETARCH" in arm64) arch=aarch64 ;; *) arch=amd64 ;; esac \
+    && unzip -p /ms.jar 'BOOT-INF/lib/zstd-jni-*.jar' > /zstd-jni.jar \
+    && mkdir -p /target/opt/zstd \
+    && unzip -p /zstd-jni.jar "linux/$arch/libzstd-jni-*.so" > /target/opt/zstd/libzstd-jni.so \
+    && test -s /target/opt/zstd/libzstd-jni.so
+
 FROM base-microservice AS datasets
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
@@ -106,8 +118,7 @@ ENV LANGUAGE=en_US.UTF-8
 
 # install the files from the 'dowloader' stage
 COPY --link --from=datasets-download /target/. /
-
-
+COPY --link --from=datasets-zstd /target/. /
 
 COPY --link datasets/entrypoint /usr/bin/
 COPY --link datasets/shanoir-ng-datasets.jar shanoir-ng-datasets.jar
@@ -126,8 +137,8 @@ COPY --link import/entrypoint /usr/bin/
 COPY --link import/shanoir-ng-import.jar shanoir-ng-import.jar
 
 # Use the below line for remote debugging
-#CMD ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:9913", "-jar", "/shanoir-ng-import.jar"]
-CMD ["-jar", "/shanoir-ng-import.jar"]
+#CMD ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:9913", "-Dspring.aot.enabled=true", "-jar", "/shanoir-ng-import.jar"]
+CMD ["-Dspring.aot.enabled=true", "-jar", "/shanoir-ng-import.jar"]
 
 
 
@@ -221,7 +232,7 @@ ENV LANG=fr_FR.UTF-8
 ENV LANGUAGE=fr_FR.UTF-8
 ENV PATH="/opt/miniconda3/bin:${PATH}"
 
-CMD ["-jar", "/nifti-conversion.jar"]
+CMD ["-Dspring.aot.enabled=true", "-jar", "/nifti-conversion.jar"]
 
 
 
@@ -233,8 +244,8 @@ COPY --link preclinical/shanoir-ng-preclinical.jar shanoir-ng-preclinical.jar
 COPY --link preclinical/entrypoint /usr/bin/
 
 # Use the below line for remote debugging
-#CMD ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:9915", "-jar", "/shanoir-ng-preclinical.jar", "-Xmx6g", "-Xms1g"]
-CMD ["-jar", "/shanoir-ng-preclinical.jar", "-Xmx6g", "-Xms1g"]
+#CMD ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:9915", "-Dspring.aot.enabled=true", "-jar", "/shanoir-ng-preclinical.jar", "-Xmx6g", "-Xms1g"]
+CMD ["-Dspring.aot.enabled=true", "-jar", "/shanoir-ng-preclinical.jar", "-Xmx6g", "-Xms1g"]
 
 
 
@@ -246,8 +257,8 @@ COPY --link studies/shanoir-ng-studies.jar shanoir-ng-studies.jar
 COPY --link studies/entrypoint /usr/bin/
 
 # Use the below line for remote debugging
-#CMD ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:9912", "-jar", "/shanoir-ng-studies.jar"]
-CMD ["-jar", "/shanoir-ng-studies.jar"]
+#CMD ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:9912", "-Dspring.aot.enabled=true", "-jar", "/shanoir-ng-studies.jar"]
+CMD ["-Dspring.aot.enabled=true", "-jar", "/shanoir-ng-studies.jar"]
 
 
 

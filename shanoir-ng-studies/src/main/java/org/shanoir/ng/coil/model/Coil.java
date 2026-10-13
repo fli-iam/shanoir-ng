@@ -20,7 +20,10 @@ import org.shanoir.ng.manufacturermodel.model.ManufacturerModel;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
 
+
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
+import java.io.Serial;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
@@ -41,6 +44,7 @@ public class Coil extends HalEntity {
     /**
      * UID
      */
+    @Serial
     private static final long serialVersionUID = 5779678698062107549L;
 
     @NotNull

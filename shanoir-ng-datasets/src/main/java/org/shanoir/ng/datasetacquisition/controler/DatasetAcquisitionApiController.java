@@ -137,10 +137,17 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 
     @RabbitListener(queues = RabbitMQConfiguration.IMPORT_EEG_QUEUE, containerFactory = "multipleConsumersFactory")
     @RabbitHandler
-    public int createNewEegDatasetAcquisition(String importJobAsString) throws IOException {
+    public int createNewEegDatasetAcquisition(String importJobAsString) throws AmqpRejectAndDontRequeueException {
         SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
-        EegImportJob importJob = objectMapper.readValue(importJobAsString, EegImportJob.class);
-        eegImporterService.createEegDataset(importJob);
+        EegImportJob importJob;
+        try {
+            importJob = objectMapper.readValue(importJobAsString, EegImportJob.class);
+            eegImporterService.createEegDataset(importJob);
+        } catch (Exception e) {
+            // do not requeue: a failing job would otherwise be redelivered endlessly
+            LOG.error(e.getMessage(), e);
+            throw new AmqpRejectAndDontRequeueException(e);
+        }
         try {
             importerService.cleanTempFiles(importJob.getWorkFolder());
         } catch (Exception e) {

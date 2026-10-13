@@ -17,7 +17,10 @@ package org.shanoir.ng.tag.model;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.study.model.Study;
 
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import java.io.Serial;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
@@ -26,6 +29,7 @@ import jakarta.persistence.ManyToOne;
 @Entity
 public class StudyTag extends HalEntity {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private String name;

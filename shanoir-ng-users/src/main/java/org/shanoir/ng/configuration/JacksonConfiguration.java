@@ -37,7 +37,7 @@ import tools.jackson.databind.ser.ValueSerializerModifier;
 public class JacksonConfiguration {
 
     @Bean
-    JsonMapper jsonMapper() {
+    public JsonMapper jsonMapper() {
         SimpleModule studyUserModule = new SimpleModule();
         studyUserModule.addAbstractTypeMapping(StudyUserInterface.class, StudyUser.class);
         SimpleModule pageModule = new SimpleModule();

@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.subject.model;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import org.hibernate.annotations.GenericGenerator;
@@ -38,6 +39,7 @@ public class PseudonymusHashValues  extends HalEntity implements Serializable {
     /**
      * UID
      */
+    @Serial
     private static final long serialVersionUID = 3108595543203629662L;
 
     /** Subject. */

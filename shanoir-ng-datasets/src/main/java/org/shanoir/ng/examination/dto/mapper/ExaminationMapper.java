@@ -171,13 +171,31 @@ public interface ExaminationMapper {
 
     ////// Pageable
 
-    @IterableMapping(qualifiedByName = "idRelations")
-    PageImpl<ExaminationDTO> examinationPageToExaminationIdRelationsDTOPage(Page<Examination> page);
+    // New default methods rather than MapStruct's own @IterableMapping
+    // generation: MapStruct has no setter to target on PageImpl for totalElements/
+    // number/size so those were stuck at their empty-page defaults (0/0/0/1)
+    // regardless of how many items were added.
+    default PageImpl<ExaminationDTO> examinationPageToExaminationIdRelationsDTOPage(Page<Examination> page) {
+        if (page == null) {
+            return null;
+        }
+        List<ExaminationDTO> content = page.getContent().stream()
+                .map(this::examinationToExaminationIdRelationsDTOWithIdRelations)
+                .collect(Collectors.toList());
+        return new PageImpl<>(content, page.getPageable(), page.getTotalElements());
+    }
 
     /**
      * Some context of usage :
      * - Populate examinations grid
      */
-    @IterableMapping(qualifiedByName = "withStudy")
-    PageImpl<ExaminationDTO> examinationListToExaminationListDTOPageWithStudy(Page<Examination> page);
+    default PageImpl<ExaminationDTO> examinationListToExaminationListDTOPageWithStudy(Page<Examination> page) {
+        if (page == null) {
+            return null;
+        }
+        List<ExaminationDTO> content = page.getContent().stream()
+                .map(this::examinationToExaminationDTOWithStudy)
+                .collect(Collectors.toList());
+        return new PageImpl<>(content, page.getPageable(), page.getTotalElements());
+    }
 }
