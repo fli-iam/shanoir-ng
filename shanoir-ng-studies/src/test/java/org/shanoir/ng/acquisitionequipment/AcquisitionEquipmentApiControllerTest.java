@@ -63,6 +63,7 @@ import tools.jackson.databind.json.JsonMapper;
 public class AcquisitionEquipmentApiControllerTest {
 
     private static final String REQUEST_PATH = "/acquisitionequipments";
+
     private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
 
     @Autowired
