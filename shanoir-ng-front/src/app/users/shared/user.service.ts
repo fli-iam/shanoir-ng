@@ -71,4 +71,10 @@ export class UserService extends EntityService<User> {
             });
     }
 
+    downloadUserStatistics(): void {
+        firstValueFrom(this.http.get(AppUtils.BACKEND_API_USER_URL + '/downloadUserStatistics',
+            { observe: 'response', responseType: 'blob' }))
+            .then(response => AppUtils.browserDownloadFileFromResponse(response));
+    }
+
 }
