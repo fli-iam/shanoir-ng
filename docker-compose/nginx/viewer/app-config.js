@@ -79,3 +79,205 @@ window.config = {
     }
   ]
 };
+
+// Interim OHIF 3.12.5 segmentation export guards (scenarios A/B in
+// docs/runbooks/OHIF-segmentation-export-failures.md). Remove when upstream OHIF
+// preloads referenced source images and blocks export with a pending AI preview.
+(function installShanoirSegExportShim() {
+	const EXPORT_COMMANDS = new Set(['storeSegmentation', 'downloadSegmentation']);
+	const POLL_MS = 250;
+
+	function tryInstall() {
+		if (window.__shanoirSegExportShimInstalled) {
+			return true;
+		}
+
+		const commandsManager = window.commandsManager;
+		const cornerstone = window.cornerstone;
+		const cornerstoneTools = window.cornerstoneTools;
+		const services = window.services;
+
+		if (
+			!commandsManager?.runCommand ||
+			!cornerstone?.cache ||
+			!cornerstone?.imageLoader ||
+			!cornerstoneTools?.segmentation?.state?.getSegmentations ||
+			!services?.segmentationService
+		) {
+			return false;
+		}
+
+		const originalRunCommand = commandsManager.runCommand.bind(commandsManager);
+		let guardDepth = 0;
+		let exportPreparePromise = null;
+
+		function collectReferencedSourceImageIds() {
+			const { cache } = window.cornerstone;
+			const segs = cornerstoneTools.segmentation.state.getSegmentations();
+			const refs = new Set();
+
+			for (const seg of segs) {
+				const labelmapIds = seg?.representationData?.Labelmap?.imageIds;
+				if (!labelmapIds) {
+					continue;
+				}
+				for (const id of labelmapIds) {
+					const lm = cache.getImage(id);
+					if (lm?.referencedImageId) {
+						refs.add(lm.referencedImageId);
+					}
+				}
+			}
+
+			return refs;
+		}
+
+		async function ensureSourceImagesLoaded() {
+			const { cache, imageLoader } = window.cornerstone;
+			const refs = collectReferencedSourceImageIds();
+			if (!refs.size) {
+				return true;
+			}
+
+			const ui = services.uiNotificationService;
+			let slowNotifyTimer = setTimeout(() => {
+				ui?.show?.({
+					title: 'Loading source images',
+					message:
+						'Loading the full image series before export. This may take a moment.',
+					type: 'info',
+					duration: 8000,
+				});
+			}, 1000);
+
+			try {
+				// Load every referenced source frame (OHIF generateSegmentation maps all
+				// labelmap slices to cache.getImage(referencedImageId) synchronously).
+				await Promise.all([...refs].map(ref => imageLoader.loadAndCacheImage(ref)));
+			} finally {
+				clearTimeout(slowNotifyTimer);
+			}
+
+			const stillMissing = [...refs].filter(ref => !cache.getImage(ref));
+			if (stillMissing.length) {
+				console.warn(
+					'[shanoir] segmentation export: source images still not in cache after preload:',
+					stillMissing.length
+				);
+				ui?.show?.({
+					title: 'Cannot export segmentation',
+					message:
+						stillMissing.length +
+						' source image(s) are not loaded yet. Scroll through the full series, wait for images to load, then try again.',
+					type: 'error',
+					duration: 15000,
+				});
+				return false;
+			}
+
+			console.info(
+				'[shanoir] segmentation export: preloaded',
+				refs.size,
+				'referenced source image(s)'
+			);
+			return true;
+		}
+
+		function prepareExport() {
+			if (!exportPreparePromise) {
+				exportPreparePromise = ensureSourceImagesLoaded().finally(() => {
+					exportPreparePromise = null;
+				});
+			}
+			return exportPreparePromise;
+		}
+
+		function findUnregisteredVoxelValues() {
+			const { cache } = window.cornerstone;
+			const segs = cornerstoneTools.segmentation.state.getSegmentations();
+			const unregistered = new Set();
+
+			for (const seg of segs) {
+				const labelmapIds = seg?.representationData?.Labelmap?.imageIds;
+				if (!labelmapIds) {
+					continue;
+				}
+				const registered = new Set(
+					Object.keys(
+						services.segmentationService.getSegmentation(seg.segmentationId).segments || {}
+					).map(Number)
+				);
+				const voxelValues = new Set();
+				for (const id of labelmapIds) {
+					const lm = cache.getImage(id);
+					if (!lm) {
+						continue;
+					}
+					const px = lm.getPixelData();
+					for (let i = 0; i < px.length; i++) {
+						if (px[i]) {
+							voxelValues.add(px[i]);
+						}
+					}
+				}
+				for (const v of voxelValues) {
+					if (!registered.has(v)) {
+						unregistered.add(v);
+					}
+				}
+			}
+
+			return [...unregistered];
+		}
+
+		async function runExportCommand(commandName, options, ...rest) {
+			const badValues = findUnregisteredVoxelValues();
+			if (badValues.length) {
+				services.uiNotificationService?.show?.({
+					title: 'Cannot export segmentation',
+					message:
+						'Accept the AI result before exporting: press Enter and wait until the page responds (about 30 seconds), or press Esc to reject. Unregistered label values: ' +
+						badValues.join(', '),
+					type: 'warning',
+					duration: 15000,
+				});
+				return;
+			}
+
+			if (guardDepth === 0) {
+				const ready = await prepareExport();
+				if (!ready) {
+					return;
+				}
+			}
+
+			guardDepth++;
+			try {
+				const result = originalRunCommand(commandName, options, ...rest);
+				return result instanceof Promise ? await result : result;
+			} finally {
+				guardDepth--;
+			}
+		}
+
+		commandsManager.runCommand = function shanoirWrappedRunCommand(commandName, options, ...rest) {
+			if (!EXPORT_COMMANDS.has(commandName)) {
+				return originalRunCommand(commandName, options, ...rest);
+			}
+			return runExportCommand(commandName, options, ...rest);
+		};
+
+		window.__shanoirSegExportShimInstalled = true;
+		console.info('[shanoir] OHIF segmentation export shim installed');
+		return true;
+	}
+
+	function poll() {
+		if (tryInstall()) {
+			return;
+		}
+		setTimeout(poll, POLL_MS);
+	}
+
+	poll();
+})();
