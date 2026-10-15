@@ -336,7 +336,7 @@ CMD []
 
 FROM ohif/app:v3.12.5 AS ohif-viewer
 
-FROM ghcr.io/videpe/videpe:0.19.0 AS videpe-viewer
+FROM ghcr.io/videpe/videpe:0.20.0 AS videpe-viewer
 
 FROM nginx AS nginx
 
