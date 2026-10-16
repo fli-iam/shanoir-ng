@@ -29,6 +29,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -106,7 +107,7 @@ class NeurobagelServiceTest {
     @Test
     void participantsOfAnExportedStudyAreBuiltLocally() {
         given(studyRepository.existsByIdAndNeurobagelExportTrueAndIsDraftFalse(1L)).willReturn(true);
-        given(bidsService.participantsTsv(1L)).willReturn("participant_id\nsub-1\n");
+        given(bidsService.participantsTsv(1L, Map.of())).willReturn("participant_id\nsub-1\n");
 
         assertEquals(Optional.of("participant_id\nsub-1\n"), service.findParticipantsTsv(1L));
     }
@@ -116,7 +117,7 @@ class NeurobagelServiceTest {
         given(studyRepository.existsByIdAndNeurobagelExportTrueAndIsDraftFalse(2L)).willReturn(false);
 
         assertFalse(service.findParticipantsTsv(2L).isPresent());
-        verify(bidsService, never()).participantsTsv(anyLong());
+        verify(bidsService, never()).participantsTsv(anyLong(), any());
     }
 
     @Test
