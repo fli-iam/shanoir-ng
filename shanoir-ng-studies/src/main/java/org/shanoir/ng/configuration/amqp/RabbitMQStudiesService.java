@@ -371,6 +371,25 @@ public class RabbitMQStudiesService {
         return null;
     }
 
+    /**
+     * Neurobagel export: participants.tsv of a study, or null unless the study is exported (flagged by an
+     * admin and not a draft). ms datasets checks it too; this guard keeps ms studies safe on its own.
+     */
+    @RabbitListener(queues = RabbitMQConfiguration.NEUROBAGEL_PARTICIPANTS_TSV, containerFactory = "singleConsumerFactory")
+    @RabbitHandler
+    public String neurobagelParticipantsTsv(Long studyId) {
+        try {
+            Study study = studyId == null ? null : studyRepo.findById(studyId).orElse(null);
+            if (study == null || !study.isNeurobagelExport() || study.getIsDraft()) {
+                return null;
+            }
+            return bidsService.participantsTsv(studyId);
+        } catch (Exception e) {
+            LOG.error("Error while creating the Neurobagel participants.tsv of study {}: ", studyId, e);
+            throw new AmqpRejectAndDontRequeueException(e);
+        }
+    }
+
     @RabbitListener(queues = RabbitMQConfiguration.STUDY_PARTICIPANTS_TSV, containerFactory = "singleConsumerFactory")
     @RabbitHandler
     public String studyParticipantsTsv(Long studyId) {
