@@ -75,7 +75,7 @@ public interface CenterService {
      * @param studyId
      * @return list of centers.
      */
-    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasAnyRightOnStudy(#studyId))")
     List<Center> findByStudy(Long studyId);
 
     /**
@@ -92,7 +92,7 @@ public interface CenterService {
      * @param studyId
      * @return list of centers.
      */
-    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasAnyRightOnStudy(#studyId))")
     List<IdName> findIdsAndNames(Long studyId);
 
     /**
