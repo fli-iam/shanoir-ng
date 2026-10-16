@@ -21,6 +21,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
@@ -102,7 +103,7 @@ public class NeurobagelService {
         if (!isExported(studyId)) {
             return Optional.empty();
         }
-        return Optional.of(bidsService.participantsTsv(studyId));
+        return Optional.of(bidsService.participantsTsv(studyId, Map.of()));
     }
 
     /**
