@@ -121,6 +121,15 @@
         "clientRole": false,
         "containerId": "shanoir-ng",
         "attributes": {}
+      },
+      {
+        "id": "846fd020-f7f2-405d-8da0-469f20c53053",
+        "name": "ROLE_NEUROBAGEL",
+        "description": "Read-only access to the /neurobagel/** export endpoints, and nothing else",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "shanoir-ng",
+        "attributes": {}
       }
     ],
     "client": {
@@ -506,6 +515,15 @@
   "webAuthnPolicyPasswordlessAcceptableAaguids": [],
   "webAuthnPolicyPasswordlessExtraOrigins": [],
   "users": [
+    {
+      "id": "86dc3205-a43b-4873-bd3c-56d5da8da70e",
+      "username": "service-account-neurobagel-export",
+      "enabled": true,
+      "serviceAccountClientId": "neurobagel-export",
+      "realmRoles": [
+        "ROLE_NEUROBAGEL"
+      ]
+    }
   ],
   "scopeMappings": [
     {
@@ -916,6 +934,43 @@
         "offline_access",
         "microprofile-jwt"
       ]
+    },
+    {
+      "id": "119e7902-5a0a-4787-b2a4-f786483d8096",
+      "clientId": "neurobagel-export",
+      "name": "neurobagel-export",
+      "description": "Export job of the Neurobagel node (client credentials only)",
+      "surrogateAuthRequired": false,
+      "enabled": true,
+      "alwaysDisplayInConsole": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "NEUROBAGEL_CLIENT_SECRET",
+      "redirectUris": [],
+      "webOrigins": [],
+      "notBefore": 0,
+      "bearerOnly": false,
+      "consentRequired": false,
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true,
+      "publicClient": false,
+      "frontchannelLogout": false,
+      "protocol": "openid-connect",
+      "attributes": {
+        "oauth2.device.authorization.grant.enabled": "false",
+        "oidc.ciba.grant.enabled": "false",
+        "client_credentials.use_refresh_token": "false",
+        "use.refresh.tokens": "false",
+        "display.on.consent.screen": "false"
+      },
+      "fullScopeAllowed": true,
+      "nodeReRegistrationTimeout": -1,
+      "defaultClientScopes": [
+        "roles",
+        "basic"
+      ],
+      "optionalClientScopes": []
     },
     {
       "id": "b2fe624e-3d5d-4b5a-b5db-a4b125908d1d",
