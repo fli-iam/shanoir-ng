@@ -222,10 +222,11 @@ public class RabbitMQConfiguration {
     /** Create tags on subject-study via quality control using study cards: ms datasets -> ms studies */
     public static final String STUDIES_SUBJECT_STUDY_STUDY_CARD_TAG = "studies-subject-study-study-card-tag";
 
-    /** Queue used to get participants.tsv of a study. */
+    /** participants.tsv of a study, from a ParticipantsTsvRequestDTO: ms datasets -> ms studies */
     public static final String STUDY_PARTICIPANTS_TSV = "study-participants-tsv";
 
-    /** Neurobagel export: participants.tsv of an exported study, without writing any file: ms datasets -> ms studies */
+    /** Neurobagel export: participants.tsv of an exported study, without writing any file, from a
+     * ParticipantsTsvRequestDTO: ms datasets -> ms studies */
     public static final String NEUROBAGEL_PARTICIPANTS_TSV = "neurobagel-participants-tsv";
 
     /** Send a mail from studies microservice to ms users */
