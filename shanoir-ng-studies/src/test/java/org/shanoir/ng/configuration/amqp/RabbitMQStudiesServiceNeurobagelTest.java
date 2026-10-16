@@ -16,21 +16,28 @@ package org.shanoir.ng.configuration.amqp;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
+import java.time.LocalDate;
+import java.util.Map;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.shanoir.ng.bids.service.BIDSService;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.repository.StudyRepository;
+
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * The Neurobagel participants.tsv listener only answers for exported studies.
@@ -48,8 +55,15 @@ class RabbitMQStudiesServiceNeurobagelTest {
     @Mock
     private BIDSService bidsService;
 
+    @Spy
+    private ObjectMapper mapper = new JsonMapper();
+
     @InjectMocks
     private RabbitMQStudiesService service;
+
+    private static String request(Long studyId) {
+        return studyId == null ? "{}" : "{\"studyId\":" + studyId + ",\"firstExaminationDates\":{\"12\":\"2020-03-15\"}}";
+    }
 
     private static Study study(boolean exported, boolean draft) {
         Study study = new Study();
@@ -62,35 +76,35 @@ class RabbitMQStudiesServiceNeurobagelTest {
     @Test
     void exportedStudyGetsItsParticipants() {
         given(studyRepo.findById(STUDY_ID)).willReturn(Optional.of(study(true, false)));
-        given(bidsService.participantsTsv(STUDY_ID)).willReturn(TSV);
-        assertEquals(TSV, service.neurobagelParticipantsTsv(STUDY_ID));
+        given(bidsService.participantsTsv(STUDY_ID, Map.of(12L, LocalDate.of(2020, 3, 15)))).willReturn(TSV);
+        assertEquals(TSV, service.neurobagelParticipantsTsv(request(STUDY_ID)));
     }
 
     @Test
     void studyNotFlaggedGetsNothing() {
         given(studyRepo.findById(STUDY_ID)).willReturn(Optional.of(study(false, false)));
-        assertNull(service.neurobagelParticipantsTsv(STUDY_ID));
-        verify(bidsService, never()).participantsTsv(anyLong());
+        assertNull(service.neurobagelParticipantsTsv(request(STUDY_ID)));
+        verify(bidsService, never()).participantsTsv(anyLong(), any());
     }
 
     @Test
     void draftStudyGetsNothing() {
         given(studyRepo.findById(STUDY_ID)).willReturn(Optional.of(study(true, true)));
-        assertNull(service.neurobagelParticipantsTsv(STUDY_ID));
-        verify(bidsService, never()).participantsTsv(anyLong());
+        assertNull(service.neurobagelParticipantsTsv(request(STUDY_ID)));
+        verify(bidsService, never()).participantsTsv(anyLong(), any());
     }
 
     @Test
     void unknownStudyGetsNothing() {
         given(studyRepo.findById(STUDY_ID)).willReturn(Optional.empty());
-        assertNull(service.neurobagelParticipantsTsv(STUDY_ID));
-        verify(bidsService, never()).participantsTsv(anyLong());
+        assertNull(service.neurobagelParticipantsTsv(request(STUDY_ID)));
+        verify(bidsService, never()).participantsTsv(anyLong(), any());
     }
 
     @Test
     void nullStudyIdGetsNothing() {
-        assertNull(service.neurobagelParticipantsTsv(null));
-        verify(bidsService, never()).participantsTsv(anyLong());
+        assertNull(service.neurobagelParticipantsTsv(request(null)));
+        verify(bidsService, never()).participantsTsv(anyLong(), any());
     }
 
 }

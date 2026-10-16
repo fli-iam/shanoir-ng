@@ -18,7 +18,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.BDDMockito.given;
 
 import java.io.File;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,6 +38,8 @@ class BIDSServiceImplTest {
 
     private static final Long STUDY_ID = 7L;
 
+    private static final String HEADER = "participant_id\tsubject_identifier\tsubject_age\tsubject_sex\n";
+
     @Mock
     private SubjectRepository subjectRepository;
 
@@ -45,19 +49,54 @@ class BIDSServiceImplTest {
     @TempDir
     private File bidsStorageDir;
 
+    private static Subject subject(Long id, LocalDate birthDate) {
+        Subject subject = new Subject();
+        subject.setId(id);
+        subject.setSex(Sex.F);
+        subject.setBirthDate(birthDate);
+        return subject;
+    }
+
     @Test
     void participantsTsvListsTheSubjectsWithoutWritingAnyFile() {
         ReflectionTestUtils.setField(service, "bidsStorageDir", bidsStorageDir.getAbsolutePath());
-        Subject subject = new Subject();
-        subject.setId(12L);
-        subject.setSex(Sex.F);
-        given(subjectRepository.findByStudy_Id(STUDY_ID)).willReturn(List.of(subject));
+        given(subjectRepository.findByStudy_Id(STUDY_ID)).willReturn(List.of(subject(12L, null)));
 
-        String tsv = service.participantsTsv(STUDY_ID);
+        String tsv = service.participantsTsv(STUDY_ID, Map.of());
 
-        assertEquals("participant_id\tsubject_identifier\tsubject_age\tsubject_sex\n"
-                + "sub-12\t12\tn/a\tF\n", tsv);
+        assertEquals(HEADER + "sub-12\t12\tn/a\tF\n", tsv);
         assertEquals(0, bidsStorageDir.list().length);
+    }
+
+    @Test
+    void ageIsComputedAtTheFirstExaminationDate() {
+        given(subjectRepository.findByStudy_Id(STUDY_ID)).willReturn(List.of(
+                subject(12L, LocalDate.of(1980, 6, 15)),
+                subject(13L, LocalDate.of(1990, 1, 1))));
+
+        String tsv = service.participantsTsv(STUDY_ID, Map.of(
+                // the day before the 40th birthday
+                12L, LocalDate.of(2020, 6, 14),
+                13L, LocalDate.of(2015, 1, 1)));
+
+        assertEquals(HEADER + "sub-12\t12\t39\tF\n" + "sub-13\t13\t25\tF\n", tsv);
+    }
+
+    @Test
+    void ageIsUnknownWithoutExamination() {
+        given(subjectRepository.findByStudy_Id(STUDY_ID)).willReturn(List.of(subject(12L, LocalDate.of(1980, 6, 15))));
+
+        assertEquals(HEADER + "sub-12\t12\tn/a\tF\n", service.participantsTsv(STUDY_ID, Map.of()));
+        assertEquals(HEADER + "sub-12\t12\tn/a\tF\n", service.participantsTsv(STUDY_ID, null));
+    }
+
+    @Test
+    void ageIsUnknownWhenTheExaminationIsBeforeTheBirth() {
+        given(subjectRepository.findByStudy_Id(STUDY_ID)).willReturn(List.of(subject(12L, LocalDate.of(1980, 6, 15))));
+
+        String tsv = service.participantsTsv(STUDY_ID, Map.of(12L, LocalDate.of(1979, 1, 1)));
+
+        assertEquals(HEADER + "sub-12\t12\tn/a\tF\n", tsv);
     }
 
 }
