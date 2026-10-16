@@ -169,6 +169,7 @@ export class StudyDTOService {
             entity.sponsor = dto.extraDetails.sponsor;
             entity.principalInvestigator = dto.extraDetails.principalInvestigator;
             entity.scientificAdvisor = dto.extraDetails.scientificAdvisor;
+            entity.subjectNamePattern = dto.extraDetails.subjectNamePattern;
         }
 
         return entity;
@@ -251,6 +252,7 @@ export class StudyDTOService {
         } else {
           study.tags = [];
         }
+        study.subjectNamePattern = dto.subjectNamePattern;
         return study;
     }
 }
@@ -336,7 +338,8 @@ export class StudyDTO {
             "inclusionRateUnit": study.inclusionRateUnit,
             "sponsor": study.sponsor,
             "principalInvestigator": study.principalInvestigator,
-            "scientificAdvisor": study.scientificAdvisor
+            "scientificAdvisor": study.scientificAdvisor,
+            "subjectNamePattern": study.subjectNamePattern
         }
     }
 }
@@ -347,6 +350,7 @@ export class CenterStudyDTO {
     studyCenterList: StudyCenterDTO[];
     profile: Profile;
     tags: Tag[];
+    subjectNamePattern: string;
 }
 
 export class StudyLight {
@@ -406,6 +410,7 @@ class StudyExtraDetailsDTO {
     sponsor: string;
     principalInvestigator: string;
     scientificAdvisor: string;
+    subjectNamePattern: string;
 
     constructor(study: Study) {
         this.expectedNbOfSubjects = study.expectedNbOfSubjects;
@@ -416,6 +421,7 @@ class StudyExtraDetailsDTO {
         this.inclusionRateUnit = study.inclusionRateUnit;
         this.sponsor = study.sponsor;
         this.principalInvestigator = study.principalInvestigator;
-        this.scientificAdvisor = study.scientificAdvisor
+        this.scientificAdvisor = study.scientificAdvisor;
+        this.subjectNamePattern = study.subjectNamePattern;
     }
 }
