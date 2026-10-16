@@ -22,9 +22,9 @@ use datasets;
 -- INSERT INTO `study_card_condition` VALUES (2,528446,'tse_vfl_WIP607',2,3),(3,1573009,'200',6,5),(4,1573009,'150',5,5),(5,1573009,'150',5,6),(6,1573013,'781.00',2,6);
 
 INSERT INTO study
-	(id, name, is_draft)
+	(id, name, is_draft, neurobagel_export)
 VALUES
-	(1, 'DemoStudy', 0);
+	(1, 'DemoStudy', 0, 0);
 
 INSERT INTO subject
 	(id, name, study_id)
