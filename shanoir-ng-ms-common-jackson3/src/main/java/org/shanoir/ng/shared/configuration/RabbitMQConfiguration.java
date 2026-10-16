@@ -253,7 +253,7 @@ public class RabbitMQConfiguration {
     /** Create tags on subject-study via quality control using study cards: ms datasets -> ms studies */
     public static final String STUDIES_SUBJECT_STUDY_STUDY_CARD_TAG = "studies-subject-study-study-card-tag";
 
-    /** Queue used to get participants.tsv of a study. */
+    /** participants.tsv of a study, from a ParticipantsTsvRequestDTO: ms datasets -> ms studies */
     public static final String STUDY_PARTICIPANTS_TSV = "study-participants-tsv";
 
     /**
