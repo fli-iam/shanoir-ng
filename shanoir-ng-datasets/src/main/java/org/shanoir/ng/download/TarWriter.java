@@ -17,6 +17,7 @@ package org.shanoir.ng.download;
 import com.github.luben.zstd.ZstdOutputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.io.FilterOutputStream;
 import java.io.IOException;
@@ -33,6 +34,13 @@ public class TarWriter implements ArchiveWriter {
     private static final String EXTENSION = ".tar.zst";
 
     private static final String CONTENT_TYPE = "application/zstd";
+
+    private static final String UNCOMPRESSED_EXTENSION = ".tar";
+
+    private static final String UNCOMPRESSED_CONTENT_TYPE = "application/x-tar";
+
+    @Value("{vip.download.compression-level}")
+    private static int COMPRESSION_LEVEL;
 
     /** Idle time after which a keep-alive tiny byte load is sent, so that the connection is not dropped while waiting for the PACS. */
     private static final long KEEP_ALIVE_PERIOD = TimeUnit.SECONDS.toNanos(20);
@@ -52,6 +60,7 @@ public class TarWriter implements ArchiveWriter {
 
     private final OutputStream network;
 
+    /** Null when COMPRESSION_LEVEL is 0: the tar is then sent uncompressed. */
     private final ZstdOutputStream zstd;
 
     private final TarArchiveOutputStreamShanoir tar;
@@ -64,24 +73,32 @@ public class TarWriter implements ArchiveWriter {
     /** Set when a keep-alive could not be written. */
     private volatile boolean clientGone;
 
-    /** Only using Zstandard compression algo atm **/
+    /** Zstandard compression, or a plain tar when COMPRESSION_LEVEL is 0 **/
     public TarWriter(OutputStream out) throws IOException {
         this.network = new FilterOutputStreamShanoir(PacsTransferStats.withNetworkTiming(out));
-        this.zstd = new ZstdOutputStream(network, 1);
-        this.tar = new TarArchiveOutputStreamShanoir(zstd);
+        if (COMPRESSION_LEVEL == 0) {
+            this.zstd = null;
+            this.tar = new TarArchiveOutputStreamShanoir(network);
+        } else {
+            this.zstd = new ZstdOutputStream(network, COMPRESSION_LEVEL);
+            this.tar = new TarArchiveOutputStreamShanoir(zstd);
+        }
 
         // DICOM paths are longer than the 100 characters of a basic tar header
         tar.setLongFileMode(TarArchiveOutputStream.LONGFILE_POSIX);
         tar.setBigNumberMode(TarArchiveOutputStream.BIGNUMBER_POSIX);
-        scheduleKeepAlive(KEEP_ALIVE_PERIOD);
+        // skippable frames only exist in zstd: no keep-alive for a plain tar
+        if (zstd != null) {
+            scheduleKeepAlive(KEEP_ALIVE_PERIOD);
+        }
     }
 
     public String getExtension() {
-        return EXTENSION;
+        return zstd == null ? UNCOMPRESSED_EXTENSION : EXTENSION;
     }
 
     public String getContentType() {
-        return CONTENT_TYPE;
+        return zstd == null ? UNCOMPRESSED_CONTENT_TYPE : CONTENT_TYPE;
     }
 
     public void addEntry(String name, byte[] content) throws IOException {
