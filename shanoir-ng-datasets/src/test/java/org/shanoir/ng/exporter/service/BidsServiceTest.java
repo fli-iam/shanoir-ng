@@ -43,6 +43,7 @@ import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.examination.model.Examination;
+import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.model.Study;
@@ -80,6 +81,9 @@ public class BidsServiceTest {
 
     @Mock
     private StudyRepository studyRepository;
+
+    @Mock
+    private ExaminationRepository examinationRepository;
 
     @InjectMocks
     @Spy
