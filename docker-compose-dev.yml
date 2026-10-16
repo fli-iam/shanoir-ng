@@ -330,6 +330,7 @@ services:
         condition: service_started
       solr:
         condition: service_started
+        required: false
   #
   # Preclinical microservice
   #
@@ -536,6 +537,25 @@ services:
       - "bids-data:/var/bids-data" # temporary
     depends_on:
       - rabbitmq
+    networks:
+      - shanoir_ng_network
+
+  integration-tests:
+    container_name: "${SHANOIR_PREFIX}integration-tests"
+    build:
+      context: docker-compose
+      target: integration-tests
+    environment:
+      - INTEGRATION_TESTS_PROFILE
+      - INTEGRATION_TESTS_SHANOIR_SERVER_URL
+      - INTEGRATION_TESTS_SHANOIR_ADMIN_USERNAME
+      - INTEGRATION_TESTS_SHANOIR_ADMIN_PASSWORD
+      - INTEGRATION_TESTS_SHANOIR_EXPERT_USERNAME
+      - INTEGRATION_TESTS_SHANOIR_EXPERT_PASSWORD
+      - INTEGRATION_TESTS_SHANOIR_USER_USERNAME
+      - INTEGRATION_TESTS_SHANOIR_USER_PASSWORD
+    depends_on:
+      - nginx
     networks:
       - shanoir_ng_network
 
