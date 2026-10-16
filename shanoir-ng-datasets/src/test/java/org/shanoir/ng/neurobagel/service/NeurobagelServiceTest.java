@@ -20,21 +20,27 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.neurobagel.dto.NeurobagelDatasetDescriptionDTO;
 import org.shanoir.ng.neurobagel.dto.NeurobagelStudyDTO;
 import org.shanoir.ng.neurobagel.repository.NeurobagelImagingRepository;
@@ -48,6 +54,8 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 @ExtendWith(MockitoExtension.class)
 class NeurobagelServiceTest {
@@ -60,6 +68,14 @@ class NeurobagelServiceTest {
 
     @Mock
     private NeurobagelImagingRepository imagingRepository;
+
+    @Mock
+    private ExaminationRepository examinationRepository;
+
+    /** Configured as the Spring Boot object mapper: dates written as ISO strings */
+    @Spy
+    private ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule())
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
     @InjectMocks
     private NeurobagelService service;
@@ -102,10 +118,25 @@ class NeurobagelServiceTest {
     @Test
     void participantsOfAnExportedStudyComeFromStudies() {
         given(studyRepository.existsByIdAndNeurobagelExportTrueAndIsDraftFalse(1L)).willReturn(true);
-        given(rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.NEUROBAGEL_PARTICIPANTS_TSV, "1"))
+        given(rabbitTemplate.convertSendAndReceive(eq(RabbitMQConfiguration.NEUROBAGEL_PARTICIPANTS_TSV), anyString()))
                 .willReturn("participant_id\nsub-1\n");
 
         assertEquals(Optional.of("participant_id\nsub-1\n"), service.findParticipantsTsv(1L));
+    }
+
+    @Test
+    void participantsRequestCarriesTheFirstExaminationDates() throws Exception {
+        given(studyRepository.existsByIdAndNeurobagelExportTrueAndIsDraftFalse(1L)).willReturn(true);
+        given(examinationRepository.findFirstExaminationDatesByStudyId(1L))
+                .willReturn(Map.of(12L, LocalDate.of(2020, 3, 15)));
+
+        service.findParticipantsTsv(1L);
+
+        ArgumentCaptor<Object> request = ArgumentCaptor.forClass(Object.class);
+        verify(rabbitTemplate).convertSendAndReceive(eq(RabbitMQConfiguration.NEUROBAGEL_PARTICIPANTS_TSV), request.capture());
+        JsonNode json = objectMapper.readTree((String) request.getValue());
+        assertEquals(1L, json.get("studyId").asLong());
+        assertEquals("2020-03-15", json.at("/firstExaminationDates/12").asText());
     }
 
     @Test
@@ -119,7 +150,8 @@ class NeurobagelServiceTest {
     @Test
     void noAnswerFromStudiesMeansNoParticipants() {
         given(studyRepository.existsByIdAndNeurobagelExportTrueAndIsDraftFalse(1L)).willReturn(true);
-        given(rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.NEUROBAGEL_PARTICIPANTS_TSV, "1")).willReturn(null);
+        given(rabbitTemplate.convertSendAndReceive(eq(RabbitMQConfiguration.NEUROBAGEL_PARTICIPANTS_TSV), anyString()))
+                .willReturn(null);
 
         assertFalse(service.findParticipantsTsv(1L).isPresent());
     }
