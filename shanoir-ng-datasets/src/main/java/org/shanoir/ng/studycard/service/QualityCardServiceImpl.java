@@ -15,7 +15,6 @@
 package org.shanoir.ng.studycard.service;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -26,6 +25,7 @@ import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
+import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -75,6 +75,9 @@ public class QualityCardServiceImpl implements QualityCardService {
 
     @Autowired
     private StudyRepository studyRepository;
+
+    @Autowired
+    private ExaminationRepository examinationRepository;
 
     @Autowired
     private DatasetAcquisitionService datasetAcquisitionService;
@@ -250,7 +253,7 @@ public class QualityCardServiceImpl implements QualityCardService {
         ShanoirEvent event = new ShanoirEvent(ShanoirEventType.CHECK_QUALITY_EVENT, null, KeycloakUtil.getTokenUserId(),
                 "Quality check started on study " + qualityCard.getStudyId(), 4, qualityCard.getStudyId());
         eventService.publishEvent(event);
-        Study study = studyRepository.findByIdWithDatasetsAndDatasetFilePaths(qualityCard.getStudyId()).orElse(null);
+        Study study = studyRepository.findById(qualityCard.getStudyId()).orElse(null);
         if (study == null)
             throw new IllegalArgumentException("study can't be null");
         if (!Objects.equals(qualityCard.getStudyId(), study.getId()))
@@ -267,60 +270,27 @@ public class QualityCardServiceImpl implements QualityCardService {
         // Load lazy data
         loadRulesLazyCollections(qualityCard.getRules(), event);
 
-        List<Examination> examinations = study.getExaminations();
+        // Only the examination ids are loaded here : each examination is loaded only when processed.
+        List<Long> examinationIds = new ArrayList<>(examinationRepository.findIdsByStudyId(study.getId()));
+        Collections.sort(examinationIds);
         if (from != null && to != null) {
             int start = Math.max(0, from);
-            int end = Math.min(to, examinations.size());
-            examinations = start < end ? examinations.subList(start, end) : Collections.emptyList();
+            int end = Math.min(to, examinationIds.size());
+            examinationIds = start < end ? examinationIds.subList(start, end) : Collections.emptyList();
         }
 
         QualityCardResult result = new QualityCardResult();
-        AtomicInteger examinationIndex = new AtomicInteger(0);
-        int totalExaminations = examinations.size();
+        int examinationIndex = 0;
+        int totalExaminations = examinationIds.size();
 
-        for (Examination examination : examinations) {
-            event.setMessage("Processing examination " + examination.getComment());
-            event.setProgress(examinationIndex.floatValue() / totalExaminations);
-            eventService.publishEvent(event);
-
-            // We only load the DatasetAcquisitions from one examination at a time
-            List<DatasetAcquisition> datasetAcquisitions = examination.getDatasetAcquisitions();
-
+        for (Long examinationId : examinationIds) {
+            event.setProgress((float) examinationIndex / totalExaminations);
             if (updateTags) {
-                resetDatasetAcquisitions(datasetAcquisitions);
+                result.merge(self.applyQualityCardOnExamination(qualityCard, examinationId, event));
+            } else {
+                result.merge(self.testQualityCardOnExamination(qualityCard, examinationId, event));
             }
-            // We apply the quality card on DatasetAcquisitions for one
-            // examination only
-            List<DatasetAcquisition> updatedAcquisitions = new ArrayList<>();
-            try {
-                datasetAcquisitions.stream().forEach(datasetAcquisition -> {
-                    event.setStatus(2);
-                    event.setMessage("Checking quality for acquisition " + datasetAcquisition.getId()
-                            + " in examination " + examination.getComment());
-                    eventService.publishEvent(event);
-                    try {
-                        QualityCardResult acquisitionResult = applyQualityCardOnDatasetAcquisition(
-                                qualityCard, datasetAcquisition);
-                        result.merge(acquisitionResult);
-                        updatedAcquisitions.addAll(acquisitionResult.getUpdatedDatasetAcquisitions());
-                    } catch (PacsException e) {
-                        throw new StreamExceptionWrapper(e);
-                    }
-                });
-            } catch (StreamExceptionWrapper e) {
-                throw (PacsException) (e.getCause());
-            }
-            if (updateTags && !updatedAcquisitions.isEmpty()) {
-                try {
-                    datasetAcquisitionService.update(updatedAcquisitions);
-                } catch (EntityNotFoundException e) {
-                    throw new IllegalStateException(
-                            "Could not update dataset acquisitions for examination " + examination.getComment(), e);
-                }
-            }
-            datasetAcquisitions.clear();
-            updatedAcquisitions.clear();
-            examinationIndex.incrementAndGet();
+            examinationIndex++;
         }
         event.setProgress(1f);
         event.setStatus(1);
@@ -328,6 +298,59 @@ public class QualityCardServiceImpl implements QualityCardService {
                 + " ms.");
         event.setReport(result.toString());
         eventService.publishEvent(event);
+        return result;
+    }
+
+    /**
+     * Applies the quality card on one examination and saves the resulting quality tags,
+     * in a transaction of its own so that only this examination is loaded at a time.
+     */
+    @Transactional
+    public QualityCardResult applyQualityCardOnExamination(QualityCard qualityCard, Long examinationId, ShanoirEvent event) throws PacsException {
+        return applyQualityCardOnExamination(qualityCard, examinationId, event, true);
+    }
+
+    /**
+     * Applies the quality card on one examination without saving anything: the transaction
+     * is read-only, so the quality tags set on the acquisitions are never flushed.
+     */
+    @Transactional(readOnly = true)
+    public QualityCardResult testQualityCardOnExamination(QualityCard qualityCard, Long examinationId, ShanoirEvent event) throws PacsException {
+        return applyQualityCardOnExamination(qualityCard, examinationId, event, false);
+    }
+
+    private QualityCardResult applyQualityCardOnExamination(QualityCard qualityCard, Long examinationId, ShanoirEvent event, boolean updateTags) throws PacsException {
+        QualityCardResult result = new QualityCardResult();
+        Examination examination = examinationRepository.findByIdWithAcquisitions(examinationId).orElse(null);
+        if (examination == null) {
+            LOG.warn("Examination {} not found while applying quality card {}", examinationId, qualityCard.getId());
+            return result;
+        }
+        event.setMessage("Processing examination " + examination.getComment());
+        eventService.publishEvent(event);
+
+        List<DatasetAcquisition> datasetAcquisitions = examination.getDatasetAcquisitions();
+        if (updateTags) {
+            resetDatasetAcquisitions(datasetAcquisitions);
+        }
+        List<DatasetAcquisition> updatedAcquisitions = new ArrayList<>();
+        for (DatasetAcquisition datasetAcquisition : datasetAcquisitions) {
+            event.setStatus(2);
+            event.setMessage("Checking quality for acquisition " + datasetAcquisition.getId()
+                    + " in examination " + examination.getComment());
+            eventService.publishEvent(event);
+            QualityCardResult acquisitionResult = applyQualityCardOnDatasetAcquisition(qualityCard, datasetAcquisition);
+            result.merge(acquisitionResult);
+            updatedAcquisitions.addAll(acquisitionResult.getUpdatedDatasetAcquisitions());
+        }
+        if (updateTags && !updatedAcquisitions.isEmpty()) {
+            try {
+                datasetAcquisitionService.update(updatedAcquisitions);
+            } catch (EntityNotFoundException e) {
+                throw new IllegalStateException(
+                        "Could not update dataset acquisitions for examination " + examination.getComment(), e);
+            }
+        }
         return result;
     }
 
