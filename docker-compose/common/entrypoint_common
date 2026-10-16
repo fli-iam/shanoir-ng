@@ -104,6 +104,7 @@ require()
             VIP_URL_HOST)           match "$name" '^([a-z0-9.:-]+)$'                     ;;
             VIP_CLIENT_SECRET)      ;;
             VIP_MAX_DOWNLOAD)       ;;
+            NEUROBAGEL_CLIENT_SECRET) match "$name" '^[A-Za-z0-9]+$' ;;
             SHANOIR_SHUTDOWN_HOUR)      ;;
             SHANOIR_CONTINUANCE_HOUR)      ;;
             DEV_USERS_DEFAULT_PASSWORD)      ;;
@@ -144,7 +145,7 @@ export SHANOIR_KEYCLOAK_INTERNAL_URL
 # For each listed environment variable:
 # - if its value is blank, then fill it with its default (if any)
 # - ensure that its value is well-formatted of blank
-# 
+#
 # usage:  require VARNAME [VARNAME...]
 optional()
 {
