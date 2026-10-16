@@ -21,6 +21,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 
+import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.neurobagel.dto.NeurobagelDatasetDescriptionDTO;
 import org.shanoir.ng.neurobagel.dto.NeurobagelStudyDTO;
 import org.shanoir.ng.neurobagel.repository.NeurobagelImagingRepository;
@@ -28,6 +29,7 @@ import org.shanoir.ng.neurobagel.repository.NeurobagelImagingRow;
 import org.shanoir.ng.neurobagel.service.NeurobagelSuffix.Modality;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.shared.dto.ParticipantsTsvRequestDTO;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.tag.model.StudyTag;
 import org.slf4j.Logger;
@@ -37,6 +39,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Studies exposed to the Neurobagel federation: flagged by an admin (neurobagel_export) and not drafts.
@@ -65,6 +70,12 @@ public class NeurobagelService {
     @Autowired
     private NeurobagelImagingRepository imagingRepository;
 
+    @Autowired
+    private ExaminationRepository examinationRepository;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
     /** Public base URL of the Shanoir front, e.g. https://shanoir.example.org/shanoir-ng/ */
     @Value("${front.server.address}")
     private String frontServerAddress;
@@ -87,15 +98,21 @@ public class NeurobagelService {
     }
 
     /**
-     * participants.tsv of an exported study, built by ms studies (which checks the export flag again).
-     * Empty when the study is not exported, or when ms studies does not answer.
+     * participants.tsv of an exported study, built by ms studies (which checks the export flag again) with the
+     * subject ages at their first examination. Empty when the study is not exported, or when ms studies does not answer.
      */
     public Optional<String> findParticipantsTsv(Long studyId) {
         if (!isExported(studyId)) {
             return Optional.empty();
         }
-        Object tsv = rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.NEUROBAGEL_PARTICIPANTS_TSV,
-                String.valueOf(studyId));
+        String request;
+        try {
+            request = objectMapper.writeValueAsString(new ParticipantsTsvRequestDTO(studyId,
+                    examinationRepository.findFirstExaminationDatesByStudyId(studyId)));
+        } catch (JsonProcessingException e) {
+            throw new UncheckedIOException("Cannot write the participants.tsv request of study " + studyId, e);
+        }
+        Object tsv = rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.NEUROBAGEL_PARTICIPANTS_TSV, request);
         if (tsv == null) {
             LOG.warn("No Neurobagel participants.tsv received from ms studies for exported study {}", studyId);
             return Optional.empty();
