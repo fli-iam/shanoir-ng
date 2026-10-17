@@ -85,11 +85,13 @@ public class RtDatasetStrategy implements DatasetStrategy<RtDataset> {
         }
         rtDataset.getOriginMetadata().setCardinalityOfRelatedSubjects(refCardinalityOfRelatedSubjects);
 
-        for (ExpressionFormat expressionFormat : dataset.getExpressionFormats()) {
-            datasetExpressionContext.setDatasetExpressionStrategy(expressionFormat.getType());
-            DatasetExpression datasetExpression = datasetExpressionContext.generateDatasetExpression(serie, expressionFormat);
-            datasetExpression.setDataset(rtDataset);
-            rtDataset.getDatasetExpressions().add(datasetExpression);
+        if (dataset.getExpressionFormats() != null) {
+            for (ExpressionFormat expressionFormat : dataset.getExpressionFormats()) {
+                datasetExpressionContext.setDatasetExpressionStrategy(expressionFormat.getType());
+                DatasetExpression datasetExpression = datasetExpressionContext.generateDatasetExpression(serie, expressionFormat);
+                datasetExpression.setDataset(rtDataset);
+                rtDataset.getDatasetExpressions().add(datasetExpression);
+            }
         }
 
         DatasetMetadata originalDM = rtDataset.getOriginMetadata();
