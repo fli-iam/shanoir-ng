@@ -15,7 +15,7 @@
 export const environment = {
     production: true,
     keycloakUrl: window["env"]["keycloakUrl"] || "https://shanoir-ng-nginx/auth",
-    ohifUrl: window["env"]["ohifUrl"] || "https://ohif",
+    ohifUrl: window["env"]["ohifUrl"] || "https://viewer",
     videpeUrl: window["env"]["videpeUrl"] || "https://videpe",
     vipUrl: window["env"]["vipUrl"] || "https://vip.creatis.insa-lyon.fr",
     dpoMail: window["env"]["dpoMail"] || "dpo@inria.fr",
