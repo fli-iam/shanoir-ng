@@ -86,6 +86,8 @@ window.config = {
 (function installShanoirSegExportShim() {
 	const EXPORT_COMMANDS = new Set(['storeSegmentation', 'downloadSegmentation']);
 	const POLL_MS = 250;
+	// Give up after ~60 s so a renamed/removed OHIF global is reported instead of failing silently.
+	const MAX_POLL_ATTEMPTS = 240;
 	// Upper bound on the export preload: queued pool requests can be dropped without
 	// settling (e.g. on mode exit), so never wait on them indefinitely.
 	const PRELOAD_TIMEOUT_MS = 120000;
@@ -343,8 +345,16 @@ window.config = {
 		return true;
 	}
 
+	let pollAttempts = 0;
+
 	function poll() {
 		if (tryInstall()) {
+			return;
+		}
+		if (++pollAttempts >= MAX_POLL_ATTEMPTS) {
+			console.warn(
+				'[shanoir] OHIF segmentation export shim NOT installed: OHIF globals not found after ~60 s (OHIF version changed?)'
+			);
 			return;
 		}
 		setTimeout(poll, POLL_MS);
