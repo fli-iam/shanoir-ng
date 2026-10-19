@@ -14,6 +14,8 @@
 
 package org.shanoir.ng.shared.configuration;
 
+import org.hibernate.tool.schema.internal.script.MultiLineSqlScriptExtractor;
+import org.hibernate.tool.schema.internal.script.SingleLineSqlScriptExtractor;
 import org.shanoir.ng.shared.email.EmailBase;
 import org.shanoir.ng.shared.email.EmailDatasetImportFailed;
 import org.shanoir.ng.shared.email.EmailDatasetsImported;
@@ -80,6 +82,15 @@ public class NativeImageHintsConfiguration {
                     MemberCategory.INVOKE_DECLARED_METHODS);
             hints.reflection().registerType(
                     ConnectionFactory.class,
+                    MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
+                    MemberCategory.INVOKE_DECLARED_METHODS);
+            hints.reflection().registerType(
+                    MultiLineSqlScriptExtractor.class,
+                    MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
+                    MemberCategory.INVOKE_DECLARED_METHODS);
+            hints.reflection().registerType(
+                    SingleLineSqlScriptExtractor.class,
+                    MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
                     MemberCategory.INVOKE_DECLARED_METHODS);
         }
     }
