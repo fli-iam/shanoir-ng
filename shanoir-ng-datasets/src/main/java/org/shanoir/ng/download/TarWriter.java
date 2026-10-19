@@ -39,8 +39,8 @@ public class TarWriter implements ArchiveWriter {
 
     private static final String UNCOMPRESSED_CONTENT_TYPE = "application/x-tar";
 
-    @Value("{vip.download.compression-level}")
-    private static int COMPRESSION_LEVEL;
+    @Value("${vip.download.compression-level}")
+    private int compressionLevel;
 
     /** Idle time after which a keep-alive tiny byte load is sent, so that the connection is not dropped while waiting for the PACS. */
     private static final long KEEP_ALIVE_PERIOD = TimeUnit.SECONDS.toNanos(20);
@@ -76,11 +76,11 @@ public class TarWriter implements ArchiveWriter {
     /** Zstandard compression, or a plain tar when COMPRESSION_LEVEL is 0 **/
     public TarWriter(OutputStream out) throws IOException {
         this.network = new FilterOutputStreamShanoir(PacsTransferStats.withNetworkTiming(out));
-        if (COMPRESSION_LEVEL == 0) {
+        if (compressionLevel == 0) {
             this.zstd = null;
             this.tar = new TarArchiveOutputStreamShanoir(network);
         } else {
-            this.zstd = new ZstdOutputStream(network, COMPRESSION_LEVEL);
+            this.zstd = new ZstdOutputStream(network, compressionLevel);
             this.tar = new TarArchiveOutputStreamShanoir(zstd);
         }
 
