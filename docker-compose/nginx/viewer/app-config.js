@@ -86,6 +86,9 @@ window.config = {
 (function installShanoirSegExportShim() {
 	const EXPORT_COMMANDS = new Set(['storeSegmentation', 'downloadSegmentation']);
 	const POLL_MS = 250;
+	// Upper bound on the export preload: queued pool requests can be dropped without
+	// settling (e.g. on mode exit), so never wait on them indefinitely.
+	const PRELOAD_TIMEOUT_MS = 120000;
 
 	function tryInstall() {
 		if (window.__shanoirSegExportShimInstalled) {
@@ -167,7 +170,9 @@ window.config = {
 							new Promise((resolve, reject) => {
 								const run = () => loadOne(ref).then(resolve, reject);
 								try {
-									pool.addRequest(run, 'prefetch', { imageId: ref }, 0);
+									// 'interaction', not 'prefetch': stackPrefetch clears the prefetch
+									// stack on every slice change, dropping queued requests unsettled.
+									pool.addRequest(run, 'interaction', { imageId: ref }, 0);
 								} catch (err) {
 									run().then(resolve, reject);
 								}
@@ -201,12 +206,23 @@ window.config = {
 				});
 			}, 1000);
 
+			let preloadTimeoutTimer;
 			try {
 				// Load every referenced source frame (OHIF generateSegmentation maps all
 				// labelmap slices to cache.getImage(referencedImageId) synchronously).
-				await preloadReferencedSourceImages(imageLoader, refs);
+				// On timeout, fall through to the cache check below.
+				await Promise.race([
+					preloadReferencedSourceImages(imageLoader, refs),
+					new Promise(resolve => {
+						preloadTimeoutTimer = setTimeout(() => {
+							console.warn('[shanoir] segmentation export: source image preload timed out');
+							resolve();
+						}, PRELOAD_TIMEOUT_MS);
+					}),
+				]);
 			} finally {
 				clearTimeout(slowNotifyTimer);
+				clearTimeout(preloadTimeoutTimer);
 			}
 
 			const stillMissing = [...refs].filter(ref => !cache.getImage(ref));
