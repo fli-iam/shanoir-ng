@@ -271,11 +271,13 @@ window.config = {
 				if (!labelmapIds) {
 					continue;
 				}
-				const registered = new Set(
-					Object.keys(
-						services.segmentationService.getSegmentation(seg.segmentationId).segments || {}
-					).map(Number)
-				);
+				const ohifSeg = services.segmentationService.getSegmentation(seg.segmentationId);
+				if (!ohifSeg) {
+					// Unknown to OHIF: no segment registry to compare against, so treating every
+					// voxel as unregistered would wrongly block the export.
+					continue;
+				}
+				const registered = new Set(Object.keys(ohifSeg.segments || {}).map(Number));
 				for (const id of labelmapIds) {
 					const lm = cache.getImage(id);
 					if (!lm) {
@@ -294,8 +296,7 @@ window.config = {
 			return [];
 		}
 
-		async function runExportCommand(commandName, options, ...rest) {
-			const segmentationId = options?.segmentationId;
+		async function isExportAllowed(segmentationId) {
 			const badValues = findUnregisteredVoxelValues(segmentationId);
 			if (badValues.length) {
 				services.uiNotificationService?.show?.({
@@ -306,13 +307,24 @@ window.config = {
 					type: 'warning',
 					duration: 15000,
 				});
-				return;
+				return false;
 			}
 
 			// Always prepare: a shared in-flight counter would let a concurrent export of
 			// another segmentation skip its preload.
-			const ready = await prepareExport(segmentationId);
-			if (!ready) {
+			return prepareExport(segmentationId);
+		}
+
+		async function runExportCommand(commandName, options, ...rest) {
+			let allowed;
+			try {
+				allowed = await isExportAllowed(options?.segmentationId);
+			} catch (err) {
+				// Fail open: a bug in the shim must never block an export.
+				console.warn('[shanoir] segmentation export shim failed, running original command:', err);
+				allowed = true;
+			}
+			if (!allowed) {
 				return;
 			}
 
