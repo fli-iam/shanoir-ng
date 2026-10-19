@@ -334,7 +334,7 @@ CMD []
 
 ################ nginx #####################################################
 
-FROM ohif/app:v3.12.5 AS nginx-viewer
+FROM ohif/app:v3.13.13 AS nginx-viewer
 
 FROM nginx AS nginx
 
