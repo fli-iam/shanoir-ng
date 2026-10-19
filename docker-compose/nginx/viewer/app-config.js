@@ -111,7 +111,6 @@ window.config = {
 		}
 
 		const originalRunCommand = commandsManager.runCommand.bind(commandsManager);
-		let guardDepth = 0;
 		const exportPreparePromises = new Map();
 
 		function getExportSegmentations(segmentationId) {
@@ -190,8 +189,11 @@ window.config = {
 
 		async function ensureSourceImagesLoaded(segmentationId) {
 			const { cache, imageLoader } = window.cornerstone;
-			const refs = collectReferencedSourceImageIds(segmentationId);
-			if (!refs.size) {
+			// Only fetch what is not cached yet, so re-entrant or repeated exports are cheap.
+			const missing = [...collectReferencedSourceImageIds(segmentationId)].filter(
+				ref => !cache.getImage(ref)
+			);
+			if (!missing.length) {
 				return true;
 			}
 
@@ -212,7 +214,7 @@ window.config = {
 				// labelmap slices to cache.getImage(referencedImageId) synchronously).
 				// On timeout, fall through to the cache check below.
 				await Promise.race([
-					preloadReferencedSourceImages(imageLoader, refs),
+					preloadReferencedSourceImages(imageLoader, missing),
 					new Promise(resolve => {
 						preloadTimeoutTimer = setTimeout(() => {
 							console.warn('[shanoir] segmentation export: source image preload timed out');
@@ -225,7 +227,7 @@ window.config = {
 				clearTimeout(preloadTimeoutTimer);
 			}
 
-			const stillMissing = [...refs].filter(ref => !cache.getImage(ref));
+			const stillMissing = missing.filter(ref => !cache.getImage(ref));
 			if (stillMissing.length) {
 				console.warn(
 					'[shanoir] segmentation export: source images still not in cache after preload:',
@@ -244,7 +246,7 @@ window.config = {
 
 			console.info(
 				'[shanoir] segmentation export: preloaded',
-				refs.size,
+				missing.length,
 				'referenced source image(s)'
 			);
 			return true;
@@ -307,20 +309,14 @@ window.config = {
 				return;
 			}
 
-			if (guardDepth === 0) {
-				const ready = await prepareExport(segmentationId);
-				if (!ready) {
-					return;
-				}
+			// Always prepare: a shared in-flight counter would let a concurrent export of
+			// another segmentation skip its preload.
+			const ready = await prepareExport(segmentationId);
+			if (!ready) {
+				return;
 			}
 
-			guardDepth++;
-			try {
-				const result = originalRunCommand(commandName, options, ...rest);
-				return result instanceof Promise ? await result : result;
-			} finally {
-				guardDepth--;
-			}
+			return originalRunCommand(commandName, options, ...rest);
 		}
 
 		commandsManager.runCommand = function shanoirWrappedRunCommand(commandName, options, ...rest) {
