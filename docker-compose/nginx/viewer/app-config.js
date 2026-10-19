@@ -109,14 +109,28 @@ window.config = {
 
 		const originalRunCommand = commandsManager.runCommand.bind(commandsManager);
 		let guardDepth = 0;
-		let exportPreparePromise = null;
+		const exportPreparePromises = new Map();
 
-		function collectReferencedSourceImageIds() {
-			const { cache } = window.cornerstone;
+		function getExportSegmentations(segmentationId) {
 			const segs = cornerstoneTools.segmentation.state.getSegmentations();
+			if (!segmentationId) {
+				return segs;
+			}
+			return segs.filter(seg => seg.segmentationId === segmentationId);
+		}
+
+		function getExportLoadConcurrency() {
+			const cfg = window.config?.maxNumRequests;
+			const raw = cfg?.prefetch ?? cfg?.interaction ?? 6;
+			const n = Number(raw);
+			return Number.isFinite(n) && n > 0 ? n : 6;
+		}
+
+		function collectReferencedSourceImageIds(segmentationId) {
+			const { cache } = window.cornerstone;
 			const refs = new Set();
 
-			for (const seg of segs) {
+			for (const seg of getExportSegmentations(segmentationId)) {
 				const labelmapIds = seg?.representationData?.Labelmap?.imageIds;
 				if (!labelmapIds) {
 					continue;
@@ -132,9 +146,46 @@ window.config = {
 			return refs;
 		}
 
-		async function ensureSourceImagesLoaded() {
+		async function preloadReferencedSourceImages(imageLoader, refs) {
+			const ids = [...refs];
+			if (!ids.length) {
+				return;
+			}
+
+			const pool = cornerstone.imageLoadPoolManager;
+			const concurrency = getExportLoadConcurrency();
+
+			const loadOne = ref =>
+				imageLoader.loadAndCacheImage(ref).catch(err => {
+					console.warn('[shanoir] segmentation export: failed to load source image', ref, err);
+				});
+
+			if (pool?.addRequest) {
+				await Promise.allSettled(
+					ids.map(
+						ref =>
+							new Promise((resolve, reject) => {
+								const run = () => loadOne(ref).then(resolve, reject);
+								try {
+									pool.addRequest(run, 'prefetch', { imageId: ref }, 0);
+								} catch (err) {
+									run().then(resolve, reject);
+								}
+							})
+					)
+				);
+				return;
+			}
+
+			for (let i = 0; i < ids.length; i += concurrency) {
+				const batch = ids.slice(i, i + concurrency);
+				await Promise.allSettled(batch.map(loadOne));
+			}
+		}
+
+		async function ensureSourceImagesLoaded(segmentationId) {
 			const { cache, imageLoader } = window.cornerstone;
-			const refs = collectReferencedSourceImageIds();
+			const refs = collectReferencedSourceImageIds(segmentationId);
 			if (!refs.size) {
 				return true;
 			}
@@ -153,7 +204,7 @@ window.config = {
 			try {
 				// Load every referenced source frame (OHIF generateSegmentation maps all
 				// labelmap slices to cache.getImage(referencedImageId) synchronously).
-				await Promise.all([...refs].map(ref => imageLoader.loadAndCacheImage(ref)));
+				await preloadReferencedSourceImages(imageLoader, refs);
 			} finally {
 				clearTimeout(slowNotifyTimer);
 			}
@@ -183,21 +234,21 @@ window.config = {
 			return true;
 		}
 
-		function prepareExport() {
-			if (!exportPreparePromise) {
-				exportPreparePromise = ensureSourceImagesLoaded().finally(() => {
-					exportPreparePromise = null;
+		function prepareExport(segmentationId) {
+			const key = segmentationId ?? '';
+			if (!exportPreparePromises.has(key)) {
+				const promise = ensureSourceImagesLoaded(segmentationId).finally(() => {
+					exportPreparePromises.delete(key);
 				});
+				exportPreparePromises.set(key, promise);
 			}
-			return exportPreparePromise;
+			return exportPreparePromises.get(key);
 		}
 
-		function findUnregisteredVoxelValues() {
+		function findUnregisteredVoxelValues(segmentationId) {
 			const { cache } = window.cornerstone;
-			const segs = cornerstoneTools.segmentation.state.getSegmentations();
-			const unregistered = new Set();
 
-			for (const seg of segs) {
+			for (const seg of getExportSegmentations(segmentationId)) {
 				const labelmapIds = seg?.representationData?.Labelmap?.imageIds;
 				if (!labelmapIds) {
 					continue;
@@ -207,7 +258,6 @@ window.config = {
 						services.segmentationService.getSegmentation(seg.segmentationId).segments || {}
 					).map(Number)
 				);
-				const voxelValues = new Set();
 				for (const id of labelmapIds) {
 					const lm = cache.getImage(id);
 					if (!lm) {
@@ -215,28 +265,25 @@ window.config = {
 					}
 					const px = lm.getPixelData();
 					for (let i = 0; i < px.length; i++) {
-						if (px[i]) {
-							voxelValues.add(px[i]);
+						const v = px[i];
+						if (v && !registered.has(v)) {
+							return [v];
 						}
-					}
-				}
-				for (const v of voxelValues) {
-					if (!registered.has(v)) {
-						unregistered.add(v);
 					}
 				}
 			}
 
-			return [...unregistered];
+			return [];
 		}
 
 		async function runExportCommand(commandName, options, ...rest) {
-			const badValues = findUnregisteredVoxelValues();
+			const segmentationId = options?.segmentationId;
+			const badValues = findUnregisteredVoxelValues(segmentationId);
 			if (badValues.length) {
 				services.uiNotificationService?.show?.({
 					title: 'Cannot export segmentation',
 					message:
-						'Accept the AI result before exporting: press Enter and wait until the page responds (about 30 seconds), or press Esc to reject. Unregistered label values: ' +
+						'Accept the AI result before exporting: press Enter and wait until the page responds, or press Esc to reject. Unregistered label values: ' +
 						badValues.join(', '),
 					type: 'warning',
 					duration: 15000,
@@ -245,7 +292,7 @@ window.config = {
 			}
 
 			if (guardDepth === 0) {
-				const ready = await prepareExport();
+				const ready = await prepareExport(segmentationId);
 				if (!ready) {
 					return;
 				}
