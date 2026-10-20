@@ -224,6 +224,8 @@ handle_microservice_migration()
 			env_setdefault	"logging.level.org.springframework.jdbc"	INFO
 			env_setdefault	"logging.level.org.springframework.orm"		INFO
 			env_setdefault	"logging.level.org.shanoir"			INFO
+			env_setdefault  "logging.level.org.hibernate.tool.hbm2ddl" DEBUG
+      env_setdefault  "logging.level.org.hibernate.SQL" DEBUG
 			;;
 		never|auto)
 			env_setdefault	spring.sql.init.mode	never
