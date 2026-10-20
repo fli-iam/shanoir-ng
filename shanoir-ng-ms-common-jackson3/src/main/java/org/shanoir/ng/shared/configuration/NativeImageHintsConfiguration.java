@@ -60,6 +60,7 @@ public class NativeImageHintsConfiguration {
         @Override
         public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
             hints.resources().registerPattern("shanoir-shared.yml");
+            hints.resources().registerPattern("scripts/import.sql");
             hints.reflection().registerType(
                     RabbitTemplate.class,
                     MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
