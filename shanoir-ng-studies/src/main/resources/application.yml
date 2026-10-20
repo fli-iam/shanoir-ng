@@ -48,6 +48,7 @@ spring:
         connection:
           charset: UTF-8
         hbm2ddl:
+          import_files: scripts/import.sql
           import_files_sql_extractor: org.hibernate.tool.schema.internal.script.MultiLineSqlScriptExtractor
   main:
     allow-circular-references: true
