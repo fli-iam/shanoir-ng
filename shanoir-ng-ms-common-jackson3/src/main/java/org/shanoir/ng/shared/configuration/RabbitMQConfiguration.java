@@ -223,9 +223,6 @@ public class RabbitMQConfiguration {
     /** Queue used to get participants.tsv of a study. */
     public static final String STUDY_PARTICIPANTS_TSV = "study-participants-tsv";
 
-    /** Neurobagel export: participants.tsv of an exported study, without writing any file: ms datasets -> ms studies */
-    public static final String NEUROBAGEL_PARTICIPANTS_TSV = "neurobagel-participants-tsv";
-
     /**
      * Neurobagel export: ms datasets writes the imaging table of a study into the shared bids-data volume
      * and replies with the file name: ms studies -> ms datasets. The table can be several MB, so it does not
@@ -501,11 +498,6 @@ public class RabbitMQConfiguration {
     @Bean
     public static Queue studyParticipantsTsvQueue() {
         return new Queue(STUDY_PARTICIPANTS_TSV, true);
-    }
-
-    @Bean
-    public static Queue neurobagelParticipantsTsvQueue() {
-        return new Queue(NEUROBAGEL_PARTICIPANTS_TSV, true);
     }
 
     @Bean
