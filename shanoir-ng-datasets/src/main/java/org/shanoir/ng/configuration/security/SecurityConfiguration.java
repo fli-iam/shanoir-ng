@@ -82,8 +82,6 @@ public class SecurityConfiguration {
                                 .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/api-docs/**",
                                         "/datasets/overallStatistics")
                                 .permitAll()
-                                .requestMatchers(NeurobagelAccess.PATHS)
-                                .hasAuthority(NeurobagelAccess.ROLE)
                                 .anyRequest()
                                 .access(NeurobagelAccess.authenticatedExceptNeurobagel()))
                 .oauth2ResourceServer(oauth2Configurer -> oauth2Configurer

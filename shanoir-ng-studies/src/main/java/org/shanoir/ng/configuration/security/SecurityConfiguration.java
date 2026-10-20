@@ -76,6 +76,8 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(
                     matcher -> matcher.requestMatchers("/studies/public/data", "/swagger-ui.html", "/swagger-ui/**", "/api-docs/**", "/dua/**")
                         .permitAll()
+                    .requestMatchers(NeurobagelAccess.PATHS)
+                        .hasAuthority(NeurobagelAccess.ROLE)
                     .anyRequest()
                         .access(NeurobagelAccess.authenticatedExceptNeurobagel())
                 )
