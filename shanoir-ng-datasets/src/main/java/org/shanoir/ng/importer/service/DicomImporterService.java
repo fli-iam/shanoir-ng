@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -52,6 +53,7 @@ import org.shanoir.ng.dicom.web.service.DICOMWebService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.importer.dto.Serie;
+import org.shanoir.ng.importer.util.DicomExaminationMetadataResolver;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.dicom.DicomUtils;
 import org.shanoir.ng.shared.dicom.EchoTime;
@@ -531,7 +533,7 @@ public class DicomImporterService {
         org.shanoir.ng.importer.dto.Study studyDICOM = new org.shanoir.ng.importer.dto.Study(attributes);
         List<Examination> examinations = examinationService.findBySubjectIdStudyId(subjectId, study.getId());
         Optional<Examination> existingExamination = examinations.stream()
-                .filter(e -> e.getStudyInstanceUID().equals(studyDICOM.getStudyInstanceUID()))
+                .filter(e -> java.util.Objects.equals(e.getStudyInstanceUID(), studyDICOM.getStudyInstanceUID()))
                 .findFirst();
         if (existingExamination.isPresent()) {
             examination = existingExamination.get();
@@ -541,9 +543,15 @@ public class DicomImporterService {
             examination = new Examination();
             examination.setStudy(study);
             examination.setSubject(subject);
-            examination.setExaminationDate(studyDICOM.getStudyDate());
+            LocalDate examinationDate = DicomExaminationMetadataResolver.resolveExaminationDate(attributes);
+            if (examinationDate == null) {
+                LOG.warn("No Study Date or Series Date in DICOM for StudyInstanceUID {}, using today",
+                        studyDICOM.getStudyInstanceUID());
+                examinationDate = LocalDate.now();
+            }
+            examination.setExaminationDate(examinationDate);
             examination.setStudyInstanceUID(studyDICOM.getStudyInstanceUID());
-            examination.setComment(studyDICOM.getStudyDescription());
+            examination.setComment(DicomExaminationMetadataResolver.resolveComment(attributes));
             examination.setCenterId(centerId);
             examination = examinationService.save(examination);
             LOG.info("Examination created: {}", examination.toString());
