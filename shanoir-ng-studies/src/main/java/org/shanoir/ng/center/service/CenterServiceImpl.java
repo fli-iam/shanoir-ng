@@ -17,7 +17,6 @@ package org.shanoir.ng.center.service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.shanoir.ng.center.dto.mapper.CenterMapper;
 import org.shanoir.ng.center.model.Center;
@@ -30,13 +29,11 @@ import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.UndeletableDependenciesException;
 import org.shanoir.ng.study.model.Study;
-import org.shanoir.ng.study.model.StudyUser;
-import org.shanoir.ng.study.repository.StudyUserRepository;
+import org.shanoir.ng.study.security.StudySecurityService;
 import org.shanoir.ng.study.service.StudyService;
 import org.shanoir.ng.studycenter.StudyCenter;
 import org.shanoir.ng.studyexamination.StudyExamination;
 import org.shanoir.ng.studyexamination.StudyExaminationRepository;
-import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +41,6 @@ import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 
@@ -73,7 +69,7 @@ public class CenterServiceImpl implements CenterService {
     private ObjectMapper objectMapper;
 
     @Autowired
-    private StudyUserRepository studyUserRepo;
+    private StudySecurityService studySecurityService;
 
     @Autowired
     private StudyService studyService;
@@ -127,24 +123,12 @@ public class CenterServiceImpl implements CenterService {
 
     @Override
     public List<IdName> findIdsAndNames(Long studyId) {
-        List<IdName> centers =  centerRepository.findIdsAndNames(studyId);
-        if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) return centers;
-        StudyUser studyUser = studyUserRepo.findByUserIdAndStudy_Id(KeycloakUtil.getTokenUserId(), studyId);
-        if (studyUser == null || !studyUser.canAccessStudy()) return new ArrayList<>();
-        if (!CollectionUtils.isEmpty(studyUser.getCenters())) {
-            centers = centers.stream().filter(center -> studyUser.getCenterIds().contains(center.getId())).collect(Collectors.toList());
-        }
-        return centers;
+        return studySecurityService.filterAccessibleCenters(studyId, centerRepository.findIdsAndNames(studyId), IdName::getId);
     }
 
     @Override
     public List<Center> findByStudy(Long studyId) {
-        List<Center> centers = centerRepository.findByStudy(studyId);
-        StudyUser studyUser = studyUserRepo.findByUserIdAndStudy_Id(KeycloakUtil.getTokenUserId(), studyId);
-        if (studyUser == null || !studyUser.canAccessStudy()) return new ArrayList<>();
-        if (!CollectionUtils.isEmpty(studyUser.getCenterIds())) {
-            centers = centers.stream().filter(center -> studyUser.getCenterIds().contains(center.getId())).collect(Collectors.toList());
-        }
+        List<Center> centers = studySecurityService.filterAccessibleCenters(studyId, centerRepository.findByStudy(studyId), Center::getId);
         // do this here: because of two bags exception, when annotating this additionally to the query in the repository
         //centers.stream().forEach(c -> c.setAcquisitionEquipments(centerRepository.findDistinctAcquisitionEquipmentsByCenterId(c.getId())));
         return centers;
