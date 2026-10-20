@@ -197,6 +197,7 @@
                     <image>
                         <name>${project.name}-native</name>
                         <builder>paketobuildpacks/builder-jammy-base:latest</builder>
+                        <runImage>paketobuildpacks/run-jammy-base</runImage>
                         <env>
                             <BP_NATIVE_IMAGE>true</BP_NATIVE_IMAGE>
                             <BP_NATIVE_IMAGE_BUILD_ARGUMENTS>-H:+AddAllCharsets</BP_NATIVE_IMAGE_BUILD_ARGUMENTS>
