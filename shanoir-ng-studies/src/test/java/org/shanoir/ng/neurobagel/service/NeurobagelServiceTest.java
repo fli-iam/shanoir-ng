@@ -37,6 +37,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.shanoir.ng.bids.service.BIDSService;
 import org.shanoir.ng.neurobagel.dto.NeurobagelDatasetDescriptionDTO;
 import org.shanoir.ng.neurobagel.dto.NeurobagelStudyDTO;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
@@ -57,6 +58,9 @@ class NeurobagelServiceTest {
 
     @Mock
     private RabbitTemplate rabbitTemplate;
+
+    @Mock
+    private BIDSService bidsService;
 
     @TempDir
     private File bidsDataDir;
@@ -100,28 +104,19 @@ class NeurobagelServiceTest {
     }
 
     @Test
-    void participantsOfAnExportedStudyComeFromStudies() {
+    void participantsOfAnExportedStudyAreBuiltLocally() {
         given(studyRepository.existsByIdAndNeurobagelExportTrueAndIsDraftFalse(1L)).willReturn(true);
-        given(rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.NEUROBAGEL_PARTICIPANTS_TSV, "1"))
-                .willReturn("participant_id\nsub-1\n");
+        given(bidsService.participantsTsv(1L)).willReturn("participant_id\nsub-1\n");
 
         assertEquals(Optional.of("participant_id\nsub-1\n"), service.findParticipantsTsv(1L));
     }
 
     @Test
-    void participantsOfAStudyNotExportedAreNeverRequested() {
+    void participantsOfAStudyNotExportedAreNeverBuilt() {
         given(studyRepository.existsByIdAndNeurobagelExportTrueAndIsDraftFalse(2L)).willReturn(false);
 
         assertFalse(service.findParticipantsTsv(2L).isPresent());
-        verify(rabbitTemplate, never()).convertSendAndReceive(anyString(), any(Object.class));
-    }
-
-    @Test
-    void noAnswerFromStudiesMeansNoParticipants() {
-        given(studyRepository.existsByIdAndNeurobagelExportTrueAndIsDraftFalse(1L)).willReturn(true);
-        given(rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.NEUROBAGEL_PARTICIPANTS_TSV, "1")).willReturn(null);
-
-        assertFalse(service.findParticipantsTsv(1L).isPresent());
+        verify(bidsService, never()).participantsTsv(anyLong());
     }
 
     @Test

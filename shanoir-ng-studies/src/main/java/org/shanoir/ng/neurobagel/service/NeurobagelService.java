@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
+import org.shanoir.ng.bids.service.BIDSService;
 import org.shanoir.ng.neurobagel.dto.NeurobagelDatasetDescriptionDTO;
 import org.shanoir.ng.neurobagel.dto.NeurobagelStudyDTO;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
@@ -56,6 +57,9 @@ public class NeurobagelService {
 
     @Autowired
     private StudyRepository studyRepository;
+
+    @Autowired
+    private BIDSService bidsService;
 
     @Autowired
     private RabbitTemplate rabbitTemplate;
@@ -91,20 +95,14 @@ public class NeurobagelService {
     }
 
     /**
-     * participants.tsv of an exported study, built by ms studies (which checks the export flag again).
-     * Empty when the study is not exported, or when ms studies does not answer.
+     * participants.tsv of an exported study (input of 'bagel pheno --pheno'). Built in memory: no file is
+     * written, unlike the BIDS export. Empty when the study is not exported.
      */
     public Optional<String> findParticipantsTsv(Long studyId) {
         if (!isExported(studyId)) {
             return Optional.empty();
         }
-        Object tsv = rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.NEUROBAGEL_PARTICIPANTS_TSV,
-                String.valueOf(studyId));
-        if (tsv == null) {
-            LOG.warn("No Neurobagel participants.tsv received from ms studies for exported study {}", studyId);
-            return Optional.empty();
-        }
-        return Optional.of((String) tsv);
+        return Optional.of(bidsService.participantsTsv(studyId));
     }
 
     /**
