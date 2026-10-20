@@ -127,7 +127,7 @@ export class HomeComponent {
         this.studyService.fetchCurrentUserStudyDates().then(expirationDates => {
             this.expiringDates = expirationDates;
             if (expirationDates) {
-                this.expiringStudies = this.studies.filter(study => {
+                this.expiringStudies = (this.studies ?? []).filter(study => {
                     const expDate = expirationDates.get(study.id);
                     if (expDate) {
                         const today = new Date();
