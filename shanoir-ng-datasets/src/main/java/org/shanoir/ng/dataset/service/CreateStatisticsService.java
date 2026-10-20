@@ -103,7 +103,7 @@ public class CreateStatisticsService {
                 try (BufferedWriter writer = new BufferedWriter(outputStreamWriter)) {
 
                     while (true) {
-                        event.setMessage("Querying results: " + (startRow + blocSize) + "/" + procedureSize);
+                        event.setMessage("Querying results: " + Math.min((startRow + blocSize), procedureSize) + "/" + procedureSize);
                         eventService.publishEvent(event);
                         //"getStatistics" is the name of the MySQL procedure
                         StoredProcedureQuery query = entityManager.createStoredProcedureQuery("getStatistics");
@@ -139,7 +139,7 @@ public class CreateStatisticsService {
                         }
 
                         progress += (1f + blocSize) / procedureSize;
-                        event.setProgress(progress);
+                        event.setProgress(Math.min(progress, 1L));
                         eventService.publishEvent(event);
 
                         startRow += blocSize;
