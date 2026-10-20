@@ -83,7 +83,6 @@ public class StudyServiceImpl implements StudyService {
         }
 
         current.setIsDraft(updated.getIsDraft());
-        current.setNeurobagelExport(updated.isNeurobagelExport());
 
         this.repository.save(current);
     }
