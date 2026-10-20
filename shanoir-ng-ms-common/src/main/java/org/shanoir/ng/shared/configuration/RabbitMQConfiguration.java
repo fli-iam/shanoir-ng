@@ -226,6 +226,12 @@ public class RabbitMQConfiguration {
     public static final String STUDY_PARTICIPANTS_TSV = "study-participants-tsv";
 
     /**
+     * First examination date of each subject of a study, as a ParticipantsTsvRequestDTO: ms studies -> ms datasets.
+     * Used for the subject ages of participants.tsv files built by ms studies.
+     */
+    public static final String STUDY_FIRST_EXAMINATION_DATES = "study-first-examination-dates";
+
+    /**
      * Neurobagel export: ms datasets writes the imaging table of a study into the shared bids-data volume
      * and replies with the file name: ms studies -> ms datasets. The table can be several MB, so it does not
      * travel through RabbitMQ.
@@ -500,6 +506,11 @@ public class RabbitMQConfiguration {
     @Bean
     public static Queue studyParticipantsTsvQueue() {
         return new Queue(STUDY_PARTICIPANTS_TSV, true);
+    }
+
+    @Bean
+    public static Queue studyFirstExaminationDatesQueue() {
+        return new Queue(STUDY_FIRST_EXAMINATION_DATES, true);
     }
 
     @Bean
