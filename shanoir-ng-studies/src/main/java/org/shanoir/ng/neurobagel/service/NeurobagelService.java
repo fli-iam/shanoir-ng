@@ -20,6 +20,7 @@ import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -29,6 +30,7 @@ import org.shanoir.ng.bids.service.BIDSService;
 import org.shanoir.ng.neurobagel.dto.NeurobagelDatasetDescriptionDTO;
 import org.shanoir.ng.neurobagel.dto.NeurobagelStudyDTO;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.shared.dto.ParticipantsTsvRequestDTO;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.repository.StudyRepository;
 import org.shanoir.ng.tag.model.StudyTag;
@@ -39,6 +41,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
+
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Studies exposed to the Neurobagel federation: flagged by an admin (neurobagel_export) and not drafts.
@@ -64,6 +69,9 @@ public class NeurobagelService {
 
     @Autowired
     private RabbitTemplate rabbitTemplate;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     /** Public base URL of the Shanoir front, e.g. https://shanoir.example.org/shanoir-ng/ */
     @Value("${front.server.address}")
@@ -97,13 +105,33 @@ public class NeurobagelService {
 
     /**
      * participants.tsv of an exported study (input of 'bagel pheno --pheno'). Built in memory: no file is
-     * written, unlike the BIDS export. Empty when the study is not exported.
+     * written, unlike the BIDS export. Ages are taken at each subject's first examination, whose dates come
+     * from ms datasets. Empty when the study is not exported.
      */
     public Optional<String> findParticipantsTsv(Long studyId) {
         if (!isExported(studyId)) {
             return Optional.empty();
         }
-        return Optional.of(bidsService.participantsTsv(studyId, Map.of()));
+        return Optional.of(bidsService.participantsTsv(studyId, findFirstExaminationDates(studyId)));
+    }
+
+    /**
+     * First examination date of each subject of the study, asked to ms datasets. Empty when ms datasets does not
+     * answer: the ages are then unknown (n/a) rather than the export failing.
+     */
+    private Map<Long, LocalDate> findFirstExaminationDates(Long studyId) {
+        Object reply = rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_FIRST_EXAMINATION_DATES,
+                String.valueOf(studyId));
+        if (!(reply instanceof String json)) {
+            LOG.warn("No first examination dates received from ms datasets for study {}: ages left unknown", studyId);
+            return Map.of();
+        }
+        try {
+            return objectMapper.readValue(json, ParticipantsTsvRequestDTO.class).getFirstExaminationDates();
+        } catch (JacksonException e) {
+            LOG.warn("Cannot read the first examination dates of study {}: ages left unknown", studyId, e);
+            return Map.of();
+        }
     }
 
     /**
