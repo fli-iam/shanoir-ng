@@ -86,7 +86,7 @@ Then the shanoir-downloader project can be simply managed as a normal git repo (
     
     
 * Add this line to C:\Windows\System32\drivers\etc\hosts :
-    127.0.0.1 shanoir-ng-nginx ohif videpe
+    127.0.0.1 shanoir-ng-nginx viewer videpe
     
 * Fork GitHub project
 * Clone
@@ -117,7 +117,7 @@ Keycloak : https://shanoir-ng-nginx/auth/admin/master/console/#/realms/shanoir-n
 * Make sur docker has enough memory to run Shanoir (6Gb should be enough)
 * If you are on your **developer/local machine**:
     * Configure your local **/etc/hosts** (for windows, C:/Windows/System32/drivers/etc/hosts) and add:
-	* 127.0.0.1       shanoir-ng-nginx ohif videpe
+	* 127.0.0.1       shanoir-ng-nginx viewer videpe
     * For windows 7, increase your RAM and set the port redirection (8080 and 443) for the virtual box.
 * If you are on a **dedicated server** (e.g. shanoir-ng.irisa.fr):
     * By default Shanoir-NG is installed with the host shanoir-ng-nginx and the scheme http (dev setup)
@@ -173,7 +173,7 @@ Before deploying, some configuration is required:
 * add the following line in your **/etc/hosts** (so that
   https://shanoir-ng-nginx/ is reachable from your web browser):
   ```
-  127.0.0.1  shanoir-ng-nginx ohif videpe
+  127.0.0.1  shanoir-ng-nginx viewer videpe
   ```
 * if docker is not running natively and thus you are using docker-machine
   (windows/macos users), you will need to tune the virtualbox machine:
@@ -262,7 +262,7 @@ Name                  | Value             | Description                         
   * in development this is achieved by:
     * adding the following line to your **/etc/hosts**
       ```
-      127.0.0.1  shanoir-ng-nginx ohif videpe
+      127.0.0.1  shanoir-ng-nginx viewer videpe
       ```
     * ensuring that the nginx container name is equals to the value of
       `SHANOIR_URL_HOST` (in the default setup, they both use:
