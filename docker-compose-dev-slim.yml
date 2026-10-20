@@ -198,7 +198,7 @@ services:
   # Studies microservice
   #
   studies:
-    image: "shanoir-ng-studies-native:latest"
+    container_name: "${SHANOIR_PREFIX}studies"
     build:
       context: docker-compose
       target: studies
