@@ -15,11 +15,18 @@
 package org.shanoir.ng.configuration.security;
 
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.mockito.BDDMockito.given;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.List;
+import java.util.Optional;
+
 import org.junit.jupiter.api.Test;
+import org.shanoir.ng.neurobagel.dto.NeurobagelStudyDTO;
+import org.shanoir.ng.neurobagel.service.NeurobagelService;
 import org.shanoir.ng.shared.security.NeurobagelAccess;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,9 +36,11 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 /**
- * The Neurobagel export token must be refused by this service, through the real security filter chain.
+ * Access rules of the Neurobagel export token, through the real security filter chain:
+ * /neurobagel/** is for that token only, and that token is refused everywhere else.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -45,6 +54,53 @@ class NeurobagelTokenSecurityTest {
 
     @MockitoBean
     private ConnectionFactory connectionFactory;
+
+    @MockitoBean
+    private NeurobagelService neurobagelService;
+
+    private static MockHttpServletRequestBuilder as(String role, MockHttpServletRequestBuilder request) {
+        return request.with(jwt().authorities(new SimpleGrantedAuthority(role)));
+    }
+
+    // --- /neurobagel/** ---
+
+    @Test
+    void neurobagelTokenListsExportedStudies() throws Exception {
+        given(neurobagelService.findExportedStudies()).willReturn(List.of(new NeurobagelStudyDTO(1L, "first")));
+        mvc.perform(as(NeurobagelAccess.ROLE, get("/neurobagel/studies")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[0].name").value("first"));
+    }
+
+    @Test
+    void neurobagelTokenGetsAnExportedStudy() throws Exception {
+        given(neurobagelService.findExportedStudy(1L)).willReturn(Optional.of(new NeurobagelStudyDTO(1L, "first")));
+        mvc.perform(as(NeurobagelAccess.ROLE, get("/neurobagel/study/1")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("first"));
+    }
+
+    @Test
+    void studyNotExportedIsNotFound() throws Exception {
+        given(neurobagelService.findExportedStudy(2L)).willReturn(Optional.empty());
+        mvc.perform(as(NeurobagelAccess.ROLE, get("/neurobagel/study/2"))).andExpect(status().isNotFound());
+    }
+
+    @Test
+    void shanoirUsersCannotCallNeurobagelEndpoints() throws Exception {
+        for (String role : List.of("ROLE_USER", "ROLE_EXPERT", "ROLE_ADMIN")) {
+            mvc.perform(as(role, get("/neurobagel/studies"))).andExpect(status().isForbidden());
+            mvc.perform(as(role, get("/neurobagel/study/1"))).andExpect(status().isForbidden());
+        }
+    }
+
+    @Test
+    void anonymousCannotCallNeurobagelEndpoints() throws Exception {
+        mvc.perform(get("/neurobagel/studies")).andExpect(status().isUnauthorized());
+    }
+
+    // --- every other endpoint ---
 
     @Test
     void neurobagelTokenIsRefused() throws Exception {
