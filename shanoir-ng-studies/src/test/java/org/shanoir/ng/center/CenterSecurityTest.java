@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.center;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
 import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessAuthorized;
@@ -32,6 +33,9 @@ import org.shanoir.ng.center.service.CenterService;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.exception.UndeletableDependenciesException;
+import org.shanoir.ng.shared.security.rights.StudyUserRight;
+import org.shanoir.ng.study.model.StudyUser;
+import org.shanoir.ng.study.repository.StudyUserRepository;
 import org.shanoir.ng.studycenter.StudyCenter;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
@@ -56,6 +60,7 @@ public class CenterSecurityTest {
     private static final long LOGGED_USER_ID = 2L;
     private static final String LOGGED_USER_USERNAME = "logged";
     private static final long ENTITY_ID = 1L;
+    private static final long STUDY_ID = 3L;
 
     private Center mockNew;
     private Center mockExisting;
@@ -65,6 +70,9 @@ public class CenterSecurityTest {
 
     @MockitoBean
     private CenterRepository repository;
+
+    @MockitoBean
+    private StudyUserRepository studyUserRepository;
 
     @MockitoBean
     private ConnectionFactory connectionFactory;
@@ -128,6 +136,58 @@ public class CenterSecurityTest {
         assertAccessAuthorized(service::update, mockExisting, true);
         assertAccessAuthorized(service::deleteById, ENTITY_ID);
         assertAccessAuthorized(service::deleteByIdCheckDependencies, ENTITY_ID);
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_USER" })
+    public void testStudyCentersAsNonMember() throws ShanoirException {
+        assertAccessDenied(service::findByStudy, STUDY_ID);
+        assertAccessDenied(service::findIdsAndNames, STUDY_ID);
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_ADMIN" })
+    public void testStudyCentersAsNonMemberAdmin() throws ShanoirException {
+        given(repository.findByStudy(STUDY_ID)).willReturn(createCenters(1L, 2L));
+        assertEquals(2, service.findByStudy(STUDY_ID).size());
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_USER" })
+    public void testStudyCentersAsMember() throws ShanoirException {
+        given(studyUserRepository.findByUserIdAndStudy_Id(LOGGED_USER_ID, STUDY_ID)).willReturn(createStudyUser());
+        given(repository.findByStudy(STUDY_ID)).willReturn(createCenters(1L, 2L));
+        assertEquals(2, service.findByStudy(STUDY_ID).size());
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_USER" })
+    public void testStudyCentersAsCenterRestrictedMember() throws ShanoirException {
+        StudyUser studyUser = createStudyUser();
+        studyUser.setCenters(createCenters(2L));
+        given(studyUserRepository.findByUserIdAndStudy_Id(LOGGED_USER_ID, STUDY_ID)).willReturn(studyUser);
+        given(repository.findByStudy(STUDY_ID)).willReturn(createCenters(1L, 2L));
+        List<Center> centers = service.findByStudy(STUDY_ID);
+        assertEquals(1, centers.size());
+        assertEquals(2L, centers.get(0).getId());
+    }
+
+    private StudyUser createStudyUser() {
+        StudyUser studyUser = new StudyUser();
+        studyUser.setUserId(LOGGED_USER_ID);
+        studyUser.setConfirmed(true);
+        studyUser.setStudyUserRights(List.of(StudyUserRight.CAN_IMPORT));
+        return studyUser;
+    }
+
+    private List<Center> createCenters(Long... ids) {
+        List<Center> centers = new ArrayList<>();
+        for (Long id : ids) {
+            Center center = ModelsUtil.createCenter();
+            center.setId(id);
+            centers.add(center);
+        }
+        return centers;
     }
 
     @Test
