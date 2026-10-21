@@ -62,3 +62,11 @@ shanoir-ng-tests/tests/pip-selfcheck.json
 /docker-compose/vip/
 /docker-compose/Dockerfile.vip
 docker-compose-vip.yml
+
+# Playwright
+node_modules/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
