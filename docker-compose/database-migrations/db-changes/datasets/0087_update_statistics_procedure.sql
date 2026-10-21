@@ -61,7 +61,7 @@ DROP PROCEDURE IF EXISTS getStatistics;
 
 
 DELIMITER //
-CREATE PROCEDURE getStatistics(IN studyNameInRegExp VARCHAR(255), IN studyNameOutRegExp VARCHAR(255), IN subjectNameInRegExp VARCHAR(255), IN subjectNameOutRegExp VARCHAR(255), IN startRow INT, IN blocSize INT) BEGIN
+CREATE PROCEDURE getStatistics(IN studyNameInRegExp VARCHAR(255), IN studyNameOutRegExp VARCHAR(255), IN subjectNameInRegExp VARCHAR(255), IN subjectNameOutRegExp VARCHAR(255), IN lastDatasetId BIGINT, IN blocSize INT) BEGIN
 SELECT 'patient_id',
        'shanoir_name',
        'double_hash',
@@ -100,8 +100,10 @@ SELECT 'patient_id',
        'protocol_type',
        'dicom_size_mo',
        'execution'
+FROM DUAL
+WHERE lastDatasetId = 0
 UNION ALL
-SELECT subject.id AS patient_id,
+(SELECT subject.id AS patient_id,
        subject.name AS shanoir_name,
        subject.identifier AS double_hash,
        pseudonymus_hash_values.birth_name_hash1 AS birthname1,
@@ -173,14 +175,12 @@ SELECT subject.id AS patient_id,
     FROM dataset ds
     LEFT JOIN dataset_processing proc
     ON proc.id = (
-    SELECT p.dataset_processing_id
+    SELECT MAX(p.dataset_processing_id)
     FROM dataset_property p
+    JOIN input_of_dataset_processing inp ON inp.dataset_id = p.dataset_id AND inp.processing_id = p.dataset_processing_id
     JOIN dataset d2 ON d2.id = p.dataset_id
     JOIN dataset_acquisition acq ON acq.id = d2.dataset_acquisition_id
-    JOIN dataset_acquisition acq_init ON acq_init.examination_id = acq.examination_id
-    WHERE ds.dataset_acquisition_id = acq_init.id
-    ORDER BY p.dataset_processing_id DESC
-    LIMIT 1
+    WHERE acq.examination_id = dataset_acquisition.examination_id
     )
     LEFT JOIN dataset_property prop
     ON prop.dataset_processing_id = proc.id AND prop.dataset_id = ds.id
@@ -203,7 +203,8 @@ FROM dataset
     LEFT JOIN studies.study AS study ON (study.id = examination.study_id)
     LEFT JOIN studies.center AS center ON (center.id = examination.center_id)
     LEFT JOIN studies.pseudonymus_hash_values AS pseudonymus_hash_values ON (pseudonymus_hash_values.id = subject.pseudonymus_hash_values_id)
-WHERE subject.name rlike if(subjectNameInRegExp IS NULL
+WHERE dataset.id > lastDatasetId
+  AND subject.name rlike if(subjectNameInRegExp IS NULL
    OR subjectNameInRegExp = '', '.*', subjectNameInRegExp)
   AND subject.name NOT rlike if(subjectNameOutRegExp IS NULL
    OR subjectNameOutRegExp = '', '^\b\B$', subjectNameOutRegExp)
@@ -211,6 +212,6 @@ WHERE subject.name rlike if(subjectNameInRegExp IS NULL
    OR studyNameInRegExp = '', '.*', studyNameInRegExp)
   AND study.name NOT rlike if(studyNameOutRegExp IS NULL
    OR studyNameOutRegExp = '', '^\b\B$', studyNameOutRegExp)
-    LIMIT blocSize
-OFFSET startRow; END //
+ORDER BY dataset.id
+LIMIT blocSize); END //
 DELIMITER ;
