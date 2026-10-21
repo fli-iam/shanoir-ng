@@ -16,7 +16,7 @@ print_help()
 	cat <<EOF
 Build and deploy Shanoir
 usage:
-	$0 --clean|--force|--no-deploy [--no-build] [--no-keycloak] [--no-dcm4chee] [--native] [--core] [--prune] [-h|--help]
+	$0 --clean|--force|--no-deploy [--no-build] [--no-keycloak] [--no-dcm4chee] [--no-infra] [--native] [--core] [--prune] [-h|--help]
 
 CAUTION: THIS COMMAND IS DESTRUCTIVE, do not use it on an existing production
 instance. It will overwrite the data hosted in the external volumes declared in
@@ -31,9 +31,9 @@ Options:
 --no-build	skip the build stage
 --no-keycloak	do not run Keycloak (used if Keycloak is external)
 --no-dcm4chee	do not run dcm4chee (used if dcm4chee is external)
---core		minimal stack: do not run nifti-conversion, bids-validator,
-		preclinical, solr nor the dcm4chee images (ldap, dcm4chee-database,
-		dcm4chee-arc). Those services form the compose profile 'full'.
+--no-infra	do not run infra-service (solr, rabbitmq, bids-validator)
+--core minimal stack: do not run nifti-conversion, bids-validator,
+		preclinical
 --native	run users, studies and import as native images (built locally with
 		'mvn -Pnative spring-boot:build-image', needs mvn + JDK on the host)
 		via the docker-compose-dev-native.yml overlay. Without it, all
@@ -67,7 +67,7 @@ NATIVE_COMPOSE=docker-compose-dev-native.yml
 
 # Microservices that have a native image (module dir: ./shanoir-ng-<name>,
 # image: shanoir-ng-<name>-native:latest, see the native overlay)
-NATIVE_SERVICES="users studies import"
+NATIVE_SERVICES="studies"
 
 # Always the plain JVM config (build + one-shot init)
 dc_jvm()
@@ -132,6 +132,7 @@ build=1
 deploy=1
 keycloak=1
 dcm4chee=1
+infra=1
 clean=
 force=
 native=
@@ -145,6 +146,7 @@ while [ $# -ne 0 ] ; do
 		--no-build)	build=		;;
 		--no-keycloak)	keycloak=	;;
 		--no-dcm4chee)	dcm4chee=	;;
+		--no-infra)	infra=		;;
 		--no-deploy)	deploy=		;;
 		--native)	native=1	;;
 		--prune)	prune=1		;;
@@ -176,23 +178,18 @@ else
 fi
 export COMPOSE_FILE
 
-# Optional services (nifti-conversion, bids-validator, preclinical, solr,
-# ldap, dcm4chee-database, dcm4chee-arc) belong to the compose profile 'full'.
+# Optional services (nifti-conversion, bids-validator, preclinical)
 if [ -n "$core" ] ; then
-	unset COMPOSE_PROFILES
-	dcm4chee=
-	INFRA_SERVICES="rabbitmq"
-	MICROSERVICES="users studies datasets import"
-	BUILD_SERVICES="keycloak-database keycloak database database-migrations $MICROSERVICES nginx"
+	INFRA_SERVICES="rabbitmq solr"
+	MICROSERVICES="users studies import datasets"
 else
-	export COMPOSE_PROFILES=full
 	INFRA_SERVICES="rabbitmq solr bids-validator"
 	MICROSERVICES="users studies datasets import preclinical nifti-conversion"
-	BUILD_SERVICES="keycloak-database keycloak database database-migrations $MICROSERVICES solr nginx bids-validator"
 fi
+BUILD_SERVICES="keycloak-database keycloak database database-migrations $MICROSERVICES nginx"
 
 #
-# Build stage
+# Build stage: only build JVM images, native images have to been build manually
 #
 if [ -n "$build" ] ; then
 	build_sql_init_mode=
@@ -213,30 +210,14 @@ if [ -n "$build" ] ; then
 
 	# JVM images: always built (used for the whole stack, or at least for 'init')
 	step "Build JVM docker images"
-	if [ -n "$prune" ] ; then
-		# one image at a time (slower than the parallel build), so that the
-		# layers of each superseded image are freed before the next build
-		for svc in $BUILD_SERVICES ; do
-			step "Build $svc"
-			dc_jvm build "$svc"
-			free_space_light
-		done
-	else
-		dc_jvm build
-	fi
+	# one image at a time (slower than the parallel build), so that the
+	# layers of each superseded image are freed before the next build
+	for svc in $BUILD_SERVICES ; do
+		step "Build $svc"
+		dc_jvm build "$svc"
+		free_space_light
+	done
 	free_space "after JVM images"
-
-	if [ -n "$native" ] ; then
-		free_buildpack_cache
-		for ms in $NATIVE_SERVICES ; do
-			step "Build $ms native image"
-			MAVEN_OPTS="-Dmaven.repo.local=$PWD/tmp/home/.m2/repository" \
-				mvn -f "./shanoir-ng-$ms/pom.xml" \
-				-Pnative spring-boot:build-image -DskipTests
-			free_buildpack_cache
-			free_space "after $ms native image"
-		done
-	fi
 fi
 
 #
@@ -246,12 +227,12 @@ if [ -n "$deploy" ] ; then
 	if [ -n "$clean" ] ; then
 		# --clean: destroy all external volumes
 		step "Full clean"
-		COMPOSE_PROFILES=full docker compose down -v
+		docker compose down -v
 	else
 		# --force: just remove all existing containers ('compose run' must not
 		# be used while the service is up, and old logs must not be displayed)
-		step "stop shanoir"
-		COMPOSE_PROFILES=full docker compose down
+		step "Stop shanoir"
+		docker compose down
 	fi
 	free_space "after stop"
 
@@ -288,10 +269,12 @@ if [ -n "$deploy" ] ; then
 	fi
 
 	# 4. other infrastructure services
-	for svc in $INFRA_SERVICES ; do
-		step "start: $svc"
-		docker compose up -d "$svc"
-	done
+	if [ -n "$infra" ] ; then
+		for svc in $INFRA_SERVICES ; do
+			step "start: $svc"
+			docker compose up -d "$svc"
+		done
+	fi
 
 	# 5. Shanoir microservices
 	# One-shot schema init: always with the JVM image/config, since native
@@ -309,9 +292,6 @@ if [ -n "$deploy" ] ; then
 	# 6. nginx
 	step "start: nginx"
 	docker compose up -d nginx
-	
-	# 7. integration tests: code within shanoir-uploader project
-	step "start: integration tests"
-	docker compose up -d integration-tests
 	free_space "deployment done"
 fi
+
