@@ -126,7 +126,7 @@ public class NeurobagelService {
         if (!isExported(studyId)) {
             return Optional.empty();
         }
-        return Optional.ofNullable(studyRepository.findStudyWithTagsById(studyId)).map(this::toDatasetDescription);
+        return Optional.ofNullable(studyRepository.findStudyWithStudyTagsById(studyId)).map(this::toDatasetDescription);
     }
 
     private NeurobagelDatasetDescriptionDTO toDatasetDescription(Study study) {

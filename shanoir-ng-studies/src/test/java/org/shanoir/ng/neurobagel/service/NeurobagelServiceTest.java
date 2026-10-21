@@ -138,7 +138,7 @@ class NeurobagelServiceTest {
         Study study = study(1L, "My study");
         study.setStudyTags(List.of(studyTag("mri"), studyTag("adhd")));
         given(studyRepository.existsByIdAndNeurobagelExportTrueAndIsDraftFalse(1L)).willReturn(true);
-        given(studyRepository.findStudyWithTagsById(1L)).willReturn(study);
+        given(studyRepository.findStudyWithStudyTagsById(1L)).willReturn(study);
 
         NeurobagelDatasetDescriptionDTO description = service.findDatasetDescription(1L).orElseThrow();
 
@@ -155,7 +155,7 @@ class NeurobagelServiceTest {
         given(studyRepository.existsByIdAndNeurobagelExportTrueAndIsDraftFalse(2L)).willReturn(false);
 
         assertFalse(service.findDatasetDescription(2L).isPresent());
-        verify(studyRepository, never()).findStudyWithTagsById(anyLong());
+        verify(studyRepository, never()).findStudyWithStudyTagsById(anyLong());
     }
 
     private static StudyTag studyTag(String name) {
