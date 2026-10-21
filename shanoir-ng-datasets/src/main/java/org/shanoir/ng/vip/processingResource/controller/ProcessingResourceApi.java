@@ -54,6 +54,4 @@ public interface ProcessingResourceApi {
             @Valid @RequestParam(value  = "converterId", required  = false) Long converterId,
             @Valid @RequestParam(value  = "sorting", required  = false) String sorting,
             HttpServletResponse response) throws IOException, RestServiceException, EntityNotFoundException;
-
-
 }

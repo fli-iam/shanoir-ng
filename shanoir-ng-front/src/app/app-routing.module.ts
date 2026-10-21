@@ -16,6 +16,8 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
+import { DownloadDatasetStatisticsComponent } from '@app/datasets/download-dataset-statistics/download-dataset-statistics.component';
+
 import { AcquisitionEquipmentListComponent } from './acquisition-equipments/acquisition-equipment-list/acquisition-equipment-list.component';
 import { AcquisitionEquipmentComponent } from './acquisition-equipments/acquisition-equipment/acquisition-equipment.component';
 import { ManufacturerModelComponent } from './acquisition-equipments/manufacturer-model/manufacturer-model.component';
@@ -34,7 +36,6 @@ import { DatasetProcessingComponent } from './datasets/dataset-processing/datase
 import { DatasetComponent } from './datasets/dataset/dataset.component';
 import { FilesComponent } from './files/files.component';
 import { MetadataComponent } from './datasets/dataset/metadata/metadata.component';
-import { DownloadStatisticsComponent } from './datasets/download-statistics/download-statistics.component';
 import { DUAAssistantComponent } from './dua/dua-assistant.component';
 import { DUAComponent } from './dua/dua.component';
 import { ExaminationListComponent } from './examinations/examination-list/examination-list.component';
@@ -247,8 +248,8 @@ const routes: Routes = [
         path: 'preclinical-contrastagent',
         component: ContrastAgentFormComponent
     },{
-        path: 'download-statistics',
-        component: DownloadStatisticsComponent
+        path: 'download-dataset-statistics',
+        component: DownloadDatasetStatisticsComponent
     },{
         path: 'send-email',
         component: SendEmailComponent,
@@ -551,8 +552,8 @@ const routes: Routes = [
 		data: { mode: 'create' },
 		canActivate: [AuthAdminOrExpertGuard],
 	},{
-        path: 'download-statistics',
-        component: DownloadStatisticsComponent
+        path: 'download-dataset-statistics',
+        component: DownloadDatasetStatisticsComponent
     },{
 		path: 'study-card',
 		redirectTo: 'study-card/list',
