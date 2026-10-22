@@ -204,7 +204,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
         );
         this.subscriptions.push(
             subjectForm.get('study')!.valueChanges.subscribe(() => {
-                subjectForm.get('name')!.updateValueAndValidity({ onlySelf: true, emitEvent: false });
+                subjectForm.get('name')!.updateValueAndValidity();
             })
         );
         if (!this.subject.name && this.subjectNamePrefix) {
