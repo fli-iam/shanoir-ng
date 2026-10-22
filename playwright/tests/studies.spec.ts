@@ -2,16 +2,14 @@ import { test, expect } from '@playwright/test';
 
 const randomString = Math.random().toString().substr(2,10);
 
+const shanoirInstanceURL = 'https://localhost/shanoir-ng/welcome';
 const roleAdminUserName = 'dummy-admin';
-
-const roleAdminUserPassword = '&a1A&a1A&a1A&a1A';
-
+const roleAdminUserPassword = '';
 const roleExpertUserName = 'dummy-expert';
-
-const roleExpertUserPassword = '&a1A&a1A&a1A&a1A';
+const roleExpertUserPassword = '';
 
 test('test', async ({ page }) => {
-  await page.goto('https://localhost/shanoir-ng/welcome');
+  await page.goto(shanoirInstanceURL);
   // role-admin: test study creation
   await page.getByRole('button', { name: 'Sign in' }).click();
   await page.getByRole('textbox', { name: 'Username or email' }).click();
