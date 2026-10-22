@@ -21,6 +21,7 @@ import { SingleDownloadService } from '@app/shared/mass-download/single-download
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import { Page, Pageable } from '../../shared/components/table/pageable.model';
 import * as AppUtils from '../../utils/app.utils';
+import { ExtraDataUploadResult } from '../../shared/models/extra-data-upload-result.model';
 
 import { ExaminationDTO, ExaminationDTOService } from './examination.dto';
 import { Examination } from './examination.model';
@@ -77,6 +78,15 @@ export class ExaminationService extends EntityService<Examination> {
         const formData: FormData = new FormData();
         formData.append('file', fileToUpload, fileToUpload.name);
         return firstValueFrom(this.http.post<any>(endpoint, formData));
+    }
+
+    postFiles(filesToUpload: File[], examId: number): Promise<ExtraDataUploadResult> {
+        const endpoint = this.API_URL + '/extra-data-upload/' + examId + '/multi';
+        const formData: FormData = new FormData();
+        for (const file of filesToUpload) {
+            formData.append('files', file, file.name);
+        }
+        return firstValueFrom(this.http.post<ExtraDataUploadResult>(endpoint, formData));
     }
 
     downloadFile(fileName: string, examId: number, state?: TaskState): Observable<TaskState>  {
