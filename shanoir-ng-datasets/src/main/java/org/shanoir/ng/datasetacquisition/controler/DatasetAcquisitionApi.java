@@ -19,6 +19,7 @@ import java.util.List;
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionWithDatasetsDTO;
 import org.shanoir.ng.datasetacquisition.dto.ExaminationDatasetAcquisitionDTO;
+import org.shanoir.ng.examination.dto.ExtraDataUploadResultDTO;
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.data.domain.Page;
@@ -205,6 +206,21 @@ public interface DatasetAcquisitionApi {
     ResponseEntity<Void> addExtraData(
             @Parameter(description = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId,
             @Parameter(description = "file to upload", required = true) @Valid @RequestBody MultipartFile file) throws RestServiceException;
+
+    @Operation(summary = "", description = "Add several extra data files to a dataset acquisition and notify the study members")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "upload done, see the result for each file"),
+        @ApiResponse(responseCode = "401", description = "unauthorized"),
+        @ApiResponse(responseCode = "403", description = "forbidden"),
+        @ApiResponse(responseCode = "404", description = "dataset acquisition not found"),
+        @ApiResponse(responseCode = "500", description = "unexpected error")})
+    @PostMapping(value = "/datasetacquisition/extra-data-upload/{datasetAcquisitionId}/multi",
+            produces = {"application/json"},
+            consumes = {"multipart/form-data"})
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnDatasetAcquisition(#datasetAcquisitionId, 'CAN_IMPORT'))")
+    ResponseEntity<ExtraDataUploadResultDTO> addExtraDataFiles(
+            @Parameter(description = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId,
+            @Parameter(description = "files to upload", required = true) @RequestParam("files") List<MultipartFile> files) throws RestServiceException;
 
     @Operation(summary = "", description = "Download extra data from a dataset acquisition")
     @ApiResponses(value = {

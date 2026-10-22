@@ -21,10 +21,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.shanoir.ng.examination.dto.ExaminationDTO;
+import org.shanoir.ng.examination.dto.ExtraDataUploadResultDTO;
 import org.shanoir.ng.examination.dto.mapper.ExaminationMapper;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;
+import org.shanoir.ng.importer.service.ImporterMailService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.dto.FileEntryDTO;
 import org.shanoir.ng.shared.event.ShanoirEvent;
@@ -96,6 +98,9 @@ public class ExaminationApiController implements ExaminationApi {
 
     @Autowired
     private ExaminationRepository repository;
+
+    @Autowired
+    private ImporterMailService importerMailService;
 
     private final HttpServletRequest request;
 
@@ -254,6 +259,36 @@ public class ExaminationApiController implements ExaminationApi {
     }
 
     @Override
+    public ResponseEntity<ExtraDataUploadResultDTO> addExtraDataFiles(Long examinationId, List<MultipartFile> files) throws RestServiceException {
+        Examination examination = examinationService.findById(examinationId);
+        if (examination == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        ExtraDataUploadResultDTO result = new ExtraDataUploadResultDTO();
+        for (MultipartFile file : files) {
+            String fileName = file.getOriginalFilename();
+            try {
+                if (storageService.existsExtraData(examinationId, fileName)) {
+                    LOG.warn("Extra-data file {} already exists for examination {}, upload skipped.", fileName, examinationId);
+                    result.getSkipped().add(fileName);
+                    continue;
+                }
+            } catch (StorageException e) {
+                LOG.error("Error checking existing extra-data file {} for examination {}", fileName, examinationId, e);
+                result.getFailed().add(fileName);
+                continue;
+            }
+            if (examinationService.addExtraData(examinationId, file) != null) {
+                result.getUploaded().add(fileName);
+            } else {
+                result.getFailed().add(fileName);
+            }
+        }
+        importerMailService.sendExtraDataEmail(examination, null, result.getUploaded(), KeycloakUtil.getTokenUserId());
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @Override
     public ResponseEntity<Void> createExaminationAndAddExtraData(
             @Parameter(description = "name of the subject", required = true) @PathVariable("subjectName") String subjectName,
             @Parameter(description = "id of the center", required = true) @PathVariable("centerId") Long centerId,
@@ -285,6 +320,7 @@ public class ExaminationApiController implements ExaminationApi {
             String path = examinationService.addExtraData(dbExamination.getId(), file);
             LOG.info("New examination created: " + examination);
             if (path != null) {
+                importerMailService.sendExtraDataEmail(dbExamination, null, List.of(file.getOriginalFilename()), KeycloakUtil.getTokenUserId());
                 return new ResponseEntity<>(HttpStatus.OK);
             } else {
                 return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
