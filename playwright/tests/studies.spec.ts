@@ -1,18 +1,22 @@
 import { test, expect } from '@playwright/test';
 
+const randomString = Math.random().toString().substr(2,10);
+
+const password = '';
+
 test('test', async ({ page }) => {
   await page.goto('https://localhost/shanoir-ng/welcome');
   await page.getByRole('button', { name: 'Sign in' }).click();
   await page.getByRole('textbox', { name: 'Username or email' }).click();
   await page.getByRole('textbox', { name: 'Username or email' }).fill('dummy-admin');
   await page.getByRole('textbox', { name: 'Username or email' }).press('Tab');
-  await page.getByRole('textbox', { name: 'Password' }).fill('');
+  await page.getByRole('textbox', { name: 'Password' }).fill(password);
   await page.getByRole('button', { name: 'Sign In' }).click();
   await page.getByText('Medical data').click();
   await page.getByText('Studies', { exact: true }).click();
   await page.getByRole('button', { name: '+ New' }).click();
   await page.getByRole('textbox').first().click();
-  await page.getByRole('textbox').first().fill('test-study-random');
+  await page.getByRole('textbox').first().fill('playwright-test-study-create-' + randomString);
   await page.getByRole('listitem').filter({ hasText: 'Start date' }).getByRole('textbox').fill('2026-10-01');
   await page.getByRole('listitem').filter({ hasText: 'End date' }).getByRole('textbox').fill('2026-10-31');
   await page.getByRole('listitem').filter({ hasText: 'Pseudonymization profile' }).locator('select-box').click();
@@ -28,20 +32,20 @@ test('test', async ({ page }) => {
   await expect(page.locator('form')).toContainText('CHU Rennes');
   await page.getByRole('button', { name: 'Save' }).click();
   await page.getByRole('button', { name: 'No' }).click();
-  await expect(page.locator('study-node')).toContainText('test-study-random');
+  await expect(page.locator('study-node')).toContainText('playwright-test-study-create-' + randomString);
   await expect(page.getByRole('heading')).toContainText('Details on study');
   await page.getByText('Logout').click();
   await page.getByRole('button', { name: 'Sign in' }).click();
   await page.getByRole('textbox', { name: 'Username or email' }).click();
   await page.getByRole('textbox', { name: 'Username or email' }).fill('dummy-expert');
   await page.getByRole('textbox', { name: 'Password' }).click();
-  await page.getByRole('textbox', { name: 'Password' }).fill('');
+  await page.getByRole('textbox', { name: 'Password' }).fill(password);
   await page.getByRole('button', { name: 'Sign In' }).click();
   await page.getByText('Medical data').click();
   await page.getByText('Studies', { exact: true }).click();
   await page.getByRole('button', { name: '+ New' }).click();
   await page.getByRole('textbox').first().click();
-  await page.getByRole('textbox').first().fill('test-study-draft');
+  await page.getByRole('textbox').first().fill('playwright-test-study-draft-create-' + randomString);
   await page.getByRole('listitem').filter({ hasText: 'Start date' }).getByRole('textbox').fill('2026-10-01');
   await page.getByRole('listitem').filter({ hasText: 'End date' }).getByRole('textbox').fill('2026-10-31');
   await page.getByRole('listitem').filter({ hasText: 'Pseudonymization profile' }).locator('select-box').click();
@@ -57,7 +61,7 @@ test('test', async ({ page }) => {
   await expect(page.locator('form')).toContainText('CHU Rennes');
   await page.getByRole('button', { name: 'Save' }).click();
   await page.getByRole('button', { name: 'No' }).click();
-  await expect(page.locator('study-node')).toContainText('test-study-draft');
+  await expect(page.locator('study-node')).toContainText('playwright-test-study-draft-create-' + randomString);
   await expect(page.getByRole('heading')).toContainText('Details on study');
   await page.getByText('Logout').click();
   await page.locator('div').nth(2).click();
@@ -65,7 +69,7 @@ test('test', async ({ page }) => {
   await page.getByRole('textbox', { name: 'Username or email' }).click();
   await page.getByRole('textbox', { name: 'Username or email' }).fill('dummy-admin');
   await page.getByRole('textbox', { name: 'Username or email' }).press('Tab');
-  await page.getByRole('textbox', { name: 'Password' }).fill('');
+  await page.getByRole('textbox', { name: 'Password' }).fill(password);
   await page.getByRole('button', { name: 'Sign In' }).click();
   await page.getByText('Notifications').click();
   await page.getByText('Draft Studies').click();
@@ -77,11 +81,11 @@ test('test', async ({ page }) => {
   await page.getByRole('textbox', { name: 'Username or email' }).click();
   await page.getByRole('textbox', { name: 'Username or email' }).fill('dummy-expert');
   await page.getByRole('textbox', { name: 'Password' }).click();
-  await page.getByRole('textbox', { name: 'Password' }).fill('');
+  await page.getByRole('textbox', { name: 'Password' }).fill(password);
   await page.getByRole('button', { name: 'Sign In' }).click();
   await page.getByText('Studies', { exact: true }).click();
   await page.getByRole('textbox', { name: 'search...' }).click();
-  await page.getByRole('link', { name: 'test-study-draft' }).click();
+  await page.getByRole('link', { name: 'playwright-test-study-draft-create-' + randomString }).click();
   await expect(page.getByRole('heading')).toContainText('Details on study');
   await page.getByText('Logout').click();
 });
