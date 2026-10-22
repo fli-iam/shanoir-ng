@@ -207,13 +207,13 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> i
             { headerName: "Start date", field: "startDate", type: "date", hidden: true },
             { headerName: "End date", field: "endDate", type: "date", hidden: true },
             {
-                headerName: "Subjects", field: "nbSubjects", type: "number", width: '30px'
+                headerName: "Subjects", field: "nbSubjects", type: "number", width: '65px'
             },
             {
-                headerName: "Examinations", field: "nbExaminations", type: "number", width: '30px'
+                headerName: "Examinations", field: "nbExaminations", type: "number", width: '95px'
             },
             {
-                headerName: "Members", field: "nbMembers", type: "number", width: '30px', hidden: true
+                headerName: "Members", field: "nbMembers", type: "number", width: '65px', hidden: true
             },
             {
                 headerName: "Storage volume", field: "totalSize", disableSearch: true, disableSorting: true, type: "number", orderBy: ["totalSize"],
