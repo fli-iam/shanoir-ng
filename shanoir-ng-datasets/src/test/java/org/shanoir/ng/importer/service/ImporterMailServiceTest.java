@@ -15,11 +15,15 @@
 package org.shanoir.ng.importer.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.LongStream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,10 +35,13 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.shanoir.ng.examination.model.Examination;
+import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.shared.email.EmailDatasetsCopied;
 import org.shanoir.ng.shared.email.EmailExtraDataAdded;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.Subject;
+import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -51,6 +58,12 @@ public class ImporterMailServiceTest {
 
     @Mock
     private RabbitTemplate rabbitTemplate;
+
+    @Mock
+    private StudyRepository studyRepository;
+
+    @Mock
+    private ExaminationRepository examinationRepository;
 
     @Spy
     private ObjectMapper objectMapper = new ObjectMapper();
@@ -117,6 +130,66 @@ public class ImporterMailServiceTest {
         importerMailService.sendExtraDataEmail(examination, null, List.of("protocol.pdf"), 9L);
 
         Mockito.verifyNoInteractions(rabbitTemplate);
+    }
+
+    @Test
+    public void sendDatasetsCopiedEmailListsTheNewExaminations() throws Exception {
+        // GIVEN 3 datasets copied into 2 new examinations, one member asking for import reports
+        givenMembers(List.of(studyUser(1L, true), studyUser(2L, false)));
+        Mockito.when(studyRepository.findById(STUDY_ID)).thenReturn(Optional.of(examination.getStudy()));
+        Examination second = new Examination();
+        second.setId(8L);
+        second.setSubject(new Subject(6L, "OtherSubject"));
+        // the repository returns them in another order than the copy
+        Mockito.when(examinationRepository.findAllById(List.of(3L, 8L))).thenReturn(List.of(second, examination));
+
+        // WHEN the copy notification is sent, with a duplicate and a null examination id
+        importerMailService.sendDatasetsCopiedEmail(STUDY_ID, 3, Arrays.asList(3L, null, 8L, 3L), 9L);
+
+        // THEN one mail lists both examinations in the copy order
+        EmailDatasetsCopied mail = captureMail(RabbitMQConfiguration.DATASETS_COPIED_MAIL_QUEUE, EmailDatasetsCopied.class);
+        assertEquals(List.of(1L), mail.getRecipients());
+        assertEquals("StudyName", mail.getStudyName());
+        assertEquals(3, mail.getCopiedDatasetCount());
+        assertEquals(2, mail.getTotalExaminations());
+        assertEquals(List.of(3L, 8L), List.copyOf(mail.getExaminations().keySet()));
+        assertEquals("SubjectName - 2026-10-22", mail.getExaminations().get(3L));
+        assertEquals("OtherSubject", mail.getExaminations().get(8L));
+        assertEquals(9L, mail.getUserId());
+    }
+
+    @Test
+    public void sendDatasetsCopiedEmailTruncatesTheExaminationList() throws Exception {
+        givenMembers(List.of(studyUser(1L, true)));
+        List<Long> examIds = LongStream.rangeClosed(1, 120).boxed().toList();
+        Mockito.when(examinationRepository.findAllById(Mockito.anyList())).thenAnswer(invocation -> {
+            List<Long> ids = invocation.getArgument(0);
+            return ids.stream().map(id -> {
+                Examination exam = new Examination();
+                exam.setId(id);
+                return exam;
+            }).toList();
+        });
+
+        importerMailService.sendDatasetsCopiedEmail(STUDY_ID, 120, examIds, 9L);
+
+        EmailDatasetsCopied mail = captureMail(RabbitMQConfiguration.DATASETS_COPIED_MAIL_QUEUE, EmailDatasetsCopied.class);
+        assertEquals(ImporterMailService.MAX_COPIED_EXAMINATIONS_IN_MAIL, mail.getExaminations().size());
+        assertEquals(120, mail.getTotalExaminations());
+        assertTrue(mail.getExaminations().containsKey(1L));
+    }
+
+    @Test
+    public void sendDatasetsCopiedEmailWithoutCopiedDatasetSendsNothing() {
+        importerMailService.sendDatasetsCopiedEmail(STUDY_ID, 0, List.of(3L), 9L);
+
+        Mockito.verifyNoInteractions(studyUserRightRepo, rabbitTemplate, examinationRepository);
+    }
+
+    private <T> T captureMail(String queue, Class<T> type) throws Exception {
+        ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+        Mockito.verify(rabbitTemplate).convertAndSend(Mockito.eq(queue), captor.capture());
+        return objectMapper.readValue(captor.getValue(), type);
     }
 
     private void givenMembers(List<StudyUser> members) {
