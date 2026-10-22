@@ -230,6 +230,39 @@ public class StudyServiceTest {
 
     @Test
     @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_EXPERT" })
+    public void testUpdateStudyUsersMailPreferencesByStudyAdministrator() throws StorageException {
+        // GIVEN a study administrated by the connected expert, no member receiving mails yet
+        Study existing = createStudy();
+        existing.setStudyUserList(new ArrayList<StudyUser>());
+        StudyUser member = createStudyUsers(1L, 1L, existing, true, StudyUserRight.CAN_SEE_ALL);
+        StudyUser me = createStudyUsers(2L, 3L, existing, true, StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_ADMINISTRATE);
+        existing.getStudyUserList().add(member);
+        existing.getStudyUserList().add(me);
+
+        // WHEN the expert turns on the mail preferences of a member and their own import mail
+        Study updated = createStudy();
+        updated.setStudyUserList(new ArrayList<StudyUser>());
+        StudyUser updatedMember = createStudyUsers(1L, 1L, updated, true, StudyUserRight.CAN_SEE_ALL);
+        updatedMember.setReceiveNewImportReport(true);
+        updatedMember.setReceiveStudyUserReport(true);
+        StudyUser updatedMe = createStudyUsers(2L, 3L, updated, true, StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_ADMINISTRATE);
+        updatedMe.setReceiveNewImportReport(true);
+        updated.getStudyUserList().add(updatedMember);
+        updated.getStudyUserList().add(updatedMe);
+        given(studyUserRepository.saveAll(Mockito.any(List.class))).willReturn(Collections.emptyList());
+
+        studyService.updateStudyUsers(existing, updated);
+
+        // THEN the preferences are saved, rights unchanged
+        assertTrue(member.isReceiveNewImportReport());
+        assertTrue(member.isReceiveStudyUserReport());
+        assertTrue(me.isReceiveNewImportReport());
+        assertFalse(me.isReceiveStudyUserReport());
+        assertEquals(List.of(StudyUserRight.CAN_SEE_ALL), member.getStudyUserRights());
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_EXPERT" })
     public void testUpdateStudyUsersNoDUA() throws StorageException {
         // We delete the DUA from the old study
         Study existing = createStudy();
