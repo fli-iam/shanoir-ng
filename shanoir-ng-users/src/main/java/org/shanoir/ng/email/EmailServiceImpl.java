@@ -34,6 +34,7 @@ import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.email.DuaDraftWrapper;
 import org.shanoir.ng.shared.email.EmailDatasetImportFailed;
 import org.shanoir.ng.shared.email.EmailDatasetsImported;
+import org.shanoir.ng.shared.email.EmailExtraDataAdded;
 import org.shanoir.ng.shared.email.EmailStudy;
 import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
 import org.shanoir.ng.shared.email.StudyInvitationEmail;
@@ -106,6 +107,10 @@ public class EmailServiceImpl implements EmailService {
     private static final String QUALITY_CARDS = "quality_cards";
 
     private static final String SERIES = "series";
+
+    private static final String ACQUISITION = "acquisition";
+
+    private static final String FILE_NAMES = "fileNames";
 
     private static final String MOTIVATION = "motivation";
 
@@ -634,6 +639,53 @@ public class EmailServiceImpl implements EmailService {
             };
             // Send the message
             LOG.info("Sending import mail to {} for study {}", admin.getUsername(), generatedMail.getStudyId());
+            mailSender.send(messagePreparator);
+        }
+    }
+
+    @Override
+    public void notifyStudyMembersExtraDataAdded(EmailExtraDataAdded generatedMail) {
+        // Find user that added the files
+        User u = userRepository.findById(generatedMail.getUserId()).orElse(null);
+        String username = u != null ? u.getUsername() : "unknown";
+
+        // Get the list of recipients
+        List<User> recipients = (List<User>) this.userRepository.findAllById(generatedMail.getRecipients());
+
+        DatasetDetail examDetail = new DatasetDetail();
+        examDetail.setName(generatedMail.getExaminationId());
+        examDetail.setUrl(shanoirServerAddress + "examination/details/" + generatedMail.getExaminationId());
+
+        DatasetDetail acquisitionDetail = null;
+        if (generatedMail.getDatasetAcquisitionId() != null) {
+            acquisitionDetail = new DatasetDetail();
+            acquisitionDetail.setName(generatedMail.getDatasetAcquisitionId());
+            acquisitionDetail.setUrl(shanoirServerAddress + "dataset-acquisition/details/" + generatedMail.getDatasetAcquisitionId());
+        }
+        final DatasetDetail acquisition = acquisitionDetail;
+
+        for (User recipient : recipients) {
+            MimeMessagePreparator messagePreparator = mimeMessage -> {
+                final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+                this.setFromAdministrator(messageHelper);
+                messageHelper.setTo(recipient.getEmail());
+                messageHelper.setSubject(subject("New extra data added to " + generatedMail.getStudyName()));
+                final Map<String, Object> variables = new HashMap<>();
+                variables.put(LASTNAME, recipient.getLastName());
+                variables.put(FIRSTNAME, recipient.getFirstName());
+                variables.put(USERNAME, username);
+                variables.put(STUDY_NAME, generatedMail.getStudyName());
+                variables.put(SUBJECT, generatedMail.getSubjectName());
+                variables.put(EXAMINATION, examDetail);
+                variables.put(EXAM_DATE, generatedMail.getExamDate());
+                variables.put(ACQUISITION, acquisition);
+                variables.put(FILE_NAMES, generatedMail.getFileNames());
+                variables.put(SERVER_ADDRESS, shanoirServerAddress);
+                final String content = build("notifyStudyMembersExtraDataAdded", variables);
+                messageHelper.setText(content, true);
+            };
+            // Send the message
+            LOG.info("Sending extra data mail to {} for study {}", recipient.getUsername(), generatedMail.getStudyId());
             mailSender.send(messagePreparator);
         }
     }
