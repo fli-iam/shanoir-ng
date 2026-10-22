@@ -35,6 +35,7 @@ import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;
+import org.shanoir.ng.importer.service.ImporterMailService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.dataset.RelatedDataset;
@@ -118,6 +119,9 @@ public class RabbitMQDatasetsService {
 
     @Autowired
     private SolrService solrService;
+
+    @Autowired
+    private ImporterMailService importerMailService;
 
     @Autowired
     @Lazy
@@ -614,8 +618,10 @@ public class RabbitMQDatasetsService {
             event.setProgress(1.0f);
             event.setReport(buildReport(datasetParentIds, countProcessed, countAlreadyExist, countCopy, countSuccess, errors));
             eventService.publishEvent(event);
-            if (!newDatasets.isEmpty())
+            if (!newDatasets.isEmpty()) {
                 solrService.indexDatasets(newDatasets);
+                sendDatasetsCopiedEmail(studyId, newDatasets.size(), propagatedExams, userId);
+            }
 
         } catch (Exception e) {
             if (event != null) {
@@ -627,6 +633,20 @@ public class RabbitMQDatasetsService {
             }
             LOG.error("Something went wrong during the copy. {}", e.getMessage());
             throw new AmqpRejectAndDontRequeueException(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Notify the members of the target study, a failure must never fail the copy.
+     */
+    private void sendDatasetsCopiedEmail(Long studyId, int copiedDatasetCount, StudyExaminationsDTO propagatedExams, Long userId) {
+        try {
+            List<Long> examinationIds = propagatedExams.getExaminations().stream()
+                    .map(StudyExaminationsDTO.StudyExaminationDTO::getExaminationId)
+                    .toList();
+            importerMailService.sendDatasetsCopiedEmail(studyId, copiedDatasetCount, examinationIds, userId);
+        } catch (Exception e) {
+            LOG.error("[CopyDatasets] Could not send the datasets copied email for study {}", studyId, e);
         }
     }
 
