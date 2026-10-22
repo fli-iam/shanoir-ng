@@ -87,5 +87,33 @@ test('test', async ({ page }) => {
   await page.getByRole('textbox', { name: 'search...' }).click();
   await page.getByRole('link', { name: 'playwright-test-study-draft-create-' + randomString }).click();
   await expect(page.getByRole('heading')).toContainText('Details on study');
+
+  // role-expert: test subject creation and deletion
+  await page.locator('side-menu').getByText('Home').click();
+  await expect(page.getByText('Subjects')).toBeVisible();
+  await page.getByText('Subjects').click();
+  await expect(page.getByRole('heading')).toContainText('Manage subjects');
+  await page.getByRole('button', { name: '+ New' }).click();
+  await expect(page.getByRole('heading')).toContainText('Create subject');
+  await page.getByRole('group', { name: 'Study' }).locator('select-box').click();
+  await page.getByText('playwright-test-study-draft-create-' + randomString).click();
+  await expect(page.getByRole('group', { name: 'Study' }).getByPlaceholder('Select an option...')).toBeVisible();
+  await page.getByRole('listitem').filter({ hasText: 'Subject type Select an option' }).locator('select-box').click();
+  await page.locator('.list > div:nth-child(2)').click();
+  await expect(page.getByRole('list').filter({ hasText: 'Subject type Patient' }).getByPlaceholder('Select an option...')).toBeVisible();
+  await page.locator('#firstName').click();
+  await page.locator('#firstName').fill('playwright-test-subject-create-' + randomString);
+  await page.locator('#lastName').click();
+  await page.locator('#lastName').fill('playwright-test-subject-create-' + randomString);
+  await page.locator('#name').click();
+  await page.locator('#name').fill('playwright-test-subject-create-' + randomString);
+  await page.locator('input[type="date"]').fill('2026-10-22');
+  await page.getByRole('button', { name: 'Save' }).click();
+  await expect(page.getByRole('heading')).toContainText('Details on subject');
+  await expect(page.getByRole('link', { name: 'playwright-test-subject-create-' + randomString })).toBeVisible();
+  await page.getByRole('button', { name: 'Delete' }).click();
+  await page.getByRole('button', { name: 'OK' }).click();
+  await expect(page.locator('side-menu')).toContainText('Delete Subject');
+  
   await page.getByText('Logout').click();
 });
