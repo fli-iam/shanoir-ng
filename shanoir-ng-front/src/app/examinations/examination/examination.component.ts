@@ -271,9 +271,15 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
     }
 
     public attachNewFile(event: any) {
-        const newFile = event.target.files[0];
-        this.examination.extraDataFilePathList.push(newFile.name);
-        this.files.push(newFile);
+        for (const newFile of Array.from(event.target.files as FileList)) {
+            if (this.examination.extraDataFilePathList.includes(newFile.name)) {
+                this.consoleService.log('warn', 'A file named "' + newFile.name + '" is already attached and was skipped.');
+                continue;
+            }
+            this.examination.extraDataFilePathList.push(newFile.name);
+            this.files.push(newFile);
+        }
+        event.target.value = null;
         this.form.markAsDirty();
         this.form.updateValueAndValidity();
     }
