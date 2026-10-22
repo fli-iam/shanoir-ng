@@ -180,7 +180,6 @@ public class DicomImporterService {
     private DatasetExpressionRepository datasetExpressionRepository;
 
     @Autowired
-    @Autowired
     private StowImportCounters stowImportCounters;
 
     @Autowired
