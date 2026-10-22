@@ -73,13 +73,6 @@ export class ExaminationService extends EntityService<Examination> {
         return this.examinationDtoService.toEntityList(entities);
     }
 
-    postFile(fileToUpload: File, examId: number): Promise<any> {
-        const endpoint = this.API_URL + '/extra-data-upload/' + examId;
-        const formData: FormData = new FormData();
-        formData.append('file', fileToUpload, fileToUpload.name);
-        return firstValueFrom(this.http.post<any>(endpoint, formData));
-    }
-
     postFiles(filesToUpload: File[], examId: number): Promise<ExtraDataUploadResult> {
         const endpoint = this.API_URL + '/extra-data-upload/' + examId + '/multi';
         const formData: FormData = new FormData();

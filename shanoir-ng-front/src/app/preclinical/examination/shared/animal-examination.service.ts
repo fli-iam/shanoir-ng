@@ -14,7 +14,7 @@
 
 import { Injectable } from '@angular/core';
 import { HttpResponse, HttpClient } from '@angular/common/http';
-import { Observable, firstValueFrom } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 
 import { Examination } from '../../../examinations/shared/examination.model';
 import * as AppUtils from '../../../utils/app.utils';
@@ -46,13 +46,6 @@ export class AnimalExaminationService extends EntityService<Examination>{
         ));
     }
     
-    postFile(fileToUpload: File, examId: number): Observable<any> {
-        const endpoint = this.API_URL + '/extra-data-upload/' + examId;
-        const formData: FormData = new FormData();
-        formData.append('file', fileToUpload, fileToUpload.name);
-        return this.http.post<any>(endpoint, formData);
-    }
-
     public stringify(entity: Examination) {
         const dto = new ExaminationDTO(entity);
         return JSON.stringify(dto, this.customReplacer);
