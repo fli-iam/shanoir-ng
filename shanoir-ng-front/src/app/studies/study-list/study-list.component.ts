@@ -184,23 +184,23 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> i
 
     getColumnDefs(): ColumnDefinition[] {
         const colDef: ColumnDefinition[] = [
-            { headerName: "", type: "boolean", awesome: 'fa-solid fa-lock', awesomeFalse: 'fa-solid fa-lock-open', color: 'var(--color-a)', colorFalse: 'var(--color-a)',
+            { headerName: "Public", hideHeaderName: true, type: "boolean", awesome: 'fa-solid fa-lock', awesomeFalse: 'fa-solid fa-lock-open', color: 'var(--color-a)', colorFalse: 'var(--color-a)',
                 cellRenderer: ret => {
                     return (ret.data as Study).visibleByDefault && (ret.data as Study).locked;
                 }
             },
             {
-                headerName: "", type: "boolean", field: "isDraft", awesome: 'fa-regular fa-clipboard', color: 'var(--color-a)', width: '15px',
+                headerName: "Draft", hideHeaderName: true, type: "boolean", field: "isDraft", awesome: 'fa-regular fa-clipboard', color: 'var(--color-a)', width: '15px',
                 tip: ret => ret.isDraft ? "draft" : null
             },
             { headerName: "Name", field: "name" },
             {
-                headerName: "Status", field: "studyStatus", width: '70px', cellRenderer: function (params: any) {
+                headerName: "Status", field: "studyStatus", width: '70px', hidden: true, cellRenderer: function (params: any) {
                     return capitalsAndUnderscoresToDisplayable(params.data.studyStatus);
                 }
             },
-            { headerName: "Start date", field: "startDate", type: "date" },
-            { headerName: "End date", field: "endDate", type: "date" },
+            { headerName: "Start date", field: "startDate", type: "date", hidden: true },
+            { headerName: "End date", field: "endDate", type: "date", hidden: true },
             {
                 headerName: "Subjects", field: "nbSubjects", type: "number", width: '30px'
             },
@@ -208,7 +208,7 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> i
                 headerName: "Examinations", field: "nbExaminations", type: "number", width: '30px'
             },
             {
-                headerName: "Members", field: "nbMembers", type: "number", width: '30px'
+                headerName: "Members", field: "nbMembers", type: "number", width: '30px', hidden: true
             },
             {
                 headerName: "Storage volume", field: "totalSize", disableSearch: true, disableSorting: true, type: "number", orderBy: ["totalSize"],
