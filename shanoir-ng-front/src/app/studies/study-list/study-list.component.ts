@@ -184,14 +184,19 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> i
 
     getColumnDefs(): ColumnDefinition[] {
         const colDef: ColumnDefinition[] = [
-            { headerName: "Public", hideHeaderName: true, type: "boolean", awesome: 'fa-solid fa-lock', awesomeFalse: 'fa-solid fa-lock-open', color: 'var(--color-a)', colorFalse: 'var(--color-a)',
+            { headerName: "Access", type: "boolean", width: '50px', awesome: 'fa-solid fa-lock', awesomeFalse: 'fa-solid fa-lock-open', color: 'var(--color-a)', colorFalse: 'var(--color-a)',
                 cellRenderer: ret => {
                     return (ret.data as Study).visibleByDefault && (ret.data as Study).locked;
-                }
+                },
+                tip: (study: Study) => study.visibleByDefault && study.locked
+                    ? "No access: public study or expired membership. You can request access"
+                    : "You have access to this study"
             },
             {
-                headerName: "Draft", hideHeaderName: true, type: "boolean", field: "isDraft", awesome: 'fa-regular fa-clipboard', color: 'var(--color-a)', width: '15px',
-                tip: ret => ret.isDraft ? "draft" : null
+                headerName: "Approved", type: "boolean", field: "isDraft", awesome: 'fa-solid fa-clipboard-check', awesomeFalse: 'fa-regular fa-clipboard',
+                color: 'var(--color-a)', colorFalse: 'var(--color-a)', width: '60px',
+                cellRenderer: ret => !(ret.data as Study).isDraft,
+                tip: (study: Study) => study.isDraft ? "Not approved yet: awaiting approval by an administrator" : "Approved by an administrator"
             },
             { headerName: "Name", field: "name" },
             {
