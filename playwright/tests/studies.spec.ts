@@ -12,6 +12,7 @@ test('test', async ({ page }) => {
   await page.goto(shanoirInstanceURL);
   // role-admin: test study creation
   await page.getByRole('button', { name: 'Sign in' }).click();
+  await expect(page.locator('#kc-page-title')).toContainText('Sign in to your account');
   await page.getByRole('textbox', { name: 'Username or email' }).click();
   await page.getByRole('textbox', { name: 'Username or email' }).fill(roleAdminUserName);
   await page.getByRole('textbox', { name: 'Username or email' }).press('Tab');
@@ -43,6 +44,7 @@ test('test', async ({ page }) => {
 
   // role-expert: test study draft creation and validation by admin
   await page.getByRole('button', { name: 'Sign in' }).click();
+  await expect(page.locator('#kc-page-title')).toContainText('Sign in to your account');
   await page.getByRole('textbox', { name: 'Username or email' }).click();
   await page.getByRole('textbox', { name: 'Username or email' }).fill(roleExpertUserName);
   await page.getByRole('textbox', { name: 'Password' }).click();
@@ -73,6 +75,7 @@ test('test', async ({ page }) => {
   await page.getByText('Logout').click();
   await page.locator('div').nth(2).click();
   await page.getByRole('button', { name: 'Sign in' }).click();
+  await expect(page.locator('#kc-page-title')).toContainText('Sign in to your account');
   await page.getByRole('textbox', { name: 'Username or email' }).click();
   await page.getByRole('textbox', { name: 'Username or email' }).fill(roleAdminUserName);
   await page.getByRole('textbox', { name: 'Username or email' }).press('Tab');
@@ -85,6 +88,7 @@ test('test', async ({ page }) => {
   await expect(page.getByRole('paragraph')).toContainText('No pending draft studies.');
   await page.getByText('Logout').click();
   await page.getByRole('button', { name: 'Sign in' }).click();
+  await expect(page.locator('#kc-page-title')).toContainText('Sign in to your account');
   await page.getByRole('textbox', { name: 'Username or email' }).click();
   await page.getByRole('textbox', { name: 'Username or email' }).fill(roleExpertUserName);
   await page.getByRole('textbox', { name: 'Password' }).click();
