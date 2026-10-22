@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -30,6 +31,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.shanoir.ng.shared.email.EmailDatasetsCopied;
 import org.shanoir.ng.shared.email.EmailDatasetsImported;
 import org.shanoir.ng.shared.email.EmailExtraDataAdded;
 import org.shanoir.ng.user.model.User;
@@ -179,6 +181,35 @@ public class EmailServiceTest {
         assertTrue(content.contains("protocol.pdf"));
         assertTrue(content.contains("notes.txt"));
         assertTrue(content.contains("dataset-acquisition/details/4"));
+    }
+
+    @Test
+    public void testNotifyStudyMembersDatasetsCopied() throws IOException, MessagingException {
+        // GIVEN a study member to contact
+        User user = new User();
+        user.setUsername("username");
+        user.setEmail("email@email.com");
+        Mockito.when(userRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.of(user));
+        Mockito.when(userRepositoryMock.findAllById(Mockito.any(Iterable.class))).thenReturn(Collections.singletonList(user));
+        EmailDatasetsCopied mail = new EmailDatasetsCopied();
+        mail.setStudyName("StudyName");
+        mail.setStudyId(12L);
+        mail.setUserId(1L);
+        mail.setRecipients(Arrays.asList(1L));
+        mail.setCopiedDatasetCount(5);
+        Map<Long, String> examinations = new LinkedHashMap<>();
+        examinations.put(3L, "SubjectName - 2026-10-22");
+        mail.setExaminations(examinations);
+        mail.setTotalExaminations(4);
+        // WHEN we receive an event stating that datasets were copied into the study
+        emailService.notifyStudyMembersDatasetsCopied(mail);
+        // THEN an email listing the examinations and the remaining count is sent to the members
+        assertReceivedMessageContains(SUBJECT_PREFIX + "New datasets copied to StudyName", "copied");
+        final String content = (String) greenMail.getReceivedMessages()[0].getContent();
+        assertTrue(content.contains("study/details/12"));
+        assertTrue(content.contains("examination/details/3"));
+        assertTrue(content.contains("SubjectName - 2026-10-22"));
+        assertTrue(content.contains("... and 3 more"));
     }
 
     @Test
