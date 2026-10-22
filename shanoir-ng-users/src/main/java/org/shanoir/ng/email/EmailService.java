@@ -21,6 +21,7 @@ import org.shanoir.ng.accessrequest.model.AccessRequest;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.email.DuaDraftWrapper;
 import org.shanoir.ng.shared.email.EmailDatasetImportFailed;
+import org.shanoir.ng.shared.email.EmailDatasetsCopied;
 import org.shanoir.ng.shared.email.EmailDatasetsImported;
 import org.shanoir.ng.shared.email.EmailExtraDataAdded;
 import org.shanoir.ng.shared.email.EmailStudy;
@@ -141,6 +142,12 @@ public interface EmailService {
      * @param generatedMail: The object containing all the mail informations
      */
     void notifyStudyMembersExtraDataAdded(EmailExtraDataAdded generatedMail);
+
+    /**
+     * This method notifies the study members that datasets were copied into the study.
+     * @param generatedMail: The object containing all the mail informations
+     */
+    void notifyStudyMembersDatasetsCopied(EmailDatasetsCopied generatedMail);
 
     /**
      * This method notifies a study manager that one ore more new members, StudyUsers,
