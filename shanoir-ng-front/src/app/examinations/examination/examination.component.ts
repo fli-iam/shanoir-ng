@@ -280,12 +280,14 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
 
     public save(): Promise<Examination> {
         return super.save(() => {
-            const uploads: Promise<void>[] = [];
-            // Once the exam is saved, save associated files
-            for (const file of this.files) {
-                uploads.push(this.examinationService.postFile(file, this.entity.id));
-            }
-            return Promise.all(uploads).then(() => null);
+            // Once the exam is saved, save associated files in a single request
+            if (!this.files?.length) return Promise.resolve();
+            return this.examinationService.postFiles(this.files, this.entity.id).then(result => {
+                result?.skipped?.forEach(fileName =>
+                    this.consoleService.log('warn', 'A file named "' + fileName + '" already exists on this examination and was not re-uploaded.'));
+                result?.failed?.forEach(fileName =>
+                    this.consoleService.log('error', 'The file "' + fileName + '" could not be uploaded to this examination.'));
+            });
         }).then(() => null).catch(reason => { if (reason.status == 403) {
             this.consoleService.log('error', 'Examination ' + this.examination.id + ' Updating study / subject / center of an examination is forbidden.');
             return null;
