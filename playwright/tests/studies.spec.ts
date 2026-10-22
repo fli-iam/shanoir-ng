@@ -2,15 +2,22 @@ import { test, expect } from '@playwright/test';
 
 const randomString = Math.random().toString().substr(2,10);
 
-const password = '';
+const roleAdminUserName = 'dummy-admin';
+
+const roleAdminUserPassword = '&a1A&a1A&a1A&a1A';
+
+const roleExpertUserName = 'dummy-expert';
+
+const roleExpertUserPassword = '&a1A&a1A&a1A&a1A';
 
 test('test', async ({ page }) => {
   await page.goto('https://localhost/shanoir-ng/welcome');
+  // role-admin: test study creation
   await page.getByRole('button', { name: 'Sign in' }).click();
   await page.getByRole('textbox', { name: 'Username or email' }).click();
-  await page.getByRole('textbox', { name: 'Username or email' }).fill('dummy-admin');
+  await page.getByRole('textbox', { name: 'Username or email' }).fill(roleAdminUserName);
   await page.getByRole('textbox', { name: 'Username or email' }).press('Tab');
-  await page.getByRole('textbox', { name: 'Password' }).fill(password);
+  await page.getByRole('textbox', { name: 'Password' }).fill(roleAdminUserPassword);
   await page.getByRole('button', { name: 'Sign In' }).click();
   await page.getByText('Medical data').click();
   await page.getByText('Studies', { exact: true }).click();
@@ -35,11 +42,13 @@ test('test', async ({ page }) => {
   await expect(page.locator('study-node')).toContainText('playwright-test-study-create-' + randomString);
   await expect(page.getByRole('heading')).toContainText('Details on study');
   await page.getByText('Logout').click();
+
+  // role-expert: test study draft creation and validation by admin
   await page.getByRole('button', { name: 'Sign in' }).click();
   await page.getByRole('textbox', { name: 'Username or email' }).click();
-  await page.getByRole('textbox', { name: 'Username or email' }).fill('dummy-expert');
+  await page.getByRole('textbox', { name: 'Username or email' }).fill(roleExpertUserName);
   await page.getByRole('textbox', { name: 'Password' }).click();
-  await page.getByRole('textbox', { name: 'Password' }).fill(password);
+  await page.getByRole('textbox', { name: 'Password' }).fill(roleExpertUserPassword);
   await page.getByRole('button', { name: 'Sign In' }).click();
   await page.getByText('Medical data').click();
   await page.getByText('Studies', { exact: true }).click();
@@ -67,9 +76,9 @@ test('test', async ({ page }) => {
   await page.locator('div').nth(2).click();
   await page.getByRole('button', { name: 'Sign in' }).click();
   await page.getByRole('textbox', { name: 'Username or email' }).click();
-  await page.getByRole('textbox', { name: 'Username or email' }).fill('dummy-admin');
+  await page.getByRole('textbox', { name: 'Username or email' }).fill(roleAdminUserName);
   await page.getByRole('textbox', { name: 'Username or email' }).press('Tab');
-  await page.getByRole('textbox', { name: 'Password' }).fill(password);
+  await page.getByRole('textbox', { name: 'Password' }).fill(roleAdminUserPassword);
   await page.getByRole('button', { name: 'Sign In' }).click();
   await page.getByText('Notifications').click();
   await page.getByText('Draft Studies').click();
@@ -79,9 +88,9 @@ test('test', async ({ page }) => {
   await page.getByText('Logout').click();
   await page.getByRole('button', { name: 'Sign in' }).click();
   await page.getByRole('textbox', { name: 'Username or email' }).click();
-  await page.getByRole('textbox', { name: 'Username or email' }).fill('dummy-expert');
+  await page.getByRole('textbox', { name: 'Username or email' }).fill(roleExpertUserName);
   await page.getByRole('textbox', { name: 'Password' }).click();
-  await page.getByRole('textbox', { name: 'Password' }).fill(password);
+  await page.getByRole('textbox', { name: 'Password' }).fill(roleExpertUserPassword);
   await page.getByRole('button', { name: 'Sign In' }).click();
   await page.getByText('Studies', { exact: true }).click();
   await page.getByRole('textbox', { name: 'search...' }).click();
