@@ -251,9 +251,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                             @for (file of examination.extraDataFilePathList; track file) {
                                                 <li>
                                                     {{ getFileName(file) }}
-                                                    <button type="button" class="dl-button" (click)="downloadFile(file)">
-                                                        <i class="fas fa-download"></i>
-                                                    </button>
+                                                    @if (hasDownloadRight) {
+                                                        <button type="button" class="dl-button" (click)="downloadFile(file)">
+                                                            <i class="fas fa-download"></i>
+                                                        </button>
+                                                    }
                                                 </li>
                                             }
                                         </ul>
