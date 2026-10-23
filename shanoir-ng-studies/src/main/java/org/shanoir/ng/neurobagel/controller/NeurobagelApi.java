@@ -16,6 +16,7 @@ package org.shanoir.ng.neurobagel.controller;
 
 import java.util.List;
 
+import org.shanoir.ng.neurobagel.dto.NeurobagelDatasetDescriptionDTO;
 import org.shanoir.ng.neurobagel.dto.NeurobagelStudyDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -37,6 +38,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RequestMapping("/neurobagel")
 public interface NeurobagelApi {
 
+    String TSV = "text/tab-separated-values";
+
     @Operation(summary = "findExportedStudies", description = "Lists the studies exposed to the Neurobagel federation")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "exported studies, possibly none"),
@@ -55,6 +58,48 @@ public interface NeurobagelApi {
     @GetMapping(value = "/study/{studyId}", produces = { "application/json" })
     @PreAuthorize("hasRole('NEUROBAGEL')")
     ResponseEntity<NeurobagelStudyDTO> findExportedStudy(
+            @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId);
+
+    @Operation(summary = "findParticipantsTsv", description = "Returns the participants.tsv of a study exposed to the Neurobagel federation")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "participants.tsv: participant_id, subject_identifier, subject_age, subject_sex"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "404", description = "no such study, or not exported") })
+    @GetMapping(value = "/study/{studyId}/participants.tsv", produces = { NeurobagelApi.TSV })
+    @PreAuthorize("hasRole('NEUROBAGEL')")
+    ResponseEntity<String> findParticipantsTsv(
+            @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId);
+
+    @Operation(summary = "getParticipantsDictionary", description = "Returns the Neurobagel data dictionary of participants.tsv, the same for every study")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "the data dictionary"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden") })
+    @GetMapping(value = "/participants.json", produces = { "application/json" })
+    @PreAuthorize("hasRole('NEUROBAGEL')")
+    ResponseEntity<String> getParticipantsDictionary();
+
+    @Operation(summary = "findDatasetDescription", description = "Returns the Neurobagel dataset description of a study exposed to the Neurobagel federation")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "the Neurobagel dataset description"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "404", description = "no such study, or not exported") })
+    @GetMapping(value = "/study/{studyId}/dataset_description.json", produces = { "application/json" })
+    @PreAuthorize("hasRole('NEUROBAGEL')")
+    ResponseEntity<NeurobagelDatasetDescriptionDTO> findDatasetDescription(
+            @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId);
+
+    @Operation(summary = "findImagingTsv", description = "Returns the imaging table of a study exposed to the Neurobagel federation")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "imaging table: sub, ses, suffix, path. Header only when no dataset has a Neurobagel suffix"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "404", description = "no such study, or not exported") })
+    @GetMapping(value = "/study/{studyId}/imaging.tsv", produces = { NeurobagelApi.TSV })
+    @PreAuthorize("hasRole('NEUROBAGEL')")
+    ResponseEntity<String> findImagingTsv(
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId);
 
 }

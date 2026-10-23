@@ -16,10 +16,12 @@ package org.shanoir.ng.neurobagel.controller;
 
 import java.util.List;
 
+import org.shanoir.ng.neurobagel.dto.NeurobagelDatasetDescriptionDTO;
 import org.shanoir.ng.neurobagel.dto.NeurobagelStudyDTO;
 import org.shanoir.ng.neurobagel.service.NeurobagelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 
@@ -38,6 +40,32 @@ public class NeurobagelApiController implements NeurobagelApi {
     public ResponseEntity<NeurobagelStudyDTO> findExportedStudy(Long studyId) {
         return neurobagelService.findExportedStudy(studyId)
                 .map(study -> new ResponseEntity<>(study, HttpStatus.OK))
+                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
+    @Override
+    public ResponseEntity<String> findParticipantsTsv(Long studyId) {
+        return neurobagelService.findParticipantsTsv(studyId)
+                .map(tsv -> ResponseEntity.ok().contentType(MediaType.parseMediaType(TSV + ";charset=UTF-8")).body(tsv))
+                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
+    @Override
+    public ResponseEntity<String> getParticipantsDictionary() {
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(neurobagelService.getParticipantsDictionary());
+    }
+
+    @Override
+    public ResponseEntity<NeurobagelDatasetDescriptionDTO> findDatasetDescription(Long studyId) {
+        return neurobagelService.findDatasetDescription(studyId)
+                .map(description -> new ResponseEntity<>(description, HttpStatus.OK))
+                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
+    @Override
+    public ResponseEntity<String> findImagingTsv(Long studyId) {
+        return neurobagelService.findImagingTsv(studyId)
+                .map(tsv -> ResponseEntity.ok().contentType(MediaType.parseMediaType(TSV + ";charset=UTF-8")).body(tsv))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
