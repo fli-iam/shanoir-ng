@@ -244,9 +244,12 @@ public class DicomSEGAndSRImporterServiceTest {
         when(datasetSecurityService.hasRightOnStudy(STUDY_ID, StudyUserRight.CAN_ANNOTATE.name())).thenReturn(true);
         when(datasetService.create(any())).thenAnswer(invocation -> invocation.getArgument(0));
         ArgumentCaptor<Dataset> datasetCaptor = ArgumentCaptor.forClass(Dataset.class);
-        boolean result = dicomSEGAndSRImporterService.importDicomSEGAndSR(metaInformationAttributes, datasetAttributes,
-                STOWRSMultipartRequestFilter.DICOM_MODALITY_RTSTRUCT, true);
-        assertTrue(result);
+        try (MockedStatic<KeycloakUtil> keycloakUtilMock = Mockito.mockStatic(KeycloakUtil.class)) {
+            keycloakUtilMock.when(KeycloakUtil::getTokenUserId).thenReturn(USER_ID);
+            boolean result = dicomSEGAndSRImporterService.importDicomSEGAndSR(metaInformationAttributes, datasetAttributes,
+                    STOWRSMultipartRequestFilter.DICOM_MODALITY_RTSTRUCT, true);
+            assertTrue(result);
+        }
         verify(datasetService).create(datasetCaptor.capture());
         assertTrue(datasetCaptor.getValue() instanceof RtDataset);
     }
@@ -256,9 +259,12 @@ public class DicomSEGAndSRImporterServiceTest {
         wireSourceDatasetAndOhifRtStructReferencesDirectSeries();
         when(datasetSecurityService.hasRightOnStudy(STUDY_ID, StudyUserRight.CAN_ANNOTATE.name())).thenReturn(true);
         when(datasetService.create(any())).thenAnswer(invocation -> invocation.getArgument(0));
-        boolean result = dicomSEGAndSRImporterService.importDicomSEGAndSR(metaInformationAttributes, datasetAttributes,
-                STOWRSMultipartRequestFilter.DICOM_MODALITY_RTSTRUCT, true);
-        assertTrue(result);
+        try (MockedStatic<KeycloakUtil> keycloakUtilMock = Mockito.mockStatic(KeycloakUtil.class)) {
+            keycloakUtilMock.when(KeycloakUtil::getTokenUserId).thenReturn(USER_ID);
+            boolean result = dicomSEGAndSRImporterService.importDicomSEGAndSR(metaInformationAttributes, datasetAttributes,
+                    STOWRSMultipartRequestFilter.DICOM_MODALITY_RTSTRUCT, true);
+            assertTrue(result);
+        }
         verify(datasetService).create(any());
     }
 
@@ -267,9 +273,12 @@ public class DicomSEGAndSRImporterServiceTest {
         wireSourceDatasetAndOhifRtStructReferencesRoiContoursOnly();
         when(datasetSecurityService.hasRightOnStudy(STUDY_ID, StudyUserRight.CAN_ANNOTATE.name())).thenReturn(true);
         when(datasetService.create(any())).thenAnswer(invocation -> invocation.getArgument(0));
-        boolean result = dicomSEGAndSRImporterService.importDicomSEGAndSR(metaInformationAttributes, datasetAttributes,
-                STOWRSMultipartRequestFilter.DICOM_MODALITY_RTSTRUCT, true);
-        assertTrue(result);
+        try (MockedStatic<KeycloakUtil> keycloakUtilMock = Mockito.mockStatic(KeycloakUtil.class)) {
+            keycloakUtilMock.when(KeycloakUtil::getTokenUserId).thenReturn(USER_ID);
+            boolean result = dicomSEGAndSRImporterService.importDicomSEGAndSR(metaInformationAttributes, datasetAttributes,
+                    STOWRSMultipartRequestFilter.DICOM_MODALITY_RTSTRUCT, true);
+            assertTrue(result);
+        }
         verify(datasetService).create(any());
     }
 

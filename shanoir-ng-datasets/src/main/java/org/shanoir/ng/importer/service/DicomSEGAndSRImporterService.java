@@ -132,7 +132,7 @@ public class DicomSEGAndSRImporterService {
         }
 
         // Find related dataset
-        Dataset dataset = findDataset(examination, datasetAttributes);
+        Dataset dataset = findDataset(examination, datasetAttributes, modality);
         if (dataset == null) {
             LOG.error("Error: importDicomSEGAndSR: source dataset could not be found.");
             return false;
@@ -215,7 +215,7 @@ public class DicomSEGAndSRImporterService {
      * @param datasetAttributes
      * @return
      */
-    private Dataset findDataset(Examination examination, Attributes datasetAttributes) {
+    private Dataset findDataset(Examination examination, Attributes datasetAttributes, String modality) {
         String studyInstanceUID = datasetAttributes.getString(Tag.StudyInstanceUID);
         String seriesInstanceUID = null;
         String sOPInstanceUID = null;
@@ -239,9 +239,16 @@ public class DicomSEGAndSRImporterService {
                     }
                 }
             }
-        // DICOM SEG: use ReferencedSeriesSequence
-        } else if (STOWRSMultipartRequestFilter.DICOM_MODALITY_SEG.equals(datasetAttributes.getString(Tag.Modality))) {
-            // Get SeriesInstanceUID at first
+        } else if (isRtStructModality(modality, datasetAttributes)) {
+            // RTSTRUCT from OHIF: Referenced Frame of Reference -> RT Referenced Series -> Contour Image
+            String[] rtReference = extractRtStructSourceReference(datasetAttributes);
+            if (rtReference == null) {
+                return null;
+            }
+            seriesInstanceUID = rtReference[0];
+            sOPInstanceUID = rtReference[1];
+        } else {
+            // DICOM SEG: use ReferencedSeriesSequence (STOW modality param is SEG; Modality tag may be absent)
             Sequence referencedSeriesSequence = datasetAttributes.getSequence(Tag.ReferencedSeriesSequence);
             if (referencedSeriesSequence == null) {
                 LOG.error("Error: missing sequences/attributes ReferencedSeriesSequence in DICOM SEG.");
@@ -253,7 +260,6 @@ public class DicomSEGAndSRImporterService {
                 return null;
             }
             seriesInstanceUID = itemReferencedSeriesSequence.getString(Tag.SeriesInstanceUID);
-            // Get SOPInstanceUID second
             Sequence referencedInstanceSequence = itemReferencedSeriesSequence.getSequence(Tag.ReferencedInstanceSequence);
             if (referencedInstanceSequence == null) {
                 LOG.error("Error: missing sequences/attributes ReferencedInstanceSequence in DICOM SEG.");
@@ -265,16 +271,13 @@ public class DicomSEGAndSRImporterService {
                 return null;
             }
             sOPInstanceUID = itemReferencedInstanceSequence.getString(Tag.ReferencedSOPInstanceUID);
-        // RTSTRUCT from OHIF: Referenced Frame of Reference -> RT Referenced Series -> Contour Image
-        } else {
-            String[] rtReference = extractRtStructSourceReference(datasetAttributes);
-            if (rtReference == null) {
-                return null;
-            }
-            seriesInstanceUID = rtReference[0];
-            sOPInstanceUID = rtReference[1];
         }
         return findDatasetByUIDs(examination, studyInstanceUID, seriesInstanceUID, sOPInstanceUID);
+    }
+
+    private boolean isRtStructModality(String modality, Attributes datasetAttributes) {
+        return STOWRSMultipartRequestFilter.DICOM_MODALITY_RTSTRUCT.equals(modality)
+                || STOWRSMultipartRequestFilter.DICOM_MODALITY_RTSTRUCT.equals(datasetAttributes.getString(Tag.Modality));
     }
 
     /**
@@ -499,7 +502,10 @@ public class DicomSEGAndSRImporterService {
         }
         // for rights check: keep link to original acquisition
         newMsOrSegDataset.setDatasetAcquisition(dataset.getDatasetAcquisition());
-        createMetadata(datasetAttributes, dataset.getOriginMetadata().getDatasetModalityType(), newMsOrSegDataset);
+        DatasetModalityType sourceModality = dataset.getOriginMetadata() != null
+                ? dataset.getOriginMetadata().getDatasetModalityType()
+                : null;
+        createMetadata(datasetAttributes, sourceModality, newMsOrSegDataset);
         dicomImporterService.manageDatasetExpression(datasetAttributes, newMsOrSegDataset);
         Dataset createdDataset = datasetService.create(newMsOrSegDataset);
         solrService.indexDataset(createdDataset.getId());
