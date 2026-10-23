@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.shanoir.ng.shared.core.model.IdName;
@@ -123,6 +124,31 @@ public class StudySecurityService {
                 && founded.getStudyUserRights() != null
                 && !founded.getStudyUserRights().isEmpty()
                 && founded.canAccessStudy();
+    }
+
+    /**
+     * Restrict the centers of a study to the ones the connected user can access:
+     * admins and members without center restriction see them all.
+     * Access to the study itself must be checked beforehand.
+     *
+     * @param studyId the study id
+     * @param centers the centers of the study
+     * @param idGetter gives the center id of an element
+     * @return the accessible centers
+     */
+    public <T> List<T> filterAccessibleCenters(Long studyId, List<T> centers, Function<T, Long> idGetter) {
+        if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+            return centers;
+        }
+        StudyUser studyUser = studyUserRepository.findByUserIdAndStudy_Id(KeycloakUtil.getTokenUserId(), studyId);
+        if (studyUser == null || !studyUser.canAccessStudy()) {
+            return new ArrayList<>();
+        }
+        List<Long> centerIds = studyUser.getCenterIds();
+        if (centerIds.isEmpty()) {
+            return centers;
+        }
+        return centers.stream().filter(center -> centerIds.contains(idGetter.apply(center))).collect(Collectors.toList());
     }
 
     public boolean hasRightOnStudyTag(Long id, String rightStr) throws EntityNotFoundException {

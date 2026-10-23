@@ -170,6 +170,7 @@ public class ImporterApiController implements ImporterApi {
                     "Wrong content type of file upload, .zip required.", null));
         }
         File tempFile = null;
+        File importJobDir = null;
         try {
             /**
              * STEP: Handle file management. Always create a userId specific folder in
@@ -182,7 +183,7 @@ public class ImporterApiController implements ImporterApi {
             if (!ImportUtils.checkZipContainsFile(DICOMDIR, tempFile)) {
                 createDicomDir = true;
             }
-            File importJobDir = ImportUtils.saveTempFileCreateFolderAndUnzip(tempFile, dicomZipFile, true);
+            importJobDir = ImportUtils.saveTempFileCreateFolderAndUnzip(tempFile, dicomZipFile, true);
             if (createDicomDir) {
                 LOG.info("DICOMDIR missing from zip file, generating one.");
                 final File dicomDir = new File(importJobDir, DICOMDIR);
@@ -235,9 +236,11 @@ public class ImporterApiController implements ImporterApi {
 
             return new ResponseEntity<>(importJob, HttpStatus.OK);
         } catch (Exception e) {
-            // If there is an exception, we should delete the temporary folder
             if (tempFile != null) {
                 FileUtils.deleteQuietly(tempFile);
+            }
+            if (importJobDir != null) {
+                FileUtils.deleteQuietly(importJobDir);
             }
             LOG.error("DICOM zip upload failed (userId={})", KeycloakUtil.getTokenUserId(), e);
             throw new RestServiceException(
