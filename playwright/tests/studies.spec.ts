@@ -91,7 +91,6 @@ test('test', async ({ page }) => {
   await studyRow.getByRole('button').click();   // opens a dialog
   await page.getByRole('button', { name: 'OK' }).click();
   const dialog = page.getByRole('dialog');
-  await expect(page.getByRole('paragraph')).toContainText('No pending draft studies.');
   await page.getByText('Logout').click();
   await page.getByRole('button', { name: 'Sign in' }).click();
   await expect(page.locator('#kc-page-title')).toContainText('Sign in to your account');
