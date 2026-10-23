@@ -185,6 +185,7 @@ vip:
     # connections VIP downloads may use from the Hikari pool (maximum-pool-size 70, 10 kept for other traffic)
     db-permits: 60
     parallel-count: ${VIP_MAX_DOWNLOAD:4}
+    compression-level: ${VIP_COMPRESSION_LEVEL:1}
 
 
 # Service account

@@ -106,6 +106,7 @@ require()
             VIP_URL_HOST)           match "$name" '^([a-z0-9.:-]+)$'                     ;;
             VIP_CLIENT_SECRET)      ;;
             VIP_MAX_DOWNLOAD)       ;;
+            VIP_COMPRESSION_LEVEL)       ;;
             SHANOIR_SHUTDOWN_HOUR)      ;;
             SHANOIR_CONTINUANCE_HOUR)      ;;
             DEV_USERS_DEFAULT_PASSWORD)      ;;
