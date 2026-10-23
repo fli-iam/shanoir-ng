@@ -187,22 +187,15 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
 
     public save(): Promise<DatasetAcquisition> {
         return super.save(() => {
-            const uploads: Promise<void>[] = [];
-            // Once the acquisition is saved, save associated extra-data files
-            for (const file of this.files) {
-                uploads.push(
-                    this.datasetAcquisitionService.postFile(file, this.entity.id).catch(error => {
-                        // 409: a file with the same name already exists on the server; keep the
-                        // existing one and skip this upload instead of failing the whole save.
-                        if (error?.status === 409) {
-                            this.consoleService.log('warn', 'A file named "' + file.name + '" already exists on this acquisition and was not re-uploaded.');
-                            return;
-                        }
-                        throw error;
-                    })
-                );
-            }
-            return Promise.all(uploads).then(() => null);
+            // Once the acquisition is saved, save associated extra-data files in a single request
+            if (!this.files?.length) return Promise.resolve();
+            return this.datasetAcquisitionService.postFiles(this.files, this.entity.id).then(result => {
+                // Skipped: a file with the same name already exists on the server; the existing one is kept.
+                result?.skipped?.forEach(fileName =>
+                    this.consoleService.log('warn', 'A file named "' + fileName + '" already exists on this acquisition and was not re-uploaded.'));
+                result?.failed?.forEach(fileName =>
+                    this.consoleService.log('error', 'The file "' + fileName + '" could not be uploaded to this acquisition.'));
+            });
         });
     }
 }

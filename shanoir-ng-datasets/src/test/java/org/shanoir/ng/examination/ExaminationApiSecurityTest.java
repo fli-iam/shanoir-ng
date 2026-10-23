@@ -321,6 +321,8 @@ public class ExaminationApiSecurityTest {
         assertAccessDenied(api::addExtraData, 4L, new MockMultipartFile("data", "filename.zip", "application/zip", "some xml".getBytes()));
 
         // downloadExtraData(Long, String, HttpServletResponse)
+        given(rightsService.hasRightOnStudy(1L, "CAN_DOWNLOAD")).willReturn(false);
+        assertAccessDenied(api::downloadExtraData, 1L, "test", new MockHttpServletResponse());
         given(rightsService.hasRightOnStudy(1L, "CAN_DOWNLOAD")).willReturn(true);
         given(rightsService.hasRightOnStudy(2L, "CAN_DOWNLOAD")).willReturn(true);
         assertAccessAuthorized(api::downloadExtraData, 1L, "test", new MockHttpServletResponse());

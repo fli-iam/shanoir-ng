@@ -21,7 +21,9 @@ import org.shanoir.ng.events.ShanoirEventsService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.email.DuaDraftWrapper;
 import org.shanoir.ng.shared.email.EmailDatasetImportFailed;
+import org.shanoir.ng.shared.email.EmailDatasetsCopied;
 import org.shanoir.ng.shared.email.EmailDatasetsImported;
+import org.shanoir.ng.shared.email.EmailExtraDataAdded;
 import org.shanoir.ng.shared.email.EmailStudy;
 import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
 import org.shanoir.ng.shared.event.ShanoirEvent;
@@ -151,6 +153,40 @@ public class RabbitMQUserService {
             this.emailService.notifyStudyManagerDataImported(mail);
         } catch (Exception e) {
             LOG.error("Something went wrong deserializing the import event.", e);
+            throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event.", e);
+        }
+    }
+
+    /**
+     * Receives a datasets copied event as a json object, thus send a mail to study members to notice them
+     * @param generatedMailAsString the mail as a json string.
+     */
+    @RabbitListener(queues = RabbitMQConfiguration.DATASETS_COPIED_MAIL_QUEUE, containerFactory = "multipleConsumersFactory")
+    @RabbitHandler
+    public void receiveDatasetsCopiedEvent(String generatedMailAsString) throws AmqpRejectAndDontRequeueException {
+        SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
+        try {
+            EmailDatasetsCopied mail = mapper.readValue(generatedMailAsString, EmailDatasetsCopied.class);
+            this.emailService.notifyStudyMembersDatasetsCopied(mail);
+        } catch (Exception e) {
+            LOG.error("Something went wrong deserializing the datasets copied event.", e);
+            throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event.", e);
+        }
+    }
+
+    /**
+     * Receives an extra data added event as a json object, thus send a mail to study members to notice them
+     * @param generatedMailAsString the mail as a json string.
+     */
+    @RabbitListener(queues = RabbitMQConfiguration.EXTRA_DATA_MAIL_QUEUE, containerFactory = "multipleConsumersFactory")
+    @RabbitHandler
+    public void receiveExtraDataAddedEvent(String generatedMailAsString) throws AmqpRejectAndDontRequeueException {
+        SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
+        try {
+            EmailExtraDataAdded mail = mapper.readValue(generatedMailAsString, EmailExtraDataAdded.class);
+            this.emailService.notifyStudyMembersExtraDataAdded(mail);
+        } catch (Exception e) {
+            LOG.error("Something went wrong deserializing the extra data event.", e);
             throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event.", e);
         }
     }

@@ -176,6 +176,12 @@ public class RabbitMQConfiguration {
     /** Send a mail from dataset microservice to ms users */
     public static final String IMPORT_DATASET_MAIL_QUEUE = "import-dataset-mail-queue";
 
+    /** Send a mail from dataset microservice to ms users when extra data files are added */
+    public static final String EXTRA_DATA_MAIL_QUEUE = "extra-data-mail-queue";
+
+    /** Send a mail from dataset microservice to ms users when datasets are copied into a study */
+    public static final String DATASETS_COPIED_MAIL_QUEUE = "datasets-copied-mail-queue";
+
     /** Queue used to import eeg data */
     public static final String IMPORT_EEG_QUEUE = "import-eeg-queue";
 
@@ -391,6 +397,16 @@ public class RabbitMQConfiguration {
     @Bean
     public static Queue importDatasetMailQueue() {
         return new Queue(IMPORT_DATASET_MAIL_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue extraDataMailQueue() {
+        return new Queue(EXTRA_DATA_MAIL_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue datasetsCopiedMailQueue() {
+        return new Queue(DATASETS_COPIED_MAIL_QUEUE, true);
     }
 
     @Bean
