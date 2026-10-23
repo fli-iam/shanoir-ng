@@ -164,19 +164,24 @@ public class ImporterApiController implements ImporterApi {
         }
         LOG.info("============== NEW ZIP UPLOAD ===========================");
         File importJobFile = null;
+        File importJobDir = null;
         try {
             ImportJob importJob = new ImportJob();
             importJob.setFromDicomZip(true);
             importJobFile = ImportUtils.initImportJob(importJob, importDir, dicomZipFile);
             boolean createDicomDir = !ImportUtils.checkZipContainsFile(DICOMDIR, importJobFile);
-            File importJobDir = new File(importJob.getWorkFolder());
+            importJobDir = new File(importJob.getWorkFolder());
             ImportUtils.unzip(importJobFile.getAbsolutePath(), importJobDir.getAbsolutePath());
             importJobFile.delete();
+            importJobFile = null;
             setPatientsFromDicomDirAndCreateImages(importJob, importJobDir, createDicomDir);
             return new ResponseEntity<>(importJob, HttpStatus.OK);
         } catch (Exception e) {
             if (importJobFile != null) {
                 FileUtils.deleteQuietly(importJobFile);
+            }
+            if (importJobDir != null) {
+                FileUtils.deleteQuietly(importJobDir);
             }
             LOG.error("DICOM zip upload failed (userId={})", KeycloakUtil.getTokenUserId(), e);
             throw new RestServiceException(

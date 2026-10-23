@@ -59,7 +59,8 @@ public class RtStructNestedUidAnonymizationTest {
 
             String profile = AnonymizationRulesSingleton.getInstance().getProfiles().keySet().iterator().next();
             AnonymizationServiceImpl anonymizer = new AnonymizationServiceImpl();
-            anonymizer.anonymizeForShanoir(batch, profile, "TEST^SUBJECT", "TEST", "1.4.9.12.34.1.8527.999999999999");
+            anonymizer.anonymizeForShanoir(batch, profile, "TEST^SUBJECT", "TEST", "1.4.9.12.34.1.8527.999999999999",
+                    workDir.toFile());
 
             File rtOut = batch.stream().filter(f -> f.getName().startsWith("RTSTRUCT")).findFirst().orElseThrow();
             File ctOut = batch.stream().filter(f -> f.getName().startsWith("CT_")).findFirst().orElseThrow();

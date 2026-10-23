@@ -14,8 +14,10 @@
 
 package org.shanoir.ng.importer;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.io.File;
@@ -23,7 +25,10 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collections;
+import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.io.FileUtils;
@@ -46,6 +51,8 @@ import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -70,6 +77,16 @@ public class ImporterApiControllerTest {
     private static final String START_EEG_JOB_PATH = "/importer/start_import_eeg_job/";
 
     private static final String GET_DICOM = "/importer/get_dicom/";
+
+    private static final String UPLOAD_DICOM = "/importer/upload_dicom/";
+
+    private static Path importDirectory;
+
+    @DynamicPropertySource
+    static void configureImportDirectory(DynamicPropertyRegistry registry) throws IOException {
+        importDirectory = Files.createTempDirectory("shanoir-import-upload-test");
+        registry.add("shanoir.import.directory", () -> importDirectory.toString());
+    }
 
     @Autowired
     private MockMvc mvc;
@@ -186,4 +203,28 @@ public class ImporterApiControllerTest {
                 .andExpect(status().is(200));
     }
 
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    public void testUploadDicomZipFileDeletesUnzippedWorkDirOnFailure() throws Exception {
+        Path zipFile = Files.createTempFile("dicom-upload", ".zip");
+        try (ZipOutputStream zipout = new ZipOutputStream(Files.newOutputStream(zipFile))) {
+            zipout.putNextEntry(new ZipEntry("instance.dcm"));
+            zipout.write("not-a-dicom".getBytes(StandardCharsets.UTF_8));
+            zipout.closeEntry();
+        }
+        MockMultipartFile upload = new MockMultipartFile("file", "dicom.zip", "application/zip",
+                Files.readAllBytes(zipFile));
+        Files.deleteIfExists(zipFile);
+
+        mvc.perform(multipart(UPLOAD_DICOM).file(upload)).andExpect(status().isUnprocessableEntity());
+
+        File userImportDir = importDirectory.resolve("3").toFile();
+        if (userImportDir.exists()) {
+            File[] leftovers = userImportDir.listFiles();
+            assertTrue(leftovers == null || leftovers.length == 0,
+                    "Unzipped import job folder should be removed after upload failure");
+        } else {
+            assertFalse(userImportDir.exists());
+        }
+    }
 }

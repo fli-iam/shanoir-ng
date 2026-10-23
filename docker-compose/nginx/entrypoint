@@ -34,9 +34,12 @@ x_forwarded_headers() {
 (
 	x_forwarded_headers
 
-	cat /etc/nginx/viewer/ohif-viewer.template.conf
+	cat /etc/nginx/viewer.template.conf
 
-) >/etc/nginx/ohif-viewer.conf
+) >/etc/nginx/viewer.conf
+
+cat /etc/nginx/ohif/ohif.template.conf     >/etc/nginx/ohif.conf
+cat /etc/nginx/videpe/videpe.template.conf >/etc/nginx/videpe.conf
 
 
 require SHANOIR_URL_HOST
@@ -45,6 +48,8 @@ export SHANOIR_CONTACT_EMAIL
 export SHANOIR_DPO_EMAIL
 require SHANOIR_VIEWER_OHIF_URL_HOST
 require SHANOIR_VIEWER_OHIF_URL_SCHEME
+require SHANOIR_VIEWER_VIDEPE_URL_HOST
+require SHANOIR_VIEWER_VIDEPE_URL_SCHEME
 optional SHANOIR_VIEWER_OHIF_INTERACTION_NUM_REQUESTS
 optional SHANOIR_VIEWER_OHIF_THUMBNAIL_NUM_REQUESTS
 optional SHANOIR_VIEWER_OHIF_PREFETCH_NUM_REQUESTS
@@ -81,12 +86,17 @@ fi
 
 # Copy our linked app-config.js into /html and remove the .gz variant
 # (so that nginx always serves the new one)
-cp "/etc/nginx/viewer/app-config.js" /etc/nginx/viewer/html/
-rm -f /etc/nginx/viewer/html/app-config.js.gz
+cp "/etc/nginx/ohif/app-config.js" /etc/nginx/ohif/html/
+rm -f /etc/nginx/ohif/html/app-config.js.gz
+
+# Copy our VIDEPE config over the default one shipped in the VIDEPE image
+cp "/etc/nginx/videpe/app-config.js" /etc/nginx/videpe/html/videpe/
 
 # Replace all placeholder variables in all the files below
 sed -i "s/SHANOIR_VIEWER_OHIF_URL_HOST/$SHANOIR_VIEWER_OHIF_URL_HOST/g
 	s/SHANOIR_VIEWER_OHIF_URL_SCHEME/$SHANOIR_VIEWER_OHIF_URL_SCHEME/g
+	s/SHANOIR_VIEWER_VIDEPE_URL_HOST/$SHANOIR_VIEWER_VIDEPE_URL_HOST/g
+	s/SHANOIR_VIEWER_VIDEPE_URL_SCHEME/$SHANOIR_VIEWER_VIDEPE_URL_SCHEME/g
 	s/SHANOIR_VIEWER_OHIF_INTERACTION_NUM_REQUESTS/$SHANOIR_VIEWER_OHIF_INTERACTION_NUM_REQUESTS/g
 	s/SHANOIR_VIEWER_OHIF_THUMBNAIL_NUM_REQUESTS/$SHANOIR_VIEWER_OHIF_THUMBNAIL_NUM_REQUESTS/g
 	s/SHANOIR_VIEWER_OHIF_PREFETCH_NUM_REQUESTS/$SHANOIR_VIEWER_OHIF_PREFETCH_NUM_REQUESTS/g
@@ -108,8 +118,11 @@ sed -i "s/SHANOIR_VIEWER_OHIF_URL_HOST/$SHANOIR_VIEWER_OHIF_URL_HOST/g
 	s/VIP_URL_SCHEME/$VIP_URL_SCHEME/g
 "	/etc/nginx/server.conf \
 	/etc/nginx/shanoir.conf \
-	/etc/nginx/viewer/html/app-config.js \
-	/etc/nginx/ohif-viewer.conf \
+	/etc/nginx/ohif/html/app-config.js \
+	/etc/nginx/videpe/html/videpe/app-config.js \
+	/etc/nginx/viewer.conf \
+	/etc/nginx/ohif.conf \
+	/etc/nginx/videpe.conf \
 	/etc/nginx/html/assets/env.js
 
 configure_instance()
