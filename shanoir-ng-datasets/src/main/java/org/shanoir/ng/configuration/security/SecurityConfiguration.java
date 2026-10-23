@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.shanoir.ng.dicom.web.STOWRSMultipartRequestFilter;
+import org.shanoir.ng.shared.security.NeurobagelAccess;
 import org.shanoir.ng.utils.MDCFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -82,7 +83,7 @@ public class SecurityConfiguration {
                                         "/datasets/overallStatistics")
                                 .permitAll()
                                 .anyRequest()
-                                .authenticated())
+                                .access(NeurobagelAccess.authenticatedExceptNeurobagel()))
                 .oauth2ResourceServer(oauth2Configurer -> oauth2Configurer
                         .jwt(jwtConfigurer -> jwtConfigurer.jwtAuthenticationConverter(jwt -> {
                             Map<String, Collection<String>> realmAccess = jwt.getClaim("realm_access"); // manage
