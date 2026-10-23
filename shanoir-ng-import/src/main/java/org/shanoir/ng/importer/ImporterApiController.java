@@ -208,6 +208,10 @@ public class ImporterApiController implements ImporterApi {
             }
         }
         List<Patient> patients = preparePatientsForImportJob(importJobDir);
+        if (patients == null || patients.isEmpty()) {
+            throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                    "No DICOM patient found in uploaded ZIP.", null));
+        }
         if (patients.size() > 1) {
             throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
                     "ZIP with multiple DICOM patients not supported.", null));
@@ -765,12 +769,17 @@ public class ImporterApiController implements ImporterApi {
         final File userImportDir = ImportUtils.getUserImportDir(importDir);
         final String userImportDirCanonicalPath = userImportDir.getCanonicalPath();
         final String decodedPath = URLDecoder.decode(path, StandardCharsets.UTF_8);
-        final File dicomFile = new File(decodedPath);
+        File candidate = new File(decodedPath);
+        final File dicomFile = candidate.isAbsolute() ? candidate : new File(userImportDir, decodedPath);
         final String dicomFileCanonicalPath = dicomFile.getCanonicalPath();
         if (!dicomFileCanonicalPath.startsWith(userImportDirCanonicalPath + File.separator)
                 && !dicomFileCanonicalPath.equals(userImportDirCanonicalPath)) {
             throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
                     "Path is not within the allowed user import directory: " + path, null));
+        }
+        if (!dicomFile.isFile()) {
+            throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                    "Path is not a DICOM file: " + path, null));
         }
         byte[] byteArray = Files.readAllBytes(dicomFile.toPath());
         ByteArrayResource resource = new ByteArrayResource(byteArray);
