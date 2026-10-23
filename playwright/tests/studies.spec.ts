@@ -87,7 +87,7 @@ test('test', async ({ page }) => {
   await page.getByText(/Draft\s*Studies\s*\d+/).click();
   const studyRow = page
     .locator('form')
-    .filter({ hasText: 'User ' + roleExpertUserName + ' Study playwright-test-study-draft-create-' + randomString });
+    .filter({ hasText: 'User ' + process.env.EXPERT_NAME + ' Study playwright-test-study-draft-create-' + randomString });
   await studyRow.getByRole('button').click();   // opens a dialog
   await page.getByRole('button', { name: 'OK' }).click();
   const dialog = page.getByRole('dialog');
