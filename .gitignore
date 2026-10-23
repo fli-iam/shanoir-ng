@@ -65,12 +65,13 @@ docker-compose-vip.yml
 
 # Playwright
 node_modules/
-/playwright/.env
-/playwright/node_modules/
-/test-results/
-/playwright/test-results/
-/playwright-report/
-/playwright/playwright-report/
-/playwright/blob-report/
-/playwright/playwright/.cache/
-/playwright/playwright/.auth/
+playwright/.env
+playwright/node_modules/
+test-results/
+playwright/test-results/
+playwright-report/
+playwright/playwright-report/
+playwright/blob-report/
+playwright/playwright/.cache/
+playwright/playwright/.auth/
+
