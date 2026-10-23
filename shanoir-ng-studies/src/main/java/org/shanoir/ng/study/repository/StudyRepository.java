@@ -41,6 +41,13 @@ public interface StudyRepository extends JpaRepository<Study, Long>, StudyReposi
     @EntityGraph(attributePaths = { "studyTags", "profile" })
     List<Study> findByVisibleByDefaultTrueAndIsDraftFalse();
 
+    /**
+     * Studies exposed to the Neurobagel federation: flagged by an admin and no longer drafts.
+     */
+    List<Study> findByNeurobagelExportTrueAndIsDraftFalseOrderByIdAsc();
+
+    boolean existsByIdAndNeurobagelExportTrueAndIsDraftFalse(Long id);
+
     @EntityGraph(attributePaths = { "studyTags", "profile" })
     List<Study> findDistinctByStudyUserListUserIdAndStudyUserListExpirationDateBefore(Long userId, LocalDate date);
 

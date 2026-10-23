@@ -24,14 +24,20 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         </button>
                     }
                     @if (mode == 'view' && hasDownloadRight) {
-                        <button type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="openViewer()">
+                        <button type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="openOhifViewer()">
                             View DICOM
                             <i class="fa fa-eye"></i>
                         </button>
                     }
                     @if (mode == 'view' && hasDownloadRight) {
-                        <button type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="openSegmentationViewer()">
+                        <button type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="openOhifSegmentation()">
                             View for segmentation
+                            <i class="fa fa-eye"></i>
+                        </button>
+                    }
+                    @if (mode == 'view' && hasDownloadRight && hasEEG) {
+                        <button type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="openVidepeViewer()">
+                            View EEG
                             <i class="fa fa-eye"></i>
                         </button>
                     }

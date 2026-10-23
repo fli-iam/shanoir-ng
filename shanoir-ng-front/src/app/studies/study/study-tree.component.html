@@ -43,6 +43,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             ">
             <double-awesome main="fas fa-eye" [sub]="loaded && canOpenDicomMultiExam ? 'far fa-copy' : 'far fa-file'"></double-awesome>
         </button>
+        <button
+            class="dl-button"
+            type="button"
+            (click)="openInVidepe()"
+            [disabled]="!loaded || !canOpenEeg"
+            title="view EEG for the one examination selected">
+            <double-awesome main="fas fa-eye" sub="fas fa-wave-square"></double-awesome>
+        </button>
     }
     <button class="dl-button" type="button" (click)="resetSelection()" [disabled]="selectionEmpty" title="unselect all">
         <i class="fas fa-broom"></i>
