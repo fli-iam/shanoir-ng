@@ -22,6 +22,7 @@ import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import { Page, Pageable } from '../../shared/components/table/pageable.model';
 import * as AppUtils from '../../utils/app.utils';
+import { ExtraDataUploadResult } from '../../shared/models/extra-data-upload-result.model';
 
 import {
     DatasetAcquisitionDatasetsDTO,
@@ -131,11 +132,13 @@ export class DatasetAcquisitionService extends EntityService<DatasetAcquisition>
         return JSON.stringify(dto, this.customReplacer);
     }
 
-    postFile(fileToUpload: File, acquisitionId: number): Promise<any> {
-        const endpoint = this.API_URL + '/extra-data-upload/' + acquisitionId;
+    postFiles(filesToUpload: File[], acquisitionId: number): Promise<ExtraDataUploadResult> {
+        const endpoint = this.API_URL + '/extra-data-upload/' + acquisitionId + '/multi';
         const formData: FormData = new FormData();
-        formData.append('file', fileToUpload, fileToUpload.name);
-        return firstValueFrom(this.http.post<any>(endpoint, formData));
+        for (const file of filesToUpload) {
+            formData.append('files', file, file.name);
+        }
+        return firstValueFrom(this.http.post<ExtraDataUploadResult>(endpoint, formData));
     }
 
     downloadFile(fileName: string, acquisitionId: number, state?: TaskState): Observable<TaskState> {

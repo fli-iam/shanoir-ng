@@ -28,6 +28,7 @@ import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.email.EmailBase;
 import org.shanoir.ng.shared.email.EmailDatasetImportFailed;
 import org.shanoir.ng.shared.email.EmailDatasetsImported;
+import org.shanoir.ng.shared.email.EmailExtraDataAdded;
 import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.slf4j.Logger;
@@ -87,7 +88,7 @@ public class ImporterMailService {
         }
 
         generatedMail.setDatasets(datasets);
-        sendMail(importJob, generatedMail, RabbitMQConfiguration.IMPORT_DATASET_MAIL_QUEUE);
+        sendMail(importJob.getStudyId(), generatedMail, RabbitMQConfiguration.IMPORT_DATASET_MAIL_QUEUE);
     }
 
     public void sendFailureMail(ImportJob importJob, Long userId, String errorMessage) {
@@ -101,20 +102,44 @@ public class ImporterMailService {
 
         generatedMail.setErrorMessage(errorMessage != null ? errorMessage : "An unexpected error occured, please contact Shanoir support.");
 
-        sendMail(importJob, generatedMail, RabbitMQConfiguration.IMPORT_DATASET_FAILED_MAIL_QUEUE);
+        sendMail(importJob.getStudyId(), generatedMail, RabbitMQConfiguration.IMPORT_DATASET_FAILED_MAIL_QUEUE);
+    }
+
+    /**
+     * Sends the extra data email through rabbitMQ to user MS
+     * @param examination the examination the files were added to, or the examination of the acquisition
+     * @param datasetAcquisitionId the acquisition the files were added to, null if added to the examination
+     * @param fileNames the names of the files successfully added
+     * @param userId the user who added the files
+     */
+    public void sendExtraDataEmail(Examination examination, Long datasetAcquisitionId, List<String> fileNames, Long userId) {
+        if (CollectionUtils.isEmpty(fileNames)) {
+            return;
+        }
+        EmailExtraDataAdded generatedMail = new EmailExtraDataAdded();
+        generatedMail.setStudyId(examination.getStudyId());
+        generatedMail.setStudyName(examination.getStudy() != null ? examination.getStudy().getName() : null);
+        generatedMail.setSubjectName(examination.getSubject() != null ? examination.getSubject().getName() : null);
+        generatedMail.setExaminationId(examination.getId().toString());
+        generatedMail.setExamDate(examination.getExaminationDate() != null ? examination.getExaminationDate().toString() : null);
+        generatedMail.setDatasetAcquisitionId(datasetAcquisitionId != null ? datasetAcquisitionId.toString() : null);
+        generatedMail.setFileNames(fileNames);
+        generatedMail.setUserId(userId);
+
+        sendMail(examination.getStudyId(), generatedMail, RabbitMQConfiguration.EXTRA_DATA_MAIL_QUEUE);
     }
 
     /**
      * Sends the given mail in entry to all recipients in a given study
-     * @param job the imprt job
+     * @param studyId the study id
      * @param email the recipients
      * @param queue
      */
-    private void sendMail(ImportJob job, EmailBase email, String queue) {
+    private void sendMail(Long studyId, EmailBase email, String queue) {
         List<Long> recipients = new ArrayList<>();
 
         // Get all recpients
-        List<StudyUser> users = (List<StudyUser>) studyUserRightRepo.findByStudyId(job.getStudyId());
+        List<StudyUser> users = (List<StudyUser>) studyUserRightRepo.findByStudyId(studyId);
 
         for (StudyUser user : users) {
             if (user.isReceiveNewImportReport()) {
@@ -130,7 +155,7 @@ public class ImporterMailService {
         try {
             rabbitTemplate.convertAndSend(queue, objectMapper.writeValueAsString(email));
         } catch (AmqpException | JsonProcessingException e) {
-            LOG.error("Could not send email for this import. ", e);
+            LOG.error("Could not send email to queue {}. ", queue, e);
         }
     }
 
