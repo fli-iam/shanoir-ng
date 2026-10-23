@@ -204,7 +204,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
         );
         this.subscriptions.push(
             subjectForm.get('study')!.valueChanges.subscribe(() => {
-                subjectForm.get('name')!.updateValueAndValidity({ onlySelf: true, emitEvent: false });
+                subjectForm.get('name')!.updateValueAndValidity();
             })
         );
         if (!this.subject.name && this.subjectNamePrefix) {
@@ -252,7 +252,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
     }
 
     private updateFormControl(formGroup: UntypedFormGroup) {
-        if (formGroup.get('imagedObjectCategory').value == ImagedObjectCategory.LIVING_HUMAN_BEING && !this.subject.isAlreadyAnonymized && this.mode == 'create') {
+        if (formGroup.get('imagedObjectCategory').value == ImagedObjectCategory.LIVING_HUMAN_BEING && !formGroup.get('isAlreadyAnonymized').value && this.mode == 'create') {
             if (this.importMode != 'EEG') {
                 formGroup.get('firstName').setValidators(this.nameValidators);
                 formGroup.get('lastName').setValidators(this.nameValidators);
@@ -336,6 +336,8 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
     }
 
     public toggleAnonymised(isAlreadyAnonymized: boolean) {
+        // the name is only derived from the DICOM patient name during an import
+        if (!this.dicomPatientName) return;
         this.subject.name = (this.subjectNamePrefix ? this.subjectNamePrefix : '')
             + (isAlreadyAnonymized ? this.dicomPatientName : '');
     }
