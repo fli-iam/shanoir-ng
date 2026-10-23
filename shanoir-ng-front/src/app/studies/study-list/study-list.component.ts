@@ -184,31 +184,36 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> i
 
     getColumnDefs(): ColumnDefinition[] {
         const colDef: ColumnDefinition[] = [
-            { headerName: "", type: "boolean", awesome: 'fa-solid fa-lock', awesomeFalse: 'fa-solid fa-lock-open', color: 'var(--color-a)', colorFalse: 'var(--color-a)',
+            { headerName: "Access", type: "boolean", width: '50px', awesome: 'fa-solid fa-lock', awesomeFalse: 'fa-solid fa-lock-open', color: 'var(--color-a)', colorFalse: 'var(--color-a)',
                 cellRenderer: ret => {
                     return (ret.data as Study).visibleByDefault && (ret.data as Study).locked;
-                }
+                },
+                tip: (study: Study) => study.visibleByDefault && study.locked
+                    ? "No access: public study or expired membership. You can request access"
+                    : "You have access to this study"
             },
             {
-                headerName: "", type: "boolean", field: "isDraft", awesome: 'fa-regular fa-clipboard', color: 'var(--color-a)', width: '15px',
-                tip: ret => ret.isDraft ? "draft" : null
+                headerName: "Approved", type: "boolean", field: "isDraft", awesome: 'fa-solid fa-clipboard-check', awesomeFalse: 'fa-regular fa-clipboard',
+                color: 'var(--color-a)', colorFalse: 'var(--color-a)', width: '60px',
+                cellRenderer: ret => !(ret.data as Study).isDraft,
+                tip: (study: Study) => study.isDraft ? "Not approved yet: awaiting approval by an administrator" : "Approved by an administrator"
             },
             { headerName: "Name", field: "name" },
             {
-                headerName: "Status", field: "studyStatus", width: '70px', cellRenderer: function (params: any) {
+                headerName: "Status", field: "studyStatus", width: '70px', hidden: true, cellRenderer: function (params: any) {
                     return capitalsAndUnderscoresToDisplayable(params.data.studyStatus);
                 }
             },
-            { headerName: "Start date", field: "startDate", type: "date" },
-            { headerName: "End date", field: "endDate", type: "date" },
+            { headerName: "Start date", field: "startDate", type: "date", hidden: true },
+            { headerName: "End date", field: "endDate", type: "date", hidden: true },
             {
-                headerName: "Subjects", field: "nbSubjects", type: "number", width: '30px'
+                headerName: "Subjects", field: "nbSubjects", type: "number", width: '65px'
             },
             {
-                headerName: "Examinations", field: "nbExaminations", type: "number", width: '30px'
+                headerName: "Examinations", field: "nbExaminations", type: "number", width: '95px'
             },
             {
-                headerName: "Members", field: "nbMembers", type: "number", width: '30px'
+                headerName: "Members", field: "nbMembers", type: "number", width: '65px', hidden: true
             },
             {
                 headerName: "Storage volume", field: "totalSize", disableSearch: true, disableSorting: true, type: "number", orderBy: ["totalSize"],

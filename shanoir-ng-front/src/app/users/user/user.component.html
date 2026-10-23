@@ -225,7 +225,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </fieldset>
             <fieldset>
                 <ol>
-                    @if (mode != 'create' || !isUserAdmin()) {
+                    @if (mode != 'create' && isUserAdmin()) {
                         <li>
                             <label i18n="Edit user|Account activated label@@editUserKeycloakEnabled">Account activated</label>
                             <span class="right-col">

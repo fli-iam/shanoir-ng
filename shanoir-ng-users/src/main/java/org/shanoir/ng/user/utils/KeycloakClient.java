@@ -148,7 +148,8 @@ public class KeycloakClient {
     /**
      * Enable Keycloak two-factor (TOTP) authentication for a user by adding the
      * {@code CONFIGURE_TOTP} required action. The user is then forced to register an
-     * authenticator at next login.
+     * authenticator at next login. Nothing is done if the user already has an OTP
+     * credential, otherwise every update of a 2FA user would force a new device registration.
      *
      * @param keycloakId
      *            the keycloak id of the user.
@@ -157,6 +158,9 @@ public class KeycloakClient {
     public void enableTotp(final String keycloakId) throws SecurityException {
         try {
             final String token = getAdminToken();
+            if (hasOtpCredential(keycloakId, token)) {
+                return;
+            }
             final Map<String, Object> userRepresentation = getUserRepresentation(keycloakId, token);
             final List<String> requiredActions = getRequiredActions(userRepresentation);
             if (!requiredActions.contains(CONFIGURE_TOTP_ACTION)) {
@@ -215,10 +219,8 @@ public class KeycloakClient {
     public boolean isTotpEnabled(final String keycloakId) throws SecurityException {
         try {
             final String token = getAdminToken();
-            for (Map<String, Object> credential : getCredentials(keycloakId, token)) {
-                if (OTP_CREDENTIAL_TYPE.equals(credential.get("type"))) {
-                    return true;
-                }
+            if (hasOtpCredential(keycloakId, token)) {
+                return true;
             }
             final Map<String, Object> userRepresentation = getUserRepresentation(keycloakId, token);
             return getRequiredActions(userRepresentation).contains(CONFIGURE_TOTP_ACTION);
@@ -339,6 +341,15 @@ public class KeycloakClient {
                 .bodyToMono(List.class)
                 .block(Duration.ofSeconds(10));
         return response == null ? List.of() : (List<Map<String, Object>>) response;
+    }
+
+    private boolean hasOtpCredential(String keycloakId, String token) {
+        for (Map<String, Object> credential : getCredentials(keycloakId, token)) {
+            if (OTP_CREDENTIAL_TYPE.equals(credential.get("type"))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void deleteCredential(String keycloakId, String credentialId, String token) {

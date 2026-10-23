@@ -45,6 +45,9 @@ export type ColumnDefinition = {
     /** hide the column */
     hidden?: boolean,
 
+    /** don't print the header name in the table header (ie icon columns), it is still used in the columns settings, the header tooltip and the CSV export */
+    hideHeaderName?: boolean,
+
     /** a list or a function that return a list of possible values for using a select box as an input for ths column in edit mode */
     possibleValues?: any[] | ((item: any) => any[]),
 

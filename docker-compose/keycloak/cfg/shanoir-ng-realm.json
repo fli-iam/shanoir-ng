@@ -815,6 +815,81 @@
       ]
     },
     {
+      "clientId": "videpe-viewer",
+      "name": "VIDEPE",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "protocol": "openid-connect",
+      "redirectUris": [
+        "SHANOIR_VIEWER_VIDEPE_URL_SCHEME://SHANOIR_VIEWER_VIDEPE_URL_HOST/videpe/*"
+      ],
+      "webOrigins": [
+        "SHANOIR_VIEWER_VIDEPE_URL_SCHEME://SHANOIR_VIEWER_VIDEPE_URL_HOST"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "+"
+      },
+      "protocolMappers": [
+        {
+          "id": "1cd31dcd-739e-4a21-81a0-a5ccc900ba05",
+          "name": "userId",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "userId",
+            "id.token.claim": "false",
+            "access.token.claim": "true",
+            "claim.name": "userId",
+            "jsonType.label": "long",
+            "userinfo.token.claim": "false"
+          }
+        },
+        {
+          "id": "644960a2-4c0f-4ffa-b13a-bd736f1d5833",
+          "name": "email",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-property-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "email",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "email",
+            "jsonType.label": "String",
+            "userinfo.token.claim": "true"
+          }
+        },
+        {
+          "id": "aa0eefdc-5373-4082-b708-f2f0c62034e3",
+          "name": "username",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-property-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "username",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "preferred_username",
+            "jsonType.label": "String",
+            "userinfo.token.claim": "true"
+          }
+        }
+      ],
+      "defaultClientScopes": [
+        "web-origins",
+        "profile",
+        "roles",
+        "basic",
+        "email"
+      ]
+    },
+    {
       "id": "149ce4d3-bd9f-4ac5-8368-9c43e31c1434",
       "clientId": "realm-management",
       "name": "${client_realm-management}",
@@ -2568,7 +2643,7 @@
           "userSetupAllowed": false
         }
       ]
-    },    
+    },
 	{
       "id": "8f3b3e04-2e47-4e90-92fc-66bc947519eb",
       "alias": "http challenge",
