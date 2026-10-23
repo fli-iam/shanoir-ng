@@ -65,6 +65,7 @@ docker-compose-vip.yml
 
 # Playwright
 node_modules/
+/playwright/.env
 /playwright/node_modules/
 /test-results/
 /playwright/test-results/
