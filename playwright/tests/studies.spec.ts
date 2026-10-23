@@ -99,8 +99,8 @@ test('test', async ({ page }) => {
   await page.getByRole('textbox', { name: 'Password' }).click();
   await page.getByRole('textbox', { name: 'Password' }).fill(process.env.EXPERT_PASSWORD);
   await page.getByRole('button', { name: 'Sign In' }).click();
+  await page.getByText('Medical data').click();
   await page.getByText('Studies', { exact: true }).click();
-  await page.getByRole('textbox', { name: 'search...' }).click();
   await page.getByRole('link', { name: 'playwright-test-study-draft-create-' + randomString }).click();
   await expect(page.getByRole('heading')).toContainText('Details on study');
 
