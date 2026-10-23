@@ -47,8 +47,8 @@ public interface PostProcessingApi {
             @ApiResponse(responseCode = "200", description = "Post processing command successfully initiated"),
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "500", description = "unexpected error")})
-    @GetMapping(value = { "/ids/"}, produces = { "application/json" })
+    @PostMapping(value = { "/ids/"}, produces = { "application/json" }, consumes = { "application/json" })
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER'))")
     ResponseEntity<IdName> launchPostProcessingFromIds(
-            @Parameter(description = "processing ids", required = true) @RequestParam final List<Long> idList) throws ResultHandlerException;
+            @Parameter(description = "processing ids", required = true) @RequestBody final List<Long> idList) throws ResultHandlerException;
 }
