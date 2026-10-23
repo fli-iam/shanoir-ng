@@ -2,10 +2,10 @@
 
 cd /etc/shanoir-core-template || exit 1
 
-# Compare old and new solr scheme.xml
-for file in $(find . -maxdepth 1 -type f -name "schema.xml"); do
-  if ! cmp -s -- "$file" "/var/solr/data/shanoir/$file"; then
-    echo 'Deleting /var/solr/data (not up-to-date with the template), the index has to be rebuilt'
+# Compare template config with the live core (schema + solrconfig); wipe data if an upgrade must re-apply them.
+for file in schema.xml conf/solrconfig.xml; do
+  if [ -f "$file" ] && { [ ! -f "/var/solr/data/shanoir/$file" ] || ! cmp -s -- "$file" "/var/solr/data/shanoir/$file"; }; then
+    echo "Deleting /var/solr/data ($file not up-to-date with the template), the index has to be rebuilt"
     rm -rf /var/solr/data
     break
   fi
