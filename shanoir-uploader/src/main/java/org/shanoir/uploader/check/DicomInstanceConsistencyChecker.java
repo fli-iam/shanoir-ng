@@ -17,14 +17,24 @@ package org.shanoir.uploader.check;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import org.apache.commons.io.FileUtils;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.dcm4che3.io.DicomInputStream;
 import org.dcm4che3.util.TagUtils;
+import org.shanoir.ng.importer.model.Image;
+import org.shanoir.ng.importer.model.ImportJobBase;
 import org.shanoir.ng.importer.model.Instance;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
@@ -45,6 +55,8 @@ import org.slf4j.LoggerFactory;
 public class DicomInstanceConsistencyChecker {
 
     private static final Logger LOG = LoggerFactory.getLogger(DicomInstanceConsistencyChecker.class);
+
+    private static final int METADATA_CHECK_PARALLELISM = 8;
 
     private final ShanoirUploaderServiceClient client;
 
@@ -151,16 +163,80 @@ public class DicomInstanceConsistencyChecker {
         return true;
     }
 
-    private void deleteInstanceFileAndSerieFolder(File importJobFolder, File instanceFile) {
-        if (instanceFile.getParentFile().equals(importJobFolder)) {
-            FileUtils.deleteQuietly(instanceFile);
+    private void deleteInstanceFileAndSerieFolder(File importJobFolder, File file) {
+        if (file.getParentFile().equals(importJobFolder)) {
+            FileUtils.deleteQuietly(file);
         } else {
-            FileUtils.deleteQuietly(instanceFile);
-            File serieFolder = instanceFile.getParentFile();
+            FileUtils.deleteQuietly(file);
+            File serieFolder = file.getParentFile();
             File[] remainingFiles = serieFolder.listFiles();
             if (remainingFiles == null || remainingFiles.length == 0) {
                 FileUtils.deleteQuietly(serieFolder);
             }
+        }
+    }
+
+    public boolean checkImportJobMetadataOnSeries(ImportJobBase importJob, String examinationUID) throws Exception {
+        Map<String, Integer> localCountsBySeriesInstanceUID = new HashMap<String, Integer>();
+        for (Serie serie : importJob.getSeries()) {
+            List<Image> images = serie.getImages();
+            if (images == null) {
+                continue;
+            }
+            localCountsBySeriesInstanceUID.put(serie.getSeriesInstanceUID(), images.size());
+        }
+        return client.checkSeriesInstanceCounts(examinationUID, localCountsBySeriesInstanceUID);
+    }
+
+    
+    /**
+     * Lightweight, metadata-only counterpart to
+     * {@link #checkImportJob(List, File, String, boolean, boolean)}: pings each
+     * instance's DICOMWeb metadata endpoint (no PixelData, no local DICOM file
+     * access at all — only the UIDs already present in the parsed tree are
+     * needed) to make sure it actually landed on the server. Meant to run, by
+     * default, right after ms-datasets reports FINISHED, to catch a bad import
+     * immediately — well before the optional, much heavier pixel-by-pixel
+     * {@link #checkImportJob} run later by ExaminationConsistencyServiceJob.
+     * Checks run concurrently (bounded pool) since this sits on the upload
+     * state machine's critical path and must stay fast.
+     */
+    public int checkImportJobMetadataOnImages(ImportJobBase importJob, String examinationUID) throws Exception {
+        List<Callable<Boolean>> checks = new ArrayList<>();
+        List<String> descriptions = new ArrayList<>(); // parallel-indexed, for error messages
+        for (Serie serie : importJob.getSeries()) {
+            List<Image> images = serie.getImages();
+            if (images == null) {
+                continue;
+            }
+            for (Image image : images) {
+                checks.add(() -> client.checkDicomInstanceMetadata(
+                        examinationUID, serie.getSeriesInstanceUID(), image.getSOPInstanceUID()));
+                descriptions.add(serie.getSeriesDescription() + " / " + image.getSOPInstanceUID());
+            }
+        }
+        if (checks.isEmpty()) {
+            return 0;
+        }
+        ExecutorService executor = Executors.newFixedThreadPool(Math.min(METADATA_CHECK_PARALLELISM, checks.size()));
+        try {
+            List<Future<Boolean>> futures = executor.invokeAll(checks);
+            int checked = 0;
+            for (int i = 0; i < futures.size(); i++) {
+                boolean found;
+                try {
+                    found = futures.get(i).get();
+                } catch (ExecutionException e) {
+                    throw (e.getCause() instanceof Exception cause) ? cause : e;
+                }
+                if (!found) {
+                    throw new Exception("DICOM instance not found on server (metadata check): " + descriptions.get(i));
+                }
+                checked++;
+            }
+            return checked;
+        } finally {
+            executor.shutdown();
         }
     }
 

@@ -46,8 +46,8 @@ import jakarta.servlet.http.HttpServletResponse;
  * The STOWRSMultipartRequestFilter handles a HTTP-POST request of
  * content type "multipart/related", according to the DICOMWeb standard.
  *
- * 1) This request filter is used by the OHIF viewer sending DICOM SR or
- * DICOM SEG modalities (SR == Structured Report, SEG = Segmentation).
+ * 1) This request filter is used by the OHIF viewer sending DICOM SR,
+ * DICOM SEG (segmentation) or RTSTRUCT (structure set / contour) objects.
  * Within the OHIF viewer, the button "save measurements" is used
  * to send the measurements (SR) to the Shanoir backend for storage.
  * Within the OHIF viewer, open for segmentation/export segmentation
@@ -90,6 +90,8 @@ public class STOWRSMultipartRequestFilter extends GenericFilterBean {
     private static final String DICOMWEB_STUDIES = "/dicomweb/studies";
 
     public static final String DICOM_MODALITY_SEG = "SEG";
+
+    public static final String DICOM_MODALITY_RTSTRUCT = "RTSTRUCT";
 
     private static final String DICOM_MODALITY_SR = "SR";
 
@@ -149,10 +151,11 @@ public class STOWRSMultipartRequestFilter extends GenericFilterBean {
             Attributes metaInformationAttributes = dIS.readFileMetaInformation();
             Attributes datasetAttributes = dIS.readDataset();
             String modality = datasetAttributes.getString(Tag.Modality);
-            if (DICOM_MODALITY_SEG.equals(modality) || DICOM_MODALITY_SR.equals(modality)) {
+            if (DICOM_MODALITY_SEG.equals(modality) || DICOM_MODALITY_SR.equals(modality)
+                    || DICOM_MODALITY_RTSTRUCT.equals(modality)) {
                 if (!dicomSEGAndSRImporterService.importDicomSEGAndSR(metaInformationAttributes, datasetAttributes, modality, nonOhifRequest)) {
-                    LOG.error("Error during import of DICOM SEG/SR.");
-                    throw new ServletException("Error during import of DICOM SEG/SR.");
+                    LOG.error("Error during import of DICOM SEG/SR/RTSTRUCT.");
+                    throw new ServletException("Error during import of DICOM SEG/SR/RTSTRUCT.");
                 }
             } else if (DICOM_MODALITY_MR.equals(modality)
                     || DICOM_MODALITY_CT.equals(modality)
