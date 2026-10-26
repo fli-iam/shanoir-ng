@@ -103,6 +103,8 @@ test('test', async ({ page }) => {
   await page.getByRole('textbox', { name: 'Password' }).fill(process.env.EXPERT_PASSWORD);
   await page.getByRole('button', { name: 'Sign In' }).click();
   await page.locator('side-menu').getByText('Home').click();
+  await expect(page.getByText('Shanoir Home')).toContainText('Challenge', { timeout: 15000 });
+  await expect(page.getByText('Shanoir Home')).toContainText('Explore the study', { timeout: 15000 });
   await page.getByRole('cell', { name: 'My Studies Studies you' }).click();
   await page.getByRole('link', { name: 'playwright-test-study-draft-create-' + randomString }).click();
   await expect(page.getByRole('heading')).toContainText('Details on study');
@@ -195,19 +197,16 @@ test('test', async ({ page }) => {
   // role-expert: equipment: create and delete
   await page.getByText('Center equipments').click();
   await page.getByRole('button', { name: '+ New' }).click();
-  
   const manuModelItem = page.getByRole('listitem').filter({ hasText: 'Manufacturer model' });
   await manuModelItem.getByPlaceholder('Select an option...').click();
   const manuModelOption = page.locator('.list > div').filter({ hasText: 'Achieva 3T' });
   await expect(manuModelOption).toBeVisible();
   await manuModelOption.click();
-
   const acqCenterItem = page.getByRole('listitem').filter({ hasText: 'Acquisition Center' });
   await acqCenterItem.getByPlaceholder('Select an option...').click();
   const acqCenterOption = page.locator('.list > div').filter({ hasText: 'CHU Rennes' });
   await expect(acqCenterOption).toBeVisible();
   await acqCenterOption.click();
-
   await page.locator('#serialNumber').click();
   await page.locator('#serialNumber').fill('serial-number' + randomString);
   await page.getByRole('button', { name: 'Save' }).click();
