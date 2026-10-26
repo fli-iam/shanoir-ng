@@ -103,6 +103,7 @@ public class LoginPanelActionListener implements ActionListener {
         } else if (result.step == AuthStep.OTP_REQUIRED) {
             LOG.info("OTP required for username: {}", username);
             ShUpConfig.username = username;
+            sSC.setPendingOtpDevices(result.otpDevices);
             sSC.setState(otpInputState);
             sSC.nextState();
 
