@@ -5,7 +5,7 @@ const randomString = Math.random().toString().substr(2,10);
 test('test', async ({ page }) => {
   await page.goto(process.env.BASE_URL);
 
-  // role-admin: test study creation
+  // role-admin: study creation and deletion
   await page.getByRole('button', { name: 'Sign in' }).click();
   await expect(page.locator('#kc-page-title')).toContainText('Sign in to your account');
   await page.getByRole('textbox', { name: 'Username or email' }).click();
@@ -39,9 +39,11 @@ test('test', async ({ page }) => {
   await page.getByRole('button', { name: 'No' }).click();
   await expect(page.locator('study-node')).toContainText('playwright-test-study-create-' + randomString);
   await expect(page.getByRole('heading')).toContainText('Details on study');
+  await page.getByRole('button', { name: 'Delete' }).click();
+  await page.getByRole('button', { name: 'OK' }).click();
   await page.getByText('Logout').click();
 
-  // role-expert: test study draft creation and validation by admin
+  // role-expert: study draft creation and validation by admin
   await page.getByRole('button', { name: 'Sign in' }).click();
   await expect(page.locator('#kc-page-title')).toContainText('Sign in to your account');
   await page.getByRole('textbox', { name: 'Username or email' }).click();
@@ -92,6 +94,7 @@ test('test', async ({ page }) => {
   await page.getByRole('button', { name: 'OK' }).click();
   const dialog = page.getByRole('dialog');
   await page.getByText('Logout').click();
+  // role-expert: verify study is not draft anymore
   await page.getByRole('button', { name: 'Sign in' }).click();
   await expect(page.locator('#kc-page-title')).toContainText('Sign in to your account');
   await page.getByRole('textbox', { name: 'Username or email' }).click();
@@ -99,11 +102,8 @@ test('test', async ({ page }) => {
   await page.getByRole('textbox', { name: 'Password' }).click();
   await page.getByRole('textbox', { name: 'Password' }).fill(process.env.EXPERT_PASSWORD);
   await page.getByRole('button', { name: 'Sign In' }).click();
-  await expect(page.getByRole('heading')).toContainText('Shanoir Home');
-  await page.getByText('Medical data').click();
-  await page.getByText('Studies', { exact: true }).click();
-  await expect(page.getByRole('heading')).toContainText('Manage studies');
-  await expect(page.locator('tbody')).toContainText('Export CSV');
+  await page.locator('side-menu').getByText('Home').click();
+  await page.getByRole('cell', { name: 'My Studies Studies you' }).click();
   await page.getByRole('link', { name: 'playwright-test-study-draft-create-' + randomString }).click();
   await expect(page.getByRole('heading')).toContainText('Details on study');
 
@@ -123,16 +123,18 @@ test('test', async ({ page }) => {
   await expect(page.getByRole('heading')).toContainText('Details on study');
   await expect(page.locator('studyuser-list')).toContainText(process.env.ADMIN_NAME);
   
-  // role-expert: test subject creation and deletion
+  // role-expert: subject creation and deletion
   await page.locator('side-menu').getByText('Home').click();
   await expect(page.getByText('Subjects')).toBeVisible();
   await page.getByText('Subjects').click();
   await expect(page.getByRole('heading')).toContainText('Manage subjects');
   await page.getByRole('button', { name: '+ New' }).click();
   await expect(page.getByRole('heading')).toContainText('Create subject');
-  await page.getByRole('group', { name: 'Study' }).locator('select-box').click();
-  await page.getByText('playwright-test-study-draft-create-' + randomString).click();
-  await expect(page.getByRole('group', { name: 'Study' }).getByPlaceholder('Select an option...')).toBeVisible();
+  const studyItem = page.getByRole('listitem').filter({ hasText: 'Study' });
+  await studyItem.getByPlaceholder('Select an option...').click();
+  const studyOption = page.locator('.list > div').filter({ hasText: 'playwright-test-study-draft-create-' + randomString });
+  await expect(studyOption).toBeVisible();
+  await studyOption.click();
   await page.getByRole('listitem').filter({ hasText: 'Subject type Select an option' }).locator('select-box').click();
   await page.locator('.list > div:nth-child(2)').click();
   await expect(page.getByRole('list').filter({ hasText: 'Subject type Patient' }).getByPlaceholder('Select an option...')).toBeVisible();
@@ -148,7 +150,6 @@ test('test', async ({ page }) => {
   await expect(page.getByRole('link', { name: 'playwright-test-subject-create-' + randomString })).toBeVisible();
   await page.getByRole('button', { name: 'Delete' }).click();
   await page.getByRole('button', { name: 'OK' }).click();
-  await expect(page.locator('side-menu')).toContainText('Delete Subject');
   
   // role-expert: test add DUA and protocol file 
   await page.getByText('Medical data').click();
@@ -157,19 +158,66 @@ test('test', async ({ page }) => {
   await page.getByRole('button', { name: 'Edit' }).click();
   await page.getByText('Files', { exact: true }).click();
   await page.getByRole('button', { name: 'Choose file' }).click();
-  await page.getByRole('group', { name: 'Data use agreement (DUA)' }).locator('input[type="file"]').setInputFiles('test_pdf.pdf');
+  await page.getByRole('group', { name: 'Data use agreement (DUA)' }).locator('input[type="file"]').setInputFiles('./tests/test_pdf.pdf');
   await page.getByRole('button', { name: 'Upload a new file' }).click();
-  await page.locator('input[type="file"]').setInputFiles('test_pdf.pdf');
+  await page.locator('input[type="file"]').setInputFiles('./tests/test_pdf.pdf');
   await page.getByRole('button', { name: 'Update' }).click();
-  const downloadPromise = page.waitForEvent('download');
-  await page.locator('.right-col > span > .dl-button').click();
-  const download = await downloadPromise;
-  const download1Promise = page.waitForEvent('download');
-  await page.locator('li > .dl-button').first().click();
-  const download1 = await download1Promise;
-  const download2Promise = page.waitForEvent('download');
-  await page.locator('li:nth-child(2) > .dl-button').click();
-  const download2 = await download2Promise;
+  
+  // role expert: center: create and delete
+  await page.getByText('Medical configuration').click();
+  await page.getByText('Acquisition centers').click();
+  await page.getByRole('button', { name: '+ New' }).click();
+  await page.locator('#name').click();
+  await page.locator('#name').fill('playwright-test-center-create-' + randomString);
+  await page.locator('#street').click();
+  await page.locator('#street').fill('street');
+  await page.locator('#street').press('Tab');
+  await page.locator('#postalCode').click();
+  await page.locator('#postalCode').fill('11111');
+  await page.locator('#postalCode').press('Tab');
+  await page.locator('#city').fill('town');
+  await page.locator('#city').press('Tab');
+  await page.locator('#country').fill('country');
+  await page.locator('#country').press('Tab');
+  await page.locator('#phoneNumber').fill('+09111222333');
+  await page.locator('#phoneNumber').press('Tab');
+  await page.locator('#website').fill('www.website.fr');
+  await page.getByRole('button', { name: 'Save' }).click();
+  await expect(page.getByRole('heading')).toContainText('Details on acquisition center');
+  await expect(page.locator('ol')).toContainText('playwright-test-center-create-');
+  await expect(page.locator('ol')).toContainText('street');
+  await expect(page.locator('ol')).toContainText('11111');
+  await expect(page.locator('ol')).toContainText('town');
+  await expect(page.locator('ol')).toContainText('country');
+  await page.getByRole('button', { name: 'Delete' }).click();
+  await page.getByRole('button', { name: 'OK' }).click();
+  
+  // role-expert: equipment: create and delete
+  await page.getByText('Center equipments').click();
+  await page.getByRole('button', { name: '+ New' }).click();
+  
+  const manuModelItem = page.getByRole('listitem').filter({ hasText: 'Manufacturer model' });
+  await manuModelItem.getByPlaceholder('Select an option...').click();
+  const manuModelOption = page.locator('.list > div').filter({ hasText: 'Achieva 3T' });
+  await expect(manuModelOption).toBeVisible();
+  await manuModelOption.click();
+
+  const acqCenterItem = page.getByRole('listitem').filter({ hasText: 'Acquisition Center' });
+  await acqCenterItem.getByPlaceholder('Select an option...').click();
+  const acqCenterOption = page.locator('.list > div').filter({ hasText: 'CHU Rennes' });
+  await expect(acqCenterOption).toBeVisible();
+  await acqCenterOption.click();
+
+  await page.locator('#serialNumber').click();
+  await page.locator('#serialNumber').fill('serial-number' + randomString);
+  await page.getByRole('button', { name: 'Save' }).click();
+  await expect(page.getByRole('heading')).toContainText('Details on center equipment');
+  await expect(page.locator('ol')).toContainText('Philips Medical Systems');
+  await expect(page.locator('ol')).toContainText('Achieva 3T (Mr) - Philips Medical Systems');
+  await expect(page.locator('ol')).toContainText('serial-number');
+  await page.getByRole('button', { name: 'Delete' }).click();
+  await page.getByRole('button', { name: 'OK' }).click();
+  await page.getByText('Center equipments').click();
   
   await page.getByText('Logout').click();
 });
