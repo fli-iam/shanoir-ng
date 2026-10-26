@@ -97,6 +97,8 @@ public class StudyDTO {
 
     private boolean isDraft;
 
+    private boolean neurobagelExport;
+
     private StudyExtraDetailsDTO extraDetails;
 
     /**
@@ -495,6 +497,14 @@ public class StudyDTO {
 
     public void setIsDraft(boolean isDraft) {
         this.isDraft = isDraft;
+    }
+
+    public boolean isNeurobagelExport() {
+        return neurobagelExport;
+    }
+
+    public void setNeurobagelExport(boolean neurobagelExport) {
+        this.neurobagelExport = neurobagelExport;
     }
 
     public StudyExtraDetailsDTO getExtraDetails() {
