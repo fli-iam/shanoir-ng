@@ -121,6 +121,15 @@
         "clientRole": false,
         "containerId": "shanoir-ng",
         "attributes": {}
+      },
+      {
+        "id": "846fd020-f7f2-405d-8da0-469f20c53053",
+        "name": "ROLE_NEUROBAGEL",
+        "description": "Read-only access to the /neurobagel/** export endpoints, and nothing else",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "shanoir-ng",
+        "attributes": {}
       }
     ],
     "client": {
@@ -506,6 +515,15 @@
   "webAuthnPolicyPasswordlessAcceptableAaguids": [],
   "webAuthnPolicyPasswordlessExtraOrigins": [],
   "users": [
+    {
+      "id": "86dc3205-a43b-4873-bd3c-56d5da8da70e",
+      "username": "service-account-neurobagel-export",
+      "enabled": true,
+      "serviceAccountClientId": "neurobagel-export",
+      "realmRoles": [
+        "ROLE_NEUROBAGEL"
+      ]
+    }
   ],
   "scopeMappings": [
     {
@@ -815,6 +833,81 @@
       ]
     },
     {
+      "clientId": "videpe-viewer",
+      "name": "VIDEPE",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "protocol": "openid-connect",
+      "redirectUris": [
+        "SHANOIR_VIEWER_VIDEPE_URL_SCHEME://SHANOIR_VIEWER_VIDEPE_URL_HOST/videpe/*"
+      ],
+      "webOrigins": [
+        "SHANOIR_VIEWER_VIDEPE_URL_SCHEME://SHANOIR_VIEWER_VIDEPE_URL_HOST"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "+"
+      },
+      "protocolMappers": [
+        {
+          "id": "1cd31dcd-739e-4a21-81a0-a5ccc900ba05",
+          "name": "userId",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "userId",
+            "id.token.claim": "false",
+            "access.token.claim": "true",
+            "claim.name": "userId",
+            "jsonType.label": "long",
+            "userinfo.token.claim": "false"
+          }
+        },
+        {
+          "id": "644960a2-4c0f-4ffa-b13a-bd736f1d5833",
+          "name": "email",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-property-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "email",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "email",
+            "jsonType.label": "String",
+            "userinfo.token.claim": "true"
+          }
+        },
+        {
+          "id": "aa0eefdc-5373-4082-b708-f2f0c62034e3",
+          "name": "username",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-property-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "username",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "preferred_username",
+            "jsonType.label": "String",
+            "userinfo.token.claim": "true"
+          }
+        }
+      ],
+      "defaultClientScopes": [
+        "web-origins",
+        "profile",
+        "roles",
+        "basic",
+        "email"
+      ]
+    },
+    {
       "id": "149ce4d3-bd9f-4ac5-8368-9c43e31c1434",
       "clientId": "realm-management",
       "name": "${client_realm-management}",
@@ -916,6 +1009,43 @@
         "offline_access",
         "microprofile-jwt"
       ]
+    },
+    {
+      "id": "119e7902-5a0a-4787-b2a4-f786483d8096",
+      "clientId": "neurobagel-export",
+      "name": "neurobagel-export",
+      "description": "Export job of the Neurobagel node (client credentials only)",
+      "surrogateAuthRequired": false,
+      "enabled": true,
+      "alwaysDisplayInConsole": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "NEUROBAGEL_CLIENT_SECRET",
+      "redirectUris": [],
+      "webOrigins": [],
+      "notBefore": 0,
+      "bearerOnly": false,
+      "consentRequired": false,
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true,
+      "publicClient": false,
+      "frontchannelLogout": false,
+      "protocol": "openid-connect",
+      "attributes": {
+        "oauth2.device.authorization.grant.enabled": "false",
+        "oidc.ciba.grant.enabled": "false",
+        "client_credentials.use_refresh_token": "false",
+        "use.refresh.tokens": "false",
+        "display.on.consent.screen": "false"
+      },
+      "fullScopeAllowed": true,
+      "nodeReRegistrationTimeout": -1,
+      "defaultClientScopes": [
+        "roles",
+        "basic"
+      ],
+      "optionalClientScopes": []
     },
     {
       "id": "b2fe624e-3d5d-4b5a-b5db-a4b125908d1d",
@@ -2568,7 +2698,7 @@
           "userSetupAllowed": false
         }
       ]
-    },    
+    },
 	{
       "id": "8f3b3e04-2e47-4e90-92fc-66bc947519eb",
       "alias": "http challenge",

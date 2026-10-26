@@ -53,7 +53,6 @@ import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
-import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.dicom.DicomUtils;
 import org.shanoir.ng.shared.dicom.EchoTime;
 import org.shanoir.ng.shared.dicom.EquipmentDicom;
@@ -559,9 +558,7 @@ public class DicomImporterService {
         if (subject == null) {
             // Communicate with MS Studies here, only if subject not existing
             // Use convertSendAndReceive to assure, that subject created in MS Studies
-            org.shanoir.ng.importer.dto.Subject subjectDTO = new org.shanoir.ng.importer.dto.Subject();
-            subjectDTO.setName(subjectName);
-            subjectDTO.setStudy(new IdName(study.getId(), study.getName()));
+            org.shanoir.ng.importer.dto.Subject subjectDTO = StowSubjectDtoBuilder.build(attributes, study);
             Long subjectId = (Long) rabbitTemplate.convertSendAndReceive(
                     RabbitMQConfiguration.SUBJECTS_QUEUE_WITHOUT_DATASETS,
                     objectMapper.writeValueAsString(subjectDTO));
@@ -577,6 +574,7 @@ public class DicomImporterService {
             subject.setId(subjectId); // use same as MS Studies
             subject.setName(subjectName);
             subject.setStudy(study);
+            subject.setSubjectType(org.shanoir.ng.shared.subjectstudy.SubjectType.PATIENT);
             subjectService.save(subject);
             LOG.info("Subject created in MS Datasets with ID: {}, Name: {}", subjectId, subjectName);
             return subjectId;

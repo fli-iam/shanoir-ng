@@ -334,7 +334,9 @@ CMD []
 
 ################ nginx #####################################################
 
-FROM ohif/app:v3.12.5 AS nginx-viewer
+FROM ohif/app:v3.12.5 AS ohif-viewer
+
+FROM ghcr.io/videpe/videpe:0.20.0 AS videpe-viewer
 
 FROM nginx AS nginx
 
@@ -347,13 +349,20 @@ COPY --link \
     nginx/shanoir.template.prod.conf \
     nginx/shanoir.template.keycloak-full.conf \
     nginx/shanoir.template.keycloak-limited.conf \
+    nginx/viewer.template.conf \
     /etc/nginx/
 
 COPY --link \
-    nginx/viewer/app-config.js \
-    nginx/viewer/ohif-viewer.template.conf \
-    /etc/nginx/viewer/
-COPY --link --from=nginx-viewer /usr/share/nginx/html/. /etc/nginx/viewer/html/
+    nginx/ohif/app-config.js \
+    nginx/ohif/ohif.template.conf \
+    /etc/nginx/ohif/
+COPY --link --from=ohif-viewer /usr/share/nginx/html/. /etc/nginx/ohif/html/
+
+COPY --link \
+    nginx/videpe/app-config.js \
+    nginx/videpe/videpe.template.conf \
+    /etc/nginx/videpe/
+COPY --link --from=videpe-viewer /usr/share/nginx/html/videpe/. /etc/nginx/videpe/html/videpe/
 
 COPY --link common/entrypoint_common /usr/bin/
 COPY --link nginx/entrypoint         /usr/bin/

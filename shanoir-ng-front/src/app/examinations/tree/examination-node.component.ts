@@ -93,7 +93,7 @@ export class ExaminationNodeComponent extends TreeNodeAbstractComponent<Examinat
     }
 
     viewExaminationDicoms() {
-        window.open(environment.viewerUrl + '/viewer?StudyInstanceUIDs=1.4.9.12.34.1.8527.' + this.node.id, '_blank');
+        window.open(environment.ohifUrl + '/viewer?StudyInstanceUIDs=1.4.9.12.34.1.8527.' + this.node.id, '_blank');
     }
 
     downloadFile(file) {
