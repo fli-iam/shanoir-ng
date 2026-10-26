@@ -20,11 +20,14 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 /**
  * Global exception handler.
@@ -57,11 +60,26 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(value = MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorModel> handleMethodArgumentTypeMismatchException(final MethodArgumentTypeMismatchException e) {
+        final ErrorModel error = new ErrorModel(HttpStatus.BAD_REQUEST.value(), e.getMessage());
+        LOG.warn("Bad request in the rest service: {}", e.getMessage());
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(value = Exception.class)
     public ResponseEntity<ErrorModel> handleException(final Exception e) {
 
         if (e.getCause() instanceof RestServiceException) {
             return this.handleRestServiceException((RestServiceException) e.getCause());
+        }
+
+        // Spring MVC client errors (unknown URL, unsupported method or media type, missing parameter...) carry their own status.
+        if (e instanceof ErrorResponse errorResponse && errorResponse.getStatusCode().is4xxClientError()) {
+            final HttpStatusCode status = errorResponse.getStatusCode();
+            final ErrorModel error = new ErrorModel(status.value(), errorResponse.getBody().getDetail());
+            LOG.warn("Client error in the rest service: {}", e.getMessage());
+            return new ResponseEntity<>(error, status);
         }
 
         final ErrorModel error = new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage());
