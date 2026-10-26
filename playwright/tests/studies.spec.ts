@@ -164,9 +164,22 @@ test('test', async ({ page }) => {
   await page.getByRole('group', { name: 'Data use agreement (DUA)' }).locator('input[type="file"]').setInputFiles('./tests/test_pdf.pdf');
   await page.getByRole('button', { name: 'Upload a new file' }).click();
   await page.locator('input[type="file"]').setInputFiles('./tests/test_pdf.pdf');
-  await page.getByRole('button', { name: 'Update' }).click();
-  
-  // role expert: center: create and delete
+  await page.getByRole('button', { name: 'Update' }).click(); 
+
+  await page.getByText('Logout').click();
+});
+
+test('expert-center-create-delete', async ({ page }) => {
+  await page.goto(process.env.BASE_URL);
+
+  await page.getByRole('button', { name: 'Sign in' }).click();
+  await expect(page.locator('#kc-page-title')).toContainText('Sign in to your account');
+  await page.getByRole('textbox', { name: 'Username or email' }).click();
+  await page.getByRole('textbox', { name: 'Username or email' }).fill(process.env.EXPERT_NAME);
+  await page.getByRole('textbox', { name: 'Password' }).click();
+  await page.getByRole('textbox', { name: 'Password' }).fill(process.env.EXPERT_PASSWORD);
+  await page.getByRole('button', { name: 'Sign In' }).click();
+
   await page.getByText('Medical configuration').click();
   await page.getByText('Acquisition centers').click();
   await page.getByRole('button', { name: '+ New' }).click();
@@ -195,9 +208,9 @@ test('test', async ({ page }) => {
   await page.getByRole('button', { name: 'Delete' }).click();
   await page.getByRole('button', { name: 'OK' }).click();
   
-  
   await page.getByText('Logout').click();
 });
+
 
 test('expert-equipment-create-delete', async ({ page }) => {
   await page.goto(process.env.BASE_URL);
