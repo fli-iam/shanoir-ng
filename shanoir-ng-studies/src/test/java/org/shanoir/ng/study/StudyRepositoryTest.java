@@ -19,6 +19,8 @@ import java.util.List;
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.center.repository.CenterRepository;
@@ -150,5 +152,30 @@ public class StudyRepositoryTest {
 //        studyRepository.save(studyFound);
 //        assertNull(studyUserRepository.findById(deletedId));
 //    }
+
+    @Test
+    public void noStudyIsExportedToNeurobagelByDefault() {
+        assertTrue(studyRepository.findByNeurobagelExportTrueAndIsDraftFalseOrderByIdAsc().isEmpty());
+        assertFalse(studyRepository.existsByIdAndNeurobagelExportTrueAndIsDraftFalse(1L));
+    }
+
+    @Test
+    public void onlyFlaggedApprovedStudiesAreExportedToNeurobagel() {
+        // Test data: studies 1, 2 and 3 are approved and not flagged
+        Study flagged = studyRepository.findById(1L).orElseThrow();
+        flagged.setNeurobagelExport(true);
+        studyRepository.save(flagged);
+        Study flaggedDraft = studyRepository.findById(3L).orElseThrow();
+        flaggedDraft.setNeurobagelExport(true);
+        flaggedDraft.setIsDraft(true);
+        studyRepository.save(flaggedDraft);
+
+        assertEquals(List.of(1L), studyRepository.findByNeurobagelExportTrueAndIsDraftFalseOrderByIdAsc()
+                .stream().map(Study::getId).toList());
+        assertTrue(studyRepository.existsByIdAndNeurobagelExportTrueAndIsDraftFalse(1L));
+        assertFalse(studyRepository.existsByIdAndNeurobagelExportTrueAndIsDraftFalse(2L)); // not flagged
+        assertFalse(studyRepository.existsByIdAndNeurobagelExportTrueAndIsDraftFalse(3L)); // draft
+        assertFalse(studyRepository.existsByIdAndNeurobagelExportTrueAndIsDraftFalse(999L)); // unknown
+    }
 
 }
