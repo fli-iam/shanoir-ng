@@ -61,7 +61,7 @@ public class OtpInputSubmitActionListener implements ActionListener {
         }
 
         try {
-            AuthResult result = session.submitOtp(otpCode);
+            AuthResult result = session.submitOtp(otpCode, null);
             handleResult(result);
         } catch (Exception ex) {
             LOG.error("OTP submission error: {}", ex.getMessage(), ex);
