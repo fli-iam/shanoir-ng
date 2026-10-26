@@ -29,11 +29,15 @@ import org.shanoir.ng.study.model.StudyExtraDetails;
 import org.shanoir.ng.study.model.StudyStatus;
 import org.shanoir.ng.study.repository.StudyRepository;
 import org.shanoir.ng.studycenter.StudyCenter;
+import org.shanoir.ng.tag.model.StudyTag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.web.WebAppConfiguration;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Persistence;
 
 
 @WebAppConfiguration
@@ -49,6 +53,9 @@ public class StudyRepositoryTest {
 
     @Autowired
     private CenterRepository centerRepository;
+
+    @Autowired
+    private EntityManager entityManager;
 
     @Test
     public void create() {
@@ -176,6 +183,23 @@ public class StudyRepositoryTest {
         assertFalse(studyRepository.existsByIdAndNeurobagelExportTrueAndIsDraftFalse(2L)); // not flagged
         assertFalse(studyRepository.existsByIdAndNeurobagelExportTrueAndIsDraftFalse(3L)); // draft
         assertFalse(studyRepository.existsByIdAndNeurobagelExportTrueAndIsDraftFalse(999L)); // unknown
+    }
+
+    @Test
+    public void studyTagsAreLoadedForTheNeurobagelDatasetDescription() {
+        StudyTag tag = new StudyTag();
+        tag.setName("mri");
+        tag.setStudy(entityManager.find(Study.class, 1L));
+        entityManager.persist(tag);
+        entityManager.flush();
+        entityManager.clear();
+
+        Study study = studyRepository.findStudyWithStudyTagsById(1L);
+        // ms studies runs without open-in-view: a lazy studyTags could not be read by the caller
+        entityManager.clear();
+
+        assertTrue(Persistence.getPersistenceUtil().isLoaded(study, "studyTags"));
+        assertEquals(List.of("mri"), study.getStudyTags().stream().map(StudyTag::getName).toList());
     }
 
 }
