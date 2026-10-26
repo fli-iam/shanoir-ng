@@ -195,7 +195,22 @@ test('test', async ({ page }) => {
   await page.getByRole('button', { name: 'Delete' }).click();
   await page.getByRole('button', { name: 'OK' }).click();
   
-  // role-expert: equipment: create and delete
+  
+  await page.getByText('Logout').click();
+});
+
+test('expert-equipment-create-delete', async ({ page }) => {
+  await page.goto(process.env.BASE_URL);
+
+  await page.getByRole('button', { name: 'Sign in' }).click();
+  await expect(page.locator('#kc-page-title')).toContainText('Sign in to your account');
+  await page.getByRole('textbox', { name: 'Username or email' }).click();
+  await page.getByRole('textbox', { name: 'Username or email' }).fill(process.env.EXPERT_NAME);
+  await page.getByRole('textbox', { name: 'Password' }).click();
+  await page.getByRole('textbox', { name: 'Password' }).fill(process.env.EXPERT_PASSWORD);
+  await page.getByRole('button', { name: 'Sign In' }).click();
+
+  await page.getByText('Medical configuration').click();
   await page.getByText('Center equipments').click();
   await page.getByRole('button', { name: '+ New' }).click();
   const manuModelItem = page.getByRole('listitem').filter({ hasText: 'Manufacturer model' });
@@ -218,6 +233,7 @@ test('test', async ({ page }) => {
   await page.getByRole('button', { name: 'Delete' }).click();
   await page.getByRole('button', { name: 'OK' }).click();
   await page.getByText('Center equipments').click();
-  
+
   await page.getByText('Logout').click();
 });
+
