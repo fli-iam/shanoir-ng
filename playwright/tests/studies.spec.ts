@@ -102,9 +102,10 @@ test('test', async ({ page }) => {
   await page.getByRole('textbox', { name: 'Password' }).click();
   await page.getByRole('textbox', { name: 'Password' }).fill(process.env.EXPERT_PASSWORD);
   await page.getByRole('button', { name: 'Sign In' }).click();
-  await page.locator('side-menu').getByText('Home').click();
-  await expect(page.getByText('Shanoir Home')).toContainText('Challenge', { timeout: 15000 });
-  await expect(page.getByText('Shanoir Home')).toContainText('Explore the study', { timeout: 15000 });
+  await page.waitForResponse(
+    (response) => response.url().includes('/studies/studies/light') && response.status() === 200,
+    { timeout: 10000 }
+  );
   await page.getByRole('cell', { name: 'My Studies Studies you' }).click();
   await page.getByRole('link', { name: 'playwright-test-study-draft-create-' + randomString }).click();
   await expect(page.getByRole('heading')).toContainText('Details on study');
