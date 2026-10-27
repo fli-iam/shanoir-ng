@@ -17,28 +17,53 @@ package org.shanoir.ng.neurobagel.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
+import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.shanoir.ng.bids.service.BIDSService;
+import org.shanoir.ng.neurobagel.dto.NeurobagelDatasetDescriptionDTO;
 import org.shanoir.ng.neurobagel.dto.NeurobagelStudyDTO;
+import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.repository.StudyRepository;
+import org.shanoir.ng.tag.model.StudyTag;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.test.util.ReflectionTestUtils;
+
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 @ExtendWith(MockitoExtension.class)
 class NeurobagelServiceTest {
 
     @Mock
     private StudyRepository studyRepository;
+
+    @Mock
+    private RabbitTemplate rabbitTemplate;
+
+    @Mock
+    private BIDSService bidsService;
+
+    @TempDir
+    private File bidsDataDir;
 
     @InjectMocks
     private NeurobagelService service;
@@ -76,6 +101,108 @@ class NeurobagelServiceTest {
     @Test
     void nullStudyIdIsNotExported() {
         assertFalse(service.isExported(null));
+    }
+
+    @Test
+    void participantsOfAnExportedStudyAreBuiltLocally() {
+        given(studyRepository.existsByIdAndNeurobagelExportTrueAndIsDraftFalse(1L)).willReturn(true);
+        given(bidsService.participantsTsv(1L)).willReturn("participant_id\nsub-1\n");
+
+        assertEquals(Optional.of("participant_id\nsub-1\n"), service.findParticipantsTsv(1L));
+    }
+
+    @Test
+    void participantsOfAStudyNotExportedAreNeverBuilt() {
+        given(studyRepository.existsByIdAndNeurobagelExportTrueAndIsDraftFalse(2L)).willReturn(false);
+
+        assertFalse(service.findParticipantsTsv(2L).isPresent());
+        verify(bidsService, never()).participantsTsv(anyLong());
+    }
+
+    @Test
+    void participantsDictionaryAnnotatesTheParticipantsColumns() throws Exception {
+        JsonNode dictionary = new ObjectMapper().readTree(service.getParticipantsDictionary());
+
+        assertEquals(List.of("participant_id", "subject_identifier", "subject_age", "subject_sex"),
+                List.copyOf(dictionary.propertyNames()));
+        assertEquals("nb:ParticipantID", dictionary.at("/participant_id/Annotations/IsAbout/TermURL").asString());
+        assertEquals("nb:Age", dictionary.at("/subject_age/Annotations/IsAbout/TermURL").asString());
+        assertEquals("nb:Sex", dictionary.at("/subject_sex/Annotations/IsAbout/TermURL").asString());
+        assertEquals(List.of("M", "F", "O"), List.copyOf(dictionary.at("/subject_sex/Annotations/Levels").propertyNames()));
+    }
+
+
+    @Test
+    void datasetDescriptionOfAnExportedStudy() {
+        ReflectionTestUtils.setField(service, "frontServerAddress", "https://shanoir.example.org/shanoir-ng");
+        Study study = study(1L, "My study");
+        study.setStudyTags(List.of(studyTag("mri"), studyTag("adhd")));
+        given(studyRepository.existsByIdAndNeurobagelExportTrueAndIsDraftFalse(1L)).willReturn(true);
+        given(studyRepository.findStudyWithStudyTagsById(1L)).willReturn(study);
+
+        NeurobagelDatasetDescriptionDTO description = service.findDatasetDescription(1L).orElseThrow();
+
+        assertEquals("My study", description.getName());
+        assertEquals(List.of("adhd", "mri"), description.getKeywords());
+        assertEquals(List.of("https://shanoir.example.org/shanoir-ng/study/details/1"), description.getReferencesAndLinks());
+        assertEquals("restricted", description.getAccessType());
+        assertEquals("https://shanoir.example.org/shanoir-ng/access-request/study/1", description.getAccessLink());
+        assertTrue(description.getAccessInstructions().contains(description.getAccessLink()));
+    }
+
+    @Test
+    void datasetDescriptionOfAStudyNotExportedIsNotBuilt() {
+        given(studyRepository.existsByIdAndNeurobagelExportTrueAndIsDraftFalse(2L)).willReturn(false);
+
+        assertFalse(service.findDatasetDescription(2L).isPresent());
+        verify(studyRepository, never()).findStudyWithStudyTagsById(anyLong());
+    }
+
+    private static StudyTag studyTag(String name) {
+        StudyTag tag = new StudyTag();
+        tag.setName(name);
+        return tag;
+    }
+
+    private static final String IMAGING_FILE = "study-1-imaging-3f2a1c9e-8b7d-4e6f-a1b2-c3d4e5f6a7b8.tsv";
+
+    @Test
+    void imagingTableOfAStudyNotExportedIsNeverRequested() {
+        given(studyRepository.existsByIdAndNeurobagelExportTrueAndIsDraftFalse(2L)).willReturn(false);
+
+        assertFalse(service.findImagingTsv(2L).isPresent());
+        verify(rabbitTemplate, never()).convertSendAndReceive(anyString(), any(Object.class));
+    }
+
+    @Test
+    void imagingTableWrittenByDatasetsIsReadThenDeleted() throws Exception {
+        ReflectionTestUtils.setField(service, "bidsDataDir", bidsDataDir.getAbsolutePath());
+        Path file = bidsDataDir.toPath().resolve("neurobagel").resolve(IMAGING_FILE);
+        Files.createDirectories(file.getParent());
+        Files.writeString(file, "sub\tses\tsuffix\tpath\n", StandardCharsets.UTF_8);
+        given(studyRepository.existsByIdAndNeurobagelExportTrueAndIsDraftFalse(1L)).willReturn(true);
+        given(rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.NEUROBAGEL_IMAGING_TSV, "1")).willReturn(IMAGING_FILE);
+
+        assertEquals(Optional.of("sub\tses\tsuffix\tpath\n"), service.findImagingTsv(1L));
+        assertFalse(Files.exists(file));
+    }
+
+    @Test
+    void unexpectedFileNameFromDatasetsIsNeverRead() {
+        ReflectionTestUtils.setField(service, "bidsDataDir", bidsDataDir.getAbsolutePath());
+        given(studyRepository.existsByIdAndNeurobagelExportTrueAndIsDraftFalse(1L)).willReturn(true);
+        given(rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.NEUROBAGEL_IMAGING_TSV, "1"))
+                .willReturn("../../etc/passwd");
+
+        assertFalse(service.findImagingTsv(1L).isPresent());
+    }
+
+    @Test
+    void noAnswerFromDatasetsMeansNoImagingTable() {
+        given(studyRepository.existsByIdAndNeurobagelExportTrueAndIsDraftFalse(1L)).willReturn(true);
+        given(rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.NEUROBAGEL_IMAGING_TSV, "1")).willReturn(null);
+
+        assertFalse(service.findImagingTsv(1L).isPresent());
     }
 
     private static Study study(Long id, String name) {

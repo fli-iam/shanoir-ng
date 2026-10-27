@@ -14,15 +14,15 @@
 
 package org.shanoir.ng.bids.service;
 
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.http.ResponseEntity;
-
 import java.io.IOException;
 
 public interface BIDSService {
 
-    ResponseEntity<ByteArrayResource> generateParticipantsTsv(Long studyId) throws IOException;
-
     String generateParticipantsTsvFile(Long studyId) throws IOException;
+
+    /**
+     * Content of the participants.tsv of a study, without writing any file.
+     */
+    String participantsTsv(Long studyId);
 
 }
