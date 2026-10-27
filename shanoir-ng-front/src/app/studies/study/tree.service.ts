@@ -89,8 +89,14 @@ export class TreeService {
         localStorage.setItem('treeOpened', this._treeOpened ? 'true' : 'false');
     }
 
-    get canAdminStudy(): boolean {
-        return this.studyRights.includes(StudyUserRight.CAN_ADMINISTRATE);
+    get canDeleteInStudy(): boolean {
+        return this.hasDeleteRight(this.studyRights);
+    }
+
+    // as in the backend, deleting study data needs the expert role along with CAN_ADMINISTRATE
+    hasDeleteRight(rights: StudyUserRight[]): boolean {
+        return this.keycloakService.isUserAdmin()
+            || (this.keycloakService.isUserExpert() && !!rights?.includes(StudyUserRight.CAN_ADMINISTRATE));
     }
 
     get canDownloadStudy(): boolean {
@@ -642,14 +648,14 @@ export class TreeService {
                 return AnimalSubjectNode.fromSubject(
                     subject,
                     studyNode,
-                    this.canAdminStudy,
+                    this.canDeleteInStudy,
                     this.canDownloadStudy
                 );
             } else {
                 return ClinicalSubjectNode.fromSubject(
                     subject,
                     studyNode,
-                    this.canAdminStudy,
+                    this.canDeleteInStudy,
                     this.canDownloadStudy
                 );
             }
