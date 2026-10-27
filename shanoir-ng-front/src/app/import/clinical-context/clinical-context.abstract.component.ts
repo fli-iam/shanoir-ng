@@ -232,7 +232,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
 
     private computeIsAdminOfStudy(studyId: number) {
         if (this.study && this.isAdminOfStudy[studyId] == undefined) {
-            if (this.keycloakService.isUserAdmin) {
+            if (this.keycloakService.isUserAdmin()) {
                 this.isAdminOfStudy[studyId] = true;
             } else {
                 this.hasAdminRightOn(this.study).then((result) => this.isAdminOfStudy[studyId] = result);
