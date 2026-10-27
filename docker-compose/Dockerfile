@@ -88,6 +88,18 @@ RUN wget -qO dcm4che-bin.zip \
     && unzip /dcm4che-bin.zip && mv dcm4che-* dcm4che \
     && rm    /dcm4che-bin.zip
 
+# Extract the zstd-jni native lib at build time: at runtime zstd-jni would
+# extract it into java.io.tmpdir, which fails when /tmp is mounted noexec
+FROM alpine AS datasets-zstd
+ARG TARGETARCH
+COPY datasets/shanoir-ng-datasets.jar /ms.jar
+RUN apk add --no-cache unzip \
+    && case "$TARGETARCH" in arm64) arch=aarch64 ;; *) arch=amd64 ;; esac \
+    && unzip -p /ms.jar 'BOOT-INF/lib/zstd-jni-*.jar' > /zstd-jni.jar \
+    && mkdir -p /target/opt/zstd \
+    && unzip -p /zstd-jni.jar "linux/$arch/libzstd-jni-*.so" > /target/opt/zstd/libzstd-jni.so \
+    && test -s /target/opt/zstd/libzstd-jni.so
+
 FROM base-microservice AS datasets
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
@@ -106,8 +118,7 @@ ENV LANGUAGE=en_US.UTF-8
 
 # install the files from the 'dowloader' stage
 COPY --link --from=datasets-download /target/. /
-
-
+COPY --link --from=datasets-zstd /target/. /
 
 COPY --link datasets/entrypoint /usr/bin/
 COPY --link datasets/shanoir-ng-datasets.jar shanoir-ng-datasets.jar
@@ -126,8 +137,8 @@ COPY --link import/entrypoint /usr/bin/
 COPY --link import/shanoir-ng-import.jar shanoir-ng-import.jar
 
 # Use the below line for remote debugging
-#CMD ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:9913", "-jar", "/shanoir-ng-import.jar"]
-CMD ["-jar", "/shanoir-ng-import.jar"]
+#CMD ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:9913", "-Dspring.aot.enabled=true", "-jar", "/shanoir-ng-import.jar"]
+CMD ["-Dspring.aot.enabled=true", "-jar", "/shanoir-ng-import.jar"]
 
 
 
@@ -221,7 +232,7 @@ ENV LANG=fr_FR.UTF-8
 ENV LANGUAGE=fr_FR.UTF-8
 ENV PATH="/opt/miniconda3/bin:${PATH}"
 
-CMD ["-jar", "/nifti-conversion.jar"]
+CMD ["-Dspring.aot.enabled=true", "-jar", "/nifti-conversion.jar"]
 
 
 
@@ -233,8 +244,8 @@ COPY --link preclinical/shanoir-ng-preclinical.jar shanoir-ng-preclinical.jar
 COPY --link preclinical/entrypoint /usr/bin/
 
 # Use the below line for remote debugging
-#CMD ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:9915", "-jar", "/shanoir-ng-preclinical.jar", "-Xmx6g", "-Xms1g"]
-CMD ["-jar", "/shanoir-ng-preclinical.jar", "-Xmx6g", "-Xms1g"]
+#CMD ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:9915", "-Dspring.aot.enabled=true", "-jar", "/shanoir-ng-preclinical.jar", "-Xmx6g", "-Xms1g"]
+CMD ["-Dspring.aot.enabled=true", "-jar", "/shanoir-ng-preclinical.jar", "-Xmx6g", "-Xms1g"]
 
 
 
@@ -246,8 +257,8 @@ COPY --link studies/shanoir-ng-studies.jar shanoir-ng-studies.jar
 COPY --link studies/entrypoint /usr/bin/
 
 # Use the below line for remote debugging
-#CMD ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:9912", "-jar", "/shanoir-ng-studies.jar"]
-CMD ["-jar", "/shanoir-ng-studies.jar"]
+#CMD ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:9912", "-Dspring.aot.enabled=true", "-jar", "/shanoir-ng-studies.jar"]
+CMD ["-Dspring.aot.enabled=true", "-jar", "/shanoir-ng-studies.jar"]
 
 
 
@@ -260,6 +271,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
 
 COPY --link users/shanoir-ng-users.jar shanoir-ng-users.jar
 COPY --link users/entrypoint /usr/bin/
+RUN chmod +x /usr/bin/entrypoint /usr/bin/entrypoint_common
 
 ENV	\
 	kc.admin.client.client.id="admin-cli"	\
@@ -273,7 +285,7 @@ CMD ["-Dspring.aot.enabled=true", "-jar", "/shanoir-ng-users.jar"]
 
 ################ keycloak ##################################################
 
-FROM quay.io/keycloak/keycloak:26.7.3 AS keycloak-base
+FROM quay.io/keycloak/keycloak:26.8.0 AS keycloak-base
 
 # keycloak options (https://www.keycloak.org/server/all-config)
 #
@@ -322,7 +334,9 @@ CMD []
 
 ################ nginx #####################################################
 
-FROM ohif/app:v3.12.5 AS nginx-viewer
+FROM ohif/app:v3.12.5 AS ohif-viewer
+
+FROM ghcr.io/videpe/videpe:0.20.0 AS videpe-viewer
 
 FROM nginx AS nginx
 
@@ -335,13 +349,20 @@ COPY --link \
     nginx/shanoir.template.prod.conf \
     nginx/shanoir.template.keycloak-full.conf \
     nginx/shanoir.template.keycloak-limited.conf \
+    nginx/viewer.template.conf \
     /etc/nginx/
 
 COPY --link \
-    nginx/viewer/app-config.js \
-    nginx/viewer/ohif-viewer.template.conf \
-    /etc/nginx/viewer/
-COPY --link --from=nginx-viewer /usr/share/nginx/html/. /etc/nginx/viewer/html/
+    nginx/ohif/app-config.js \
+    nginx/ohif/ohif.template.conf \
+    /etc/nginx/ohif/
+COPY --link --from=ohif-viewer /usr/share/nginx/html/. /etc/nginx/ohif/html/
+
+COPY --link \
+    nginx/videpe/app-config.js \
+    nginx/videpe/videpe.template.conf \
+    /etc/nginx/videpe/
+COPY --link --from=videpe-viewer /usr/share/nginx/html/videpe/. /etc/nginx/videpe/html/videpe/
 
 COPY --link common/entrypoint_common /usr/bin/
 COPY --link nginx/entrypoint         /usr/bin/
@@ -416,15 +437,18 @@ CMD ["solr-precreate", "shanoir", "/etc/shanoir-core-template"]
 
 ################ BIDS validator #####################################################
 # ---- stage: cache validator deps
-FROM denoland/deno:debian AS deno_cache
+# Deno version pinned: npm resolution behaviour changes between Deno releases
+FROM denoland/deno:debian-2.9.7 AS deno_cache
 
 # Force Deno to store its cache here
 ENV DENO_DIR=/deno
 
 ARG BIDS_VALIDATOR_VERSION=2.2.10
 
-# Pre-fetch into Deno cache
-RUN deno cache jsr:@bids/validator@${BIDS_VALIDATOR_VERSION}
+# Pre-fetch into Deno cache. "deno cache" alone misses npm packages that "deno run" resolves
+# (e.g. a newer which-typed-array), so also run the validator once with the worker's exact flags
+RUN deno cache jsr:@bids/validator@${BIDS_VALIDATOR_VERSION} \
+    && deno run --node-modules-dir=none -ERWN jsr:@bids/validator@${BIDS_VALIDATOR_VERSION} --version
 
 
 # ---- stage: runtime

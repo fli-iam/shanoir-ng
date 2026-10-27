@@ -16,6 +16,7 @@ package org.shanoir.ng.importer.dicom;
 
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Comparator;
 
 import org.shanoir.ng.importer.model.Serie;
@@ -37,6 +38,15 @@ public class SeriesNumberOrAcquisitionTimeOrDescriptionSorter implements Compara
 
     @Override
     public int compare(Serie s1, Serie s2) {
+        if (s1 == s2) {
+            return 0;
+        }
+        if (s1 == null) {
+            return 1;
+        }
+        if (s2 == null) {
+            return -1;
+        }
         String s1SeriesNumber = s1.getSeriesNumber();
         String s2SeriesNumber = s2.getSeriesNumber();
         try {
@@ -67,17 +77,37 @@ public class SeriesNumberOrAcquisitionTimeOrDescriptionSorter implements Compara
         }
         LocalTime t1 = parseDicomTime(s1AcquisitionTime);
         LocalTime t2 = parseDicomTime(s2AcquisitionTime);
+        if (t1 == null || t2 == null) {
+            return orderBySeriesDescription(s1, s2);
+        }
         return t1.compareTo(t2);
     }
 
     private LocalTime parseDicomTime(String dicomTime) {
-        String padded = String.format("%-6s", dicomTime).replace(' ', '0');
-        if (padded.contains(".")) {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HHmmss.SSSSSS");
-            return LocalTime.parse(padded, formatter);
-        } else {
+        if (dicomTime == null || dicomTime.isBlank()) {
+            return null;
+        }
+        try {
+            String padded = String.format("%-6s", dicomTime.trim()).replace(' ', '0');
+            if (padded.contains(".")) {
+                String[] parts = padded.split("\\.", 2);
+                String fraction = parts[1];
+                if (fraction.length() > 6) {
+                    fraction = fraction.substring(0, 6);
+                } else {
+                    fraction = String.format("%-6s", fraction).replace(' ', '0');
+                }
+                padded = parts[0] + "." + fraction;
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HHmmss.SSSSSS");
+                return LocalTime.parse(padded, formatter);
+            }
+            if (padded.length() > 6) {
+                padded = padded.substring(0, 6);
+            }
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HHmmss");
             return LocalTime.parse(padded, formatter);
+        } catch (DateTimeParseException | IllegalArgumentException e) {
+            return null;
         }
     }
 

@@ -78,7 +78,9 @@ public class JacksonConfiguration {
         @Override
         public JsonSerializer<?> modifySerializer(SerializationConfig config, BeanDescription beanDesc,
                 JsonSerializer<?> serializer) {
-            if (beanDesc.getBeanClass() == Page.class) {
+            // Page is an interface - the runtime class is always a concrete implementation
+            // (e.g. PageImpl), so getBeanClass() == Page.class could never match.
+            if (Page.class.isAssignableFrom(beanDesc.getBeanClass())) {
                 return new MyClassSerializer((JsonSerializer<Object>) serializer);
             }
             return serializer;

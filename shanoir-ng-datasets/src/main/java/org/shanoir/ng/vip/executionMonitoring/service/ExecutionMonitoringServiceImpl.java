@@ -125,12 +125,19 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
 
 
     public void startMonitoringJob(ExecutionMonitoring createdMonitoring, ShanoirEvent event, Integer jobsNumber) {
+        Long userId = KeycloakUtil.getTokenUserId();
+
+        // Publish here, not in the monitoring loop: queued behind others, the job would show up late.
+        if (Objects.isNull(event) || !Objects.equals(event.getStatus(), ShanoirEvent.IN_PROGRESS)) {
+            event = initShanoirEvent(createdMonitoring, event, getExecLabel(createdMonitoring), jobsNumber, userId);
+            LOG.info("Monitoring of execution id: " + createdMonitoring.getId() + ", identifier: " + createdMonitoring.getPipelineIdentifier() + ", name: " + createdMonitoring.getName() + " started");
+        }
+
         Map<String, Object> monitoringMap = new HashMap<>();
         monitoringMap.put("monitoring", createdMonitoring);
         monitoringMap.put("event", event);
         monitoringMap.put("attempt", 1);
         monitoringMap.put("jobsNumber", jobsNumber);
-        monitoringMap.put("userId", KeycloakUtil.getTokenUserId());
         monitoringQueue.add(monitoringMap);
 
         if (!isRunning) { //If we remove this line, each calling thread needs to wait the old ones to finish the synchronized block below before resuming the code execution. It's only for code performance.
@@ -154,15 +161,7 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
                 ShanoirEvent event = (ShanoirEvent) emMap.get("event");
                 Integer attempt = (Integer) emMap.get("attempt");
                 Integer jobsNumber = (Integer) emMap.get("jobsNumber");
-                Long userId = (Long) emMap.get("userId");
                 String execLabel = getExecLabel(monitoring);
-
-
-                if (Objects.isNull(event) || !Objects.equals(event.getStatus(), ShanoirEvent.IN_PROGRESS)) {
-                    event = initShanoirEvent(monitoring, event, execLabel, jobsNumber, userId);
-                    emMap.put("event", event);
-                    LOG.info("Monitoring of execution id: " + monitoring.getId() + ", identifier: " + monitoring.getPipelineIdentifier() + ", name: " + monitoring.getName() + " started");
-                }
 
                 try {
                     VipExecutionDTO dto = executionService.getExecutionAsServiceAccount(attempt, monitoring.getIdentifier()).block();
@@ -196,7 +195,6 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
                     if (!Objects.equals(dto.getStatus(), ExecutionStatus.RUNNING)) {
                         monitoringQueue.remove(emMap);
                     }
-                    Thread.sleep(10000);
                 } catch (Exception e) {
                     // Unwrap ReactiveException thrown from async method
                     Throwable ex = Exceptions.unwrap(e);
@@ -207,6 +205,7 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
                     monitoringQueue.remove(emMap);
                 }
             }
+            // Paces the whole cycle, so polling stays at sleepTime whatever the number of monitored executions.
             while (System.currentTimeMillis() - startTime < sleepTime) {
                 try {
                     Thread.sleep(1000);

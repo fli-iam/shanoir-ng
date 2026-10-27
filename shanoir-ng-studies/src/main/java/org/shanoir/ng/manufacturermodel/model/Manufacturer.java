@@ -16,14 +16,18 @@ package org.shanoir.ng.manufacturermodel.model;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.validator.constraints.Length;
-import org.hibernate.validator.constraints.NotBlank;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
 import org.shanoir.ng.shared.validation.Unique;
 
+
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+import jakarta.validation.constraints.NotBlank;
+
 import jakarta.persistence.Column;
+
+import java.io.Serial;
 import jakarta.persistence.Entity;
 import jakarta.persistence.PostLoad;
 
@@ -41,6 +45,7 @@ public class Manufacturer extends HalEntity {
     /**
      * UID
      */
+    @Serial
     private static final long serialVersionUID = -4761707953959168601L;
 
     @NotBlank

@@ -39,7 +39,6 @@ import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.aot.DisabledInAotMode;
@@ -76,9 +75,6 @@ public class UserServiceSecurityTest {
 
     @MockitoBean
     private UserRepository userRepository;
-
-    @MockitoBean
-    private ApplicationEventPublisher publisher;
 
     @Autowired
     private UserService userService;

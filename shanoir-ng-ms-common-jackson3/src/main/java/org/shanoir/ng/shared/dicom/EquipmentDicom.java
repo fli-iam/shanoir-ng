@@ -15,15 +15,18 @@
 package org.shanoir.ng.shared.dicom;
 
 import org.apache.commons.lang3.StringUtils;
+import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.Tag;
+import org.shanoir.ng.utils.Utils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-/**
- * @author yyao
- *
- */
 public class EquipmentDicom {
+
+    private static final String UNKNOWN = "unknown";
+
+    private static final String MAGNETIC_FIELD_STRENGTH_DEFAULT = "0.0";
 
     @JsonProperty("manufacturer")
     private String manufacturer;
@@ -46,13 +49,14 @@ public class EquipmentDicom {
     // Keep this empty constructor to avoid Jackson deserialization exceptions
     public EquipmentDicom() { }
 
-    public EquipmentDicom(String manufacturer, String manufacturerModelName, String modality, String deviceSerialNumber, String stationName, String magneticFieldStrength) {
-        this.manufacturer = manufacturer;
-        this.manufacturerModelName = manufacturerModelName;
-        this.modality = modality;
-        this.deviceSerialNumber = deviceSerialNumber;
-        this.stationName = stationName;
-        this.magneticFieldStrength = magneticFieldStrength;
+    public EquipmentDicom(Attributes attributes) {
+        this.modality = attributes.getString(Tag.Modality);
+        this.manufacturer = Utils.getOrSetToDefault(attributes, Tag.Manufacturer, UNKNOWN);
+        this.manufacturerModelName = Utils.getOrSetToDefault(attributes, Tag.ManufacturerModelName, UNKNOWN);
+        this.deviceSerialNumber = Utils.getOrSetToDefault(attributes, Tag.DeviceSerialNumber, UNKNOWN);
+        this.stationName = Utils.getOrSetToDefault(attributes, Tag.StationName, UNKNOWN);
+        this.magneticFieldStrength = Utils.getOrSetToDefault(attributes, Tag.MagneticFieldStrength,
+                MAGNETIC_FIELD_STRENGTH_DEFAULT);
     }
 
     public String getManufacturer() {
@@ -116,6 +120,18 @@ public class EquipmentDicom {
             && StringUtils.isNotEmpty(this.manufacturerModelName)
             && StringUtils.isNotEmpty(this.deviceSerialNumber)
             && StringUtils.isNotEmpty(this.modality);
+    }
+
+    @JsonIgnore
+    public boolean isKnown() {
+        return isKnown(manufacturer)
+            && isKnown(manufacturerModelName)
+            && isKnown(deviceSerialNumber)
+            && isKnown(modality);
+    }
+
+    private boolean isKnown(String value) {
+        return value != null && !UNKNOWN.equals(value);
     }
 
     @Override

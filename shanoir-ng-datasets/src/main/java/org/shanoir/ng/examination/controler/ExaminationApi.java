@@ -123,6 +123,7 @@ public interface ExaminationApi {
     ResponseEntity<List<Long>> findExaminationsByStudyId(
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId);
 
+    // Attention: this method is used by ShanoirUploader!!!
     @Operation(summary = "", description = "Returns the list of examinations by subject id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "found examinations"),

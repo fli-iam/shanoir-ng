@@ -19,6 +19,8 @@ import java.util.List;
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.center.repository.CenterRepository;
@@ -27,11 +29,15 @@ import org.shanoir.ng.study.model.StudyExtraDetails;
 import org.shanoir.ng.study.model.StudyStatus;
 import org.shanoir.ng.study.repository.StudyRepository;
 import org.shanoir.ng.studycenter.StudyCenter;
+import org.shanoir.ng.tag.model.StudyTag;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.web.WebAppConfiguration;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Persistence;
 
 
 @WebAppConfiguration
@@ -47,6 +53,9 @@ public class StudyRepositoryTest {
 
     @Autowired
     private CenterRepository centerRepository;
+
+    @Autowired
+    private EntityManager entityManager;
 
     @Test
     public void create() {
@@ -121,6 +130,17 @@ public class StudyRepositoryTest {
     }
 
     @Test
+    public void findStudiesOfUserLoadsAllMembers() {
+        // user 2 has CAN_SEE_ALL (4) on study 1, which has 2 members: the whole member list must be
+        // loaded, not only the queried user's StudyUser ("Members" column of the study list)
+        final List<Study> studies = studyRepository
+                .findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(2L, 4, true);
+        assertEquals(1, studies.size());
+        assertEquals(STUDY_TEST_1_ID, studies.get(0).getId());
+        assertEquals(2, studies.get(0).getStudyUserList().size());
+    }
+
+    @Test
     public void testRights() {
         Study studyFound = studyRepository.findById(1L).orElseThrow();
         assertEquals(2, studyFound.getStudyUserList().size());
@@ -139,5 +159,47 @@ public class StudyRepositoryTest {
 //        studyRepository.save(studyFound);
 //        assertNull(studyUserRepository.findById(deletedId));
 //    }
+
+    @Test
+    public void noStudyIsExportedToNeurobagelByDefault() {
+        assertTrue(studyRepository.findByNeurobagelExportTrueAndIsDraftFalseOrderByIdAsc().isEmpty());
+        assertFalse(studyRepository.existsByIdAndNeurobagelExportTrueAndIsDraftFalse(1L));
+    }
+
+    @Test
+    public void onlyFlaggedApprovedStudiesAreExportedToNeurobagel() {
+        // Test data: studies 1, 2 and 3 are approved and not flagged
+        Study flagged = studyRepository.findById(1L).orElseThrow();
+        flagged.setNeurobagelExport(true);
+        studyRepository.save(flagged);
+        Study flaggedDraft = studyRepository.findById(3L).orElseThrow();
+        flaggedDraft.setNeurobagelExport(true);
+        flaggedDraft.setIsDraft(true);
+        studyRepository.save(flaggedDraft);
+
+        assertEquals(List.of(1L), studyRepository.findByNeurobagelExportTrueAndIsDraftFalseOrderByIdAsc()
+                .stream().map(Study::getId).toList());
+        assertTrue(studyRepository.existsByIdAndNeurobagelExportTrueAndIsDraftFalse(1L));
+        assertFalse(studyRepository.existsByIdAndNeurobagelExportTrueAndIsDraftFalse(2L)); // not flagged
+        assertFalse(studyRepository.existsByIdAndNeurobagelExportTrueAndIsDraftFalse(3L)); // draft
+        assertFalse(studyRepository.existsByIdAndNeurobagelExportTrueAndIsDraftFalse(999L)); // unknown
+    }
+
+    @Test
+    public void studyTagsAreLoadedForTheNeurobagelDatasetDescription() {
+        StudyTag tag = new StudyTag();
+        tag.setName("mri");
+        tag.setStudy(entityManager.find(Study.class, 1L));
+        entityManager.persist(tag);
+        entityManager.flush();
+        entityManager.clear();
+
+        Study study = studyRepository.findStudyWithStudyTagsById(1L);
+        // ms studies runs without open-in-view: a lazy studyTags could not be read by the caller
+        entityManager.clear();
+
+        assertTrue(Persistence.getPersistenceUtil().isLoaded(study, "studyTags"));
+        assertEquals(List.of("mri"), study.getStudyTags().stream().map(StudyTag::getName).toList());
+    }
 
 }

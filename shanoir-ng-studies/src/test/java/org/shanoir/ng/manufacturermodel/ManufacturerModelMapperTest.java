@@ -19,10 +19,12 @@ import org.junit.jupiter.api.Test;
 import org.shanoir.ng.manufacturermodel.dto.ManufacturerModelDTO;
 import org.shanoir.ng.manufacturermodel.dto.mapper.ManufacturerModelMapper;
 import org.shanoir.ng.manufacturermodel.model.ManufacturerModel;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 /**
  * Manufacturer model mapper test.
@@ -39,6 +41,9 @@ public class ManufacturerModelMapperTest {
 
     @Autowired
     private ManufacturerModelMapper manufacturerModelMapper;
+
+    @MockitoBean
+    private ConnectionFactory connectionFactory;
 
     @Test
     public void centersToCenterDTOsTest() {

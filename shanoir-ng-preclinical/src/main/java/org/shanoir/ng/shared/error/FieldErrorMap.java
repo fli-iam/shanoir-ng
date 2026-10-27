@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.shared.error;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,6 +30,7 @@ import org.springframework.validation.ObjectError;
  */
 public class FieldErrorMap extends HashMap<String, List<FieldError>> {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /**

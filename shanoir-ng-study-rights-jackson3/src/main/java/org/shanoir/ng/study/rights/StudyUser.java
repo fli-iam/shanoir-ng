@@ -56,6 +56,7 @@ public class StudyUser implements StudyUserInterface {
     private boolean receivedExpirationNotification = false;
 
     /** Study id. */
+    @Column(name = "study_id", nullable = false)
     private Long studyId;
 
     /** User id. */
@@ -71,7 +72,7 @@ public class StudyUser implements StudyUserInterface {
 
     @ElementCollection
     @CollectionTable(name = "study_user_center", joinColumns = @JoinColumn(name = "study_user_id"))
-    @Column(name = "center_id")
+    @Column(name = "center_id", nullable = false)
     private List<Long> centerIds;
 
     /**

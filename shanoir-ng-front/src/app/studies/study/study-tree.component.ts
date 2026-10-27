@@ -47,6 +47,7 @@ export class StudyTreeComponent implements OnDestroy {
     protected downloadState: TaskState;
     canOpenDicomSingleExam: boolean = false;
     canOpenDicomMultiExam: boolean = false;
+    canOpenEeg: boolean = false;
     protected loaded: boolean = false;
     private subscriptions: Subscription[] = [];
     subjectNodes: SubjectNodeComponent[] = [];
@@ -182,10 +183,30 @@ export class StudyTreeComponent implements OnDestroy {
             this.selectedAcquisitionNodes.forEach(acq => studies.add('1.4.9.12.34.1.8527.' + acq.parent.id));
         }
         if ((series.size == 0 && studies.size > 0) || studies.size > 1) {
-            window.open(environment.viewerUrl + '/viewer?StudyInstanceUIDs=' + Array.from(studies).join(','), '_blank');
+            window.open(environment.ohifUrl + '/viewer?StudyInstanceUIDs=' + Array.from(studies).join(','), '_blank');
         } else if (series.size > 0 && studies.size == 1) {
-            window.open(environment.viewerUrl + '/viewer?StudyInstanceUIDs=' + Array.from(studies).join(',') + '&SeriesInstanceUIDs=' + Array.from(series).join(','), '_blank');
+            window.open(environment.ohifUrl + '/viewer?StudyInstanceUIDs=' + Array.from(studies).join(',') + '&SeriesInstanceUIDs=' + Array.from(series).join(','), '_blank');
         }
+    }
+
+    openInVidepe() {
+        if (!this.canOpenEeg) return;
+        window.open(environment.videpeUrl + '/videpe/?examinationId=' + this.selectedExaminationNodes[0].id, '_blank');
+    }
+
+    // Not awaited: the EEG viewer button is enabled once the exam datasets are loaded
+    private checkEEG(): void {
+        this.canOpenEeg = false;
+        if (this.selectedExaminationNodes.length != 1 || !this.selectedExaminationNodes[0].canDownload) return;
+        const examId: number = this.selectedExaminationNodes[0].id;
+        this.datasetService.getByExaminationId(examId)
+            .then(datasets => {
+                // ignore the response if the selection changed meanwhile
+                if (this.selectedExaminationNodes.length == 1 && this.selectedExaminationNodes[0].id == examId) {
+                    this.canOpenEeg = datasets.some(ds => String(ds.type).toUpperCase() == 'EEG');
+                }
+            })
+            .catch(() => this.canOpenEeg = false);
     }
 
     onSelectedChange(study: StudyNode) {
@@ -230,7 +251,7 @@ export class StudyTreeComponent implements OnDestroy {
             this.canOpenDicomSingleExam = false;
             this.canOpenDicomMultiExam = true;
         }
-
+        this.checkEEG();
     }
 
     private searchSelectedInDatasetNodes(dsNodes: DatasetNode[] | 'UNLOADED'): DatasetNode[] {

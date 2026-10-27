@@ -24,7 +24,6 @@ import org.shanoir.ng.accessrequest.model.AccessRequest;
 import org.shanoir.ng.accessrequest.repository.AccessRequestRepository;
 import org.shanoir.ng.accountrequest.repository.AccountRequestInfoRepository;
 import org.shanoir.ng.email.EmailService;
-import org.shanoir.ng.events.UserDeleteEvent;
 import org.shanoir.ng.extensionrequest.model.ExtensionRequestInfo;
 import org.shanoir.ng.role.repository.RoleRepository;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
@@ -46,7 +45,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
 import tools.jackson.databind.ObjectMapper;
@@ -84,9 +82,6 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private AccessRequestRepository accessRequestRepository;
-
-    @Autowired
-    private ApplicationEventPublisher publisher;
 
     @Autowired
     private RabbitTemplate rabbitTemplate;
@@ -148,7 +143,6 @@ public class UserServiceImpl implements UserService {
             this.accessRequestService.deleteById(request.getId());
         }
         userRepository.deleteById(id);
-        publisher.publishEvent(new UserDeleteEvent(id));
 
         try {
             ShanoirEvent event = new ShanoirEvent(ShanoirEventType.DELETE_USER_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS);

@@ -14,8 +14,10 @@
 
 package org.shanoir.ng.importer;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.io.File;
@@ -23,7 +25,10 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collections;
+import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.io.FileUtils;
@@ -37,20 +42,23 @@ import org.shanoir.ng.importer.dicom.query.QueryPACSService;
 import org.shanoir.ng.importer.model.EegDataset;
 import org.shanoir.ng.importer.model.EegImportJob;
 import org.shanoir.ng.shared.event.ShanoirEventService;
-import org.shanoir.ng.shared.jackson.JacksonUtils;
 import org.shanoir.ng.utils.ImportUtils;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.client.RestTemplate;
+
+import tools.jackson.databind.json.JsonMapper;
 
 
 /**
@@ -59,7 +67,10 @@ import org.springframework.web.client.RestTemplate;
  * @author atouboul
  *
  */
-@WebMvcTest(controllers = ImporterApiController.class)
+@WebMvcTest(controllers = ImporterApiController.class,
+        excludeAutoConfiguration = {
+                org.springframework.boot.security.oauth2.server.resource.autoconfigure.servlet.OAuth2ResourceServerAutoConfiguration.class
+        })
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
 public class ImporterApiControllerTest {
@@ -68,35 +79,48 @@ public class ImporterApiControllerTest {
 
     private static final String GET_DICOM = "/importer/get_dicom/";
 
+    private static final String UPLOAD_DICOM = "/importer/upload_dicom/";
+
+    private static Path importDirectory;
+
+    @DynamicPropertySource
+    static void configureImportDirectory(DynamicPropertyRegistry registry) throws IOException {
+        importDirectory = Files.createTempDirectory("shanoir-import-upload-test");
+        registry.add("shanoir.import.directory", () -> importDirectory.toString());
+    }
+
     @Autowired
     private MockMvc mvc;
 
-    @MockBean
+    @MockitoBean
     private RestTemplate restTemplate;
 
-    @MockBean
+    @MockitoBean
     private DicomDirToModelService dicomDirToModel;
 
-    @MockBean
+    @MockitoBean
     private ImagesCreatorAndDicomFileAnalyzerService imagesCreatorAndDicomFileAnalyzer;
 
-    @MockBean
+    @MockitoBean
     private ImporterManagerService importerManagerService;
 
-    @MockBean
+    @MockitoBean
     private QueryPACSService queryPACSService;
 
-    @MockBean
+    @MockitoBean
     private RabbitTemplate rabbitTemplate;
 
-    @MockBean
+    @MockitoBean
     private DicomDirGeneratorService dicomDirGeneratorService;
 
-    @MockBean
+    @MockitoBean
     private ShanoirEventService shanoirEventService;
 
-    @MockBean
+    @MockitoBean
     private ImportJobStatusService importJobStatusService;
+
+    @Autowired
+    private JsonMapper mapper;
 
     public MockMultipartFile createFile(boolean withParticipants, boolean studyDescription,
             boolean sourceData, boolean importJson) throws IOException {
@@ -146,7 +170,7 @@ public class ImporterApiControllerTest {
         mvc.perform(MockMvcRequestBuilders.post(START_EEG_JOB_PATH)
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(JacksonUtils.serialize(importJob)));
+                .content(mapper.writeValueAsString(importJob)));
 
         // Just check that the name is well transmitted and that the call is made
         verify(rabbitTemplate).convertSendAndReceive(Mockito.any(String.class), captor.capture());
@@ -157,10 +181,51 @@ public class ImporterApiControllerTest {
 
     @Test
     @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    public void testStartImportEEGJobNoReply() throws Exception {
+        EegImportJob importJob = new EegImportJob();
+        importJob.setWorkFolder("/tmp/2/12341234");
+        importJob.setExaminationId(1L);
+        importJob.setDatasets(Collections.singletonList(new EegDataset()));
+
+        // rabbitTemplate mock returns null, as on a reply timeout
+        mvc.perform(MockMvcRequestBuilders.post(START_EEG_JOB_PATH)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(importJob)))
+                .andExpect(status().isGatewayTimeout());
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
     public void testGetDicomImageNoPath() throws Exception {
 
         mvc.perform(MockMvcRequestBuilders.get(GET_DICOM)
                 .param("path", ""))
                 .andExpect(status().is(200));
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    public void testUploadDicomZipFileDeletesUnzippedWorkDirOnFailure() throws Exception {
+        Path zipFile = Files.createTempFile("dicom-upload", ".zip");
+        try (ZipOutputStream zipout = new ZipOutputStream(Files.newOutputStream(zipFile))) {
+            zipout.putNextEntry(new ZipEntry("instance.dcm"));
+            zipout.write("not-a-dicom".getBytes(StandardCharsets.UTF_8));
+            zipout.closeEntry();
+        }
+        MockMultipartFile upload = new MockMultipartFile("file", "dicom.zip", "application/zip",
+                Files.readAllBytes(zipFile));
+        Files.deleteIfExists(zipFile);
+
+        mvc.perform(multipart(UPLOAD_DICOM).file(upload)).andExpect(status().isUnprocessableEntity());
+
+        File userImportDir = importDirectory.resolve("3").toFile();
+        if (userImportDir.exists()) {
+            File[] leftovers = userImportDir.listFiles();
+            assertTrue(leftovers == null || leftovers.length == 0,
+                    "Unzipped import job folder should be removed after upload failure");
+        } else {
+            assertFalse(userImportDir.exists());
+        }
     }
 }

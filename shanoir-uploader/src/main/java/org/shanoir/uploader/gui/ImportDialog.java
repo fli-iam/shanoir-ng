@@ -640,7 +640,7 @@ public class ImportDialog extends JDialog {
         formPanel.add(separatorMrExamination, importDialogGBC);
 
         mrExaminationExistingExamLabel = new JLabel(
-                resourceBundle.getString("shanoir.uploader.mrExaminationExitingExamLabel"));
+                resourceBundle.getString("shanoir.uploader.mrExaminationExistingExamLabel"));
         mrExaminationExistingExamLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         importDialogGBC.weightx = 0.2;
         importDialogGBC.fill = GridBagConstraints.HORIZONTAL;

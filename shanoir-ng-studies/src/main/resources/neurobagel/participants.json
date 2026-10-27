@@ -1,0 +1,61 @@
+{
+    "participant_id": {
+        "Description": "Shanoir subject id, BIDS-prefixed (sub-<subjectId>)",
+        "Annotations": {
+            "IsAbout": {
+                "TermURL": "nb:ParticipantID",
+                "Label": "Subject Unique Identifier"
+            },
+            "VariableType": "Identifier"
+        }
+    },
+    "subject_identifier": {
+        "Description": "Shanoir subject id, without prefix"
+    },
+    "subject_age": {
+        "Description": "Age in years",
+        "Annotations": {
+            "IsAbout": {
+                "TermURL": "nb:Age",
+                "Label": "Age"
+            },
+            "Format": {
+                "TermURL": "nb:FromFloat",
+                "Label": "float value"
+            },
+            "MissingValues": [
+                "n/a"
+            ],
+            "VariableType": "Continuous"
+        }
+    },
+    "subject_sex": {
+        "Description": "Sex",
+        "Levels": {
+            "M": "Male",
+            "F": "Female",
+            "O": "Other"
+        },
+        "Annotations": {
+            "IsAbout": {
+                "TermURL": "nb:Sex",
+                "Label": "Sex"
+            },
+            "Levels": {
+                "M": {
+                    "TermURL": "snomed:248153007",
+                    "Label": "Male"
+                },
+                "F": {
+                    "TermURL": "snomed:248152002",
+                    "Label": "Female"
+                },
+                "O": {
+                    "TermURL": "snomed:32570681000036106",
+                    "Label": "Other"
+                }
+            },
+            "VariableType": "Categorical"
+        }
+    }
+}

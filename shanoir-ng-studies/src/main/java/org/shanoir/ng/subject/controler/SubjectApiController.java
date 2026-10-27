@@ -188,12 +188,8 @@ public class SubjectApiController implements SubjectApi {
         simpleSubjectDTOList.sort(new Comparator<SimpleSubjectDTO>() {
             @Override
             public int compare(SimpleSubjectDTO o1, SimpleSubjectDTO o2) {
-                String aname = o1.getSubjectStudy().getSubjectStudyIdentifier() != null
-                        ? o1.getSubjectStudy().getSubjectStudyIdentifier()
-                        : o1.getName();
-                String bname = o2.getSubjectStudy().getSubjectStudyIdentifier() != null
-                        ? o2.getSubjectStudy().getSubjectStudyIdentifier()
-                        : o2.getName();
+                String aname = o1.getStudyIdentifier() != null ? o1.getStudyIdentifier() : o1.getName();
+                String bname = o2.getStudyIdentifier() != null ? o2.getStudyIdentifier() : o2.getName();
                 return aname.compareToIgnoreCase(bname);
             }
         });

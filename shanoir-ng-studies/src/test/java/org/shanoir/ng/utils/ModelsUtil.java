@@ -143,11 +143,13 @@ public final class ModelsUtil {
         study.setName(STUDY_NAME);
         study.setStudyCenterList(new ArrayList<>());
         StudyCenter sc = new StudyCenter();
-        sc.setStudy(study); sc.setCenter(createCenter()); sc.setId(1L);
+        sc.setStudy(study);
+        sc.setCenter(createCenter());
+        sc.setId(1L);
         study.getStudyCenterList().add(sc);
         study.setStudyUserList(new ArrayList<>());
         study.setTags(new ArrayList<>());
-        study.setSubjectStudyList(new ArrayList<>());
+        study.setSubjects(new ArrayList<>());
         return study;
     }
 

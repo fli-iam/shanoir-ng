@@ -409,6 +409,21 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             </span>
                         </li>
                         <li>
+                            <label i18n="Study detail|Neurobagel export label@@studyDetailNeurobagelExport">Exposed to Neurobagel</label>
+                            <span class="right-col">
+                                @if (mode != 'view' && isAdmin()) {
+                                    <checkbox formControlName="neurobagelExport"></checkbox>
+                                } @else {
+                                    @if (study.neurobagelExport) {
+                                        <span class="bool-true"><i class="fas fa-check"></i></span>
+                                    } @else {
+                                        <span class="bool-false"><i class="fas fa-times"></i></span>
+                                    }
+                                }
+                                <tool-tip>Publishes the study's metadata (subject counts, ages, sexes, imaging modalities) to the Neurobagel federated search. Only administrators can change it.</tool-tip>
+                            </span>
+                        </li>
+                        <li>
                             <label i18n="Study detail|Expected number of subjects label@@expectedNbOfSubjects">Expected number of subjects</label>
                             <span class="right-col">
                                 @switch (mode) {
@@ -695,12 +710,24 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         [tagsInUse]="subjectTagsInUse"
                         (userChange)="onTagListChange()"
                         formControlName="tags"></tag-creator>
-                    <subject-study-list
-                        [allowRemove]="false"
-                        [study]="study"
-                        [selectableList]="subjects"
-                        formControlName="subjects"
-                        [mode]="mode"></subject-study-list>
+                    <legend>
+                        Subject
+                        <tool-tip>You can choose one or more subjects from the list</tool-tip>
+                    </legend>
+                    <ol>
+                        @if (study.subjects?.length > 0 && subjectColumnDefs) {
+                            <li>
+                                <shanoir-table
+                                    #subjectTable
+                                    [getPage]="getSubjectsPage.bind(this)"
+                                    [editMode]="mode != 'view'"
+                                    [columnDefs]="subjectColumnDefs"
+                                    [browserSearch]="false"
+                                    [rowRoute]="getSubjectRoute.bind(this)"
+                                    (rowEdit)="onSubjectEdit()"></shanoir-table>
+                            </li>
+                        }
+                    </ol>
                 </fieldset>
                 <fieldset [class.hidden-tab]="activeTab != 'centers'" tab="centers">
                     <legend i18n="Study detail|Name label@@studyDetailCentersAndPITitle">List of centers</legend>
@@ -838,6 +865,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         [users]="users"
                         [studyCenters]="study.studyCenterList"
                         [study]="study"
+                        [isStudyAdmin]="isStudyAdmin"
                         [mode]="mode"></studyuser-list>
                 </fieldset>
                 @if (hasEmailMembersRight && mode == 'view') {

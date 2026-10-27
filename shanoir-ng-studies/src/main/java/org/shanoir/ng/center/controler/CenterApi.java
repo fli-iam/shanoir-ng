@@ -24,10 +24,13 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -46,7 +49,7 @@ public interface CenterApi {
         @ApiResponse(responseCode = "403", description = "forbidden"),
         @ApiResponse(responseCode = "404", description = "no center found"),
         @ApiResponse(responseCode = "500", description = "unexpected error")})
-    @RequestMapping(value = "/{centerId}", produces = {"application/json"}, method = RequestMethod.DELETE)
+    @DeleteMapping(value = "/{centerId}", produces = {"application/json"})
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
     ResponseEntity<Void> deleteCenter(
             @Parameter(description = "id of the center", required = true) @PathVariable("centerId") Long centerId)
@@ -59,7 +62,7 @@ public interface CenterApi {
         @ApiResponse(responseCode = "403", description = "forbidden"),
         @ApiResponse(responseCode = "404", description = "no center found"),
         @ApiResponse(responseCode = "500", description = "unexpected error")})
-    @RequestMapping(value = "/{centerId}", produces = {"application/json"}, method = RequestMethod.GET)
+    @GetMapping(value = "/{centerId}", produces = {"application/json"})
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     ResponseEntity<CenterDTO> findCenterById(
             @Parameter(description = "id of the center", required = true) @PathVariable("centerId") Long centerId);
@@ -72,7 +75,7 @@ public interface CenterApi {
         @ApiResponse(responseCode = "403", description = "forbidden"),
         @ApiResponse(responseCode = "404", description = "no center found"),
         @ApiResponse(responseCode = "500", description = "unexpected error")})
-    @RequestMapping(value = "/byDicom/{studyId}", produces = {"application/json"}, method = RequestMethod.POST)
+    @PostMapping(value = "/byDicom/{studyId}", produces = {"application/json"})
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER') and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_IMPORT')")
     ResponseEntity<CenterDTO> findOrCreateOrAddCenterByInstitutionDicom(
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
@@ -86,7 +89,7 @@ public interface CenterApi {
         @ApiResponse(responseCode = "401", description = "unauthorized"),
         @ApiResponse(responseCode = "403", description = "forbidden"),
         @ApiResponse(responseCode = "500", description = "unexpected error")})
-    @RequestMapping(value = "", produces = {"application/json"}, method = RequestMethod.GET)
+    @GetMapping(value = "", produces = {"application/json"})
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     ResponseEntity<List<CenterDTO>> findCenters();
 
@@ -97,7 +100,7 @@ public interface CenterApi {
         @ApiResponse(responseCode = "401", description = "unauthorized"),
         @ApiResponse(responseCode = "403", description = "forbidden"),
         @ApiResponse(responseCode = "500", description = "unexpected error")})
-    @RequestMapping(value = "/study/{studyId}", produces = {"application/json"}, method = RequestMethod.GET)
+    @GetMapping(value = "/study/{studyId}", produces = {"application/json"})
     public ResponseEntity<List<CenterDTO>> findCentersByStudy(
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId);
 
@@ -108,7 +111,7 @@ public interface CenterApi {
         @ApiResponse(responseCode = "401", description = "unauthorized"),
         @ApiResponse(responseCode = "403", description = "forbidden"),
         @ApiResponse(responseCode = "500", description = "unexpected error")})
-    @RequestMapping(value = "/names", produces = {"application/json"}, method = RequestMethod.GET)
+    @GetMapping(value = "/names", produces = {"application/json"})
     ResponseEntity<List<IdName>> findCentersNames();
 
     @Operation(summary = "", description = "Returns id and name for all the centers")
@@ -118,7 +121,7 @@ public interface CenterApi {
         @ApiResponse(responseCode = "401", description = "unauthorized"),
         @ApiResponse(responseCode = "403", description = "forbidden"),
         @ApiResponse(responseCode = "500", description = "unexpected error")})
-    @RequestMapping(value = "/names/{studyId}", produces = {"application/json"}, method = RequestMethod.GET)
+    @GetMapping(value = "/names/{studyId}", produces = {"application/json"})
     ResponseEntity<List<IdName>> findCentersNames(
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId);
 
@@ -129,8 +132,8 @@ public interface CenterApi {
         @ApiResponse(responseCode = "403", description = "forbidden"),
         @ApiResponse(responseCode = "422", description = "bad parameters"),
         @ApiResponse(responseCode = "500", description = "unexpected error")})
-    @RequestMapping(value = "", produces = {"application/json"}, consumes = {
-        "application/json"}, method = RequestMethod.POST)
+    @PostMapping(value = "", produces = {"application/json"}, consumes = {
+        "application/json"})
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
     ResponseEntity<CenterDTO> saveNewCenter(
             @Parameter(description = "center to create", required = true) @RequestBody Center center, BindingResult result)
@@ -143,8 +146,8 @@ public interface CenterApi {
         @ApiResponse(responseCode = "403", description = "forbidden"),
         @ApiResponse(responseCode = "422", description = "bad parameters"),
         @ApiResponse(responseCode = "500", description = "unexpected error")})
-    @RequestMapping(value = "/{centerId}", produces = {"application/json"}, consumes = {
-        "application/json"}, method = RequestMethod.PUT)
+    @PutMapping(value = "/{centerId}", produces = {"application/json"}, consumes = {
+        "application/json"})
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @controllerSecurityService.idMatches(#centerId, #center)")
     ResponseEntity<Void> updateCenter(
             @Parameter(description = "id of the center", required = true) @PathVariable("centerId") Long centerId,

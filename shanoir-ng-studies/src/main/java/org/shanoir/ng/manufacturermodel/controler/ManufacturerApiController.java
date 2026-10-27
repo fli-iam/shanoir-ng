@@ -32,10 +32,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-
-import jakarta.validation.Valid;
 
 @Controller
 public class ManufacturerApiController implements ManufacturerApi {
@@ -47,7 +43,7 @@ public class ManufacturerApiController implements ManufacturerApi {
     private ManufacturerUniqueConstraintManager uniqueConstraintManager;
 
     @Override
-    public ResponseEntity<Manufacturer> findManufacturerById(@PathVariable("manufacturerId") final Long manufacturerId) {
+    public ResponseEntity<Manufacturer> findManufacturerById(final Long manufacturerId) {
         final Optional<Manufacturer> manufacturerOpt = manufacturerService.findById(manufacturerId);
         if (manufacturerOpt.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -67,7 +63,7 @@ public class ManufacturerApiController implements ManufacturerApi {
     }
 
     @Override
-    public ResponseEntity<Manufacturer> saveNewManufacturer(@RequestBody final Manufacturer manufacturer,
+    public ResponseEntity<Manufacturer> saveNewManufacturer(final Manufacturer manufacturer,
             final BindingResult result) throws RestServiceException {
 
         validate(manufacturer, result);
@@ -75,8 +71,7 @@ public class ManufacturerApiController implements ManufacturerApi {
     }
 
     @Override
-    public ResponseEntity<Void> updateManufacturer(@PathVariable("manufacturerId") final Long manufacturerId,
-            @RequestBody @Valid final Manufacturer manufacturer, final BindingResult result) throws RestServiceException {
+    public ResponseEntity<Void> updateManufacturer(final Long manufacturerId, final Manufacturer manufacturer, final BindingResult result) throws RestServiceException {
 
         validate(manufacturer, result);
         try {

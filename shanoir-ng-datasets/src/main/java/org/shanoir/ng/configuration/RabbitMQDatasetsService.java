@@ -423,9 +423,10 @@ public class RabbitMQDatasetsService {
             autoDelete = "false", durable = "true", type = ExchangeTypes.TOPIC)), containerFactory = "singleConsumerFactory"
             )
     @Transactional
-    public void deleteStudy(ShanoirEvent event) throws AmqpRejectAndDontRequeueException {
+    public void deleteStudy(String eventAsString) throws AmqpRejectAndDontRequeueException {
         SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
         try {
+            ShanoirEvent event = objectMapper.readValue(eventAsString, ShanoirEvent.class);
             // Keep the identity of the user who actually asked for the deletion, so that every
             // event published while cascading this deletion (examinations, dataset acquisitions...)
             // is correctly attributed to them instead of falling back to the generic system user.
@@ -567,9 +568,9 @@ public class RabbitMQDatasetsService {
                 eventService.publishEvent(event);
 
                 LOG.info("[CopyDatasets] Start copy for dataset " + datasetParentId + " to study " + studyId);
-                Long dsCount = datasetRepository.countDatasetsBySourceIdAndStudyId(datasetParentId, studyId);
+                boolean dsExists = datasetRepository.existsBySourceIdAndStudyId(datasetParentId, studyId) != 0;
 
-                if (dsCount != 0) {
+                if (dsExists) {
                     LOG.info("[CopyDatasets] Dataset already exists in this study, copy aborted.");
                     countAlreadyExist++;
                 } else {

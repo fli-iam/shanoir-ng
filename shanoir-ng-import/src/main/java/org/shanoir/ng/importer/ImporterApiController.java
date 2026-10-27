@@ -86,10 +86,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.swagger.v3.oas.annotations.Parameter;
-import jakarta.validation.Valid;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * This is the main component of the import of Shanoir-NG. The front-end in
@@ -171,6 +170,7 @@ public class ImporterApiController implements ImporterApi {
                     "Wrong content type of file upload, .zip required.", null));
         }
         File tempFile = null;
+        File importJobDir = null;
         try {
             /**
              * STEP: Handle file management. Always create a userId specific folder in
@@ -183,7 +183,7 @@ public class ImporterApiController implements ImporterApi {
             if (!ImportUtils.checkZipContainsFile(DICOMDIR, tempFile)) {
                 createDicomDir = true;
             }
-            File importJobDir = ImportUtils.saveTempFileCreateFolderAndUnzip(tempFile, dicomZipFile, true);
+            importJobDir = ImportUtils.saveTempFileCreateFolderAndUnzip(tempFile, dicomZipFile, true);
             if (createDicomDir) {
                 LOG.info("DICOMDIR missing from zip file, generating one.");
                 final File dicomDir = new File(importJobDir, DICOMDIR);
@@ -236,11 +236,13 @@ public class ImporterApiController implements ImporterApi {
 
             return new ResponseEntity<>(importJob, HttpStatus.OK);
         } catch (Exception e) {
-            // If there is an exception, we should delete the temporary folder
             if (tempFile != null) {
                 FileUtils.deleteQuietly(tempFile);
             }
-            LOG.error(e.getMessage(), e);
+            if (importJobDir != null) {
+                FileUtils.deleteQuietly(importJobDir);
+            }
+            LOG.error("DICOM zip upload failed (userId={})", KeycloakUtil.getTokenUserId(), e);
             throw new RestServiceException(
                     new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), ERROR_WHILE_SAVING_UPLOADED_FILE, null));
         }
@@ -267,8 +269,7 @@ public class ImporterApiController implements ImporterApi {
     }
 
     @Override
-    public ResponseEntity<Void> startImportJob(
-            @Parameter(name = "ImportJob", required = true) @Valid @RequestBody final ImportJob importJob)
+    public ResponseEntity<Void> startImportJob(final ImportJob importJob)
                     throws RestServiceException {
         File userImportDir = ImportUtils.getUserImportDir(importDir);
         final Long userId = KeycloakUtil.getTokenUserId();
@@ -308,8 +309,7 @@ public class ImporterApiController implements ImporterApi {
     }
 
     @Override
-    public ResponseEntity<Void> startImportJobBase(
-            @Parameter(name = "ImportJob", required = true) @Valid @RequestBody final ImportJobBase importJob)
+    public ResponseEntity<Void> startImportJobBase(final ImportJobBase importJob)
             throws RestServiceException {
         File userImportDir = ImportUtils.getUserImportDir(importDir);
         final Long userId = KeycloakUtil.getTokenUserId();
@@ -342,9 +342,7 @@ public class ImporterApiController implements ImporterApi {
     }
 
     @Override
-    public ResponseEntity<ImportJob> queryPACS(
-            @Parameter(name = "DicomQuery", required = true) @Valid @RequestBody final DicomQuery dicomQuery)
-                    throws RestServiceException {
+    public ResponseEntity<ImportJob> queryPACS(final DicomQuery dicomQuery) throws RestServiceException {
         ImportJob importJob;
         try {
             importJob = queryPACSService.queryCFIND(dicomQuery);
@@ -691,8 +689,7 @@ public class ImporterApiController implements ImporterApi {
      * subject, ect...) so we make a call to dataset API to create it.
      */
     @Override
-    public ResponseEntity<Void> startImportEEGJob(
-            @Parameter(name = "EegImportJob", required = true) @Valid @RequestBody final EegImportJob importJob)
+    public ResponseEntity<Void> startImportEEGJob(final EegImportJob importJob)
             throws RestServiceException {
         final String tempDirId = ImportJobStatusService.keyOf(importJob.getWorkFolder());
         importJobStatusService.setInProgress(tempDirId, "Import job received, queued for processing.");
@@ -703,6 +700,12 @@ public class ImporterApiController implements ImporterApi {
             importJob.setShanoirEvent(event);
             cleanUpImportJob(importJob);
             Integer integg = (Integer) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.IMPORT_EEG_QUEUE, objectMapper.writeValueAsString(importJob));
+            // null when MS Datasets did not reply in time or failed while processing the job
+            if (integg == null) {
+                LOG.error("No reply from MS Datasets for EEG import of workFolder {}", importJob.getWorkFolder());
+                importJobStatusService.setError(tempDirId, "No reply from MS Datasets for EEG import.");
+                return new ResponseEntity<Void>(HttpStatus.GATEWAY_TIMEOUT);
+            }
             importJobStatusService.setFinished(tempDirId, importJob);
             return new ResponseEntity<Void>(HttpStatusCode.valueOf(integg.intValue()));
         } catch (Exception e) {
@@ -853,7 +856,7 @@ public class ImporterApiController implements ImporterApi {
                     // Update birth date to 1st of january of the year
                     LocalDate updateBirthdate = patient.getPatientBirthDate().withDayOfYear(1);
                     subject = ImportUtils.createSubject(subjectName, studyId, studyName, updateBirthdate, patient.getPatientSex(), 1);
-                    Long subjectId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECTS_QUEUE_WITH_DATASETS, objectMapper.writeValueAsString(subject));
+                    Long subjectId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECTS_QUEUE_WITH_DATASETS, subject);
                     if (subjectId == null) {
                         throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Subject could not be created, please check data", null));
                     }
@@ -894,7 +897,7 @@ public class ImporterApiController implements ImporterApi {
                 examination.setStudyInstanceUID(studyInstanceUID);
 
                 // Create one examination for every session folder
-                Long examId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EXAMINATION_CREATION_QUEUE, objectMapper.writeValueAsString(examination));
+                Long examId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EXAMINATION_CREATION_QUEUE, examination);
 
                 if (examId == null) {
                     throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while creating examination", null));
@@ -928,7 +931,7 @@ public class ImporterApiController implements ImporterApi {
 
             // STEP 5 delete temporary file
             FileUtils.deleteQuietly(importJobDir);
-        } catch (IOException e) {
+        } catch (JacksonException | IOException e) {
             throw new RestServiceException(new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(),
                     "The file could not be correctly unziped on the server. Please check consistency.", e));
         }

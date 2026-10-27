@@ -55,10 +55,10 @@ public interface StudyUserRightsRepository extends CrudRepository<StudyUser, Lon
     List<Long> findDistinctStudyIdByUserId(@Param("userId") Long userId, @Param("right") Integer right);
 
     @Query("select su from StudyUser su left join fetch su.centerIds where su.userId = :userId and :right in elements(su.studyUserRights)")
-    Iterable<StudyUser> findByUserIdAndRight(Long userId, int right);
+    Iterable<StudyUser> findByUserIdAndRight(@Param("userId") Long userId, @Param("right") Integer right);
 
     @Query("select su from StudyUser su left join fetch su.centerIds where su.studyId = :studyId and :right in elements(su.studyUserRights)")
-    Iterable<StudyUser> findByStudyIdAndRight(Long studyId, int right);
+    Iterable<StudyUser> findByStudyIdAndRight(@Param("studyId") Long studyId, @Param("right") Integer right);
 
     List<StudyUser> findByExpirationDateBetweenAndReceivedExpirationNotificationFalse(LocalDate start, LocalDate end);
 
