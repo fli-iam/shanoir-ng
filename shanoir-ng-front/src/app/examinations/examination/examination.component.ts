@@ -271,7 +271,7 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
     }
 
     public async hasDeleteRight(): Promise<boolean> {
-         return this.keycloakService.isUserAdmin() || this.hasAdministrateRight;
+         return this.keycloakService.isUserAdmin() || (this.keycloakService.isUserExpert() && this.hasAdministrateRight);
     }
 
     public isAdmin(): boolean {

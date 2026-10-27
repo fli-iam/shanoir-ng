@@ -145,7 +145,11 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
     }
 
     public async hasEditRight(): Promise<boolean> {
-        return this.keycloakService.isUserAdminOrExpert(); // TODO
+        return this.keycloakService.isUserAdmin() || (this.keycloakService.isUserExpert() && this.hasAdministrateRight);
+    }
+
+    public async hasDeleteRight(): Promise<boolean> {
+        return this.keycloakService.isUserAdmin() || (this.keycloakService.isUserExpert() && this.hasAdministrateRight);
     }
 
     downloadAll() {
