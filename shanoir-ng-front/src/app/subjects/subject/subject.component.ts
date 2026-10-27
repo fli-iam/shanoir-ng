@@ -290,15 +290,16 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
             .getStudiesNames()
             .then(studies => {
                 this.studies = studies;
+                // read from the unfiltered list, the subject's study may not be importable
+                this.studyNameForSubject = studies?.find(s => s.id == this.entity?.study?.id)?.name || '';
                 this.userRightsService.getMyRights().then(rights => {
                     if (!this.keycloakService.isUserAdmin()) {
-                        // filter studies to only those with import or admin rights
+                        // filter studies to only those with import rights
                         this.studies = this.studies.filter(study => {
                             const studyRights = rights.get(study.id);
-                            return studyRights && (studyRights.includes(StudyUserRight.CAN_IMPORT) || studyRights.includes(StudyUserRight.CAN_ADMINISTRATE));
+                            return studyRights?.includes(StudyUserRight.CAN_IMPORT);
                         });
                     }
-                    this.studyNameForSubject = this.studies?.filter(s => s.id == this.entity?.study?.id)?.[0]?.name || '';
                 });
             });
     }

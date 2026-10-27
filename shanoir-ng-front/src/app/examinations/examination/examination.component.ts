@@ -242,10 +242,10 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
                 this.studies = studies;
                 this.userRightsService.getMyRights().then(rights => {
                     if (!this.keycloakService.isUserAdmin()) {
-                        // filter studies to only those with import or admin rights
+                        // filter studies to only those with import rights
                         this.studies = this.studies.filter(study => {
                             const studyRights = rights.get(study.id);
-                            return studyRights && (studyRights.includes(StudyUserRight.CAN_IMPORT) || studyRights.includes(StudyUserRight.CAN_ADMINISTRATE));
+                            return studyRights?.includes(StudyUserRight.CAN_IMPORT);
                         });
                     }
                 });
