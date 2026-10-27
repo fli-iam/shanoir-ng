@@ -69,3 +69,63 @@
 .kc-login-tooltip i {
   cursor: pointer;
 }
+
+/* OTP device selection (login-otp.ftl, login-reset-otp.ftl) */
+.shanoir-otp-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 280px;
+  max-width: 100%;
+  margin: 10px auto 15px;
+  text-align: left;
+}
+
+.shanoir-otp-radio {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.shanoir-otp-tile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border: 1px solid var(--color-b-light2);
+  border-radius: 4px;
+  color: var(--color-b-light);
+  cursor: pointer;
+}
+
+.shanoir-otp-tile:hover {
+  border-color: var(--color-b-light);
+}
+
+.shanoir-otp-tile-check {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--color-b-light);
+  border-radius: 50%;
+}
+
+.shanoir-otp-tile-title {
+  overflow-wrap: anywhere;
+}
+
+.shanoir-otp-radio:checked + .shanoir-otp-tile {
+  border-color: var(--color-b-light);
+  background-color: rgba(255, 255, 255, 0.12);
+  font-weight: bold;
+}
+
+.shanoir-otp-radio:checked + .shanoir-otp-tile .shanoir-otp-tile-check {
+  background-color: var(--color-b-light);
+  box-shadow: inset 0 0 0 2px var(--color-a);
+}
+
+.shanoir-otp-radio:focus-visible + .shanoir-otp-tile {
+  outline: 2px solid var(--color-b-light);
+  outline-offset: 2px;
+}
