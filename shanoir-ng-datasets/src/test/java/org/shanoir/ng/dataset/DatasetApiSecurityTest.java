@@ -165,6 +165,7 @@ public class DatasetApiSecurityTest {
         assertAccessAuthorized(api::findDatasets, PageRequest.of(0, 10));
         assertAccessAuthorized(api::downloadDatasetById, 1L, 1L, "dcm", new MockHttpServletResponse());
         assertAccessAuthorized(api::updateDataset, 1L, mockDataset(1L), mockBindingResult);
+        assertAccessDenied(api::updateDataset, 2L, mockDataset(1L), mockBindingResult);
     }
 
     private void testAll(String role) throws ShanoirException, RestServiceException {
@@ -217,6 +218,8 @@ public class DatasetApiSecurityTest {
         } else if ("ROLE_EXPERT".equals(role)) {
             assertAccessAuthorized(api::updateDataset, 1L, mockDataset(1L, 1L, 1L, 1L, 1L), mockBindingResult);
             assertAccessDenied(api::updateDataset, 1L, ds, mockBindingResult);
+            // path id must match the body id, even with the right on the dataset
+            assertAccessDenied(api::updateDataset, 2L, mockDataset(1L, 1L, 1L, 1L, 1L), mockBindingResult);
         }
         assertAccessDenied(api::updateDataset, 1L, mockDataset(2L, 2L, 2L, 2L, 2L), mockBindingResult);
         assertAccessDenied(api::updateDataset, 1L, mockDataset(3L, 3L, 3L, 3L, 1L), mockBindingResult);
