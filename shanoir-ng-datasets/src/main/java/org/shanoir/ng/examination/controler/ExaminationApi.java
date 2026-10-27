@@ -160,14 +160,10 @@ public interface ExaminationApi {
             @ApiResponse(responseCode = "401", description = "unauthorized"),
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "422", description = "bad parameters"),
-            @ApiResponse(responseCode = "500", description = "unexpected error, examination not created") })
-    @PostMapping(value = {"", "/"}, produces = { "application/json" }, consumes = {
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @PutMapping(value = "/", produces = { "application/json" }, consumes = {
             "multipart/form-data" })
-    @PreAuthorize("!@datasetSecurityService.isDraftStudy(#examinationDTO.getStudyId()) and "
-              + "(hasRole('ADMIN') or "
-              + "(hasAnyRole('EXPERT', 'USER') and "
-              + "#examination.getId().equals(#examinationId) and "
-              + "(@datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_IMPORT')))")
+    @PreAuthorize("#examinationId.equals(#examination.getId()) and !@datasetSecurityService.isDraftStudy(#examinationDTO.getStudyId()) and (hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and (@datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_IMPORT')))))")
     ResponseEntity<ExaminationDTO> saveNewExaminationWithExtraData(
             @Parameter(description = "examination to create", required = true) @Valid @RequestPart("examination") ExaminationDTO examinationDTO,
             final BindingResult result,

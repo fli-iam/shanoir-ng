@@ -137,6 +137,8 @@ public class ExaminationApiSecurityTest {
         assertAccessAuthorized(api::findExaminationsBySubjectId, 1L);
         assertAccessAuthorized(api::saveNewExamination, new ExaminationDTO(), mockBindingResult);
         assertAccessAuthorized(api::updateExamination, 1L, mockExaminationDTO(1L), mockBindingResult, null);
+        // the path id must match the body id, for admins too
+        assertAccessDenied(api::updateExamination, 2L, mockExaminationDTO(1L), mockBindingResult, null);
     }
 
 
@@ -308,9 +310,9 @@ public class ExaminationApiSecurityTest {
         given(rightsService.hasRightOnStudy(1L, "CAN_IMPORT")).willReturn(false);
         given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(true);
         if ("ROLE_EXPERT".equals(role)) {
-            assertAccessAuthorized(api::updateExamination, 1L, examDTO1, mockBindingResult);
+            assertAccessAuthorized(api::updateExamination, 1L, examDTO1, mockBindingResult, null);
         } else {
-            assertAccessDenied(api::updateExamination, 1L, examDTO1, mockBindingResult);
+            assertAccessDenied(api::updateExamination, 1L, examDTO1, mockBindingResult, null);
         }
         given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(false);
         given(rightsService.hasRightOnStudy(1L, "CAN_IMPORT")).willReturn(true);
