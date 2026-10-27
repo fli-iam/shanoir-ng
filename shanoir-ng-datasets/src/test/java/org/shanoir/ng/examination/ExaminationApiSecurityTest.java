@@ -138,6 +138,8 @@ public class ExaminationApiSecurityTest {
         assertAccessAuthorized(api::findExaminationsBySubjectId, 1L);
         assertAccessAuthorized(api::saveNewExamination, new ExaminationDTO(), mockBindingResult);
         assertAccessAuthorized(api::updateExamination, 1L, mockExaminationDTO(1L), mockBindingResult);
+        // the path id must match the body id, for admins too
+        assertAccessDenied(api::updateExamination, 2L, mockExaminationDTO(1L), mockBindingResult);
     }
 
 

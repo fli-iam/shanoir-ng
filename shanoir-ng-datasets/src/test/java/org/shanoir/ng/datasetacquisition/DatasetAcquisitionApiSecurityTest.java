@@ -154,6 +154,8 @@ public class DatasetAcquisitionApiSecurityTest {
 
         assertAccessAuthorized(api::createNewDatasetAcquisition, new ImportJob());
         assertAccessAuthorized(api::updateDatasetAcquisition, 1L, mockDsAcqDTO(1L), mockBindingResult);
+        // the path id must match the body id, for admins too
+        assertAccessDenied(api::updateDatasetAcquisition, 2L, mockDsAcqDTO(1L), mockBindingResult);
         assertAccessAuthorized(api::deleteDatasetAcquisition, 4L);
         assertAccessAuthorized(api::findEmptyDatasetAcquisitions, 1L);
         assertAccessAuthorized(api::deleteEmptyDatasetAcquisitions, 1L);
