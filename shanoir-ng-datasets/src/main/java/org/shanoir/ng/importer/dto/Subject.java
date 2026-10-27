@@ -14,8 +14,11 @@
 
 package org.shanoir.ng.importer.dto;
 
+import java.time.LocalDate;
+
 import org.shanoir.ng.shared.core.model.IdName;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -34,6 +37,20 @@ public class Subject {
 
     @JsonProperty("study")
     private IdName study;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDate birthDate;
+
+    /** Studies MS stores sex as integer id ({@link org.shanoir.ng.subject.model.Sex}). */
+    @JsonProperty("sex")
+    private Integer sex;
+
+    /** Enum name for studies MS Jackson binding (integer ids are misread as ordinals). */
+    @JsonProperty("imagedObjectCategory")
+    private String imagedObjectCategory;
+
+    @JsonProperty("subjectType")
+    private String subjectType;
 
     public Long getId() {
         return id;
@@ -57,6 +74,38 @@ public class Subject {
 
     public void setStudy(IdName study) {
         this.study = study;
+    }
+
+    public LocalDate getBirthDate() {
+        return birthDate;
+    }
+
+    public void setBirthDate(LocalDate birthDate) {
+        this.birthDate = birthDate;
+    }
+
+    public Integer getSex() {
+        return sex;
+    }
+
+    public void setSex(Integer sex) {
+        this.sex = sex;
+    }
+
+    public String getImagedObjectCategory() {
+        return imagedObjectCategory;
+    }
+
+    public void setImagedObjectCategory(String imagedObjectCategory) {
+        this.imagedObjectCategory = imagedObjectCategory;
+    }
+
+    public String getSubjectType() {
+        return subjectType;
+    }
+
+    public void setSubjectType(String subjectType) {
+        this.subjectType = subjectType;
     }
 
 }

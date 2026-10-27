@@ -19,10 +19,12 @@ import java.util.List;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -39,8 +41,8 @@ public interface SubjectPathologyApi {
             @ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
             @ApiResponse(responseCode = "409", description = "Already exists - conflict"),
             @ApiResponse(responseCode = "500", description = "Unexpected Error") })
-    @RequestMapping(value = "/subject/{id}/pathology", produces = { "application/json" }, consumes = {
-            "application/json" }, method = RequestMethod.POST)
+    @PostMapping(value = "/subject/{id}/pathology", produces = { "application/json" }, consumes = {
+            "application/json" })
     ResponseEntity<SubjectPathology> addSubjectPathology(
             @Parameter(name = "subject id", required = true) @PathVariable("id") Long id,
             @Parameter(name = "pathology to add to subject", required = true) @RequestBody SubjectPathology pathos,
@@ -50,8 +52,8 @@ public interface SubjectPathologyApi {
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Successful operation"),
             @ApiResponse(responseCode = "400", description = "Invalid subject pathology id"),
             @ApiResponse(responseCode = "500", description = "Unexpected Error") })
-    @RequestMapping(value = "/subject/{id}/pathology/{pid}", produces = {
-            "application/json" }, method = RequestMethod.DELETE)
+    @DeleteMapping(value = "/subject/{id}/pathology/{pid}", produces = {
+            "application/json" })
     ResponseEntity<Void> deleteSubjectPathology(
             @Parameter(name = "animal subject id", required = true) @PathVariable("id") Long id,
             @Parameter(name = "pathology id", required = true) @PathVariable("pid") Long pid)
@@ -61,8 +63,8 @@ public interface SubjectPathologyApi {
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Successful operation"),
             @ApiResponse(responseCode = "400", description = "Invalid subject id"),
             @ApiResponse(responseCode = "500", description = "Unexpected Error") })
-    @RequestMapping(value = "/subject/{id}/pathology/all", produces = {
-            "application/json" }, method = RequestMethod.DELETE)
+    @DeleteMapping(value = "/subject/{id}/pathology/all", produces = {
+            "application/json" })
     ResponseEntity<Void> deleteSubjectPathologies(
             @Parameter(name = "animal subject id", required = true) @PathVariable("id") Long id)
             throws RestServiceException;
@@ -72,8 +74,8 @@ public interface SubjectPathologyApi {
             @ApiResponse(responseCode = "200", description = "A subject pathology"),
             @ApiResponse(responseCode = "404", description = "Subjet pathology not found"),
             @ApiResponse(responseCode = "500", description = "Unexpected error") })
-    @RequestMapping(value = "/subject/{id}/pathology/{pid}", produces = {
-            "application/json" }, method = RequestMethod.GET)
+    @GetMapping(value = "/subject/{id}/pathology/{pid}", produces = {
+            "application/json" })
     ResponseEntity<SubjectPathology> getSubjectPathologyById(
             @Parameter(name = "subject id", required = true) @PathVariable("id") Long id,
             @Parameter(name = "Subject pathology id", required = true) @PathVariable("pid") Long pid)
@@ -83,8 +85,8 @@ public interface SubjectPathologyApi {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "An array of subject pathologies"),
             @ApiResponse(responseCode = "500", description = "Unexpected error") })
-    @RequestMapping(value = "/subject/{id}/pathology/all", produces = {
-            "application/json" }, method = RequestMethod.GET)
+    @GetMapping(value = "/subject/{id}/pathology/all", produces = {
+            "application/json" })
     ResponseEntity<List<SubjectPathology>> getSubjectPathologies(
             @Parameter(name = "subject id", required = true) @PathVariable("id") Long id) throws RestServiceException;
 
@@ -92,8 +94,8 @@ public interface SubjectPathologyApi {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "An array of subject pathologies"),
             @ApiResponse(responseCode = "500", description = "Unexpected error") })
-    @RequestMapping(value = "/subject/all/pathology/{pid}", produces = {
-            "application/json" }, method = RequestMethod.GET)
+    @GetMapping(value = "/subject/all/pathology/{pid}", produces = {
+            "application/json" })
     ResponseEntity<List<SubjectPathology>> getSubjectPathologiesByPathology(
             @Parameter(name = "pathology id", required = true) @PathVariable("pid") Long pid)
             throws RestServiceException;
@@ -102,8 +104,8 @@ public interface SubjectPathologyApi {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "An array of subject pathologies"),
             @ApiResponse(responseCode = "500", description = "Unexpected error") })
-    @RequestMapping(value = "/subject/all/pathology/model/{pathoModelId}/", produces = {
-            "application/json" }, method = RequestMethod.GET)
+    @GetMapping(value = "/subject/all/pathology/model/{pathoModelId}/", produces = {
+            "application/json" })
     public ResponseEntity<List<SubjectPathology>> getSubjectPathologiesByPathologyModel(
             @Parameter(name = "pathology model id", required = true) @PathVariable("pathoModelId") Long pathoModelId);
 
@@ -112,8 +114,8 @@ public interface SubjectPathologyApi {
             @ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
             @ApiResponse(responseCode = "404", description = "Subject Pathology not found"),
             @ApiResponse(responseCode = "500", description = "Unexpected Error") })
-    @RequestMapping(value = "/subject/{id}/pathology/{pid}", produces = { "application/json" }, consumes = {
-            "application/json" }, method = RequestMethod.PUT)
+    @PutMapping(value = "/subject/{id}/pathology/{pid}", produces = { "application/json" }, consumes = {
+            "application/json" })
     ResponseEntity<Void> updateSubjectPathology(
             @Parameter(name = "ID of subject", required = true) @PathVariable("id") Long id,
             @Parameter(name = "ID of subject pathology that needs to be updated", required = true) @PathVariable("pid") Long pid,

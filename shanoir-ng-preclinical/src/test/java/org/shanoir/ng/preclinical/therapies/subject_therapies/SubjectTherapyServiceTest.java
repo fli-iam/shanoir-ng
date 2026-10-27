@@ -23,8 +23,8 @@ import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.mockito.Mockito;
 import org.shanoir.ng.preclinical.references.RefsRepository;
 import org.shanoir.ng.preclinical.subjects.repository.AnimalSubjectRepository;
@@ -48,19 +48,19 @@ public class SubjectTherapyServiceTest {
     private static final Long STHERAPY_ID = 1L;
     private static final String UPDATED_THERAPY_NAME = "Chimiotherapy";
 
-    @Mock
+    @MockitoBean
     private SubjectTherapyRepository stherapiesRepository;
 
-    @Mock
+    @MockitoBean
     private RefsRepository refsRepository;
 
-    @Mock
+    @MockitoBean
     private AnimalSubjectRepository subjectsRepository;
 
-    @Mock
+    @MockitoBean
     private RabbitTemplate rabbitTemplate;
 
-    @InjectMocks
+    @Autowired
     private SubjectTherapyServiceImpl stherapiesService;
 
     @BeforeEach

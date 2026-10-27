@@ -23,8 +23,8 @@ import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.mockito.Mockito;
 import org.shanoir.ng.preclinical.anesthetics.anesthetic.Anesthetic;
 import org.shanoir.ng.preclinical.anesthetics.anesthetic.AnestheticRepository;
@@ -49,13 +49,13 @@ public class AnestheticServiceTest {
     private static final Long ANESTHETIC_ID = 1L;
     private static final String UPDATED_ANESTHETIC_DATA = "Injection 2%";
 
-    @Mock
+    @MockitoBean
     private AnestheticRepository anestheticRepository;
 
-    @Mock
+    @MockitoBean
     private RabbitTemplate rabbitTemplate;
 
-    @InjectMocks
+    @Autowired
     private AnestheticServiceImpl anestheticsService;
 
     @BeforeEach
