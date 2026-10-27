@@ -108,7 +108,7 @@ public class SubjectApiSecurityTest {
     @WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_USER" })
     public void testAsUser() throws ShanoirException, RestServiceException {
         testRead();
-        testCreate("ROLE_USER");
+        testCreate();
         assertAccessDenied(api::updateSubject, ENTITY_ID, mockExisting, mockBindingResult);
         testUpdate("ROLE_USER");
 
@@ -133,7 +133,7 @@ public class SubjectApiSecurityTest {
     @WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_EXPERT" })
     public void testAsExpert() throws ShanoirException, RestServiceException {
         testRead();
-        testCreate("ROLE_EXPERT");
+        testCreate();
         testUpdate("ROLE_EXPERT");
 
         assertAccessDenied(api::deleteSubject, ENTITY_ID);
@@ -234,7 +234,7 @@ public class SubjectApiSecurityTest {
         assertEquals(1, api.findSubjectsByStudyId(1L, null).getBody().size());
     }
 
-    private void testCreate(String role) throws ShanoirException {
+    private void testCreate() throws ShanoirException {
         List<Study> studiesMock;
 
         // Create subject without subject <-> study
@@ -251,7 +251,7 @@ public class SubjectApiSecurityTest {
         assertAccessDenied(api::saveNewSubject, newSubjectMock, null, mockBindingResult);
 
         // Create subject linked to a study where I can admin, download, see all but not import:
-        // allowed to study administrators with the expert role only.
+        // refused, whatever the role.
         studiesMock = new ArrayList<>();
         studiesMock.add(buildStudyMock(10L, StudyUserRight.CAN_ADMINISTRATE, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_SEE_ALL));
         given(studyRepository.findAllById(Arrays.asList(10L))).willReturn(studiesMock);
@@ -259,11 +259,7 @@ public class SubjectApiSecurityTest {
         given(studyUserRepository.findByStudy_Id(10L)).willReturn(buildStudyMock(10L, StudyUserRight.CAN_ADMINISTRATE).getStudyUserList());
         newSubjectMock = buildSubjectMock(null);
         addStudyToMock(newSubjectMock, 10L);
-        if ("ROLE_EXPERT".equals(role)) {
-            assertAccessAuthorized(api::saveNewSubject, newSubjectMock, null, mockBindingResult);
-        } else {
-            assertAccessDenied(api::saveNewSubject, newSubjectMock, null, mockBindingResult);
-        }
+        assertAccessDenied(api::saveNewSubject, newSubjectMock, null, mockBindingResult);
 
         // Create subject linked to a study where I can import
         studiesMock = new ArrayList<>();
@@ -277,13 +273,13 @@ public class SubjectApiSecurityTest {
     }
 
     private void testUpdate(String role) throws ShanoirException {
-        // importers may update the subject, whatever their role
+        // importers without the administrate right may not update the subject, whatever their role
         Subject mock = buildSubjectMock(ENTITY_ID);
         addStudyToMock(mock, 1L, StudyUserRight.CAN_IMPORT);
         given(repository.findById(ENTITY_ID)).willReturn(Optional.of(mock));
-        assertAccessAuthorized(api::updateSubject, ENTITY_ID, mock, mockBindingResult);
+        assertAccessDenied(api::updateSubject, ENTITY_ID, mock, mockBindingResult);
 
-        // study administrators without the import right: with the expert role only
+        // study administrators: with the expert role only
         mock = buildSubjectMock(ENTITY_ID);
         addStudyToMock(mock, 1L, StudyUserRight.CAN_ADMINISTRATE);
         given(repository.findById(ENTITY_ID)).willReturn(Optional.of(mock));
