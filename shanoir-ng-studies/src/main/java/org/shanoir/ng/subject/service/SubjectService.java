@@ -129,7 +129,7 @@ public interface SubjectService {
      * @param subject subject to create.
      * @return created subject.
      */
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnTrustedSubject(#subject, 'CAN_IMPORT'))")
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and (@studySecurityService.hasRightOnTrustedSubject(#subject, 'CAN_IMPORT') or (hasRole('EXPERT') and @studySecurityService.hasRightOnTrustedSubject(#subject, 'CAN_ADMINISTRATE'))))")
     Subject create(Subject subject, boolean withAMQP) throws ShanoirException;
 
     /**
@@ -138,7 +138,7 @@ public interface SubjectService {
      * @param subject subject to create.
      * @return created subject.
      */
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnTrustedSubject(#subject, 'CAN_IMPORT'))")
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and (@studySecurityService.hasRightOnTrustedSubject(#subject, 'CAN_IMPORT') or (hasRole('EXPERT') and @studySecurityService.hasRightOnTrustedSubject(#subject, 'CAN_ADMINISTRATE'))))")
     Subject createAutoIncrement(Subject subject, Long centerId, boolean withAMQP) throws ShanoirException;
 
     /**
@@ -151,7 +151,7 @@ public interface SubjectService {
      * @throws ShanoirException
      * @throws RestServiceException
      */
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnSubject(#subject, 'CAN_IMPORT'))")
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and (@studySecurityService.hasRightOnSubject(#subject, 'CAN_IMPORT') or (hasRole('EXPERT') and @studySecurityService.hasRightOnSubject(#subject, 'CAN_ADMINISTRATE'))))")
     Subject update(@Param("subject") Subject subject) throws ShanoirException;
 
     /**
