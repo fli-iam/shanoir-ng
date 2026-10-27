@@ -113,39 +113,33 @@ test('expert-study-create-edit-delete', async ({ page }) => {
     { timeout: 10000 }
   );
   await page.getByRole('cell', { name: 'My Studies Studies you' }).click();
-  await page.getByRole('link', { name: 'playwright-test-study-draft-create-' + randomString }).click();
-  await expect(page.getByRole('heading')).toContainText('Details on study');
   
-  await page.goto(process.env.BASE_URL);
-
-  // role-expert: subject: create and delete
+  // role-expert: add member with can_admin rights
+  await page.getByRole('link', { name: 'playwright-test-study-draft-create-' + randomString }).click();
+  await page.getByRole('button', { name: 'Edit' }).click();
+  await page.getByRole('listitem').filter({ hasText: 'Members' }).click();
+  await page.getByRole('textbox', { name: 'email address / username' }).click();
+  await page.getByRole('textbox', { name: 'email address / username' }).fill(process.env.ADMIN_NAME);
+  await page.getByRole('button', { name: 'Invite & Add +' }).click();
+  await page.locator('.cell.cell-boolean > .cell-container').first().click();
+  await page.locator('.cell.cell-date > .cell-container').first().click();
+  await page.locator('li:nth-child(10) > .right-col > .ng-untouched').click();
+  await page.getByRole('button', { name: 'Update' }).click();
+  await page.locator('.cell.cell-date > .cell-container').first().click();
+  await expect(page.getByRole('heading')).toContainText('Details on study');
+  await expect(page.locator('studyuser-list')).toContainText(process.env.ADMIN_NAME);
+  
+  // role-expert: test add DUA and protocol file 
   await page.getByText('Medical data').click();
-  await page.getByRole('listitem').filter({ hasText: 'Subjects' }).first().click();
-  await expect(page.getByRole('heading')).toContainText('Manage subjects', { timeout: 10000});
-  await page.getByRole('button', { name: '+ New' }).click();
-  await expect(page.getByRole('heading')).toContainText('Create subject');
-  await page.locator('#firstName').click();
-  await page.locator('#firstName').fill('playwright-test-subject-create-' + randomString);
-  await page.locator('#lastName').click();
-  await page.locator('#lastName').fill('playwright-test-subject-create-' + randomString);
-  await page.locator('#name').click();
-  await page.locator('#name').fill('playwright-test-subject-create-' + randomString);
-  await page.locator('input[type="date"]').fill('2026-10-22');
-  await page.getByRole('listitem').filter({ hasText: 'Subject type Select an option' }).locator('select-box').click();
-  await page.locator('.list > div:nth-child(2)').click();
-  await expect(page.getByRole('list').filter({ hasText: 'Subject type Patient' }).getByPlaceholder('Select an option...')).toBeVisible();
-  const studyItem = page.getByRole('listitem').filter({ hasText: 'Study *' });
-  await studyItem.getByPlaceholder('Select an option...').click();
-  const studyOption = page.locator('.list > div').filter({ hasText: 'playwright-test-study-draft-create-' + randomString });
-  await expect(studyOption).toBeVisible();
-  await studyOption.click();
-  await page.getByRole('button', { name: 'Save' }).click();
-  await expect(page.getByRole('heading')).toContainText('Details on subject');
-  await expect(page.getByRole('link', { name: 'playwright-test-subject-create-' + randomString })).toBeVisible();
-  await page.getByRole('button', { name: 'Delete' }).click();
-  await expect(page.locator('confirm-dialog')).toContainText('Delete subject');
-  await expect(page.getByRole('paragraph')).toContainText('This subject belongs to the study');
-  await page.getByRole('button', { name: 'OK' }).click();
+  await page.getByText('Studies', { exact: true }).click();
+  await page.getByRole('link', { name: 'playwright-test-study-draft-create-' + randomString }).click();
+  await page.getByRole('button', { name: 'Edit' }).click();
+  await page.getByText('Files', { exact: true }).click();
+  await page.getByRole('button', { name: 'Choose file' }).click();
+  await page.getByRole('group', { name: 'Data use agreement (DUA)' }).locator('input[type="file"]').setInputFiles('./tests/test_pdf.pdf');
+  await page.getByRole('button', { name: 'Upload a new file' }).click();
+  await page.locator('input[type="file"]').setInputFiles('./tests/test_pdf.pdf');
+  await page.getByRole('button', { name: 'Update' }).click();
   
   await page.getByText('Logout').click();
 });
