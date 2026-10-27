@@ -93,7 +93,9 @@ export class ExaminationListComponent extends EntityListComponent<Examination>{
     }
 
     canEdit(ex: Examination): boolean {
-        return this.keycloakService.isUserAdmin() || this.studyIdsForCurrentUser.includes(ex.study.id);
+        return this.keycloakService.isUserAdmin()
+            || this.studyIdsForCurrentUser?.includes(ex.study?.id)
+            || (this.keycloakService.isUserExpert() && this.studiesICanAdmin?.includes(ex.study?.id));
     }
 
     canDelete(exam: Examination): boolean {
