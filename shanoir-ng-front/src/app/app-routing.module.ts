@@ -295,6 +295,7 @@ const routes: Routes = [
         path: 'subject/edit/:id',
         component: SubjectComponent,
         data: { mode: 'edit' },
+        canActivate: [AuthAdminOrExpertGuard],
     },
     {
         path: 'subject/create',

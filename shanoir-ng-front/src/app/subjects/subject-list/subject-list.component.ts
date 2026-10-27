@@ -42,7 +42,6 @@ export class SubjectListComponent extends EntityListComponent<Subject> {
     @ViewChild('table', { static: false }) table: TableComponent;
     private studies: IdName[];
     private studyIdsForCurrentUser: number[];
-    private studiesICanImport: number[];
 
     constructor(
             private subjectService: SubjectService,
@@ -50,7 +49,6 @@ export class SubjectListComponent extends EntityListComponent<Subject> {
         super('subject');
         this.studyService.findStudyIdNamesIcanAdmin().then(ids => this.studies = ids);
         this.studyService.getStudiesByRight(StudyUserRight.CAN_ADMINISTRATE).then( studies => this.studyIdsForCurrentUser = studies);
-        this.studyService.getStudiesByRight(StudyUserRight.CAN_IMPORT).then(studies => this.studiesICanImport = studies);
     }
 
     getService(): EntityService<Subject> {
@@ -86,15 +84,14 @@ export class SubjectListComponent extends EntityListComponent<Subject> {
         return {
             new: true,
             view: true,
-            edit: true,
+            edit: this.keycloakService.isUserAdminOrExpert(),
             delete: this.keycloakService.isUserAdminOrExpert()
         };
     }
 
-    // importers, or study administrators with the expert role
+    // study administrators with the expert role, as in the backend
     canEdit(subject: Subject): boolean {
         return this.keycloakService.isUserAdmin()
-            || !!this.studiesICanImport?.includes(subject.studyId)
             || (this.keycloakService.isUserExpert() && !!this.studyIdsForCurrentUser?.includes(subject.studyId));
     }
 
