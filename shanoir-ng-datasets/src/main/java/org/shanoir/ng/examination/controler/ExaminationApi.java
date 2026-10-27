@@ -166,7 +166,8 @@ public interface ExaminationApi {
     @PreAuthorize("!@datasetSecurityService.isDraftStudy(#examinationDTO.getStudyId()) and "
               + "(hasRole('ADMIN') or "
               + "(hasAnyRole('EXPERT', 'USER') and "
-              + "@datasetSecurityService.hasRightOnStudyCenter(#examinationDTO.getCenterId(), #examinationDTO.getStudyId(), 'CAN_IMPORT')))")
+              + "#examination.getId().equals(#examinationId) and "
+              + "(@datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_IMPORT')))")
     ResponseEntity<ExaminationDTO> saveNewExaminationWithExtraData(
             @Parameter(description = "examination to create", required = true) @Valid @RequestPart("examination") ExaminationDTO examinationDTO,
             final BindingResult result,
