@@ -22,6 +22,7 @@ import java.util.stream.StreamSupport;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
+import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
@@ -49,6 +50,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.util.Pair;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -59,6 +61,10 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 
     @Autowired
     private DatasetAcquisitionRepository repository;
+
+    @Autowired
+    @Lazy
+    private DatasetSecurityService datasetSecurityService;
 
     @Autowired
     private SecurityService securityService;
@@ -131,6 +137,11 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
         to.setStudyCard(from.getStudyCard());
         to.setAcquisitionStartTime(from.getAcquisitionStartTime()); // immutable
         to.setQualityTag(from.getQualityTag());
+        updateExtraDataFilePathList(from, to);
+        return to;
+    }
+
+    private void updateExtraDataFilePathList(DatasetAcquisition from, DatasetAcquisition to) {
         // Update extra data paths => delete files not present in the new list anymore
         if (to.getExtraDataFilePathList() != null) {
             for (String filePath : to.getExtraDataFilePathList()) {
@@ -149,7 +160,6 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
         } else {
             to.setExtraDataFilePathList(null);
         }
-        return to;
     }
 
     @Override
@@ -216,10 +226,24 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
         if (entityDb == null) {
             throw new EntityNotFoundException(entity.getClass(), entity.getId());
         }
-        updateValues(entity, entityDb);
+        // The acquisition fields are edited by study administrators with the expert role, the extra-data
+        // files by importers: whatever the user is not allowed to change is dropped, not refused.
+        if (!datasetSecurityService.hasRightOnDatasetAcquisition(entity.getId(), "CAN_IMPORT")) {
+            entity.setExtraDataFilePathList(entityDb.getExtraDataFilePathList());
+        }
+        if (KeycloakUtil.isAdmin() || (KeycloakUtil.getTokenRoles().contains("ROLE_EXPERT")
+                && datasetSecurityService.hasRightOnDatasetAcquisition(entity.getId(), "CAN_ADMINISTRATE"))) {
+            if (!KeycloakUtil.isAdmin() && (entity.getExamination() == null
+                    || !entityDb.getExamination().getId().equals(entity.getExamination().getId()))) {
+                throw new AccessDeniedException("Cannot move the dataset acquisition to another examination, please ask an administrator.");
+            }
+            updateValues(entity, entityDb);
+        } else {
+            updateExtraDataFilePathList(entity, entityDb);
+        }
         DatasetAcquisition acq = repository.save(entityDb);
 
-        shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_DATASET_ACQUISITION_EVENT, entity.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, entity.getExamination().getStudyId()));
+        shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_DATASET_ACQUISITION_EVENT, entity.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, acq.getExamination().getStudyId()));
 
         return acq;
     }

@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
 import org.shanoir.ng.dicom.web.service.DICOMWebService;
 import org.shanoir.ng.examination.model.Examination;
@@ -32,6 +33,7 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.SubjectRepository;
+import org.shanoir.ng.storage.StorageService;
 import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
@@ -41,6 +43,8 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.BDDMockito.given;
@@ -86,6 +90,12 @@ public class ExaminationServiceTest {
     @Mock
     private DICOMWebService dicomWebService;
 
+    @Mock
+    private DatasetSecurityService datasetSecurityService;
+
+    @Mock
+    private StorageService storageService;
+
 
     @BeforeEach
     public void setup() throws ShanoirException {
@@ -93,6 +103,7 @@ public class ExaminationServiceTest {
         //         .willReturn(Arrays.asList(ModelsUtil.createExamination()));
         given(examinationRepository.findById(EXAMINATION_ID)).willReturn(Optional.of(ModelsUtil.createExamination()));
         given(examinationRepository.save(Mockito.any(Examination.class))).willReturn(ModelsUtil.createExamination());
+        given(datasetSecurityService.hasRightOnExamination(Mockito.anyLong(), Mockito.anyString())).willReturn(true);
     }
 
     @Test
@@ -140,6 +151,39 @@ public class ExaminationServiceTest {
         Assertions.assertNotNull(updatedExamination);
         Assertions.assertTrue(UPDATED_EXAMINATION_COMMENT.equals(updatedExamination.getComment()));
         Mockito.verify(examinationRepository, Mockito.times(1)).save(Mockito.any(Examination.class));
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_USER" })
+    public void updateAsImporterOnlyChangesTheExtraDataFiles() throws Exception {
+        Examination examinationDb = ModelsUtil.createExamination();
+        examinationDb.setExtraDataFilePathList(new ArrayList<>(List.of("a.pdf")));
+        given(examinationRepository.findById(EXAMINATION_ID)).willReturn(Optional.of(examinationDb));
+        given(datasetSecurityService.hasRightOnExamination(EXAMINATION_ID, "CAN_ADMINISTRATE")).willReturn(false);
+        Examination examination = createExamination();
+        examination.setExtraDataFilePathList(new ArrayList<>(List.of("a.pdf", "b.pdf")));
+
+        final Examination updatedExamination = examinationService.update(examination);
+
+        Assertions.assertNotEquals(UPDATED_EXAMINATION_COMMENT, updatedExamination.getComment());
+        Assertions.assertEquals(List.of("a.pdf", "b.pdf"), updatedExamination.getExtraDataFilePathList());
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_EXPERT" })
+    public void updateAsStudyAdministratorWithoutImportRightKeepsTheExtraDataFiles() throws Exception {
+        Examination examinationDb = ModelsUtil.createExamination();
+        examinationDb.setExtraDataFilePathList(new ArrayList<>(List.of("a.pdf")));
+        given(examinationRepository.findById(EXAMINATION_ID)).willReturn(Optional.of(examinationDb));
+        given(datasetSecurityService.hasRightOnExamination(EXAMINATION_ID, "CAN_IMPORT")).willReturn(false);
+        Examination examination = createExamination();
+        examination.setExtraDataFilePathList(new ArrayList<>());
+
+        final Examination updatedExamination = examinationService.update(examination);
+
+        Assertions.assertEquals(UPDATED_EXAMINATION_COMMENT, updatedExamination.getComment());
+        Assertions.assertEquals(List.of("a.pdf"), updatedExamination.getExtraDataFilePathList());
+        Mockito.verify(storageService, Mockito.never()).deleteExtraData(Mockito.anyLong(), Mockito.anyString());
     }
 
     private Examination createExamination() {

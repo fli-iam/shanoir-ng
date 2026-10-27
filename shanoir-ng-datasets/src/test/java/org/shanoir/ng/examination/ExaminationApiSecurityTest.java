@@ -305,6 +305,16 @@ public class ExaminationApiSecurityTest {
         examDTO4.setStudyId(1L); // try to move exam to my study
         assertAccessDenied(api::updateExamination, 4L, examDTO4, mockBindingResult);
         examDTO4.setStudyId(4L); //back to study 4
+        // without the import right, only a study administrator with the expert role may update the examination
+        given(rightsService.hasRightOnStudy(1L, "CAN_IMPORT")).willReturn(false);
+        given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(true);
+        if ("ROLE_EXPERT".equals(role)) {
+            assertAccessAuthorized(api::updateExamination, 1L, examDTO1, mockBindingResult);
+        } else {
+            assertAccessDenied(api::updateExamination, 1L, examDTO1, mockBindingResult);
+        }
+        given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(false);
+        given(rightsService.hasRightOnStudy(1L, "CAN_IMPORT")).willReturn(true);
 
         // addExtraData(Long, MultipartFile)
         given(rightsService.hasRightOnStudy(1L, "CAN_IMPORT")).willReturn(false);
