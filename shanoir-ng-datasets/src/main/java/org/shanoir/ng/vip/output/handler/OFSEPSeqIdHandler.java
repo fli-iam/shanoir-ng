@@ -303,6 +303,8 @@ public class OFSEPSeqIdHandler extends OutputHandler {
 
             if (shanoirId.contains(",")) {
                 return Arrays.stream(shanoirId.split(",")).anyMatch(split -> Objects.equals(Long.valueOf(split), dataset.getId()));
+            } else if (shanoirId.equals("unknownShanoirId")) {
+                return false;
             } else {
                 return Objects.equals(Long.valueOf(shanoirId), dataset.getId());
             }
