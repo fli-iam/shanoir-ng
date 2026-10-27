@@ -63,6 +63,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
     dicomPatientName: string;
     downloadState: TaskState = new TaskState();
     hasDownloadRight: boolean = false;
+    hasAdministrateRight: boolean = false;
     importMode: string = "";
     isImporting: boolean = false;
     tags: Tag[] = [];
@@ -145,15 +146,15 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
         this.loadAllStudies();
         if (this.keycloakService.isUserAdmin()) {
             this.hasDownloadRight = true;
-            return;
+            this.hasAdministrateRight = true;
+            return Promise.resolve();
         } else {
-            this.treeService.studyPromise.then(study => {
-                return this.studyRightsService.getMyRightsForStudy(study.id).then(rights => {
-                    this.hasDownloadRight = rights.includes(StudyUserRight.CAN_DOWNLOAD);
-                });
+            // awaited: the footer delete button depends on these rights
+            return this.studyRightsService.getMyRightsForStudy(this.subject.study.id).then(rights => {
+                this.hasDownloadRight = rights.includes(StudyUserRight.CAN_DOWNLOAD);
+                this.hasAdministrateRight = rights.includes(StudyUserRight.CAN_ADMINISTRATE);
             });
         }
-        return Promise.resolve();
     }
 
     initEdit(): Promise<void> {
@@ -333,6 +334,10 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
 
     public async hasEditRight(): Promise<boolean> {
         return this.keycloakService.isUserAdminOrExpert();
+    }
+
+    public async hasDeleteRight(): Promise<boolean> {
+        return this.keycloakService.isUserAdmin() || (this.keycloakService.isUserExpert() && this.hasAdministrateRight);
     }
 
     public toggleAnonymised(isAlreadyAnonymized: boolean) {
