@@ -87,7 +87,7 @@ export class ExaminationListComponent extends EntityListComponent<Examination>{
         return {
             new: true,
             view: true,
-            edit: this.keycloakService.isUserAdminOrExpert(),
+            edit: true,
             delete: this.keycloakService.isUserAdminOrExpert()
         };
     }
