@@ -138,7 +138,7 @@ public class ImporterMailService {
     private void sendMail(Long studyId, EmailBase email, String queue) {
         List<Long> recipients = new ArrayList<>();
 
-        // Get all recpients
+        // Get all recipients
         List<StudyUser> users = (List<StudyUser>) studyUserRightRepo.findByStudyId(studyId);
 
         for (StudyUser user : users) {
