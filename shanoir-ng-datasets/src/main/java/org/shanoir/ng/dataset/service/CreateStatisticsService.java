@@ -30,6 +30,7 @@ import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import org.hibernate.procedure.ProcedureCall;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -125,9 +126,12 @@ public class CreateStatisticsService {
                         query.setParameter(5, lastDatasetId);
                         query.setParameter(6, blocSize);
 
-                        //Execute query
-                        @SuppressWarnings("unchecked")
                         List<Object[]> results = query.getResultList();
+
+                        // Release the statement now: otherwise Hibernate keeps it, with the result set
+                        // buffered by the driver, until the end of the transaction
+                        // It would lead to a JavaHeapSpace
+                        query.unwrap(ProcedureCall.class).close();
 
                         if (results.isEmpty()) {
                             break;
