@@ -302,6 +302,10 @@ public class StudyServiceImpl implements StudyService {
         studyDb.setVisibleByDefault(study.isVisibleByDefault());
         studyDb.setStudyCardPolicy(study.getStudyCardPolicy());
         studyDb.setWithExamination(study.isWithExamination());
+        // Exposing a study to Neurobagel publishes its metadata outside the institution: admins only
+        if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+            studyDb.setNeurobagelExport(study.isNeurobagelExport());
+        }
 
         if (study.getExtraDetails() != null) {
             StudyExtraDetails incoming = study.getExtraDetails();
@@ -577,6 +581,12 @@ public class StudyServiceImpl implements StudyService {
                 && !CollectionUtils.isEmpty(study.getDataUserAgreementPaths())
                 && !study.getDataUserAgreementPaths().get(0).equals(studyDb.getDataUserAgreementPaths().get(0));
 
+        // The study has a single DUA file: archive it once, not once per study user
+        // (the signatures of the study users are handled per user below)
+        if (updateDua || deleteDua) {
+            this.archiveDuaFile(studyDb);
+        }
+
         Map<Long, StudyUser> replacing = new HashMap<>();
         for (StudyUser su : study.getStudyUserList()) {
             if (su.getId() == null) {
@@ -598,11 +608,8 @@ public class StudyServiceImpl implements StudyService {
                         duaSigning.setTimestampOfAccepted(new Date());
                         dataUserAgreementService.update(duaSigning);
                     }
-                    this.archiveDuaFile(studyDb);
                 } else if (deleteDua) {
                     // existing DUA removed from study
-                    this.archiveDuaFile(studyDb);
-
                     su.setConfirmed(true);
                     // without DUA all StudyUser are confirmed, set back to true, if false before
                     dataUserAgreementService.deleteIncompleteDataUserAgreementForUserInStudy(studyDb, su.getUserId());
@@ -699,6 +706,11 @@ public class StudyServiceImpl implements StudyService {
             return;
         }
         String originalFilename = study.getDataUserAgreementPaths().get(0);
+        if (!storageService.existsStudyData(study.getId(), originalFilename)) {
+            // e.g. already archived by a previous failed update: do not block the study update
+            LOG.warn("DUA file {} of study {} not found, nothing to archive.", originalFilename, study.getId());
+            return;
+        }
         String archiveFilename = "archive_"
                 + new SimpleDateFormat("yyyyMMddHHmm").format(new Date())
                 + "_" + originalFilename;
