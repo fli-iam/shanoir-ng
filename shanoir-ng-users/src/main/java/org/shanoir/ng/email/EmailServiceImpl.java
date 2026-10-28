@@ -656,13 +656,11 @@ public class EmailServiceImpl implements EmailService {
         examDetail.setName(generatedMail.getExaminationId());
         examDetail.setUrl(shanoirServerAddress + "examination/details/" + generatedMail.getExaminationId());
 
-        DatasetDetail acquisitionDetail = null;
+        DatasetDetail acquisitionDetail = new DatasetDetail();
         if (generatedMail.getDatasetAcquisitionId() != null) {
-            acquisitionDetail = new DatasetDetail();
             acquisitionDetail.setName(generatedMail.getDatasetAcquisitionId());
             acquisitionDetail.setUrl(shanoirServerAddress + "dataset-acquisition/details/" + generatedMail.getDatasetAcquisitionId());
         }
-        final DatasetDetail acquisition = acquisitionDetail;
 
         for (User recipient : recipients) {
             MimeMessagePreparator messagePreparator = mimeMessage -> {
@@ -678,7 +676,7 @@ public class EmailServiceImpl implements EmailService {
                 variables.put(SUBJECT, generatedMail.getSubjectName());
                 variables.put(EXAMINATION, examDetail);
                 variables.put(EXAM_DATE, generatedMail.getExamDate());
-                variables.put(ACQUISITION, acquisition);
+                variables.put(ACQUISITION, acquisitionDetail);
                 variables.put(FILE_NAMES, generatedMail.getFileNames());
                 variables.put(SERVER_ADDRESS, shanoirServerAddress);
                 final String content = build("notifyStudyMembersExtraDataAdded", variables);
