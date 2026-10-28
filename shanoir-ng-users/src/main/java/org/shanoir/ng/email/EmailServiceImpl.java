@@ -659,13 +659,13 @@ public class EmailServiceImpl implements EmailService {
         // Get the list of recipients
         List<User> recipients = (List<User>) this.userRepository.findAllById(generatedMail.getRecipients());
 
-        List<DatasetDetail> examinationLinks = new ArrayList<>();
+        List<EmailEntityLink> examinationLinks = new ArrayList<>();
         if (generatedMail.getExaminations() != null) {
             for (Entry<Long, String> examination : generatedMail.getExaminations().entrySet()) {
-                DatasetDetail detail = new DatasetDetail();
-                detail.setName(examination.getValue());
-                detail.setUrl(shanoirServerAddress + "examination/details/" + examination.getKey());
-                examinationLinks.add(detail);
+                EmailEntityLink emailLink = new EmailEntityLink();
+                emailLink.setName(examination.getValue());
+                emailLink.setUrl(shanoirServerAddress + "examination/details/" + examination.getKey());
+                examinationLinks.add(emailLink);
             }
         }
         int moreExaminations = Math.max(0, generatedMail.getTotalExaminations() - examinationLinks.size());
