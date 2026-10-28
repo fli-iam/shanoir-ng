@@ -926,7 +926,7 @@ public class EmailServiceImpl implements EmailService {
 
     /**
      * Notify a user its study request was refused
-     * @param accessRequest the access request
+     * @param refusedRequest the refused access request
      */
     public void notifyUserRefusedFromStudy(AccessRequest refusedRequest) {
         User user = refusedRequest.getUser();
