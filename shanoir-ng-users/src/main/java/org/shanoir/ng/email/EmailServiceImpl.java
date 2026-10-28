@@ -28,7 +28,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 
 import org.shanoir.ng.accessrequest.model.AccessRequest;
-import org.shanoir.ng.email.model.DatasetDetail;
+import org.shanoir.ng.email.model.EmailEntityLink;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.email.DuaDraftWrapper;
@@ -603,15 +603,15 @@ public class EmailServiceImpl implements EmailService {
         // Get the list of recipients
         List<User> admins = (List<User>) this.userRepository.findAllById(generatedMail.getRecipients());
 
-        List<DatasetDetail> datasetLinks = new ArrayList<>();
+        List<EmailEntityLink> datasetLinks = new ArrayList<>();
         for (Entry<Long, String> dataset :  generatedMail.getDatasets().entrySet()) {
-            DatasetDetail detail = new DatasetDetail();
+            EmailEntityLink detail = new EmailEntityLink();
             detail.setName(dataset.getValue());
             detail.setUrl(this.shanoirServerAddress + "dataset/details/" + dataset.getKey());
             datasetLinks.add(detail);
         }
 
-        DatasetDetail examDetail = new DatasetDetail();
+        EmailEntityLink examDetail = new EmailEntityLink();
         examDetail.setName(generatedMail.getExaminationId());
         examDetail.setUrl(shanoirServerAddress + "examination/details/" + generatedMail.getExaminationId());
 
@@ -652,11 +652,11 @@ public class EmailServiceImpl implements EmailService {
         // Get the list of recipients
         List<User> recipients = (List<User>) this.userRepository.findAllById(generatedMail.getRecipients());
 
-        DatasetDetail examDetail = new DatasetDetail();
+        EmailEntityLink examDetail = new EmailEntityLink();
         examDetail.setName(generatedMail.getExaminationId());
         examDetail.setUrl(shanoirServerAddress + "examination/details/" + generatedMail.getExaminationId());
 
-        DatasetDetail acquisitionDetail = new DatasetDetail();
+        EmailEntityLink acquisitionDetail = new EmailEntityLink();
         if (generatedMail.getDatasetAcquisitionId() != null) {
             acquisitionDetail.setName(generatedMail.getDatasetAcquisitionId());
             acquisitionDetail.setUrl(shanoirServerAddress + "dataset-acquisition/details/" + generatedMail.getDatasetAcquisitionId());
@@ -696,7 +696,7 @@ public class EmailServiceImpl implements EmailService {
         // Get the list of recipients
         List<User> admins = (List<User>) this.userRepository.findAllById(generatedMail.getRecipients());
 
-        DatasetDetail examDetail = new DatasetDetail();
+        EmailEntityLink examDetail = new EmailEntityLink();
         examDetail.setName(generatedMail.getExaminationId());
         examDetail.setUrl(shanoirServerAddress + "examination/details/" + generatedMail.getExaminationId());
 
