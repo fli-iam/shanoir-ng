@@ -373,6 +373,72 @@ public class StudyServiceTest {
         }
     }
 
+    /**
+     * The study has a single DUA file: removing it must archive it once, whatever the number of
+     * study users (it used to be moved once per study user, failing from the second one).
+     */
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    public void testUpdateStudyUsersDeleteDUAArchivesFileOnce() throws StorageException {
+        Study existing = createStudyWithTwoStudyUsers();
+        existing.setDataUserAgreementPaths(Collections.singletonList("DUA-test.pdf"));
+        Study updated = createStudyWithTwoStudyUsers();
+        updated.setDataUserAgreementPaths(new ArrayList<>());
+        given(fileSystemStorageService.existsStudyData(STUDY_ID, "DUA-test.pdf")).willReturn(true);
+
+        studyService.updateStudyUsers(existing, updated);
+
+        Mockito.verify(fileSystemStorageService, Mockito.times(1))
+                .moveStudyData(Mockito.eq(STUDY_ID), Mockito.eq("DUA-test.pdf"), Mockito.startsWith("archive_"));
+        for (StudyUser su : updated.getStudyUserList()) {
+            assertTrue(su.isConfirmed());
+            Mockito.verify(dataUserAgreementService).deleteIncompleteDataUserAgreementForUserInStudy(existing, su.getUserId());
+        }
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    public void testUpdateStudyUsersReplaceDUAArchivesFileOnce() throws StorageException {
+        Study existing = createStudyWithTwoStudyUsers();
+        existing.setDataUserAgreementPaths(Collections.singletonList("DUA-old.pdf"));
+        Study updated = createStudyWithTwoStudyUsers();
+        updated.setDataUserAgreementPaths(Collections.singletonList("DUA-new.pdf"));
+        given(fileSystemStorageService.existsStudyData(STUDY_ID, "DUA-old.pdf")).willReturn(true);
+
+        studyService.updateStudyUsers(existing, updated);
+
+        Mockito.verify(fileSystemStorageService, Mockito.times(1))
+                .moveStudyData(Mockito.eq(STUDY_ID), Mockito.eq("DUA-old.pdf"), Mockito.startsWith("archive_"));
+    }
+
+    /**
+     * A DUA file already missing (e.g. archived by a previous failed update) must not block the update.
+     */
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    public void testUpdateStudyUsersDeleteDUAAlreadyArchived() throws StorageException {
+        Study existing = createStudyWithTwoStudyUsers();
+        existing.setDataUserAgreementPaths(Collections.singletonList("DUA-test.pdf"));
+        Study updated = createStudyWithTwoStudyUsers();
+        updated.setDataUserAgreementPaths(new ArrayList<>());
+        given(fileSystemStorageService.existsStudyData(STUDY_ID, "DUA-test.pdf")).willReturn(false);
+
+        studyService.updateStudyUsers(existing, updated);
+
+        Mockito.verify(fileSystemStorageService, Mockito.never())
+                .moveStudyData(Mockito.anyLong(), Mockito.anyString(), Mockito.anyString());
+        for (StudyUser su : updated.getStudyUserList()) {
+            assertTrue(su.isConfirmed());
+        }
+    }
+
+    private Study createStudyWithTwoStudyUsers() {
+        Study study = createStudy();
+        study.getStudyUserList().add(createStudyUsers(1L, 1L, study, false, StudyUserRight.CAN_SEE_ALL));
+        study.getStudyUserList().add(createStudyUsers(2L, 2L, study, false, StudyUserRight.CAN_ADMINISTRATE));
+        return study;
+    }
+
     private Study createStudy() {
         final Study study = new Study();
         study.setId(STUDY_ID);
