@@ -340,7 +340,16 @@ public class OFSEPSeqIdHandler extends OutputHandler {
             }
 
             for (Dataset ds : datasets) {
-                Attributes attributes = wadoDownloaderService.getDicomAttributesForDataset(ds);
+                Attributes attributes;
+                try {
+                    attributes = wadoDownloaderService.getDicomAttributesForDataset(ds);
+                } catch (PacsException e) {
+                    LOG.warn("Could not get DICOM attributes of dataset [{}] from PACS, dataset skipped for SIMS identification : {}", ds.getId(), e.getMessage());
+                    continue;
+                }
+                if (Objects.isNull(attributes)) {
+                    continue;
+                }
                 JSONObject vol = getMatchingVolume(ds, serie, attributes);
 
                 if (vol == null) {
@@ -392,7 +401,13 @@ public class OFSEPSeqIdHandler extends OutputHandler {
             }
 
             for (Dataset ds : datasets) {
-                Attributes attributes = wadoDownloaderService.getDicomAttributesForDataset(ds);
+                Attributes attributes;
+                try {
+                    attributes = wadoDownloaderService.getDicomAttributesForDataset(ds);
+                } catch (PacsException e) {
+                    LOG.warn("Could not get DICOM attributes of dataset [{}] from PACS, dataset skipped: {}", ds.getId(), e.getMessage());
+                    continue;
+                }
                 if (Objects.isNull(attributes)) {
                     continue;
                 }
