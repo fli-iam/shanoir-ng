@@ -1,17 +1,11 @@
 import { test, expect } from '@playwright/test';
+import { login, logout } from './utils/auth';
 
 const randomString = Math.random().toString().substr(2,10);
 
 test('admin-study-create-delete', async ({ page }) => {
-  await page.goto(process.env.BASE_URL);
+  await login(page, 'ADMIN');
 
-  await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page.locator('#kc-page-title')).toContainText('Sign in to your account');
-  await page.getByRole('textbox', { name: 'Username or email' }).click();
-  await page.getByRole('textbox', { name: 'Username or email' }).fill(process.env.ADMIN_NAME);
-  await page.getByRole('textbox', { name: 'Username or email' }).press('Tab');
-  await page.getByRole('textbox', { name: 'Password' }).fill(process.env.ADMIN_PASSWORD);
-  await page.getByRole('button', { name: 'Sign In' }).click();
   await page.getByText('Medical data').click();
   await page.getByText('Studies', { exact: true }).click();
   await page.getByRole('button', { name: '+ New' }).click();
@@ -41,20 +35,13 @@ test('admin-study-create-delete', async ({ page }) => {
   await page.getByRole('button', { name: 'Delete' }).click();
   await page.getByRole('button', { name: 'OK' }).click();
 
-  await page.getByText('Logout').click();
+  await logout(page);
 });
 
 test('expert-study-create-edit-delete', async ({ page }) => {
-  await page.goto(process.env.BASE_URL);
-
   // role-expert: study draft creation and validation by admin
-  await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page.locator('#kc-page-title')).toContainText('Sign in to your account');
-  await page.getByRole('textbox', { name: 'Username or email' }).click();
-  await page.getByRole('textbox', { name: 'Username or email' }).fill(process.env.EXPERT_NAME);
-  await page.getByRole('textbox', { name: 'Password' }).click();
-  await page.getByRole('textbox', { name: 'Password' }).fill(process.env.EXPERT_PASSWORD);
-  await page.getByRole('button', { name: 'Sign In' }).click();
+  await login(page, 'EXPERT');
+
   await page.getByText('Medical data').click();
   await page.getByText('Studies', { exact: true }).click();
   await page.getByRole('button', { name: '+ New' }).click();
@@ -79,16 +66,10 @@ test('expert-study-create-edit-delete', async ({ page }) => {
   await page.getByRole('button', { name: 'Save' }).click();
   await page.getByRole('button', { name: 'No' }).click();
   await expect(page.getByRole('heading')).toContainText('Details on study');
-  await page.getByText('Logout').click();
-  await page.locator('div').nth(2).click();
+  await logout(page);
+
   // role-admin: validate study draft
-  await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page.locator('#kc-page-title')).toContainText('Sign in to your account');
-  await page.getByRole('textbox', { name: 'Username or email' }).click();
-  await page.getByRole('textbox', { name: 'Username or email' }).fill(process.env.ADMIN_NAME);
-  await page.getByRole('textbox', { name: 'Username or email' }).press('Tab');
-  await page.getByRole('textbox', { name: 'Password' }).fill(process.env.ADMIN_PASSWORD);
-  await page.getByRole('button', { name: 'Sign In' }).click();
+  await login(page, 'ADMIN');
   await expect(page.getByText(/Notifications\s*\d+/)).toBeVisible();
   await page.getByText(/Notifications\s*\d+/).click();
   await expect(page.getByText(/Draft\s*Studies\s*\d+/)).toBeVisible();
@@ -99,27 +80,24 @@ test('expert-study-create-edit-delete', async ({ page }) => {
   await studyRow.getByRole('button').click();   // opens a dialog
   await page.getByRole('button', { name: 'OK' }).click();
   const dialog = page.getByRole('dialog');
-  await page.getByText('Logout').click();
+  await logout(page);
+
   // role-expert: verify study is not draft anymore
-  await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page.locator('#kc-page-title')).toContainText('Sign in to your account');
-  await page.getByRole('textbox', { name: 'Username or email' }).click();
-  await page.getByRole('textbox', { name: 'Username or email' }).fill(process.env.EXPERT_NAME);
-  await page.getByRole('textbox', { name: 'Password' }).click();
-  await page.getByRole('textbox', { name: 'Password' }).fill(process.env.EXPERT_PASSWORD);
-  await page.getByRole('button', { name: 'Sign In' }).click();
-  await page.waitForResponse(
+  // (the response listener is registered before login so it cannot be missed)
+  const studiesLoaded = page.waitForResponse(
     (response) => response.url().includes('/studies/studies/light') && response.status() === 200,
     { timeout: 10000 }
   );
+  await login(page, 'EXPERT');
+  await studiesLoaded;
   await page.getByRole('cell', { name: 'My Studies Studies you' }).click();
-  
+
   // role-expert: add member with can_admin rights
   await page.getByRole('link', { name: 'playwright-test-study-draft-create-' + randomString }).click();
   await page.getByRole('button', { name: 'Edit' }).click();
   await page.getByRole('listitem').filter({ hasText: 'Members' }).click();
   await page.getByRole('textbox', { name: 'email address / username' }).click();
-  await page.getByRole('textbox', { name: 'email address / username' }).fill(process.env.ADMIN_NAME);
+  await page.getByRole('textbox', { name: 'email address / username' }).fill(process.env.ADMIN_NAME!);
   await page.getByRole('button', { name: 'Invite & Add +' }).click();
   await page.locator('.cell.cell-boolean > .cell-container').first().click();
   await page.locator('.cell.cell-date > .cell-container').first().click();
@@ -127,9 +105,9 @@ test('expert-study-create-edit-delete', async ({ page }) => {
   await page.getByRole('button', { name: 'Update' }).click();
   await page.locator('.cell.cell-date > .cell-container').first().click();
   await expect(page.getByRole('heading')).toContainText('Details on study');
-  await expect(page.locator('studyuser-list')).toContainText(process.env.ADMIN_NAME);
-  
-  // role-expert: test add DUA and protocol file 
+  await expect(page.locator('studyuser-list')).toContainText(process.env.ADMIN_NAME!);
+
+  // role-expert: test add DUA and protocol file
   await page.getByText('Medical data').click();
   await page.getByText('Studies', { exact: true }).click();
   await page.getByRole('link', { name: 'playwright-test-study-draft-create-' + randomString }).click();
@@ -140,20 +118,12 @@ test('expert-study-create-edit-delete', async ({ page }) => {
   await page.getByRole('button', { name: 'Upload a new file' }).click();
   await page.locator('input[type="file"]').setInputFiles('./tests/test_pdf.pdf');
   await page.getByRole('button', { name: 'Update' }).click();
-  
-  await page.getByText('Logout').click();
+
+  await logout(page);
 });
 
 test('expert-center-create-delete', async ({ page }) => {
-  await page.goto(process.env.BASE_URL);
-
-  await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page.locator('#kc-page-title')).toContainText('Sign in to your account');
-  await page.getByRole('textbox', { name: 'Username or email' }).click();
-  await page.getByRole('textbox', { name: 'Username or email' }).fill(process.env.EXPERT_NAME);
-  await page.getByRole('textbox', { name: 'Password' }).click();
-  await page.getByRole('textbox', { name: 'Password' }).fill(process.env.EXPERT_PASSWORD);
-  await page.getByRole('button', { name: 'Sign In' }).click();
+  await login(page, 'EXPERT');
 
   await page.getByText('Medical configuration').click();
   await page.getByText('Acquisition centers').click();
@@ -182,21 +152,12 @@ test('expert-center-create-delete', async ({ page }) => {
   await expect(page.locator('ol')).toContainText('country');
   await page.getByRole('button', { name: 'Delete' }).click();
   await page.getByRole('button', { name: 'OK' }).click();
-  
-  await page.getByText('Logout').click();
+
+  await logout(page);
 });
 
-
 test('expert-equipment-create-delete', async ({ page }) => {
-  await page.goto(process.env.BASE_URL);
-
-  await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page.locator('#kc-page-title')).toContainText('Sign in to your account');
-  await page.getByRole('textbox', { name: 'Username or email' }).click();
-  await page.getByRole('textbox', { name: 'Username or email' }).fill(process.env.EXPERT_NAME);
-  await page.getByRole('textbox', { name: 'Password' }).click();
-  await page.getByRole('textbox', { name: 'Password' }).fill(process.env.EXPERT_PASSWORD);
-  await page.getByRole('button', { name: 'Sign In' }).click();
+  await login(page, 'EXPERT');
 
   await page.getByText('Medical configuration').click();
   await page.getByText('Center equipments').click();
@@ -222,19 +183,11 @@ test('expert-equipment-create-delete', async ({ page }) => {
   await page.getByRole('button', { name: 'OK' }).click();
   await page.getByText('Center equipments').click();
 
-  await page.getByText('Logout').click();
+  await logout(page);
 });
 
 test('expert-coil-create-delete', async ({ page }) => {
-  await page.goto(process.env.BASE_URL);
-
-  await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page.locator('#kc-page-title')).toContainText('Sign in to your account');
-  await page.getByRole('textbox', { name: 'Username or email' }).click();
-  await page.getByRole('textbox', { name: 'Username or email' }).fill(process.env.EXPERT_NAME);
-  await page.getByRole('textbox', { name: 'Password' }).click();
-  await page.getByRole('textbox', { name: 'Password' }).fill(process.env.EXPERT_PASSWORD);
-  await page.getByRole('button', { name: 'Sign In' }).click();
+  await login(page, 'EXPERT');
 
   await page.getByText('Medical configuration').click();
   await page.getByText('Coils').click();
@@ -263,5 +216,5 @@ test('expert-coil-create-delete', async ({ page }) => {
   await page.getByRole('button', { name: 'Delete' }).click();
   await page.getByRole('button', { name: 'OK' }).click();
 
-  await page.getByText('Logout').click();
+  await logout(page);
 });
