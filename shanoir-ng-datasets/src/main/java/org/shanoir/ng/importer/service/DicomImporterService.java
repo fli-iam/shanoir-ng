@@ -244,6 +244,10 @@ public class DicomImporterService {
             Long centerId = manageCenter(serie.getInstitution(), study.getId());
             Examination examination = manageExamination(attributes, study, subjectId, centerId);
             DatasetAcquisition acquisition = manageAcquisitionAndEquipment(attributes, examination, centerId, serie);
+            if (isAlreadyImported(acquisition, attributes)) {
+                LOG.info("DICOM instance of serie {} already imported, skipped.", serie.getSeriesDescription());
+                return true;
+            }
             Dataset dataset = manageDataset(attributes, studyId, subjectId, acquisition, serie);
             DatasetExpression expression = manageDatasetExpression(attributes, dataset);
             datasetExpressionRepository.save(expression);
@@ -255,6 +259,32 @@ public class DicomImporterService {
             return false;
         }
         return true;
+    }
+
+    /**
+     * A sender repeats an instance when a request timed out or when an extraction
+     * is restarted. Importing it again would be refused when its file is added to
+     * the dataset, so it is recognised first and skipped.
+     */
+    private boolean isAlreadyImported(DatasetAcquisition acquisition, Attributes attributes)
+            throws MalformedURLException {
+        List<Dataset> datasets = acquisition.getDatasets();
+        if (datasets == null || datasets.isEmpty()) {
+            return false;
+        }
+        String path = instancePath(attributes);
+        for (Dataset dataset : datasets) {
+            if (dataset.getDatasetExpressions() == null) {
+                continue;
+            }
+            for (DatasetExpression expression : dataset.getDatasetExpressions()) {
+                if (expression.getDatasetFiles() != null
+                        && expression.getDatasetFiles().stream().anyMatch(file -> path.equals(file.getPath()))) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private void countNumberOfFiles(Examination examination, DatasetAcquisition acquisition, String seriesDescription) {
@@ -687,8 +717,10 @@ public class DicomImporterService {
      * @throws MalformedURLException
      * @throws ShanoirException
      */
-    private void addDatasetFile(Attributes attributes, DatasetExpression expression)
-            throws MalformedURLException, ShanoirException {
+    /**
+     * The WADO-RS URL of an instance in the PACS, which is the path of its dataset file.
+     */
+    private String instancePath(Attributes attributes) throws MalformedURLException {
         final String studyInstanceUID = attributes.getString(Tag.StudyInstanceUID);
         final String seriesInstanceUID = attributes.getString(Tag.SeriesInstanceUID);
         final String sOPInstanceUID = attributes.getString(Tag.SOPInstanceUID);
@@ -697,7 +729,12 @@ public class DicomImporterService {
         wadoStrBuf.append(dicomWebRS + "/" + studyInstanceUID
                 + "/series/" + seriesInstanceUID + "/instances/" + sOPInstanceUID);
         URL wadoURL = new URL(wadoStrBuf.toString());
-        String newPath = wadoURL.toString();
+        return wadoURL.toString();
+    }
+
+    private void addDatasetFile(Attributes attributes, DatasetExpression expression)
+            throws MalformedURLException, ShanoirException {
+        String newPath = instancePath(attributes);
         List<DatasetFile> datasetFilesDb = expression.getDatasetFiles();
         if (datasetFilesDb == null) {
             datasetFilesDb = new ArrayList<DatasetFile>();
