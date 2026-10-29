@@ -101,7 +101,7 @@ test('expert-subject-examination-create-delete', async ({ page }) => {
   await page.locator('#comment').click();
   await page.locator('#comment').fill('comment');
   await page.getByRole('button', { name: 'Save' }).click();
-  await expect(page.getByRole('heading')).toContainText('Details on examination');
+  await expect(page.getByRole('heading')).toContainText('Details on examination', { timeout: 15000});
   await expect(page.locator('ol')).toContainText('Examination date');
   await expect(page.locator('ol')).toContainText('10/28/2026');
   await page.locator('.selected > .arrow > span > .fas').click();

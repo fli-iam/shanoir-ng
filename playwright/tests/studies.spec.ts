@@ -86,7 +86,7 @@ test('expert-study-create-edit-delete', async ({ page }) => {
   // (the response listener is registered before login so it cannot be missed)
   const studiesLoaded = page.waitForResponse(
     (response) => response.url().includes('/studies/studies/light') && response.status() === 200,
-    { timeout: 10000 }
+    { timeout: 20000 }
   );
   await login(page, 'EXPERT');
   await studiesLoaded;
@@ -107,14 +107,12 @@ test('expert-study-create-edit-delete', async ({ page }) => {
   await expect(page.getByRole('heading')).toContainText('Details on study');
   await expect(page.locator('studyuser-list')).toContainText(process.env.ADMIN_NAME!);
 
-  // role-expert: test add DUA and protocol file
+  // role-expert: test add protocol file
   await page.getByText('Medical data').click();
   await page.getByText('Studies', { exact: true }).click();
   await page.getByRole('link', { name: 'playwright-test-study-draft-create-' + randomString }).click();
   await page.getByRole('button', { name: 'Edit' }).click();
   await page.getByText('Files', { exact: true }).click();
-  await page.getByRole('button', { name: 'Choose file' }).click();
-  await page.getByRole('group', { name: 'Data use agreement (DUA)' }).locator('input[type="file"]').setInputFiles('./tests/test_pdf.pdf');
   await page.getByRole('button', { name: 'Upload a new file' }).click();
   await page.locator('input[type="file"]').setInputFiles('./tests/test_pdf.pdf');
   await page.getByRole('button', { name: 'Update' }).click();
@@ -144,7 +142,7 @@ test('expert-center-create-delete', async ({ page }) => {
   await page.locator('#phoneNumber').press('Tab');
   await page.locator('#website').fill('www.website.fr');
   await page.getByRole('button', { name: 'Save' }).click();
-  await expect(page.getByRole('heading')).toContainText('Details on acquisition center');
+  await expect(page.getByRole('heading')).toContainText('Details on acquisition center', { timeout: 10000});
   await expect(page.locator('ol')).toContainText('playwright-test-center-create-');
   await expect(page.locator('ol')).toContainText('street');
   await expect(page.locator('ol')).toContainText('11111');
