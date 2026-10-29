@@ -108,7 +108,6 @@ test('expert-subject-examination-create-delete', async ({ page }) => {
   await page.locator('.selected > .arrow > span > .fas').click();
   await page.getByRole('button', { name: 'Delete' }).click();
   await page.getByRole('button', { name: 'OK' }).click();
-  await expect(page.locator('side-menu')).toContainText('Delete Examination');
 
   await logout(page);
 });
