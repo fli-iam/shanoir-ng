@@ -24,11 +24,9 @@ import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 import java.lang.reflect.Method;
 
@@ -39,7 +37,6 @@ import org.junit.jupiter.api.io.TempDir;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.shanoir.ng.examination.controler.ExaminationApiController;
-import org.shanoir.ng.examination.dto.ExtraDataUploadResultDTO;
 import org.shanoir.ng.examination.dto.mapper.ExaminationMapper;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
@@ -51,8 +48,6 @@ import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.paging.PageImpl;
-import org.shanoir.ng.shared.repository.CenterRepository;
-import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.storage.StorageService;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
@@ -69,13 +64,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -124,12 +117,6 @@ public class ExaminationApiControllerTest {
 
     @MockBean
     private StorageService storageService;
-
-    @MockBean
-    private SubjectRepository subjectRepository;
-
-    @MockBean
-    private CenterRepository centerRepository;
 
     @MockBean
     private ExaminationRepository examinationRepository;
@@ -256,69 +243,6 @@ public class ExaminationApiControllerTest {
         mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(ModelsUtil.createExamination(1L))))
                 .andExpect(status().isNoContent());
-    }
-
-    @Test
-    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
-    public void testAddExtraData() throws IOException {
-        // GIVEN a file to add to an examination
-        File importZip = tempFolder.createTempFile("test-import-extra-data", ".zip");
-
-        try {
-            importZip.createNewFile();
-            MockMultipartFile file = new MockMultipartFile("file", "test-import-extra-data.txt", MediaType.MULTIPART_FORM_DATA_VALUE, new FileInputStream(importZip.getAbsolutePath()));
-
-            // WHEN The file is added to the examination
-            mvc.perform(MockMvcRequestBuilders.multipart(REQUEST_PATH + "/extra-data-upload/1").file(file))
-                    .andExpect(status().isUnprocessableEntity());
-
-            Mockito.verify(examinationServiceMock).addExtraData(Mockito.any(Long.class), Mockito.any(MultipartFile.class));
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail();
-        }
-    }
-
-    @Test
-    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
-    public void testAddExtraDataFiles() throws Exception {
-        // GIVEN an examination and three files: one new, one already existing, one failing to store
-        Examination exam = ModelsUtil.createExamination(1L);
-        given(examinationServiceMock.findById(1L)).willReturn(exam);
-        given(storageService.existsExtraData(1L, "existing.txt")).willReturn(true);
-        given(examinationServiceMock.addExtraData(Mockito.eq(1L), Mockito.argThat(f -> f != null && "new.txt".equals(f.getOriginalFilename())))).willReturn("path/new.txt");
-        MockMultipartFile newFile = new MockMultipartFile("files", "new.txt", MediaType.TEXT_PLAIN_VALUE, "new".getBytes());
-        MockMultipartFile existingFile = new MockMultipartFile("files", "existing.txt", MediaType.TEXT_PLAIN_VALUE, "existing".getBytes());
-        MockMultipartFile failingFile = new MockMultipartFile("files", "failing.txt", MediaType.TEXT_PLAIN_VALUE, "failing".getBytes());
-
-        // WHEN the files are uploaded in a single request
-        MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.multipart(REQUEST_PATH + "/extra-data-upload/1/multi").file(newFile).file(existingFile).file(failingFile))
-                .andExpect(status().isOk())
-                .andReturn();
-        ExtraDataUploadResultDTO result = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ExtraDataUploadResultDTO.class);
-        assertEquals(List.of("new.txt"), result.getUploaded());
-        assertEquals(List.of("existing.txt"), result.getSkipped());
-        assertEquals(List.of("failing.txt"), result.getFailed());
-
-        // THEN the existing file is not overwritten and one mail lists only the uploaded file
-        Mockito.verify(examinationServiceMock, Mockito.never()).addExtraData(Mockito.eq(1L), Mockito.argThat(f -> f != null && "existing.txt".equals(f.getOriginalFilename())));
-        Mockito.verify(importerMailService).sendExtraDataEmail(exam, null, List.of("new.txt"), 12L);
-    }
-
-    @Test
-    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
-    public void testAddExtraDataFilesExaminationNotFound() throws Exception {
-        // GIVEN no examination with this id
-        MockMultipartFile file = new MockMultipartFile("files", "new.txt", MediaType.TEXT_PLAIN_VALUE, "new".getBytes());
-
-        // WHEN files are uploaded to it
-        mvc.perform(MockMvcRequestBuilders.multipart(REQUEST_PATH + "/extra-data-upload/1/multi").file(file))
-                .andExpect(status().isNotFound());
-
-        // THEN nothing is stored and no mail is sent
-        Mockito.verify(examinationServiceMock, Mockito.never()).addExtraData(Mockito.any(Long.class), Mockito.any(MultipartFile.class));
-        Mockito.verifyNoInteractions(importerMailService);
     }
 
     @Test

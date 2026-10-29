@@ -16,12 +16,10 @@ package org.shanoir.ng.examination.controler;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.shanoir.ng.examination.dto.ExaminationDTO;
-import org.shanoir.ng.examination.dto.ExtraDataUploadResultDTO;
 import org.shanoir.ng.examination.dto.mapper.ExaminationMapper;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
@@ -36,9 +34,6 @@ import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
-import org.shanoir.ng.shared.model.Subject;
-import org.shanoir.ng.shared.repository.CenterRepository;
-import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.storage.StorageException;
 import org.shanoir.ng.storage.StorageService;
 import org.shanoir.ng.utils.KeycloakUtil;
@@ -78,12 +73,6 @@ public class ExaminationApiController implements ExaminationApi {
 
     @Autowired
     private ExaminationService examinationService;
-
-    @Autowired
-    private SubjectRepository subjectRepository;
-
-    @Autowired
-    private CenterRepository centerRepository;
 
     @Autowired
     private ShanoirEventService eventService;
@@ -311,91 +300,6 @@ public class ExaminationApiController implements ExaminationApi {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (ShanoirException e) {
             throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), e.getMessage()));
-        }
-    }
-
-    @Override
-    public ResponseEntity<Void> addExtraData(Long examinationId, MultipartFile file) {
-        if (examinationService.addExtraData(examinationId, file) != null) {
-            return new ResponseEntity<>(HttpStatus.OK);
-        }
-        return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
-    }
-
-    @Override
-    public ResponseEntity<ExtraDataUploadResultDTO> addExtraDataFiles(Long examinationId, List<MultipartFile> files) throws RestServiceException {
-        Examination examination = examinationService.findById(examinationId);
-        if (examination == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        ExtraDataUploadResultDTO result = new ExtraDataUploadResultDTO();
-        for (MultipartFile file : files) {
-            String fileName = file.getOriginalFilename();
-            try {
-                if (storageService.existsExtraData(examinationId, fileName)) {
-                    LOG.warn("Extra-data file {} already exists for examination {}, upload skipped.", fileName, examinationId);
-                    result.getSkipped().add(fileName);
-                    continue;
-                }
-            } catch (StorageException e) {
-                LOG.error("Error checking existing extra-data file {} for examination {}", fileName, examinationId, e);
-                result.getFailed().add(fileName);
-                continue;
-            }
-            if (examinationService.addExtraData(examinationId, file) != null) {
-                result.getUploaded().add(fileName);
-            } else {
-                result.getFailed().add(fileName);
-            }
-        }
-        importerMailService.sendExtraDataEmail(examination, null, result.getUploaded(), KeycloakUtil.getTokenUserId());
-        return new ResponseEntity<>(result, HttpStatus.OK);
-    }
-
-    @Override
-    public ResponseEntity<Void> createExaminationAndAddExtraData(
-            @Parameter(description = "name of the subject", required = true) @PathVariable("subjectName") String subjectName,
-            @Parameter(description = "id of the center", required = true) @PathVariable("centerId") Long centerId,
-            @Parameter(description = "file to upload", required = true) @Valid @RequestBody MultipartFile file) throws RestServiceException {
-
-        Subject subject = subjectRepository.findByName(subjectName);
-        if (subject == null) {
-            ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Couldn't find subject with name " + subjectName);
-            throw new RestServiceException(error);
-        }
-
-        if (centerRepository.findById(centerId).isEmpty()) {
-            ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Couldn't find center with id " + centerId);
-            throw new RestServiceException(error);
-        }
-
-        Examination examination = new Examination();
-        examination.setComment(file.getOriginalFilename());
-        examination.setCenterId(centerId);
-        examination.setSubject(subject);
-        examination.setStudy(subject.getStudy());
-        examination.setExaminationDate(LocalDate.now());
-        List<String> pathList = new ArrayList<>();
-        pathList.add(file.getOriginalFilename());
-        examination.setExtraDataFilePathList(pathList);
-        examinationService.generateStudyInstanceUID(examination);
-        try {
-            Examination dbExamination = examinationService.save(examination);
-            String path = examinationService.addExtraData(dbExamination.getId(), file);
-            LOG.info("New examination created: " + examination);
-            if (path != null) {
-                importerMailService.sendExtraDataEmail(dbExamination, null, List.of(file.getOriginalFilename()), KeycloakUtil.getTokenUserId());
-                return new ResponseEntity<>(HttpStatus.OK);
-            } else {
-                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-        } catch (EntityNotFoundException e) {
-            throw new RestServiceException(
-                    e,
-                    new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
-                        "Couldn't create examination"
-                    )
-            );
         }
     }
 
