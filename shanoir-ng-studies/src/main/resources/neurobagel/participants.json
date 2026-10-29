@@ -13,7 +13,7 @@
         "Description": "Shanoir subject id, without prefix"
     },
     "subject_age": {
-        "Description": "Age in years",
+        "Description": "Age in years at the first examination of the subject in the study",
         "Annotations": {
             "IsAbout": {
                 "TermURL": "nb:Age",
