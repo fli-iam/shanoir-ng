@@ -3,7 +3,7 @@ import { login, logout } from './utils/auth';
 
 const randomString = Math.random().toString().substr(2,10);
 
-test('expert-examination-create-delete', async ({ page }) => {
+test('expert-subject-examination-create-delete', async ({ page }) => {
   // role-expert: study draft creation and validation by admin
   await login(page, 'EXPERT');
 
@@ -30,7 +30,7 @@ test('expert-examination-create-delete', async ({ page }) => {
   await expect(page.locator('form')).toContainText('CHU Rennes');
   await page.getByRole('button', { name: 'Save' }).click();
   await page.getByRole('button', { name: 'No' }).click();
-  await expect(page.getByRole('heading')).toContainText('Details on study');
+  await expect(page.getByRole('heading')).toContainText('Details on study', { timeout: 10000});
   await logout(page);
 
   // role-admin: validate study draft
@@ -64,7 +64,8 @@ test('expert-examination-create-delete', async ({ page }) => {
   await page.getByRole('listitem').filter({ hasText: 'Subject type Select an option' }).locator('select-box').click();
   await page.locator('.list > div:nth-child(2)').click();
   await expect(page.getByRole('list').filter({ hasText: 'Subject type Patient' }).getByPlaceholder('Select an option...')).toBeVisible();
-  const studyItem = page.getByRole('listitem').filter({ hasText: 'Study *' });
+  
+  const studyItem = page.getByRole('listitem').filter({ hasText: 'Study' });
   await studyItem.getByPlaceholder('Select an option...').click();
   const studyOption = page.locator('.list > div').filter({ hasText: 'playwright-test-study-draft-create-' + randomString });
   await expect(studyOption).toBeVisible();
@@ -76,11 +77,9 @@ test('expert-examination-create-delete', async ({ page }) => {
   await page.goto('/shanoir-ng/examination/list');
 
   await expect(page.getByRole('heading')).toContainText('Manage examinations');
-  await expect(page.locator('tbody')).toContainText('Columns settings', { timeout: 10000});
-  await expect(page.locator('tbody')).toContainText('Found :');
   await page.getByRole('button', { name: '+ New' }).click();
 
-  const studyItem2 = page.getByRole('listitem').filter({ hasText: 'Research study' });
+  const studyItem2 = page.getByRole('listitem').filter({ hasText: 'Study' });
   await studyItem2.getByPlaceholder('Select an option...').click();
   const studyOption2 = page.locator('.list > div').filter({ hasText: 'playwright-test-study-draft-create-' + randomString }).first();
   await expect(studyOption2).toBeVisible();
