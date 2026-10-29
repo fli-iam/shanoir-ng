@@ -401,14 +401,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <legend i18n="Subject detail|Name label@@subjectDetailGeneral">Study</legend>
                     <ol>
                         <li>
-                            <label i18n="Subject detail |Study label@@SubjectDetailSubjectStudy">Study</label>
+                            <label [class.required-label]="mode == 'create'" i18n="Subject detail |Study label@@SubjectDetailSubjectStudy">Study</label>
                             <span class="right-col">
                                 @switch (mode) {
                                     @case ('create') {
                                         <select-box formControlName="study" [optionArr]="studies" (userChange)="onSelectStudy()"></select-box>
-                                    }
-                                    @default {
-                                        {{ studyNameForSubject }}
                                         @if (hasError('study', ['required'])) {
                                             <label
                                                 animate.enter="slide-down-error"
@@ -418,6 +415,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                                 Study is required!
                                             </label>
                                         }
+                                    }
+                                    @default {
+                                        {{ studyNameForSubject }}
                                     }
                                 }
                             </span>
