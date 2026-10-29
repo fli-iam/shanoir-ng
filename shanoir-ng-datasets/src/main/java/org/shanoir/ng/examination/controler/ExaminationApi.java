@@ -37,6 +37,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -156,6 +157,23 @@ public interface ExaminationApi {
             @Parameter(description = "examination to create", required = true) @Valid @RequestBody ExaminationDTO examinationDTO,
             final BindingResult result) throws RestServiceException;
 
+    @Operation(summary = "", description = "Saves a new examination with its extra data files, the examination is created only if all the files are stored")
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "created examination"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "422", description = "bad parameters"),
+            @ApiResponse(responseCode = "500", description = "unexpected error, examination not created") })
+    @PostMapping(value = "/with-extra-data", produces = { "application/json" }, consumes = {
+            "multipart/form-data" })
+    @PreAuthorize("!@datasetSecurityService.isDraftStudy(#examinationDTO.getStudyId()) and "
+              + "(hasRole('ADMIN') or "
+              + "(hasAnyRole('EXPERT', 'USER') and "
+              + "@datasetSecurityService.hasRightOnStudyCenter(#examinationDTO.getCenterId(), #examinationDTO.getStudyId(), 'CAN_IMPORT')))")
+    ResponseEntity<ExaminationDTO> saveNewExaminationWithExtraData(
+            @Parameter(description = "examination to create", required = true) @Valid @RequestPart("examination") ExaminationDTO examinationDTO,
+            final BindingResult result,
+            @Parameter(description = "extra data files to upload", required = true) @RequestPart("files") List<MultipartFile> files) throws RestServiceException;
+
     @Operation(summary = "", description = "Updates an examination")
     @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "examination updated"),
             @ApiResponse(responseCode = "401", description = "unauthorized"),
@@ -169,6 +187,22 @@ public interface ExaminationApi {
             @Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
             @Parameter(description = "examination to update", required = true) @Valid @RequestBody ExaminationDTO examination,
             final BindingResult result) throws Exception;
+
+    @Operation(summary = "", description = "Updates an examination with new extra data files, the examination is updated only if all the files are stored")
+    @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "examination updated"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "404", description = "examination not found"),
+            @ApiResponse(responseCode = "422", description = "bad parameters or file already existing"),
+            @ApiResponse(responseCode = "500", description = "unexpected error, examination not updated") })
+    @PutMapping(value = "/{examinationId}/with-extra-data", produces = { "application/json" }, consumes = {
+            "multipart/form-data" })
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and #examination.getId().equals(#examinationId) and @datasetSecurityService.hasRightOnExamination(#examination.getId(), 'CAN_IMPORT'))")
+    ResponseEntity<Void> updateExaminationWithExtraData(
+            @Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
+            @Parameter(description = "examination to update", required = true) @Valid @RequestPart("examination") ExaminationDTO examination,
+            final BindingResult result,
+            @Parameter(description = "new extra data files to upload", required = true) @RequestPart("files") List<MultipartFile> files) throws RestServiceException;
 
     @Operation(summary = "", description = "Add extra data to an examination")
     @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "examination updated"),

@@ -57,6 +57,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -207,6 +208,40 @@ public class ExaminationApiController implements ExaminationApi {
     }
 
     @Override
+    public ResponseEntity<ExaminationDTO> saveNewExaminationWithExtraData(
+            @Parameter(description = "the examination to create", required = true) @Valid @RequestPart("examination") final ExaminationDTO examinationDTO,
+            final BindingResult result,
+            @Parameter(description = "extra data files to upload", required = true) @RequestPart("files") final List<MultipartFile> files) throws RestServiceException {
+        examinationService.validate(result);
+        Examination examination = examinationMapper.examinationDTOToExaminationIdRelations(examinationDTO);
+        examinationService.generateStudyInstanceUID(examination);
+        try {
+            final Examination createdExamination = examinationService.saveWithExtraData(examination, files);
+            LOG.info("New examination created with {} extra data file(s): {}", files.size(), createdExamination);
+            // NB: Message as centerId / subjectId is important in RabbitMQStudiesService
+            eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EXAMINATION_EVENT, createdExamination.getId().toString(), KeycloakUtil.getTokenUserId(), "centerId:" + createdExamination.getCenterId() + ";subjectId:" + (createdExamination.getSubject() != null ? createdExamination.getSubject().getId() : null), ShanoirEvent.SUCCESS, createdExamination.getStudyId()));
+            importerMailService.sendExtraDataEmail(createdExamination, null, files.stream().map(MultipartFile::getOriginalFilename).toList(), KeycloakUtil.getTokenUserId());
+            ExaminationDTO createdExaminationDTO = examinationMapper.examinationToExaminationDTOWithCopiesAndSourceAndStudyId(createdExamination);
+            return new ResponseEntity<>(createdExaminationDTO, HttpStatus.OK);
+        } catch (EntityNotFoundException e) {
+            throw new RestServiceException(
+                    e,
+                    new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                        "Couldn't create examination"
+                    )
+            );
+        } catch (StorageException e) {
+            LOG.error(e.getMessage());
+            throw new RestServiceException(
+                    e,
+                    new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                        "Couldn't store extra data files, examination not created"
+                    )
+            );
+        }
+    }
+
+    @Override
     public ResponseEntity<Void> updateExamination(
             @Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") final Long examinationId,
             @Parameter(description = "the examination to update", required = true) @RequestBody @Valid final ExaminationDTO examination,
@@ -219,6 +254,35 @@ public class ExaminationApiController implements ExaminationApi {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (JsonProcessingException | EntityNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (ShanoirException e) {
+            throw new RestServiceException(new ErrorModel(e.getErrorCode(), e.getMessage()));
+        }
+    }
+
+    @Override
+    public ResponseEntity<Void> updateExaminationWithExtraData(
+            @Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") final Long examinationId,
+            @Parameter(description = "the examination to update", required = true) @Valid @RequestPart("examination") final ExaminationDTO examination,
+            final BindingResult result,
+            @Parameter(description = "new extra data files to upload", required = true) @RequestPart("files") final List<MultipartFile> files) throws RestServiceException {
+        examinationService.validate(result);
+        try {
+            Examination updatedExamination = examinationService.updateWithExtraData(examinationMapper.examinationDTOToExaminationIdRelations(examination), files);
+            LOG.info("Examination {} updated with {} new extra data file(s)", examinationId, files.size());
+            eventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_EXAMINATION_EVENT, examination.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, examination.getStudyId()));
+            rabbitTemplate.convertAndSend(RabbitMQConfiguration.RELOAD_BIDS, objectMapper.writeValueAsString(examination.getStudyId()));
+            importerMailService.sendExtraDataEmail(updatedExamination, null, files.stream().map(MultipartFile::getOriginalFilename).toList(), KeycloakUtil.getTokenUserId());
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (JsonProcessingException | EntityNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (StorageException e) {
+            LOG.error(e.getMessage());
+            throw new RestServiceException(
+                    e,
+                    new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                        "Couldn't store extra data files, examination not updated"
+                    )
+            );
         } catch (ShanoirException e) {
             throw new RestServiceException(new ErrorModel(e.getErrorCode(), e.getMessage()));
         }
