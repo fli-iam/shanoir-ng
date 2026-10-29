@@ -159,6 +159,7 @@ export class StudyDTOService {
         }
 
         entity.isDraft = dto.isDraft;
+        entity.neurobagelExport = dto.neurobagelExport;
         if (dto.extraDetails) {
             entity.expectedNbOfSubjects = dto.extraDetails.expectedNbOfSubjects;
             entity.averageExaminationSize = dto.extraDetails.averageExaminationSize;
@@ -289,6 +290,7 @@ export class StudyDTO {
     license: string;
     storageVolume: StudyStorageVolumeDTO;
     isDraft: boolean;
+    neurobagelExport: boolean;
     extraDetails: StudyExtraDetailsDTO;
 
     constructor(study: Study) {
@@ -329,6 +331,7 @@ export class StudyDTO {
         this.description = study.description;
         this.license = study.license;
         this.isDraft = study.isDraft;
+        this.neurobagelExport = study.neurobagelExport;
         this.extraDetails = {
             "expectedNbOfSubjects": study.expectedNbOfSubjects,
             "averageExaminationSize": study.averageExaminationSize,

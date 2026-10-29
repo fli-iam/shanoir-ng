@@ -41,6 +41,13 @@ public interface StudyRepository extends JpaRepository<Study, Long>, StudyReposi
     @EntityGraph(attributePaths = { "studyTags", "profile" })
     List<Study> findByVisibleByDefaultTrueAndIsDraftFalse();
 
+    /**
+     * Studies exposed to the Neurobagel federation: flagged by an admin and no longer drafts.
+     */
+    List<Study> findByNeurobagelExportTrueAndIsDraftFalseOrderByIdAsc();
+
+    boolean existsByIdAndNeurobagelExportTrueAndIsDraftFalse(Long id);
+
     @EntityGraph(attributePaths = { "studyTags", "profile" })
     List<Study> findDistinctByStudyUserListUserIdAndStudyUserListExpirationDateBefore(Long userId, LocalDate date);
 
@@ -90,6 +97,13 @@ public interface StudyRepository extends JpaRepository<Study, Long>, StudyReposi
     @EntityGraph(attributePaths = "tags")
     @Query("SELECT s FROM Study s WHERE s.id = :studyId")
     Study findStudyWithTagsById(@Param("studyId") Long studyId);
+
+    /**
+     * The study with its own tags, the keywords of its Neurobagel dataset description.
+     */
+    @EntityGraph(attributePaths = "studyTags")
+    @Query("SELECT s FROM Study s WHERE s.id = :studyId")
+    Study findStudyWithStudyTagsById(@Param("studyId") Long studyId);
 
     @Query("SELECT s.protocolFilePaths FROM Study s WHERE s.id = :studyId")
     List<String> findProtocolFilePathsByStudyId(Long studyId);

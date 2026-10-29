@@ -26,7 +26,7 @@ import org.shanoir.ng.preclinical.anesthetics.ingredients.AnestheticIngredient;
 import org.shanoir.ng.preclinical.anesthetics.ingredients.AnestheticIngredientRepository;
 import org.shanoir.ng.utils.AnestheticModelUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 

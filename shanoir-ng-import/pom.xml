@@ -76,17 +76,6 @@
             <artifactId>anonymization</artifactId>
             <version>3.4.0</version>
         </dependency>
-        <dependency>
-            <groupId>org.shanoir-ng</groupId>
-            <artifactId>shanoir-ng-exchange</artifactId>
-            <version>3.4.0</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>*</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
 
         <dependency>
             <groupId>org.mariadb.jdbc</groupId>

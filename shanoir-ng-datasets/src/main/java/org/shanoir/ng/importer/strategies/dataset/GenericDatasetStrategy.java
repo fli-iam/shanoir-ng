@@ -112,11 +112,13 @@ public class GenericDatasetStrategy implements DatasetStrategy<GenericDataset> {
          *  The DatasetExpressionFactory will return the proper object according to the expression format type and add it to the current ctDataset
          *
          **/
-        for (ExpressionFormat expressionFormat : dataset.getExpressionFormats()) {
-            datasetExpressionContext.setDatasetExpressionStrategy(expressionFormat.getType());
-            DatasetExpression datasetExpression = datasetExpressionContext.generateDatasetExpression(serie, expressionFormat);
-            datasetExpression.setDataset(genericDataset);
-            genericDataset.getDatasetExpressions().add(datasetExpression);
+        if (dataset.getExpressionFormats() != null) {
+            for (ExpressionFormat expressionFormat : dataset.getExpressionFormats()) {
+                datasetExpressionContext.setDatasetExpressionStrategy(expressionFormat.getType());
+                DatasetExpression datasetExpression = datasetExpressionContext.generateDatasetExpression(serie, expressionFormat);
+                datasetExpression.setDataset(genericDataset);
+                genericDataset.getDatasetExpressions().add(datasetExpression);
+            }
         }
 
         DatasetMetadata originalDM = genericDataset.getOriginMetadata();

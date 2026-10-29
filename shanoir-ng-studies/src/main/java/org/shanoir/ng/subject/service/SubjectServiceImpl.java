@@ -452,9 +452,11 @@ public class SubjectServiceImpl implements SubjectService {
                 page, studyIds);
     }
 
-    @Override
+    @Transactional(readOnly = true)
     public List<Subject> findByPreclinical(boolean preclinical) {
-        return subjectRepository.findByPreclinical(preclinical);
+        List<Subject> list = subjectRepository.findByPreclinical(preclinical);
+        list.stream().map(Subject::getStudy).distinct().toList().forEach(study -> Hibernate.initialize(study.getTags()));
+        return list;
     }
 
     @Override

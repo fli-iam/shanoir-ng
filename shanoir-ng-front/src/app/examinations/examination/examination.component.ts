@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, ElementRef, OnDestroy, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ElementRef, OnDestroy, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { AbstractControl, FormGroup, UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { NgClass } from '@angular/common';
@@ -24,6 +24,7 @@ import { Selection } from '@app/studies/study/tree.service';
 import { environment } from '../../../environments/environment';
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { CenterService } from '../../centers/shared/center.service';
+import { DatasetService } from '../../datasets/shared/dataset.service';
 import { UnitOfMeasure } from "../../enum/unitofmeasure.enum";
 import { dateDisplay } from "../../shared/./localLanguage/localDate.abstract";
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
@@ -74,6 +75,7 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
     unit = UnitOfMeasure;
     defaultUnit = this.unit.KG;
     private studyFirstChange: boolean = true;
+    private datasetService: DatasetService = inject(DatasetService);
 
     constructor(
         private route: ActivatedRoute,
@@ -119,14 +121,23 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
             this.hasAdministrateRight = true;
             this.hasDownloadRight = true;
             this.hasImportRight = true;
+            this.checkEEG();
             return Promise.resolve();
         } else {
             return this.studyRightsService.getMyRightsForStudy(this.examination.study.id).then(rights => {
                 this.hasImportRight = rights.includes(StudyUserRight.CAN_IMPORT);
                 this.hasAdministrateRight = rights.includes(StudyUserRight.CAN_ADMINISTRATE);
                 this.hasDownloadRight = rights.includes(StudyUserRight.CAN_DOWNLOAD);
+                if (this.hasDownloadRight) this.checkEEG();
             });
         }
+    }
+
+    // Not awaited: the EEG viewer button just appears once the datasets are loaded
+    private checkEEG(): void {
+        this.datasetService.getByExaminationId(this.examination.id)
+            .then(datasets => this.hasEEG = datasets.some(ds => String(ds.type).toUpperCase() == 'EEG'))
+            .catch(() => this.hasEEG = false);
     }
 
     initEdit(): Promise<void> {
@@ -204,12 +215,16 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
         this.downloadService.downloadAllByExaminationId(this.examination?.id,this.downloadState);
     }
 
-    openViewer() {
-	    window.open(environment.viewerUrl + '/viewer?StudyInstanceUIDs=1.4.9.12.34.1.8527.' + this.entity.id, '_blank');
+    openOhifViewer() {
+	    window.open(environment.ohifUrl + '/viewer?StudyInstanceUIDs=1.4.9.12.34.1.8527.' + this.entity.id, '_blank');
     }
 
-    openSegmentationViewer() {
-        window.open(environment.viewerUrl + '/segmentation?StudyInstanceUIDs=1.4.9.12.34.1.8527.' + this.entity.id, '_blank');
+    openOhifSegmentation() {
+        window.open(environment.ohifUrl + '/segmentation?StudyInstanceUIDs=1.4.9.12.34.1.8527.' + this.entity.id, '_blank');
+    }
+
+    openVidepeViewer() {
+        window.open(environment.videpeUrl + '/videpe/?examinationId=' + this.entity.id, '_blank');
     }
 
     getCenters(studyId: number): void {

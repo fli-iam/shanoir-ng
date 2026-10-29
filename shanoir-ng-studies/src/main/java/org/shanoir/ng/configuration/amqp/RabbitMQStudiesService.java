@@ -31,6 +31,7 @@ import org.shanoir.ng.center.service.CenterService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.dicom.EquipmentDicom;
 import org.shanoir.ng.shared.dicom.InstitutionDicom;
+import org.shanoir.ng.shared.dto.ParticipantsTsvRequestDTO;
 import org.shanoir.ng.shared.dto.StudyExaminationsDTO;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -209,7 +210,7 @@ public class RabbitMQStudiesService {
     @Transactional
     public String getStudyName(final long studyId) {
         SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
-        Study study = this.studyRepo.findById(studyId).get();
+        Study study = this.studyRepo.findById(studyId).orElse(null);
         if (study != null) {
             return study.getName();
         }
@@ -220,8 +221,8 @@ public class RabbitMQStudiesService {
     @Transactional
     public String getStudyAnonymisationProfile(final long studyId) {
         SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
-        Study study = this.studyRepo.findById(studyId).get();
-        if (study != null) {
+        Study study = this.studyRepo.findById(studyId).orElse(null);
+        if (study != null && study.getProfile() != null) {
             return study.getProfile().getProfileName();
         }
         return null;
@@ -373,10 +374,11 @@ public class RabbitMQStudiesService {
 
     @RabbitListener(queues = RabbitMQConfiguration.STUDY_PARTICIPANTS_TSV, containerFactory = "singleConsumerFactory")
     @RabbitHandler
-    public String studyParticipantsTsv(Long studyId) {
+    public String studyParticipantsTsv(String requestStr) {
         try {
             SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
-            return this.getStudyParticipantsTsv(studyId);
+            ParticipantsTsvRequestDTO request = mapper.readValue(requestStr, ParticipantsTsvRequestDTO.class);
+            return this.getStudyParticipantsTsv(request);
         } catch (Exception e) {
             LOG.error("Error while creating participants.tsv: ", e);
             throw new AmqpRejectAndDontRequeueException(e);
@@ -384,9 +386,9 @@ public class RabbitMQStudiesService {
     }
 
     @Transactional
-    private String getStudyParticipantsTsv(Long studyId) {
+    private String getStudyParticipantsTsv(ParticipantsTsvRequestDTO request) {
         try {
-            return this.bidsService.generateParticipantsTsvFile(studyId);
+            return this.bidsService.generateParticipantsTsvFile(request.getStudyId(), request.getFirstExaminationDates());
         } catch (IOException e) {
             LOG.error("Error while creating participants.tsv: ", e);
         }

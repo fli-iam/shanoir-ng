@@ -14,7 +14,10 @@
 
 package org.shanoir.uploader.action.init;
 
+import java.util.List;
+
 import org.shanoir.uploader.service.rest.KeycloakAuthCodeLoginService.LoginSession;
+import org.shanoir.uploader.service.rest.KeycloakAuthCodeLoginService.OtpDevice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +54,9 @@ public class StartupStateContext {
 
     /** Base32 manual key passed from LoginPanelActionListener to OtpSetupState. */
     private String pendingTotpManualKey;
+
+    /** OTP devices passed from LoginPanelActionListener to OtpInputState. */
+    private List<OtpDevice> pendingOtpDevices = List.of();
 
     @Autowired
     private InitialStartupState initialStartupState;
@@ -106,6 +112,14 @@ public class StartupStateContext {
 
     public void setPendingTotpManualKey(String pendingTotpManualKey) {
         this.pendingTotpManualKey = pendingTotpManualKey;
+    }
+
+    public List<OtpDevice> getPendingOtpDevices() {
+        return pendingOtpDevices;
+    }
+
+    public void setPendingOtpDevices(List<OtpDevice> pendingOtpDevices) {
+        this.pendingOtpDevices = pendingOtpDevices;
     }
 
 }

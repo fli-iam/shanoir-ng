@@ -157,7 +157,6 @@ public class DatasetServiceImpl implements DatasetService {
     @Autowired
     private SubjectService subjectService;
 
-
     private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
 
     private void delete(Dataset entity, ShanoirEvent parentEvent) throws ShanoirException, SolrServerException, IOException, RestServiceException {
@@ -648,14 +647,13 @@ public class DatasetServiceImpl implements DatasetService {
         return metadataFile;
     }
 
-    public Map<String, String> getSpecificDicomMetadataValues(Dataset dataset, List<String> metadataKeys) {
+    public Map<String, String> extractDicomMetadataValues(String metadataJson, List<String> metadataKeys) {
         ObjectMapper mapper = new ObjectMapper();
         JsonNode metadatas = null;
         Map<String, String> results = new HashMap<>();
 
         try {
-            String metadataStr = getMetadataFromDicom(dataset);
-            metadatas = mapper.readTree(metadataStr).get(0);
+            metadatas = mapper.readTree(metadataJson).get(0);
         } catch (Exception ignored) {
         }
 

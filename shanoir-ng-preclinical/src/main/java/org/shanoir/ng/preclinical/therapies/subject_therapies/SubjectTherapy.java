@@ -68,7 +68,6 @@ public class SubjectTherapy extends HalEntity {
 
     private String molecule;
 
-
     public SubjectTherapy() { }
 
     public SubjectTherapy(SubjectTherapy source) {

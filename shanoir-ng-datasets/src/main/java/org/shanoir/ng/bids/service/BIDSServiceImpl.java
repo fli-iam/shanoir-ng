@@ -59,8 +59,10 @@ import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.eeg.model.Channel;
 import org.shanoir.ng.eeg.model.Event;
 import org.shanoir.ng.examination.model.Examination;
+import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.shared.dto.ParticipantsTsvRequestDTO;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
@@ -136,6 +138,9 @@ public class BIDSServiceImpl implements BIDSService {
     private StudyRepository studyRepo;
 
     @Autowired
+    private ExaminationRepository examinationRepository;
+
+    @Autowired
     private SubjectRepository subjectRepository;
 
     @Autowired
@@ -160,10 +165,17 @@ public class BIDSServiceImpl implements BIDSService {
 
     private DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
+    /**
+     * Deletes the BIDS folder of a study (not the study itself), to be regenerated on next access.
+     * The study is not loaded from database: this message is sent for each examination deleted,
+     * including when the whole study is deleted (RabbitMQDatasetsService.deleteStudy), so the
+     * study row may already be gone when it is received. Its BIDS folder must be deleted anyway.
+     *
+     * @param studyId the study id, as a string
+     */
     @RabbitListener(queues = RabbitMQConfiguration.RELOAD_BIDS)
     public void deleteBidsForStudy(String studyId) {
-        Study studyDeleted = studyRepo.findById(Long.valueOf(studyId)).orElse(null);
-        this.deleteBidsFolder(studyDeleted.getId());
+        this.deleteBidsFolder(Long.valueOf(studyId));
     }
 
     @Override
@@ -221,7 +233,8 @@ public class BIDSServiceImpl implements BIDSService {
                 // Create participants.tsv
                 event.setMessage("Getting participants.tsv for study " + studyName);
                 eventService.publishEvent(event);
-                rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_PARTICIPANTS_TSV, objectMapper.writeValueAsString(studyId));
+                rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_PARTICIPANTS_TSV, objectMapper.writeValueAsString(
+                        new ParticipantsTsvRequestDTO(studyId, examinationRepository.findFirstExaminationDatesByStudyId(studyId))));
 
                 int index = 1;
                 for (Subject subject : subjects) {

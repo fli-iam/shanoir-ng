@@ -40,10 +40,8 @@ public class ExaminationExtraData extends HalEntity {
     private Long examinationId;
 
     @JsonProperty("filename")
-    //@NotNull
     private String filename;
 
-    //@NotNull
     @JsonIgnore
     @JsonProperty("filepath")
     private String filepath;

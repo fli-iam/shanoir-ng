@@ -15,6 +15,7 @@
 package org.shanoir.ng.user.utils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
@@ -66,6 +67,12 @@ public class KeycloakClientTest {
     private List<Map<String, Object>> pageOneUsers = List.of();
     private List<Map<String, Object>> pageTwoUsers = List.of();
     private boolean usersEndpointFails = false;
+
+    // Configurable behaviour of the fake Keycloak single user endpoints, set per-test.
+    private static final String USER_ID = "user-id";
+    private List<String> userRequiredActions = new ArrayList<>();
+    private List<Map<String, Object>> userCredentials = List.of();
+    private Map<String, Object> updatedUserRepresentation;
 
     @BeforeEach
     public void setup() throws IOException {
@@ -128,6 +135,41 @@ public class KeycloakClientTest {
         assertThrows(SecurityException.class, () -> keycloakClient.getUsersEnabledStatus());
     }
 
+    @Test
+    public void enableTotpAddsRequiredActionWhenNoOtpCredentialTest() throws SecurityException {
+        userCredentials = List.of(credential("password"));
+
+        keycloakClient.enableTotp(USER_ID);
+
+        assertEquals(List.of("CONFIGURE_TOTP"), updatedUserRepresentation.get("requiredActions"));
+    }
+
+    @Test
+    public void enableTotpKeepsExistingOtpCredentialTest() throws SecurityException {
+        userCredentials = List.of(credential("password"), credential("otp"));
+
+        keycloakClient.enableTotp(USER_ID);
+
+        // The user already registered an authenticator: no new registration must be forced.
+        assertNull(updatedUserRepresentation);
+    }
+
+    @Test
+    public void enableTotpAlreadyPendingTest() throws SecurityException {
+        userRequiredActions = new ArrayList<>(List.of("CONFIGURE_TOTP"));
+
+        keycloakClient.enableTotp(USER_ID);
+
+        assertNull(updatedUserRepresentation);
+    }
+
+    private Map<String, Object> credential(final String type) {
+        final Map<String, Object> credential = new HashMap<>();
+        credential.put("id", type + "-credential-id");
+        credential.put("type", type);
+        return credential;
+    }
+
     private Map<String, Object> userRepresentation(final String keycloakId, final Boolean enabled) {
         final Map<String, Object> userRepresentation = new HashMap<>();
         userRepresentation.put("id", keycloakId);
@@ -145,9 +187,31 @@ public class KeycloakClientTest {
             exchange.close();
             return;
         }
+        final String path = exchange.getRequestURI().getPath();
+        if (path.endsWith("/users/" + USER_ID + "/credentials")) {
+            writeJson(exchange, 200, userCredentials);
+            return;
+        }
+        if (path.endsWith("/users/" + USER_ID)) {
+            handleUser(exchange);
+            return;
+        }
         int first = extractIntQueryParam(exchange.getRequestURI().getQuery(), "first");
         List<Map<String, Object>> page = (first == 0) ? pageOneUsers : pageTwoUsers;
         writeJson(exchange, 200, page);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void handleUser(HttpExchange exchange) throws IOException {
+        if ("PUT".equals(exchange.getRequestMethod())) {
+            updatedUserRepresentation = objectMapper.readValue(exchange.getRequestBody(), Map.class);
+            exchange.sendResponseHeaders(204, -1);
+            exchange.close();
+            return;
+        }
+        final Map<String, Object> userRepresentation = userRepresentation(USER_ID, Boolean.TRUE);
+        userRepresentation.put("requiredActions", userRequiredActions);
+        writeJson(exchange, 200, userRepresentation);
     }
 
     private int extractIntQueryParam(String query, String name) {
