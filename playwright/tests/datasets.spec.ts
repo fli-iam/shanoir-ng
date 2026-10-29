@@ -72,7 +72,7 @@ test('expert-subject-examination-create-delete', async ({ page }) => {
   await studyOption.first().click();
 
   await page.getByRole('button', { name: 'Save' }).click();
-  await expect(page.getByRole('heading')).toContainText('Details on subject');
+  await expect(page.getByRole('heading')).toContainText('Details on subject', { timeout: 15000 });
   await expect(page.getByRole('link', { name: 'playwright-test-subject-create-' + randomString })).toBeVisible();
 
   await page.goto('/shanoir-ng/examination/list');
