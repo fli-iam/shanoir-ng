@@ -351,16 +351,8 @@ public class DicomImporterService {
         // Echo times
         Set<EchoTime> echoTimes = DatasetSeparationHelper.echoTimesForDatasetSeparation(acquisition, attributes);
         // Image orientation patient
-        List<Double> imageOrientationPatient = new ArrayList<>();
-        double[] imageOrientationPatientArray = attributes.getDoubles(Tag.ImageOrientationPatient);
-        if (imageOrientationPatientArray != null) {
-            for (int i = 0; i < imageOrientationPatientArray.length; i++) {
-                imageOrientationPatient.add(imageOrientationPatientArray[i]);
-            }
-        }
-        double[] imageOrientationPatientsDoubleArray = imageOrientationPatient == null
-                ? null
-                : imageOrientationPatient.stream().mapToDouble(i -> i).toArray();
+        double[] imageOrientationPatientsDoubleArray = DatasetSeparationHelper
+                .imageOrientationForDatasetSeparation(attributes);
         SerieToDatasetsSeparator seriesToDatasetsSeparator =
                 new SerieToDatasetsSeparator(
                 acquisitionNumber, echoTimes,

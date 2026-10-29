@@ -30,6 +30,9 @@ import org.shanoir.ng.shared.dicom.EchoTime;
  * MR datasets store them. The key of an incoming instance and the key rebuilt from
  * an existing dataset must follow the same rule, otherwise they never match and
  * every instance of a non-MR series opens a new dataset.
+ *
+ * The same holds for the image orientation: a dataset stored without one is read
+ * back as null, so an incoming instance without one must give null too.
  */
 final class DatasetSeparationHelper {
 
@@ -59,6 +62,17 @@ final class DatasetSeparationHelper {
             ((MrDataset) dataset).getEchoTime().forEach(eT -> echoTimes.add(eT.getEchoTimeShared()));
         }
         return echoTimes;
+    }
+
+    /**
+     * Image orientation of an incoming DICOM instance, null when it carries none.
+     */
+    static double[] imageOrientationForDatasetSeparation(Attributes attributes) {
+        double[] imageOrientationPatient = attributes.getDoubles(Tag.ImageOrientationPatient);
+        if (imageOrientationPatient == null || imageOrientationPatient.length == 0) {
+            return null;
+        }
+        return imageOrientationPatient;
     }
 
 }

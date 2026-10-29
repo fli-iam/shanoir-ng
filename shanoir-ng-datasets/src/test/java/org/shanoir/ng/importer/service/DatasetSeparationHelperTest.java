@@ -14,8 +14,10 @@
 
 package org.shanoir.ng.importer.service;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
@@ -84,6 +86,33 @@ class DatasetSeparationHelperTest {
         Set<EchoTime> incoming = DatasetSeparationHelper.echoTimesForDatasetSeparation(acquisition, slice);
 
         assertNotEquals(key(stored), key(incoming));
+    }
+
+    @Test
+    void seriesWithoutOrientationMatchesItsStoredDataset() {
+        // a stored dataset without orientation is read back as null
+        SerieToDatasetsSeparator stored = new SerieToDatasetsSeparator(1, Set.of(), null);
+        Attributes slice = new Attributes();
+        slice.setInt(Tag.AcquisitionNumber, VR.IS, 1);
+
+        double[] incomingOrientation = DatasetSeparationHelper.imageOrientationForDatasetSeparation(slice);
+        SerieToDatasetsSeparator incoming = new SerieToDatasetsSeparator(1, Set.of(), incomingOrientation);
+
+        assertNull(incomingOrientation);
+        assertEquals(stored, incoming);
+    }
+
+    @Test
+    void orientationOfAnInstanceIsKeptAndDoesNotMatchADatasetWithoutOne() {
+        Attributes slice = slice();
+
+        double[] incomingOrientation = DatasetSeparationHelper.imageOrientationForDatasetSeparation(slice);
+
+        assertArrayEquals(IOP, incomingOrientation);
+        assertNotEquals(new SerieToDatasetsSeparator(1, Set.of(), null),
+                new SerieToDatasetsSeparator(1, Set.of(), incomingOrientation));
+        assertNotEquals(new SerieToDatasetsSeparator(1, Set.of(), incomingOrientation),
+                new SerieToDatasetsSeparator(1, Set.of(), null));
     }
 
     private static void assertSameKey(Set<EchoTime> stored, Set<EchoTime> incoming) {
