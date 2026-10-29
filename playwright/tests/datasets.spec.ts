@@ -65,11 +65,12 @@ test('expert-subject-examination-create-delete', async ({ page }) => {
   await page.locator('.list > div:nth-child(2)').click();
   await expect(page.getByRole('list').filter({ hasText: 'Subject type Patient' }).getByPlaceholder('Select an option...')).toBeVisible();
   
-  const studyItem = page.getByRole('listitem').filter({ hasText: 'Study' });
-  await studyItem.getByPlaceholder('Select an option...').click();
-  const studyOption = page.locator('.list > div').filter({ hasText: 'playwright-test-study-draft-create-' + randomString });
-  await expect(studyOption).toBeVisible();
-  await studyOption.click();
+  const studyBox = page.locator('select-box[formcontrolname="study"]');
+  await studyBox.locator('input.label').fill('playwright-test-study-draft-create-' + randomString);
+  const studyOption = studyBox.locator('.list .option', { hasText: 'playwright-test-study-draft-create-' + randomString });
+  await expect(studyOption.first()).toBeVisible({ timeout: 15000 });
+  await studyOption.first().click();
+
   await page.getByRole('button', { name: 'Save' }).click();
   await expect(page.getByRole('heading')).toContainText('Details on subject');
   await expect(page.getByRole('link', { name: 'playwright-test-subject-create-' + randomString })).toBeVisible();
