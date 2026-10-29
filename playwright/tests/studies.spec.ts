@@ -34,7 +34,6 @@ test('admin-center-study-create', async ({ page }) => {
   await page.getByRole('radio').nth(1).check();
   // add center to study
   await page.getByRole('listitem', { name: 'At least one center is' }).click();
-await page.getByRole('listitem', { name: 'At least one center is' }).click();
   await page.getByRole('textbox', { name: 'Select a center' }).click();
   await page.getByText('center-' + randomStringAdmin).first().click();
   await page.locator('.commands > span:nth-child(3) > .fas').click();
@@ -56,7 +55,7 @@ test('expert-study-create-edit-delete', async ({ page }) => {
   await page.getByText('Studies', { exact: true }).click();
   await page.getByRole('button', { name: '+ New' }).click();
   await page.getByRole('textbox').first().click();
-  await page.getByRole('textbox').first().fill('playwright-test-study-draft-create-' + randomStringExpert);
+  await page.getByRole('textbox').first().fill('study-draft-' + randomStringExpert);
   await page.getByRole('listitem').filter({ hasText: 'Start date' }).getByRole('textbox').fill('2026-10-01');
   await page.getByRole('listitem').filter({ hasText: 'End date' }).getByRole('textbox').fill('2026-10-31');
   // select pseudo profile
@@ -70,9 +69,10 @@ test('expert-study-create-edit-delete', async ({ page }) => {
   // add center to study
   await page.getByRole('listitem', { name: 'At least one center is' }).click();
   await page.getByRole('textbox', { name: 'Select a center' }).click();
-  await page.getByText('CHU Rennes').click();
+  await page.getByText('center-' + randomStringAdmin).first().click();
   await page.locator('.commands > span:nth-child(3) > .fas').click();
-  await expect(page.locator('form')).toContainText('CHU Rennes');
+  await expect(page.locator('form')).toContainText('center-' + randomStringAdmin);
+  
   await page.getByRole('button', { name: 'Save' }).click();
   await page.getByRole('button', { name: 'No' }).click();
   await expect(page.getByRole('heading')).toContainText('Details on study', { timeout: 15000});
@@ -86,7 +86,7 @@ test('expert-study-create-edit-delete', async ({ page }) => {
   await page.getByText(/Draft\s*Studies\s*\d+/).click();
   const studyRow = page
     .locator('form')
-    .filter({ hasText: 'User ' + process.env.EXPERT_NAME + ' Study playwright-test-study-draft-create-' + randomStringExpert });
+    .filter({ hasText: 'User ' + process.env.EXPERT_NAME + ' Study study-draft-' + randomStringExpert });
   await studyRow.getByRole('button').click();   // opens a dialog
   await page.getByRole('button', { name: 'OK' }).click();
   const dialog = page.getByRole('dialog');
@@ -102,7 +102,7 @@ test('expert-study-create-edit-delete', async ({ page }) => {
   await page.getByRole('cell', { name: 'My Studies Studies you' }).click();
 
   // role-expert: add member with can_admin rights
-  await page.getByRole('link', { name: 'playwright-test-study-draft-create-' + randomStringExpert }).click();
+  await page.getByRole('link', { name: 'study-draft-' + randomStringExpert }).click();
   await page.getByRole('button', { name: 'Edit' }).click();
   await page.getByRole('listitem').filter({ hasText: 'Members' }).click();
   await page.getByRole('textbox', { name: 'email address / username' }).click();
@@ -119,7 +119,7 @@ test('expert-study-create-edit-delete', async ({ page }) => {
   // role-expert: test add protocol file
   await page.getByText('Medical data').click();
   await page.getByText('Studies', { exact: true }).click();
-  await page.getByRole('link', { name: 'playwright-test-study-draft-create-' + randomStringExpert }).click();
+  await page.getByRole('link', { name: 'study-draft-' + randomStringExpert }).click();
   await page.getByRole('button', { name: 'Edit' }).click();
   await page.getByText('Files', { exact: true }).click();
   await page.getByRole('button', { name: 'Upload a new file' }).click();
@@ -180,7 +180,7 @@ test('expert-equipment-create-delete', async ({ page }) => {
   await expect(acqCenterOption).toBeVisible();
   await acqCenterOption.click();
   await page.locator('#serialNumber').click();
-  await page.locator('#serialNumber').fill('serial-number' + randomStringExpert);
+  await page.locator('#serialNumber').fill('serial-number-' + randomStringExpert);
   await page.getByRole('button', { name: 'Save' }).click();
   await expect(page.getByRole('heading')).toContainText('Details on center equipment');
   await expect(page.locator('ol')).toContainText('Philips Medical Systems');
@@ -230,25 +230,63 @@ test('expert-coil-create-delete', async ({ page }) => {
 test('expert-study-card-create-delete', async ({ page }) => {
   await login(page, 'EXPERT');
 
+  // center create
+  await page.getByText('Medical configuration').click();
+  await page.getByText('Acquisition centers').click();
+  await page.getByRole('button', { name: '+ New' }).click();
+  await page.locator('#name').click();
+  await page.locator('#name').fill('center-' + randomStringExpert);
+  await page.getByRole('button', { name: 'Save' }).click();
+  await expect(page.getByRole('heading')).toContainText('Details on acquisition center', { timeout: 10000});
+  await expect(page.locator('ol')).toContainText('center-' + randomStringExpert);
+
+  // equipment create
+  await page.getByText('Center equipments').click();
+  await page.getByRole('button', { name: '+ New' }).click();
+  await page.locator('.button.new-file').click();
+  await page.locator('.button.new-file').click();
+  // manufacturer create
+  await page.locator('#name').click();
+  await page.locator('#name').fill('manufacturer-' + randomStringExpert);
+  await page.getByRole('button', { name: 'Save' }).click();
+  // manufacturer model create
+  await page.getByRole('listitem').filter({ hasText: 'Modality type Mr' }).getByPlaceholder('Select an option...').click();
+  await page.locator('#name').click();
+  await page.locator('#name').fill('model-name-' + randomStringExpert);
+  await page.locator('#magneticField').click();
+  await page.locator('#magneticField').fill('3');
+  await page.getByRole('button', { name: 'Save' }).click();
+  // equipment create
+  await page.locator('select-box').filter({ hasText: 'Select an option...' }).click();
+  await page.getByText('center-' + randomStringExpert).click();
+  await page.locator('#serialNumber').click();
+  await page.locator('#serialNumber').fill('serial-number-' + randomStringExpert);
+  await page.getByRole('button', { name: 'Save' }).click();
+  
   await page.getByText('Medical configuration').click();
   await page.getByText('Study cards').click();
   await expect(page.getByRole('heading')).toContainText('Manage study cards');
-  await expect(page.locator('tbody')).toContainText('Columns settings');
+  await expect(page.locator('tbody')).toContainText('Columns settings', { timeout: 15000});
   await expect(page.getByText('Columns settings')).toBeVisible();
   await page.getByRole('button', { name: '+ New' }).click();
   await page.getByRole('listitem').filter({ hasText: 'Name' }).getByRole('textbox').click();
-  await page.getByRole('listitem').filter({ hasText: 'Name' }).getByRole('textbox').fill('playwright-test-study-card-create-delete-' + randomStringExpert);
+  await page.getByRole('listitem').filter({ hasText: 'Name' }).getByRole('textbox').fill('study-card-' + randomStringExpert);
   await page.getByRole('textbox', { name: 'Select an option...' }).click();
   
-  await page.locator('select-box').filter({ hasText: 'Select an option... BCAN' }).click();
+  const studyBoxExam = page.locator('select-box[formcontrolname="study"]');
+  await studyBoxExam.locator('input.label').fill('study-draft-');
+  const studyOptionExam = studyBoxExam.locator('.list .option', { hasText: 'study-draft-' });
+  await expect(studyOptionExam.first()).toBeVisible({ timeout: 15000 });
+  await studyOptionExam.first().click();
+
   await page.getByRole('listitem').filter({ hasText: 'Center equipment Select an' }).getByPlaceholder('Select an option...').click();
-  await page.locator('select-box').filter({ hasText: 'Select an option... Philips' }).click();
+  await page.locator('select-box').filter({ hasText: 'Select an option... model-name-' + randomStringExpert }).click();
   
   await page.getByRole('button', { name: 'Save' }).click();
   await expect(page.getByRole('heading', { name: 'Details on study card' })).toBeVisible();
   await expect(page.getByRole('heading')).toContainText('Details on study card');
   await expect(page.locator('ol')).toContainText('Study');
-  await expect(page.locator('ol')).toContainText('playwright-test-study-card-create-delete-' + randomStringExpert);
+  await expect(page.locator('ol')).toContainText('study-card-' + randomStringExpert);
   await expect(page.locator('legend')).toContainText('Rules');
   await page.getByRole('button', { name: 'Delete' }).click();
   await page.getByRole('button', { name: 'OK' }).click();
