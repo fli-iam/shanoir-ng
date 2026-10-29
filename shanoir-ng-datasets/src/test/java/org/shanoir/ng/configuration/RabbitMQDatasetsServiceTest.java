@@ -32,6 +32,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -39,9 +40,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.shanoir.ng.bids.service.BIDSService;
+import org.shanoir.ng.dataset.repository.DatasetRepository;
+import org.shanoir.ng.dataset.security.DatasetSecurityService;
+import org.shanoir.ng.dataset.service.CsvCopyService;
+import org.shanoir.ng.dataset.service.DatasetCopyService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;
+import org.shanoir.ng.importer.service.ImporterMailService;
+import org.shanoir.ng.shared.dataset.RelatedDataset;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
@@ -49,6 +56,7 @@ import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.service.SubjectService;
+import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.studycard.repository.QualityCardRepository;
 import org.shanoir.ng.studycard.repository.StudyCardRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
@@ -94,6 +102,24 @@ class RabbitMQDatasetsServiceTest {
 
     @Mock
     private ObjectMapper objectMapper;
+
+    @Mock
+    private DatasetSecurityService securityService;
+
+    @Mock
+    private DatasetRepository datasetRepository;
+
+    @Mock
+    private DatasetCopyService datasetCopyService;
+
+    @Mock
+    private CsvCopyService csvCopyService;
+
+    @Mock
+    private SolrService solrService;
+
+    @Mock
+    private ImporterMailService importerMailService;
 
     @InjectMocks
     private RabbitMQDatasetsService rabbitMQDatasetsService;
@@ -239,6 +265,72 @@ class RabbitMQDatasetsServiceTest {
         exam.setId(id);
         exam.setStudy(study);
         return exam;
+    }
+
+    @Test
+    void copyDatasetsToStudySendsOneMailForTheCopiedDatasets() throws Exception {
+        // GIVEN two datasets to copy, both landing in the same new examination
+        givenCopyRequest(List.of(1L, 2L));
+        when(datasetRepository.existsBySourceIdAndStudyId(any(), eq(STUDY_ID))).thenReturn(0);
+        DatasetCopyService.DatasetCopyResult first = copyResult(501L);
+        DatasetCopyService.DatasetCopyResult second = copyResult(502L);
+        when(datasetCopyService.moveDataset(eq(1L), eq(STUDY_ID), any(), any(), any(), eq(REQUESTING_USER_ID))).thenReturn(first);
+        when(datasetCopyService.moveDataset(eq(2L), eq(STUDY_ID), any(), any(), any(), eq(REQUESTING_USER_ID))).thenReturn(second);
+
+        // WHEN the copy runs
+        rabbitMQDatasetsService.copyDatasetsToStudy("{}");
+
+        // THEN the target study members are notified once, for both datasets and their examination
+        verify(importerMailService).sendDatasetsCopiedEmail(STUDY_ID, 2, List.of(EXAM_ID), REQUESTING_USER_ID);
+    }
+
+    @Test
+    void copyDatasetsToStudyDoesNotSendMailWhenNothingWasCopied() throws Exception {
+        // GIVEN a dataset already existing in the target study
+        givenCopyRequest(List.of(1L));
+        when(datasetRepository.existsBySourceIdAndStudyId(1L, STUDY_ID)).thenReturn(1);
+
+        rabbitMQDatasetsService.copyDatasetsToStudy("{}");
+
+        verify(importerMailService, never()).sendDatasetsCopiedEmail(any(), any(Integer.class), any(), any());
+    }
+
+    @Test
+    void copyDatasetsToStudyStillSucceedsWhenMailFails() throws Exception {
+        // GIVEN a copy whose notification fails
+        givenCopyRequest(List.of(1L));
+        when(datasetRepository.existsBySourceIdAndStudyId(1L, STUDY_ID)).thenReturn(0);
+        DatasetCopyService.DatasetCopyResult result = copyResult(501L);
+        when(datasetCopyService.moveDataset(eq(1L), eq(STUDY_ID), any(), any(), any(), eq(REQUESTING_USER_ID))).thenReturn(result);
+        doThrow(new RuntimeException("rabbit down")).when(importerMailService)
+                .sendDatasetsCopiedEmail(any(), any(Integer.class), any(), any());
+
+        // WHEN the copy runs, THEN no exception escapes and the datasets are still indexed
+        rabbitMQDatasetsService.copyDatasetsToStudy("{}");
+
+        verify(solrService).indexDatasets(List.of(501L));
+    }
+
+    private void givenCopyRequest(List<Long> datasetIds) throws Exception {
+        RelatedDataset dto = new RelatedDataset();
+        dto.setStudyId(STUDY_ID);
+        dto.setDatasetIds(new ArrayList<>(datasetIds));
+        dto.setUserId(REQUESTING_USER_ID);
+        dto.setUserRole(KeycloakUtil.UserRole.USER);
+        dto.setEventId(7L);
+        when(objectMapper.readValue(anyString(), eq(RelatedDataset.class))).thenReturn(dto);
+        when(objectMapper.writeValueAsString(any())).thenReturn("{}");
+        when(securityService.checkDatasetRelatedDatasets(any(), eq(REQUESTING_USER_ID), eq(KeycloakUtil.UserRole.USER))).thenReturn(true);
+    }
+
+    private DatasetCopyService.DatasetCopyResult copyResult(Long newDatasetId) {
+        DatasetCopyService.DatasetCopyResult result = mock(DatasetCopyService.DatasetCopyResult.class);
+        when(result.getNewDsId()).thenReturn(newDatasetId);
+        when(result.getExaminationId()).thenReturn(EXAM_ID);
+        when(result.getCenterId()).thenReturn(1L);
+        when(result.getSubjectId()).thenReturn(SUBJECT_ID);
+        when(result.getCountSuccess()).thenReturn(1);
+        return result;
     }
 
 }

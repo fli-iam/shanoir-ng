@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -426,7 +427,9 @@ public class ExaminationServiceImpl implements ExaminationService {
         examinationDb.setDataReuseAgreement(examination.getDataReuseAgreement());
         examinationDb.setSubjectWeight(examination.getSubjectWeight());
         examinationDb.setWeightUnitOfMeasure(examination.getWeightUnitOfMeasure());
-        examinationDb.setExtraDataFilePathList(examination.getExtraDataFilePathList());
+        examinationDb.setExtraDataFilePathList(examination.getExtraDataFilePathList() != null
+                ? examination.getExtraDataFilePathList().stream().distinct().collect(Collectors.toList())
+                : null);
         examinationDb.setInstrumentBasedAssessmentList(examination.getInstrumentBasedAssessmentList());
         return examinationDb;
     }

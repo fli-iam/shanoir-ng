@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.shanoir.ng.examination.dto.ExaminationDTO;
+import org.shanoir.ng.examination.dto.ExtraDataUploadResultDTO;
 import org.shanoir.ng.shared.dto.FileEntryDTO;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.RestServiceException;
@@ -35,6 +36,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -182,6 +184,20 @@ public interface ExaminationApi {
             @Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
             @Parameter(description = "file to upload", required = true) @Valid @RequestBody MultipartFile file) throws RestServiceException;
 
+    @Operation(summary = "", description = "Add several extra data files to an examination and notify the study members")
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "upload done, see the result for each file"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "404", description = "examination not found"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @PostMapping(value = "extra-data-upload/{examinationId}/multi",
+            produces = { "application/json" },
+            consumes = { "multipart/form-data" })
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_IMPORT'))")
+    ResponseEntity<ExtraDataUploadResultDTO> addExtraDataFiles(
+            @Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
+            @Parameter(description = "files to upload", required = true) @RequestParam("files") List<MultipartFile> files) throws RestServiceException;
+
     @Operation(summary = "", description = "Create an examination and add extra data")
     @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "examination created and data added"),
             @ApiResponse(responseCode = "401", description = "unauthorized"),
@@ -218,7 +234,7 @@ public interface ExaminationApi {
             @ApiResponse(responseCode = "422", description = "bad parameters"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
     @GetMapping(value = "extra-data-download/{examinationId}/{fileName:.+}/")
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_SEE_ALL'))")
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_DOWNLOAD'))")
     void downloadExtraData(
             @Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
             @Parameter(description = "file to download", required = true) @PathVariable("fileName") String fileName, HttpServletResponse response) throws RestServiceException, IOException;

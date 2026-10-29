@@ -75,7 +75,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <node
                         label="{{ file }}"
                         awesome="fas fa-file"
-                        [buttonPicto]="'fas fa-download'"
+                        [buttonPicto]="node.canDownload ? 'fas fa-download' : null"
                         (buttonClick)="downloadFile(file)"
                         [hasChildren]="false"></node>
                 }

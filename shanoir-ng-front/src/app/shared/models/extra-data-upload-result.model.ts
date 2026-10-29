@@ -12,28 +12,9 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.email.model;
-
-public class DatasetDetail {
-
-    private String url;
-
-    private String name;
-
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
+/** Result of a multi-file extra data upload on an examination or a dataset acquisition. */
+export interface ExtraDataUploadResult {
+    uploaded: string[];
+    skipped: string[];
+    failed: string[];
 }

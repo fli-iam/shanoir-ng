@@ -28,12 +28,14 @@ import java.util.Map.Entry;
 import java.util.Optional;
 
 import org.shanoir.ng.accessrequest.model.AccessRequest;
-import org.shanoir.ng.email.model.DatasetDetail;
+import org.shanoir.ng.email.model.EmailEntityLink;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.email.DuaDraftWrapper;
 import org.shanoir.ng.shared.email.EmailDatasetImportFailed;
+import org.shanoir.ng.shared.email.EmailDatasetsCopied;
 import org.shanoir.ng.shared.email.EmailDatasetsImported;
+import org.shanoir.ng.shared.email.EmailExtraDataAdded;
 import org.shanoir.ng.shared.email.EmailStudy;
 import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
 import org.shanoir.ng.shared.email.StudyInvitationEmail;
@@ -106,6 +108,16 @@ public class EmailServiceImpl implements EmailService {
     private static final String QUALITY_CARDS = "quality_cards";
 
     private static final String SERIES = "series";
+
+    private static final String ACQUISITION = "acquisition";
+
+    private static final String FILE_NAMES = "fileNames";
+
+    private static final String DATASET_COUNT = "datasetCount";
+
+    private static final String EXAMINATIONS = "examinations";
+
+    private static final String MORE_EXAMINATIONS = "moreExaminations";
 
     private static final String MOTIVATION = "motivation";
 
@@ -598,15 +610,15 @@ public class EmailServiceImpl implements EmailService {
         // Get the list of recipients
         List<User> admins = (List<User>) this.userRepository.findAllById(generatedMail.getRecipients());
 
-        List<DatasetDetail> datasetLinks = new ArrayList<>();
+        List<EmailEntityLink> datasetLinks = new ArrayList<>();
         for (Entry<Long, String> dataset :  generatedMail.getDatasets().entrySet()) {
-            DatasetDetail detail = new DatasetDetail();
+            EmailEntityLink detail = new EmailEntityLink();
             detail.setName(dataset.getValue());
             detail.setUrl(this.shanoirServerAddress + "dataset/details/" + dataset.getKey());
             datasetLinks.add(detail);
         }
 
-        DatasetDetail examDetail = new DatasetDetail();
+        EmailEntityLink examDetail = new EmailEntityLink();
         examDetail.setName(generatedMail.getExaminationId());
         examDetail.setUrl(shanoirServerAddress + "examination/details/" + generatedMail.getExaminationId());
 
@@ -639,6 +651,96 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
+    public void notifyStudyMembersDatasetsCopied(EmailDatasetsCopied generatedMail) {
+        // Find user that copied the datasets
+        User u = userRepository.findById(generatedMail.getUserId()).orElse(null);
+        String username = u != null ? u.getUsername() : "unknown";
+
+        // Get the list of recipients
+        List<User> recipients = (List<User>) this.userRepository.findAllById(generatedMail.getRecipients());
+
+        List<EmailEntityLink> examinationLinks = new ArrayList<>();
+        if (generatedMail.getExaminations() != null) {
+            for (Entry<Long, String> examination : generatedMail.getExaminations().entrySet()) {
+                EmailEntityLink emailLink = new EmailEntityLink();
+                emailLink.setName(examination.getValue());
+                emailLink.setUrl(shanoirServerAddress + "examination/details/" + examination.getKey());
+                examinationLinks.add(emailLink);
+            }
+        }
+        int moreExaminations = Math.max(0, generatedMail.getTotalExaminations() - examinationLinks.size());
+
+        for (User recipient : recipients) {
+            MimeMessagePreparator messagePreparator = mimeMessage -> {
+                final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+                this.setFromAdministrator(messageHelper);
+                messageHelper.setTo(recipient.getEmail());
+                messageHelper.setSubject(subject("New datasets copied to " + generatedMail.getStudyName()));
+                final Map<String, Object> variables = new HashMap<>();
+                variables.put(LASTNAME, recipient.getLastName());
+                variables.put(FIRSTNAME, recipient.getFirstName());
+                variables.put(USERNAME, username);
+                variables.put(STUDY_NAME, generatedMail.getStudyName());
+                variables.put(STUDY_ADDRESS, shanoirServerAddress + "study/details/" + generatedMail.getStudyId());
+                variables.put(DATASET_COUNT, generatedMail.getCopiedDatasetCount());
+                variables.put(EXAMINATIONS, examinationLinks);
+                variables.put(MORE_EXAMINATIONS, moreExaminations);
+                variables.put(SERVER_ADDRESS, shanoirServerAddress);
+                final String content = build("notifyStudyMembersDatasetsCopied", variables);
+                messageHelper.setText(content, true);
+            };
+            // Send the message
+            LOG.info("Sending datasets copied mail to {} for study {}", recipient.getUsername(), generatedMail.getStudyId());
+            mailSender.send(messagePreparator);
+        }
+    }
+
+    @Override
+    public void notifyStudyMembersExtraDataAdded(EmailExtraDataAdded generatedMail) {
+        // Find user that added the files
+        User u = userRepository.findById(generatedMail.getUserId()).orElse(null);
+        String username = u != null ? u.getUsername() : "unknown";
+
+        // Get the list of recipients
+        List<User> recipients = (List<User>) this.userRepository.findAllById(generatedMail.getRecipients());
+
+        EmailEntityLink examDetail = new EmailEntityLink();
+        examDetail.setName(generatedMail.getExaminationId());
+        examDetail.setUrl(shanoirServerAddress + "examination/details/" + generatedMail.getExaminationId());
+
+        EmailEntityLink acquisitionDetail = new EmailEntityLink();
+        if (generatedMail.getDatasetAcquisitionId() != null) {
+            acquisitionDetail.setName(generatedMail.getDatasetAcquisitionId());
+            acquisitionDetail.setUrl(shanoirServerAddress + "dataset-acquisition/details/" + generatedMail.getDatasetAcquisitionId());
+        }
+
+        for (User recipient : recipients) {
+            MimeMessagePreparator messagePreparator = mimeMessage -> {
+                final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+                this.setFromAdministrator(messageHelper);
+                messageHelper.setTo(recipient.getEmail());
+                messageHelper.setSubject(subject("New extra data added to " + generatedMail.getStudyName()));
+                final Map<String, Object> variables = new HashMap<>();
+                variables.put(LASTNAME, recipient.getLastName());
+                variables.put(FIRSTNAME, recipient.getFirstName());
+                variables.put(USERNAME, username);
+                variables.put(STUDY_NAME, generatedMail.getStudyName());
+                variables.put(SUBJECT, generatedMail.getSubjectName());
+                variables.put(EXAMINATION, examDetail);
+                variables.put(EXAM_DATE, generatedMail.getExamDate());
+                variables.put(ACQUISITION, acquisitionDetail);
+                variables.put(FILE_NAMES, generatedMail.getFileNames());
+                variables.put(SERVER_ADDRESS, shanoirServerAddress);
+                final String content = build("notifyStudyMembersExtraDataAdded", variables);
+                messageHelper.setText(content, true);
+            };
+            // Send the message
+            LOG.info("Sending extra data mail to {} for study {}", recipient.getUsername(), generatedMail.getStudyId());
+            mailSender.send(messagePreparator);
+        }
+    }
+
+    @Override
     public void notifyStudyManagerImportFailure(EmailDatasetImportFailed generatedMail) {
         // Find user that imported
         User u = userRepository.findById(generatedMail.getUserId()).orElse(null);
@@ -646,7 +748,7 @@ public class EmailServiceImpl implements EmailService {
         // Get the list of recipients
         List<User> admins = (List<User>) this.userRepository.findAllById(generatedMail.getRecipients());
 
-        DatasetDetail examDetail = new DatasetDetail();
+        EmailEntityLink examDetail = new EmailEntityLink();
         examDetail.setName(generatedMail.getExaminationId());
         examDetail.setUrl(shanoirServerAddress + "examination/details/" + generatedMail.getExaminationId());
 
@@ -824,7 +926,7 @@ public class EmailServiceImpl implements EmailService {
 
     /**
      * Notify a user its study request was refused
-     * @param accessRequest the access request
+     * @param refusedRequest the refused access request
      */
     public void notifyUserRefusedFromStudy(AccessRequest refusedRequest) {
         User user = refusedRequest.getUser();
