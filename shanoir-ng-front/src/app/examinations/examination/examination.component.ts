@@ -321,8 +321,8 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
         EntityComponent.mapFormToEntity(this.entity, this.form);
         const creation: boolean = this.mode == 'create';
         const request: Promise<Examination> = creation
-            ? this.examinationService.createWithFiles(this.examination, this.files)
-            : this.examinationService.updateWithFiles(this.examination.id, this.examination, this.files).then(() => this.examination);
+            ? this.examinationService.create(this.examination, this.files)
+            : this.examinationService.update(this.examination.id, this.examination, this.files).then(() => this.examination);
         return request.then(exam => {
             this.entity.id = exam.id;
             this.onSave.next(exam);

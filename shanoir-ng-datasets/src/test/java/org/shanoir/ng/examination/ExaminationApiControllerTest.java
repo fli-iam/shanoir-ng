@@ -27,6 +27,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.lang.reflect.Method;
 
@@ -48,6 +49,7 @@ import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.paging.PageImpl;
+import org.shanoir.ng.storage.StorageException;
 import org.shanoir.ng.storage.StorageService;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
@@ -63,12 +65,15 @@ import org.springframework.core.io.Resource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -216,7 +221,7 @@ public class ExaminationApiControllerTest {
         exam.setSubject(new Subject(1L, "1"));
         given(examinationMapperMock.examinationDTOToExaminationIdRelations(Mockito.any())).willReturn(exam);
         given(examinationServiceMock.findById(1L)).willReturn(exam);
-        given(examinationServiceMock.save(Mockito.any())).willReturn(exam);
+        given(examinationServiceMock.saveWithExtraData(Mockito.any(), Mockito.anyList())).willReturn(exam);
 
         mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(ModelsUtil.createExamination())))
@@ -240,9 +245,48 @@ public class ExaminationApiControllerTest {
     @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
     public void updateExaminationTest() throws Exception {
         given(examinationServiceMock.findById(1L)).willReturn(ModelsUtil.createExamination(1L));
-        mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(ModelsUtil.createExamination(1L))))
+        mvc.perform(MockMvcRequestBuilders.multipart(HttpMethod.PUT, REQUEST_PATH_WITH_ID)
+                .file(new MockMultipartFile("examination", "", MediaType.APPLICATION_JSON_VALUE, objectMapper.writeValueAsBytes(ModelsUtil.createExamination(1L)))))
                 .andExpect(status().isNoContent());
+        // without files: plain update, nothing to store
+        Mockito.verify(examinationServiceMock).updateWithExtraData(Mockito.any(), Mockito.eq(List.of()));
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void updateExaminationWithFilesStorageFailureTest() throws Exception {
+        given(examinationServiceMock.updateWithExtraData(Mockito.any(), Mockito.anyList())).willThrow(new StorageException("storage down", null));
+        mvc.perform(MockMvcRequestBuilders.multipart(HttpMethod.PUT, REQUEST_PATH_WITH_ID)
+                .file(new MockMultipartFile("examination", "", MediaType.APPLICATION_JSON_VALUE, objectMapper.writeValueAsBytes(ModelsUtil.createExamination(1L))))
+                .file(new MockMultipartFile("files", "a.txt", MediaType.TEXT_PLAIN_VALUE, "a".getBytes())))
+                .andExpect(status().isInternalServerError());
+        // examination not updated => no event, no mail
+        Mockito.verifyNoInteractions(eventService, importerMailService);
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void saveNewExaminationWithFilesTest() throws Exception {
+        Examination exam = new Examination();
+        exam.setId(123L);
+        exam.setStudy(new Study());
+        exam.getStudy().setId(3L);
+        exam.setSubject(new Subject(1L, "1"));
+        given(examinationMapperMock.examinationDTOToExaminationIdRelations(Mockito.any())).willReturn(exam);
+        given(examinationServiceMock.saveWithExtraData(Mockito.any(), Mockito.anyList())).willReturn(exam);
+
+        // the same URL as the JSON creation, as multipart with files
+        mvc.perform(MockMvcRequestBuilders.multipart(REQUEST_PATH)
+                .file(new MockMultipartFile("examination", "", MediaType.APPLICATION_JSON_VALUE, objectMapper.writeValueAsBytes(ModelsUtil.createExamination())))
+                .file(new MockMultipartFile("files", "a.txt", MediaType.TEXT_PLAIN_VALUE, "a".getBytes()))
+                .file(new MockMultipartFile("files", "b.txt", MediaType.TEXT_PLAIN_VALUE, "b".getBytes())))
+                .andExpect(status().isOk());
+
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<List<MultipartFile>> filesCaptor = ArgumentCaptor.forClass(List.class);
+        Mockito.verify(examinationServiceMock).saveWithExtraData(Mockito.eq(exam), filesCaptor.capture());
+        assertEquals(List.of("a.txt", "b.txt"), filesCaptor.getValue().stream().map(MultipartFile::getOriginalFilename).toList());
+        Mockito.verify(importerMailService).sendExtraDataEmail(exam, null, List.of("a.txt", "b.txt"), 12L);
     }
 
     @Test

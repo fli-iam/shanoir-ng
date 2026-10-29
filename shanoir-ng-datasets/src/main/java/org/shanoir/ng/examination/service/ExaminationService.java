@@ -165,7 +165,7 @@ public interface ExaminationService {
      * the examination is committed only if all the files have been successfully stored.
      *
      * @param examination  examination to create.
-     * @param files the extra data files to store.
+     * @param files the extra data files to store, can be empty.
      * @return created examination.
      * @throws StorageException if a file could not be stored (examination not created).
      */
@@ -189,7 +189,7 @@ public interface ExaminationService {
      * The files are stored first, as the update deletes the files removed from the list.
      *
      * @param examination  examination to update.
-     * @param files the new extra data files to store.
+     * @param files the new extra data files to store, can be empty.
      * @return updated examination.
      * @throws ShanoirException if a file already exists (422) or the update is refused.
      * @throws StorageException if a file could not be stored (examination not updated).

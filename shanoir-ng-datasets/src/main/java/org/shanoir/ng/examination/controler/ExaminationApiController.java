@@ -176,40 +176,25 @@ public class ExaminationApiController implements ExaminationApi {
     public ResponseEntity<ExaminationDTO> saveNewExamination(
             @Parameter(description = "the examination to create", required = true) @RequestBody @Valid final ExaminationDTO examinationDTO,
             final BindingResult result) throws RestServiceException {
-        examinationService.validate(result);
-        Examination examination = examinationMapper.examinationDTOToExaminationIdRelations(examinationDTO);
-        examinationService.generateStudyInstanceUID(examination);
-        try {
-            final Examination createdExamination = examinationService.save(examination);
-            LOG.info("New examination created: " + createdExamination.toString());
-            // NB: Message as centerId / subjectId is important in RabbitMQStudiesService
-            eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EXAMINATION_EVENT, createdExamination.getId().toString(), KeycloakUtil.getTokenUserId(), "centerId:" + createdExamination.getCenterId() + ";subjectId:" + (createdExamination.getSubject() != null ? createdExamination.getSubject().getId() : null), ShanoirEvent.SUCCESS, createdExamination.getStudyId()));
-            ExaminationDTO createdExaminationDTO = examinationMapper.examinationToExaminationDTOWithCopiesAndSourceAndStudyId(createdExamination);
-            return new ResponseEntity<>(createdExaminationDTO, HttpStatus.OK);
-        } catch (EntityNotFoundException e) {
-            throw new RestServiceException(
-                    e,
-                    new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
-                        "Couldn't create examination"
-                    )
-            );
-        }
+        // JSON creation (no files) = multipart creation without files
+        return saveNewExaminationWithExtraData(examinationDTO, result, null);
     }
 
     @Override
     public ResponseEntity<ExaminationDTO> saveNewExaminationWithExtraData(
             @Parameter(description = "the examination to create", required = true) @Valid @RequestPart("examination") final ExaminationDTO examinationDTO,
             final BindingResult result,
-            @Parameter(description = "extra data files to upload", required = true) @RequestPart("files") final List<MultipartFile> files) throws RestServiceException {
+            @Parameter(description = "extra data files to store") @RequestPart(value = "files", required = false) final List<MultipartFile> files) throws RestServiceException {
+        List<MultipartFile> filesToStore = files != null ? files : List.of();
         examinationService.validate(result);
         Examination examination = examinationMapper.examinationDTOToExaminationIdRelations(examinationDTO);
         examinationService.generateStudyInstanceUID(examination);
         try {
-            final Examination createdExamination = examinationService.saveWithExtraData(examination, files);
-            LOG.info("New examination created with {} extra data file(s): {}", files.size(), createdExamination);
+            final Examination createdExamination = examinationService.saveWithExtraData(examination, filesToStore);
+            LOG.info("New examination created with {} extra data file(s): {}", filesToStore.size(), createdExamination);
             // NB: Message as centerId / subjectId is important in RabbitMQStudiesService
             eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EXAMINATION_EVENT, createdExamination.getId().toString(), KeycloakUtil.getTokenUserId(), "centerId:" + createdExamination.getCenterId() + ";subjectId:" + (createdExamination.getSubject() != null ? createdExamination.getSubject().getId() : null), ShanoirEvent.SUCCESS, createdExamination.getStudyId()));
-            importerMailService.sendExtraDataEmail(createdExamination, null, files.stream().map(MultipartFile::getOriginalFilename).toList(), KeycloakUtil.getTokenUserId());
+            importerMailService.sendExtraDataEmail(createdExamination, null, filesToStore.stream().map(MultipartFile::getOriginalFilename).toList(), KeycloakUtil.getTokenUserId());
             ExaminationDTO createdExaminationDTO = examinationMapper.examinationToExaminationDTOWithCopiesAndSourceAndStudyId(createdExamination);
             return new ResponseEntity<>(createdExaminationDTO, HttpStatus.OK);
         } catch (EntityNotFoundException e) {
@@ -233,34 +218,17 @@ public class ExaminationApiController implements ExaminationApi {
     @Override
     public ResponseEntity<Void> updateExamination(
             @Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") final Long examinationId,
-            @Parameter(description = "the examination to update", required = true) @RequestBody @Valid final ExaminationDTO examination,
-            final BindingResult result) throws Exception {
-        /* Update examination in db. */
-        try {
-            examinationService.update(examinationMapper.examinationDTOToExaminationIdRelations(examination));
-            eventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_EXAMINATION_EVENT, examination.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, examination.getStudyId()));
-            rabbitTemplate.convertAndSend(RabbitMQConfiguration.RELOAD_BIDS, objectMapper.writeValueAsString(examination.getStudyId()));
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } catch (JsonProcessingException | EntityNotFoundException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } catch (ShanoirException e) {
-            throw new RestServiceException(new ErrorModel(e.getErrorCode(), e.getMessage()));
-        }
-    }
-
-    @Override
-    public ResponseEntity<Void> updateExaminationWithExtraData(
-            @Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") final Long examinationId,
             @Parameter(description = "the examination to update", required = true) @Valid @RequestPart("examination") final ExaminationDTO examination,
             final BindingResult result,
-            @Parameter(description = "new extra data files to upload", required = true) @RequestPart("files") final List<MultipartFile> files) throws RestServiceException {
+            @Parameter(description = "new extra data files to store") @RequestPart(value = "files", required = false) final List<MultipartFile> files) throws RestServiceException {
         examinationService.validate(result);
+        List<MultipartFile> filesToStore = files != null ? files : List.of();
         try {
-            Examination updatedExamination = examinationService.updateWithExtraData(examinationMapper.examinationDTOToExaminationIdRelations(examination), files);
-            LOG.info("Examination {} updated with {} new extra data file(s)", examinationId, files.size());
+            Examination updatedExamination = examinationService.updateWithExtraData(examinationMapper.examinationDTOToExaminationIdRelations(examination), filesToStore);
+            LOG.info("Examination {} updated with {} new extra data file(s)", examinationId, filesToStore.size());
             eventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_EXAMINATION_EVENT, examination.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, examination.getStudyId()));
             rabbitTemplate.convertAndSend(RabbitMQConfiguration.RELOAD_BIDS, objectMapper.writeValueAsString(examination.getStudyId()));
-            importerMailService.sendExtraDataEmail(updatedExamination, null, files.stream().map(MultipartFile::getOriginalFilename).toList(), KeycloakUtil.getTokenUserId());
+            importerMailService.sendExtraDataEmail(updatedExamination, null, filesToStore.stream().map(MultipartFile::getOriginalFilename).toList(), KeycloakUtil.getTokenUserId());
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (JsonProcessingException | EntityNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
