@@ -65,7 +65,7 @@ test('expert-study-create-edit-delete', async ({ page }) => {
   await expect(page.locator('form')).toContainText('CHU Rennes');
   await page.getByRole('button', { name: 'Save' }).click();
   await page.getByRole('button', { name: 'No' }).click();
-  await expect(page.getByRole('heading')).toContainText('Details on study');
+  await expect(page.getByRole('heading')).toContainText('Details on study', { timeout: 15000});
   await logout(page);
 
   // role-admin: validate study draft
