@@ -19,7 +19,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 
 import { ConsoleService } from '@app/shared/console/console.service';
 
-import mailSupplierBlacklists from '../../../assets/mail_supplier_blacklist.json';
 import * as AppUtils from '../../utils/app.utils';
 import { AccountRequestInfo } from '../account-request-info/account-request-info.model';
 import { User } from '../shared/user.model';
@@ -50,7 +49,7 @@ export class AccountRequestComponent implements OnInit {
     function: string; // optional : operator/researcher
     language: 'english' | 'french' = 'english';
     loading: boolean = false;
-    public mailSupplierBlacklistConfig: string = AppUtils.MAIL_SUPPLIER_BLACK_LIST;
+    public mailSupplierBlacklistConfig: string = AppUtils.SHANOIR_MAIL_SUPPLIER_BLACK_LIST;
     public mailSupplierBlacklist: string[] = [];
 
 
@@ -168,7 +167,7 @@ export class AccountRequestComponent implements OnInit {
 
     private loadMailSupplierBlackList() {
         if (this.mailSupplierBlacklistConfig) {
-            this.mailSupplierBlacklist = (mailSupplierBlacklists as Record<string, string[]>)[this.mailSupplierBlacklistConfig] || [];
+            this.mailSupplierBlacklist = this.mailSupplierBlacklistConfig.split(',').map(supplier => supplier.trim().toLowerCase()).filter(supplier => supplier.length);
         }
     }
 }
