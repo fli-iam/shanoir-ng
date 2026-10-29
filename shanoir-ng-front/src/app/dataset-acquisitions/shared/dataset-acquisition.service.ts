@@ -22,7 +22,6 @@ import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import { Page, Pageable } from '../../shared/components/table/pageable.model';
 import * as AppUtils from '../../utils/app.utils';
-import { ExtraDataUploadResult } from '../../shared/models/extra-data-upload-result.model';
 
 import {
     DatasetAcquisitionDatasetsDTO,
@@ -132,13 +131,17 @@ export class DatasetAcquisitionService extends EntityService<DatasetAcquisition>
         return JSON.stringify(dto, this.customReplacer);
     }
 
-    postFiles(filesToUpload: File[], acquisitionId: number): Promise<ExtraDataUploadResult> {
-        const endpoint = this.API_URL + '/extra-data-upload/' + acquisitionId + '/multi';
+    /**
+     * Updates the acquisition, with its new extra data files if any, in a single request:
+     * the acquisition is not updated if a file can't be stored.
+     */
+    update(id: number, entity: DatasetAcquisition, filesToUpload: File[] = []): Promise<void> {
         const formData: FormData = new FormData();
+        formData.append('datasetAcquisition', new Blob([this.stringify(entity)], { type: 'application/json' }));
         for (const file of filesToUpload) {
             formData.append('files', file, file.name);
         }
-        return firstValueFrom(this.http.post<ExtraDataUploadResult>(endpoint, formData));
+        return firstValueFrom(this.http.put<void>(this.API_URL + '/' + id, formData));
     }
 
     downloadFile(fileName: string, acquisitionId: number, state?: TaskState): Observable<TaskState> {

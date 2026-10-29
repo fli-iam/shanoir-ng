@@ -185,17 +185,31 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
         this.datasetAcquisitionService.downloadFile(file, this.datasetAcquisition.id, this.downloadState);
     }
 
+    /**
+     * - with new files: update + files in one request, nothing is saved if a file can't be stored
+     * - without new files: classic save
+     */
     public save(): Promise<DatasetAcquisition> {
-        return super.save(() => {
-            // Once the acquisition is saved, save associated extra-data files in a single request
-            if (!this.files?.length) return Promise.resolve();
-            return this.datasetAcquisitionService.postFiles(this.files, this.entity.id).then(result => {
-                // Skipped: a file with the same name already exists on the server; the existing one is kept.
-                result?.skipped?.forEach(fileName =>
-                    this.consoleService.log('warn', 'A file named "' + fileName + '" already exists on this acquisition and was not re-uploaded.'));
-                result?.failed?.forEach(fileName =>
-                    this.consoleService.log('error', 'The file "' + fileName + '" could not be uploaded to this acquisition.'));
-            });
-        });
+        if (!this.files?.length) return super.save();
+        return this.updateWithFiles();
+    }
+
+    /**
+     * Updates the acquisition with its new files in one request.
+     * Mirrors what the classic save does around the request (EntityComponent.save / modeSpecificSave).
+     */
+    private updateWithFiles(): Promise<DatasetAcquisition> {
+        this.footerState.loading = true;
+        EntityComponent.mapFormToEntity(this.entity, this.form);
+        return this.datasetAcquisitionService.update(this.entity.id, this.entity, this.files).then(() => {
+            this.onSave.next(this.entity);
+            this.chooseRouteAfterSave(this.entity);
+            this.consoleService.log('info', this.getRoutingName() + ' n°' + this.entity.id + ' successfully updated');
+            this.treeService.updateTree();
+            return this.entity;
+        }).catch(reason => {
+            this.catchSavingErrors(reason);
+            return null;
+        }).finally(() => this.footerState.loading = false);
     }
 }
