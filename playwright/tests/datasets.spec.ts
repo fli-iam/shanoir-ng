@@ -80,11 +80,11 @@ test('expert-subject-examination-create-delete', async ({ page }) => {
   await expect(page.getByRole('heading')).toContainText('Manage examinations');
   await page.getByRole('button', { name: '+ New' }).click();
 
-  const studyItem2 = page.getByRole('listitem').filter({ hasText: 'Study' });
-  await studyItem2.getByPlaceholder('Select an option...').click();
-  const studyOption2 = page.locator('.list > div').filter({ hasText: 'playwright-test-study-draft-create-' + randomString }).first();
-  await expect(studyOption2).toBeVisible();
-  await studyOption2.click();
+  const studyBoxExam = page.locator('select-box[formcontrolname="study"]');
+  await studyBoxExam.locator('input.label').fill('playwright-test-study-draft-create-' + randomString);
+  const studyOptionExam = studyBoxExam.locator('.list .option', { hasText: 'playwright-test-study-draft-create-' + randomString });
+  await expect(studyOptionExam.first()).toBeVisible({ timeout: 15000 });
+  await studyOptionExam.first().click();
 
   const subjectItem = page.getByRole('listitem').filter({ hasText: 'Subject' });
   await subjectItem.getByPlaceholder('Select an option...').click();
