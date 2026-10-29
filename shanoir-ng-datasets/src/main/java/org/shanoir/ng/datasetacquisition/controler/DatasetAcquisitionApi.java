@@ -19,7 +19,6 @@ import java.util.List;
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionWithDatasetsDTO;
 import org.shanoir.ng.datasetacquisition.dto.ExaminationDatasetAcquisitionDTO;
-import org.shanoir.ng.examination.dto.ExtraDataUploadResultDTO;
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.data.domain.Page;
@@ -36,6 +35,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -176,51 +176,22 @@ public interface DatasetAcquisitionApi {
     @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.checkDatasetAcquisitionDTOPage(returnObject.getBody(), 'CAN_SEE_ALL')")
     ResponseEntity<Page<DatasetAcquisitionDTO>> findDatasetAcquisitions(Pageable pageable) throws RestServiceException;
 
-    @Operation(summary = "", description = "Updates a datasetAcquisition")
+    @Operation(summary = "", description = "Updates a datasetAcquisition. If files are sent, they are stored first: the update is done only if all of them are stored")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "204", description = "datasetAcquisition updated"),
         @ApiResponse(responseCode = "401", description = "unauthorized"),
         @ApiResponse(responseCode = "403", description = "forbidden"),
-        @ApiResponse(responseCode = "422", description = "bad parameters"),
-        @ApiResponse(responseCode = "500", description = "unexpected error")})
+        @ApiResponse(responseCode = "404", description = "datasetAcquisition not found"),
+        @ApiResponse(responseCode = "422", description = "bad parameters or extra data file already existing"),
+        @ApiResponse(responseCode = "500", description = "unexpected error, datasetAcquisition not updated")})
     @RequestMapping(value = "/datasetacquisition/{datasetAcquisitionId}", produces = {"application/json"}, consumes = {
-        "application/json"}, method = RequestMethod.PUT)
+        "multipart/form-data"}, method = RequestMethod.PUT)
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and #datasetAcquisitionId == #datasetAcquisition.getId() and @datasetSecurityService.hasRightOnExamination(#datasetAcquisition.examination.id, 'CAN_ADMINISTRATE')")
     ResponseEntity<Void> updateDatasetAcquisition(
             @Parameter(description = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId,
-            @Parameter(description = "datasetAcquisition to update", required = true) @Valid @RequestBody DatasetAcquisitionDTO datasetAcquisition, BindingResult result)
+            @Parameter(description = "datasetAcquisition to update", required = true) @Valid @RequestPart("datasetAcquisition") DatasetAcquisitionDTO datasetAcquisition, BindingResult result,
+            @Parameter(description = "new extra data files to store") @RequestPart(value = "files", required = false) List<MultipartFile> files)
             throws RestServiceException;
-
-    @Operation(summary = "", description = "Add extra data to a dataset acquisition")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "extra data added"),
-        @ApiResponse(responseCode = "401", description = "unauthorized"),
-        @ApiResponse(responseCode = "403", description = "forbidden"),
-        @ApiResponse(responseCode = "409", description = "a file with the same name already exists"),
-        @ApiResponse(responseCode = "422", description = "bad parameters"),
-        @ApiResponse(responseCode = "500", description = "unexpected error")})
-    @PostMapping(value = "/datasetacquisition/extra-data-upload/{datasetAcquisitionId}",
-            produces = {"application/json"},
-            consumes = {"multipart/form-data"})
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnDatasetAcquisition(#datasetAcquisitionId, 'CAN_IMPORT'))")
-    ResponseEntity<Void> addExtraData(
-            @Parameter(description = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId,
-            @Parameter(description = "file to upload", required = true) @Valid @RequestBody MultipartFile file) throws RestServiceException;
-
-    @Operation(summary = "", description = "Add several extra data files to a dataset acquisition and notify the study members")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "upload done, see the result for each file"),
-        @ApiResponse(responseCode = "401", description = "unauthorized"),
-        @ApiResponse(responseCode = "403", description = "forbidden"),
-        @ApiResponse(responseCode = "404", description = "dataset acquisition not found"),
-        @ApiResponse(responseCode = "500", description = "unexpected error")})
-    @PostMapping(value = "/datasetacquisition/extra-data-upload/{datasetAcquisitionId}/multi",
-            produces = {"application/json"},
-            consumes = {"multipart/form-data"})
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnDatasetAcquisition(#datasetAcquisitionId, 'CAN_IMPORT'))")
-    ResponseEntity<ExtraDataUploadResultDTO> addExtraDataFiles(
-            @Parameter(description = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId,
-            @Parameter(description = "files to upload", required = true) @RequestParam("files") List<MultipartFile> files) throws RestServiceException;
 
     @Operation(summary = "", description = "Download extra data from a dataset acquisition")
     @ApiResponses(value = {

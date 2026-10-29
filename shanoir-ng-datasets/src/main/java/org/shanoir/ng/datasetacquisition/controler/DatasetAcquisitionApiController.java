@@ -31,7 +31,6 @@ import org.shanoir.ng.datasetacquisition.dto.mapper.ExaminationDatasetAcquisitio
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
-import org.shanoir.ng.examination.dto.ExtraDataUploadResultDTO;
 import org.shanoir.ng.importer.dto.EegImportJob;
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.service.EegImporterService;
@@ -70,7 +69,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -340,73 +339,29 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 
     @Override
     public ResponseEntity<Void> updateDatasetAcquisition(
-              Long datasetAcquisitionId,
-            @Parameter(description = "datasetAcquisition to update", required = true) @Valid @RequestBody DatasetAcquisitionDTO datasetAcquisition,
-            final BindingResult result) throws RestServiceException {
+            Long datasetAcquisitionId,
+            @Parameter(description = "datasetAcquisition to update", required = true) @Valid @RequestPart("datasetAcquisition") DatasetAcquisitionDTO datasetAcquisition,
+            final BindingResult result,
+            @Parameter(description = "new extra data files to store") @RequestPart(value = "files", required = false) List<MultipartFile> files) throws RestServiceException {
 
         validate(result);
+        List<MultipartFile> filesToStore = files != null ? files : List.of();
         try {
-            datasetAcquisitionService.update(dsAcqMapper.acquisitionDTOToAcquisitionIdRelations(datasetAcquisition));
+            DatasetAcquisition acquisition = datasetAcquisitionService.update(dsAcqMapper.acquisitionDTOToAcquisitionIdRelations(datasetAcquisition), filesToStore);
+            if (acquisition.getExamination() != null) {
+                importerMailService.sendExtraDataEmail(acquisition.getExamination(), datasetAcquisitionId,
+                        filesToStore.stream().map(MultipartFile::getOriginalFilename).toList(), KeycloakUtil.getTokenUserId());
+            }
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-
         } catch (EntityNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-    }
-
-    @Override
-    public ResponseEntity<Void> addExtraData(
-            @Parameter(description = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId,
-            @Parameter(description = "file to upload", required = true) @Valid @RequestBody MultipartFile file) throws RestServiceException {
-        try {
-            if (storageService.existsAcquisitionExtraData(datasetAcquisitionId, file.getOriginalFilename())) {
-                LOG.warn("Extra-data file {} already exists for dataset acquisition {}, upload rejected.",
-                        file.getOriginalFilename(), datasetAcquisitionId);
-                return new ResponseEntity<>(HttpStatus.CONFLICT);
-            }
         } catch (StorageException e) {
-            LOG.error("Error checking existing extra-data file {} for dataset acquisition {}",
-                    file.getOriginalFilename(), datasetAcquisitionId, e);
-            return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
+            LOG.error(e.getMessage());
+            throw new RestServiceException(e, new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "Couldn't store extra data files, dataset acquisition not updated"));
+        } catch (ShanoirException e) {
+            throw new RestServiceException(new ErrorModel(e.getErrorCode(), e.getMessage()));
         }
-        if (datasetAcquisitionService.addExtraData(datasetAcquisitionId, file) != null) {
-            return new ResponseEntity<>(HttpStatus.OK);
-        }
-        return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
-    }
-
-    @Override
-    public ResponseEntity<ExtraDataUploadResultDTO> addExtraDataFiles(
-            @Parameter(description = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId,
-            @Parameter(description = "files to upload", required = true) @RequestParam("files") List<MultipartFile> files) throws RestServiceException {
-        DatasetAcquisition acquisition = datasetAcquisitionService.findById(datasetAcquisitionId);
-        if (acquisition == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        ExtraDataUploadResultDTO result = new ExtraDataUploadResultDTO();
-        for (MultipartFile file : files) {
-            String fileName = file.getOriginalFilename();
-            try {
-                if (storageService.existsAcquisitionExtraData(datasetAcquisitionId, fileName)) {
-                    LOG.warn("Extra-data file {} already exists for dataset acquisition {}, upload skipped.", fileName, datasetAcquisitionId);
-                    result.getSkipped().add(fileName);
-                    continue;
-                }
-            } catch (StorageException e) {
-                LOG.error("Error checking existing extra-data file {} for dataset acquisition {}", fileName, datasetAcquisitionId, e);
-                result.getFailed().add(fileName);
-                continue;
-            }
-            if (datasetAcquisitionService.addExtraData(datasetAcquisitionId, file) != null) {
-                result.getUploaded().add(fileName);
-            } else {
-                result.getFailed().add(fileName);
-            }
-        }
-        if (acquisition.getExamination() != null) {
-            importerMailService.sendExtraDataEmail(acquisition.getExamination(), datasetAcquisitionId, result.getUploaded(), KeycloakUtil.getTokenUserId());
-        }
-        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     @Override
