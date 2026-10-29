@@ -16,7 +16,6 @@ package org.shanoir.ng.importer.service;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -24,7 +23,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
-import java.util.Objects;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -54,6 +52,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
+import org.springframework.util.FileSystemUtils;
 
 @Service
 @Scope("prototype")
@@ -95,11 +94,19 @@ public class ProcessedDatasetImporterService {
             return null;
         }
 
+        File dicomDirectory = null;
         try {
             Dataset dataset = createDataset(importJob);
 
             File processedDatasetFile = new File(importJob.getProcessedDatasetFilePath());
             Attributes attributes = checkIfDICOM(processedDatasetFile);
+            // Processed dataset can be a zip of DICOM files: we use the first slice to read the attributes
+            if (attributes == null && processedDatasetFile.getName().toLowerCase().endsWith(".zip")) {
+                dicomDirectory = extractDicomZip(processedDatasetFile);
+                if (dicomDirectory != null) {
+                    attributes = checkIfDICOM(dicomDirectory.listFiles()[0]);
+                }
+            }
 
             DatasetExpression expression = new DatasetExpression();
             expression.setDataset(dataset);
@@ -114,7 +121,11 @@ public class ProcessedDatasetImporterService {
                 expression.setDatasetExpressionFormat(DatasetExpressionFormat.DICOM);
                 datasetFile.setPacs(true);
                 datasetFile = dicomDatasetExpressionStrategy.setPath(attributes, datasetFile);
-                dicomWebService.sendDicomFileToPacs(processedDatasetFile);
+                if (dicomDirectory != null) {
+                    dicomWebService.sendDicomFilesToPacs(dicomDirectory);
+                } else {
+                    dicomWebService.sendDicomFileToPacs(processedDatasetFile);
+                }
             // Processed dataset: other, e.g. NIfTI
             } else {
                 expression.setDatasetExpressionFormat(DatasetExpressionFormat.NIFTI_SINGLE_FILE);
@@ -141,31 +152,19 @@ public class ProcessedDatasetImporterService {
             event.setProgress(-1f);
             eventService.publishEvent(event);
             throw e;
+        } finally {
+            if (dicomDirectory != null) {
+                FileSystemUtils.deleteRecursively(dicomDirectory);
+            }
         }
     }
 
     private Attributes checkIfDICOM(File processedDatasetFile) throws FieldNotFoundException {
         if (processedDatasetFile.exists()) {
-            File firstSlice = processedDatasetFile;
-
-            try {
-                if (processedDatasetFile.getName().toLowerCase().endsWith(".zip")) {
-                    firstSlice = getFirstSlice(processedDatasetFile);
-                }
-            } catch (Exception ignored) {
-                LOG.error("Processed dataset file is not a dataset : {}", processedDatasetFile.getAbsolutePath());
-                return null;
-            }
-
             // We pass here by using DicomInputStream,
             // in case processed dataset file does not end with .dcm
-            try (DicomInputStream dIS = new DicomInputStream(firstSlice)) {
-                Attributes attributes = dIS.readDataset(); // we close InputStream and use Attributes
-
-                if (!Objects.equals(firstSlice.getName(), processedDatasetFile.getName())) {
-                    firstSlice.delete();
-                }
-                return attributes;
+            try (DicomInputStream dIS = new DicomInputStream(processedDatasetFile)) {
+                return dIS.readDataset(); // we close InputStream and use Attributes
             } catch (IOException e) {
                 // We ignore the exception here: if not DICOM, we assume other format
             }
@@ -177,54 +176,50 @@ public class ProcessedDatasetImporterService {
     }
 
     /**
-     * return the first slice when the file is a zip containing a folder with dicoms or directly dicoms
+     * Extract a zip containing DICOM files (at its root or in one folder) into a temporary flat directory.
      *
-     * @param processedDatasetFile
-     * @return firstSlice
+     * @param zipFile
+     * @return the temporary directory, or null if the zip does not contain only DICOM files
      */
-    private File getFirstSlice(File processedDatasetFile) throws Exception {
-        //Check that all files are .dcm
-        try (ZipInputStream zis = new ZipInputStream(new FileInputStream(processedDatasetFile))) {
+    private File extractDicomZip(File zipFile) throws IOException {
+        File directory = Files.createTempDirectory("processed_dicom_").toFile();
+        int sliceIndex = 0;
+        boolean valid = false;
+        try (ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile))) {
             ZipEntry entry;
-
             while ((entry = zis.getNextEntry()) != null) {
-
                 if (entry.isDirectory()) {
-                    zis.closeEntry();
                     continue;
                 }
-
                 // Allow only root or one folder level
-                if (entry.getName().split("/").length  > 2) {
-                    throw new Exception();
+                if (entry.getName().split("/").length > 2) {
+                    LOG.warn("Processed dataset zip has more than one folder level: {}", zipFile.getAbsolutePath());
+                    return null;
                 }
-
-
-                if (!entry.getName().endsWith(".dcm")) {
-                    throw new Exception();
+                // Entry names are not used as paths, to avoid zip slip and name collisions between folders
+                File slice = new File(directory, sliceIndex++ + ".dcm");
+                Files.copy(zis, slice.toPath());
+                if (!isDicom(slice)) {
+                    LOG.warn("Processed dataset zip contains a non DICOM file [{}]: {}", entry.getName(), zipFile.getAbsolutePath());
+                    return null;
                 }
-                zis.closeEntry();
             }
-
-            //Returning first .dcm
-            while ((entry = zis.getNextEntry()) != null) {
-                if (!entry.isDirectory()) {
-                    File tempFile = File.createTempFile("dicom_", ".dcm");
-
-                    try (FileOutputStream fos = new FileOutputStream(tempFile)) {
-                        byte[] buffer = new byte[8192];
-                        int len;
-                        while ((len = zis.read(buffer)) > 0) {
-                            fos.write(buffer, 0, len);
-                        }
-                    }
-
-                    return tempFile;
-                }
-                zis.closeEntry();
+            valid = sliceIndex > 0;
+        } finally {
+            if (!valid) {
+                FileSystemUtils.deleteRecursively(directory);
             }
         }
-        return null;
+        return valid ? directory : null;
+    }
+
+    private boolean isDicom(File file) {
+        // DicomInputStream constructor reads the preamble / guesses the transfer syntax and fails if not DICOM
+        try (DicomInputStream dIS = new DicomInputStream(file)) {
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
     }
 
     /**
