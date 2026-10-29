@@ -67,6 +67,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -342,7 +343,7 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
             Long datasetAcquisitionId,
             @Parameter(description = "datasetAcquisition to update", required = true) @Valid @RequestPart("datasetAcquisition") DatasetAcquisitionDTO datasetAcquisition,
             final BindingResult result,
-            @Parameter(description = "new extra data files to store") @RequestPart(value = "files", required = false) List<MultipartFile> files) throws RestServiceException {
+            @Parameter(description = "new extra data files to store") @RequestPart(value = "files", required = false) List<MultipartFile> files) throws RestServiceException, StorageException {
 
         validate(result);
         List<MultipartFile> filesToStore = files != null ? files : List.of();
@@ -355,10 +356,6 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (EntityNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } catch (StorageException e) {
-            LOG.error(e.getMessage());
-            throw new RestServiceException(e, new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                    "Couldn't store extra data files, dataset acquisition not updated"));
         } catch (ShanoirException e) {
             throw new RestServiceException(new ErrorModel(e.getErrorCode(), e.getMessage()));
         }
@@ -400,6 +397,16 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
             ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors));
             throw new RestServiceException(error);
         }
+    }
+
+    /**
+     * Extra data files could not be stored (nothing saved): one log line instead of a stack trace,
+     * and the reason sent to the client.
+     */
+    @ExceptionHandler(StorageException.class)
+    public ResponseEntity<ErrorModel> handleStorageException(final StorageException e) {
+        LOG.error(e.getMessage());
+        return new ResponseEntity<>(new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
 }

@@ -50,6 +50,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -175,7 +176,7 @@ public class ExaminationApiController implements ExaminationApi {
     @Override
     public ResponseEntity<ExaminationDTO> saveNewExamination(
             @Parameter(description = "the examination to create", required = true) @RequestBody @Valid final ExaminationDTO examinationDTO,
-            final BindingResult result) throws RestServiceException {
+            final BindingResult result) throws RestServiceException, StorageException {
         // JSON creation (no files) = multipart creation without files
         return saveNewExaminationWithExtraData(examinationDTO, result, null);
     }
@@ -184,7 +185,7 @@ public class ExaminationApiController implements ExaminationApi {
     public ResponseEntity<ExaminationDTO> saveNewExaminationWithExtraData(
             @Parameter(description = "the examination to create", required = true) @Valid @RequestPart("examination") final ExaminationDTO examinationDTO,
             final BindingResult result,
-            @Parameter(description = "extra data files to store") @RequestPart(value = "files", required = false) final List<MultipartFile> files) throws RestServiceException {
+            @Parameter(description = "extra data files to store") @RequestPart(value = "files", required = false) final List<MultipartFile> files) throws RestServiceException, StorageException {
         List<MultipartFile> filesToStore = files != null ? files : List.of();
         examinationService.validate(result);
         Examination examination = examinationMapper.examinationDTOToExaminationIdRelations(examinationDTO);
@@ -204,14 +205,6 @@ public class ExaminationApiController implements ExaminationApi {
                         "Couldn't create examination"
                     )
             );
-        } catch (StorageException e) {
-            LOG.error(e.getMessage());
-            throw new RestServiceException(
-                    e,
-                    new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                        "Couldn't store extra data files, examination not created"
-                    )
-            );
         }
     }
 
@@ -220,7 +213,7 @@ public class ExaminationApiController implements ExaminationApi {
             @Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") final Long examinationId,
             @Parameter(description = "the examination to update", required = true) @Valid @RequestPart("examination") final ExaminationDTO examination,
             final BindingResult result,
-            @Parameter(description = "new extra data files to store") @RequestPart(value = "files", required = false) final List<MultipartFile> files) throws RestServiceException {
+            @Parameter(description = "new extra data files to store") @RequestPart(value = "files", required = false) final List<MultipartFile> files) throws RestServiceException, StorageException {
         examinationService.validate(result);
         List<MultipartFile> filesToStore = files != null ? files : List.of();
         try {
@@ -232,14 +225,6 @@ public class ExaminationApiController implements ExaminationApi {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (JsonProcessingException | EntityNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } catch (StorageException e) {
-            LOG.error(e.getMessage());
-            throw new RestServiceException(
-                    e,
-                    new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                        "Couldn't store extra data files, examination not updated"
-                    )
-            );
         } catch (ShanoirException e) {
             throw new RestServiceException(new ErrorModel(e.getErrorCode(), e.getMessage()));
         }
@@ -316,6 +301,16 @@ public class ExaminationApiController implements ExaminationApi {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity<>(entries, HttpStatus.OK);
+    }
+
+    /**
+     * Extra data files could not be stored (nothing saved): one log line instead of a stack trace,
+     * and the reason sent to the client.
+     */
+    @ExceptionHandler(StorageException.class)
+    public ResponseEntity<ErrorModel> handleStorageException(final StorageException e) {
+        LOG.error(e.getMessage());
+        return new ResponseEntity<>(new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
 }

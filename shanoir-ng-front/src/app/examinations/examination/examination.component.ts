@@ -333,6 +333,11 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
             this.treeService.updateTree();
             return exam;
         }).catch(reason => {
+            // Files not stored (nothing saved): show the server reason instead of a generic error
+            if (reason?.status == 500 && reason.error?.message) {
+                this.consoleService.log('error', reason.error.message);
+                return null;
+            }
             this.catchSavingErrors(reason);
             return null;
         }).finally(() => this.footerState.loading = false);

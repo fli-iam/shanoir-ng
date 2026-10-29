@@ -21,6 +21,7 @@ import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionWithDatasetsDTO;
 import org.shanoir.ng.datasetacquisition.dto.ExaminationDatasetAcquisitionDTO;
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.storage.StorageException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -191,7 +192,7 @@ public interface DatasetAcquisitionApi {
             @Parameter(description = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId,
             @Parameter(description = "datasetAcquisition to update", required = true) @Valid @RequestPart("datasetAcquisition") DatasetAcquisitionDTO datasetAcquisition, BindingResult result,
             @Parameter(description = "new extra data files to store") @RequestPart(value = "files", required = false) List<MultipartFile> files)
-            throws RestServiceException;
+            throws RestServiceException, StorageException;
 
     @Operation(summary = "", description = "Download extra data from a dataset acquisition")
     @ApiResponses(value = {

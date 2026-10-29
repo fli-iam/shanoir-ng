@@ -153,7 +153,7 @@ public interface ExaminationApi {
               + "@datasetSecurityService.hasRightOnStudyCenter(#examinationDTO.getCenterId(), #examinationDTO.getStudyId(), 'CAN_IMPORT')))")
     ResponseEntity<ExaminationDTO> saveNewExamination(
             @Parameter(description = "examination to create", required = true) @Valid @RequestBody ExaminationDTO examinationDTO,
-            final BindingResult result) throws RestServiceException;
+            final BindingResult result) throws RestServiceException, StorageException;
 
     @Operation(summary = "", description = "Saves a new examination with its extra data files if any, the examination is created only if all the files are stored")
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "created examination"),
@@ -170,7 +170,7 @@ public interface ExaminationApi {
     ResponseEntity<ExaminationDTO> saveNewExaminationWithExtraData(
             @Parameter(description = "examination to create", required = true) @Valid @RequestPart("examination") ExaminationDTO examinationDTO,
             final BindingResult result,
-            @Parameter(description = "extra data files to store") @RequestPart(value = "files", required = false) List<MultipartFile> files) throws RestServiceException;
+            @Parameter(description = "extra data files to store") @RequestPart(value = "files", required = false) List<MultipartFile> files) throws RestServiceException, StorageException;
 
     @Operation(summary = "", description = "Updates an examination with its new extra data files if any, the examination is updated only if all the files are stored")
     @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "examination updated"),
@@ -186,7 +186,7 @@ public interface ExaminationApi {
             @Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
             @Parameter(description = "examination to update", required = true) @Valid @RequestPart("examination") ExaminationDTO examination,
             final BindingResult result,
-            @Parameter(description = "new extra data files to store") @RequestPart(value = "files", required = false) List<MultipartFile> files) throws RestServiceException;
+            @Parameter(description = "new extra data files to store") @RequestPart(value = "files", required = false) List<MultipartFile> files) throws RestServiceException, StorageException;
 
     @Operation(summary = "", description = "Retrieves the DICOM StudyInstanceUID from the backup PACS for the given examination and updates it in the database")
     @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "study instance UID synced from PACS and updated"),
