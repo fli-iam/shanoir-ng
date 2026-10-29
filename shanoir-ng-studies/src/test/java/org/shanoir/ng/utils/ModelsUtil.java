@@ -100,6 +100,7 @@ public final class ModelsUtil {
     public static AcquisitionEquipment createAcquisitionEquipment() {
         final AcquisitionEquipment equipment = new AcquisitionEquipment();
         equipment.setCenter(createCenter());
+        equipment.getCenter().setAcquisitionEquipments(null);
         equipment.setManufacturerModel(createManufacturerModel());
         equipment.setSerialNumber(ACQ_EQPT_SERIAL_NUMBER);
         return equipment;

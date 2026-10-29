@@ -246,9 +246,10 @@ public class StudyServiceTest {
         existing.setStudyUserList(new ArrayList<StudyUser>());
         existing.getStudyUserList().add(createStudyUsers(1L, 1L, existing, true, StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_IMPORT));
         existing.getStudyUserList().add(createStudyUsers(2L, 2L, existing, true, StudyUserRight.CAN_ADMINISTRATE));
-        existing.getStudyUserList().add(createStudyUsers(1L, 3L, existing, true, StudyUserRight.CAN_ADMINISTRATE));
+        existing.getStudyUserList().add(createStudyUsers(3L, 3L, existing, true, StudyUserRight.CAN_ADMINISTRATE));
 
-
+        // Updated study can not contain study-users with an existing ID, that are not part
+        // of existing, only null (as this means they are to be created)
         Study updated = createStudy();
         updated.setStudyUserList(new ArrayList<StudyUser>());
         updated.getStudyUserList().add(createStudyUsers(1L, 1L, updated, true, StudyUserRight.CAN_DOWNLOAD));
@@ -257,8 +258,10 @@ public class StudyServiceTest {
         given(studyRepository.findById(STUDY_ID)).willReturn(Optional.of(existing));
         given(studyUserRepository.findById(1L)).willReturn(Optional.of(existing.getStudyUserList().get(0)));
         given(studyUserRepository.findById(2L)).willReturn(Optional.of(existing.getStudyUserList().get(1)));
-        List<StudyUser> in = new ArrayList<>(); in.add(updated.getStudyUserList().get(1));
-        List<StudyUser> out = new ArrayList<>(); out.add(createStudyUsers(4L, 3L, updated, true, StudyUserRight.CAN_SEE_ALL));
+        List<StudyUser> in = new ArrayList<>();
+        in.add(updated.getStudyUserList().get(1));
+        List<StudyUser> out = new ArrayList<>();
+        out.add(createStudyUsers(null, 3L, updated, true, StudyUserRight.CAN_SEE_ALL));
         given(studyUserRepository.saveAll(in)).willReturn(out);
         given(studyService.updateStudyName(Mockito.any(StudyDTO.class))).willReturn("");
 

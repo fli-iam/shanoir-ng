@@ -81,7 +81,7 @@ public class ShanoirUploaderServiceClient {
 
     private static final Logger LOG = LoggerFactory.getLogger(ShanoirUploaderServiceClient.class);
 
-    private static final String SHANOIR_SERVER_URL = "shanoir.server.url";
+    public static final String SHANOIR_SERVER_URL = "shanoir.server.url";
 
     private static final String SERVICE_STUDIES_CREATE = "service.studies.create";
 
@@ -557,6 +557,8 @@ public class ShanoirUploaderServiceClient {
                 int code = response.getCode();
                 if (code == HttpStatus.SC_OK) {
                     return Util.getMappedObject(response, StudyUser.class);
+                } else if (code == HttpStatus.SC_UNPROCESSABLE_ENTITY) {
+                    return studyUser;
                 } else {
                     LOG.error("Error in addStudyUser: studyId={}, userId={} (status code: {}, message: {})",
                             studyId, studyUser.getUserId(), code,
