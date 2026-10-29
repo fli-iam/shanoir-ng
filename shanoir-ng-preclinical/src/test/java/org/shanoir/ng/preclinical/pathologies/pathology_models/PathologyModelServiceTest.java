@@ -23,8 +23,8 @@ import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.mockito.Mockito;
 import org.shanoir.ng.preclinical.pathologies.PathologyRepository;
 import org.shanoir.ng.preclinical.pathologies.PathologyServiceImpl;
@@ -48,19 +48,19 @@ public class PathologyModelServiceTest {
     private static final String UPDATED_MODEL_DATA = "AAAA";
     private static final Long PATHO_ID = 1L;
 
-    @Mock
+    @MockitoBean
     private PathologyModelRepository modelsRepository;
 
-    @Mock
+    @MockitoBean
     private RabbitTemplate rabbitTemplate;
 
-    @InjectMocks
+    @Autowired
     private PathologyModelServiceImpl modelsService;
 
-    @InjectMocks
+    @Autowired
     private PathologyServiceImpl pathosService;
 
-    @Mock
+    @MockitoBean
     private PathologyRepository pathosRepository;
 
 

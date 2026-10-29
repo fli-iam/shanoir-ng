@@ -83,7 +83,7 @@ public class StudyApiController implements StudyApi {
 
     private static final String PDF_EXTENSION = ".pdf";
 
-    @Value("${shanoir.userDefaultExpirationDays}")
+    @Value("${shanoir.userDefaultExpirationDays:183}")
     private int userDefaultExpirationDays;
 
     @Autowired
@@ -117,7 +117,6 @@ public class StudyApiController implements StudyApi {
 
     private final HttpServletRequest request;
 
-    @org.springframework.beans.factory.annotation.Autowired
     public StudyApiController(final HttpServletRequest request) {
         this.request = request;
     }
@@ -236,6 +235,9 @@ public class StudyApiController implements StudyApi {
         Study createdStudy;
         try {
             study.setIsDraft(!KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN"));
+            if (!KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+                study.setNeurobagelExport(false);
+            }
             addCurrentUserAsStudyUserIfEmptyStudyUsers(study);
             setDefaultStudyUserExpirationDates(study);
             createdStudy = studyService.create(study);

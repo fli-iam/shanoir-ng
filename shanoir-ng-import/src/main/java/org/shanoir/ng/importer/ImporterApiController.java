@@ -170,6 +170,7 @@ public class ImporterApiController implements ImporterApi {
                     "Wrong content type of file upload, .zip required.", null));
         }
         File tempFile = null;
+        File importJobDir = null;
         try {
             /**
              * STEP: Handle file management. Always create a userId specific folder in
@@ -182,7 +183,7 @@ public class ImporterApiController implements ImporterApi {
             if (!ImportUtils.checkZipContainsFile(DICOMDIR, tempFile)) {
                 createDicomDir = true;
             }
-            File importJobDir = ImportUtils.saveTempFileCreateFolderAndUnzip(tempFile, dicomZipFile, true);
+            importJobDir = ImportUtils.saveTempFileCreateFolderAndUnzip(tempFile, dicomZipFile, true);
             if (createDicomDir) {
                 LOG.info("DICOMDIR missing from zip file, generating one.");
                 final File dicomDir = new File(importJobDir, DICOMDIR);
@@ -235,9 +236,11 @@ public class ImporterApiController implements ImporterApi {
 
             return new ResponseEntity<>(importJob, HttpStatus.OK);
         } catch (Exception e) {
-            // If there is an exception, we should delete the temporary folder
             if (tempFile != null) {
                 FileUtils.deleteQuietly(tempFile);
+            }
+            if (importJobDir != null) {
+                FileUtils.deleteQuietly(importJobDir);
             }
             LOG.error("DICOM zip upload failed (userId={})", KeycloakUtil.getTokenUserId(), e);
             throw new RestServiceException(
@@ -697,6 +700,12 @@ public class ImporterApiController implements ImporterApi {
             importJob.setShanoirEvent(event);
             cleanUpImportJob(importJob);
             Integer integg = (Integer) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.IMPORT_EEG_QUEUE, objectMapper.writeValueAsString(importJob));
+            // null when MS Datasets did not reply in time or failed while processing the job
+            if (integg == null) {
+                LOG.error("No reply from MS Datasets for EEG import of workFolder {}", importJob.getWorkFolder());
+                importJobStatusService.setError(tempDirId, "No reply from MS Datasets for EEG import.");
+                return new ResponseEntity<Void>(HttpStatus.GATEWAY_TIMEOUT);
+            }
             importJobStatusService.setFinished(tempDirId, importJob);
             return new ResponseEntity<Void>(HttpStatusCode.valueOf(integg.intValue()));
         } catch (Exception e) {

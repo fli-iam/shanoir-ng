@@ -30,9 +30,8 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 @Service
 public class RabbitMQSubjectService {
@@ -48,23 +47,6 @@ public class RabbitMQSubjectService {
     @Autowired
     private ObjectMapper mapper;
 
-    /**
-     * This methods returns a list of subjects for a given study ID
-     * @param studyId the study ID
-     * @return a list of subjects
-     */
-    @RabbitListener(queues = RabbitMQConfiguration.DATASET_SUBJECT_QUEUE, containerFactory = "multipleConsumersFactory")
-    @RabbitHandler
-    @Transactional
-    public String getSubjectsForStudy(String studyId) {
-        try {
-            return mapper.writeValueAsString(subjectService.findAllSubjectsOfStudyId(Long.valueOf(studyId)));
-        } catch (Exception e) {
-            LOG.error("Error while serializing subjects for participants.tsv file.", e);
-            throw new AmqpRejectAndDontRequeueException(e);
-        }
-    }
-
     @RabbitListener(queues = RabbitMQConfiguration.SUBJECTS_NAME_QUEUE, containerFactory = "multipleConsumersFactory")
     @RabbitHandler
     @Transactional
@@ -73,7 +55,7 @@ public class RabbitMQSubjectService {
         try {
             subjectNameInStudy = mapper.readValue(subjectNameInStudyString, IdName.class);
             return this.subjectService.existsSubjectWithNameInStudy(subjectNameInStudy.getName(), subjectNameInStudy.getId());
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             LOG.error("Error while checking subject name existence", e);
             throw new AmqpRejectAndDontRequeueException(e);
         }

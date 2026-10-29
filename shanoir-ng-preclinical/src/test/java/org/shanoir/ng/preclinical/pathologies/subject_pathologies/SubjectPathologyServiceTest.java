@@ -23,8 +23,8 @@ import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.mockito.Mockito;
 import org.shanoir.ng.preclinical.references.RefsRepository;
 import org.shanoir.ng.preclinical.subjects.model.AnimalSubject;
@@ -50,16 +50,16 @@ public class SubjectPathologyServiceTest {
     private static final String UPDATED_PATHO_NAME = "Cancer";
     private static final Long LOCATION_ID = 2L;
 
-    @Mock
+    @MockitoBean
     private SubjectPathologyRepository spathosRepository;
 
-    @Mock
+    @MockitoBean
     private RefsRepository refsRepository;
 
-    @Mock
+    @MockitoBean
     private RabbitTemplate rabbitTemplate;
 
-    @InjectMocks
+    @Autowired
     private SubjectPathologyServiceImpl spathosService;
 
     @BeforeEach

@@ -34,8 +34,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.shanoir.ng.messaging.StudyUserUpdateBroadcastService;
 import org.shanoir.ng.shared.exception.AccessDeniedException;
@@ -55,14 +53,16 @@ import org.shanoir.ng.study.repository.StudyUserRepository;
 import org.shanoir.ng.studycenter.StudyCenterRepository;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.DatabindException;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Study service test.
@@ -78,35 +78,38 @@ public class StudyServiceTest {
     private static final String UPDATED_STUDY_NAME = "test";
     private static final Long USER_ID = 1L;
 
-    @Mock
+    @MockitoBean
     private StudyRepository studyRepository;
 
-    @Mock
+    @MockitoBean
     private RabbitTemplate rabbitTemplate;
 
-    @InjectMocks
+    @Autowired
     private StudyServiceImpl studyService;
 
-    @Mock
+    @MockitoBean
     private StudyUserRepository studyUserRepository;
 
-    @Mock
+    @MockitoBean
     private StudyCenterRepository studyCenterRepository;
 
-    @Mock
+    @MockitoBean
     private StudyUserUpdateBroadcastService studyUserCom;
 
-    @Mock
+    @MockitoBean
     private DataUserAgreementService dataUserAgreementService;
 
-    @Mock
+    @MockitoBean
     private StudyMapper studyMapperMock;
 
-    @Mock
+    @MockitoBean
     private FileSystemStorageService fileSystemStorageService;
 
-    @Mock
-    private ObjectMapper objectMapper;
+    @MockitoBean
+    private JsonMapper jsonMapper;
+
+    @MockitoBean
+    private ConnectionFactory connectionFactory;
 
     @TempDir
     private File tempFolder;
@@ -120,6 +123,7 @@ public class StudyServiceTest {
     }
 
     @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
     public void deleteByIdTest() throws AccessDeniedException, EntityNotFoundException {
         final Study newStudy = ModelsUtil.createStudy();
         final StudyUser studyUser = new StudyUser();
@@ -134,6 +138,7 @@ public class StudyServiceTest {
     }
 
     @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
     public void findByIdTest() throws AccessDeniedException {
         final Study study = studyService.findById(STUDY_ID);
         Assertions.assertNotNull(study);
@@ -143,6 +148,7 @@ public class StudyServiceTest {
     }
 
     @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
     public void findByIdWithAccessRightTest() throws AccessDeniedException {
         final Study newStudy = ModelsUtil.createStudy();
         final StudyUser studyUser = new StudyUser();
@@ -159,7 +165,8 @@ public class StudyServiceTest {
     }
 
     @Test
-    public void saveTest() throws MicroServiceCommunicationException, JsonMappingException, JsonProcessingException {
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    public void saveTest() throws MicroServiceCommunicationException, DatabindException {
         studyService.create(createStudy());
         Mockito.verify(studyRepository, Mockito.times(1)).save(Mockito.any(Study.class));
     }
@@ -175,6 +182,8 @@ public class StudyServiceTest {
         Study dbStudy = ModelsUtil.createStudy();
         dbStudy.setId(1L);
         dbStudy.setProtocolFilePaths(Collections.singletonList("old.txt"));
+        dbStudy.setStudyUserList(new ArrayList<StudyUser>());
+        dbStudy.getStudyUserList().add(createStudyUsers(1L, 3L, dbStudy, true, StudyUserRight.CAN_ADMINISTRATE));
         Study updatedStudy = createStudy();
         updatedStudy.setId(1L);
         updatedStudy.setProtocolFilePaths(Collections.singletonList("new.txt"));
@@ -195,11 +204,50 @@ public class StudyServiceTest {
 
     @Test
     @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_EXPERT" })
+    public void updateNeurobagelExportAsExpertTest() throws ShanoirException, StorageException {
+        // Neither switching the export on nor off is allowed
+        assertFalse(updateNeurobagelExport(false, true).isNeurobagelExport());
+        assertTrue(updateNeurobagelExport(true, false).isNeurobagelExport());
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    public void updateNeurobagelExportAsAdminTest() throws ShanoirException, StorageException {
+        assertTrue(updateNeurobagelExport(false, true).isNeurobagelExport());
+        assertFalse(updateNeurobagelExport(true, false).isNeurobagelExport());
+    }
+
+    /**
+     * Updates a study whose stored flag is dbValue with a payload carrying requestedValue,
+     * and returns the stored study.
+     */
+    private Study updateNeurobagelExport(boolean dbValue, boolean requestedValue) throws ShanoirException, StorageException {
+        Study dbStudy = ModelsUtil.createStudy();
+        dbStudy.setId(STUDY_ID);
+        dbStudy.setNeurobagelExport(dbValue);
+        dbStudy.setStudyUserList(new ArrayList<StudyUser>());
+        dbStudy.getStudyUserList().add(createStudyUsers(1L, 3L, dbStudy, true, StudyUserRight.CAN_ADMINISTRATE));
+        Study updatedStudy = createStudy();
+        updatedStudy.setId(STUDY_ID);
+        updatedStudy.setNeurobagelExport(requestedValue);
+
+        given(studyRepository.findById(STUDY_ID)).willReturn(Optional.of(dbStudy));
+        given(studyRepository.save(Mockito.any(Study.class))).willReturn(dbStudy);
+        given(studyService.updateStudyName(Mockito.any(StudyDTO.class))).willReturn("");
+
+        studyService.update(updatedStudy);
+        return dbStudy;
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_EXPERT" })
     public void updateStudyUsersTest() throws ShanoirException, StorageException {
         Study existing = createStudy();
         existing.setStudyUserList(new ArrayList<StudyUser>());
         existing.getStudyUserList().add(createStudyUsers(1L, 1L, existing, true, StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_IMPORT));
         existing.getStudyUserList().add(createStudyUsers(2L, 2L, existing, true, StudyUserRight.CAN_ADMINISTRATE));
+        existing.getStudyUserList().add(createStudyUsers(1L, 3L, existing, true, StudyUserRight.CAN_ADMINISTRATE));
+
 
         Study updated = createStudy();
         updated.setStudyUserList(new ArrayList<StudyUser>());
@@ -215,6 +263,39 @@ public class StudyServiceTest {
         given(studyService.updateStudyName(Mockito.any(StudyDTO.class))).willReturn("");
 
         studyService.update(updated);
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_EXPERT" })
+    public void testUpdateStudyUsersMailPreferencesByStudyAdministrator() throws StorageException {
+        // GIVEN a study administrated by the connected expert, no member receiving mails yet
+        Study existing = createStudy();
+        existing.setStudyUserList(new ArrayList<StudyUser>());
+        StudyUser member = createStudyUsers(1L, 1L, existing, true, StudyUserRight.CAN_SEE_ALL);
+        StudyUser me = createStudyUsers(2L, 3L, existing, true, StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_ADMINISTRATE);
+        existing.getStudyUserList().add(member);
+        existing.getStudyUserList().add(me);
+
+        // WHEN the expert turns on the mail preferences of a member and their own import mail
+        Study updated = createStudy();
+        updated.setStudyUserList(new ArrayList<StudyUser>());
+        StudyUser updatedMember = createStudyUsers(1L, 1L, updated, true, StudyUserRight.CAN_SEE_ALL);
+        updatedMember.setReceiveNewImportReport(true);
+        updatedMember.setReceiveStudyUserReport(true);
+        StudyUser updatedMe = createStudyUsers(2L, 3L, updated, true, StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_ADMINISTRATE);
+        updatedMe.setReceiveNewImportReport(true);
+        updated.getStudyUserList().add(updatedMember);
+        updated.getStudyUserList().add(updatedMe);
+        given(studyUserRepository.saveAll(Mockito.any(List.class))).willReturn(Collections.emptyList());
+
+        studyService.updateStudyUsers(existing, updated);
+
+        // THEN the preferences are saved, rights unchanged
+        assertTrue(member.isReceiveNewImportReport());
+        assertTrue(member.isReceiveStudyUserReport());
+        assertTrue(me.isReceiveNewImportReport());
+        assertFalse(me.isReceiveStudyUserReport());
+        assertEquals(List.of(StudyUserRight.CAN_SEE_ALL), member.getStudyUserRights());
     }
 
     @Test
@@ -290,6 +371,72 @@ public class StudyServiceTest {
                 fail("This study user with id 2 should have been removed");
             }
         }
+    }
+
+    /**
+     * The study has a single DUA file: removing it must archive it once, whatever the number of
+     * study users (it used to be moved once per study user, failing from the second one).
+     */
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    public void testUpdateStudyUsersDeleteDUAArchivesFileOnce() throws StorageException {
+        Study existing = createStudyWithTwoStudyUsers();
+        existing.setDataUserAgreementPaths(Collections.singletonList("DUA-test.pdf"));
+        Study updated = createStudyWithTwoStudyUsers();
+        updated.setDataUserAgreementPaths(new ArrayList<>());
+        given(fileSystemStorageService.existsStudyData(STUDY_ID, "DUA-test.pdf")).willReturn(true);
+
+        studyService.updateStudyUsers(existing, updated);
+
+        Mockito.verify(fileSystemStorageService, Mockito.times(1))
+                .moveStudyData(Mockito.eq(STUDY_ID), Mockito.eq("DUA-test.pdf"), Mockito.startsWith("archive_"));
+        for (StudyUser su : updated.getStudyUserList()) {
+            assertTrue(su.isConfirmed());
+            Mockito.verify(dataUserAgreementService).deleteIncompleteDataUserAgreementForUserInStudy(existing, su.getUserId());
+        }
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    public void testUpdateStudyUsersReplaceDUAArchivesFileOnce() throws StorageException {
+        Study existing = createStudyWithTwoStudyUsers();
+        existing.setDataUserAgreementPaths(Collections.singletonList("DUA-old.pdf"));
+        Study updated = createStudyWithTwoStudyUsers();
+        updated.setDataUserAgreementPaths(Collections.singletonList("DUA-new.pdf"));
+        given(fileSystemStorageService.existsStudyData(STUDY_ID, "DUA-old.pdf")).willReturn(true);
+
+        studyService.updateStudyUsers(existing, updated);
+
+        Mockito.verify(fileSystemStorageService, Mockito.times(1))
+                .moveStudyData(Mockito.eq(STUDY_ID), Mockito.eq("DUA-old.pdf"), Mockito.startsWith("archive_"));
+    }
+
+    /**
+     * A DUA file already missing (e.g. archived by a previous failed update) must not block the update.
+     */
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    public void testUpdateStudyUsersDeleteDUAAlreadyArchived() throws StorageException {
+        Study existing = createStudyWithTwoStudyUsers();
+        existing.setDataUserAgreementPaths(Collections.singletonList("DUA-test.pdf"));
+        Study updated = createStudyWithTwoStudyUsers();
+        updated.setDataUserAgreementPaths(new ArrayList<>());
+        given(fileSystemStorageService.existsStudyData(STUDY_ID, "DUA-test.pdf")).willReturn(false);
+
+        studyService.updateStudyUsers(existing, updated);
+
+        Mockito.verify(fileSystemStorageService, Mockito.never())
+                .moveStudyData(Mockito.anyLong(), Mockito.anyString(), Mockito.anyString());
+        for (StudyUser su : updated.getStudyUserList()) {
+            assertTrue(su.isConfirmed());
+        }
+    }
+
+    private Study createStudyWithTwoStudyUsers() {
+        Study study = createStudy();
+        study.getStudyUserList().add(createStudyUsers(1L, 1L, study, false, StudyUserRight.CAN_SEE_ALL));
+        study.getStudyUserList().add(createStudyUsers(2L, 2L, study, false, StudyUserRight.CAN_ADMINISTRATE));
+        return study;
     }
 
     private Study createStudy() {

@@ -32,18 +32,19 @@ import org.shanoir.ng.coil.model.Coil;
 import org.shanoir.ng.coil.service.CoilService;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.shared.jackson.JacksonUtils;
 import org.shanoir.ng.shared.security.ControllerSecurityService;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Unit tests for coil controller.
@@ -52,7 +53,10 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
  *
  */
 
-@WebMvcTest(CoilApiController.class)
+@WebMvcTest(controllers = CoilApiController.class,
+        excludeAutoConfiguration = {
+                org.springframework.boot.security.oauth2.server.resource.autoconfigure.OAuth2ResourceServerAutoConfiguration.class
+        })
 @AutoConfigureMockMvc(addFilters = false)
 @WithMockKeycloakUser(id = 123)
 @ActiveProfiles("test")
@@ -64,16 +68,19 @@ public class CoilApiControllerTest {
     @Autowired
     private MockMvc mvc;
 
-    @MockBean
+    @Autowired
+    private JsonMapper mapper;
+
+    @MockitoBean
     private CoilMapper coilMapperMock;
 
-    @MockBean
+    @MockitoBean
     private CoilService coilServiceMock;
 
-    @MockBean
+    @MockitoBean
     private ShanoirEventService eventService;
 
-    @MockBean(name = "controllerSecurityService")
+    @MockitoBean(name = "controllerSecurityService")
     private ControllerSecurityService controllerSecurityService;
 
     @BeforeEach
@@ -113,7 +120,7 @@ public class CoilApiControllerTest {
     @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
     public void saveNewCoilTest() throws Exception {
         mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(ModelsUtil.createCoil())))
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(ModelsUtil.createCoil())))
                 .andExpect(status().isOk());
     }
 
@@ -123,7 +130,7 @@ public class CoilApiControllerTest {
         Coil coil = ModelsUtil.createCoil();
         coil.setId(1L);
         mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(coil)))
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(coil)))
                 .andExpect(status().isNoContent());
     }
 

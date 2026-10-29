@@ -81,10 +81,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 import jakarta.transaction.Transactional;
 
@@ -100,7 +99,7 @@ public class StudyServiceImpl implements StudyService {
 
     private static final Logger LOG = LoggerFactory.getLogger(StudyServiceImpl.class);
 
-    @Value("${shanoir.userDefaultExpirationDays}")
+    @Value("${shanoir.userDefaultExpirationDays:183}")
     private int userDefaultExpirationDays;
 
     @Autowired
@@ -303,6 +302,10 @@ public class StudyServiceImpl implements StudyService {
         studyDb.setVisibleByDefault(study.isVisibleByDefault());
         studyDb.setStudyCardPolicy(study.getStudyCardPolicy());
         studyDb.setWithExamination(study.isWithExamination());
+        // Exposing a study to Neurobagel publishes its metadata outside the institution: admins only
+        if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+            studyDb.setNeurobagelExport(study.isNeurobagelExport());
+        }
 
         if (study.getExtraDetails() != null) {
             StudyExtraDetails incoming = study.getExtraDetails();
@@ -578,6 +581,12 @@ public class StudyServiceImpl implements StudyService {
                 && !CollectionUtils.isEmpty(study.getDataUserAgreementPaths())
                 && !study.getDataUserAgreementPaths().get(0).equals(studyDb.getDataUserAgreementPaths().get(0));
 
+        // The study has a single DUA file: archive it once, not once per study user
+        // (the signatures of the study users are handled per user below)
+        if (updateDua || deleteDua) {
+            this.archiveDuaFile(studyDb);
+        }
+
         Map<Long, StudyUser> replacing = new HashMap<>();
         for (StudyUser su : study.getStudyUserList()) {
             if (su.getId() == null) {
@@ -599,11 +608,8 @@ public class StudyServiceImpl implements StudyService {
                         duaSigning.setTimestampOfAccepted(new Date());
                         dataUserAgreementService.update(duaSigning);
                     }
-                    this.archiveDuaFile(studyDb);
                 } else if (deleteDua) {
                     // existing DUA removed from study
-                    this.archiveDuaFile(studyDb);
-
                     su.setConfirmed(true);
                     // without DUA all StudyUser are confirmed, set back to true, if false before
                     dataUserAgreementService.deleteIncompleteDataUserAgreementForUserInStudy(studyDb, su.getUserId());
@@ -700,6 +706,11 @@ public class StudyServiceImpl implements StudyService {
             return;
         }
         String originalFilename = study.getDataUserAgreementPaths().get(0);
+        if (!storageService.existsStudyData(study.getId(), originalFilename)) {
+            // e.g. already archived by a previous failed update: do not block the study update
+            LOG.warn("DUA file {} of study {} not found, nothing to archive.", originalFilename, study.getId());
+            return;
+        }
         String archiveFilename = "archive_"
                 + new SimpleDateFormat("yyyyMMddHHmm").format(new Date())
                 + "_" + originalFilename;
@@ -728,7 +739,7 @@ public class StudyServiceImpl implements StudyService {
             try {
                 rabbitTemplate.convertAndSend(RabbitMQConfiguration.STUDY_USER_MAIL_QUEUE,
                         objectMapper.writeValueAsString(emailStudyUserAdded));
-            } catch (AmqpException | JsonProcessingException e) {
+            } catch (AmqpException | JacksonException e) {
                 LOG.error("Could not send email for study user report. ", e);
             }
         }
@@ -851,7 +862,7 @@ public class StudyServiceImpl implements StudyService {
         try {
             return (String) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_UPDATE_QUEUE,
                     objectMapper.writeValueAsString(study));
-        } catch (AmqpException | JsonProcessingException e) {
+        } catch (AmqpException | JacksonException e) {
             throw new MicroServiceCommunicationException(
                     "Error while communicating with datasets MS to update study name.", e);
         }
@@ -938,7 +949,7 @@ public class StudyServiceImpl implements StudyService {
             } else {
                 dto = new StudyStorageVolumeDTO();
             }
-        } catch (AmqpException | JsonProcessingException e) {
+        } catch (AmqpException | JacksonException e) {
             LOG.error("Error while fetching study [{}] datasets volume storage details.", studyId, e);
             return null;
         }
@@ -962,7 +973,7 @@ public class StudyServiceImpl implements StudyService {
             } else {
                 return new HashMap<>();
             }
-        } catch (AmqpException | JsonProcessingException e) {
+        } catch (AmqpException | JacksonException e) {
             LOG.error("Error while fetching studies [{}] datasets volume storage details.", studyIds, e);
             return null;
         }

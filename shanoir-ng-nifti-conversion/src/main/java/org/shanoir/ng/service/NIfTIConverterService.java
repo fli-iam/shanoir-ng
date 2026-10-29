@@ -17,7 +17,7 @@ package org.shanoir.ng.service;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -184,7 +184,7 @@ public class NIfTIConverterService {
         for (File file : niiFiles) {
             try {
                 // Copy all nifti files
-                Files.copy(file.toPath(), Paths.get(directory.getPath() + File.separator + rand.nextInt()
+                Files.copy(file.toPath(), Path.of(directory.getPath() + File.separator + rand.nextInt()
                         + dataset.getName() + "_" + file.getName()), StandardCopyOption.REPLACE_EXISTING);
             } catch (IOException e) {
                 LOG.error("Error while copying files", e);

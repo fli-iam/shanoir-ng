@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.study.model;
 
+import java.io.Serial;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -88,6 +89,7 @@ public class Study extends HalEntity {
     /**
      * UID
      */
+    @Serial
     private static final long serialVersionUID = 2182323766659913794L;
 
     /** Is clinical. */
@@ -98,6 +100,7 @@ public class Study extends HalEntity {
     private Long coordinatorId;
 
     /** Is with downloadable by default. */
+    @NotNull
     private boolean downloadableByDefault;
 
     /** End date. */
@@ -107,6 +110,7 @@ public class Study extends HalEntity {
 
     @Column(unique = true)
     @Unique
+    @NotNull
     @EditableOnlyBy(roles = { "ROLE_ADMIN", "ROLE_EXPERT" })
     private String name;
 
@@ -166,13 +170,16 @@ public class Study extends HalEntity {
     private List<Timepoint> timepoints = new ArrayList<>();
 
     /** Is visible by default. */
+    @NotNull
     private boolean visibleByDefault;
 
     /** Is with examination. */
+    @NotNull
     private boolean withExamination;
 
     private StudyCardPolicy studyCardPolicy;
 
+    @NotNull
     private boolean challenge;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "study", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -191,6 +198,11 @@ public class Study extends HalEntity {
     @NotNull
     @Column(name = "is_draft")
     private boolean isDraft;
+
+    /** Metadata exposed to the Neurobagel federation. Set by admins only. */
+    @NotNull
+    @Column(name = "neurobagel_export")
+    private boolean neurobagelExport;
 
     @JsonManagedReference
     @OneToOne(fetch = FetchType.LAZY, mappedBy = "study", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -560,6 +572,14 @@ public class Study extends HalEntity {
 
     public void setIsDraft(boolean isDraft) {
         this.isDraft = isDraft;
+    }
+
+    public boolean isNeurobagelExport() {
+        return neurobagelExport;
+    }
+
+    public void setNeurobagelExport(boolean neurobagelExport) {
+        this.neurobagelExport = neurobagelExport;
     }
 
     /**

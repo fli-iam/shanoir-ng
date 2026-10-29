@@ -212,7 +212,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             @if (!sub) {
                 <div class="click-dummy" (click)="sortBy(col)" [class.resizing]="currentDrag"></div>
             }
-            <span class="col-title">{{ col.headerName }}</span>
+            @if (!col.hideHeaderName) {
+                <span class="col-title">{{ col.headerName }}</span>
+            }
             @if (i < columnDefs.length - 1) {
                 <div class="resizer" (mousedown)="startDrag(i, refTh, $event, columnDefs)" (mouseup)="stopDrag()"></div>
             }

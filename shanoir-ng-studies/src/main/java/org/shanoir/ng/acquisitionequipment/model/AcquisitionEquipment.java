@@ -21,7 +21,10 @@ import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.manufacturermodel.model.ManufacturerModel;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 
+
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
+import java.io.Serial;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -47,6 +50,7 @@ public class AcquisitionEquipment extends HalEntity {
     /**
      * UID
      */
+    @Serial
     private static final long serialVersionUID = 7137351748882747602L;
 
     @ManyToOne
