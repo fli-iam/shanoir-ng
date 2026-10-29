@@ -21,7 +21,6 @@ import { SingleDownloadService } from '@app/shared/mass-download/single-download
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import { Page, Pageable } from '../../shared/components/table/pageable.model';
 import * as AppUtils from '../../utils/app.utils';
-import { ExtraDataUploadResult } from '../../shared/models/extra-data-upload-result.model';
 
 import { ExaminationDTO, ExaminationDTOService } from './examination.dto';
 import { Examination } from './examination.model';
@@ -73,13 +72,33 @@ export class ExaminationService extends EntityService<Examination> {
         return this.examinationDtoService.toEntityList(entities);
     }
 
-    postFiles(filesToUpload: File[], examId: number): Promise<ExtraDataUploadResult> {
-        const endpoint = this.API_URL + '/extra-data-upload/' + examId + '/multi';
+    /**
+     * Creates the examination with its extra data files in a single request:
+     * the examination is not created if a file can't be stored.
+     */
+    createWithFiles(entity: Examination, filesToUpload: File[]): Promise<Examination> {
+        const endpoint = this.API_URL + '/with-extra-data';
         const formData: FormData = new FormData();
+        formData.append('examination', new Blob([this.stringify(entity)], { type: 'application/json' }));
         for (const file of filesToUpload) {
             formData.append('files', file, file.name);
         }
-        return firstValueFrom(this.http.post<ExtraDataUploadResult>(endpoint, formData));
+        return firstValueFrom(this.http.post<ExaminationDTO>(endpoint, formData))
+            .then(this.mapEntity);
+    }
+
+    /**
+     * Updates the examination with its new extra data files in a single request:
+     * the examination is not updated if a file can't be stored.
+     */
+    updateWithFiles(id: number, entity: Examination, filesToUpload: File[]): Promise<void> {
+        const endpoint = this.API_URL + '/' + id + '/with-extra-data';
+        const formData: FormData = new FormData();
+        formData.append('examination', new Blob([this.stringify(entity)], { type: 'application/json' }));
+        for (const file of filesToUpload) {
+            formData.append('files', file, file.name);
+        }
+        return firstValueFrom(this.http.put<void>(endpoint, formData));
     }
 
     downloadFile(fileName: string, examId: number, state?: TaskState): Observable<TaskState>  {
