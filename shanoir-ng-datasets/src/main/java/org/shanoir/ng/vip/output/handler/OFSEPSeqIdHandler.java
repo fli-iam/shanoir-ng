@@ -47,7 +47,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -304,6 +303,8 @@ public class OFSEPSeqIdHandler extends OutputHandler {
 
             if (shanoirId.contains(",")) {
                 return Arrays.stream(shanoirId.split(",")).anyMatch(split -> Objects.equals(Long.valueOf(split), dataset.getId()));
+            } else if (shanoirId.equals("unknownShanoirId")) {
+                return false;
             } else {
                 return Objects.equals(Long.valueOf(shanoirId), dataset.getId());
             }
@@ -316,7 +317,6 @@ public class OFSEPSeqIdHandler extends OutputHandler {
     /**
      * Process all series / acquisitions found in output JSON
      */
-    @Transactional(readOnly = true)
     protected void processSeries(JSONArray series, ExecutionMonitoring monitoring, String resourceId) throws JSONException, PacsException, EntityNotFoundException, CheckedIllegalClassException, SolrServerException, IOException {
         Long examinationId = null;
 
@@ -370,7 +370,7 @@ public class OFSEPSeqIdHandler extends OutputHandler {
                     List<DatasetProperty> properties = getDatasetPropertiesFromVolume(ds, vol, monitoring);
                     addDatasetTags(ds, properties);
                     properties.addAll(getDatasetPropertiesFromDicom(attributes, ds, monitoring));
-                    datasetPropertyService.createAll(properties);
+                    datasetPropertyService.replaceAllExisting(properties, ds);
                 } else {
                     LOG.info("Dataset {} ignored, no update", ds.getId());
                 }
@@ -431,7 +431,7 @@ public class OFSEPSeqIdHandler extends OutputHandler {
                     List<DatasetProperty> properties = getDatasetPropertiesFromVolume(ds, vol, (ExecutionMonitoring) processing.getParent());
                     addDatasetTags(ds, properties);
                     properties.addAll(getDatasetPropertiesFromDicom(attributes, ds, (ExecutionMonitoring) processing.getParent()));
-                    datasetPropertyService.createAll(properties);
+                    datasetPropertyService.replaceAllExisting(properties, ds);
                 } else {
                     LOG.info("Dataset {} ignored, no update", ds.getId());
                 }

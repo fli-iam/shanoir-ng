@@ -38,6 +38,7 @@ import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.dataset.RelatedDataset;
+import org.shanoir.ng.shared.dto.ParticipantsTsvRequestDTO;
 import org.shanoir.ng.shared.dto.StudyExaminationsDTO;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -162,6 +163,22 @@ public class RabbitMQDatasetsService {
     )
     public void receiveMessage(String commandArrStr) {
         listener.receiveStudyUsers(commandArrStr);
+    }
+
+    /**
+     * First examination date of each subject of a study, as a ParticipantsTsvRequestDTO, or null when they cannot
+     * be read (ms studies then falls back to unknown ages rather than waiting for a timeout).
+     */
+    @RabbitListener(queues = RabbitMQConfiguration.STUDY_FIRST_EXAMINATION_DATES, containerFactory = "singleConsumerFactory")
+    @RabbitHandler
+    public String findFirstExaminationDates(Long studyId) {
+        try {
+            return objectMapper.writeValueAsString(
+                    new ParticipantsTsvRequestDTO(studyId, examinationRepository.findFirstExaminationDatesByStudyId(studyId)));
+        } catch (Exception e) {
+            LOG.error("Cannot read the first examination dates of study {}", studyId, e);
+            return null;
+        }
     }
 
     @RabbitListener(queues = RabbitMQConfiguration.STUDY_UPDATE_QUEUE, containerFactory = "singleConsumerFactory")

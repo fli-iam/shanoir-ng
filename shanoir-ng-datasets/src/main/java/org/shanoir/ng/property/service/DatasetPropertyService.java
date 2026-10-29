@@ -15,13 +15,14 @@
 
 package org.shanoir.ng.property.service;
 
+import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.property.model.DatasetProperty;
 
 import java.util.List;
 
 public interface DatasetPropertyService {
 
-    List<DatasetProperty> createAll(List<DatasetProperty> properties);
+    void replaceAllExisting(List<DatasetProperty> properties, Dataset ds);
 
     void deleteByDatasetId(Long id);
 
