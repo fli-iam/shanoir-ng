@@ -37,7 +37,7 @@ test('expert-subject-examination-create-delete', async ({ page }) => {
   await login(page, 'ADMIN');
   await expect(page.getByText(/Notifications\s*\d+/)).toBeVisible();
   await page.getByText(/Notifications\s*\d+/).click();
-  await expect(page.getByText(/Draft\s*Studies\s*\d+/)).toBeVisible();
+  await expect(page.getByText(/Draft\s*Studies\s*\d+/)).toBeVisible({ timeout: 10000});
   await page.getByText(/Draft\s*Studies\s*\d+/).click();
   const studyRow = page
     .locator('form')

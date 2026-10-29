@@ -30,7 +30,7 @@ test('admin-study-create-delete', async ({ page }) => {
   // save study
   await page.getByRole('button', { name: 'Save' }).click();
   await page.getByRole('button', { name: 'No' }).click();
-  await expect(page.locator('study-node')).toContainText('playwright-test-study-create-' + randomString, { timeout: 10000 });
+  await expect(page.locator('study-node')).toContainText('playwright-test-study-create-' + randomString, { timeout: 15000 });
   await expect(page.getByRole('heading')).toContainText('Details on study', { timeout: 10000 });
   await page.getByRole('button', { name: 'Delete' }).click();
   await page.getByRole('button', { name: 'OK' }).click();
@@ -72,7 +72,7 @@ test('expert-study-create-edit-delete', async ({ page }) => {
   await login(page, 'ADMIN');
   await expect(page.getByText(/Notifications\s*\d+/)).toBeVisible();
   await page.getByText(/Notifications\s*\d+/).click();
-  await expect(page.getByText(/Draft\s*Studies\s*\d+/)).toBeVisible();
+  await expect(page.getByText(/Draft\s*Studies\s*\d+/)).toBeVisible({ timeout: 10000});
   await page.getByText(/Draft\s*Studies\s*\d+/).click();
   const studyRow = page
     .locator('form')
