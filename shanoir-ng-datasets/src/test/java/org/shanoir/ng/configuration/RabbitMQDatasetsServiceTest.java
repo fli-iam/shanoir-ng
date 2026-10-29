@@ -14,13 +14,16 @@
 
 package org.shanoir.ng.configuration;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,6 +31,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import static org.mockito.Mockito.doAnswer;
@@ -42,6 +46,7 @@ import org.shanoir.ng.bids.service.BIDSService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;
+import org.shanoir.ng.shared.dto.ParticipantsTsvRequestDTO;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
@@ -53,6 +58,7 @@ import org.shanoir.ng.studycard.repository.QualityCardRepository;
 import org.shanoir.ng.studycard.repository.StudyCardRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
@@ -239,6 +245,29 @@ class RabbitMQDatasetsServiceTest {
         exam.setId(id);
         exam.setStudy(study);
         return exam;
+    }
+
+    @Test
+    void firstExaminationDatesAreSentAsAParticipantsTsvRequest() throws Exception {
+        Map<Long, LocalDate> dates = Map.of(SUBJECT_ID, LocalDate.of(2020, 1, 31));
+        when(examinationRepository.findFirstExaminationDatesByStudyId(STUDY_ID)).thenReturn(dates);
+        when(objectMapper.writeValueAsString(any(ParticipantsTsvRequestDTO.class))).thenReturn("{json}");
+
+        assertEquals("{json}", rabbitMQDatasetsService.findFirstExaminationDates(STUDY_ID));
+
+        ArgumentCaptor<ParticipantsTsvRequestDTO> sent = ArgumentCaptor.forClass(ParticipantsTsvRequestDTO.class);
+        verify(objectMapper).writeValueAsString(sent.capture());
+        assertEquals(STUDY_ID, sent.getValue().getStudyId());
+        assertEquals(dates, sent.getValue().getFirstExaminationDates());
+    }
+
+    @Test
+    void firstExaminationDatesThatCannotBeWrittenReplyNull() throws Exception {
+        when(examinationRepository.findFirstExaminationDatesByStudyId(STUDY_ID)).thenReturn(Map.of());
+        when(objectMapper.writeValueAsString(any(ParticipantsTsvRequestDTO.class)))
+                .thenThrow(new JsonProcessingException("broken") { });
+
+        assertNull(rabbitMQDatasetsService.findFirstExaminationDates(STUDY_ID));
     }
 
 }
