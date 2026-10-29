@@ -47,8 +47,6 @@ services:
       - SHANOIR_URL_HOST
       - SHANOIR_VIEWER_OHIF_URL_SCHEME
       - SHANOIR_VIEWER_OHIF_URL_HOST
-      - SHANOIR_VIEWER_VIDEPE_URL_SCHEME
-      - SHANOIR_VIEWER_VIDEPE_URL_HOST
       - SHANOIR_MIGRATION
       - SHANOIR_KEYCLOAK_USER
       - SHANOIR_KEYCLOAK_PASSWORD
@@ -62,7 +60,6 @@ services:
       - SHANOIR_SMTP_STARTTLS_ENABLE
       - SHANOIR_SMTP_STARTTLS_REQUIRED
       - SHANOIR_SMTP_FROM
-      - NEUROBAGEL_CLIENT_SECRET
     build:
       context: docker-compose
       target: keycloak
@@ -90,25 +87,7 @@ services:
     networks:
       - shanoir_ng_network
   #
-  # Init service: run and stop. Create temporary certificate
-  # related to SHANOIR_URL_HOST for all Shanoir microservices
-  # and set rights on log folder for native images
-  #
-  init-cert-and-logs:
-    container_name: "${SHANOIR_PREFIX}init-cert-and-logs"
-    build:
-      context: docker-compose
-      target: init-cert-and-logs
-    environment:
-      - SHANOIR_URL_HOST
-      - SHANOIR_CERTIFICATE
-      - SHANOIR_CERTIFICATE_PEM_CRT
-      - SHANOIR_CERTIFICATE_PEM_KEY
-    volumes:
-      - "certificate-share-data:/etc/ssl/certs/java"
-      - "logs:/var/log/shanoir-ng-logs"
-  #
-  # Database for all Shanoir microservices
+  # Database for all other microservices
   #
   database:
     container_name: "${SHANOIR_PREFIX}database"
@@ -180,22 +159,18 @@ services:
       - SHANOIR_SMTP_PORT
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
-      - "certificate-share-data:/etc/ssl/certs/java:ro"
+      - certificate-share-data:/etc/ssl/certs/java
     networks:
       - shanoir_ng_network
     ports:
-      - "9901:9901"
-      - "9911:9911"
+     - "9901:9901"
+     - "9911:9911"
     depends_on:
-      init-cert-and-logs:
-        condition: service_completed_successfully
       database-migrations:
         condition: service_completed_successfully
       database:
         condition: service_healthy
       rabbitmq:
-        condition: service_started
-      keycloak:
         condition: service_started
   #
   # Studies microservice
@@ -230,8 +205,6 @@ services:
      - "9902:9902"
      - "9912:9912"
     depends_on:
-      init-cert-and-logs:
-        condition: service_completed_successfully
       database-migrations:
         condition: service_completed_successfully
       database:
@@ -269,8 +242,6 @@ services:
      # do not add by default, as it blocks local ShUp from using 44105
      # - "44105:44105"
     depends_on:
-      init-cert-and-logs:
-        condition: service_completed_successfully
       database-migrations:
         condition: service_completed_successfully
       database:
@@ -305,10 +276,8 @@ services:
       - VIP_URL_SCHEME
       - VIP_URL_HOST
       - VIP_CLIENT_SECRET
-      - VIP_MAX_DOWNLOAD
       - SHANOIR_CONTINUANCE_HOUR
       - SHANOIR_SHUTDOWN_HOUR
-      - SHANOIR_PACS_CONCURRENT_DOWNLOADS
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - certificate-share-data:/etc/ssl/certs/java:ro
@@ -321,8 +290,6 @@ services:
      - "9904:9904"
      - "9914:9914"
     depends_on:
-      init-cert-and-logs:
-        condition: service_completed_successfully
       database-migrations:
         condition: service_completed_successfully
       database:
@@ -365,8 +332,6 @@ services:
      - "9905:9905"
      - "9915:9915"
     depends_on:
-      init-cert-and-logs:
-        condition: service_completed_successfully
       database-migrations:
         condition: service_completed_successfully
       database:
@@ -376,8 +341,7 @@ services:
       users:
         condition: service_started
   #
-  # NIfTI conversion microservice
-  # Only contacted by RabbitMQ, no REST-API
+  # Nifti conversion microservice
   #
   nifti-conversion:
     container_name: "${SHANOIR_PREFIX}nifti-conversion"
@@ -398,13 +362,8 @@ services:
       - "tmp:/tmp"
     networks:
       - shanoir_ng_network
-    depends_on:
-      import:
-        condition: service_started
-      datasets:
-        condition: service_started
   #
-  # Solr microservice for Shanoir search
+  # Solr microservice for Shanoir-NG search
   #
   solr:
     container_name: "${SHANOIR_PREFIX}solr"
@@ -495,8 +454,6 @@ services:
       - SHANOIR_URL_HOST
       - SHANOIR_VIEWER_OHIF_URL_SCHEME
       - SHANOIR_VIEWER_OHIF_URL_HOST
-      - SHANOIR_VIEWER_VIDEPE_URL_SCHEME
-      - SHANOIR_VIEWER_VIDEPE_URL_HOST
       - SHANOIR_VIEWER_OHIF_INTERACTION_NUM_REQUESTS
       - SHANOIR_VIEWER_OHIF_THUMBNAIL_NUM_REQUESTS
       - SHANOIR_VIEWER_OHIF_PREFETCH_NUM_REQUESTS
@@ -512,6 +469,7 @@ services:
       - VIP_URL_HOST
       - SHANOIR_DPO_EMAIL
       - SHANOIR_CONTACT_EMAIL
+      - SHANOIR_MAIL_SUPPLIER_BLACK_LIST
     volumes:
       - "logs:/var/log/nginx"
       - certificate-share-data:/opt/ssl:ro
@@ -520,7 +478,6 @@ services:
     ports:
      - "443:443"
     depends_on:
-      - "init-cert-and-logs"
       - "users"
       - "studies"
       - "import"

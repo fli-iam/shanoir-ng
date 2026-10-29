@@ -16,7 +16,7 @@ services:
   #
   keycloak-database:
     container_name: "${SHANOIR_PREFIX}keycloak-database"
-    image: "ghcr.io/fli-iam/shanoir-ng/keycloak-database:NG_v2.14.0"
+    image: "ghcr.io/fli-iam/shanoir-ng/keycloak-database:NG_v2.12.0"
     environment:
       - MARIADB_DATABASE=keycloak
       - MARIADB_ROOT_PASSWORD=password
@@ -45,8 +45,6 @@ services:
       - SHANOIR_URL_HOST
       - SHANOIR_VIEWER_OHIF_URL_SCHEME
       - SHANOIR_VIEWER_OHIF_URL_HOST
-      - SHANOIR_VIEWER_VIDEPE_URL_SCHEME
-      - SHANOIR_VIEWER_VIDEPE_URL_HOST
       - SHANOIR_MIGRATION
       - SHANOIR_KEYCLOAK_USER
       - SHANOIR_KEYCLOAK_PASSWORD
@@ -60,8 +58,7 @@ services:
       - SHANOIR_SMTP_STARTTLS_ENABLE
       - SHANOIR_SMTP_STARTTLS_REQUIRED
       - SHANOIR_SMTP_FROM
-      - NEUROBAGEL_CLIENT_SECRET
-    image: "ghcr.io/fli-iam/shanoir-ng/keycloak:NG_v2.14.0"
+    image: "ghcr.io/fli-iam/shanoir-ng/keycloak:NG_v2.12.0"
     volumes:
       - "keycloak-logs:/opt/keycloak/data/log"
     networks:
@@ -85,29 +82,11 @@ services:
     networks:
       - shanoir_ng_network
   #
-  # Init service: run and stop. Create temporary certificate
-  # related to SHANOIR_URL_HOST for all Shanoir microservices
-  # and set rights on log folder for native images
-  #  
-  init-cert-and-logs:
-    container_name: "${SHANOIR_PREFIX}init-cert-and-logs"
-    build:
-      context: docker-compose
-      target: init-cert-and-logs
-    environment:
-      - SHANOIR_URL_HOST
-      - SHANOIR_CERTIFICATE
-      - SHANOIR_CERTIFICATE_PEM_CRT
-      - SHANOIR_CERTIFICATE_PEM_KEY
-    volumes:
-      - "certificate-share-data:/etc/ssl/certs/java"
-      - "logs:/var/log/shanoir-ng-logs"
-  #
   # Database for all other microservices
   #
   database:
     container_name: "${SHANOIR_PREFIX}database"
-    image: "ghcr.io/fli-iam/shanoir-ng/database:NG_v2.14.0"
+    image: "ghcr.io/fli-iam/shanoir-ng/database:NG_v2.12.0"
     command: --max_allowed_packet 20000000
     environment:
       - MARIADB_ROOT_PASSWORD=password
@@ -133,7 +112,7 @@ services:
   #
   database-migrations:
     container_name: "${SHANOIR_PREFIX}database-migrations"
-    image: "ghcr.io/fli-iam/shanoir-ng/database-migrations:NG_v2.14.0"
+    image: "ghcr.io/fli-iam/shanoir-ng/database-migrations:NG_v2.12.0"
     environment:
       - SHANOIR_MIGRATION
     networks:
@@ -147,7 +126,7 @@ services:
   #
   users:
     container_name: "${SHANOIR_PREFIX}users"
-    image: "ghcr.io/fli-iam/shanoir-ng/users:NG_v2.14.0"
+    image: "ghcr.io/fli-iam/shanoir-ng/users:NG_v2.12.0"
     environment:
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
@@ -168,15 +147,13 @@ services:
       - SHANOIR_SMTP_PORT
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
-      - "certificate-share-data:/etc/ssl/certs/java:ro"
+      - certificate-share-data:/etc/ssl/certs/java
     networks:
       - shanoir_ng_network
     ports:
      - "9901:9901"
      - "9911:9911"
     depends_on:
-      init-cert-and-logs:
-        condition: service_completed_successfully
       database-migrations:
         condition: service_completed_successfully
       database:
@@ -188,7 +165,7 @@ services:
   #
   studies:
     container_name: "${SHANOIR_PREFIX}studies"
-    image: "ghcr.io/fli-iam/shanoir-ng/studies:NG_v2.14.0"
+    image: "ghcr.io/fli-iam/shanoir-ng/studies:NG_v2.12.0"
     environment:
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
@@ -214,8 +191,6 @@ services:
      - "9902:9902"
      - "9912:9912"
     depends_on:
-      init-cert-and-logs:
-        condition: service_completed_successfully
       database-migrations:
         condition: service_completed_successfully
       database:
@@ -229,7 +204,7 @@ services:
   #
   import:
     container_name: "${SHANOIR_PREFIX}import"
-    image: "ghcr.io/fli-iam/shanoir-ng/import:NG_v2.14.0"
+    image: "ghcr.io/fli-iam/shanoir-ng/import:NG_v2.12.0"
     environment:
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
@@ -251,8 +226,6 @@ services:
      # do not add by default, as it blocks local ShUp from using 44105
      # - "44105:44105"
     depends_on:
-      init-cert-and-logs:
-        condition: service_completed_successfully
       database-migrations:
         condition: service_completed_successfully
       database:
@@ -266,7 +239,7 @@ services:
   #
   datasets:
     container_name: "${SHANOIR_PREFIX}datasets"
-    image: "ghcr.io/fli-iam/shanoir-ng/datasets:NG_v2.14.0"
+    image: "ghcr.io/fli-iam/shanoir-ng/datasets:NG_v2.12.0"
     environment:
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
@@ -277,7 +250,6 @@ services:
       - SHANOIR_VIEWER_OHIF_URL_HOST
       - SHANOIR_MIGRATION
       - SHANOIR_STORAGE_TYPE
-      - SHANOIR_PACS_CONCURRENT_DOWNLOADS
       - S3_ENDPOINT
       - S3_REGION
       - S3_ACCESS_KEY_ID
@@ -286,7 +258,6 @@ services:
       - VIP_URL_SCHEME
       - VIP_URL_HOST
       - VIP_CLIENT_SECRET
-      - VIP_MAX_DOWNLOAD
       - SHANOIR_CONTINUANCE_HOUR
       - SHANOIR_SHUTDOWN_HOUR
     volumes:
@@ -301,8 +272,6 @@ services:
      - "9904:9904"
      - "9914:9914"
     depends_on:
-      init-cert-and-logs:
-        condition: service_completed_successfully
       database-migrations:
         condition: service_completed_successfully
       database:
@@ -318,7 +287,7 @@ services:
   #
   preclinical:
     container_name: "${SHANOIR_PREFIX}preclinical"
-    image: "ghcr.io/fli-iam/shanoir-ng/preclinical:NG_v2.14.0"
+    image: "ghcr.io/fli-iam/shanoir-ng/preclinical:NG_v2.12.0"
     environment:
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
@@ -343,8 +312,6 @@ services:
      - "9905:9905"
      - "9915:9915"
     depends_on:
-      init-cert-and-logs:
-        condition: service_completed_successfully
       database-migrations:
         condition: service_completed_successfully
       database:
@@ -354,12 +321,11 @@ services:
       users:
         condition: service_started
   #
-  # NIfTI conversion microservice
-  # Only contacted by RabbitMQ, no REST-API
+  # Nifti conversion microservice
   #
   nifti-conversion:
     container_name: "${SHANOIR_PREFIX}nifti-conversion"
-    image: "ghcr.io/fli-iam/shanoir-ng/nifti-conversion:NG_v2.14.0"
+    image: "ghcr.io/fli-iam/shanoir-ng/nifti-conversion:NG_v2.12.0"
     environment:
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
@@ -373,17 +339,13 @@ services:
       - "tmp:/tmp"
     networks:
       - shanoir_ng_network
-    depends_on:
-      import:
-        condition: service_started
-      datasets:
-        condition: service_started
+
   #
-  # Solr microservice for Shanoir search
+  # Solr microservice for Shanoir-NG search
   #
   solr:
     container_name: "${SHANOIR_PREFIX}solr"
-    image: "ghcr.io/fli-iam/shanoir-ng/solr:NG_v2.14.0"
+    image: "ghcr.io/fli-iam/shanoir-ng/solr:NG_v2.12.0"
     environment:
       - SOLR_LOG_LEVEL=SEVERE
     volumes:
@@ -459,15 +421,13 @@ services:
   #
   nginx:
     container_name: shanoir-ng-nginx
-    image: "ghcr.io/fli-iam/shanoir-ng/nginx:NG_v2.14.0"
+    image: "ghcr.io/fli-iam/shanoir-ng/nginx:NG_v2.12.0"
     environment:
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
       - SHANOIR_URL_HOST
       - SHANOIR_VIEWER_OHIF_URL_SCHEME
       - SHANOIR_VIEWER_OHIF_URL_HOST
-      - SHANOIR_VIEWER_VIDEPE_URL_SCHEME
-      - SHANOIR_VIEWER_VIDEPE_URL_HOST
       - SHANOIR_VIEWER_OHIF_INTERACTION_NUM_REQUESTS
       - SHANOIR_VIEWER_OHIF_THUMBNAIL_NUM_REQUESTS
       - SHANOIR_VIEWER_OHIF_PREFETCH_NUM_REQUESTS
@@ -483,6 +443,7 @@ services:
       - VIP_URL_HOST
       - SHANOIR_DPO_EMAIL
       - SHANOIR_CONTACT_EMAIL
+      - SHANOIR_MAIL_SUPPLIER_BLACK_LIST
     volumes:
       - "logs:/var/log/nginx"
       - certificate-share-data:/opt/ssl:ro
@@ -491,7 +452,6 @@ services:
     ports:
      - "443:443"
     depends_on:
-      - "init-cert-and-logs"
       - "users"
       - "studies"
       - "import"
@@ -500,7 +460,7 @@ services:
 
   bids-validator:
     container_name: "${SHANOIR_PREFIX}bids-validator"
-    image: "ghcr.io/fli-iam/shanoir-ng/bids-validator:NG_v2.14.0"
+    image: "ghcr.io/fli-iam/shanoir-ng/bids-validator:NG_v2.12.0"
     environment:
       - AMQP_URL=amqp://guest:guest@rabbitmq:5672/
       - IN_QUEUE=bids.validate
