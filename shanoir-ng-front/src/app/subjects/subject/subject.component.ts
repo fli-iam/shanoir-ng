@@ -225,6 +225,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
     };
 
     public onSelectStudy() {
+        if (!this.subject.study) return;
         this.studyService.get(this.subject.study?.id).then(study => {
             this.subject.study = study;
             this.studyService.getTagsFromStudyId(this.subject.study.id).then(tags => {
