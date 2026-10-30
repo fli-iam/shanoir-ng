@@ -209,7 +209,7 @@ test('expert-coil-create-delete', async ({ page }) => {
   await page.getByText('Coils').click();
   await page.getByRole('button', { name: '+ New' }).click();
   await page.locator('#name').click();
-  await page.locator('#name').fill('playwright-test-coil-create-' + randomStringExpert);
+  await page.locator('#name').fill('coil-' + randomStringExpert);
   await page.locator('#serialNb').click();
   await page.locator('#serialNb').fill('serial-number-' + randomStringExpert);
   const coilTypeItem = page.getByRole('listitem').filter({ hasText: 'Coil Type' });
@@ -226,7 +226,7 @@ test('expert-coil-create-delete', async ({ page }) => {
   await acqCenterOption.click();
   await page.getByRole('button', { name: 'Save' }).click();
   await expect(page.getByRole('heading')).toContainText('Details on coil');
-  await expect(page.locator('ol')).toContainText('playwright-test-coil-create-' + randomStringExpert);
+  await expect(page.locator('ol')).toContainText('coil-' + randomStringExpert);
   await expect(page.locator('ol')).toContainText('Serial Number');
   await expect(page.locator('ol')).toContainText('Coil Type');
   await page.getByRole('button', { name: 'Delete' }).click();
