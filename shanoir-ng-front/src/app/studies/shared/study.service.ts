@@ -151,7 +151,7 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
             .then(this.mapSubjectList);
     }
 
-    private findStudiesICanImport(): Promise<Study[]> {
+    findStudiesICanImport(): Promise<Study[]> {
         if (this.keycloakService.isUserAdmin()) {
             return this.getAll();
         } else {

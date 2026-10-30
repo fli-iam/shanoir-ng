@@ -196,7 +196,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
     }
 
     private completeStudyCenters(): Promise<void> {
-        return Promise.all([this.studyService.getAll(), this.centerService.getAll()])
+        return Promise.all([this.studyService.findStudiesICanImport(), this.centerService.getAll()])
             .then(([allStudies, allCenters]) => {
                 this.studyOptions = [];
                 this.allCenters = allCenters;
@@ -232,7 +232,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
 
     private computeIsAdminOfStudy(studyId: number) {
         if (this.study && this.isAdminOfStudy[studyId] == undefined) {
-            if (this.keycloakService.isUserAdmin) {
+            if (this.keycloakService.isUserAdmin()) {
                 this.isAdminOfStudy[studyId] = true;
             } else {
                 this.hasAdminRightOn(this.study).then((result) => this.isAdminOfStudy[studyId] = result);
