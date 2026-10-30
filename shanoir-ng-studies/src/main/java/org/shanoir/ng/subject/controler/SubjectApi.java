@@ -132,6 +132,7 @@ public interface SubjectApi {
     ResponseEntity<SubjectDTO> saveNewSubject(
             @Parameter(description = "subject to create", required = true) @RequestBody Subject subject,
             @Parameter(description = "request param centerId as flag for auto-increment common name", required = false) @RequestParam(required = false) Long centerId,
+            @Parameter(description = "false to skip the study's subject name pattern check, for names built from imported data", required = false) @RequestParam(required = false, defaultValue = "true") boolean checkNamePattern,
             final BindingResult result) throws ShanoirException, RestServiceException;
 
     // Attention: this method is used by ShanoirUploader!!!

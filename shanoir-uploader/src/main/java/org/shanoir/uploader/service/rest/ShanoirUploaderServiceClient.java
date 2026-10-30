@@ -1310,11 +1310,25 @@ public class ShanoirUploaderServiceClient {
             final Subject subject,
             final boolean modeSubjectCommonNameManual,
             final Long centerId) {
+        return createSubject(subject, modeSubjectCommonNameManual, centerId, true);
+    }
+
+    /**
+     * Same as {@link #createSubject(Subject, boolean, Long)}, with checkNamePattern false to skip
+     * the study's subject name pattern check on the server, for names not chosen by the user.
+     */
+    public Subject createSubject(
+            final Subject subject,
+            final boolean modeSubjectCommonNameManual,
+            final Long centerId,
+            final boolean checkNamePattern) {
         try {
             String json = Util.objectWriter.writeValueAsString(subject);
             CloseableHttpResponse response;
             if (modeSubjectCommonNameManual) {
-                response = httpService.post(this.serviceURLSubjectsCreate, json, false);
+                String url = checkNamePattern ? this.serviceURLSubjectsCreate
+                        : this.serviceURLSubjectsCreate + "?checkNamePattern=false";
+                response = httpService.post(url, json, false);
             } else {
                 response = httpService.post(this.serviceURLSubjectsCreate + "?centerId=" + centerId, json, false);
             }
