@@ -128,6 +128,7 @@ public class SubjectApiController implements SubjectApi {
     public ResponseEntity<SubjectDTO> saveNewSubject(
             @RequestBody Subject subject,
             @RequestParam(required = false) Long centerId,
+            @RequestParam(required = false, defaultValue = "true") boolean checkNamePattern,
             final BindingResult result) throws ShanoirException, RestServiceException {
         validate(subject, result);
         Subject createdSubject;
@@ -138,9 +139,9 @@ public class SubjectApiController implements SubjectApi {
             }
 
             try {
-                createdSubject = subjectService.create(subject, true);
+                createdSubject = subjectService.create(subject, true, checkNamePattern);
             } catch (ShanoirException e) {
-                throw new RestServiceException(new ErrorModel(HttpStatus.FORBIDDEN.value(), e.getMessage(), null));
+                throw new RestServiceException(new ErrorModel(e.getErrorCode(), e.getMessage(), null));
             }
         } else {
             createdSubject = subjectService.createAutoIncrement(subject, centerId, true);

@@ -98,7 +98,7 @@ public class SubjectApiSecurityTest {
         assertAccessDenied(api::findAllSubjectsNames);
         assertAccessDenied(api::findSubjectsNames, List.of(ENTITY_ID));
         assertAccessDenied(api::findSubjectById, ENTITY_ID);
-        assertAccessDenied(api::saveNewSubject, mockNew, null, mockBindingResult);
+        assertAccessDenied(api::saveNewSubject, mockNew, null, true, mockBindingResult);
         assertAccessDenied(api::updateSubject, ENTITY_ID, mockExisting, mockBindingResult);
         assertAccessDenied(api::findSubjectsByStudyId, ENTITY_ID, "null");
         assertAccessDenied(api::findSubjectByIdentifier, "identifier");
@@ -157,7 +157,7 @@ public class SubjectApiSecurityTest {
         assertAccessAuthorized(api::findAllSubjectsNames);
         assertAccessAuthorized(api::findSubjectsNames, List.of(ENTITY_ID));
         assertAccessAuthorized(api::findSubjectById, ENTITY_ID);
-        assertAccessAuthorized(api::saveNewSubject, mockNew, null, mockBindingResult);
+        assertAccessAuthorized(api::saveNewSubject, mockNew, null, true, mockBindingResult);
         assertAccessAuthorized(api::updateSubject, ENTITY_ID, mockExisting, mockBindingResult);
         assertAccessAuthorized(api::findSubjectsByStudyId, ENTITY_ID, "null");
         assertAccessAuthorized(api::findSubjectByIdentifier, "identifier");
@@ -239,7 +239,7 @@ public class SubjectApiSecurityTest {
 
         // Create subject without subject <-> study
         Subject newSubjectMock = buildSubjectMock(null);
-        assertAccessDenied(api::saveNewSubject, newSubjectMock, null, mockBindingResult);
+        assertAccessDenied(api::saveNewSubject, newSubjectMock, null, true, mockBindingResult);
 
         // Create subject
         studiesMock = new ArrayList<>();
@@ -248,7 +248,7 @@ public class SubjectApiSecurityTest {
         given(studyRepository.findById(9L)).willReturn(Optional.of(buildStudyMock(9L)));
         newSubjectMock = buildSubjectMock(null);
         addStudyToMock(newSubjectMock, 9L);
-        assertAccessDenied(api::saveNewSubject, newSubjectMock, null, mockBindingResult);
+        assertAccessDenied(api::saveNewSubject, newSubjectMock, null, true, mockBindingResult);
 
         // Create subject linked to a study where I can admin, download, see all but not import.
         studiesMock = new ArrayList<>();
@@ -257,7 +257,7 @@ public class SubjectApiSecurityTest {
         given(studyRepository.findById(10L)).willReturn(Optional.of(buildStudyMock(10L, StudyUserRight.CAN_ADMINISTRATE, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_SEE_ALL)));
         newSubjectMock = buildSubjectMock(null);
         addStudyToMock(newSubjectMock, 10L);
-        assertAccessDenied(api::saveNewSubject, newSubjectMock, null, mockBindingResult);
+        assertAccessDenied(api::saveNewSubject, newSubjectMock, null, true, mockBindingResult);
 
         // Create subject linked to a study where I can import
         studiesMock = new ArrayList<>();
@@ -267,7 +267,7 @@ public class SubjectApiSecurityTest {
         given(studyUserRepository.findByStudy_Id(13L)).willReturn(buildStudyMock(13L, StudyUserRight.CAN_IMPORT).getStudyUserList());
         newSubjectMock = buildSubjectMock(null);
         addStudyToMock(newSubjectMock, 13L, StudyUserRight.CAN_IMPORT);
-        assertAccessAuthorized(api::saveNewSubject, newSubjectMock, null, mockBindingResult);
+        assertAccessAuthorized(api::saveNewSubject, newSubjectMock, null, true, mockBindingResult);
     }
 
     private Study buildStudyMock(Long id, StudyUserRight... rights) {
