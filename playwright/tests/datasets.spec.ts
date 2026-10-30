@@ -35,7 +35,7 @@ test('expert-subject-examination-create-delete', async ({ page }) => {
   // add center to study
   await page.getByRole('listitem', { name: 'At least one center is' }).click();
   await page.getByRole('textbox', { name: 'Select a center' }).click();
-  await page.getByText('center-' + randomString).click();
+  await page.getByText('center-' + randomString).first().click();
   await page.locator('.commands > span:nth-child(3) > .fas').click();
   await expect(page.locator('form')).toContainText('center-' + randomString);
   await page.getByRole('button', { name: 'Save' }).click();
