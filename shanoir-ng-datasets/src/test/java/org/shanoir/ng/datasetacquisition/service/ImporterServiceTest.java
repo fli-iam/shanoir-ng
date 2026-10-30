@@ -25,8 +25,10 @@ import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.dcm4che3.data.VR;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -60,12 +62,14 @@ import org.shanoir.ng.importer.service.ImporterMailService;
 import org.shanoir.ng.importer.service.ImporterService;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.quality.QualityTag;
 import org.shanoir.ng.shared.service.SubjectService;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.dto.QualityCardResultEntry;
 import org.shanoir.ng.studycard.model.QualityCard;
+import org.shanoir.ng.studycard.model.QualityException;
 import org.shanoir.ng.studycard.repository.QualityCardRepository;
 import org.shanoir.ng.studycard.service.QualityCardService;
 import org.shanoir.ng.utils.Utils;
@@ -236,6 +240,52 @@ public class ImporterServiceTest {
             // AN archive is not referenced in the examination (file not existing)
             List<String> extradata = datasetAcq.getExamination().getExtraDataFilePathList();
             assertNull(extradata);
+        }
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    public void createAllDatasetAcquisitionWithoutImagesIsNotAQualityError() throws Exception {
+        // GIVEN an importJob whose only serie has no images, in a study without quality card
+        Serie serie = new Serie();
+        serie.setSelected(Boolean.TRUE);
+        serie.setModality("MR");
+        serie.setIsEnhanced(Boolean.FALSE);
+
+        ImportJob importJob = new ImportJob();
+        importJob.setSeries(Utils.toList(serie));
+        importJob.setExaminationId(2L);
+        importJob.setStudyId(1L);
+        importJob.setShanoirEvent(new ShanoirEvent());
+        importJob.setFromShanoirUploader(false);
+
+        Examination examination = new Examination();
+        examination.setId(2L);
+        examination.setExaminationDate(LocalDate.now());
+        examination.setDatasetAcquisitions(new ArrayList<>());
+        examination.setStudy(new org.shanoir.ng.shared.model.Study());
+        examination.getStudy().setId(1L);
+
+        AcquisitionAttributes<String> acquisitionAttributes = new AcquisitionAttributes<String>();
+        Attributes attributes = new Attributes();
+        attributes.setString(Tag.StudyInstanceUID, VR.UI, "123412341234");
+        acquisitionAttributes.addDatasetAttributes("1", attributes);
+
+        try (MockedStatic<DicomProcessing> dicomProcessingMock = Mockito.mockStatic(DicomProcessing.class)) {
+            dicomProcessingMock
+                    .when(() -> DicomProcessing.getDicomAcquisitionAttributes(serie))
+                    .thenReturn(acquisitionAttributes);
+            when(qualityCardRepository.findByStudyId(examination.getStudyId())).thenReturn(Collections.emptyList());
+            when(examinationRepository.findByIdWithAcquisitions(examination.getId())).thenReturn(Optional.of(examination));
+
+            // WHEN we treat this importjob
+            ShanoirException exception = assertThrows(ShanoirException.class,
+                    () -> service.createAllDatasetAcquisition(importJob, 1L));
+
+            // THEN the failure is not reported as a quality check failure
+            assertFalse(exception.getCause() instanceof QualityException);
+            assertTrue(exception.getMessage().contains("No dataset acquisition could be generated: 1 of the 1 selected serie(s) had no images."));
+            verify(examinationService).deleteEmptyExamination(examination.getId());
         }
     }
 }
