@@ -286,27 +286,61 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
     }
 
     public attachNewFile(event: any) {
-        const newFile = event.target.files[0];
-        this.examination.extraDataFilePathList.push(newFile.name);
-        this.files.push(newFile);
+        for (const newFile of Array.from(event.target.files as FileList)) {
+            if (this.examination.extraDataFilePathList.includes(newFile.name)) {
+                this.consoleService.log('warn', 'A file named "' + newFile.name + '" is already attached and was skipped.');
+                continue;
+            }
+            this.examination.extraDataFilePathList.push(newFile.name);
+            this.files.push(newFile);
+        }
+        event.target.value = null;
         this.form.markAsDirty();
         this.form.updateValueAndValidity();
     }
 
+    /**
+     * - with new files: exam + files in one request (create or update), nothing is saved if a file can't be stored
+     * - without new files: classic save
+     */
     public save(): Promise<Examination> {
-        return super.save(() => {
-            const uploads: Promise<void>[] = [];
-            // Once the exam is saved, save associated files
-            for (const file of this.files) {
-                uploads.push(this.examinationService.postFile(file, this.entity.id));
-            }
-            return Promise.all(uploads).then(() => null);
-        }).then(() => null).catch(reason => { if (reason.status == 403) {
+        const saving: Promise<Examination> = this.files?.length ? this.saveWithFiles() : super.save();
+        return saving.then(() => null).catch(reason => {
+            if (reason.status != 403) throw reason;
             this.consoleService.log('error', 'Examination ' + this.examination.id + ' Updating study / subject / center of an examination is forbidden.');
             return null;
-        } else {
-            throw reason;
-        }});
+        });
+    }
+
+    /**
+     * Saves (creates or updates) the exam with its new files in one request.
+     * Mirrors what the classic save does around the request (EntityComponent.save / modeSpecificSave).
+     */
+    private saveWithFiles(): Promise<Examination> {
+        this.footerState.loading = true;
+        EntityComponent.mapFormToEntity(this.entity, this.form);
+        const creation: boolean = this.mode == 'create';
+        const request: Promise<Examination> = creation
+            ? this.examinationService.create(this.examination, this.files)
+            : this.examinationService.update(this.examination.id, this.examination, this.files).then(() => this.examination);
+        return request.then(exam => {
+            this.entity.id = exam.id;
+            this.onSave.next(exam);
+            this.chooseRouteAfterSave(exam);
+            this.consoleService.log('info', creation
+                ? 'New examination successfully saved with n° ' + exam.id
+                : 'Examination n°' + exam.id + ' successfully updated');
+            this.treeService.updateTree();
+            return exam;
+        }).catch(reason => {
+            // Files not stored (nothing saved): show the server reason instead of a generic error
+            if (reason?.status == 500 && reason.error?.message) {
+                this.consoleService.log('error', reason.error.message);
+                return null;
+            }
+            this.catchSavingErrors(reason);
+            return null;
+        }).finally(() => this.footerState.loading = false);
     }
 
     getFileName(element): string {

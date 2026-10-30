@@ -72,11 +72,30 @@ export class ExaminationService extends EntityService<Examination> {
         return this.examinationDtoService.toEntityList(entities);
     }
 
-    postFile(fileToUpload: File, examId: number): Promise<any> {
-        const endpoint = this.API_URL + '/extra-data-upload/' + examId;
+    /**
+     * Creates the examination, with its extra data files if any, in a single request:
+     * the examination is not created if a file can't be stored.
+     */
+    create(entity: Examination, filesToUpload: File[] = []): Promise<Examination> {
+        return firstValueFrom(this.http.post<ExaminationDTO>(this.API_URL, this.toFormData(entity, filesToUpload)))
+            .then(this.mapEntity);
+    }
+
+    /**
+     * Updates the examination, with its new extra data files if any, in a single request:
+     * the examination is not updated if a file can't be stored.
+     */
+    update(id: number, entity: Examination, filesToUpload: File[] = []): Promise<void> {
+        return firstValueFrom(this.http.put<void>(this.API_URL + '/' + id, this.toFormData(entity, filesToUpload)));
+    }
+
+    private toFormData(entity: Examination, filesToUpload: File[]): FormData {
         const formData: FormData = new FormData();
-        formData.append('file', fileToUpload, fileToUpload.name);
-        return firstValueFrom(this.http.post<any>(endpoint, formData));
+        formData.append('examination', new Blob([this.stringify(entity)], { type: 'application/json' }));
+        for (const file of filesToUpload) {
+            formData.append('files', file, file.name);
+        }
+        return formData;
     }
 
     downloadFile(fileName: string, examId: number, state?: TaskState): Observable<TaskState>  {

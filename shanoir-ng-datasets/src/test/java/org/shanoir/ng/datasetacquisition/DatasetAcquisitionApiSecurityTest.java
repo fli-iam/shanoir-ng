@@ -119,7 +119,7 @@ public class DatasetAcquisitionApiSecurityTest {
         assertAccessDenied(api::findByStudyCard, 1L);
         assertAccessDenied(api::findDatasetAcquisitions, PageRequest.of(0, 10));
         assertAccessDenied(api::createNewDatasetAcquisition, new ImportJob());
-        assertAccessDenied(api::updateDatasetAcquisition, 1L, mockDsAcqDTO(1L), mockBindingResult);
+        assertAccessDenied(api::updateDatasetAcquisition, 1L, mockDsAcqDTO(1L), mockBindingResult, null);
         assertAccessDenied(api::deleteDatasetAcquisition, 1L);
         assertAccessDenied(api::findEmptyDatasetAcquisitions, 1L);
         assertAccessDenied(api::deleteEmptyDatasetAcquisitions, 1L);
@@ -153,7 +153,7 @@ public class DatasetAcquisitionApiSecurityTest {
         //assertEquals(3, api.findDatasetAcquisitions(PageRequest.of(0, 10)).getBody().getTotalElements());
 
         assertAccessAuthorized(api::createNewDatasetAcquisition, new ImportJob());
-        assertAccessAuthorized(api::updateDatasetAcquisition, 1L, mockDsAcqDTO(1L), mockBindingResult);
+        assertAccessAuthorized(api::updateDatasetAcquisition, 1L, mockDsAcqDTO(1L), mockBindingResult, null);
         assertAccessAuthorized(api::deleteDatasetAcquisition, 4L);
         assertAccessAuthorized(api::findEmptyDatasetAcquisitions, 1L);
         assertAccessAuthorized(api::deleteEmptyDatasetAcquisitions, 1L);
@@ -267,13 +267,13 @@ public class DatasetAcquisitionApiSecurityTest {
         given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(true);
         // updateDatasetAcquisition(Long, DatasetAcquisitionDTO, BindingResult)
         if ("ROLE_USER".equals(role)) {
-            assertAccessDenied(api::updateDatasetAcquisition, 1L, mockDsAcqDTO(1L), mockBindingResult);
+            assertAccessDenied(api::updateDatasetAcquisition, 1L, mockDsAcqDTO(1L), mockBindingResult, null);
         } else if ("ROLE_EXPERT".equals(role)) {
-            assertAccessAuthorized(api::updateDatasetAcquisition, 1L, mockDsAcqDTO(1L), mockBindingResult);
+            assertAccessAuthorized(api::updateDatasetAcquisition, 1L, mockDsAcqDTO(1L), mockBindingResult, null);
         }
-        assertAccessDenied(api::updateDatasetAcquisition, 1L, mockDsAcqDTO(2L), mockBindingResult);
-        assertAccessDenied(api::updateDatasetAcquisition, 1L, mockDsAcqDTO(3L), mockBindingResult);
-        assertAccessDenied(api::updateDatasetAcquisition, 1L, mockDsAcqDTO(4L), mockBindingResult);
+        assertAccessDenied(api::updateDatasetAcquisition, 1L, mockDsAcqDTO(2L), mockBindingResult, null);
+        assertAccessDenied(api::updateDatasetAcquisition, 1L, mockDsAcqDTO(3L), mockBindingResult, null);
+        assertAccessDenied(api::updateDatasetAcquisition, 1L, mockDsAcqDTO(4L), mockBindingResult, null);
     }
 
 

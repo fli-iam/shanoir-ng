@@ -35,6 +35,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -152,50 +153,40 @@ public interface ExaminationApi {
               + "@datasetSecurityService.hasRightOnStudyCenter(#examinationDTO.getCenterId(), #examinationDTO.getStudyId(), 'CAN_IMPORT')))")
     ResponseEntity<ExaminationDTO> saveNewExamination(
             @Parameter(description = "examination to create", required = true) @Valid @RequestBody ExaminationDTO examinationDTO,
-            final BindingResult result) throws RestServiceException;
+            final BindingResult result) throws RestServiceException, StorageException;
 
-    @Operation(summary = "", description = "Updates an examination")
-    @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "examination updated"),
+    @Operation(summary = "", description = "Saves a new examination with its extra data files if any, the examination is created only if all the files are stored")
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "created examination"),
             @ApiResponse(responseCode = "401", description = "unauthorized"),
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "422", description = "bad parameters"),
-            @ApiResponse(responseCode = "500", description = "unexpected error") })
+            @ApiResponse(responseCode = "500", description = "unexpected error, examination not created") })
+    @PostMapping(value = {"", "/"}, produces = { "application/json" }, consumes = {
+            "multipart/form-data" })
+    @PreAuthorize("!@datasetSecurityService.isDraftStudy(#examinationDTO.getStudyId()) and "
+              + "(hasRole('ADMIN') or "
+              + "(hasAnyRole('EXPERT', 'USER') and "
+              + "@datasetSecurityService.hasRightOnStudyCenter(#examinationDTO.getCenterId(), #examinationDTO.getStudyId(), 'CAN_IMPORT')))")
+    ResponseEntity<ExaminationDTO> saveNewExaminationWithExtraData(
+            @Parameter(description = "examination to create", required = true) @Valid @RequestPart("examination") ExaminationDTO examinationDTO,
+            final BindingResult result,
+            @Parameter(description = "extra data files to store") @RequestPart(value = "files", required = false) List<MultipartFile> files) throws RestServiceException, StorageException;
+
+    @Operation(summary = "", description = "Updates an examination with its new extra data files if any, the examination is updated only if all the files are stored")
+    @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "examination updated"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "404", description = "examination not found"),
+            @ApiResponse(responseCode = "422", description = "bad parameters or extra data file already existing"),
+            @ApiResponse(responseCode = "500", description = "unexpected error, examination not updated") })
     @PutMapping(value = "/{examinationId}", produces = { "application/json" }, consumes = {
-            "application/json" })
+            "multipart/form-data" })
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and #examination.getId().equals(#examinationId) and @datasetSecurityService.hasRightOnExamination(#examination.getId(), 'CAN_IMPORT'))")
     ResponseEntity<Void> updateExamination(
             @Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
-            @Parameter(description = "examination to update", required = true) @Valid @RequestBody ExaminationDTO examination,
-            final BindingResult result) throws Exception;
-
-    @Operation(summary = "", description = "Add extra data to an examination")
-    @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "examination updated"),
-            @ApiResponse(responseCode = "401", description = "unauthorized"),
-            @ApiResponse(responseCode = "403", description = "forbidden"),
-            @ApiResponse(responseCode = "422", description = "bad parameters"),
-            @ApiResponse(responseCode = "500", description = "unexpected error") })
-    @PostMapping(value = "extra-data-upload/{examinationId}",
-            produces = { "application/json" },
-            consumes = { "multipart/form-data" })
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_IMPORT'))")
-    ResponseEntity<Void> addExtraData(
-            @Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
-            @Parameter(description = "file to upload", required = true) @Valid @RequestBody MultipartFile file) throws RestServiceException;
-
-    @Operation(summary = "", description = "Create an examination and add extra data")
-    @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "examination created and data added"),
-            @ApiResponse(responseCode = "401", description = "unauthorized"),
-            @ApiResponse(responseCode = "403", description = "forbidden"),
-            @ApiResponse(responseCode = "422", description = "bad parameters"),
-            @ApiResponse(responseCode = "500", description = "unexpected error") })
-    @PostMapping(value = "extra-data-upload/new-exam/subject/{subjectName}/center/{centerId}",
-            produces = { "application/json" },
-            consumes = { "multipart/form-data" })
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnSubjectName(#subjectName, 'CAN_IMPORT'))")
-    ResponseEntity<Void> createExaminationAndAddExtraData(
-            @Parameter(description = "name of the subject", required = true) @PathVariable("subjectName") String subjectName,
-            @Parameter(description = "id of the center", required = true) @PathVariable("centerId") Long centerId,
-            @Parameter(description = "file to upload", required = true) @Valid @RequestBody MultipartFile file) throws RestServiceException;
+            @Parameter(description = "examination to update", required = true) @Valid @RequestPart("examination") ExaminationDTO examination,
+            final BindingResult result,
+            @Parameter(description = "new extra data files to store") @RequestPart(value = "files", required = false) List<MultipartFile> files) throws RestServiceException, StorageException;
 
     @Operation(summary = "", description = "Retrieves the DICOM StudyInstanceUID from the backup PACS for the given examination and updates it in the database")
     @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "study instance UID synced from PACS and updated"),
@@ -218,7 +209,7 @@ public interface ExaminationApi {
             @ApiResponse(responseCode = "422", description = "bad parameters"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
     @GetMapping(value = "extra-data-download/{examinationId}/{fileName:.+}/")
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_SEE_ALL'))")
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_DOWNLOAD'))")
     void downloadExtraData(
             @Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
             @Parameter(description = "file to download", required = true) @PathVariable("fileName") String fileName, HttpServletResponse response) throws RestServiceException, IOException;

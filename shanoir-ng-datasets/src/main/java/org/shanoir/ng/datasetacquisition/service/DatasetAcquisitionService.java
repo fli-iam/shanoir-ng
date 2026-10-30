@@ -25,6 +25,7 @@ import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.storage.StorageException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PostAuthorize;
@@ -65,6 +66,20 @@ public interface DatasetAcquisitionService {
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and  @datasetSecurityService.hasRightOnExamination(#entity.examination.id, 'CAN_ADMINISTRATE')")
     DatasetAcquisition update(DatasetAcquisition entity) throws EntityNotFoundException;
+
+    /**
+     * Update a dataset acquisition with new extra data files.
+     * The files are stored first: the acquisition is updated only if all of them are stored,
+     * otherwise the files stored by this call are removed and nothing is updated.
+     *
+     * @param entity the acquisition to update.
+     * @param files the new extra data files, can be empty.
+     * @return the updated acquisition.
+     * @throws ShanoirException if a file already exists (422) or the acquisition is not found.
+     * @throws StorageException if a file could not be stored.
+     */
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and  @datasetSecurityService.hasRightOnExamination(#entity.examination.id, 'CAN_ADMINISTRATE')")
+    DatasetAcquisition update(DatasetAcquisition entity, List<MultipartFile> files) throws ShanoirException, StorageException;
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and  @datasetSecurityService.filterDatasetAcquisitionList(#entities, 'CAN_ADMINISTRATE')")
     Iterable<DatasetAcquisition> update(List<DatasetAcquisition> entities) throws EntityNotFoundException;
@@ -121,7 +136,5 @@ public interface DatasetAcquisitionService {
     boolean existsByStudyCardId(Long studyCardId);
 
     Collection<DatasetAcquisition> createAll(Collection<DatasetAcquisition> acquisitions);
-
-    String addExtraData(Long acquisitionId, MultipartFile file);
 
 }
