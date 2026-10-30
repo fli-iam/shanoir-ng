@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -109,10 +110,16 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
             event.setId(copyData.getTaskId());
         }
         eventService.publishEvent(event);
-        Study targetStudy = studyService.findById(copyData.getTargetStudyId());
-        Map<Long, IdName> subjectMapping = createSubjectsInTargetStudy(copyData.getSubjects(), copyData.getCenterIds(), targetStudy, event);
-        addCentersInTargetStudy(copyData.getCenterIds(), targetStudy, event);
-        copyDatasetsToStudy(copyData.getDatasetIds(), copyData.getTargetStudyId(), subjectMapping, event);
+        try {
+            Study targetStudy = studyService.findById(copyData.getTargetStudyId());
+            Map<Long, IdName> subjectMapping = createSubjectsInTargetStudy(copyData.getSubjects(), copyData.getCenterIds(), targetStudy, event);
+            addCentersInTargetStudy(copyData.getCenterIds(), targetStudy, event);
+            copyDatasetsToStudy(copyData.getDatasetIds(), copyData.getTargetStudyId(), subjectMapping, event);
+        } catch (ShanoirException | RuntimeException e) {
+            // the event is already published as in progress: close it, as the transaction is rolled back
+            eventService.publishErrorEvent(event, "Copy datasets failed: " + e.getMessage());
+            throw e;
+        }
         return event.getId();
     }
 
@@ -217,6 +224,7 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
             centerPrefix = targetStudy.getStudyCenterList().stream()
                     .filter(studyCenter -> studyCenter.getCenter() != null && centerId.equals(studyCenter.getCenter().getId()))
                     .map(StudyCenter::getSubjectNamePrefix)
+                    .filter(Objects::nonNull) // findFirst() can't return a null prefix
                     .findFirst().orElse(null);
         }
         SubjectNamePatternUtils.NameBase nameBase = SubjectNamePatternUtils.computeNameBase(namePattern, centerPrefix);
