@@ -62,6 +62,7 @@ services:
       - SHANOIR_SMTP_STARTTLS_ENABLE
       - SHANOIR_SMTP_STARTTLS_REQUIRED
       - SHANOIR_SMTP_FROM
+      - NEUROBAGEL_CLIENT_SECRET
     build:
       context: docker-compose
       target: keycloak
@@ -92,7 +93,7 @@ services:
   # Init service: run and stop. Create temporary certificate
   # related to SHANOIR_URL_HOST for all Shanoir microservices
   # and set rights on log folder for native images
-  #  
+  #
   init-cert-and-logs:
     container_name: "${SHANOIR_PREFIX}init-cert-and-logs"
     build:
@@ -305,6 +306,7 @@ services:
       - VIP_URL_HOST
       - VIP_CLIENT_SECRET
       - VIP_MAX_DOWNLOAD
+      - VIP_COMPRESSION_LEVEL
       - SHANOIR_CONTINUANCE_HOUR
       - SHANOIR_SHUTDOWN_HOUR
       - SHANOIR_PACS_CONCURRENT_DOWNLOADS

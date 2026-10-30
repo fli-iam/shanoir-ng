@@ -296,6 +296,7 @@ export class StudyComponent extends EntityComponent<Study> {
             'description': [this.study.description],
             'license': [this.study.license],
             'visibleByDefault': [this.study.visibleByDefault],
+            'neurobagelExport': [this.study.neurobagelExport],
             'downloadableByDefault': [this.study.downloadableByDefault],
             'studyCenterList': [{value: this.study.studyCenterList}, [Validators.required, this.validateCenter]],
             'subjects': [this.study.subjects],
@@ -610,15 +611,11 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     public deleteDataUserAgreement() {
-        if (this.mode == 'create') {
-            this.study.dataUserAgreementPaths = [];
-            this.dataUserAgreement = null;
-        } else if (this.mode == 'edit') {
-            this.studyService.deleteFile(this.study.id, 'dua');
-            this.study.dataUserAgreementPaths = [];
-            this.dataUserAgreement = null;
-        }
-
+        // the file is removed on the server when the study is saved (with an empty dataUserAgreementPaths)
+        this.study.dataUserAgreementPaths = [];
+        this.dataUserAgreement = null;
+        this.form.markAsDirty();
+        this.form.updateValueAndValidity();
     }
 
     public downloadDataUserAgreement() {
