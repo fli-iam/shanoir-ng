@@ -97,9 +97,9 @@ public class EquipmentDicom {
 
     public String toStringAcquisitionEquipment(String centerName) {
         return manufacturer + " - "
-            + manufacturerModelName + " "
-            + (magneticFieldStrength != null ? (magneticFieldStrength + "T ") : "")
-            + deviceSerialNumber + " - " + centerName;
+                + manufacturerModelName + " "
+                + (magneticFieldStrength != null ? (magneticFieldStrength + "T ") : "")
+                + deviceSerialNumber + " - " + centerName;
     }
 
     public void setMagneticFieldStrength(String magneticFieldStrength) {
@@ -117,17 +117,17 @@ public class EquipmentDicom {
     @JsonIgnore
     public boolean isComplete() {
         return StringUtils.isNotEmpty(this.manufacturer)
-            && StringUtils.isNotEmpty(this.manufacturerModelName)
-            && StringUtils.isNotEmpty(this.deviceSerialNumber)
-            && StringUtils.isNotEmpty(this.modality);
+                && StringUtils.isNotEmpty(this.manufacturerModelName)
+                && StringUtils.isNotEmpty(this.deviceSerialNumber)
+                && StringUtils.isNotEmpty(this.modality);
     }
 
     @JsonIgnore
     public boolean isKnown() {
         return isKnown(manufacturer)
-            && isKnown(manufacturerModelName)
-            && isKnown(deviceSerialNumber)
-            && isKnown(modality);
+                && isKnown(manufacturerModelName)
+                && isKnown(deviceSerialNumber)
+                && isKnown(modality);
     }
 
     private boolean isKnown(String value) {
