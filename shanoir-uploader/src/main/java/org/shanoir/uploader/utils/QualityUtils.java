@@ -105,8 +105,9 @@ public class QualityUtils {
                 DatasetAcquisition datasetAcquisition = generateDatasetAcquisitionForQualityCheck(importJob.getStudy(), serie);
 
                 QualityCardResult serieQualityCardResult = qualityService.checkQuality(datasetAcquisition, dicomAttributes, cardsToCheck);
-                // We retrieve the worst quality tag associated with the datasetAcquisition
-                QualityTag worstTagSet = serieQualityCardResult.getUpdatedDatasetAcquisitions().get(0).getQualityTag();
+                // We retrieve the worst quality tag set by the rules on the datasetAcquisition,
+                // null if no rule applied to the serie: no tag is set then
+                QualityTag worstTagSet = datasetAcquisition.getQualityTag();
                 // if quality card result contains an ERROR tag, we remove the serie from the selection
                 if (!serieQualityCardResult.isEmpty() && serieQualityCardResult.hasError()) {
                     seriesIt.remove();
