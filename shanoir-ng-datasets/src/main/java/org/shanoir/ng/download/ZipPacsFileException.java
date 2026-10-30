@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.download;
 
+///  Allow the separation of "this one file failed on the PACS side, keep going" and "the archive or client is broken, stop everything"
 public class ZipPacsFileException extends Exception {
 
     ZipPacsFileException(Throwable cause) {
