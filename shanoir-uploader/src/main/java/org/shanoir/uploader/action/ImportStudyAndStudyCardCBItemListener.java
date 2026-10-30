@@ -225,6 +225,17 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
             importDialog.subjectTypeCB.setSelectedItem(subject.getSubjectType());
             importDialog.subjectTypeCB.setEnabled(false);
         } else {
+            if (ShUpConfig.isModeSubjectNameAutoIncrement()) {
+//                importDialog.subjectTextField
+//                        .setText(importDialog.resourceBundle.getString("shanoir.uploader.import.subject.autofill"));
+                importDialog.subjectTextField.setBackground(Color.LIGHT_GRAY);
+                importDialog.subjectTextField.setEnabled(false);
+                importDialog.subjectTextField.setEditable(false);
+                importDialog.existingSubjectsCB.setVisible(false);
+                importDialog.existingSubjectsCB.setBackground(Color.LIGHT_GRAY);
+                importDialog.existingSubjectsCB.setEnabled(false);
+                importDialog.existingSubjectsCB.setEditable(false);
+            }
             // subject is new, enable editing and display defaults
             if (ShUpConfig.isModeSubjectStudyIdentifier()) {
                 importDialog.subjectStudyIdentifierTF.setEnabled(true);
