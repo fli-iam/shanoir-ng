@@ -14,7 +14,10 @@
 
 package org.shanoir.ng.examination.repository;
 
+import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.hibernate.Hibernate;
@@ -94,6 +97,26 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
      */
     @Query("select e.id from Examination e where e.study.id = :studyId")
     List<Long> findIdsByStudyId(Long studyId);
+
+    @Query("SELECT e.subject.id, MIN(e.examinationDate) FROM Examination e "
+            + "WHERE e.study.id = :studyId AND e.subject IS NOT NULL AND e.examinationDate IS NOT NULL "
+            + "GROUP BY e.subject.id")
+    List<Object[]> findFirstExaminationDateRowsByStudyId(@Param("studyId") Long studyId);
+
+    /**
+     * Date of the first examination of each subject of a study, by subject id.
+     * Subjects without any dated examination in the study are left out.
+     *
+     * @param studyId
+     * @return the first examination dates, by subject id.
+     */
+    default Map<Long, LocalDate> findFirstExaminationDatesByStudyId(Long studyId) {
+        Map<Long, LocalDate> dates = new HashMap<>();
+        for (Object[] row : findFirstExaminationDateRowsByStudyId(studyId)) {
+            dates.put((Long) row[0], (LocalDate) row[1]);
+        }
+        return dates;
+    }
 
     /**
      * Get all examinations, clinical or preclinical.
