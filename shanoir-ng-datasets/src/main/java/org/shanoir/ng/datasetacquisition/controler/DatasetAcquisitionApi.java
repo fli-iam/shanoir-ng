@@ -19,6 +19,7 @@ import java.util.List;
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionWithDatasetsDTO;
 import org.shanoir.ng.datasetacquisition.dto.ExaminationDatasetAcquisitionDTO;
+import org.shanoir.ng.examination.dto.ExtraDataUploadResultDTO;
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.data.domain.Page;
@@ -184,7 +185,7 @@ public interface DatasetAcquisitionApi {
         @ApiResponse(responseCode = "500", description = "unexpected error")})
     @RequestMapping(value = "/datasetacquisition/{datasetAcquisitionId}", produces = {"application/json"}, consumes = {
         "application/json"}, method = RequestMethod.PUT)
-    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and #datasetAcquisitionId == #datasetAcquisition.getId() and @datasetSecurityService.hasRightOnExamination(#datasetAcquisition.examination.id, 'CAN_ADMINISTRATE')")
+    @PreAuthorize("#datasetAcquisitionId == #datasetAcquisition.getId() and (hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and (@datasetSecurityService.hasRightOnDatasetAcquisition(#datasetAcquisitionId, 'CAN_IMPORT') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnDatasetAcquisition(#datasetAcquisitionId, 'CAN_ADMINISTRATE')))))")
     ResponseEntity<Void> updateDatasetAcquisition(
             @Parameter(description = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId,
             @Parameter(description = "datasetAcquisition to update", required = true) @Valid @RequestBody DatasetAcquisitionDTO datasetAcquisition, BindingResult result)
@@ -206,6 +207,21 @@ public interface DatasetAcquisitionApi {
             @Parameter(description = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId,
             @Parameter(description = "file to upload", required = true) @Valid @RequestBody MultipartFile file) throws RestServiceException;
 
+    @Operation(summary = "", description = "Add several extra data files to a dataset acquisition and notify the study members")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "upload done, see the result for each file"),
+        @ApiResponse(responseCode = "401", description = "unauthorized"),
+        @ApiResponse(responseCode = "403", description = "forbidden"),
+        @ApiResponse(responseCode = "404", description = "dataset acquisition not found"),
+        @ApiResponse(responseCode = "500", description = "unexpected error")})
+    @PostMapping(value = "/datasetacquisition/extra-data-upload/{datasetAcquisitionId}/multi",
+            produces = {"application/json"},
+            consumes = {"multipart/form-data"})
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnDatasetAcquisition(#datasetAcquisitionId, 'CAN_IMPORT'))")
+    ResponseEntity<ExtraDataUploadResultDTO> addExtraDataFiles(
+            @Parameter(description = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId,
+            @Parameter(description = "files to upload", required = true) @RequestParam("files") List<MultipartFile> files) throws RestServiceException;
+
     @Operation(summary = "", description = "Download extra data from a dataset acquisition")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "file downloaded"),
@@ -215,7 +231,7 @@ public interface DatasetAcquisitionApi {
         @ApiResponse(responseCode = "422", description = "bad parameters"),
         @ApiResponse(responseCode = "500", description = "unexpected error")})
     @GetMapping(value = "/datasetacquisition/extra-data-download/{datasetAcquisitionId}/{fileName:.+}/")
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnDatasetAcquisition(#datasetAcquisitionId, 'CAN_SEE_ALL'))")
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnDatasetAcquisition(#datasetAcquisitionId, 'CAN_DOWNLOAD'))")
     void downloadExtraData(
             @Parameter(description = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId,
             @Parameter(description = "file to download", required = true) @PathVariable("fileName") String fileName, HttpServletResponse response) throws RestServiceException, IOException;

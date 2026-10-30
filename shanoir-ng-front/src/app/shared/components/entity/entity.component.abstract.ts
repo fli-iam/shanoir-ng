@@ -316,7 +316,8 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
         if (this.form) {
             this.subscriptions.push(
                 this.form.statusChanges.subscribe(status => {
-                    this.footerState.valid = status == 'VALID' && (this.form.dirty || this.mode == 'create');
+                    // a fully disabled form (e.g. an edit restricted to the extra-data files) has nothing invalid
+                    this.footerState.valid = (status == 'VALID' || status == 'DISABLED') && (this.form.dirty || this.mode == 'create');
                     this.footerState.dirty = this.form.dirty;
                 }),
             );
@@ -572,7 +573,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
                 fieldControl.updateValueAndValidity({emitEvent: false});
                 if (!fieldControl.valid) fieldControl.markAsTouched();
             }
-            this.footerState.valid = this.form.status == 'VALID';
+            this.footerState.valid = this.form.status == 'VALID' || this.form.status == 'DISABLED';
             return null;
         } else {
             throw reason;

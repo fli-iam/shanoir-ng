@@ -117,20 +117,34 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
         if(!this.examination.weightUnitOfMeasure){
             this.examination.weightUnitOfMeasure = this.defaultUnit;
         }
+        return this.loadRights().then(() => {
+            if (this.hasDownloadRight) this.checkEEG();
+        });
+    }
+
+    private loadRights(): Promise<void> {
         if (this.keycloakService.isUserAdmin()) {
             this.hasAdministrateRight = true;
             this.hasDownloadRight = true;
             this.hasImportRight = true;
-            this.checkEEG();
             return Promise.resolve();
         } else {
             return this.studyRightsService.getMyRightsForStudy(this.examination.study.id).then(rights => {
                 this.hasImportRight = rights.includes(StudyUserRight.CAN_IMPORT);
                 this.hasAdministrateRight = rights.includes(StudyUserRight.CAN_ADMINISTRATE);
                 this.hasDownloadRight = rights.includes(StudyUserRight.CAN_DOWNLOAD);
-                if (this.hasDownloadRight) this.checkEEG();
             });
         }
+    }
+
+    // as in the backend: the fields are edited by study administrators with the expert role,
+    // the extra-data files by importers
+    get canEditFields(): boolean {
+        return this.keycloakService.isUserAdmin() || (this.keycloakService.isUserExpert() && this.hasAdministrateRight);
+    }
+
+    get canEditFiles(): boolean {
+        return this.keycloakService.isUserAdmin() || this.hasImportRight;
     }
 
     // Not awaited: the EEG viewer button just appears once the datasets are loaded
@@ -147,7 +161,7 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
         if(!this.examination.weightUnitOfMeasure){
             this.examination.weightUnitOfMeasure = this.defaultUnit;
         }
-        return Promise.resolve();
+        return this.loadRights();
     }
 
     initCreate(): Promise<void> {
@@ -169,6 +183,8 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
             'subjectWeight': [this.examination.subjectWeight],
             'weightUnitOfMeasure': [this.examination.weightUnitOfMeasure]
         });
+        // files-only edit: every field is read-only, only the extra-data files can change
+        if (this.mode == 'edit' && !this.canEditFields) form.disable({emitEvent: false});
         const examinationDateCtrl: AbstractControl = form.get('examinationDate');
         this.subscriptions.push(
             examinationDateCtrl.valueChanges.subscribe(value => {
@@ -267,11 +283,11 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
     }
 
     public async hasEditRight(): Promise<boolean> {
-	   return this.keycloakService.isUserAdmin() || this.hasImportRight;
+        return this.canEditFields || this.canEditFiles;
     }
 
     public async hasDeleteRight(): Promise<boolean> {
-         return this.keycloakService.isUserAdmin() || this.hasAdministrateRight;
+         return this.keycloakService.isUserAdmin() || (this.keycloakService.isUserExpert() && this.hasAdministrateRight);
     }
 
     public isAdmin(): boolean {
@@ -286,21 +302,29 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
     }
 
     public attachNewFile(event: any) {
-        const newFile = event.target.files[0];
-        this.examination.extraDataFilePathList.push(newFile.name);
-        this.files.push(newFile);
+        for (const newFile of Array.from(event.target.files as FileList)) {
+            if (this.examination.extraDataFilePathList.includes(newFile.name)) {
+                this.consoleService.log('warn', 'A file named "' + newFile.name + '" is already attached and was skipped.');
+                continue;
+            }
+            this.examination.extraDataFilePathList.push(newFile.name);
+            this.files.push(newFile);
+        }
+        event.target.value = null;
         this.form.markAsDirty();
         this.form.updateValueAndValidity();
     }
 
     public save(): Promise<Examination> {
         return super.save(() => {
-            const uploads: Promise<void>[] = [];
-            // Once the exam is saved, save associated files
-            for (const file of this.files) {
-                uploads.push(this.examinationService.postFile(file, this.entity.id));
-            }
-            return Promise.all(uploads).then(() => null);
+            // Once the exam is saved, save associated files in a single request
+            if (!this.files?.length) return Promise.resolve();
+            return this.examinationService.postFiles(this.files, this.entity.id).then(result => {
+                result?.skipped?.forEach(fileName =>
+                    this.consoleService.log('warn', 'A file named "' + fileName + '" already exists on this examination and was not re-uploaded.'));
+                result?.failed?.forEach(fileName =>
+                    this.consoleService.log('error', 'The file "' + fileName + '" could not be uploaded to this examination.'));
+            });
         }).then(() => null).catch(reason => { if (reason.status == 403) {
             this.consoleService.log('error', 'Examination ' + this.examination.id + ' Updating study / subject / center of an examination is forbidden.');
             return null;

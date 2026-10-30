@@ -138,6 +138,8 @@ public class ExaminationApiSecurityTest {
         assertAccessAuthorized(api::findExaminationsBySubjectId, 1L);
         assertAccessAuthorized(api::saveNewExamination, new ExaminationDTO(), mockBindingResult);
         assertAccessAuthorized(api::updateExamination, 1L, mockExaminationDTO(1L), mockBindingResult);
+        // the path id must match the body id, for admins too
+        assertAccessDenied(api::updateExamination, 2L, mockExaminationDTO(1L), mockBindingResult);
     }
 
 
@@ -305,6 +307,16 @@ public class ExaminationApiSecurityTest {
         examDTO4.setStudyId(1L); // try to move exam to my study
         assertAccessDenied(api::updateExamination, 4L, examDTO4, mockBindingResult);
         examDTO4.setStudyId(4L); //back to study 4
+        // without the import right, only a study administrator with the expert role may update the examination
+        given(rightsService.hasRightOnStudy(1L, "CAN_IMPORT")).willReturn(false);
+        given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(true);
+        if ("ROLE_EXPERT".equals(role)) {
+            assertAccessAuthorized(api::updateExamination, 1L, examDTO1, mockBindingResult);
+        } else {
+            assertAccessDenied(api::updateExamination, 1L, examDTO1, mockBindingResult);
+        }
+        given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(false);
+        given(rightsService.hasRightOnStudy(1L, "CAN_IMPORT")).willReturn(true);
 
         // addExtraData(Long, MultipartFile)
         given(rightsService.hasRightOnStudy(1L, "CAN_IMPORT")).willReturn(false);
@@ -321,6 +333,8 @@ public class ExaminationApiSecurityTest {
         assertAccessDenied(api::addExtraData, 4L, new MockMultipartFile("data", "filename.zip", "application/zip", "some xml".getBytes()));
 
         // downloadExtraData(Long, String, HttpServletResponse)
+        given(rightsService.hasRightOnStudy(1L, "CAN_DOWNLOAD")).willReturn(false);
+        assertAccessDenied(api::downloadExtraData, 1L, "test", new MockHttpServletResponse());
         given(rightsService.hasRightOnStudy(1L, "CAN_DOWNLOAD")).willReturn(true);
         given(rightsService.hasRightOnStudy(2L, "CAN_DOWNLOAD")).willReturn(true);
         assertAccessAuthorized(api::downloadExtraData, 1L, "test", new MockHttpServletResponse());

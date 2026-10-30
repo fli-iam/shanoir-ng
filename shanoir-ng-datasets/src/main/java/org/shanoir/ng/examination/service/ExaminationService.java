@@ -168,7 +168,7 @@ public interface ExaminationService {
      * @throws EntityNotFoundException
      * @throws ShanoirException
      */
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examination.getId(), 'CAN_IMPORT'))")
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and (@datasetSecurityService.hasRightOnExamination(#examination.getId(), 'CAN_IMPORT') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnExamination(#examination.getId(), 'CAN_ADMINISTRATE'))))")
     Examination update(Examination examination) throws EntityNotFoundException, ShanoirException, StorageException;
 
     Long getExtraDataSizeByStudyId(Long studyId) throws StorageException;

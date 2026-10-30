@@ -151,7 +151,7 @@ public interface SubjectService {
      * @throws ShanoirException
      * @throws RestServiceException
      */
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnSubject(#subject, 'CAN_IMPORT'))")
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @studySecurityService.hasRightOnSubject(#subject, 'CAN_ADMINISTRATE'))")
     Subject update(@Param("subject") Subject subject) throws ShanoirException;
 
     /**

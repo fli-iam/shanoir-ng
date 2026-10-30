@@ -33,23 +33,34 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.DatasetMetadata;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
+import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetfile.DatasetFileRepository;
+import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.processing.service.DatasetProcessingService;
 import org.shanoir.ng.property.service.DatasetPropertyService;
 import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.model.Study;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.vip.processingResource.repository.ProcessingResourceRepository;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.http.HttpStatus;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 /**
- * Unit tests of the dataset deletion guards.
+ * Unit tests of the dataset deletion guards and of the dataset update.
  *
  * A dataset that has been copied into another study is the source of its copies, which are mapped
  * with CascadeType.ALL: deleting it would delete the copies along with it. Both the direct deletion
@@ -82,6 +93,15 @@ class DatasetServiceImplTest {
 
     @Mock
     private DatasetFileRepository datasetFileRepository;
+
+    @Mock
+    private ShanoirEventService shanoirEventService;
+
+    @Mock
+    private RabbitTemplate rabbitTemplate;
+
+    @Mock
+    private ObjectMapper objectMapper;
 
     @InjectMocks
     private DatasetServiceImpl service;
@@ -166,5 +186,39 @@ class DatasetServiceImplTest {
         service.deleteById(DATASET_ID);
 
         verify(processingService).removeDatasetFromAllProcessingInput(eq(DATASET_ID), isNull());
+    }
+
+    /**
+     * The subject of a dataset is not editable: a subject id sent in the update body must not
+     * replace the one stored in database.
+     */
+    @Test
+    void updateKeepsTheSubjectOfTheDatabase() throws Exception {
+        Examination examination = new Examination();
+        examination.setStudy(new Study(1L, "study", false));
+        MrDatasetAcquisition acquisition = new MrDatasetAcquisition();
+        acquisition.setExamination(examination);
+        Dataset datasetDb = datasetWithoutCopies();
+        datasetDb.setSubjectId(1L);
+        datasetDb.setDatasetAcquisition(acquisition);
+        when(repository.findByIdWithDatasetProcessing(DATASET_ID)).thenReturn(Optional.of(datasetDb));
+        when(repository.save(any(Dataset.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Dataset dataset = datasetWithoutCopies();
+        dataset.setSubjectId(2L);
+        DatasetMetadata originMetadata = new DatasetMetadata();
+        originMetadata.setId(1L);
+        DatasetMetadata updatedMetadata = new DatasetMetadata();
+        updatedMetadata.setId(2L);
+        dataset.setOriginMetadata(originMetadata);
+        dataset.setUpdatedMetadata(updatedMetadata);
+
+        try (MockedStatic<KeycloakUtil> keycloakUtil = Mockito.mockStatic(KeycloakUtil.class)) {
+            keycloakUtil.when(KeycloakUtil::getTokenUserId).thenReturn(1L);
+
+            Dataset updated = service.update(dataset);
+
+            assertEquals(1L, updated.getSubjectId());
+        }
     }
 }

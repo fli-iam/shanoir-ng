@@ -200,24 +200,30 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                             @for (file of datasetAcquisition.extraDataFilePathList; track file) {
                                                 <li>
                                                     {{ getFileName(file) }}
-                                                    <button type="button" class="dl-button" (click)="downloadFile(file)">
-                                                        <i class="fas fa-download"></i>
-                                                    </button>
+                                                    @if (hasDownloadRight) {
+                                                        <button type="button" class="dl-button" (click)="downloadFile(file)">
+                                                            <i class="fas fa-download"></i>
+                                                        </button>
+                                                    }
                                                 </li>
                                             }
                                         </ul>
                                     }
                                     @default {
-                                        <input #input hidden multiple type="file" (change)="attachNewFile($event)" />
-                                        <button type="button" (click)="setFile()" class="left-icon">
-                                            <i class="fas fa-upload"></i>
-                                            Choose file
-                                        </button>
+                                        @if (mode == 'create' || canEditFiles) {
+                                            <input #input hidden multiple type="file" (change)="attachNewFile($event)" />
+                                            <button type="button" (click)="setFile()" class="left-icon">
+                                                <i class="fas fa-upload"></i>
+                                                Choose file
+                                            </button>
+                                        }
                                         <ul>
                                             @for (file of datasetAcquisition.extraDataFilePathList; track file) {
                                                 <li>
                                                     {{ getFileName(file) }}
-                                                    <button type="button" (click)="deleteFile(file)"><i class="fa-regular fa-trash-can"></i></button>
+                                                    @if (mode == 'create' || canEditFiles) {
+                                                        <button type="button" (click)="deleteFile(file)"><i class="fa-regular fa-trash-can"></i></button>
+                                                    }
                                                 </li>
                                             }
                                         </ul>

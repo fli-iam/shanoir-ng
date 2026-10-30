@@ -63,6 +63,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
     dicomPatientName: string;
     downloadState: TaskState = new TaskState();
     hasDownloadRight: boolean = false;
+    hasAdministrateRight: boolean = false;
     importMode: string = "";
     isImporting: boolean = false;
     tags: Tag[] = [];
@@ -145,15 +146,15 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
         this.loadAllStudies();
         if (this.keycloakService.isUserAdmin()) {
             this.hasDownloadRight = true;
-            return;
+            this.hasAdministrateRight = true;
+            return Promise.resolve();
         } else {
-            this.treeService.studyPromise.then(study => {
-                return this.studyRightsService.getMyRightsForStudy(study.id).then(rights => {
-                    this.hasDownloadRight = rights.includes(StudyUserRight.CAN_DOWNLOAD);
-                });
+            // awaited: the footer edit and delete buttons depend on these rights
+            return this.studyRightsService.getMyRightsForStudy(this.subject.study.id).then(rights => {
+                this.hasDownloadRight = rights.includes(StudyUserRight.CAN_DOWNLOAD);
+                this.hasAdministrateRight = rights.includes(StudyUserRight.CAN_ADMINISTRATE);
             });
         }
-        return Promise.resolve();
     }
 
     initEdit(): Promise<void> {
@@ -292,10 +293,10 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
                 this.studies = studies;
                 this.userRightsService.getMyRights().then(rights => {
                     if (!this.keycloakService.isUserAdmin()) {
-                        // filter studies to only those with import or admin rights
+                        // filter studies to only those with import rights
                         this.studies = this.studies.filter(study => {
                             const studyRights = rights.get(study.id);
-                            return studyRights && (studyRights.includes(StudyUserRight.CAN_IMPORT) || studyRights.includes(StudyUserRight.CAN_ADMINISTRATE));
+                            return studyRights?.includes(StudyUserRight.CAN_IMPORT);
                         });
                     }
                     this.studyNameForSubject = this.studies?.filter(s => s.id == this.entity?.study?.id)?.[0]?.name || '';
@@ -331,8 +332,13 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
         this.subject.birthDate = newDate;
     }
 
+    // as in the backend: study administrators with the expert role
     public async hasEditRight(): Promise<boolean> {
-        return this.keycloakService.isUserAdminOrExpert();
+        return this.keycloakService.isUserAdmin() || (this.keycloakService.isUserExpert() && this.hasAdministrateRight);
+    }
+
+    public async hasDeleteRight(): Promise<boolean> {
+        return this.keycloakService.isUserAdmin() || (this.keycloakService.isUserExpert() && this.hasAdministrateRight);
     }
 
     public toggleAnonymised(isAlreadyAnonymized: boolean) {

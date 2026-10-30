@@ -18,14 +18,19 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,6 +46,7 @@ import org.mockito.quality.Strictness;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
+import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.GenericDatasetAcquisition;
@@ -55,6 +61,7 @@ import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.storage.StorageService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 
 /**
  * Unit tests of the removal of dataset acquisitions that hold no dataset anymore.
@@ -84,6 +91,9 @@ class DatasetAcquisitionServiceImplTest {
 
     @Mock
     private SolrService solrService;
+
+    @Mock
+    private DatasetSecurityService datasetSecurityService;
 
     @InjectMocks
     private DatasetAcquisitionServiceImpl service;
@@ -313,5 +323,73 @@ class DatasetAcquisitionServiceImplTest {
         verify(datasetService).deleteById(11L, null);
         verify(datasetService).deleteById(12L, null);
         verify(repository).deleteById(ACQ_ID);
+    }
+
+    /**
+     * An acquisition sent for update, on the same examination as the database one, with other
+     * values and the given extra-data files.
+     */
+    private DatasetAcquisition acquisitionToUpdate(List<String> extraDataFilePathList) {
+        DatasetAcquisition entity = new GenericDatasetAcquisition();
+        entity.setId(ACQ_ID);
+        entity.setExamination(acquisition.getExamination());
+        entity.setSoftwareRelease("new release");
+        entity.setExtraDataFilePathList(extraDataFilePathList);
+        return entity;
+    }
+
+    private void prepareUpdate(boolean canImport, boolean canAdministrate) throws EntityNotFoundException {
+        acquisition.setSoftwareRelease("old release");
+        acquisition.setExtraDataFilePathList(new ArrayList<>(List.of("a.pdf")));
+        when(repository.save(any(DatasetAcquisition.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(datasetSecurityService.hasRightOnDatasetAcquisition(ACQ_ID, "CAN_IMPORT")).thenReturn(canImport);
+        when(datasetSecurityService.hasRightOnDatasetAcquisition(ACQ_ID, "CAN_ADMINISTRATE")).thenReturn(canAdministrate);
+    }
+
+    @Test
+    void updateAsImporterOnlyChangesTheExtraDataFiles() throws Exception {
+        prepareUpdate(true, false);
+
+        try (MockedStatic<KeycloakUtil> keycloakUtil = Mockito.mockStatic(KeycloakUtil.class)) {
+            keycloakUtil.when(KeycloakUtil::getTokenUserId).thenReturn(1L);
+            keycloakUtil.when(KeycloakUtil::getTokenRoles).thenReturn(Set.of("ROLE_USER"));
+
+            DatasetAcquisition updated = service.update(acquisitionToUpdate(new ArrayList<>(List.of("a.pdf", "b.pdf"))));
+
+            assertEquals("old release", updated.getSoftwareRelease());
+            assertEquals(List.of("a.pdf", "b.pdf"), updated.getExtraDataFilePathList());
+        }
+    }
+
+    @Test
+    void updateAsStudyAdministratorWithoutImportRightKeepsTheExtraDataFiles() throws Exception {
+        prepareUpdate(false, true);
+
+        try (MockedStatic<KeycloakUtil> keycloakUtil = Mockito.mockStatic(KeycloakUtil.class)) {
+            keycloakUtil.when(KeycloakUtil::getTokenUserId).thenReturn(1L);
+            keycloakUtil.when(KeycloakUtil::getTokenRoles).thenReturn(Set.of("ROLE_EXPERT"));
+
+            DatasetAcquisition updated = service.update(acquisitionToUpdate(new ArrayList<>()));
+
+            assertEquals("new release", updated.getSoftwareRelease());
+            assertEquals(List.of("a.pdf"), updated.getExtraDataFilePathList());
+            verify(storageService, never()).deleteAcquisitionExtraData(anyLong(), anyString());
+        }
+    }
+
+    @Test
+    void updateAsStudyAdministratorCannotMoveTheAcquisitionToAnotherExamination() throws Exception {
+        prepareUpdate(true, true);
+        Examination otherExamination = new Examination();
+        otherExamination.setId(8L);
+        DatasetAcquisition entity = acquisitionToUpdate(new ArrayList<>(List.of("a.pdf")));
+        entity.setExamination(otherExamination);
+
+        try (MockedStatic<KeycloakUtil> keycloakUtil = Mockito.mockStatic(KeycloakUtil.class)) {
+            keycloakUtil.when(KeycloakUtil::getTokenRoles).thenReturn(Set.of("ROLE_EXPERT"));
+
+            assertThrows(AccessDeniedException.class, () -> service.update(entity));
+            verify(repository, never()).save(any(DatasetAcquisition.class));
+        }
     }
 }

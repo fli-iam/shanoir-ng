@@ -63,7 +63,7 @@ public interface DatasetAcquisitionService {
     @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetAcquisitionList(returnObject, 'CAN_SEE_ALL')")
     List<DatasetAcquisition> findByDatasetId(Long[] datasetIds);
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and  @datasetSecurityService.hasRightOnExamination(#entity.examination.id, 'CAN_ADMINISTRATE')")
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and (@datasetSecurityService.hasRightOnDatasetAcquisition(#entity.id, 'CAN_IMPORT') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnDatasetAcquisition(#entity.id, 'CAN_ADMINISTRATE'))))")
     DatasetAcquisition update(DatasetAcquisition entity) throws EntityNotFoundException;
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and  @datasetSecurityService.filterDatasetAcquisitionList(#entities, 'CAN_ADMINISTRATE')")

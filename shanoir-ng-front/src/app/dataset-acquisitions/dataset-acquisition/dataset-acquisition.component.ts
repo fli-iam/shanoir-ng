@@ -54,6 +54,7 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
     public acquisitionEquipments: AcquisitionEquipment[];
     hasDownloadRight: boolean = false;
     hasAdministrateRight: boolean = false;
+    hasImportRight: boolean = false;
     noDatasets: boolean = false;
     hasDicom: boolean = false;
     protected downloadState: TaskState = new TaskState();
@@ -106,22 +107,38 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
                 }
             });
         })
+        return this.loadRights();
+    }
+
+    private loadRights(): Promise<void> {
         if (this.keycloakService.isUserAdmin()) {
             this.hasDownloadRight = true;
             this.hasAdministrateRight = true;
+            this.hasImportRight = true;
             return Promise.resolve();
         } else {
             return this.studyRightsService.getMyRightsForStudy(this.datasetAcquisition.examination.study.id).then(rights => {
                 this.hasDownloadRight = rights.includes(StudyUserRight.CAN_DOWNLOAD);
                 this.hasAdministrateRight = rights.includes(StudyUserRight.CAN_ADMINISTRATE);
+                this.hasImportRight = rights.includes(StudyUserRight.CAN_IMPORT);
             });
         }
+    }
+
+    // as in the backend: the fields are edited by study administrators with the expert role,
+    // the extra-data files by importers
+    get canEditFields(): boolean {
+        return this.keycloakService.isUserAdmin() || (this.keycloakService.isUserExpert() && this.hasAdministrateRight);
+    }
+
+    get canEditFiles(): boolean {
+        return this.keycloakService.isUserAdmin() || this.hasImportRight;
     }
 
     initEdit(): Promise<void> {
         this.studyCardService.getAll().then(scs => this.studyCards = scs);
         this.acqEqService.getAll().then(aes => this.acquisitionEquipments = aes);
-        return Promise.resolve();
+        return this.loadRights();
     }
 
     initCreate(): Promise<void> {
@@ -132,7 +149,7 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
     }
 
     buildForm(): UntypedFormGroup {
-        return this.formBuilder.group({
+        const form: UntypedFormGroup = this.formBuilder.group({
             'type': [this.datasetAcquisition.type],
             'studyCard': [this.datasetAcquisition.studyCard],
             'acquisitionEquipment': [this.datasetAcquisition.acquisitionEquipment, [Validators.required]],
@@ -142,10 +159,17 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
             'sortingIndex': [this.datasetAcquisition.sortingIndex],
             'protocol': [this.datasetAcquisition.protocol]
         });
+        // files-only edit: every field is read-only, only the extra-data files can change
+        if (this.mode == 'edit' && !this.canEditFields) form.disable({emitEvent: false});
+        return form;
     }
 
     public async hasEditRight(): Promise<boolean> {
-        return this.keycloakService.isUserAdminOrExpert(); // TODO
+        return this.canEditFields || this.canEditFiles;
+    }
+
+    public async hasDeleteRight(): Promise<boolean> {
+        return this.canEditFields;
     }
 
     downloadAll() {
@@ -187,22 +211,15 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
 
     public save(): Promise<DatasetAcquisition> {
         return super.save(() => {
-            const uploads: Promise<void>[] = [];
-            // Once the acquisition is saved, save associated extra-data files
-            for (const file of this.files) {
-                uploads.push(
-                    this.datasetAcquisitionService.postFile(file, this.entity.id).catch(error => {
-                        // 409: a file with the same name already exists on the server; keep the
-                        // existing one and skip this upload instead of failing the whole save.
-                        if (error?.status === 409) {
-                            this.consoleService.log('warn', 'A file named "' + file.name + '" already exists on this acquisition and was not re-uploaded.');
-                            return;
-                        }
-                        throw error;
-                    })
-                );
-            }
-            return Promise.all(uploads).then(() => null);
+            // Once the acquisition is saved, save associated extra-data files in a single request
+            if (!this.files?.length) return Promise.resolve();
+            return this.datasetAcquisitionService.postFiles(this.files, this.entity.id).then(result => {
+                // Skipped: a file with the same name already exists on the server; the existing one is kept.
+                result?.skipped?.forEach(fileName =>
+                    this.consoleService.log('warn', 'A file named "' + fileName + '" already exists on this acquisition and was not re-uploaded.'));
+                result?.failed?.forEach(fileName =>
+                    this.consoleService.log('error', 'The file "' + fileName + '" could not be uploaded to this acquisition.'));
+            });
         });
     }
 }
