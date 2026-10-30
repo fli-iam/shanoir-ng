@@ -166,8 +166,17 @@ test('expert-center-create-delete', async ({ page }) => {
 test('expert-equipment-create-delete', async ({ page }) => {
   await login(page, 'EXPERT');
 
+  // center create
   await page.getByText('Medical configuration').click();
-  await page.getByText('Center equipments').click();
+  await page.getByText('Acquisition centers').click();
+  await page.getByRole('button', { name: '+ New' }).click();
+  await page.locator('#name').click();
+  await page.locator('#name').fill('center-' + randomStringExpert);
+  await page.getByRole('button', { name: 'Save' }).click();
+  await expect(page.getByRole('heading')).toContainText('Details on acquisition center', { timeout: 10000});
+  await expect(page.locator('ol')).toContainText('center-' + randomStringExpert);
+
+  await page.goto('/shanoir-ng/acquisition-equipment/list');
   await page.getByRole('button', { name: '+ New' }).click();
   const manuModelItem = page.getByRole('listitem').filter({ hasText: 'Manufacturer model' });
   await manuModelItem.getByPlaceholder('Select an option...').click();
@@ -176,7 +185,7 @@ test('expert-equipment-create-delete', async ({ page }) => {
   await manuModelOption.click();
   const acqCenterItem = page.getByRole('listitem').filter({ hasText: 'Acquisition Center' });
   await acqCenterItem.getByPlaceholder('Select an option...').click();
-  const acqCenterOption = page.locator('.list > div').filter({ hasText: 'CHU Rennes' });
+  const acqCenterOption = page.locator('.list > div').filter({ hasText: 'center-' + randomStringExpert });
   await expect(acqCenterOption).toBeVisible();
   await acqCenterOption.click();
   await page.locator('#serialNumber').click();
