@@ -55,6 +55,10 @@ public class ProcessingResourceApiController implements ProcessingResourceApi {
     @Value("${vip.download.parallel-count:4}")
     private int parallelCount;
 
+    /** zstd level of VIP archives, 0 sends a plain tar. */
+    @Value("${vip.download.compression-level:1}")
+    private int compressionLevel;
+
     /** Caps the download thread count, to avoid PACS saturation. */
     private Semaphore dlPermits;
 
@@ -89,7 +93,7 @@ public class ProcessingResourceApiController implements ProcessingResourceApi {
                 }
 
                 PacsTransferStats pacsStats = PacsTransferStats.start();
-                TarWriter archiveWriter = new TarWriter(response.getOutputStream());
+                TarWriter archiveWriter = new TarWriter(response.getOutputStream(), compressionLevel);
                 try {
                     datasetDownloaderService.prepareArchiveResponse(response, datasets, archiveWriter);
                     dlPermits.acquire();
