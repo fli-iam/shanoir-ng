@@ -274,15 +274,6 @@ public class ImportDialogOpener {
         }
         // Existing subject found with identifier: only profile OFSEP, not Neurinfo
         if (subject != null) {
-            importDialog.subjectTextField.setText(subject.getName());
-            importDialog.subjectTextField.setBackground(Color.LIGHT_GRAY);
-            importDialog.subjectTextField.setEnabled(false);
-            importDialog.subjectTextField.setEditable(false);
-            importDialog.subjectTextField.setValueSet(true);
-            importDialog.existingSubjectsCB.setVisible(false);
-            importDialog.existingSubjectsCB.setBackground(Color.LIGHT_GRAY);
-            importDialog.existingSubjectsCB.setEnabled(false);
-            importDialog.existingSubjectsCB.setEditable(false);
             ImportStudyAndStudyCardCBItemListener.updateImportDialogForExistingSubject(subject, importDialog);
         // No existing subject found with identifier:
         } else {

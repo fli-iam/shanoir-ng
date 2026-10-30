@@ -93,12 +93,10 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
                 // Profile OFSEP: search in study with subject identifier
                 if (ShUpConfig.isModeSubjectNameAutoIncrement()) {
                     subject = getSubject(study.getId(), subjectIdentifier);
-                }
-                // Profile Neurinfo
-                if (ShUpConfig.isModeSubjectNameManual()) {
+                // Profile Neurinfo: user has free selection of subject
+                } else if (ShUpConfig.isModeSubjectNameManual()) {
                     updateExistingSubjects(study);
                     this.subject = (Subject) mainWindow.importDialog.existingSubjectsCB.getSelectedItem();
-                    // for OFSEP this is done in ImportDialogOpener as subject found before, if
                 }
                 updateImportDialogForExistingSubject(this.subject, mainWindow.importDialog);
                 examinationsOfSubject = updateExaminations(subject);
@@ -188,6 +186,17 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 
     public static void updateImportDialogForExistingSubject(Subject subject, ImportDialog importDialog) {
         if (subject != null) {
+            if (ShUpConfig.isModeSubjectNameAutoIncrement()) {
+                importDialog.subjectTextField.setText(subject.getName());
+                importDialog.subjectTextField.setBackground(Color.LIGHT_GRAY);
+                importDialog.subjectTextField.setEnabled(false);
+                importDialog.subjectTextField.setEditable(false);
+                importDialog.subjectTextField.setValueSet(true);
+                importDialog.existingSubjectsCB.setVisible(false);
+                importDialog.existingSubjectsCB.setBackground(Color.LIGHT_GRAY);
+                importDialog.existingSubjectsCB.setEnabled(false);
+                importDialog.existingSubjectsCB.setEditable(false);
+            }
             importDialog.subjectImageObjectCategoryCB.setEnabled(false);
             if (subject.getImagedObjectCategory() != null) {
                 importDialog.subjectImageObjectCategoryCB.setSelectedItem(subject.getImagedObjectCategory());
