@@ -99,8 +99,8 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
                     updateExistingSubjects(study);
                     this.subject = (Subject) mainWindow.importDialog.existingSubjectsCB.getSelectedItem();
                     // for OFSEP this is done in ImportDialogOpener as subject found before, if
-                    updateImportDialogForExistingSubject(this.subject, mainWindow.importDialog);
                 }
+                updateImportDialogForExistingSubject(this.subject, mainWindow.importDialog);
                 examinationsOfSubject = updateExaminations(subject);
                 filterExistingExamsForSelectedStudy(study);
             }
