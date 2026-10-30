@@ -59,8 +59,10 @@ import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.eeg.model.Channel;
 import org.shanoir.ng.eeg.model.Event;
 import org.shanoir.ng.examination.model.Examination;
+import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.shared.dto.ParticipantsTsvRequestDTO;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
@@ -134,6 +136,9 @@ public class BIDSServiceImpl implements BIDSService {
 
     @Autowired
     private StudyRepository studyRepo;
+
+    @Autowired
+    private ExaminationRepository examinationRepository;
 
     @Autowired
     private SubjectRepository subjectRepository;
@@ -228,7 +233,8 @@ public class BIDSServiceImpl implements BIDSService {
                 // Create participants.tsv
                 event.setMessage("Getting participants.tsv for study " + studyName);
                 eventService.publishEvent(event);
-                rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_PARTICIPANTS_TSV, objectMapper.writeValueAsString(studyId));
+                rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_PARTICIPANTS_TSV, objectMapper.writeValueAsString(
+                        new ParticipantsTsvRequestDTO(studyId, examinationRepository.findFirstExaminationDatesByStudyId(studyId))));
 
                 int index = 1;
                 for (Subject subject : subjects) {
