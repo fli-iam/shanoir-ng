@@ -25,6 +25,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.shanoir.ng.importer.model.ImportJobBase;
 import org.shanoir.ng.shared.dicom.EquipmentDicom;
 import org.shanoir.ng.shared.dicom.InstitutionDicom;
 import org.shanoir.uploader.ShUpConfig;
@@ -54,6 +55,8 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 
     private Subject subject;
 
+    private String subjectIdentifier;
+
     private List<Examination> examinationsOfSubject;
 
     private Date studyDate;
@@ -62,11 +65,12 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 
     private ShanoirUploaderServiceClient serviceClient;
 
-    public ImportStudyAndStudyCardCBItemListener(MainWindow mainWindow, InstitutionDicom institutionDicom, EquipmentDicom equipmentDicom, Subject subject, Date studyDate, ImportStudyCardFilterDocumentListener importStudyCardDocumentListener, ShanoirUploaderServiceClient serviceClient) {
+    public ImportStudyAndStudyCardCBItemListener(MainWindow mainWindow, InstitutionDicom institutionDicom, EquipmentDicom equipmentDicom, Subject subject, String subjectIdentifier, Date studyDate, ImportStudyCardFilterDocumentListener importStudyCardDocumentListener, ShanoirUploaderServiceClient serviceClient) {
         this.mainWindow = mainWindow;
         this.institutionDicom = institutionDicom;
         this.equipmentDicom = equipmentDicom;
         this.subject = subject;
+        this.subjectIdentifier = subjectIdentifier;
         this.studyDate = studyDate;
         this.importStudyCardDocumentListener = importStudyCardDocumentListener;
         this.serviceClient = serviceClient;
@@ -85,6 +89,10 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
                     IdName centerIdName = new IdName(0L, "Automatic, as above");
                     mainWindow.importDialog.mrExaminationCenterCB.addItem(centerIdName);
                     showOrHideStudyCardComponents(false);
+                }
+                // Profile OFSEP: search in study with subject identifier
+                if (ShUpConfig.isModeSubjectNameAutoIncrement()) {
+                    subject = getSubject(study.getId(), subjectIdentifier);
                 }
                 // Profile Neurinfo
                 if (ShUpConfig.isModeSubjectNameManual()) {
@@ -118,6 +126,17 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
                 filterExistingExamsForSelectedStudy(study);
             }
         } // ignore otherwise
+    }
+
+    private Subject getSubject(final Long studyId, final String subjectIdentifier) {
+        if (studyId != null && subjectIdentifier != null) {
+            try {
+                return serviceClient.findSubjectByStudyIdAndSubjectIdentifier(studyId, subjectIdentifier);
+            } catch (Exception e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
+        return null;
     }
 
     private void showOrHideStudyCardComponents(boolean show) {
