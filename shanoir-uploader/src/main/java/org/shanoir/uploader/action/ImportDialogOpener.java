@@ -75,10 +75,6 @@ public class ImportDialogOpener {
         try {
             Date studyDate = ShUpConfig.FORMATTER.parse(Util.convertLocalDateToString(importJob.getStudy().getStudyDate()));
             Subject subject = null;
-            // Profile OFSEP: search with identifier
-            if (ShUpConfig.isModeSubjectNameAutoIncrement()) {
-                subject = getSubject(importJob);
-            } // else Profile Neurinfo: no search with identifier, user selects existing subject
             List<AcquisitionEquipment> acquisitionEquipments = shanoirUploaderServiceClient.findAcquisitionEquipments();
             LOG.info("findAcquisitionEquipments: " + acquisitionEquipments.size() + " equipments found.");
             List<Study> studiesWithStudyCards = getStudiesWithStudyCards(importJob, acquisitionEquipments);
@@ -93,7 +89,7 @@ public class ImportDialogOpener {
             } else {
                 LOG.warn("None of the selected series contains both institution and equipment information.");
             }
-            ImportStudyAndStudyCardCBItemListener importStudyAndStudyCardCBIL = new ImportStudyAndStudyCardCBItemListener(this.mainWindow, institutionDicom, equipmentDicom, subject, studyDate, importStudyCardFilterDocumentListener, shanoirUploaderServiceClient);
+            ImportStudyAndStudyCardCBItemListener importStudyAndStudyCardCBIL = new ImportStudyAndStudyCardCBItemListener(this.mainWindow, institutionDicom, equipmentDicom, subject, importJob.getSubject().getIdentifier(), studyDate, importStudyCardFilterDocumentListener, shanoirUploaderServiceClient);
             ImportFinishActionListener importFinishAL = new ImportFinishActionListener(this.mainWindow, importFolder, subject);
             importDialog = new ImportDialog(this.mainWindow,
                     ShUpConfig.resourceBundle.getString("shanoir.uploader.preImportDialog.title"), true, resourceBundle,
@@ -257,15 +253,6 @@ public class ImportDialogOpener {
         importDialog.studyCB.setValueSet(false);
     }
 
-    private Subject getSubject(final ImportJobBase importJob) throws Exception {
-        String identifier = importJob.getSubject().getIdentifier();
-        if (identifier != null) {
-            return shanoirUploaderServiceClient
-                .findSubjectBySubjectIdentifier(identifier);
-        }
-        return null;
-    }
-
     private void updateImportDialogForSubject(Subject subject) {
         /**
          * Insert subject specific items into combo boxes from model classes.
@@ -287,15 +274,6 @@ public class ImportDialogOpener {
         }
         // Existing subject found with identifier: only profile OFSEP, not Neurinfo
         if (subject != null) {
-            importDialog.subjectTextField.setText(subject.getName());
-            importDialog.subjectTextField.setBackground(Color.LIGHT_GRAY);
-            importDialog.subjectTextField.setEnabled(false);
-            importDialog.subjectTextField.setEditable(false);
-            importDialog.subjectTextField.setValueSet(true);
-            importDialog.existingSubjectsCB.setVisible(false);
-            importDialog.existingSubjectsCB.setBackground(Color.LIGHT_GRAY);
-            importDialog.existingSubjectsCB.setEnabled(false);
-            importDialog.existingSubjectsCB.setEditable(false);
             ImportStudyAndStudyCardCBItemListener.updateImportDialogForExistingSubject(subject, importDialog);
         // No existing subject found with identifier:
         } else {

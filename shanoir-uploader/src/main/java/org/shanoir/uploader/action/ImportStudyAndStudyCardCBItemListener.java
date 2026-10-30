@@ -25,6 +25,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.shanoir.ng.importer.model.ImportJobBase;
 import org.shanoir.ng.shared.dicom.EquipmentDicom;
 import org.shanoir.ng.shared.dicom.InstitutionDicom;
 import org.shanoir.uploader.ShUpConfig;
@@ -54,6 +55,8 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 
     private Subject subject;
 
+    private String subjectIdentifier;
+
     private List<Examination> examinationsOfSubject;
 
     private Date studyDate;
@@ -62,11 +65,12 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 
     private ShanoirUploaderServiceClient serviceClient;
 
-    public ImportStudyAndStudyCardCBItemListener(MainWindow mainWindow, InstitutionDicom institutionDicom, EquipmentDicom equipmentDicom, Subject subject, Date studyDate, ImportStudyCardFilterDocumentListener importStudyCardDocumentListener, ShanoirUploaderServiceClient serviceClient) {
+    public ImportStudyAndStudyCardCBItemListener(MainWindow mainWindow, InstitutionDicom institutionDicom, EquipmentDicom equipmentDicom, Subject subject, String subjectIdentifier, Date studyDate, ImportStudyCardFilterDocumentListener importStudyCardDocumentListener, ShanoirUploaderServiceClient serviceClient) {
         this.mainWindow = mainWindow;
         this.institutionDicom = institutionDicom;
         this.equipmentDicom = equipmentDicom;
         this.subject = subject;
+        this.subjectIdentifier = subjectIdentifier;
         this.studyDate = studyDate;
         this.importStudyCardDocumentListener = importStudyCardDocumentListener;
         this.serviceClient = serviceClient;
@@ -86,13 +90,15 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
                     mainWindow.importDialog.mrExaminationCenterCB.addItem(centerIdName);
                     showOrHideStudyCardComponents(false);
                 }
-                // Profile Neurinfo
-                if (ShUpConfig.isModeSubjectNameManual()) {
+                // Profile OFSEP: search in study with subject identifier
+                if (ShUpConfig.isModeSubjectNameAutoIncrement()) {
+                    subject = getSubject(study.getId(), subjectIdentifier);
+                // Profile Neurinfo: user has free selection of subject
+                } else if (ShUpConfig.isModeSubjectNameManual()) {
                     updateExistingSubjects(study);
                     this.subject = (Subject) mainWindow.importDialog.existingSubjectsCB.getSelectedItem();
-                    // for OFSEP this is done in ImportDialogOpener as subject found before, if
-                    updateImportDialogForExistingSubject(this.subject, mainWindow.importDialog);
                 }
+                updateImportDialogForExistingSubject(this.subject, mainWindow.importDialog);
                 examinationsOfSubject = updateExaminations(subject);
                 filterExistingExamsForSelectedStudy(study);
             }
@@ -118,6 +124,17 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
                 filterExistingExamsForSelectedStudy(study);
             }
         } // ignore otherwise
+    }
+
+    private Subject getSubject(final Long studyId, final String subjectIdentifier) {
+        if (studyId != null && subjectIdentifier != null) {
+            try {
+                return serviceClient.findSubjectByStudyIdAndSubjectIdentifier(studyId, subjectIdentifier);
+            } catch (Exception e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
+        return null;
     }
 
     private void showOrHideStudyCardComponents(boolean show) {
@@ -169,6 +186,17 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 
     public static void updateImportDialogForExistingSubject(Subject subject, ImportDialog importDialog) {
         if (subject != null) {
+            if (ShUpConfig.isModeSubjectNameAutoIncrement()) {
+                importDialog.subjectTextField.setText(subject.getName());
+                importDialog.subjectTextField.setBackground(Color.LIGHT_GRAY);
+                importDialog.subjectTextField.setEnabled(false);
+                importDialog.subjectTextField.setEditable(false);
+                importDialog.subjectTextField.setValueSet(true);
+                importDialog.existingSubjectsCB.setVisible(false);
+                importDialog.existingSubjectsCB.setBackground(Color.LIGHT_GRAY);
+                importDialog.existingSubjectsCB.setEnabled(false);
+                importDialog.existingSubjectsCB.setEditable(false);
+            }
             importDialog.subjectImageObjectCategoryCB.setEnabled(false);
             if (subject.getImagedObjectCategory() != null) {
                 importDialog.subjectImageObjectCategoryCB.setSelectedItem(subject.getImagedObjectCategory());
@@ -197,6 +225,17 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
             importDialog.subjectTypeCB.setSelectedItem(subject.getSubjectType());
             importDialog.subjectTypeCB.setEnabled(false);
         } else {
+            if (ShUpConfig.isModeSubjectNameAutoIncrement()) {
+//                importDialog.subjectTextField
+//                        .setText(importDialog.resourceBundle.getString("shanoir.uploader.import.subject.autofill"));
+                importDialog.subjectTextField.setBackground(Color.LIGHT_GRAY);
+                importDialog.subjectTextField.setEnabled(false);
+                importDialog.subjectTextField.setEditable(false);
+                importDialog.existingSubjectsCB.setVisible(false);
+                importDialog.existingSubjectsCB.setBackground(Color.LIGHT_GRAY);
+                importDialog.existingSubjectsCB.setEnabled(false);
+                importDialog.existingSubjectsCB.setEditable(false);
+            }
             // subject is new, enable editing and display defaults
             if (ShUpConfig.isModeSubjectStudyIdentifier()) {
                 importDialog.subjectStudyIdentifierTF.setEnabled(true);
