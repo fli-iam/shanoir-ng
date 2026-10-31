@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.shanoir.ng.anonymization.uid.generation.UIDGeneration;
@@ -891,7 +892,11 @@ public class ImporterApiController implements ImporterApi {
                     job.setStudyCardId(studyCardId);
 
                 // STEP 4.2 Create examination
-                ExaminationDTO examination = ImportUtils.createExam(studyId, centerId, subject.getId(), examFolder.getName(),
+                String examinationComment = job.getStudy().getStudyDescription();
+                if (StringUtils.isBlank(examinationComment)) {
+                    examinationComment = examFolder.getName();
+                }
+                ExaminationDTO examination = ImportUtils.createExam(studyId, centerId, subject.getId(), examinationComment,
                         job.getStudy().getStudyDate(), subject.getName());
                 String studyInstanceUID = UID_GENERATOR.getNewUID();
                 examination.setStudyInstanceUID(studyInstanceUID);
