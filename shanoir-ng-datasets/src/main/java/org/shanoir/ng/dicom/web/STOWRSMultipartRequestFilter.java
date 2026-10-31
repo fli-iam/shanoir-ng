@@ -16,6 +16,7 @@ package org.shanoir.ng.dicom.web;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.concurrent.locks.Lock;
 
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
@@ -27,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -109,6 +111,10 @@ public class STOWRSMultipartRequestFilter extends GenericFilterBean {
     @Lazy
     private DicomImporterService dicomImporterService;
 
+    @Autowired
+    @Lazy
+    private StowImportLock stowImportLock;
+
     @Override
     public void doFilter(
             ServletRequest request,
@@ -149,25 +155,48 @@ public class STOWRSMultipartRequestFilter extends GenericFilterBean {
             Attributes metaInformationAttributes = dIS.readFileMetaInformation();
             Attributes datasetAttributes = dIS.readDataset();
             String modality = datasetAttributes.getString(Tag.Modality);
-            if (DICOM_MODALITY_SEG.equals(modality) || DICOM_MODALITY_SR.equals(modality)) {
-                if (!dicomSEGAndSRImporterService.importDicomSEGAndSR(metaInformationAttributes, datasetAttributes, modality, nonOhifRequest)) {
-                    LOG.error("Error during import of DICOM SEG/SR.");
-                    throw new ServletException("Error during import of DICOM SEG/SR.");
+            // Held until the importer has returned, that is until its transaction has committed.
+            Lock importLock = stowImportLock.lockFor(
+                    datasetAttributes.getString(Tag.ClinicalTrialProtocolID),
+                    datasetAttributes.getString(Tag.PatientName));
+            importLock.lock();
+            try {
+                try {
+                    importInstance(metaInformationAttributes, datasetAttributes, modality, nonOhifRequest);
+                } catch (DataIntegrityViolationException e) {
+                    // The lock covers one subject. The center and the equipment are shared by all
+                    // subjects: two new subjects can both create them, and one of the two requests
+                    // fails on the duplicate key. Its transaction is rolled back, so it can run
+                    // again, and finds what the other one created.
+                    LOG.warn("Duplicate key during STOW-RS import, trying once more: {}", e.getMostSpecificCause().getMessage());
+                    importInstance(metaInformationAttributes, datasetAttributes, modality, nonOhifRequest);
                 }
-            } else if (DICOM_MODALITY_MR.equals(modality)
-                    || DICOM_MODALITY_CT.equals(modality)
-                    || DICOM_MODALITY_PT.equals(modality)
-                    || DICOM_MODALITY_NM.equals(modality)) {
-                if (!dicomImporterService.importDicom(metaInformationAttributes, datasetAttributes)) {
-                    LOG.error("Error during import of DICOM MR/CT/PT/NM.");
-                    throw new ServletException("Error during import of DICOM MR/CT/PT/NM.");
-                }
-            } else {
-                LOG.error("Not supported DICOM modality sent: {}", modality);
-                throw new ServletException("Not supported DICOM modality sent: " + modality);
+            } finally {
+                importLock.unlock();
             }
         } catch (Exception e) {
             throw e;
+        }
+    }
+
+    private void importInstance(Attributes metaInformationAttributes, Attributes datasetAttributes,
+            String modality, boolean nonOhifRequest) throws Exception {
+        if (DICOM_MODALITY_SEG.equals(modality) || DICOM_MODALITY_SR.equals(modality)) {
+            if (!dicomSEGAndSRImporterService.importDicomSEGAndSR(metaInformationAttributes, datasetAttributes, modality, nonOhifRequest)) {
+                LOG.error("Error during import of DICOM SEG/SR.");
+                throw new ServletException("Error during import of DICOM SEG/SR.");
+            }
+        } else if (DICOM_MODALITY_MR.equals(modality)
+                || DICOM_MODALITY_CT.equals(modality)
+                || DICOM_MODALITY_PT.equals(modality)
+                || DICOM_MODALITY_NM.equals(modality)) {
+            if (!dicomImporterService.importDicom(metaInformationAttributes, datasetAttributes)) {
+                LOG.error("Error during import of DICOM MR/CT/PT/NM.");
+                throw new ServletException("Error during import of DICOM MR/CT/PT/NM.");
+            }
+        } else {
+            LOG.error("Not supported DICOM modality sent: {}", modality);
+            throw new ServletException("Not supported DICOM modality sent: " + modality);
         }
     }
 
