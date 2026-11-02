@@ -58,10 +58,9 @@ public class ImportFinishActionListener implements ActionListener {
     
     private Subject subjectREST;
     
-    public ImportFinishActionListener(final MainWindow mainWindow, File uploadFolder, Subject subjectREST) {
+    public ImportFinishActionListener(final MainWindow mainWindow, File uploadFolder) {
         this.mainWindow = mainWindow;
         this.uploadFolder = uploadFolder;
-        this.subjectREST = subjectREST;
     }
 
     @Override
@@ -171,15 +170,17 @@ public class ImportFinishActionListener implements ActionListener {
             // if nothing is entered, use existing subject selected
             if (mainWindow.importDialog.existingSubjectsCB.isEnabled()) {
                 subjectREST = (Subject) mainWindow.importDialog.existingSubjectsCB.getSelectedItem();
-                if (subjectREST != null) {
-                    logger.info("Existing subject used from server with ID: " + subjectREST.getId() + ", name: " + subjectREST.getName());
-                    useExistingSubjectInStudy = true;
-                } else {
-                    showErrorAndReset(startButton, folderKey,
-                            "shanoir.uploader.systemErrorDialog.error.subject.creation");
-                    return;
-                }
             }
+        } else if (ShUpConfig.isModeSubjectNameAutoIncrement()) {
+            subjectREST = (Subject) mainWindow.importDialog.existingSubjectsCB.getSelectedItem();
+        }
+        if (subjectREST != null) {
+            logger.info("Existing subject used from server with ID: " + subjectREST.getId() + ", name: " + subjectREST.getName());
+            useExistingSubjectInStudy = true;
+        } else {
+            showErrorAndReset(startButton, folderKey,
+                    "shanoir.uploader.systemErrorDialog.error.subject.creation");
+            return;
         }
 
         // In case user selects existing subject from study, just use it

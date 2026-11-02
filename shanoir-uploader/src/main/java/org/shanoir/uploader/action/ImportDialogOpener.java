@@ -74,7 +74,6 @@ public class ImportDialogOpener {
     public void openImportDialog(ImportJobBase importJob, File importFolder) {
         try {
             Date studyDate = ShUpConfig.FORMATTER.parse(Util.convertLocalDateToString(importJob.getStudy().getStudyDate()));
-            Subject subject = null;
             List<AcquisitionEquipment> acquisitionEquipments = shanoirUploaderServiceClient.findAcquisitionEquipments();
             LOG.info("findAcquisitionEquipments: " + acquisitionEquipments.size() + " equipments found.");
             List<Study> studiesWithStudyCards = getStudiesWithStudyCards(importJob, acquisitionEquipments);
@@ -89,8 +88,8 @@ public class ImportDialogOpener {
             } else {
                 LOG.warn("None of the selected series contains both institution and equipment information.");
             }
-            ImportStudyAndStudyCardCBItemListener importStudyAndStudyCardCBIL = new ImportStudyAndStudyCardCBItemListener(this.mainWindow, institutionDicom, equipmentDicom, subject, importJob.getSubject().getIdentifier(), studyDate, importStudyCardFilterDocumentListener, shanoirUploaderServiceClient);
-            ImportFinishActionListener importFinishAL = new ImportFinishActionListener(this.mainWindow, importFolder, subject);
+            ImportStudyAndStudyCardCBItemListener importStudyAndStudyCardCBIL = new ImportStudyAndStudyCardCBItemListener(this.mainWindow, institutionDicom, equipmentDicom, importJob.getSubject().getIdentifier(), studyDate, importStudyCardFilterDocumentListener, shanoirUploaderServiceClient);
+            ImportFinishActionListener importFinishAL = new ImportFinishActionListener(this.mainWindow, importFolder);
             importDialog = new ImportDialog(this.mainWindow,
                     ShUpConfig.resourceBundle.getString("shanoir.uploader.preImportDialog.title"), true, resourceBundle,
                     importStudyAndStudyCardCBIL, importFinishAL, importStudyCardFilterDocumentListener);

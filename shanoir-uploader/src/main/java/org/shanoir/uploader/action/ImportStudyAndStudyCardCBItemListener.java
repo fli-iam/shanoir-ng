@@ -55,8 +55,6 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 
     private EquipmentDicom equipmentDicom;
 
-    private Subject subject;
-
     private String subjectIdentifier;
 
     private List<Examination> examinationsOfSubject;
@@ -67,11 +65,10 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 
     private ShanoirUploaderServiceClient serviceClient;
 
-    public ImportStudyAndStudyCardCBItemListener(MainWindow mainWindow, InstitutionDicom institutionDicom, EquipmentDicom equipmentDicom, Subject subject, String subjectIdentifier, Date studyDate, ImportStudyCardFilterDocumentListener importStudyCardDocumentListener, ShanoirUploaderServiceClient serviceClient) {
+    public ImportStudyAndStudyCardCBItemListener(MainWindow mainWindow, InstitutionDicom institutionDicom, EquipmentDicom equipmentDicom, String subjectIdentifier, Date studyDate, ImportStudyCardFilterDocumentListener importStudyCardDocumentListener, ShanoirUploaderServiceClient serviceClient) {
         this.mainWindow = mainWindow;
         this.institutionDicom = institutionDicom;
         this.equipmentDicom = equipmentDicom;
-        this.subject = subject;
         this.subjectIdentifier = subjectIdentifier;
         this.studyDate = studyDate;
         this.importStudyCardDocumentListener = importStudyCardDocumentListener;
@@ -79,6 +76,7 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
     }
 
     public void itemStateChanged(ItemEvent e) {
+        Subject subject = null;
         int state = e.getStateChange();
         if (state == ItemEvent.SELECTED) {
             if (e.getSource().equals(mainWindow.importDialog.studyCB)) {
@@ -95,12 +93,14 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
                 // Profile OFSEP: search in study with subject identifier
                 if (ShUpConfig.isModeSubjectNameAutoIncrement()) {
                     subject = getSubject(study.getId(), subjectIdentifier);
+                    mainWindow.importDialog.existingSubjectsCB.removeAllItems();
+                    mainWindow.importDialog.existingSubjectsCB.addItem(subject);
                 // Profile Neurinfo: user has free selection of subject
                 } else if (ShUpConfig.isModeSubjectNameManual()) {
                     updateExistingSubjects(study);
-                    this.subject = (Subject) mainWindow.importDialog.existingSubjectsCB.getSelectedItem();
+                    subject = (Subject) mainWindow.importDialog.existingSubjectsCB.getSelectedItem();
                 }
-                updateImportDialogForSubject(this.subject, mainWindow.importDialog, mainWindow.resourceBundle);
+                updateImportDialogForSubject(subject, mainWindow.importDialog, mainWindow.resourceBundle);
                 examinationsOfSubject = updateExaminations(subject);
                 filterExistingExamsForSelectedStudy(study);
             }
@@ -120,8 +120,8 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
             // the selection of an existing subject defines the list of existing exams
             if (e.getSource().equals(mainWindow.importDialog.existingSubjectsCB)) {
                 Study study = (Study) mainWindow.importDialog.studyCB.getSelectedItem();
-                this.subject = (Subject) mainWindow.importDialog.existingSubjectsCB.getSelectedItem();
-                updateImportDialogForSubject(this.subject, mainWindow.importDialog, mainWindow.resourceBundle);
+                subject = (Subject) mainWindow.importDialog.existingSubjectsCB.getSelectedItem();
+                updateImportDialogForSubject(subject, mainWindow.importDialog, mainWindow.resourceBundle);
                 examinationsOfSubject = updateExaminations(subject);
                 filterExistingExamsForSelectedStudy(study);
             }
@@ -232,6 +232,7 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
         for (int i = 0; i < ImagedObjectCategory.values().length; i++) {
             importDialog.subjectImageObjectCategoryCB.addItem(ImagedObjectCategory.values()[i]);
         }
+        importDialog.subjectImageObjectCategoryCB.setSelectedItem(ImagedObjectCategory.values()[1]);
         // Insert String here, as the model does not contain "", the unknown, not selected hemdom
         importDialog.subjectLanguageHemisphericDominanceCB.removeAllItems();
         importDialog.subjectLanguageHemisphericDominanceCB.addItem("");
@@ -241,10 +242,14 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
         importDialog.subjectManualHemisphericDominanceCB.addItem("");
         importDialog.subjectManualHemisphericDominanceCB.addItem(HemisphericDominance.Left.getName());
         importDialog.subjectManualHemisphericDominanceCB.addItem(HemisphericDominance.Right.getName());
+
         importDialog.subjectTypeCB.removeAllItems();
         for (int i = 0; i < SubjectType.values().length; i++) {
             importDialog.subjectTypeCB.addItem(SubjectType.values()[i]);
         }
+        importDialog.subjectTypeCB.setEnabled(true);
+        importDialog.subjectTypeCB.setSelectedItem(SubjectType.values()[1]);
+
         // subject is new, enable editing and display defaults
         if (ShUpConfig.isModeSubjectStudyIdentifier()) {
             importDialog.subjectStudyIdentifierTF.setEnabled(true);
@@ -254,8 +259,6 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
         importDialog.subjectStudyIdentifierTF.setText("");
         importDialog.subjectIsPhysicallyInvolvedCB.setEnabled(true);
         importDialog.subjectIsPhysicallyInvolvedCB.setSelected(true);
-        importDialog.subjectTypeCB.setEnabled(true);
-        importDialog.subjectTypeCB.setSelectedItem(SubjectType.values()[1]);
     }
 
     private static void setSubjectValuesInDialog(Subject subject, ImportDialog importDialog) {
