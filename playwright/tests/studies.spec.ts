@@ -259,7 +259,12 @@ test('expert-study-card-create-delete', async ({ page }) => {
   await page.locator('#name').fill('manufacturer-' + randomStringExpert);
   await page.getByRole('button', { name: 'Save' }).click();
   // manufacturer model create
-  await page.getByRole('listitem').filter({ hasText: 'Modality type Mr' }).getByPlaceholder('Select an option...').click();
+  const modalityItem = page.getByRole('listitem').filter({ hasText: 'Modality type' });
+  await modalityItem.getByPlaceholder('Select an option...').click();
+  const modalityOption = page.locator('.list > div').filter({ hasText: 'Mr' });
+  await expect(modalityOption).toBeVisible();
+  await modalityOption.click();
+
   await page.locator('#name').click();
   await page.locator('#name').fill('model-name-' + randomStringExpert);
   await page.locator('#magneticField').click();
@@ -267,7 +272,7 @@ test('expert-study-card-create-delete', async ({ page }) => {
   await page.getByRole('button', { name: 'Save' }).click();
   // equipment create
   await page.locator('select-box').filter({ hasText: 'Select an option...' }).click();
-  await page.getByText('center-' + randomStringExpert).click();
+  await page.getByText('center-' + randomStringExpert).first().click();
   await page.locator('#serialNumber').click();
   await page.locator('#serialNumber').fill('serial-number-' + randomStringExpert);
   await page.getByRole('button', { name: 'Save' }).click();
