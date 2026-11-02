@@ -21,8 +21,9 @@ export class SubjectExaminationPipe implements PipeTransform {
 
     transform(examination: SubjectExamination) {
         if (examination) {
+            const comment = examination.comment ? ", " + examination.comment : "";
             return new Date(examination.examinationDate).toLocaleDateString()
-                + ", " + examination.comment + " ( id = " + examination.id + " ) ";
+                + comment + " ( id = " + examination.id + " ) ";
         }
         return "";
     }
