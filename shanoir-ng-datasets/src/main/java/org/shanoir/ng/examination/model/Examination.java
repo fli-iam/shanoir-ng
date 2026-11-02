@@ -37,11 +37,13 @@ import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.PostLoad;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 
 /**
@@ -52,6 +54,12 @@ import jakarta.validation.constraints.NotNull;
  */
 @Entity
 @JsonPropertyOrder({ "_links", "id", "examinationDate", "studyInstanceUID", "centerId", "subjectId", "studyId", "preclinical" })
+@Table(name = "examination", indexes = {
+    @Index(name = "examination_study_id_idx", columnList = "study_id"),
+    @Index(name = "examination_subject_id_idx", columnList = "subject_id"),
+    @Index(name = "examination_source_id_idx", columnList = "source_id"),
+    @Index(name = "examination_center_id_idx", columnList = "center_id")
+})
 public class Examination extends HalEntity {
 
     /**
