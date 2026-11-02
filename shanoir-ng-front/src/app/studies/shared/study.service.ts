@@ -13,7 +13,7 @@
  */
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, OnDestroy } from '@angular/core';
-import { Observable, Subscription, firstValueFrom } from 'rxjs';
+import { Subscription, firstValueFrom } from 'rxjs';
 
 import { TaskState } from '@app/async-tasks/task.model';
 import { SingleDownloadService } from '@app/shared/mass-download/single-download.service';
@@ -227,11 +227,6 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
         return promise;
     }
 
-
-    deleteFile(studyId: number, fileType: 'protocol-file'|'dua'): Observable<any> {
-        const endpoint = this.API_URL + '/' + fileType + '-delete/' + studyId;
-        return this.http.delete(endpoint);
-    }
 
     downloadProtocolFile(fileName: string, studyId: number, state?: TaskState) {
         const endpoint = this.API_URL + '/protocol-file-download/' + studyId + "/" + fileName + "/";

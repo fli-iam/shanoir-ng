@@ -611,15 +611,11 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     public deleteDataUserAgreement() {
-        if (this.mode == 'create') {
-            this.study.dataUserAgreementPaths = [];
-            this.dataUserAgreement = null;
-        } else if (this.mode == 'edit') {
-            this.studyService.deleteFile(this.study.id, 'dua');
-            this.study.dataUserAgreementPaths = [];
-            this.dataUserAgreement = null;
-        }
-
+        // the file is removed on the server when the study is saved (with an empty dataUserAgreementPaths)
+        this.study.dataUserAgreementPaths = [];
+        this.dataUserAgreement = null;
+        this.form.markAsDirty();
+        this.form.updateValueAndValidity();
     }
 
     public downloadDataUserAgreement() {

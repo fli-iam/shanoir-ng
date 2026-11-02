@@ -73,7 +73,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             </li>
                         }
                         <li>
-                            <label i18n="Examination detail|Research study label@@examinationDetailStudy">Research study</label>
+                            <label i18n="Examination detail|Research study label@@examinationDetailStudy">Study</label>
                             <span class="right-col">
                                 @if (mode == 'view' || (mode == 'edit' && !isAdmin())) {
                                     <a [routerLink]="['/study/details/', $safeNavigationMigration(examination.study?.id)]">
