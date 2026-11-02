@@ -95,7 +95,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 </fieldset>
 
 <upload-file
-    [disabled]="!center"
+    [disabled]="!center || !study"
     (fileChange)="uploadArchive($event)"
     [loading]="archiveStatus == 'uploading'"
     [error]="archiveStatus == 'error'"></upload-file>
