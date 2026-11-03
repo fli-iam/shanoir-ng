@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -292,6 +293,58 @@ public class ExaminationServiceImpl implements ExaminationService {
         return savedExamination;
     }
 
+    @Transactional(rollbackFor = StorageException.class)
+    public Examination saveWithExtraData(final Examination examination, final List<MultipartFile> files) throws EntityNotFoundException, StorageException {
+        Examination savedExamination = save(examination);
+        for (MultipartFile file : files) {
+            if (addExtraData(savedExamination.getId(), file) == null) {
+                // DB insert is rolled back, but files already stored are not: remove them (new examination => whole directory)
+                try {
+                    storageService.deleteDirectoryExtraData(savedExamination.getId());
+                } catch (StorageException e) {
+                    LOG.error("Could not clean extra data of rolled back examination {}", savedExamination.getId(), e);
+                }
+                throw new StorageException("Could not store extra data file " + file.getOriginalFilename()
+                        + ", examination not created.", null);
+            }
+        }
+        return savedExamination;
+    }
+
+    @Transactional(rollbackFor = { ShanoirException.class, StorageException.class })
+    public Examination updateWithExtraData(final Examination examination, final List<MultipartFile> files) throws ShanoirException, StorageException {
+        Long examinationId = examination.getId();
+        // A new file must not overwrite an existing one: it would be lost when cleaning up on failure
+        for (MultipartFile file : files) {
+            if (storageService.existsExtraData(examinationId, file.getOriginalFilename())) {
+                throw new ShanoirException("A file named " + file.getOriginalFilename() + " already exists on this examination.",
+                        HttpStatus.UNPROCESSABLE_ENTITY.value());
+            }
+        }
+        // Store the files before the update, as the update deletes from the storage the files removed from the list
+        List<String> storedFileNames = new ArrayList<>();
+        try {
+            for (MultipartFile file : files) {
+                if (addExtraData(examinationId, file) == null) {
+                    throw new StorageException("Could not store extra data file " + file.getOriginalFilename()
+                            + ", examination not updated.", null);
+                }
+                storedFileNames.add(file.getOriginalFilename());
+            }
+            return update(examination);
+        } catch (ShanoirException | StorageException | RuntimeException e) {
+            // DB changes are rolled back, but files stored by this request are not: remove them
+            for (String fileName : storedFileNames) {
+                try {
+                    storageService.deleteExtraData(examinationId, fileName);
+                } catch (StorageException deleteException) {
+                    LOG.error("Could not clean extra data file {} of examination {}", fileName, examinationId, deleteException);
+                }
+            }
+            throw e;
+        }
+    }
+
     @Transactional
     public Examination update(final Examination examination) throws ShanoirException, StorageException {
         final Examination examinationDb = examinationRepository.findById(examination.getId()).orElse(null);
@@ -426,7 +479,9 @@ public class ExaminationServiceImpl implements ExaminationService {
         examinationDb.setDataReuseAgreement(examination.getDataReuseAgreement());
         examinationDb.setSubjectWeight(examination.getSubjectWeight());
         examinationDb.setWeightUnitOfMeasure(examination.getWeightUnitOfMeasure());
-        examinationDb.setExtraDataFilePathList(examination.getExtraDataFilePathList());
+        examinationDb.setExtraDataFilePathList(examination.getExtraDataFilePathList() != null
+                ? examination.getExtraDataFilePathList().stream().distinct().collect(Collectors.toList())
+                : null);
         examinationDb.setInstrumentBasedAssessmentList(examination.getInstrumentBasedAssessmentList());
         return examinationDb;
     }
