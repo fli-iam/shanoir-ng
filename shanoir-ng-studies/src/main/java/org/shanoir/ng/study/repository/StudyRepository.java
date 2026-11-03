@@ -98,6 +98,13 @@ public interface StudyRepository extends JpaRepository<Study, Long>, StudyReposi
     @Query("SELECT s FROM Study s WHERE s.id = :studyId")
     Study findStudyWithTagsById(@Param("studyId") Long studyId);
 
+    /**
+     * The study with its own tags, the keywords of its Neurobagel dataset description.
+     */
+    @EntityGraph(attributePaths = "studyTags")
+    @Query("SELECT s FROM Study s WHERE s.id = :studyId")
+    Study findStudyWithStudyTagsById(@Param("studyId") Long studyId);
+
     @Query("SELECT s.protocolFilePaths FROM Study s WHERE s.id = :studyId")
     List<String> findProtocolFilePathsByStudyId(Long studyId);
 

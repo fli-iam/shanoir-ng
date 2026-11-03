@@ -14,14 +14,21 @@
 
 package org.shanoir.ng.subject.controler;
 
-import io.swagger.v3.oas.annotations.Parameter;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
-import org.shanoir.ng.shared.exception.*;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.ErrorDetails;
+import org.shanoir.ng.shared.exception.ErrorModel;
+import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
+import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.service.StudyService;
 import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
@@ -42,10 +49,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.transaction.Transactional;
 
 @Controller
@@ -197,15 +201,31 @@ public class SubjectApiController implements SubjectApi {
     }
 
     // Attention: this method is used by ShanoirUploader!!!
+    // Legacy method: used by old version, to remove later.
     @Override
     @Transactional
-    public ResponseEntity<SubjectDTO> findSubjectByIdentifier(
-            @Parameter(description = "identifier of the subject", required = true) @PathVariable("subjectIdentifier") String subjectIdentifier) {
+    public ResponseEntity<SubjectDTO> findSubjectByIdentifier(String subjectIdentifier) {
         // Get all allowed studies
         List<Study> studies = studyService.findAll();
         // As only studies are used to find a subject, in which the user has rights, no
         // need for further rights checks
         final Subject subject = subjectService.findByIdentifierInStudiesWithRights(subjectIdentifier, studies);
+        if (subject == null) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(subjectMapper.subjectToSubjectDTO(subject), HttpStatus.OK);
+    }
+
+    // Attention: this method is used by ShanoirUploader!!!
+    // New method: used by all upcoming versions, please keep.
+    @Override
+    @Transactional
+    public ResponseEntity<SubjectDTO> findSubjectByStudyIdAndIdentifier(Long studyId, String subjectIdentifier) {
+        Study study = studyService.findById(studyId);
+        if (study == null) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        final Subject subject = subjectService.findByIdentifierInStudiesWithRights(subjectIdentifier, List.of(study));
         if (subject == null) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }

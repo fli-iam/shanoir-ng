@@ -20,6 +20,7 @@ import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 
 /**
  * Repository for coils.
@@ -40,5 +41,6 @@ public interface AcquisitionEquipmentRepository extends CrudRepository<Acquisiti
 
     @Modifying
     @Query("DELETE FROM AcquisitionEquipment ae WHERE ae.id = :id")
-    public void deleteById(Long id);
+    public void deleteById(@Param("id") Long id);
+
 }
