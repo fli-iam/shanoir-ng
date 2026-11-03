@@ -163,7 +163,7 @@ public interface SubjectApi {
             @Parameter(description = "preclinical", required = false) @RequestParam(value = "preclinical", required = false) String preclinical);
 
     // Attention: this method is used by ShanoirUploader!!!
-    // Legacy method: used by old version, to remove later.
+    // Legacy method: used by old versions, to remove later.
     @Operation(summary = "", description = "If exists, returns the subject corresponding to the given identifier")
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found subject"),
             @ApiResponse(responseCode = "204", description = "no subject found"),
