@@ -1,0 +1,33 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head></head>
+<body>
+    <p>Dear <span th:text="${firstname}"></span> <span th:text="${lastname}"></span>, <br/>
+    User <span th:text="${username}"></span> added extra data to study <span th:text="${studyName}"></span>.</p>
+    <p>Subject: <span th:text="${subject}"></span><br/>
+    <a th:href="${examination.url}" th:text="${'Examination ' + examination.name}"></a> <br/>
+    Examination Date: <span th:text="${exam_date}"></span><br/>
+    <span th:if="${acquisition != null}"><a th:href="${acquisition.url}" th:text="${'Acquisition ' + acquisition.name}"></a></span></p>
+    <p> Files: <br/>
+    <ul>
+    <li th:each="fileName : ${fileNames}" th:text="${fileName}"></li>
+    </ul>
+    </p>
+    <p>Regards,<br/>
+    Shanoir administrator</p>
+</body>
+</html>
