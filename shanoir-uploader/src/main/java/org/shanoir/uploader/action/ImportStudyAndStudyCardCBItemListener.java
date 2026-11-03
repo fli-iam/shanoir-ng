@@ -191,29 +191,35 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
         if (ShUpConfig.isModeSubjectNameAutoIncrement()) {
             // Subject found in study via identifier: fix it
             if (subject != null) {
-                importDialog.subjectTextField.setText(subject.getName());
+                importDialog.subjectTextField.setText("");
+                importDialog.existingSubjectsCB.setEnabled(true);
+                importDialog.existingSubjectsCB.setEditable(false);
+                importDialog.existingSubjectsCB.setVisible(true);
+                importDialog.existingSubjectsCB.setBackground(Color.WHITE);
             } else {
                 importDialog.subjectTextField
                         .setText(resourceBundle.getString("shanoir.uploader.import.subject.autofill"));
+                importDialog.existingSubjectsCB.setEnabled(false);
+                importDialog.existingSubjectsCB.setEditable(false);
+                importDialog.existingSubjectsCB.setVisible(false);
+                importDialog.existingSubjectsCB.setBackground(Color.LIGHT_GRAY);
             }
             importDialog.subjectTextField.setBackground(Color.LIGHT_GRAY);
             importDialog.subjectTextField.setEnabled(false);
             importDialog.subjectTextField.setEditable(false);
             importDialog.subjectTextField.setValueSet(true);
-            // no choice on existing subject list
-            importDialog.existingSubjectsCB.setVisible(false);
-            importDialog.existingSubjectsCB.setBackground(Color.LIGHT_GRAY);
-            importDialog.existingSubjectsCB.setEnabled(false);
-            importDialog.existingSubjectsCB.setEditable(false);
         // Profile Neurinfo: enable manual edition
         } else if (ShUpConfig.isModeSubjectNameManual()) {
             if (subject == null) {
                 importDialog.subjectTextField.setText("");
             }
-            importDialog.subjectTextField.setBackground(Color.WHITE);
             importDialog.subjectTextField.setEnabled(true);
             importDialog.subjectTextField.setEditable(true);
+            importDialog.subjectTextField.setBackground(Color.WHITE);
+            importDialog.existingSubjectsCB.setEnabled(true);
             importDialog.existingSubjectsCB.setEditable(true);
+            importDialog.existingSubjectsCB.setVisible(true);
+            importDialog.existingSubjectsCB.setBackground(Color.WHITE);
         }
         if (subject != null) {
             fixSubjectValuesInDialog(subject, importDialog);
