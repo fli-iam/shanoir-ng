@@ -56,45 +56,41 @@ public class ImportSubjectNameDocumentFilter implements DocumentListener {
 
     private void updateExistingExaminations() {
         // Profile OFSEP: do not use it, as no manual subject name creation
-        if (updating || ShUpConfig.isModeSubjectNameAutoIncrement()) return;
-        updating = true;
-        try {
-            String subjectName = mainWindow.importDialog.subjectTextField.getText();
-            /**
-             * Profile Neurinfo: user types a new subject name, to create one
-             */
-            if (subjectName.length() > 0) {
-                // Store examinations in cache to bring them back
-                int size = mainWindow.importDialog.mrExaminationExistingExamCB.getItemCount();
-                if (examinationsOfExistingSubject.isEmpty()) {
-                    for (int i = 0; i < size; i++) {
-                        Examination examination = (Examination) mainWindow.importDialog.mrExaminationExistingExamCB.getItemAt(i);
-                        examinationsOfExistingSubject.add(examination);
-                    }
+        if (ShUpConfig.isModeSubjectNameAutoIncrement()) return;
+        String subjectName = mainWindow.importDialog.subjectTextField.getText();
+        /**
+         * Profile Neurinfo: user types a new subject name, to create one
+         */
+        if (subjectName.length() > 0) {
+            mainWindow.importDialog.existingSubjectsCB.setEnabled(false);
+            // Store examinations in cache to bring them back
+            int size = mainWindow.importDialog.mrExaminationExistingExamCB.getItemCount();
+            if (examinationsOfExistingSubject.isEmpty()) {
+                for (int i = 0; i < size; i++) {
+                    Examination examination = (Examination) mainWindow.importDialog.mrExaminationExistingExamCB.getItemAt(i);
+                    examinationsOfExistingSubject.add(examination);
                 }
-                ImportStudyAndStudyCardCBItemListener.updateImportDialogForSubject(null, mainWindow.importDialog, mainWindow.resourceBundle);
-                // Clear examinations
-                mainWindow.importDialog.mrExaminationExistingExamCB.removeAllItems();
+            }
+            ImportStudyAndStudyCardCBItemListener.updateImportDialogForSubject(null, mainWindow.importDialog, mainWindow.resourceBundle);
+            // Clear examinations
+            mainWindow.importDialog.mrExaminationExistingExamCB.removeAllItems();
+            mainWindow.importDialog.mrExaminationExistingExamCB.setEnabled(false);
+            mainWindow.importDialog.mrExaminationNewExamCB.setSelected(true);
+        } else {
+            Subject subject = (Subject) mainWindow.importDialog.existingSubjectsCB.getSelectedItem();
+            ImportStudyAndStudyCardCBItemListener.updateImportDialogForSubject(subject, mainWindow.importDialog, mainWindow.resourceBundle);
+            // Update examinations and clear cache
+            if (examinationsOfExistingSubject.isEmpty()) {
                 mainWindow.importDialog.mrExaminationExistingExamCB.setEnabled(false);
                 mainWindow.importDialog.mrExaminationNewExamCB.setSelected(true);
             } else {
-                Subject subject = (Subject) mainWindow.importDialog.existingSubjectsCB.getSelectedItem();
-                ImportStudyAndStudyCardCBItemListener.updateImportDialogForSubject(subject, mainWindow.importDialog, mainWindow.resourceBundle);
-                // Update examinations and clear cache
-                if (examinationsOfExistingSubject.isEmpty()) {
-                    mainWindow.importDialog.mrExaminationExistingExamCB.setEnabled(false);
-                    mainWindow.importDialog.mrExaminationNewExamCB.setSelected(true);
-                } else {
-                    for (Examination examination : examinationsOfExistingSubject) {
-                        mainWindow.importDialog.mrExaminationExistingExamCB.addItem(examination);
-                    }
-                    mainWindow.importDialog.mrExaminationExistingExamCB.setEnabled(true);
-                    mainWindow.importDialog.mrExaminationNewExamCB.setSelected(false);
+                for (Examination examination : examinationsOfExistingSubject) {
+                    mainWindow.importDialog.mrExaminationExistingExamCB.addItem(examination);
                 }
-                examinationsOfExistingSubject.clear();
+                mainWindow.importDialog.mrExaminationExistingExamCB.setEnabled(true);
+                mainWindow.importDialog.mrExaminationNewExamCB.setSelected(false);
             }
-        } finally {
-            updating = false;
+            examinationsOfExistingSubject.clear();
         }
     }
 

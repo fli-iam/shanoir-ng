@@ -210,16 +210,15 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
             importDialog.subjectTextField.setValueSet(true);
         // Profile Neurinfo: enable manual edition
         } else if (ShUpConfig.isModeSubjectNameManual()) {
-            if (subject == null) {
-                importDialog.subjectTextField.setText("");
-            }
             importDialog.subjectTextField.setEnabled(true);
             importDialog.subjectTextField.setEditable(true);
             importDialog.subjectTextField.setBackground(Color.WHITE);
-            importDialog.existingSubjectsCB.setEnabled(true);
-            importDialog.existingSubjectsCB.setEditable(true);
-            importDialog.existingSubjectsCB.setVisible(true);
-            importDialog.existingSubjectsCB.setBackground(Color.WHITE);
+            if (subject != null) {
+                importDialog.existingSubjectsCB.setEnabled(true);
+                importDialog.existingSubjectsCB.setEditable(true);
+                importDialog.existingSubjectsCB.setVisible(true);
+                importDialog.existingSubjectsCB.setBackground(Color.WHITE);
+            }
         }
         if (subject != null) {
             fixSubjectValuesInDialog(subject, importDialog);
@@ -312,9 +311,11 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 
     private void updateExistingSubjects(Study study) {
         try {
+            mainWindow.importDialog.existingSubjectsCB.setEnabled(false);
             mainWindow.importDialog.existingSubjectsCB.removeAllItems();
             List<Subject> subjects = serviceClient.findSubjectsByStudy(study.getId());
-            if (subjects != null) {
+            if (subjects != null && !subjects.isEmpty()) {
+                mainWindow.importDialog.existingSubjectsCB.setEnabled(true);
                 for (Subject subject : subjects) {
                     mainWindow.importDialog.existingSubjectsCB.addItem(subject);
                 }
