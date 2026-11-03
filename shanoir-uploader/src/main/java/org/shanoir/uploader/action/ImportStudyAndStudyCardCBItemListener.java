@@ -216,7 +216,7 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
             importDialog.existingSubjectsCB.setEditable(true);
         }
         if (subject != null) {
-            setSubjectValuesInDialog(subject, importDialog);
+            fixSubjectValuesInDialog(subject, importDialog);
         } else {
             clearSubjectValuesInDialog(importDialog);
         }
@@ -228,40 +228,41 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
          * Should be there nevertheless if subject exists or not.
          */
         // Insert ImageObjectCategory objects
+        importDialog.subjectImageObjectCategoryCB.setEnabled(true);
         importDialog.subjectImageObjectCategoryCB.removeAllItems();
         for (int i = 0; i < ImagedObjectCategory.values().length; i++) {
             importDialog.subjectImageObjectCategoryCB.addItem(ImagedObjectCategory.values()[i]);
         }
         importDialog.subjectImageObjectCategoryCB.setSelectedItem(ImagedObjectCategory.values()[1]);
         // Insert String here, as the model does not contain "", the unknown, not selected hemdom
+        importDialog.subjectLanguageHemisphericDominanceCB.setEnabled(true);
         importDialog.subjectLanguageHemisphericDominanceCB.removeAllItems();
         importDialog.subjectLanguageHemisphericDominanceCB.addItem("");
         importDialog.subjectLanguageHemisphericDominanceCB.addItem(HemisphericDominance.Left.getName());
         importDialog.subjectLanguageHemisphericDominanceCB.addItem(HemisphericDominance.Right.getName());
+        importDialog.subjectManualHemisphericDominanceCB.setEnabled(true);
         importDialog.subjectManualHemisphericDominanceCB.removeAllItems();
         importDialog.subjectManualHemisphericDominanceCB.addItem("");
         importDialog.subjectManualHemisphericDominanceCB.addItem(HemisphericDominance.Left.getName());
         importDialog.subjectManualHemisphericDominanceCB.addItem(HemisphericDominance.Right.getName());
-
+        importDialog.subjectIsPhysicallyInvolvedCB.setEnabled(true);
+        importDialog.subjectIsPhysicallyInvolvedCB.setSelected(true);
+        importDialog.subjectTypeCB.setEnabled(true);
         importDialog.subjectTypeCB.removeAllItems();
         for (int i = 0; i < SubjectType.values().length; i++) {
             importDialog.subjectTypeCB.addItem(SubjectType.values()[i]);
         }
-        importDialog.subjectTypeCB.setEnabled(true);
         importDialog.subjectTypeCB.setSelectedItem(SubjectType.values()[1]);
-
-        // subject is new, enable editing and display defaults
-        if (ShUpConfig.isModeSubjectStudyIdentifier()) {
-            importDialog.subjectStudyIdentifierTF.setEnabled(true);
-            importDialog.subjectStudyIdentifierTF.setEditable(true);
-            importDialog.subjectStudyIdentifierTF.setBackground(Color.WHITE);
-        }
+        // not used anymore on server: remove later
+        importDialog.subjectPersonalCommentTextArea.setBackground(Color.LIGHT_GRAY);
+        importDialog.subjectPersonalCommentTextArea.setEditable(false);
         importDialog.subjectStudyIdentifierTF.setText("");
-        importDialog.subjectIsPhysicallyInvolvedCB.setEnabled(true);
-        importDialog.subjectIsPhysicallyInvolvedCB.setSelected(true);
+        importDialog.subjectStudyIdentifierTF.setBackground(Color.LIGHT_GRAY);
+        importDialog.subjectStudyIdentifierTF.setEnabled(false);
+        importDialog.subjectStudyIdentifierTF.setEditable(false);
     }
 
-    private static void setSubjectValuesInDialog(Subject subject, ImportDialog importDialog) {
+    private static void fixSubjectValuesInDialog(Subject subject, ImportDialog importDialog) {
         importDialog.subjectImageObjectCategoryCB.setEnabled(false);
         if (subject.getImagedObjectCategory() != null) {
             importDialog.subjectImageObjectCategoryCB.setSelectedItem(subject.getImagedObjectCategory());
@@ -278,6 +279,10 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
         } else {
             importDialog.subjectManualHemisphericDominanceCB.setSelectedItem("");
         }
+        importDialog.subjectIsPhysicallyInvolvedCB.setEnabled(false);
+        importDialog.subjectIsPhysicallyInvolvedCB.setSelected(subject.isPhysicallyInvolved());
+        importDialog.subjectTypeCB.setEnabled(false);
+        importDialog.subjectTypeCB.setSelectedItem(subject.getSubjectType());
         // not used anymore on server: remove later
         importDialog.subjectPersonalCommentTextArea.setBackground(Color.LIGHT_GRAY);
         importDialog.subjectPersonalCommentTextArea.setEditable(false);
@@ -285,10 +290,6 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
         importDialog.subjectStudyIdentifierTF.setBackground(Color.LIGHT_GRAY);
         importDialog.subjectStudyIdentifierTF.setEnabled(false);
         importDialog.subjectStudyIdentifierTF.setEditable(false);
-        importDialog.subjectIsPhysicallyInvolvedCB.setSelected(subject.isPhysicallyInvolved());
-        importDialog.subjectIsPhysicallyInvolvedCB.setEnabled(false);
-        importDialog.subjectTypeCB.setSelectedItem(subject.getSubjectType());
-        importDialog.subjectTypeCB.setEnabled(false);
     }
 
     private void updateExistingSubjects(Study study) {
