@@ -263,7 +263,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <li>
                                 <label i18n="Examination detail|Attached files label@@examinationDetailAttachedFiles">Attach new files</label>
                                 <span class="right-col">
-                                    <input #input hidden type="file" (change)="attachNewFile($event)" />
+                                    <input #input hidden multiple type="file" (change)="attachNewFile($event)" />
                                     <button (click)="setFile()" class="left-icon">
                                         <i class="fas fa-upload"></i>
                                         Choose file
@@ -286,7 +286,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         @for (file of examination.extraDataFilePathList; track file) {
                                             <li>
                                                 {{ getFileName(file) }}
-                                                <button (click)="downloadFile(file)" class="download"><i class="fas fa-download"></i></button>
+                                                @if (hasDownloadRight) {
+                                                    <button (click)="downloadFile(file)" class="download"><i class="fas fa-download"></i></button>
+                                                }
                                             </li>
                                         }
                                     </ul>
