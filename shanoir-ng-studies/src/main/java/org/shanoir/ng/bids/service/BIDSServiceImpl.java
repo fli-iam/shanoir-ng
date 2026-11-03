@@ -18,12 +18,12 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
-import org.joda.time.DurationFieldType;
-import org.joda.time.LocalDate;
-import org.joda.time.Years;
 import org.shanoir.ng.storage.StorageService;
 import org.shanoir.ng.study.dto.DatasetDescription;
 import org.shanoir.ng.study.model.Study;
@@ -79,7 +79,7 @@ public class BIDSServiceImpl implements BIDSService {
     private static final String README_FILE = "README";
 
     @Override
-    public String generateParticipantsTsvFile(Long studyId) throws IOException {
+    public String generateParticipantsTsvFile(Long studyId, Map<Long, LocalDate> firstExaminationDates) throws IOException {
         Study study = studyRepository.findById(studyId).orElse(null);
         File workFolder = getBidsFolderPath(studyId);
         File baseDir = createBaseBidsFolder(workFolder, study.getName());
@@ -89,7 +89,7 @@ public class BIDSServiceImpl implements BIDSService {
             // Recreate it everytime
             FileUtils.deleteQuietly(csvFile);
         }
-        String participants = participantsTsv(studyId);
+        String participants = participantsTsv(studyId, firstExaminationDates);
 
         try {
             Files.write(Path.of(csvFile.getAbsolutePath()), participants.getBytes());
@@ -100,17 +100,18 @@ public class BIDSServiceImpl implements BIDSService {
     }
 
     @Override
-    public String participantsTsv(Long studyId) {
-        return participantsSerializer(subjectRepository.findByStudy_Id(studyId)).toString();
+    public String participantsTsv(Long studyId, Map<Long, LocalDate> firstExaminationDates) {
+        return participantsSerializer(subjectRepository.findByStudy_Id(studyId), firstExaminationDates).toString();
     }
 
-    public StringBuilder participantsSerializer(List<Subject> subjects) {
+    public StringBuilder participantsSerializer(List<Subject> subjects, Map<Long, LocalDate> firstExaminationDates) {
         StringBuilder buffer =  new StringBuilder();
         // Headers. Columns are separated, not terminated, by tabs: a trailing tab would read as an empty column.
         buffer.append(String.join(CSV_SEPARATOR, CSV_PARTICIPANTS_HEADER)).append(CSV_SPLITTER);
 
         for (Subject subject : subjects) {
-            String subjectAge = ageCalculation(subject);
+            String subjectAge = ageCalculation(subject.getBirthDate(),
+                    firstExaminationDates == null ? null : firstExaminationDates.get(subject.getId()));
             String subjectSex = subject.getSex() != null ? subject.getSex().name() : "O";
             // Write in the file the values
             buffer.append(String.join(CSV_SEPARATOR,
@@ -143,15 +144,15 @@ public class BIDSServiceImpl implements BIDSService {
         return workFolder;
     }
 
-    private String ageCalculation(Subject subject) {
-        java.time.LocalDate bd = subject.getBirthDate();
-        if (bd == null) {
+    /**
+     * Age in years at the first examination: unlike an age computed today, it describes the data and does not
+     * change over time. n/a without birth date or examination date, or when the examination is before the birth.
+     */
+    private String ageCalculation(LocalDate birthDate, LocalDate firstExaminationDate) {
+        if (birthDate == null || firstExaminationDate == null || firstExaminationDate.isBefore(birthDate)) {
             return "n/a";
         }
-        LocalDate birthDate = new LocalDate(bd.getYear(), bd.getMonthValue(), bd.getDayOfMonth());
-        LocalDate now = new LocalDate();
-        Years age = Years.yearsBetween(birthDate, now);
-        return String.valueOf(age.get(DurationFieldType.years()));
+        return String.valueOf(Period.between(birthDate, firstExaminationDate).getYears());
     }
 
 }
