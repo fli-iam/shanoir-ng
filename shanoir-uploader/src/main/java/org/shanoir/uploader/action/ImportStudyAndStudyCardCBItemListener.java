@@ -229,6 +229,7 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
          */
         // Insert ImageObjectCategory objects
         importDialog.subjectImageObjectCategoryCB.setEnabled(true);
+        importDialog.subjectImageObjectCategoryCB.setBackground(Color.WHITE);
         importDialog.subjectImageObjectCategoryCB.removeAllItems();
         for (int i = 0; i < ImagedObjectCategory.values().length; i++) {
             importDialog.subjectImageObjectCategoryCB.addItem(ImagedObjectCategory.values()[i]);
@@ -236,60 +237,71 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
         importDialog.subjectImageObjectCategoryCB.setSelectedItem(ImagedObjectCategory.values()[1]);
         // Insert String here, as the model does not contain "", the unknown, not selected hemdom
         importDialog.subjectLanguageHemisphericDominanceCB.setEnabled(true);
+        importDialog.subjectLanguageHemisphericDominanceCB.setBackground(Color.WHITE);
         importDialog.subjectLanguageHemisphericDominanceCB.removeAllItems();
         importDialog.subjectLanguageHemisphericDominanceCB.addItem("");
         importDialog.subjectLanguageHemisphericDominanceCB.addItem(HemisphericDominance.Left.getName());
         importDialog.subjectLanguageHemisphericDominanceCB.addItem(HemisphericDominance.Right.getName());
         importDialog.subjectManualHemisphericDominanceCB.setEnabled(true);
+        importDialog.subjectManualHemisphericDominanceCB.setBackground(Color.WHITE);
         importDialog.subjectManualHemisphericDominanceCB.removeAllItems();
         importDialog.subjectManualHemisphericDominanceCB.addItem("");
         importDialog.subjectManualHemisphericDominanceCB.addItem(HemisphericDominance.Left.getName());
         importDialog.subjectManualHemisphericDominanceCB.addItem(HemisphericDominance.Right.getName());
         importDialog.subjectIsPhysicallyInvolvedCB.setEnabled(true);
+        importDialog.subjectIsPhysicallyInvolvedCB.setBackground(Color.WHITE);
         importDialog.subjectIsPhysicallyInvolvedCB.setSelected(true);
         importDialog.subjectTypeCB.setEnabled(true);
+        importDialog.subjectTypeCB.setBackground(Color.WHITE);
         importDialog.subjectTypeCB.removeAllItems();
         for (int i = 0; i < SubjectType.values().length; i++) {
             importDialog.subjectTypeCB.addItem(SubjectType.values()[i]);
         }
         importDialog.subjectTypeCB.setSelectedItem(SubjectType.values()[1]);
         // not used anymore on server: remove later
-        importDialog.subjectPersonalCommentTextArea.setBackground(Color.LIGHT_GRAY);
+        importDialog.subjectPersonalCommentTextArea.setEnabled(false);
         importDialog.subjectPersonalCommentTextArea.setEditable(false);
-        importDialog.subjectStudyIdentifierTF.setText("");
-        importDialog.subjectStudyIdentifierTF.setBackground(Color.LIGHT_GRAY);
+        importDialog.subjectPersonalCommentTextArea.setBackground(Color.LIGHT_GRAY);
         importDialog.subjectStudyIdentifierTF.setEnabled(false);
         importDialog.subjectStudyIdentifierTF.setEditable(false);
+        importDialog.subjectStudyIdentifierTF.setBackground(Color.LIGHT_GRAY);
+        importDialog.subjectStudyIdentifierTF.setText("");
     }
 
     private static void fixSubjectValuesInDialog(Subject subject, ImportDialog importDialog) {
         importDialog.subjectImageObjectCategoryCB.setEnabled(false);
+        importDialog.subjectImageObjectCategoryCB.setBackground(Color.LIGHT_GRAY);
         if (subject.getImagedObjectCategory() != null) {
             importDialog.subjectImageObjectCategoryCB.setSelectedItem(subject.getImagedObjectCategory());
         }
         importDialog.subjectLanguageHemisphericDominanceCB.setEnabled(false);
+        importDialog.subjectLanguageHemisphericDominanceCB.setBackground(Color.LIGHT_GRAY);
         if (subject.getLanguageHemisphericDominance() != null) {
             importDialog.subjectLanguageHemisphericDominanceCB.setSelectedItem(subject.getLanguageHemisphericDominance().getName());
         } else {
             importDialog.subjectLanguageHemisphericDominanceCB.setSelectedItem("");
         }
         importDialog.subjectManualHemisphericDominanceCB.setEnabled(false);
+        importDialog.subjectManualHemisphericDominanceCB.setBackground(Color.LIGHT_GRAY);
         if (subject.getManualHemisphericDominance() != null) {
             importDialog.subjectManualHemisphericDominanceCB.setSelectedItem(subject.getManualHemisphericDominance().getName());
         } else {
             importDialog.subjectManualHemisphericDominanceCB.setSelectedItem("");
         }
         importDialog.subjectIsPhysicallyInvolvedCB.setEnabled(false);
+        importDialog.subjectIsPhysicallyInvolvedCB.setBackground(Color.LIGHT_GRAY);
         importDialog.subjectIsPhysicallyInvolvedCB.setSelected(subject.isPhysicallyInvolved());
         importDialog.subjectTypeCB.setEnabled(false);
+        importDialog.subjectTypeCB.setBackground(Color.LIGHT_GRAY);
         importDialog.subjectTypeCB.setSelectedItem(subject.getSubjectType());
         // not used anymore on server: remove later
-        importDialog.subjectPersonalCommentTextArea.setBackground(Color.LIGHT_GRAY);
+        importDialog.subjectPersonalCommentTextArea.setEnabled(false);
         importDialog.subjectPersonalCommentTextArea.setEditable(false);
-        importDialog.subjectStudyIdentifierTF.setText(subject.getStudyIdentifier());
-        importDialog.subjectStudyIdentifierTF.setBackground(Color.LIGHT_GRAY);
+        importDialog.subjectPersonalCommentTextArea.setBackground(Color.LIGHT_GRAY);
         importDialog.subjectStudyIdentifierTF.setEnabled(false);
         importDialog.subjectStudyIdentifierTF.setEditable(false);
+        importDialog.subjectStudyIdentifierTF.setBackground(Color.LIGHT_GRAY);
+        importDialog.subjectStudyIdentifierTF.setText(subject.getStudyIdentifier());
     }
 
     private void updateExistingSubjects(Study study) {
