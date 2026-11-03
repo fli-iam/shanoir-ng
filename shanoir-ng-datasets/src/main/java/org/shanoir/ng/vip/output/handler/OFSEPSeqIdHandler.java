@@ -188,7 +188,7 @@ public class OFSEPSeqIdHandler extends OutputHandler {
                     LOG.warn("Series list is empty in result file [{}].", file.getAbsolutePath());
                     return;
                 }
-                processSeries(series, monitoring, resourceId);
+                processSeries(series, monitoring, resourceId, null);
             } catch (Exception e) {
                 LOG.error("An error occured while extracting result from result archive.", e);
             }
@@ -218,7 +218,7 @@ public class OFSEPSeqIdHandler extends OutputHandler {
                     LOG.warn("Series list is empty in result file [{}].", file.getAbsolutePath());
                     return;
                 }
-                processSeries(series, processing);
+                processSeries(series, null, null, processing);
             } catch (Exception e) {
                 LOG.error("An error occured while extracting result from result archive.", e);
             }
@@ -340,7 +340,7 @@ public class OFSEPSeqIdHandler extends OutputHandler {
     /**
      * Process all series / acquisitions found in output JSON
      */
-    protected void processSeries(JSONArray series, ExecutionMonitoring monitoring, String resourceId) throws JSONException, PacsException, EntityNotFoundException, CheckedIllegalClassException, SolrServerException, IOException {
+    protected void processSeries(JSONArray series, ExecutionMonitoring monitoring, String resourceId, DatasetProcessing processing) throws JSONException, EntityNotFoundException, CheckedIllegalClassException, SolrServerException, IOException {
         Long examinationId = null;
 
         for (int i = 0; i < series.length(); i++) {
@@ -348,10 +348,16 @@ public class OFSEPSeqIdHandler extends OutputHandler {
             Long serieId = serie.getLong(ID);
 
 
-            List<Dataset> datasets = datasetRepository.findByResourceId(resourceId)
-                    .stream().filter(ds -> ds.getDatasetAcquisition() != null
-                            && ds.getDatasetAcquisition().getId().equals(serieId))
-                    .collect(Collectors.toList());
+            List<Dataset> datasets;
+            if (Objects.nonNull(processing)) {
+                datasets = datasetRepository.findInputsOfProcessingIdBySerieId(processing.getId(), serieId);
+                monitoring = (ExecutionMonitoring) processing.getParent();
+            } else {
+                datasets = datasetRepository.findByResourceId(resourceId)
+                        .stream().filter(ds -> ds.getDatasetAcquisition() != null
+                                && ds.getDatasetAcquisition().getId().equals(serieId))
+                        .collect(Collectors.toList());
+            }
 
             if (datasets.isEmpty()) {
                 LOG.error("No dataset found for serie/acquisition [" + serieId + "]");
@@ -367,7 +373,9 @@ public class OFSEPSeqIdHandler extends OutputHandler {
                 try {
                     attributes = wadoDownloaderService.getDicomAttributesForDataset(ds);
                 } catch (PacsException e) {
-                    LOG.warn("Could not get DICOM attributes of dataset [{}] from PACS, dataset skipped for SIMS identification : {}", ds.getId(), e.getMessage());
+                    LOG.warn("Could not get DICOM attributes of dataset [{}] from PACS, dataset skipped for SIMS identification.", ds.getId());
+                    DatasetProperty property = setDatasetStatusProperty(ds, "NOT_DOWNLOADABLE", monitoring);
+                    datasetPropertyService.replaceAllExisting(List.of(property), ds);
                     continue;
                 }
                 if (Objects.isNull(attributes)) {
@@ -377,6 +385,8 @@ public class OFSEPSeqIdHandler extends OutputHandler {
 
                 if (vol == null) {
                     LOG.error("No volume from serie [{}] could be match with dataset [{}].", serieId, ds.getId());
+                    DatasetProperty property = setDatasetStatusProperty(ds, "NO_MATCHING", monitoring);
+                    datasetPropertyService.replaceAllExisting(List.of(property), ds);
                     continue;
                 }
                 JSONObject volume = vol.getJSONObject("volume");
@@ -396,67 +406,8 @@ public class OFSEPSeqIdHandler extends OutputHandler {
                     datasetPropertyService.replaceAllExisting(properties, ds);
                 } else {
                     LOG.info("Dataset {} ignored, no update", ds.getId());
-                }
-            }
-        }
-        LOG.info("Output.json processed for examination {}", examinationId);
-    }
-
-    /**
-     * Process all series / acquisitions found in output JSON
-     */
-    private void processSeries(JSONArray series, DatasetProcessing processing) throws JSONException, PacsException, EntityNotFoundException, CheckedIllegalClassException, SolrServerException, IOException {
-        Long examinationId = null;
-
-        for (int i = 0; i < series.length(); i++) {
-            JSONObject serie = series.getJSONObject(i);
-            Long serieId = serie.getLong(ID);
-
-            List<Dataset> datasets = datasetRepository.findInputsOfProcessingIdBySerieId(processing.getId(), serieId);
-
-            if (datasets.isEmpty()) {
-                LOG.error("No dataset found for serie/acquisition [" + serieId + "]");
-                continue;
-            }
-
-            if (Objects.isNull(examinationId)) {
-                examinationId = datasetService.getFirstRealInput(datasets.get(0)).getDatasetAcquisition().getExamination().getId();
-            }
-
-            for (Dataset ds : datasets) {
-                Attributes attributes;
-                try {
-                    attributes = wadoDownloaderService.getDicomAttributesForDataset(ds);
-                } catch (PacsException e) {
-                    LOG.warn("Could not get DICOM attributes of dataset [{}] from PACS, dataset skipped: {}", ds.getId(), e.getMessage());
-                    continue;
-                }
-                if (Objects.isNull(attributes)) {
-                    continue;
-                }
-
-                JSONObject vol = getMatchingVolume(ds, serie, attributes);
-
-                if (vol == null) {
-                    continue;
-                }
-                JSONObject volume = vol.getJSONObject("volume");
-                if (!volume.has("status") || !Objects.equals("IGNORED", volume.getString("status"))) {
-                    try {
-                        updateDataset(serie, ds, vol);
-                    } catch (CheckedIllegalClassException | EntityNotFoundException | SolrServerException | IOException e) {
-                        LOG.error("Error while updating dataset [{}]", ds.getId(), e);
-                        throw e;
-                    }
-
-                    LOG.info("Dataset {} updated", ds.getId());
-
-                    List<DatasetProperty> properties = getDatasetPropertiesFromVolume(ds, vol, (ExecutionMonitoring) processing.getParent());
-                    addDatasetTags(ds, properties);
-                    properties.addAll(getDatasetPropertiesFromDicom(attributes, ds, (ExecutionMonitoring) processing.getParent()));
-                    datasetPropertyService.replaceAllExisting(properties, ds);
-                } else {
-                    LOG.info("Dataset {} ignored, no update", ds.getId());
+                    DatasetProperty property = setDatasetStatusProperty(ds, "IGNORED", monitoring);
+                    datasetPropertyService.replaceAllExisting(List.of(property), ds);
                 }
             }
         }
@@ -560,6 +511,15 @@ public class OFSEPSeqIdHandler extends OutputHandler {
         return properties;
     }
 
+    private DatasetProperty setDatasetStatusProperty(Dataset ds, String value, ExecutionMonitoring monitoring) {
+        DatasetProperty property = new DatasetProperty();
+        property.setDataset(ds);
+        property.setName("status");
+        property.setValue(value);
+        property.setProcessing(monitoring);
+        return property;
+    }
+
     /**
      * Get institution properties from attributes associated to dataset
      */
@@ -582,4 +542,5 @@ public class OFSEPSeqIdHandler extends OutputHandler {
 
         return properties;
     }
+
 }
