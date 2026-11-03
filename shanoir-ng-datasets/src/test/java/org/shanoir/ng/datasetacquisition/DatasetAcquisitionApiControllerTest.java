@@ -38,15 +38,18 @@ import org.shanoir.ng.datasetacquisition.dto.mapper.DatasetAcquisitionMapper;
 import org.shanoir.ng.datasetacquisition.dto.mapper.ExaminationDatasetAcquisitionMapper;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
+import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.importer.dto.EegImportJob;
 import org.shanoir.ng.importer.service.DicomImporterService;
 import org.shanoir.ng.importer.service.DicomSEGAndSRImporterService;
 import org.shanoir.ng.importer.service.EegImporterService;
+import org.shanoir.ng.importer.service.ImporterMailService;
 import org.shanoir.ng.importer.service.ImporterService;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.solr.service.SolrService;
+import org.shanoir.ng.storage.StorageException;
 import org.shanoir.ng.storage.StorageService;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
@@ -57,6 +60,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
@@ -114,6 +118,9 @@ public class DatasetAcquisitionApiControllerTest {
 
     @MockBean
     private StorageService storageService;
+
+    @MockBean
+    private ImporterMailService importerMailService;
 
     @Autowired
     private MockMvc mvc;
@@ -180,16 +187,64 @@ public class DatasetAcquisitionApiControllerTest {
 
     @Test
     @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
-    public void testAddExtraData() throws Exception {
-        // GIVEN a file to add to a dataset acquisition (service returns null => failure)
-        MockMultipartFile file = new MockMultipartFile("file", "extra-data.txt", MediaType.MULTIPART_FORM_DATA_VALUE, "test content".getBytes());
+    public void testUpdateWithoutFiles() throws Exception {
+        // GIVEN an acquisition update without files
+        GenericDatasetAcquisition acquisition = new GenericDatasetAcquisition();
+        acquisition.setId(1L);
+        given(dsAcqMapper.acquisitionDTOToAcquisitionIdRelations(Mockito.any())).willReturn(acquisition);
+        given(datasetAcquisitionService.update(Mockito.eq(acquisition), Mockito.anyList())).willReturn(acquisition);
 
-        // WHEN the file is uploaded
-        mvc.perform(MockMvcRequestBuilders.multipart(REQUEST_PATH + "/extra-data-upload/1").file(file))
-                .andExpect(status().isUnprocessableEntity());
+        // WHEN it is sent
+        mvc.perform(MockMvcRequestBuilders.multipart(HttpMethod.PUT, REQUEST_PATH + "/1")
+                .file(new MockMultipartFile("datasetAcquisition", "", MediaType.APPLICATION_JSON_VALUE, "{\"id\":1}".getBytes())))
+                .andExpect(status().isNoContent());
 
-        // THEN the service is called
-        Mockito.verify(datasetAcquisitionService).addExtraData(Mockito.any(Long.class), Mockito.any(MultipartFile.class));
+        // THEN the acquisition is updated with no file
+        Mockito.verify(datasetAcquisitionService).update(acquisition, List.of());
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void testUpdateWithFiles() throws Exception {
+        // GIVEN an acquisition of an examination updated with two new files
+        Examination exam = new Examination();
+        exam.setId(3L);
+        GenericDatasetAcquisition acquisition = new GenericDatasetAcquisition();
+        acquisition.setId(1L);
+        acquisition.setExamination(exam);
+        given(dsAcqMapper.acquisitionDTOToAcquisitionIdRelations(Mockito.any())).willReturn(acquisition);
+        given(datasetAcquisitionService.update(Mockito.eq(acquisition), Mockito.anyList())).willReturn(acquisition);
+
+        // WHEN the update and the files are sent in a single request
+        mvc.perform(MockMvcRequestBuilders.multipart(HttpMethod.PUT, REQUEST_PATH + "/1")
+                .file(new MockMultipartFile("datasetAcquisition", "", MediaType.APPLICATION_JSON_VALUE, "{\"id\":1}".getBytes()))
+                .file(new MockMultipartFile("files", "a.txt", MediaType.TEXT_PLAIN_VALUE, "a".getBytes()))
+                .file(new MockMultipartFile("files", "b.txt", MediaType.TEXT_PLAIN_VALUE, "b".getBytes())))
+                .andExpect(status().isNoContent());
+
+        // THEN the files go to the service with the update, and one mail lists them
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<List<MultipartFile>> filesCaptor = ArgumentCaptor.forClass(List.class);
+        Mockito.verify(datasetAcquisitionService).update(Mockito.eq(acquisition), filesCaptor.capture());
+        assertEquals(List.of("a.txt", "b.txt"), filesCaptor.getValue().stream().map(MultipartFile::getOriginalFilename).toList());
+        Mockito.verify(importerMailService).sendExtraDataEmail(exam, 1L, List.of("a.txt", "b.txt"), 12L);
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void testUpdateWithFilesStorageFailure() throws Exception {
+        // GIVEN a file that can't be stored
+        given(dsAcqMapper.acquisitionDTOToAcquisitionIdRelations(Mockito.any())).willReturn(new GenericDatasetAcquisition());
+        given(datasetAcquisitionService.update(Mockito.any(), Mockito.anyList())).willThrow(new StorageException("storage down", null));
+
+        // WHEN the update is sent with it
+        mvc.perform(MockMvcRequestBuilders.multipart(HttpMethod.PUT, REQUEST_PATH + "/1")
+                .file(new MockMultipartFile("datasetAcquisition", "", MediaType.APPLICATION_JSON_VALUE, "{\"id\":1}".getBytes()))
+                .file(new MockMultipartFile("files", "a.txt", MediaType.TEXT_PLAIN_VALUE, "a".getBytes())))
+                .andExpect(status().isInternalServerError());
+
+        // THEN the acquisition is not updated, so no mail is sent
+        Mockito.verifyNoInteractions(importerMailService);
     }
 
     @Test

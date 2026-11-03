@@ -23,7 +23,6 @@ import { MassDownloadService } from '@app/shared/mass-download/mass-download.ser
 
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
 import { CenterService } from '../../../centers/shared/center.service';
-import { Examination } from '../../../examinations/shared/examination.model';
 import { ExaminationService } from '../../../examinations/shared/examination.service';
 import { FormFooterComponent } from '../../../shared/components/form-footer/form-footer.component';
 import { LocalDateFormatPipe } from '../../../shared/localLanguage/localDateFormat.pipe';
@@ -106,16 +105,6 @@ export class AnimalExaminationFormComponent extends ExaminationComponent {
                 this.addExtraDataToExamination(response.id);
             })
         );
-    }
-
-    public save(): Promise<Examination> {
-        return super.save().then(result => {
-            // Once the exam is saved, save associated files
-            for (const file of this.files) {
-                this.examinationService.postFile(file, this.entity.id);
-            }
-            return result;
-        });
     }
 
     manageExaminationAnesthetic(examinationId : number) {
