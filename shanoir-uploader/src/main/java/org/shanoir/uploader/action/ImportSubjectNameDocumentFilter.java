@@ -14,7 +14,6 @@
 
 package org.shanoir.uploader.action;
 
-import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,7 +23,6 @@ import javax.swing.event.DocumentListener;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.gui.MainWindow;
 import org.shanoir.uploader.model.rest.Examination;
-import org.shanoir.uploader.model.rest.ImagedObjectCategory;
 import org.shanoir.uploader.model.rest.Subject;
 
 public class ImportSubjectNameDocumentFilter implements DocumentListener {
@@ -33,8 +31,6 @@ public class ImportSubjectNameDocumentFilter implements DocumentListener {
 
     // Cache exams of latest selected subject
     private List<Examination> examinationsOfExistingSubject = new ArrayList<>();
-
-    private boolean updating = false;
 
     public ImportSubjectNameDocumentFilter(final MainWindow mainWindow) {
         this.mainWindow = mainWindow;
