@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -52,6 +53,7 @@ import org.shanoir.ng.dicom.web.service.DICOMWebService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.importer.dto.Serie;
+import org.shanoir.ng.importer.util.DicomExaminationMetadataResolver;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.dicom.DicomUtils;
 import org.shanoir.ng.shared.dicom.EchoTime;
@@ -244,6 +246,10 @@ public class DicomImporterService {
             Long centerId = manageCenter(serie.getInstitution(), study.getId());
             Examination examination = manageExamination(attributes, study, subjectId, centerId);
             DatasetAcquisition acquisition = manageAcquisitionAndEquipment(attributes, examination, centerId, serie);
+            if (isAlreadyImported(acquisition, attributes)) {
+                LOG.info("DICOM instance of serie {} already imported, skipped.", serie.getSeriesDescription());
+                return true;
+            }
             Dataset dataset = manageDataset(attributes, studyId, subjectId, acquisition, serie);
             DatasetExpression expression = manageDatasetExpression(attributes, dataset);
             datasetExpressionRepository.save(expression);
@@ -255,6 +261,32 @@ public class DicomImporterService {
             return false;
         }
         return true;
+    }
+
+    /**
+     * A sender repeats an instance when a request timed out or when an extraction
+     * is restarted. Importing it again would be refused when its file is added to
+     * the dataset, so it is recognised first and skipped.
+     */
+    private boolean isAlreadyImported(DatasetAcquisition acquisition, Attributes attributes)
+            throws MalformedURLException {
+        List<Dataset> datasets = acquisition.getDatasets();
+        if (datasets == null || datasets.isEmpty()) {
+            return false;
+        }
+        String path = instancePath(attributes);
+        for (Dataset dataset : datasets) {
+            if (dataset.getDatasetExpressions() == null) {
+                continue;
+            }
+            for (DatasetExpression expression : dataset.getDatasetExpressions()) {
+                if (expression.getDatasetFiles() != null
+                        && expression.getDatasetFiles().stream().anyMatch(file -> path.equals(file.getPath()))) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private void countNumberOfFiles(Examination examination, DatasetAcquisition acquisition, String seriesDescription) {
@@ -531,7 +563,7 @@ public class DicomImporterService {
         org.shanoir.ng.importer.dto.Study studyDICOM = new org.shanoir.ng.importer.dto.Study(attributes);
         List<Examination> examinations = examinationService.findBySubjectIdStudyId(subjectId, study.getId());
         Optional<Examination> existingExamination = examinations.stream()
-                .filter(e -> e.getStudyInstanceUID().equals(studyDICOM.getStudyInstanceUID()))
+                .filter(e -> java.util.Objects.equals(e.getStudyInstanceUID(), studyDICOM.getStudyInstanceUID()))
                 .findFirst();
         if (existingExamination.isPresent()) {
             examination = existingExamination.get();
@@ -541,9 +573,15 @@ public class DicomImporterService {
             examination = new Examination();
             examination.setStudy(study);
             examination.setSubject(subject);
-            examination.setExaminationDate(studyDICOM.getStudyDate());
+            LocalDate examinationDate = DicomExaminationMetadataResolver.resolveExaminationDate(attributes);
+            if (examinationDate == null) {
+                LOG.warn("No Study Date or Series Date in DICOM for StudyInstanceUID {}, using today",
+                        studyDICOM.getStudyInstanceUID());
+                examinationDate = LocalDate.now();
+            }
+            examination.setExaminationDate(examinationDate);
             examination.setStudyInstanceUID(studyDICOM.getStudyInstanceUID());
-            examination.setComment(studyDICOM.getStudyDescription());
+            examination.setComment(DicomExaminationMetadataResolver.resolveComment(attributes));
             examination.setCenterId(centerId);
             examination = examinationService.save(examination);
             LOG.info("Examination created: {}", examination.toString());
@@ -687,8 +725,10 @@ public class DicomImporterService {
      * @throws MalformedURLException
      * @throws ShanoirException
      */
-    private void addDatasetFile(Attributes attributes, DatasetExpression expression)
-            throws MalformedURLException, ShanoirException {
+    /**
+     * The WADO-RS URL of an instance in the PACS, which is the path of its dataset file.
+     */
+    private String instancePath(Attributes attributes) throws MalformedURLException {
         final String studyInstanceUID = attributes.getString(Tag.StudyInstanceUID);
         final String seriesInstanceUID = attributes.getString(Tag.SeriesInstanceUID);
         final String sOPInstanceUID = attributes.getString(Tag.SOPInstanceUID);
@@ -697,7 +737,12 @@ public class DicomImporterService {
         wadoStrBuf.append(dicomWebRS + "/" + studyInstanceUID
                 + "/series/" + seriesInstanceUID + "/instances/" + sOPInstanceUID);
         URL wadoURL = new URL(wadoStrBuf.toString());
-        String newPath = wadoURL.toString();
+        return wadoURL.toString();
+    }
+
+    private void addDatasetFile(Attributes attributes, DatasetExpression expression)
+            throws MalformedURLException, ShanoirException {
+        String newPath = instancePath(attributes);
         List<DatasetFile> datasetFilesDb = expression.getDatasetFiles();
         if (datasetFilesDb == null) {
             datasetFilesDb = new ArrayList<DatasetFile>();
