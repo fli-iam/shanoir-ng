@@ -204,8 +204,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     i18n="Edit user|Request account button label@@requestAccountButton"
                     (click)="accountRequest()"
                     class="Button right-icon"
-                    [disabled]="!form.valid"
-                    [disabled]="loading">
+                    [disabled]="!form.valid || loading">
                     Request Account
                     @if (loading) {
                         <i class="fas fa-spinner fa-spin"></i>
