@@ -65,19 +65,21 @@ public class OFSEPSeqIdHandler extends OutputHandler {
 
     public static final String PIPELINE_OUTPUT = "output.json";
     private static final String[] SERIE_PROPERTIES = {
+            "burnedInAnnotation",
             "coil",
-            "type",
-            "protocolValidityStatus",
-            "name",
-            "numberOfDirections",
+            "contrast",
             "deviceConstructor",
             "deviceMagneticField",
             "deviceModel",
             "deviceSerialNumber",
-            "burnedInAnnotation",
             "modality",
+            "name",
+            "numberOfDirections",
             "originalSerieId",
-            "studyId"
+            "protocolValidityStatus",
+            "serieNumber",
+            "studyId",
+            "type"
     };
 
     private static final String[] VOLUME_PROPERTIES = {
@@ -107,6 +109,27 @@ public class OFSEPSeqIdHandler extends OutputHandler {
             "sequenceList",
             "acquisitionNumber",
             "acquisitionTime"
+    };
+
+    private static final String[] DICOM_PROPERTIES = {
+            "AcquisitionContrast",
+            "AcquisitionNumber",
+            "ImageType",
+            "InstanceNumber",
+            "MRAcquisitionType",
+            "PHILIPPS_AcquisitionContrast",
+            "PHILIPPS_PulseSequenceName",
+            "ProtocolName",
+            "PulseSequenceName",
+            "RepetitionTime",
+            "ScanningSequence",
+            "ScanningTechnique",
+            "ScanOption",
+            "SequenceName",
+            "SequenceVariant",
+            "SerieDescription",
+            "SerieNumber",
+            "StudyDescription"
     };
 
     public static final String TYPE = "type";
@@ -493,6 +516,8 @@ public class OFSEPSeqIdHandler extends OutputHandler {
 
         JSONObject volume = json.getJSONObject("volume");
         JSONObject serie = json.getJSONObject("serie");
+        JSONObject dicom = json.getJSONObject("champs_DICOM");
+
 
         for (String name : SERIE_PROPERTIES) {
             if (!serie.has(name)) {
@@ -507,7 +532,6 @@ public class OFSEPSeqIdHandler extends OutputHandler {
             properties.add(property);
         }
 
-
         for (String name : VOLUME_PROPERTIES) {
             if (!volume.has(name)) {
                 continue;
@@ -517,6 +541,19 @@ public class OFSEPSeqIdHandler extends OutputHandler {
             property.setDataset(ds);
             property.setName("volume." + name);
             property.setValue(volume.getString(name));
+            property.setProcessing(monitoring);
+            properties.add(property);
+        }
+
+        for (String name : DICOM_PROPERTIES) {
+            if (!dicom.has(name)) {
+                continue;
+            }
+
+            DatasetProperty property = new DatasetProperty();
+            property.setDataset(ds);
+            property.setName("dicom." + name);
+            property.setValue(dicom.getString(name));
             property.setProcessing(monitoring);
             properties.add(property);
         }
