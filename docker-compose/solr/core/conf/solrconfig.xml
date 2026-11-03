@@ -339,7 +339,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
       -->
 
     <autoSoftCommit>
-      <maxTime>${solr.autoSoftCommit.maxTime:-1}</maxTime>
+      <maxTime>${solr.autoSoftCommit.maxTime:3000}</maxTime>
     </autoSoftCommit>
 
     <!-- Update Related Event Listeners
