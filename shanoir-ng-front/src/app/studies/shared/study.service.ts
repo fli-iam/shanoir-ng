@@ -13,7 +13,7 @@
  */
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, OnDestroy } from '@angular/core';
-import { Observable, Subscription, firstValueFrom } from 'rxjs';
+import { Subscription, firstValueFrom } from 'rxjs';
 
 import { TaskState } from '@app/async-tasks/task.model';
 import { SingleDownloadService } from '@app/shared/mass-download/single-download.service';
@@ -36,6 +36,7 @@ import {
     StudyDTO,
     StudyDTOService,
     StudyLight,
+    StudyStatisticsDTO,
     StudyStorageVolumeDTO
 } from './study.dto';
 import { Study } from './study.model';
@@ -131,6 +132,10 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
             });
     }
 
+    getStudyStatistics(studyId: number): Promise<StudyStatisticsDTO[]> {
+        return firstValueFrom(this.http.get<StudyStatisticsDTO[]>(AppUtils.BACKEND_API_STUDY_STATISTICS_URL + '/' + studyId));
+    }
+  
     fetchCurrentUserStudyDates(): Promise<Map<number, Date>> {
         return firstValueFrom(this.http.get<{id: number, date: Date}[]>(AppUtils.BACKEND_API_STUDY_URL + '/userExpirationDates')).then(dtos => {
             const result: Map<number, Date> = new Map();
@@ -227,11 +232,6 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
         return promise;
     }
 
-
-    deleteFile(studyId: number, fileType: 'protocol-file'|'dua'): Observable<any> {
-        const endpoint = this.API_URL + '/' + fileType + '-delete/' + studyId;
-        return this.http.delete(endpoint);
-    }
 
     downloadProtocolFile(fileName: string, studyId: number, state?: TaskState) {
         const endpoint = this.API_URL + '/protocol-file-download/' + studyId + "/" + fileName + "/";

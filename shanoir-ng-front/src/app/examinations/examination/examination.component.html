@@ -73,7 +73,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             </li>
                         }
                         <li>
-                            <label i18n="Examination detail|Research study label@@examinationDetailStudy">Research study</label>
+                            <label i18n="Examination detail|Research study label@@examinationDetailStudy">Study</label>
                             <span class="right-col">
                                 @if (mode == 'view' || (mode == 'edit' && !isAdmin())) {
                                     <a [routerLink]="['/study/details/', $safeNavigationMigration(examination.study?.id)]">
@@ -257,15 +257,17 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                             @for (file of examination.extraDataFilePathList; track file) {
                                                 <li>
                                                     {{ getFileName(file) }}
-                                                    <button type="button" class="dl-button" (click)="downloadFile(file)">
-                                                        <i class="fas fa-download"></i>
-                                                    </button>
+                                                    @if (hasDownloadRight) {
+                                                        <button type="button" class="dl-button" (click)="downloadFile(file)">
+                                                            <i class="fas fa-download"></i>
+                                                        </button>
+                                                    }
                                                 </li>
                                             }
                                         </ul>
                                     }
                                     @default {
-                                        <input #input hidden type="file" (change)="attachNewFile($event)" />
+                                        <input #input hidden multiple type="file" (change)="attachNewFile($event)" />
                                         <button (click)="setFile()" class="left-icon">
                                             <i class="fas fa-upload"></i>
                                             Choose file
