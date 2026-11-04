@@ -56,7 +56,6 @@ spring:
       matching-strategy: ANT_PATH_MATCHER
   sql:
     init:
-      data-locations: classpath:/scripts/import.sql
       mode: never
   threads:
     virtual:

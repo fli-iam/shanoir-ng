@@ -48,6 +48,7 @@ public class DataUserAgreement extends AbstractEntity {
     @NotNull
     private Long userId;
 
+    @NotNull
     @CreationTimestamp
     @Column(updatable = false)
     private Date timestampOfNew;

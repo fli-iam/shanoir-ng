@@ -55,7 +55,7 @@ import com.google.gson.GsonBuilder;
  */
 @WebMvcTest(controllers = PathologyModelApiController.class,
         excludeAutoConfiguration = {
-                org.springframework.boot.security.oauth2.server.resource.autoconfigure.OAuth2ResourceServerAutoConfiguration.class
+                org.springframework.boot.security.oauth2.server.resource.autoconfigure.servlet.OAuth2ResourceServerAutoConfiguration.class
         })
 @AutoConfigureMockMvc(addFilters = false)
 @ContextConfiguration(classes = ShanoirPreclinicalApplication.class)

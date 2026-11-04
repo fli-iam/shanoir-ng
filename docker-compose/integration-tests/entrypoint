@@ -1,0 +1,28 @@
+#!/bin/bash
+set -eu
+
+: "${INTEGRATION_TESTS_SHANOIR_ADMIN_USERNAME:?missing}"  "${INTEGRATION_TESTS_SHANOIR_ADMIN_PASSWORD:?missing}"
+: "${INTEGRATION_TESTS_SHANOIR_EXPERT_USERNAME:?missing}" "${INTEGRATION_TESTS_SHANOIR_EXPERT_PASSWORD:?missing}"
+: "${INTEGRATION_TESTS_SHANOIR_USER_USERNAME:?missing}"   "${INTEGRATION_TESTS_SHANOIR_USER_PASSWORD:?missing}"
+
+# Generated test.properties, found first on the classpath (/config before the jar)
+cat > /config/test.properties <<EOF
+profile=${INTEGRATION_TESTS_PROFILE:-dev}
+shanoir.client.admin.name=${INTEGRATION_TESTS_SHANOIR_ADMIN_USERNAME}
+shanoir.client.admin.password=${INTEGRATION_TESTS_SHANOIR_ADMIN_PASSWORD}
+shanoir.client.expert.name=${INTEGRATION_TESTS_SHANOIR_EXPERT_USERNAME}
+shanoir.client.expert.password=${INTEGRATION_TESTS_SHANOIR_EXPERT_PASSWORD}
+shanoir.client.user.name=${INTEGRATION_TESTS_SHANOIR_USER_USERNAME}
+shanoir.client.user.password=${INTEGRATION_TESTS_SHANOIR_USER_PASSWORD}
+EOF
+
+# Default: run all tests under org.shanoir.uploader; override by passing args to `docker run`
+if [ "$#" -eq 0 ]; then
+    set -- --select-package org.shanoir.uploader
+fi
+
+exec java -Djava.security.egd=file:/dev/urandom \
+    -cp /config:/app/shanoir-uploader-tests.jar \
+    org.junit.platform.console.ConsoleLauncher \
+    --reports-dir /reports \
+    "$@"

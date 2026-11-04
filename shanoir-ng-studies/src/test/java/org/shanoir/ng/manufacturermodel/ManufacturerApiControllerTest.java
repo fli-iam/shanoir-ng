@@ -31,6 +31,7 @@ import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.security.ControllerSecurityService;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.security.oauth2.server.resource.autoconfigure.servlet.OAuth2ResourceServerAutoConfiguration;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
@@ -51,7 +52,7 @@ import tools.jackson.databind.json.JsonMapper;
 
 @WebMvcTest(controllers = {ManufacturerApiController.class, ControllerSecurityService.class},
         excludeAutoConfiguration = {
-                org.springframework.boot.security.oauth2.server.resource.autoconfigure.OAuth2ResourceServerAutoConfiguration.class
+                OAuth2ResourceServerAutoConfiguration.class
         })
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
