@@ -137,6 +137,7 @@ service-account:
   user:
     name: service-account-service-account
     email: ${VIP_SERVICE_EMAIL}
+    blacklist-mail: ${SHANOIR_MAIL_SUPPLIER_BLACK_LIST:}
 
 ---
 ######################################
