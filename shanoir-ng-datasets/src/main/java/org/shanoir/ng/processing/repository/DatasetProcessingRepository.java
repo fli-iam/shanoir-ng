@@ -220,4 +220,9 @@ public interface DatasetProcessingRepository extends CrudRepository<DatasetProce
         });
         return processings;
     }
+
+    @Query(value = "SELECT dp.comment FROM DatasetProcessing AS dp "
+            + "JOIN ProcessingResource AS pr ON pr.processing = dp "
+            + "WHERE pr.resourceId = :resourceId")
+    String findTypeByResourceId(String resourceId);
 }
