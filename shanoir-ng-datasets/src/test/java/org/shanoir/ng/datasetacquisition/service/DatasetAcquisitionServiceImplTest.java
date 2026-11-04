@@ -61,6 +61,7 @@ import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.storage.StorageService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.springframework.http.HttpStatus;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.access.AccessDeniedException;
 
 /**
@@ -389,6 +390,21 @@ class DatasetAcquisitionServiceImplTest {
             keycloakUtil.when(KeycloakUtil::getTokenRoles).thenReturn(Set.of("ROLE_EXPERT"));
 
             assertThrows(AccessDeniedException.class, () -> service.update(entity));
+            verify(repository, never()).save(any(DatasetAcquisition.class));
+        }
+    }
+
+    @Test
+    void updateWithFilesWithoutImportRightStoresNoFile() throws Exception {
+        prepareUpdate(false, true);
+        MockMultipartFile file = new MockMultipartFile("files", "b.pdf", "application/pdf", new byte[] { 1 });
+
+        try (MockedStatic<KeycloakUtil> keycloakUtil = Mockito.mockStatic(KeycloakUtil.class)) {
+            keycloakUtil.when(KeycloakUtil::getTokenRoles).thenReturn(Set.of("ROLE_EXPERT"));
+
+            assertThrows(AccessDeniedException.class,
+                    () -> service.update(acquisitionToUpdate(new ArrayList<>(List.of("a.pdf", "b.pdf"))), List.of(file)));
+            verify(storageService, never()).existsAcquisitionExtraData(anyLong(), anyString());
             verify(repository, never()).save(any(DatasetAcquisition.class));
         }
     }

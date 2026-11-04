@@ -160,10 +160,13 @@ public interface ExaminationApi {
             @ApiResponse(responseCode = "401", description = "unauthorized"),
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "422", description = "bad parameters"),
-            @ApiResponse(responseCode = "500", description = "unexpected error") })
-    @PutMapping(value = "/", produces = { "application/json" }, consumes = {
+            @ApiResponse(responseCode = "500", description = "unexpected error, examination not created") })
+    @PostMapping(value = {"", "/"}, produces = { "application/json" }, consumes = {
             "multipart/form-data" })
-    @PreAuthorize("#examinationId.equals(#examination.getId()) and !@datasetSecurityService.isDraftStudy(#examinationDTO.getStudyId()) and (hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and (@datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_IMPORT')))))")
+    @PreAuthorize("!@datasetSecurityService.isDraftStudy(#examinationDTO.getStudyId()) and "
+              + "(hasRole('ADMIN') or "
+              + "(hasAnyRole('EXPERT', 'USER') and "
+              + "@datasetSecurityService.hasRightOnStudyCenter(#examinationDTO.getCenterId(), #examinationDTO.getStudyId(), 'CAN_IMPORT')))")
     ResponseEntity<ExaminationDTO> saveNewExaminationWithExtraData(
             @Parameter(description = "examination to create", required = true) @Valid @RequestPart("examination") ExaminationDTO examinationDTO,
             final BindingResult result,
@@ -178,7 +181,7 @@ public interface ExaminationApi {
             @ApiResponse(responseCode = "500", description = "unexpected error, examination not updated") })
     @PutMapping(value = "/{examinationId}", produces = { "application/json" }, consumes = {
             "multipart/form-data" })
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and #examination.getId().equals(#examinationId) and @datasetSecurityService.hasRightOnExamination(#examination.getId(), 'CAN_IMPORT'))")
+    @PreAuthorize("#examinationId.equals(#examination.getId()) and (hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and (@datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_IMPORT') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_ADMINISTRATE')))))")
     ResponseEntity<Void> updateExamination(
             @Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
             @Parameter(description = "examination to update", required = true) @Valid @RequestPart("examination") ExaminationDTO examination,

@@ -319,6 +319,11 @@ public class ExaminationServiceImpl implements ExaminationService {
     @Transactional(rollbackFor = { ShanoirException.class, StorageException.class })
     public Examination updateWithExtraData(final Examination examination, final List<MultipartFile> files) throws ShanoirException, StorageException {
         Long examinationId = examination.getId();
+        // Only importers may add extra-data files: refuse before storing anything, the files would be orphaned
+        if (!files.isEmpty() && !KeycloakUtil.isAdmin()
+                && !datasetSecurityService.hasRightOnExamination(examinationId, "CAN_IMPORT")) {
+            throw new AccessDeniedException("Adding extra data files requires the import right on the study.");
+        }
         // A new file must not overwrite an existing one: it would be lost when cleaning up on failure
         for (MultipartFile file : files) {
             if (storageService.existsExtraData(examinationId, file.getOriginalFilename())) {

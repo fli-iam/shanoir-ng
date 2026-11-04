@@ -255,6 +255,10 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
             return update(entity);
         }
         Long acquisitionId = entity.getId();
+        // Only importers may add extra-data files: refuse before storing anything, the files would be orphaned
+        if (!KeycloakUtil.isAdmin() && !datasetSecurityService.hasRightOnDatasetAcquisition(acquisitionId, "CAN_IMPORT")) {
+            throw new AccessDeniedException("Adding extra data files requires the import right on the study.");
+        }
         // A new file must not overwrite an existing one: it would be lost when cleaning up on failure
         for (MultipartFile file : files) {
             if (storageService.existsAcquisitionExtraData(acquisitionId, file.getOriginalFilename())) {

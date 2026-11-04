@@ -78,7 +78,7 @@ public interface DatasetAcquisitionService {
      * @throws ShanoirException if a file already exists (422) or the acquisition is not found.
      * @throws StorageException if a file could not be stored.
      */
-    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and  @datasetSecurityService.hasRightOnExamination(#entity.examination.id, 'CAN_ADMINISTRATE')")
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and (@datasetSecurityService.hasRightOnDatasetAcquisition(#entity.id, 'CAN_IMPORT') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnDatasetAcquisition(#entity.id, 'CAN_ADMINISTRATE'))))")
     DatasetAcquisition update(DatasetAcquisition entity, List<MultipartFile> files) throws ShanoirException, StorageException;
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and  @datasetSecurityService.filterDatasetAcquisitionList(#entities, 'CAN_ADMINISTRATE')")

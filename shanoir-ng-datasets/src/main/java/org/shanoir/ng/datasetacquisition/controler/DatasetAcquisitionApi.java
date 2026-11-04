@@ -186,7 +186,7 @@ public interface DatasetAcquisitionApi {
         @ApiResponse(responseCode = "422", description = "bad parameters or extra data file already existing"),
         @ApiResponse(responseCode = "500", description = "unexpected error, datasetAcquisition not updated")})
     @RequestMapping(value = "/datasetacquisition/{datasetAcquisitionId}", produces = {"application/json"}, consumes = {
-        "application/json"}, method = RequestMethod.PUT)
+        "multipart/form-data"}, method = RequestMethod.PUT)
     @PreAuthorize("#datasetAcquisitionId == #datasetAcquisition.getId() and (hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and (@datasetSecurityService.hasRightOnDatasetAcquisition(#datasetAcquisitionId, 'CAN_IMPORT') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnDatasetAcquisition(#datasetAcquisitionId, 'CAN_ADMINISTRATE')))))")
     ResponseEntity<Void> updateDatasetAcquisition(
             @Parameter(description = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId,

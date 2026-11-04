@@ -39,6 +39,8 @@ import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -184,6 +186,18 @@ public class ExaminationServiceTest {
         Assertions.assertEquals(UPDATED_EXAMINATION_COMMENT, updatedExamination.getComment());
         Assertions.assertEquals(List.of("a.pdf"), updatedExamination.getExtraDataFilePathList());
         Mockito.verify(storageService, Mockito.never()).deleteExtraData(Mockito.anyLong(), Mockito.anyString());
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_EXPERT" })
+    public void updateWithExtraDataWithoutImportRightStoresNoFile() throws Exception {
+        given(datasetSecurityService.hasRightOnExamination(EXAMINATION_ID, "CAN_IMPORT")).willReturn(false);
+        MockMultipartFile file = new MockMultipartFile("files", "b.pdf", "application/pdf", new byte[] { 1 });
+
+        Assertions.assertThrows(AccessDeniedException.class,
+                () -> examinationService.updateWithExtraData(createExamination(), List.of(file)));
+        Mockito.verify(storageService, Mockito.never()).existsExtraData(Mockito.anyLong(), Mockito.anyString());
+        Mockito.verify(examinationRepository, Mockito.never()).save(Mockito.any(Examination.class));
     }
 
     private Examination createExamination() {

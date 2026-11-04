@@ -194,7 +194,7 @@ public interface ExaminationService {
      * @throws ShanoirException if a file already exists (422) or the update is refused.
      * @throws StorageException if a file could not be stored (examination not updated).
      */
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examination.getId(), 'CAN_IMPORT'))")
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and (@datasetSecurityService.hasRightOnExamination(#examination.getId(), 'CAN_IMPORT') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnExamination(#examination.getId(), 'CAN_ADMINISTRATE'))))")
     Examination updateWithExtraData(Examination examination, List<MultipartFile> files) throws ShanoirException, StorageException;
 
     Long getExtraDataSizeByStudyId(Long studyId) throws StorageException;
