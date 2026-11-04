@@ -66,7 +66,6 @@ public class Instance implements Cloneable {
         if (sopInstanceUID != null)
             sopInstanceUID = sopInstanceUID.trim();
         instanceNumber = attributes.getString(Tag.InstanceNumber);
-        // Only used/returned in case of a DICOMDIR, Q/R does not know it
         referencedFileID = attributes.getStrings(Tag.ReferencedFileID);
     }
 

@@ -21,11 +21,6 @@ import org.shanoir.ng.shared.dicom.EchoTime;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-/**
- * The path of an image is always RELATIVE to the importJobDir.
- * The DICOM ZIP import is relative to the server importJobDir by userId,
- * but ShUp is relative to the Windows/Linux importJobDir of the local machine.
- */
 public class Image {
 
     @JsonProperty("path")
@@ -49,7 +44,6 @@ public class Image {
     @JsonProperty("imageOrientationPatient")
     private List<Double> imageOrientationPatient;
 
-    @JsonProperty("sopInstanceUID")
     private String sopInstanceUID;
 
     public String getPath() {
@@ -115,5 +109,4 @@ public class Image {
     public void setSOPInstanceUID(String sopInstanceUID) {
         this.sopInstanceUID = sopInstanceUID;
     }
-
 }

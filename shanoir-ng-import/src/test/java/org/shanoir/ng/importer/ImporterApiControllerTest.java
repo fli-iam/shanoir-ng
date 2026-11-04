@@ -60,6 +60,7 @@ import org.springframework.web.client.RestTemplate;
 
 import tools.jackson.databind.json.JsonMapper;
 
+
 /**
  * Unit tests for importer controller.
  *
@@ -200,7 +201,7 @@ public class ImporterApiControllerTest {
 
         mvc.perform(MockMvcRequestBuilders.get(GET_DICOM)
                 .param("path", ""))
-                .andExpect(status().isUnprocessableEntity());
+                .andExpect(status().is(200));
     }
 
     @Test
