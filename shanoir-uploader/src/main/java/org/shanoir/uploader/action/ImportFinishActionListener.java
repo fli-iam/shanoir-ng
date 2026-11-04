@@ -54,14 +54,13 @@ public class ImportFinishActionListener implements ActionListener {
 
     private MainWindow mainWindow;
 
-    private File importJobDir;
+    private File uploadFolder;
     
     private Subject subjectREST;
     
-    public ImportFinishActionListener(final MainWindow mainWindow, File importJobDir, Subject subjectREST) {
+    public ImportFinishActionListener(final MainWindow mainWindow, File uploadFolder) {
         this.mainWindow = mainWindow;
-        this.importJobDir = importJobDir;
-        this.subjectREST = subjectREST;
+        this.uploadFolder = uploadFolder;
     }
 
     @Override
@@ -72,7 +71,7 @@ public class ImportFinishActionListener implements ActionListener {
         }
         startButton.setEnabled(false);
 
-        final String folderKey = importJobDir.getAbsolutePath();
+        final String folderKey = uploadFolder.getAbsolutePath();
         if (!FOLDERS_IN_PROGRESS.add(folderKey)) {
             logger.warn("Import for folder {} already in progress, ignoring duplicate trigger.", folderKey);
             startButton.setEnabled(true);
@@ -88,7 +87,7 @@ public class ImportFinishActionListener implements ActionListener {
 
         ImportJobBase importJob = null;
         try {
-            importJob = ImportUtils.readImportJob(importJobDir);
+            importJob = ImportUtils.readImportJob(uploadFolder);
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
             showErrorAndReset(startButton, folderKey,
@@ -166,19 +165,15 @@ public class ImportFinishActionListener implements ActionListener {
          * or select an existing subject from the combo box. This is not possible for OFSEP profile.
          */
         boolean useExistingSubjectInStudy = false;
-        if (ShUpConfig.isModeSubjectNameManual()) {
-            // minimal length for subject common name is 1, same for subject study identifier
-            // if nothing is entered, use existing subject selected
-            if (mainWindow.importDialog.existingSubjectsCB.isEnabled()) {
-                subjectREST = (Subject) mainWindow.importDialog.existingSubjectsCB.getSelectedItem();
-                if (subjectREST != null) {
-                    logger.info("Existing subject used from server with ID: " + subjectREST.getId() + ", name: " + subjectREST.getName());
-                    useExistingSubjectInStudy = true;
-                } else {
-                    showErrorAndReset(startButton, folderKey,
-                            "shanoir.uploader.systemErrorDialog.error.subject.creation");
-                    return;
-                }
+        if (mainWindow.importDialog.existingSubjectsCB.isEnabled()) {
+            subjectREST = (Subject) mainWindow.importDialog.existingSubjectsCB.getSelectedItem();
+            if (subjectREST != null) {
+                logger.info("Existing subject used from server with ID: " + subjectREST.getId() + ", name: " + subjectREST.getName());
+                useExistingSubjectInStudy = true;
+            } else {
+                showErrorAndReset(startButton, folderKey,
+                        "shanoir.uploader.systemErrorDialog.error.subject.creation");
+                return;
             }
         }
 
@@ -227,14 +222,14 @@ public class ImportFinishActionListener implements ActionListener {
         // Quality Check if the Study selected has Quality Cards to be checked at import
         boolean seriesToBeImported = true;
         try {
-            QualityCardResult qualityControlResult = QualityUtils.checkQualityAtImport(importJobDir, importJob, mainWindow.isFromPACS);
+            QualityCardResult qualityControlResult = QualityUtils.checkQualityAtImport(importJob, mainWindow.isFromPACS);
             if (!qualityControlResult.isEmpty() && (qualityControlResult.hasError())) {
                 JOptionPane.showMessageDialog(mainWindow.frame,  QualityUtils.getQualityControlreportScrollPane(qualityControlResult),
                 ShUpConfig.resourceBundle.getString("shanoir.uploader.import.quality.check.window.title"), JOptionPane.ERROR_MESSAGE);
                 // set status ERROR if all series were unselected from importJob due to Quality Control errors
                 if (importJob.getSeries().isEmpty()) {
                     seriesToBeImported = false;
-                    ShUpOnloadConfig.getCurrentNominativeDataController().updateNominativeDataPercentage(importJobDir,
+                    ShUpOnloadConfig.getCurrentNominativeDataController().updateNominativeDataPercentage(uploadFolder,
                         UploadState.ERROR.toString());
                         // if an exam was created for the import, we delete it
                         if (mainWindow.importDialog.mrExaminationNewExamCB.isSelected()) {
@@ -277,7 +272,7 @@ public class ImportFinishActionListener implements ActionListener {
             // Submit to the bounded pool. The completion callback (always run,
             // success or failure) is where we release the guard and restore
             // the UI -- NOT immediately after submission.
-            IMPORT_FINISH_EXECUTOR.submit(new ImportFinishRunnable(importJobDir, importJob,
+            IMPORT_FINISH_EXECUTOR.submit(new ImportFinishRunnable(uploadFolder, importJob,
                 () -> onImportFinishDone(folderKey)));
 
             JOptionPane.showMessageDialog(mainWindow.frame,

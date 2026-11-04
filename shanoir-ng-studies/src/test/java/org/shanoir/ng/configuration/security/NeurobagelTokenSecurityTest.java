@@ -18,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -25,6 +26,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
+import org.shanoir.ng.neurobagel.dto.NeurobagelDatasetDescriptionDTO;
 import org.shanoir.ng.neurobagel.dto.NeurobagelStudyDTO;
 import org.shanoir.ng.neurobagel.service.NeurobagelService;
 import org.shanoir.ng.shared.security.NeurobagelAccess;
@@ -88,10 +90,76 @@ class NeurobagelTokenSecurityTest {
     }
 
     @Test
+    void neurobagelTokenGetsTheParticipantsOfAnExportedStudy() throws Exception {
+        given(neurobagelService.findParticipantsTsv(1L)).willReturn(Optional.of("participant_id\nsub-1\n"));
+        mvc.perform(as(NeurobagelAccess.ROLE, get("/neurobagel/study/1/participants.tsv")))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith("text/tab-separated-values"))
+                .andExpect(content().string("participant_id\nsub-1\n"));
+    }
+
+    @Test
+    void participantsOfAStudyNotExportedAreNotFound() throws Exception {
+        given(neurobagelService.findParticipantsTsv(2L)).willReturn(Optional.empty());
+        mvc.perform(as(NeurobagelAccess.ROLE, get("/neurobagel/study/2/participants.tsv"))).andExpect(status().isNotFound());
+    }
+
+    @Test
+    void neurobagelTokenGetsTheParticipantsDictionary() throws Exception {
+        given(neurobagelService.getParticipantsDictionary()).willReturn("{\"participant_id\": {}}");
+        mvc.perform(as(NeurobagelAccess.ROLE, get("/neurobagel/participants.json")))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith("application/json"))
+                .andExpect(jsonPath("$.participant_id").exists());
+    }
+
+    @Test
+    void neurobagelTokenGetsTheDatasetDescriptionWithNeurobagelKeys() throws Exception {
+        NeurobagelDatasetDescriptionDTO description = new NeurobagelDatasetDescriptionDTO();
+        description.setName("My study");
+        description.setKeywords(List.of("mri"));
+        description.setAccessType("restricted");
+        given(neurobagelService.findDatasetDescription(1L)).willReturn(Optional.of(description));
+        mvc.perform(as(NeurobagelAccess.ROLE, get("/neurobagel/study/1/dataset_description.json")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.Name").value("My study"))
+                .andExpect(jsonPath("$.Keywords[0]").value("mri"))
+                .andExpect(jsonPath("$.AccessType").value("restricted"))
+                .andExpect(jsonPath("$.name").doesNotExist())
+                .andExpect(jsonPath("$.AccessLink").doesNotExist());
+    }
+
+    @Test
+    void datasetDescriptionOfAStudyNotExportedIsNotFound() throws Exception {
+        given(neurobagelService.findDatasetDescription(2L)).willReturn(Optional.empty());
+        mvc.perform(as(NeurobagelAccess.ROLE, get("/neurobagel/study/2/dataset_description.json"))).andExpect(status().isNotFound());
+    }
+
+    @Test
+    void neurobagelTokenGetsTheImagingTableOfAnExportedStudy() throws Exception {
+        String tsv = "sub\tses\tsuffix\tpath\nsub-1\tses-2\tT1w\t/shanoir/examination/2/dataset/3\n";
+        given(neurobagelService.findImagingTsv(1L)).willReturn(Optional.of(tsv));
+        mvc.perform(as(NeurobagelAccess.ROLE, get("/neurobagel/study/1/imaging.tsv")))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith("text/tab-separated-values"))
+                .andExpect(content().string(tsv));
+    }
+
+    @Test
+    void imagingTableOfAStudyNotExportedIsNotFound() throws Exception {
+        given(neurobagelService.findImagingTsv(2L)).willReturn(Optional.empty());
+        mvc.perform(as(NeurobagelAccess.ROLE, get("/neurobagel/study/2/imaging.tsv"))).andExpect(status().isNotFound());
+    }
+
+    @Test
     void shanoirUsersCannotCallNeurobagelEndpoints() throws Exception {
         for (String role : List.of("ROLE_USER", "ROLE_EXPERT", "ROLE_ADMIN")) {
             mvc.perform(as(role, get("/neurobagel/studies"))).andExpect(status().isForbidden());
             mvc.perform(as(role, get("/neurobagel/study/1"))).andExpect(status().isForbidden());
+            mvc.perform(as(role, get("/neurobagel/study/1/participants.tsv"))).andExpect(status().isForbidden());
+            mvc.perform(as(role, get("/neurobagel/participants.json"))).andExpect(status().isForbidden());
+            mvc.perform(as(role, get("/neurobagel/study/1/dataset_description.json"))).andExpect(status().isForbidden());
+            mvc.perform(as(role, get("/neurobagel/study/1/imaging.tsv"))).andExpect(status().isForbidden());
         }
     }
 

@@ -60,6 +60,8 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
     @Input() studies: Study[] = [];
     @Input() study: Study;
     @Input() studyCenters: StudyCenter[] = [];
+    /** The connected user administrates this study (CAN_ADMINISTRATE), see StudyComponent.isStudyAdmin */
+    @Input() isStudyAdmin: boolean = false;
     protected consoleService: ConsoleService;
     centers: Center[] = [];
     studyOptions: Option<Study>[];
@@ -71,6 +73,7 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
     panelStudyUser: StudyUser;
     StudyUserRight = StudyUserRight;
     isAdmin: boolean;
+    private isExpert: boolean;
     invitationMail: string;
     invitationFunction: string;
     newUser: User[] = [];
@@ -82,6 +85,7 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
     constructor(private keycloakService: KeycloakService,
                 protected accessRequestService: AccessRequestService) {
         this.isAdmin = keycloakService.isUserAdmin();
+        this.isExpert = keycloakService.isUserExpert();
         this.consoleService = inject(ConsoleService);
     }
 
@@ -126,6 +130,11 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
 
     isMe(user: User): boolean {
         return user.id == KeycloakService.auth.userId;
+    }
+
+    /** Mirrors the backend study update rule: an administrator, or an expert administrating the study */
+    get canManageMembers(): boolean {
+        return this.isAdmin || (this.isExpert && this.isStudyAdmin);
     }
 
     disableEdit(studyUser: StudyUser): boolean {

@@ -50,7 +50,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <span class="right-col">
                 <div class="panel">
                     <div class="close" (click)="closePanel()"><i class="fas fa-times"></i></div>
-                    @if (isAdmin) {
+                    @if (canManageMembers) {
                         <fieldset>
                             <legend>General</legend>
                             <ul>

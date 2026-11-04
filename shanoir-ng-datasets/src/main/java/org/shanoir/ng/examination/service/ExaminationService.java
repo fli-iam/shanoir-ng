@@ -161,6 +161,18 @@ public interface ExaminationService {
     Examination save(Examination examination) throws EntityNotFoundException;
 
     /**
+     * Save an examination and store its extra data files in a single transaction:
+     * the examination is committed only if all the files have been successfully stored.
+     *
+     * @param examination  examination to create.
+     * @param files the extra data files to store, can be empty.
+     * @return created examination.
+     * @throws StorageException if a file could not be stored (examination not created).
+     */
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudyCenter(#examination.getCenterId(), #examination.getStudyId(), 'CAN_IMPORT'))")
+    Examination saveWithExtraData(Examination examination, List<MultipartFile> files) throws EntityNotFoundException, StorageException;
+
+    /**
      * Update an examination.
      *
      * @param examination  examination to update.
@@ -170,6 +182,20 @@ public interface ExaminationService {
      */
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examination.getId(), 'CAN_IMPORT'))")
     Examination update(Examination examination) throws EntityNotFoundException, ShanoirException, StorageException;
+
+    /**
+     * Update an examination and store its new extra data files in a single transaction:
+     * the examination is updated only if all the files have been successfully stored.
+     * The files are stored first, as the update deletes the files removed from the list.
+     *
+     * @param examination  examination to update.
+     * @param files the new extra data files to store, can be empty.
+     * @return updated examination.
+     * @throws ShanoirException if a file already exists (422) or the update is refused.
+     * @throws StorageException if a file could not be stored (examination not updated).
+     */
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examination.getId(), 'CAN_IMPORT'))")
+    Examination updateWithExtraData(Examination examination, List<MultipartFile> files) throws ShanoirException, StorageException;
 
     Long getExtraDataSizeByStudyId(Long studyId) throws StorageException;
 
