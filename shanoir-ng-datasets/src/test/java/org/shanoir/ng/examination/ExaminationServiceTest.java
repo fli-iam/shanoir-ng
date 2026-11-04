@@ -192,7 +192,7 @@ public class ExaminationServiceTest {
     @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_EXPERT" })
     public void updateWithExtraDataWithoutImportRightStoresNoFile() throws Exception {
         given(datasetSecurityService.hasRightOnExamination(EXAMINATION_ID, "CAN_IMPORT")).willReturn(false);
-        MockMultipartFile file = new MockMultipartFile("files", "b.pdf", "application/pdf", new byte[] { 1 });
+        MockMultipartFile file = new MockMultipartFile("files", "b.pdf", "application/pdf", new byte[] {1});
 
         Assertions.assertThrows(AccessDeniedException.class,
                 () -> examinationService.updateWithExtraData(createExamination(), List.of(file)));

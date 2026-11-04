@@ -397,7 +397,7 @@ class DatasetAcquisitionServiceImplTest {
     @Test
     void updateWithFilesWithoutImportRightStoresNoFile() throws Exception {
         prepareUpdate(false, true);
-        MockMultipartFile file = new MockMultipartFile("files", "b.pdf", "application/pdf", new byte[] { 1 });
+        MockMultipartFile file = new MockMultipartFile("files", "b.pdf", "application/pdf", new byte[] {1});
 
         try (MockedStatic<KeycloakUtil> keycloakUtil = Mockito.mockStatic(KeycloakUtil.class)) {
             keycloakUtil.when(KeycloakUtil::getTokenRoles).thenReturn(Set.of("ROLE_EXPERT"));
