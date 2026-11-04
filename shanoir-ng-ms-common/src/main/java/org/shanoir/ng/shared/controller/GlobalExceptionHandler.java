@@ -27,6 +27,7 @@ import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.request.async.AsyncRequestNotUsableException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 /**
@@ -65,6 +66,12 @@ public class GlobalExceptionHandler {
         final ErrorModel error = new ErrorModel(HttpStatus.BAD_REQUEST.value(), e.getMessage());
         LOG.warn("Bad request in the rest service: {}", e.getMessage());
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(value = AsyncRequestNotUsableException.class)
+    public void handleAsyncRequestNotUsableException(final AsyncRequestNotUsableException e) {
+        // Client disconnected (e.g. closed tab on an SSE stream): nothing to answer, don't log as error.
+        LOG.debug("Client disconnected: {}", e.getMessage());
     }
 
     @ExceptionHandler(value = Exception.class)

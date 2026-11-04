@@ -15,14 +15,25 @@
 package org.shanoir.ng.bids.service;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.util.Map;
 
 public interface BIDSService {
 
-    String generateParticipantsTsvFile(Long studyId) throws IOException;
+    /**
+     * Writes the participants.tsv of a study in its BIDS folder and returns its content.
+     *
+     * @param firstExaminationDates date of the first examination of each subject, by subject id: the ages are
+     *                              computed at that date
+     */
+    String generateParticipantsTsvFile(Long studyId, Map<Long, LocalDate> firstExaminationDates) throws IOException;
 
     /**
      * Content of the participants.tsv of a study, without writing any file.
+     *
+     * @param firstExaminationDates date of the first examination of each subject, by subject id: the ages are
+     *                              computed at that date
      */
-    String participantsTsv(Long studyId);
+    String participantsTsv(Long studyId, Map<Long, LocalDate> firstExaminationDates);
 
 }
