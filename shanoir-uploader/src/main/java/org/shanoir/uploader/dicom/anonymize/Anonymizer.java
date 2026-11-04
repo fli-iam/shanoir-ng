@@ -4,32 +4,31 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import org.shanoir.anonymization.anonymization.AnonymizationResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.shanoir.anonymization.anonymization.AnonymizationService;
 import org.shanoir.anonymization.anonymization.AnonymizationServiceImpl;
 import org.shanoir.uploader.dicom.retrieve.DcmRcvManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class Anonymizer {
 
     private static final Logger logger = LoggerFactory.getLogger(Anonymizer.class);
 
-    public AnonymizationResult pseudonymize(final File importJobDir,
+    public boolean pseudonymize(final File uploadFolder,
             final String profile, final String subjectName, final String studyInstanceUID)
             throws IOException {
         ArrayList<File> dicomFiles = new ArrayList<File>();
-        getListOfDicomFiles(importJobDir, dicomFiles);
+        getListOfDicomFiles(uploadFolder, dicomFiles);
         try {
             AnonymizationService anonymizationService = new AnonymizationServiceImpl();
-            AnonymizationResult result = anonymizationService.anonymizeForShanoir(
-                    dicomFiles, profile, subjectName, subjectName, studyInstanceUID, importJobDir);
-            logger.info("--> " + dicomFiles.size() + " DICOM files pseudonymized.");
-            return result;
+            anonymizationService.anonymizeForShanoir(dicomFiles, profile, subjectName, subjectName, studyInstanceUID,
+                    uploadFolder);
+            logger.info("--> " + dicomFiles.size() + " DICOM files successfully pseudonymized.");
         } catch (Exception e) {
             logger.error("pseudonymization service: ", e);
-            return null;
+            return false;
         }
+        return true;
     }
 
     private void getListOfDicomFiles(final File folder, ArrayList<File> dicomFiles) throws IOException {

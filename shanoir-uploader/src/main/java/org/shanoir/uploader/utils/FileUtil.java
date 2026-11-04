@@ -137,7 +137,7 @@ public class FileUtil {
         }
     }
 
-    public static void readAndCopyDicomFilesToImportJobFolder(File workFolder, String studyInstanceUID, List<Serie> selectedSeries, final File importJobFolder,
+    public static void readAndCopyDicomFilesToUploadFolder(File workFolder, String studyInstanceUID, List<Serie> selectedSeries, final File uploadFolder,
             final List<String> retrievedDicomFiles, StringBuilder downloadOrCopyReport) throws IOException {
         for (Serie serie : selectedSeries) {
             List<String> fileNamesForSerie = new ArrayList<String>();
@@ -153,12 +153,11 @@ public class FileUtil {
                     fileNamesForSerie.add(dicomFileName);
                     File sourceFileFromPacs = serieFiles[i];
                     try (DicomInputStream dIS = new DicomInputStream(sourceFileFromPacs)) { // keep try to finally close input stream
-                        Attributes attributes = dIS.readDatasetUntilPixelData();
+                        Attributes attributes = dIS.readDataset();
                         if (!DicomSerieAndInstanceAnalyzer.checkInstanceIsIgnored(attributes)) {
-                            // Here the referencedFileID is always null
                             Instance instance = new Instance(attributes);
                             instances.add(instance);
-                            File destSerieFolder = new File(importJobFolder.getAbsolutePath() + File.separator + seriesInstanceUID);
+                            File destSerieFolder = new File(uploadFolder.getAbsolutePath() + File.separator + seriesInstanceUID);
                             if (!destSerieFolder.exists())
                                 destSerieFolder.mkdirs();
                             File destDicomFile = new File(destSerieFolder, dicomFileName);
@@ -170,7 +169,7 @@ public class FileUtil {
                 serie.setInstances(instances);
                 if (!instances.isEmpty()) {
                     instances.sort(new InstanceNumberSorter());
-                    LOG.info(instances.size() + " instances " + serie.getSeriesDescription() + " (" + serie.getSeriesInstanceUID() + ")");
+                    LOG.info(instances.size() + " instances found for serie " + serie.getSeriesDescription());
                 } else {
                     LOG.warn("Serie found with empty instances and therefore ignored (SeriesDescription: {}, SerieInstanceUID: {}).", serie.getSeriesDescription(), serie.getSeriesInstanceUID());
                     serie.setIgnored(true);
@@ -198,14 +197,14 @@ public class FileUtil {
                     );
                 }
                 retrievedDicomFiles.addAll(fileNamesForSerie);
-                LOG.debug(importJobFolder.getName() + ":\n\n Download of " + fileNamesForSerie.size()
+                LOG.info(uploadFolder.getName() + ":\n\n Download of " + fileNamesForSerie.size()
                         + " DICOM files for serie " + seriesInstanceUID + ": " + serie.getSeriesDescription()
                         + " was successful.\n\n");
             } else {
                 downloadOrCopyReport.append("Error: Download: serie "
                         + (serie.getSeriesNumber() != null ? "(No. " + serie.getSeriesNumber() + ") " : "")
                         + serie.getSeriesDescription() + " downloaded without an existing serie folder.\n");
-                LOG.error(importJobFolder.getName() + ":\n\n Download of " + fileNamesForSerie.size()
+                LOG.error(uploadFolder.getName() + ":\n\n Download of " + fileNamesForSerie.size()
                         + " DICOM files for serie " + seriesInstanceUID + ": " + serie.getSeriesDescription()
                         + " has failed.\n\n");
             }

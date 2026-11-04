@@ -246,7 +246,7 @@ public class DicomPushServiceJob {
 
         List<String> retrievedDicomFiles = new ArrayList<String>();
         StringBuilder downloadOrCopyReportPerStudy = new StringBuilder();
-        FileUtil.readAndCopyDicomFilesToImportJobFolder(workFolder, study.getStudyInstanceUID(), completeSeries, uploadFolder, retrievedDicomFiles, downloadOrCopyReportPerStudy);
+        FileUtil.readAndCopyDicomFilesToUploadFolder(workFolder, study.getStudyInstanceUID(), completeSeries, uploadFolder, retrievedDicomFiles, downloadOrCopyReportPerStudy);
 
         // We delete the study folder
         FileUtil.deleteFolderDownloadFromDicomServer(workFolder, study.getStudyInstanceUID(), completeSeries);
