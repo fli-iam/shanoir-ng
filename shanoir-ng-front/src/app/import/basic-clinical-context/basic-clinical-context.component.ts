@@ -23,6 +23,7 @@ import { ImagedObjectCategory } from '../../subjects/shared/imaged-object-catego
 import { SimpleSubject, Subject } from '../../subjects/shared/subject.model';
 import { AbstractClinicalContextComponent } from '../clinical-context/clinical-context.abstract.component';
 import { EquipmentDicom, ImportJob, PatientDicom, SerieDicom, StudyDicom } from '../shared/dicom-data.model';
+import { resolveExaminationCommentFromDicom, resolveExaminationDateFromDicom } from '../shared/dicom-examination-metadata.util';
 import { TooltipComponent } from '../../shared/components/tooltip/tooltip.component';
 import { SelectBoxComponent } from '../../shared/select/select.component';
 
@@ -130,8 +131,10 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
         newExam.subject = new Subject();
         newExam.subject.id = this.subject.id;
         newExam.subject.name = this.subject.name;
-        newExam.examinationDate = this.getFirstSelectedSerie()?.seriesDate ? new Date(this.getFirstSelectedSerie()?.seriesDate) : null;
-        newExam.comment = this.getFirstSelectedStudy()?.studyDescription;
+        const study = this.getFirstSelectedStudy();
+        const serie = this.getFirstSelectedSerie();
+        newExam.examinationDate = resolveExaminationDateFromDicom(study, serie);
+        newExam.comment = resolveExaminationCommentFromDicom(study);
         newExam.weightUnitOfMeasure = UnitOfMeasure.KG;
         return newExam;
     }

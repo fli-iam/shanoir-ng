@@ -18,9 +18,12 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
-import org.shanoir.ng.download.DownloadAbortedException;
+import org.shanoir.ng.download.ArchiveWriter;
 import org.shanoir.ng.download.PacsTransferStats;
 import org.shanoir.ng.download.TarWriter;
+import org.shanoir.ng.download.ZipWriter;
+import org.shanoir.ng.download.DownloadAbortedException;
+import org.shanoir.ng.processing.repository.DatasetProcessingRepository;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
@@ -50,7 +53,10 @@ public class ProcessingResourceApiController implements ProcessingResourceApi {
     private DatasetDownloaderServiceImpl datasetDownloaderService;
 
     @Autowired
-    private DatasetRepository  datasetRepository;
+    private DatasetRepository datasetRepository;
+
+    @Autowired
+    private DatasetProcessingRepository processingRepository;
 
     @Value("${vip.download.parallel-count:4}")
     private int parallelCount;
@@ -87,18 +93,27 @@ public class ProcessingResourceApiController implements ProcessingResourceApi {
                 return new ResponseEntity<Void>(HttpStatus.NOT_IMPLEMENTED);
             case "content":
                 List<Dataset> datasets = findDatasetsWithSemaphore(completePath);
+
                 if (datasets.isEmpty()) {
                     LOG.error("No dataset found for resource id [{}]", completePath);
                     return new ResponseEntity<Void>(HttpStatus.BAD_REQUEST);
                 }
-
+                // Temporary solution while something generic
+                String processingType = findProcessingTypeWithSemaphore(completePath);
                 PacsTransferStats pacsStats = PacsTransferStats.start();
-                TarWriter archiveWriter = new TarWriter(response.getOutputStream(), compressionLevel);
+
+                ArchiveWriter archiveWriter;
+                if (processingType.startsWith("SIMS")) {
+                    archiveWriter = new TarWriter(response.getOutputStream(), compressionLevel);
+                } else {
+                    archiveWriter = new ZipWriter(response.getOutputStream());
+                }
+
                 try {
                     datasetDownloaderService.prepareArchiveResponse(response, datasets, archiveWriter);
                     dlPermits.acquire();
                     try {
-                        if (archiveWriter.isClientGone()) {
+                        if (archiveWriter instanceof TarWriter && ((TarWriter) archiveWriter).isClientGone()) {
                             throw new DownloadAbortedException("Client disconnected while waiting for a download thread.");
                         }
                         datasetDownloaderService.massiveDownload(format, datasets, response, true, converterId, true, sorting, archiveWriter, true);
@@ -139,6 +154,21 @@ public class ProcessingResourceApiController implements ProcessingResourceApi {
         }
         try {
             return datasetRepository.findByResourceIdWithDatasetFiles(resourceId);
+        } finally {
+            dbPermits.release();
+        }
+    }
+
+    private String findProcessingTypeWithSemaphore(String resourceId) throws RestServiceException {
+        try {
+            dbPermits.acquire();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RestServiceException(new ErrorModel(HttpStatus.SERVICE_UNAVAILABLE.value(),
+                    "Interrupted while waiting for a database connection"));
+        }
+        try {
+            return processingRepository.findTypeByResourceId(resourceId);
         } finally {
             dbPermits.release();
         }
