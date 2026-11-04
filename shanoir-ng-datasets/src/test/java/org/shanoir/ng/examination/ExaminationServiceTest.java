@@ -157,7 +157,7 @@ public class ExaminationServiceTest {
 
     @Test
     @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_USER" })
-    public void updateAsImporterOnlyChangesTheExtraDataFiles() throws Exception {
+    public void updateAsImporterChangesTheFieldsAndTheExtraDataFiles() throws Exception {
         Examination examinationDb = ModelsUtil.createExamination();
         examinationDb.setExtraDataFilePathList(new ArrayList<>(List.of("a.pdf")));
         given(examinationRepository.findById(EXAMINATION_ID)).willReturn(Optional.of(examinationDb));
@@ -167,7 +167,7 @@ public class ExaminationServiceTest {
 
         final Examination updatedExamination = examinationService.update(examination);
 
-        Assertions.assertNotEquals(UPDATED_EXAMINATION_COMMENT, updatedExamination.getComment());
+        Assertions.assertEquals(UPDATED_EXAMINATION_COMMENT, updatedExamination.getComment());
         Assertions.assertEquals(List.of("a.pdf", "b.pdf"), updatedExamination.getExtraDataFilePathList());
     }
 

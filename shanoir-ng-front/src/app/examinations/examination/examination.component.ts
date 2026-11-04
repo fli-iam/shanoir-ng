@@ -137,10 +137,11 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
         }
     }
 
-    // as in the backend: the fields are edited by study administrators with the expert role,
-    // the extra-data files by importers
+    // as in the backend: the fields are edited by importers and by study administrators with the expert role,
+    // the extra-data files by importers only
     get canEditFields(): boolean {
-        return this.keycloakService.isUserAdmin() || (this.keycloakService.isUserExpert() && this.hasAdministrateRight);
+        return this.keycloakService.isUserAdmin() || this.hasImportRight
+            || (this.keycloakService.isUserExpert() && this.hasAdministrateRight);
     }
 
     get canEditFiles(): boolean {
