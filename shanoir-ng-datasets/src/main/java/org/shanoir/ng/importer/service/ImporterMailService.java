@@ -42,6 +42,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -54,7 +55,8 @@ public class ImporterMailService {
     private static final Logger LOG = LoggerFactory.getLogger(ImporterMailService.class);
 
     /** Maximum number of examinations listed in the datasets copied email. */
-    static final int MAX_COPIED_EXAMINATIONS_IN_MAIL = 50;
+    @Value("${mail.datasets-copied.max-examinations:50}")
+    private int maxCopiedExaminationsInMail;
 
     @Autowired
     private StudyUserRightsRepository studyUserRightRepo;
@@ -157,7 +159,7 @@ public class ImporterMailService {
         }
         List<Long> distinctExamIds = examinationIds == null ? List.of()
                 : examinationIds.stream().filter(Objects::nonNull).distinct().toList();
-        List<Long> listedExamIds = distinctExamIds.stream().limit(MAX_COPIED_EXAMINATIONS_IN_MAIL).toList();
+        List<Long> listedExamIds = distinctExamIds.stream().limit(Math.max(0, maxCopiedExaminationsInMail)).toList();
 
         // Keep the copy order, the repository does not guarantee it
         Map<Long, Examination> examsById = new LinkedHashMap<>();

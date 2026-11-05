@@ -45,6 +45,7 @@ import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -52,6 +53,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class ImporterMailServiceTest {
 
     private static final Long STUDY_ID = 7L;
+
+    private static final int MAX_COPIED_EXAMINATIONS_IN_MAIL = 50;
 
     @Mock
     private StudyUserRightsRepository studyUserRightRepo;
@@ -75,6 +78,7 @@ public class ImporterMailServiceTest {
 
     @BeforeEach
     public void setUp() {
+        ReflectionTestUtils.setField(importerMailService, "maxCopiedExaminationsInMail", MAX_COPIED_EXAMINATIONS_IN_MAIL);
         examination = new Examination();
         examination.setId(3L);
         examination.setExaminationDate(LocalDate.of(2026, 10, 22));
@@ -174,7 +178,7 @@ public class ImporterMailServiceTest {
         importerMailService.sendDatasetsCopiedEmail(STUDY_ID, 120, examIds, 9L);
 
         EmailDatasetsCopied mail = captureMail(RabbitMQConfiguration.DATASETS_COPIED_MAIL_QUEUE, EmailDatasetsCopied.class);
-        assertEquals(ImporterMailService.MAX_COPIED_EXAMINATIONS_IN_MAIL, mail.getExaminations().size());
+        assertEquals(MAX_COPIED_EXAMINATIONS_IN_MAIL, mail.getExaminations().size());
         assertEquals(120, mail.getTotalExaminations());
         assertTrue(mail.getExaminations().containsKey(1L));
     }
