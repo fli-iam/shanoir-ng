@@ -25,6 +25,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.request.async.AsyncRequestNotUsableException;
 
 /**
  * Global exception handler.
@@ -55,6 +56,12 @@ public class GlobalExceptionHandler {
         final ErrorModel error = new ErrorModel(HttpStatus.NOT_FOUND.value(), e.getMessage());
         LOG.warn("Entity not found in the rest service. ", e);
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(value = AsyncRequestNotUsableException.class)
+    public void handleAsyncRequestNotUsableException(final AsyncRequestNotUsableException e) {
+        // Client disconnected (e.g. closed tab on an SSE stream): nothing to answer, don't log as error.
+        LOG.debug("Client disconnected: {}", e.getMessage());
     }
 
     @ExceptionHandler(value = Exception.class)

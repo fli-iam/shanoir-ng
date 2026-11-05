@@ -304,7 +304,7 @@ window.config = {
 				services.uiNotificationService?.show?.({
 					title: 'Cannot export segmentation',
 					message:
-						'Accept the AI result before exporting: press Enter and wait until the page responds, or press Esc to reject. Unregistered label values: ' +
+						'Accept the AI result before exporting: press Enter (this can take a few seconds on large series), or press Esc to reject. Unregistered label values: ' +
 						badValues.join(', '),
 					type: 'warning',
 					duration: 15000,
@@ -354,6 +354,172 @@ window.config = {
 		if (++pollAttempts >= MAX_POLL_ATTEMPTS) {
 			console.warn(
 				'[shanoir] OHIF segmentation export shim NOT installed: OHIF globals not found after ~60 s (OHIF version changed?)'
+			);
+			return;
+		}
+		setTimeout(poll, POLL_MS);
+	}
+
+	poll();
+})();
+
+// Interim OHIF 3.12.5 / Cornerstone 4.15.29 fix for the tab freeze (tens of seconds on a large
+// series) when an AI preview is accepted with Enter. Cornerstone's AcceptPreview walks the whole
+// labelmap with forEach and reads every voxel through a per-voxel image-cache lookup, only to find
+// the few voxels holding the preview value. The AI controller commits its undo memo after each
+// preview, so those voxels are tracked nowhere else: a memo-only accept would miss them.
+// While 'acceptPreview' runs, forEach on the labelmap volumes is swapped for a per-slice scan of
+// the raw pixel data that only visits preview voxels. Cornerstone still does the conversion, the
+// undo bookkeeping and the events. Remove when upstream stops scanning the whole volume (the same
+// code is in Cornerstone 5.6.8 and main).
+(function installShanoirAcceptPreviewShim() {
+	// LabelmapBaseTool.getOperationData: previewSegmentIndex = 255.
+	const PREVIEW_SEGMENT_INDEX = 255;
+	const POLL_MS = 250;
+	// Give up after ~60 s so a renamed/removed OHIF global is reported instead of failing silently.
+	const MAX_POLL_ATTEMPTS = 240;
+
+	function tryInstall() {
+		if (window.__shanoirAcceptPreviewShimInstalled) {
+			return true;
+		}
+
+		const commandsManager = window.commandsManager;
+		const cornerstone = window.cornerstone;
+		const cornerstoneTools = window.cornerstoneTools;
+
+		if (
+			!commandsManager?.runCommand ||
+			!cornerstone?.cache?.getVolumes ||
+			!cornerstoneTools?.ToolGroupManager?.getAllToolGroups
+		) {
+			return false;
+		}
+
+		const originalRunCommand = commandsManager.runCommand.bind(commandsManager);
+
+		// Volumes built from the labelmap images (their images carry referencedImageId) whose voxel
+		// manager reads each voxel through the image cache. Map-backed managers are left alone.
+		function getLabelmapVolumes() {
+			const { cache } = window.cornerstone;
+			return cache.getVolumes().filter(volume => {
+				const voxelManager = volume.voxelManager;
+				const imageIds = volume.imageIds;
+				if (!voxelManager || voxelManager.map || !voxelManager.dimensions || !imageIds?.length) {
+					return false;
+				}
+				return (
+					imageIds.length === voxelManager.dimensions[2] &&
+					!!cache.getImage(imageIds[0])?.referencedImageId
+				);
+			});
+		}
+
+		// With "center segment index" painting, AcceptPreview acts on recorded indices instead of on
+		// the preview value, so a scan for the preview value would be wrong. Use the stock path.
+		function centerSegmentIndexIsInUse() {
+			const { ToolGroupManager } = window.cornerstoneTools;
+			for (const toolGroup of ToolGroupManager.getAllToolGroups()) {
+				for (const tool of Object.values(toolGroup.getToolInstances?.() ?? {})) {
+					if (tool?.centerSegmentIndexInfo?.changedIndices?.length) {
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+
+		function installPreviewScan(volume) {
+			const { cache } = window.cornerstone;
+			const voxelManager = volume.voxelManager;
+			const hadOwnForEach = Object.prototype.hasOwnProperty.call(voxelManager, 'forEach');
+			const originalForEach = voxelManager.forEach;
+			const [width, height, depth] = voxelManager.dimensions;
+			const sliceSize = width * height;
+
+			voxelManager.forEach = function previewOnlyForEach(callback, options) {
+				// Callers passing bounds, LPS or point options keep Cornerstone's own iteration.
+				if (options && Object.keys(options).length) {
+					return originalForEach.call(this, callback, options);
+				}
+				for (let k = 0; k < depth; k++) {
+					const pixelData = cache.getImage(volume.imageIds[k])?.getPixelData?.();
+					if (!pixelData) {
+						continue;
+					}
+					const length = Math.min(pixelData.length, sliceSize);
+					for (let p = 0; p < length; p++) {
+						if (pixelData[p] === PREVIEW_SEGMENT_INDEX) {
+							callback({
+								value: PREVIEW_SEGMENT_INDEX,
+								index: k * sliceSize + p,
+								pointIJK: [p % width, Math.floor(p / width), k],
+								pointLPS: null,
+							});
+						}
+					}
+				}
+				return [];
+			};
+
+			return () => {
+				if (hadOwnForEach) {
+					voxelManager.forEach = originalForEach;
+				} else {
+					delete voxelManager.forEach;
+				}
+			};
+		}
+
+		function installPreviewScans() {
+			if (centerSegmentIndexIsInUse()) {
+				return () => {};
+			}
+			const restores = getLabelmapVolumes().map(installPreviewScan);
+			return () => restores.forEach(restore => restore());
+		}
+
+		commandsManager.runCommand = function shanoirAcceptPreviewRunCommand(commandName, options, ...rest) {
+			if (commandName !== 'acceptPreview') {
+				return originalRunCommand(commandName, options, ...rest);
+			}
+
+			let restore = () => {};
+			try {
+				restore = installPreviewScans();
+			} catch (err) {
+				// Fail open: a bug in the shim must never block accepting a preview.
+				console.warn('[shanoir] accept-preview shim failed, running original command:', err);
+			}
+
+			let result;
+			try {
+				result = originalRunCommand(commandName, options, ...rest);
+			} catch (err) {
+				restore();
+				throw err;
+			}
+			if (typeof result?.then === 'function') {
+				return result.finally(restore);
+			}
+			restore();
+			return result;
+		};
+
+		window.__shanoirAcceptPreviewShimInstalled = true;
+		console.info('[shanoir] OHIF accept-preview shim installed');
+		return true;
+	}
+
+	let pollAttempts = 0;
+
+	function poll() {
+		if (tryInstall()) {
+			return;
+		}
+		if (++pollAttempts >= MAX_POLL_ATTEMPTS) {
+			console.warn(
+				'[shanoir] OHIF accept-preview shim NOT installed: OHIF globals not found after ~60 s (OHIF version changed?)'
 			);
 			return;
 		}

@@ -23,7 +23,8 @@ export const environment = {
     videpeUrl: window["env"]["videpeUrl"] || "https://videpe",
     vipUrl: window["env"]["vipUrl"] || "https://vip.creatis.insa-lyon.fr",
     dpoMail: window["env"]["dpoMail"] || "dpo@inria.fr",
-    contactMail: window["env"]["contactMail"] || "developers_shanoir@inria.fr"
+    contactMail: window["env"]["contactMail"] || "developers_shanoir@inria.fr",
+    shanoirMailSupplierBlacklist: window["env"]["shanoirMailSupplierBlacklist"]
 };
 
 /*
