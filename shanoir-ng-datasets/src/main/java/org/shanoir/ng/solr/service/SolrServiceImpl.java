@@ -325,6 +325,7 @@ public class SolrServiceImpl implements SolrService {
                 if (!Objects.equals(query, ShanoirMetadataRepositoryCustom.PROCESSED_QUERY)) {
                     query += " AND d.dataset_processing_id IS NULL";
                 }
+                indexationProgess++;
 
                 while (true) {
                     String offsetQuery = query + " LIMIT " + indexationPartitionSize + " OFFSET " + offSet;
@@ -334,7 +335,6 @@ public class SolrServiceImpl implements SolrService {
                     indexedDataNumber += docPartition.size();
 
                     //Prepare event progression
-                    indexationProgess++;
                     event.setProgress((float) Math.floor(10F + ((indexationProgess / (float) ShanoirMetadataRepositoryCustom.ALL_DATASET_QUERIES.size()) * 90F)) / 100F);
 
                     indexDataPartition(event, docPartition, tags, indexedDataNumber);
