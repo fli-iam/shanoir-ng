@@ -311,6 +311,7 @@ services:
       - SHANOIR_CONTINUANCE_HOUR
       - SHANOIR_SHUTDOWN_HOUR
       - SHANOIR_PACS_CONCURRENT_DOWNLOADS
+      - SHANOIR_MAIL_COPIED_EXAMINATIONS_MAX
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - certificate-share-data:/etc/ssl/certs/java:ro
