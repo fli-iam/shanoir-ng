@@ -332,14 +332,14 @@ public class SolrServiceImpl implements SolrService {
 
                     offSet += indexationPartitionSize;
                     indexedDataNumber += docPartition.size();
-                    boolean lastPartition = docPartition.size() < indexationPartitionSize;
-                    if (lastPartition) {
-                        indexationProgess++;
-                        event.setProgress((float) Math.floor(10F + ((indexationProgess / (float) ShanoirMetadataRepositoryCustom.ALL_DATASET_QUERIES.size()) * 90F)) / 100F);
-                    }
+
+                    //Prepare event progression
+                    indexationProgess++;
+                    event.setProgress((float) Math.floor(10F + ((indexationProgess / (float) ShanoirMetadataRepositoryCustom.ALL_DATASET_QUERIES.size()) * 90F)) / 100F);
+
                     indexDataPartition(event, docPartition, tags, indexedDataNumber);
 
-                    if (lastPartition) {
+                    if (docPartition.size() < indexationPartitionSize) {
                         break; // Switch to the next query type
                     }
                 }
