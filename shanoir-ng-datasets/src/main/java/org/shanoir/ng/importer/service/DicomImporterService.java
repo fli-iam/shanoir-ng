@@ -21,10 +21,10 @@ import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -37,7 +37,6 @@ import org.dcm4che3.data.Sequence;
 import org.dcm4che3.data.Tag;
 import org.dcm4che3.data.UID;
 import org.dcm4che3.io.DicomOutputStream;
-import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
@@ -45,13 +44,13 @@ import org.shanoir.ng.dataset.repository.DatasetExpressionRepository;
 import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.dicom.web.service.DICOMWebService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.importer.dto.Serie;
+import org.shanoir.ng.importer.util.DicomExaminationMetadataResolver;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.dicom.DicomUtils;
 import org.shanoir.ng.shared.dicom.EchoTime;
@@ -244,6 +243,10 @@ public class DicomImporterService {
             Long centerId = manageCenter(serie.getInstitution(), study.getId());
             Examination examination = manageExamination(attributes, study, subjectId, centerId);
             DatasetAcquisition acquisition = manageAcquisitionAndEquipment(attributes, examination, centerId, serie);
+            if (isAlreadyImported(acquisition, attributes)) {
+                LOG.info("DICOM instance of serie {} already imported, skipped.", serie.getSeriesDescription());
+                return true;
+            }
             Dataset dataset = manageDataset(attributes, studyId, subjectId, acquisition, serie);
             DatasetExpression expression = manageDatasetExpression(attributes, dataset);
             datasetExpressionRepository.save(expression);
@@ -255,6 +258,32 @@ public class DicomImporterService {
             return false;
         }
         return true;
+    }
+
+    /**
+     * A sender repeats an instance when a request timed out or when an extraction
+     * is restarted. Importing it again would be refused when its file is added to
+     * the dataset, so it is recognised first and skipped.
+     */
+    private boolean isAlreadyImported(DatasetAcquisition acquisition, Attributes attributes)
+            throws MalformedURLException {
+        List<Dataset> datasets = acquisition.getDatasets();
+        if (datasets == null || datasets.isEmpty()) {
+            return false;
+        }
+        String path = instancePath(attributes);
+        for (Dataset dataset : datasets) {
+            if (dataset.getDatasetExpressions() == null) {
+                continue;
+            }
+            for (DatasetExpression expression : dataset.getDatasetExpressions()) {
+                if (expression.getDatasetFiles() != null
+                        && expression.getDatasetFiles().stream().anyMatch(file -> path.equals(file.getPath()))) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private void countNumberOfFiles(Examination examination, DatasetAcquisition acquisition, String seriesDescription) {
@@ -297,12 +326,7 @@ public class DicomImporterService {
         if (currentDataset == null) {
             org.shanoir.ng.importer.dto.Dataset dataset = new org.shanoir.ng.importer.dto.Dataset();
             dataset.setFirstImageSOPInstanceUID(attributes.getString(Tag.SOPInstanceUID));
-            Set<EchoTime> echoTimes = new HashSet<>();
-            EchoTime echoTime = new EchoTime();
-            echoTime.setEchoNumber(attributes.getInt(Tag.EchoNumbers, 0));
-            echoTime.setEchoTime(attributes.getDouble(Tag.EchoTime, 0.0));
-            echoTimes.add(echoTime);
-            dataset.setEchoTimes(echoTimes);
+            dataset.setEchoTimes(DatasetSeparationHelper.echoTimesForDatasetSeparation(acquisition, attributes));
             currentDataset = acquisitionContext.generateFlatDataset(
                     serie, dataset, datasetIndex, subjectId,
                     attributes);
@@ -331,14 +355,7 @@ public class DicomImporterService {
                     }
                 }
             }
-            Set<EchoTime> echoTimes = new HashSet<EchoTime>();
-            if (acquisition instanceof MrDatasetAcquisition) {
-                if (dataset instanceof MrDataset) {
-                    MrDataset mrDataset = (MrDataset) dataset;
-                    mrDataset.getEchoTime().stream().forEach(
-                            eT -> echoTimes.add(eT.getEchoTimeShared()));
-                }
-            }
+            Set<EchoTime> echoTimes = DatasetSeparationHelper.echoTimesForDatasetSeparation(acquisition, dataset);
             int acquisitionNumber = 0;
             if (acquisition.getAcquisitionNumber() != null) {
                 acquisitionNumber = acquisition.getAcquisitionNumber().intValue();
@@ -349,7 +366,8 @@ public class DicomImporterService {
                     imageOrientationPatient);
             existingDatasetToSeparatorMap.put(existingSeparator, dataset);
         }
-        SerieToDatasetsSeparator currentSeriesToDatasetsSeparator = createSeriesToDatasetsSeparator(attributes);
+        SerieToDatasetsSeparator currentSeriesToDatasetsSeparator = createSeriesToDatasetsSeparator(attributes,
+                acquisition);
         for (Map.Entry<SerieToDatasetsSeparator, Dataset> entry : existingDatasetToSeparatorMap.entrySet()) {
             if (entry.getKey().equals(currentSeriesToDatasetsSeparator)) {
                 return entry.getValue();
@@ -358,26 +376,15 @@ public class DicomImporterService {
         return null;
     }
 
-    private SerieToDatasetsSeparator createSeriesToDatasetsSeparator(Attributes attributes) {
+    private SerieToDatasetsSeparator createSeriesToDatasetsSeparator(Attributes attributes,
+            DatasetAcquisition acquisition) {
         // Acquisition number
         final int acquisitionNumber = attributes.getInt(Tag.AcquisitionNumber, 0);
         // Echo times
-        Set<EchoTime> echoTimes = new HashSet<>();
-        EchoTime echoTime = new EchoTime();
-        echoTime.setEchoNumber(attributes.getInt(Tag.EchoNumbers, 0));
-        echoTime.setEchoTime(attributes.getDouble(Tag.EchoTime, 0.0));
-        echoTimes.add(echoTime);
+        Set<EchoTime> echoTimes = DatasetSeparationHelper.echoTimesForDatasetSeparation(acquisition, attributes);
         // Image orientation patient
-        List<Double> imageOrientationPatient = new ArrayList<>();
-        double[] imageOrientationPatientArray = attributes.getDoubles(Tag.ImageOrientationPatient);
-        if (imageOrientationPatientArray != null) {
-            for (int i = 0; i < imageOrientationPatientArray.length; i++) {
-                imageOrientationPatient.add(imageOrientationPatientArray[i]);
-            }
-        }
-        double[] imageOrientationPatientsDoubleArray = imageOrientationPatient == null
-                ? null
-                : imageOrientationPatient.stream().mapToDouble(i -> i).toArray();
+        double[] imageOrientationPatientsDoubleArray = DatasetSeparationHelper
+                .imageOrientationForDatasetSeparation(attributes);
         SerieToDatasetsSeparator seriesToDatasetsSeparator =
                 new SerieToDatasetsSeparator(
                 acquisitionNumber, echoTimes,
@@ -531,7 +538,7 @@ public class DicomImporterService {
         org.shanoir.ng.importer.dto.Study studyDICOM = new org.shanoir.ng.importer.dto.Study(attributes);
         List<Examination> examinations = examinationService.findBySubjectIdStudyId(subjectId, study.getId());
         Optional<Examination> existingExamination = examinations.stream()
-                .filter(e -> e.getStudyInstanceUID().equals(studyDICOM.getStudyInstanceUID()))
+                .filter(e -> java.util.Objects.equals(e.getStudyInstanceUID(), studyDICOM.getStudyInstanceUID()))
                 .findFirst();
         if (existingExamination.isPresent()) {
             examination = existingExamination.get();
@@ -541,9 +548,15 @@ public class DicomImporterService {
             examination = new Examination();
             examination.setStudy(study);
             examination.setSubject(subject);
-            examination.setExaminationDate(studyDICOM.getStudyDate());
+            LocalDate examinationDate = DicomExaminationMetadataResolver.resolveExaminationDate(attributes);
+            if (examinationDate == null) {
+                LOG.warn("No Study Date or Series Date in DICOM for StudyInstanceUID {}, using today",
+                        studyDICOM.getStudyInstanceUID());
+                examinationDate = LocalDate.now();
+            }
+            examination.setExaminationDate(examinationDate);
             examination.setStudyInstanceUID(studyDICOM.getStudyInstanceUID());
-            examination.setComment(studyDICOM.getStudyDescription());
+            examination.setComment(DicomExaminationMetadataResolver.resolveComment(attributes));
             examination.setCenterId(centerId);
             examination = examinationService.save(examination);
             LOG.info("Examination created: {}", examination.toString());
@@ -687,8 +700,10 @@ public class DicomImporterService {
      * @throws MalformedURLException
      * @throws ShanoirException
      */
-    private void addDatasetFile(Attributes attributes, DatasetExpression expression)
-            throws MalformedURLException, ShanoirException {
+    /**
+     * The WADO-RS URL of an instance in the PACS, which is the path of its dataset file.
+     */
+    private String instancePath(Attributes attributes) throws MalformedURLException {
         final String studyInstanceUID = attributes.getString(Tag.StudyInstanceUID);
         final String seriesInstanceUID = attributes.getString(Tag.SeriesInstanceUID);
         final String sOPInstanceUID = attributes.getString(Tag.SOPInstanceUID);
@@ -697,7 +712,12 @@ public class DicomImporterService {
         wadoStrBuf.append(dicomWebRS + "/" + studyInstanceUID
                 + "/series/" + seriesInstanceUID + "/instances/" + sOPInstanceUID);
         URL wadoURL = new URL(wadoStrBuf.toString());
-        String newPath = wadoURL.toString();
+        return wadoURL.toString();
+    }
+
+    private void addDatasetFile(Attributes attributes, DatasetExpression expression)
+            throws MalformedURLException, ShanoirException {
+        String newPath = instancePath(attributes);
         List<DatasetFile> datasetFilesDb = expression.getDatasetFiles();
         if (datasetFilesDb == null) {
             datasetFilesDb = new ArrayList<DatasetFile>();

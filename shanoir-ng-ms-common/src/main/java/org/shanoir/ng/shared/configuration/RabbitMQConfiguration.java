@@ -224,6 +224,12 @@ public class RabbitMQConfiguration {
     /** Send a mail from dataset microservice to ms users */
     public static final String IMPORT_DATASET_MAIL_QUEUE = "import-dataset-mail-queue";
 
+    /** Send a mail from dataset microservice to ms users when extra data files are added */
+    public static final String EXTRA_DATA_MAIL_QUEUE = "extra-data-mail-queue";
+
+    /** Send a mail from dataset microservice to ms users when datasets are copied into a study */
+    public static final String DATASETS_COPIED_MAIL_QUEUE = "datasets-copied-mail-queue";
+
     /** Queue used to import eeg data */
     public static final String IMPORT_EEG_QUEUE = "import-eeg-queue";
 
@@ -268,8 +274,14 @@ public class RabbitMQConfiguration {
     /** Create tags on subject-study via quality control using study cards: ms datasets -> ms studies */
     public static final String STUDIES_SUBJECT_STUDY_STUDY_CARD_TAG = "studies-subject-study-study-card-tag";
 
-    /** Queue used to get participants.tsv of a study. */
+    /** participants.tsv of a study, from a ParticipantsTsvRequestDTO: ms datasets -> ms studies */
     public static final String STUDY_PARTICIPANTS_TSV = "study-participants-tsv";
+
+    /**
+     * First examination date of each subject of a study, as a ParticipantsTsvRequestDTO: ms studies -> ms datasets.
+     * Used for the subject ages of participants.tsv files built by ms studies.
+     */
+    public static final String STUDY_FIRST_EXAMINATION_DATES = "study-first-examination-dates";
 
     /**
      * Neurobagel export: ms datasets writes the imaging table of a study into the shared bids-data volume
@@ -449,6 +461,16 @@ public class RabbitMQConfiguration {
     }
 
     @Bean
+    public static Queue extraDataMailQueue() {
+        return new Queue(EXTRA_DATA_MAIL_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue datasetsCopiedMailQueue() {
+        return new Queue(DATASETS_COPIED_MAIL_QUEUE, true);
+    }
+
+    @Bean
     public static Queue importEEGQueue() {
         return new Queue(IMPORT_EEG_QUEUE, true);
     }
@@ -546,6 +568,11 @@ public class RabbitMQConfiguration {
     @Bean
     public static Queue studyParticipantsTsvQueue() {
         return new Queue(STUDY_PARTICIPANTS_TSV, true);
+    }
+
+    @Bean
+    public static Queue studyFirstExaminationDatesQueue() {
+        return new Queue(STUDY_FIRST_EXAMINATION_DATES, true);
     }
 
     @Bean
