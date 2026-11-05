@@ -302,7 +302,7 @@ public class SolrServiceImpl implements SolrService {
     private void indexDataPartition(ShanoirEvent event, List<ShanoirMetadata> documents, Map<Long, List<String>> tags, int indexedSize) throws SolrServerException, IOException {
         indexDocumentsInSolr(documents, tags);
         if (Objects.equals(1f, event.getProgress())) {
-            eventService.publishSuccessEvent(event, "Indexed [" + indexedSize + "] datasets.");
+            eventService.publishSuccessEvent(event, indexedSize + " datasets indexed.");
         } else {
             eventService.publishEvent(event, "Indexing [" + indexedSize + "] datasets...", event.getProgress());
         }
@@ -332,13 +332,19 @@ public class SolrServiceImpl implements SolrService {
 
                     offSet += indexationPartitionSize;
                     indexedDataNumber += docPartition.size();
+                    boolean lastPartition = docPartition.size() < indexationPartitionSize;
+                    if (lastPartition) {
+                        indexationProgess++;
+                        event.setProgress((float) Math.floor(10F + ((indexationProgess / (float) ShanoirMetadataRepositoryCustom.ALL_DATASET_QUERIES.size()) * 90F)) / 100F);
+                    }
                     indexDataPartition(event, docPartition, tags, indexedDataNumber);
 
-                    if (docPartition.size() < indexationPartitionSize) {
-                        event.setProgress((float) Math.floor(10F + ((indexationProgess / (float) ShanoirMetadataRepositoryCustom.ALL_DATASET_QUERIES.size()) * 90F)) / 100F);
+                    if (lastPartition) {
                         break; // Switch to the next query type
                     }
                 }
+
+
             }
         } catch (Exception e) {
             LOG.error("Error while fetching/indexing data to solr.", e);
