@@ -32,6 +32,17 @@ window.config = {
 				$set: 'primary',
 			},
 		},
+		{
+			// Avoid hard crash when RT/SEG cannot resolve a referenced display set (OHIF 3.12).
+			'missingReferenceDisplaySetHandler': {
+				$set: function missingReferenceDisplaySetHandler() {
+					console.warn(
+						'OHIF: referenced display set not loaded; open the source series in this examination first.'
+					);
+					return { handled: false };
+				},
+			},
+		},
 	],
 	maxNumRequests: {
 		interaction: SHANOIR_VIEWER_OHIF_INTERACTION_NUM_REQUESTS,

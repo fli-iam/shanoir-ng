@@ -21,7 +21,8 @@ public class Anonymizer {
         getListOfDicomFiles(uploadFolder, dicomFiles);
         try {
             AnonymizationService anonymizationService = new AnonymizationServiceImpl();
-            anonymizationService.anonymizeForShanoir(dicomFiles, profile, subjectName, subjectName, studyInstanceUID);
+            anonymizationService.anonymizeForShanoir(dicomFiles, profile, subjectName, subjectName, studyInstanceUID,
+                    uploadFolder);
             logger.info("--> " + dicomFiles.size() + " DICOM files successfully pseudonymized.");
         } catch (Exception e) {
             logger.error("pseudonymization service: ", e);
