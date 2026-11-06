@@ -301,8 +301,6 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
                             return studyRights?.includes(StudyUserRight.CAN_IMPORT);
                         });
                     }
-                    this.studyNameForSubject = this.entity?.study?.name
-                        || this.studies?.filter(s => s.id == this.entity?.study?.id)?.[0]?.name || '';
                 });
             });
     }
