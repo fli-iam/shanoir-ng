@@ -32,7 +32,7 @@ export class SolrService {
 
     public indexAll() {
         if (this.keycloakService.isUserAdmin()) {
-            return firstValueFrom(this.http.post<void>(AppUtils.BACKEND_API_SOLR_INDEX_URL, {}, {reportProgress: true, observe: 'events'}));
+            return firstValueFrom(this.http.post<void>(AppUtils.BACKEND_API_SOLR_INDEX_URL, {}));
         }
     }
 
