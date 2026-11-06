@@ -41,6 +41,9 @@ import { XaProtocolComponent } from '../modality/xa/xa-protocol.component';
 import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
 import { LocalDateFormatPipe } from '../../shared/localLanguage/localDateFormat.pipe';
 
+// upper bound of the backend Integer / MySQL INT columns
+const MAX_INT = 2147483647;
+
 @Component({
     selector: 'dataset-acquisition-detail',
     templateUrl: 'dataset-acquisition.component.html',
@@ -153,10 +156,10 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
             'type': [this.datasetAcquisition.type],
             'studyCard': [this.datasetAcquisition.studyCard],
             'acquisitionEquipment': [this.datasetAcquisition.acquisitionEquipment, [Validators.required]],
-            'rank': [this.datasetAcquisition.rank, [Validators.pattern(/^[0-9]*$/)]],
+            'rank': [this.datasetAcquisition.rank, [Validators.pattern(/^[0-9]*$/), Validators.max(MAX_INT)]],
             'acquisitionStartTime': [this.datasetAcquisition.acquisitionStartTime],
             'softwareRelease': [this.datasetAcquisition.softwareRelease],
-            'sortingIndex': [this.datasetAcquisition.sortingIndex],
+            'sortingIndex': [this.datasetAcquisition.sortingIndex, [Validators.pattern(/^[0-9]*$/), Validators.max(MAX_INT)]],
             'protocol': [this.datasetAcquisition.protocol]
         });
         // files-only edit: every field is read-only, only the extra-data files can change
