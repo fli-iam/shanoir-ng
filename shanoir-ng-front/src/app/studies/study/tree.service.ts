@@ -103,6 +103,14 @@ export class TreeService {
         return this.studyRights.includes(StudyUserRight.CAN_DOWNLOAD);
     }
 
+    get canExecuteInStudy(): boolean {
+        return !!this.studyRights?.includes(StudyUserRight.CAN_EXECUTE);
+    }
+
+    get canImportInStudy(): boolean {
+        return !!this.studyRights?.includes(StudyUserRight.CAN_IMPORT);
+    }
+
     get treeAvailable(): boolean {
         return this._treeAvailable;
     }
