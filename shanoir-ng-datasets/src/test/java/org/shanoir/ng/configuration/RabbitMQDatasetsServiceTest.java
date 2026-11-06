@@ -23,6 +23,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
@@ -129,6 +130,15 @@ class RabbitMQDatasetsServiceTest {
 
     @InjectMocks
     private RabbitMQDatasetsService rabbitMQDatasetsService;
+
+    @Test
+    void subjectHasCopiedDataAnswersFromExaminationCopies() {
+        when(examinationRepository.existsCopyOfSubjectExaminations(10L)).thenReturn(true);
+        when(examinationRepository.existsCopyOfSubjectExaminations(11L)).thenReturn(false);
+
+        assertTrue(rabbitMQDatasetsService.subjectHasCopiedData(10L));
+        assertFalse(rabbitMQDatasetsService.subjectHasCopiedData(11L));
+    }
 
     @Test
     void deleteSubjectForwardsReceivedEventAndAttributesCascadeToRequestingUser() throws Exception {

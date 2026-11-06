@@ -320,6 +320,9 @@ public class RabbitMQConfiguration {
     /** Preclinical subject creation => Check if a subject with this name already exists **/
     public static final String SUBJECTS_NAME_QUEUE = "subjects-name-queue";
 
+    /** Subject deletion => Check if some data of the subject was copied into another study **/
+    public static final String SUBJECT_HAS_COPIED_DATA_QUEUE = "subject-has-copied-data-queue";
+
     ////////////////// EXCHANGES //////////////////
 
     /** Exchange used to publish / treat all sort of shanoir events. */
@@ -603,6 +606,11 @@ public class RabbitMQConfiguration {
     @Bean
     public static Queue subjectsNameQueue() {
         return new Queue(SUBJECTS_NAME_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue subjectHasCopiedDataQueue() {
+        return new Queue(SUBJECT_HAS_COPIED_DATA_QUEUE, true);
     }
 
     @Bean

@@ -54,11 +54,13 @@ public interface SubjectApi {
             @ApiResponse(responseCode = "204", description = "no subject found"),
             @ApiResponse(responseCode = "401", description = "unauthorized"),
             @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "422", description = "subject data copied into another study"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
     @DeleteMapping(value = "/{subjectId}", produces = { "application/json" })
     @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @studySecurityService.hasRightOnSubject(#subjectId, 'CAN_ADMINISTRATE'))")
     ResponseEntity<Void> deleteSubject(
-            @Parameter(description = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId);
+            @Parameter(description = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId)
+            throws RestServiceException;
 
     @Operation(summary = "", description = "Returns all the subjects")
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found subjects"),

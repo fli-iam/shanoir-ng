@@ -161,7 +161,7 @@ public interface SubjectService {
      * @throws EntityNotFoundException
      */
     @PreAuthorize("hasAnyRole('ADMIN') or hasAnyRole('EXPERT') and @studySecurityService.hasRightOnSubject(#id, 'CAN_ADMINISTRATE')")
-    void deleteById(Long id) throws EntityNotFoundException;
+    void deleteById(Long id) throws ShanoirException;
 
     /**
      * Update subject name and values for other microservices.
