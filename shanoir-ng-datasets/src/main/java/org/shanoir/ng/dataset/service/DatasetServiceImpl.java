@@ -19,7 +19,15 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
@@ -207,8 +215,9 @@ public class DatasetServiceImpl implements DatasetService {
                     ));
         }
         long startTime = System.currentTimeMillis();
-        delete(dataset, parentEvent);
+
         deleteDatasetFilesFromDiskAndPacs(dataset, parentEvent);
+        delete(dataset, parentEvent);
         long endTime = System.currentTimeMillis();
         long elapsedTime = endTime - startTime;
         LOG.info("Dataset deletion time: " + elapsedTime + " milliseconds");
@@ -221,7 +230,11 @@ public class DatasetServiceImpl implements DatasetService {
         Long id = dataset.getId();
         for (DatasetExpression expression : dataset.getDatasetExpressions()) {
             boolean isDicom = DatasetExpressionFormat.DICOM.equals(expression.getDatasetExpressionFormat());
-            List<DatasetFile> datasetFiles = expression.getDatasetFiles();
+            List<DatasetFile> datasetFiles = new ArrayList<>(expression.getDatasetFiles());
+
+            // clear() required, otherwise delete() which is caleld jsut after in the aprent method would try to delete them again,
+            // since they are known in hibernate session
+            expression.getDatasetFiles().clear();
             if (dataset.getSource() == null)
                 datasetAsyncService.deleteDatasetFilesFromDiskAndPacsAsync(datasetFiles, isDicom, id, parentEvent);
         }
