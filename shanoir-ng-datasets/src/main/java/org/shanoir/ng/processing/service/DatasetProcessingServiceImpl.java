@@ -26,6 +26,7 @@ import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.processing.repository.DatasetProcessingRepository;
+import org.shanoir.ng.property.repository.DatasetPropertyRepository;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
@@ -56,6 +57,9 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
 
     @Autowired
     private ProcessingResourceRepository processingResourceRepository;
+
+    @Autowired
+    private DatasetPropertyRepository propertyRepository;
 
     @Autowired
     private DatasetService datasetService;
@@ -149,6 +153,7 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
 
         // delete associated ressources
         processingResourceRepository.deleteByProcessingId(id);
+        propertyRepository.deleteAll(propertyRepository.getByProcessingId(id));
 
         for (Dataset ds : datasets) {
             datasetService.deleteById(ds.getId(), parentEvent);
