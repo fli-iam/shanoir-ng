@@ -464,6 +464,14 @@ public interface ShanoirMetadataRepositoryCustom {
      */
     List<ShanoirMetadata> findSpecificSolrDoc(String queryType);
 
+    /**
+     * Count the rows returned by a Solr doc query.
+     *
+     * @param queryType the doc type query to count
+     * @return the number of rows the query returns.
+     */
+    long countSpecificSolrDoc(String queryType);
+
     ShanoirMetadata findOneSolrDoc(Long datasetId);
 
     List<ShanoirMetadata> findSolrDocs(List<Long> datasetIds);
