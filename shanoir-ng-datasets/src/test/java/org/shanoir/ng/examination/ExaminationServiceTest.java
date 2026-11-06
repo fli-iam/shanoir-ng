@@ -157,9 +157,20 @@ public class ExaminationServiceTest {
 
     @Test
     @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_USER" })
-    public void updateAsImporterChangesTheFieldsAndTheExtraDataFiles() throws Exception {
+    public void updateAsImporterChangesOnlyTheExtraDataFiles() throws Exception {
+        assertImporterChangesOnlyTheExtraDataFiles();
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_EXPERT" })
+    public void updateAsExpertImporterWithoutAdministrateRightChangesOnlyTheExtraDataFiles() throws Exception {
+        assertImporterChangesOnlyTheExtraDataFiles();
+    }
+
+    private void assertImporterChangesOnlyTheExtraDataFiles() throws Exception {
         Examination examinationDb = ModelsUtil.createExamination();
-        examinationDb.setExtraDataFilePathList(new ArrayList<>(List.of("a.pdf")));
+        examinationDb.setExtraDataFilePathList(new ArrayList<>(List.of("a.pdf", "c.pdf")));
+        String commentDb = examinationDb.getComment();
         given(examinationRepository.findById(EXAMINATION_ID)).willReturn(Optional.of(examinationDb));
         given(datasetSecurityService.hasRightOnExamination(EXAMINATION_ID, "CAN_ADMINISTRATE")).willReturn(false);
         Examination examination = createExamination();
@@ -167,8 +178,11 @@ public class ExaminationServiceTest {
 
         final Examination updatedExamination = examinationService.update(examination);
 
-        Assertions.assertEquals(UPDATED_EXAMINATION_COMMENT, updatedExamination.getComment());
+        Assertions.assertNotEquals(UPDATED_EXAMINATION_COMMENT, commentDb);
+        Assertions.assertEquals(commentDb, updatedExamination.getComment());
         Assertions.assertEquals(List.of("a.pdf", "b.pdf"), updatedExamination.getExtraDataFilePathList());
+        Mockito.verify(storageService).deleteExtraData(EXAMINATION_ID, "c.pdf");
+        Mockito.verify(examinationRepository).save(examinationDb);
     }
 
     @Test
