@@ -37,7 +37,7 @@ import org.shanoir.ng.dataset.modality.MrDatasetMapper;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.OverallStatistics;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
-import org.shanoir.ng.dataset.service.CreateStatisticsService;
+import org.shanoir.ng.dataset.service.CreateDatasetStatisticsService;
 import org.shanoir.ng.dataset.service.CsvCopyService;
 import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
 import org.shanoir.ng.dataset.service.DatasetService;
@@ -109,7 +109,7 @@ public class DatasetApiController implements DatasetApi {
     private DatasetService datasetService;
 
     @Autowired
-    private CreateStatisticsService createStatisticsService;
+    private CreateDatasetStatisticsService createDatasetStatisticsService;
 
     @Autowired
     private ImporterService importerService;
@@ -507,7 +507,7 @@ public class DatasetApiController implements DatasetApi {
 
         ShanoirEvent event = null;
         event = new ShanoirEvent(
-                ShanoirEventType.DOWNLOAD_STATISTICS_EVENT,
+                ShanoirEventType.DOWNLOAD_DATASET_STATISTICS_EVENT,
                 null,
                 KeycloakUtil.getTokenUserId(),
                 "Fetching statistics with parameters :" + params,
@@ -516,7 +516,7 @@ public class DatasetApiController implements DatasetApi {
                 null);
 
         eventService.publishEvent(event);
-        createStatisticsService.createStats(studyNameInRegExp, studyNameOutRegExp, subjectNameInRegExp, subjectNameOutRegExp, event, params);
+        createDatasetStatisticsService.createStats(studyNameInRegExp, studyNameOutRegExp, subjectNameInRegExp, subjectNameOutRegExp, event, params);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
@@ -525,7 +525,7 @@ public class DatasetApiController implements DatasetApi {
         try {
             String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
             File userDir = DatasetFileUtils.getUserImportDir(tmpDir);
-            File zipFile = new File(userDir + File.separator + CreateStatisticsService.TSV_FILE_PREFIX + "_" + eventId + ZIP);
+            File zipFile = new File(userDir + File.separator + CreateDatasetStatisticsService.TSV_FILE_PREFIX + "_" + eventId + ZIP);
             if (!zipFile.exists()) {
                 // if it doesn't exist, maybe we are in the case of a copy report TSV file
                 zipFile = new File(userDir + File.separator + CsvCopyService.TSV_FILE_PREFIX + "_" + eventId + ".tsv");
@@ -561,7 +561,7 @@ public class DatasetApiController implements DatasetApi {
     @Scheduled(cron = "0 0 6 * * *", zone = "Europe/Paris")
     public void computeOverallStatistics() {
         try {
-            createStatisticsService.computeOverallStatistics();
+            createDatasetStatisticsService.computeOverallStatistics();
         } catch (Exception e) {
             LOG.error("Error while computing overall statistics.", e);
         }

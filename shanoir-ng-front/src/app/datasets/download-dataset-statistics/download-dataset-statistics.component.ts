@@ -20,13 +20,13 @@ import { DatasetService } from '../shared/dataset.service';
 import { TooltipComponent } from '../../shared/components/tooltip/tooltip.component';
 
 @Component({
-    selector: 'download-statistics',
-    templateUrl: 'download-statistics.component.html',
+    selector: 'download-dataset-statistics',
+    templateUrl: 'download-dataset-statistics.component.html',
     changeDetection: ChangeDetectionStrategy.Eager,
     imports: [FormsModule, ReactiveFormsModule, TooltipComponent]
 })
 
-export class DownloadStatisticsComponent{
+export class DownloadDatasetStatisticsComponent {
 
     public form: UntypedFormGroup;
 
