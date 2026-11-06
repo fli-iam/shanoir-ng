@@ -106,12 +106,17 @@ export class StudyCardDTOService extends StudyCardDTOServiceAbstract {
                         entity.study.name = studies.find(study => study.id == entity.study.id)?.name;
                 }
             }),
-            this.acqEqService.getAll().then(acqs => {
-                for (const entity of result) {
-                    if (entity.acquisitionEquipment) 
-                        entity.acquisitionEquipment = acqs.find(acq => acq.id == entity.acquisitionEquipment?.id);
-                }
-            }),
+            // Resolve only the distinct equipment ids actually referenced by this list, instead of
+            // fetching every acquisition equipment in the system just to look a handful of them up.
+            (() => {
+                const distinctIds = [...new Set(result.filter(e => e.acquisitionEquipment).map(e => e.acquisitionEquipment.id))];
+                return Promise.all(distinctIds.map(id => this.acqEqService.get(id))).then(acqs => {
+                    for (const entity of result) {
+                        if (entity.acquisitionEquipment)
+                            entity.acquisitionEquipment = acqs.find(acq => acq.id == entity.acquisitionEquipment?.id);
+                    }
+                });
+            })(),
             // this.dicomService.getDicomTags().then(tags => {
             //     for (let entity of result) {
             //         this.completeDicomTagNames(entity, tags);
