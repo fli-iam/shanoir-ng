@@ -45,6 +45,24 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <input type="text" [(ngModel)]="subjectName" placeholder="Enter subject name for copied datasets" class="subject-name-input" />
                     </span>
                 </p>
+                @if (targetPattern) {
+                    <p class="info">
+                        <i class="fas fa-info-circle"></i>
+                        The target study requires subject names like
+                        <strong>{{ targetPatternExamples.join(', ') }}</strong>.
+                        Leave the name empty to have one generated automatically.
+                    </p>
+                }
+                @if (subjectNameInvalid) {
+                    <div class="error">
+                        This subject name does not match the subject name pattern of the target study.
+                    </div>
+                }
+            } @else if (targetPattern) {
+                <p class="info">
+                    <i class="fas fa-info-circle"></i>
+                    The copied subjects will be named automatically to match the subject name pattern of the target study.
+                </p>
             }
             @if (statusMessage) {
                 <div class="error">
@@ -54,7 +72,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </div>
         <div class="footer-position">
             <div class="footer">
-                <button type="button" (click)="copy()" [disabled]="!canCopy || !selectedStudy" class="left-icon alt">
+                <button type="button" (click)="copy()" [disabled]="!canCopy || !selectedStudy || subjectNameInvalid" class="left-icon alt">
                     <i class="fa-solid fa-copy"></i>
                     Copy
                 </button>

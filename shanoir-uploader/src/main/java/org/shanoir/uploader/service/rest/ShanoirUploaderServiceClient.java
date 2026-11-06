@@ -109,6 +109,8 @@ public class ShanoirUploaderServiceClient {
 
     private static final String SERVICE_CENTERS_FIND_OR_CREATE_BY_INSTITUTION_DICOM = "service.centers.find.or.create.by.institution.dicom";
 
+    private static final String SERVICE_CENTERS_FIND_BY_STUDY_ID = "service.centers.find.by.study.id";
+
     private static final String SERVICE_ACQUISITION_EQUIPMENTS = "service.acquisition.equipments";
 
     private static final String SERVICE_ACQUISITION_EQUIPMENTS_BY_SERIAL_NUMBER = "service.acquisition.equipments.by.serial.number";
@@ -194,6 +196,8 @@ public class ShanoirUploaderServiceClient {
     private String serviceURLQualityCardsByStudyId;
 
     private String serviceURLCentersCreate;
+
+    private String serviceURLCentersFindByStudyId;
 
     private String serviceURLCentersFindOrCreateByInstitutionDicom;
 
@@ -296,6 +300,8 @@ public class ShanoirUploaderServiceClient {
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_QUALITYCARDS_FIND_BY_STUDY_ID);
         this.serviceURLCentersCreate = this.serverURL
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_CENTERS_CREATE);
+        this.serviceURLCentersFindByStudyId = this.serverURL
+                + ShUpConfig.endpointProperties.getProperty(SERVICE_CENTERS_FIND_BY_STUDY_ID);
         this.serviceURLCentersFindOrCreateByInstitutionDicom = this.serverURL
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_CENTERS_FIND_OR_CREATE_BY_INSTITUTION_DICOM);
         this.serviceURLAcquisitionEquipments = this.serverURL
@@ -1304,11 +1310,25 @@ public class ShanoirUploaderServiceClient {
             final Subject subject,
             final boolean modeSubjectCommonNameManual,
             final Long centerId) {
+        return createSubject(subject, modeSubjectCommonNameManual, centerId, true);
+    }
+
+    /**
+     * Same as {@link #createSubject(Subject, boolean, Long)}, with checkNamePattern false to skip
+     * the study's subject name pattern check on the server, for names not chosen by the user.
+     */
+    public Subject createSubject(
+            final Subject subject,
+            final boolean modeSubjectCommonNameManual,
+            final Long centerId,
+            final boolean checkNamePattern) {
         try {
             String json = Util.objectWriter.writeValueAsString(subject);
             CloseableHttpResponse response;
             if (modeSubjectCommonNameManual) {
-                response = httpService.post(this.serviceURLSubjectsCreate, json, false);
+                String url = checkNamePattern ? this.serviceURLSubjectsCreate
+                        : this.serviceURLSubjectsCreate + "?checkNamePattern=false";
+                response = httpService.post(url, json, false);
             } else {
                 response = httpService.post(this.serviceURLSubjectsCreate + "?centerId=" + centerId, json, false);
             }
@@ -1421,6 +1441,32 @@ public class ShanoirUploaderServiceClient {
                 } else {
                     LOG.error("Could not get quality cards for studyId : " + studyIdentifier + " (status code: " + code
                             + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+                }
+            }
+        } catch (JsonProcessingException e) {
+            LOG.error(e.getMessage(), e);
+        }
+        return null;
+    }
+
+    /**
+     * Returns the centers of the given study that the current user has rights on.
+     * The server filters by the user's per-center rights (StudyUser.centerIds): when the user
+     * isn't center-restricted, every center of the study is returned.
+     */
+    public List<Center> findCentersByStudy(Long studyId) throws Exception {
+        try {
+            String studyIdentifier = URLEncoder.encode(Long.toString(studyId), "UTF-8");
+            try (CloseableHttpResponse response = httpService
+                    .get(this.serviceURLCentersFindByStudyId + studyIdentifier)) {
+                int code = response.getCode();
+                if (code == HttpStatus.SC_OK) {
+                    return Util.getMappedList(response, Center.class);
+                } else if (code == HttpStatus.SC_NO_CONTENT) {
+                    return new ArrayList<>();
+                } else {
+                    LOG.error("Could not get accessible centers for studyId : " + studyIdentifier + " (status code: "
+                            + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
                 }
             }
         } catch (JsonProcessingException e) {

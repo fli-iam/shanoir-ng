@@ -96,7 +96,8 @@ public class RabbitMQSubjectService {
         }
         Subject subjectOld = subjectRepository.findByStudyIdAndName(studyId, subject.getName());
         if (subjectOld == null) {
-            return subjectService.create(subject, withAMQP);
+            // BIDS, multi-DICOM and preclinical imports: names come from the data, not from a user
+            return subjectService.create(subject, withAMQP, false);
         } else {
             return subjectOld;
         }
