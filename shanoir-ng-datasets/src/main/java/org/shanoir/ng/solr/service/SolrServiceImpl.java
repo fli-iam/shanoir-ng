@@ -75,6 +75,8 @@ public class SolrServiceImpl implements SolrService {
 
     private int indexationPartitionSize = 100000;
 
+    private int indexationChunkSize = 1000;
+
     @Autowired
     private SolrJWrapper solrJWrapper;
 
@@ -293,59 +295,59 @@ public class SolrServiceImpl implements SolrService {
     }
 
     /**
-     * Index data to the existing index by partition and manage shanoir event
-     * @param event the Shanoir event relative to the indexation
-     * @param documents the documents to index
-     * @param tags the tags relative to the documents to index
-     * @param indexedSize the documents already indexed
-     */
-    private void indexDataPartition(ShanoirEvent event, List<ShanoirMetadata> documents, Map<Long, List<String>> tags, int indexedSize) throws SolrServerException, IOException {
-        indexDocumentsInSolr(documents, tags);
-        if (Objects.equals(1f, event.getProgress())) {
-            eventService.publishSuccessEvent(event, indexedSize + " datasets indexed.");
-        } else {
-            eventService.publishEvent(event, "Indexing [" + indexedSize + "] datasets...", event.getProgress());
-        }
-    }
-
-    /**
      * Fetch and index data to the existing index and manage shanoir event
      * @param event the Shanoir event relative to the indexation
      */
     private void fetchAndIndexData(ShanoirEvent event) throws SolrServerException, IOException {
-        int indexationProgess = 0;
         int indexedDataNumber = 0;
-        List<ShanoirMetadata> docPartition;
+        int publishedPercent = 0;
         Map<Long, List<String>> tags = shanoirMetadataRepository.findAllTags(null);
 
         try {
+            List<String> queries = new ArrayList<>();
             for (String query : ShanoirMetadataRepositoryCustom.ALL_DATASET_QUERIES) {
-                int offSet = 0;
-
                 if (!Objects.equals(query, ShanoirMetadataRepositoryCustom.PROCESSED_QUERY)) {
                     query += " AND d.dataset_processing_id IS NULL";
                 }
-                indexationProgess++;
+                queries.add(query);
+            }
+
+            // Count everything up front so progression follows the number of indexed datasets
+            long totalDataNumber = 0;
+            for (String query : queries) {
+                totalDataNumber += shanoirMetadataRepository.countSpecificSolrDoc(query);
+            }
+            eventService.publishEvent(event, "Indexing [0/" + totalDataNumber + "] datasets...", 0f);
+
+            for (String query : queries) {
+                int offSet = 0;
 
                 while (true) {
+                    // Fetch from the database by large partitions...
                     String offsetQuery = query + " LIMIT " + indexationPartitionSize + " OFFSET " + offSet;
-                    docPartition = shanoirMetadataRepository.findSpecificSolrDoc(offsetQuery);
-
+                    List<ShanoirMetadata> docPartition = shanoirMetadataRepository.findSpecificSolrDoc(offsetQuery);
                     offSet += indexationPartitionSize;
-                    indexedDataNumber += docPartition.size();
 
-                    //Prepare event progression
-                    event.setProgress((float) Math.floor(10F + ((indexationProgess / (float) ShanoirMetadataRepositoryCustom.ALL_DATASET_QUERIES.size()) * 90F)) / 100F);
+                    // ...and send them to Solr by small chunks, so the progression moves dataset by dataset
+                    for (int from = 0; from < docPartition.size(); from += indexationChunkSize) {
+                        List<ShanoirMetadata> chunk = docPartition.subList(from, Math.min(from + indexationChunkSize, docPartition.size()));
+                        indexDocumentsInSolr(chunk, tags);
+                        indexedDataNumber += chunk.size();
 
-                    indexDataPartition(event, docPartition, tags, indexedDataNumber);
+                        // 100% is only reached with the success event
+                        int percent = totalDataNumber > 0 ? (int) Math.min(99, indexedDataNumber * 100L / totalDataNumber) : 99;
+                        if (percent > publishedPercent) {
+                            publishedPercent = percent;
+                            eventService.publishEvent(event, "Indexing [" + indexedDataNumber + "/" + totalDataNumber + "] datasets...", percent / 100F);
+                        }
+                    }
 
                     if (docPartition.size() < indexationPartitionSize) {
                         break; // Switch to the next query type
                     }
                 }
-
-
             }
+            eventService.publishSuccessEvent(event, indexedDataNumber + " datasets indexed.");
         } catch (Exception e) {
             LOG.error("Error while fetching/indexing data to solr.", e);
             eventService.publishErrorEvent(event, "Error while fetching/indexing data to solr : " + e.getMessage());
@@ -365,7 +367,7 @@ public class SolrServiceImpl implements SolrService {
             eventService.publishErrorEvent(event, "Error while cleaning Solr index : " + e.getMessage());
             throw e;
         }
-        eventService.publishEvent(event, "Fetching data to index...", 0.1f);
+        eventService.publishEvent(event, "Counting datasets to index...", 0f);
     }
 
     /**
