@@ -299,7 +299,8 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
                             return studyRights?.includes(StudyUserRight.CAN_IMPORT);
                         });
                     }
-                    this.studyNameForSubject = this.studies?.filter(s => s.id == this.entity?.study?.id)?.[0]?.name || '';
+                    this.studyNameForSubject = this.entity?.study?.name
+                        || this.studies?.filter(s => s.id == this.entity?.study?.id)?.[0]?.name || '';
                 });
             });
     }
@@ -356,7 +357,11 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
     getOnDeleteConfirmMessage(subject: Subject): string {
         let msg : string = 'Are you sure you want to finally delete the subject '
             + (subject.name + ' with id n° ' + subject.id) + ' ?';
-        msg += "\n\nThis subject belongs to the study " + this.studies.find(st => st.id === subject.study.id).name;
+        // the subject's own study, not this.studies: that list only holds the studies the user can import into
+        const studyName: string = subject.study?.name ?? this.studies?.find(st => st.id === subject.study?.id)?.name;
+        if (studyName) {
+            msg += "\n\nThis subject belongs to the study " + studyName;
+        }
         msg += '\n\nWarning: this action deletes ALL datasets from this subject.';
         return msg;
     }
