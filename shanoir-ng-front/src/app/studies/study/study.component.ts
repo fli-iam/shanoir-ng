@@ -415,15 +415,12 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     public async hasEditRight(): Promise<boolean> {
-        return this.hasStudyAdminRight();
+        if (this.keycloakService.isUserAdmin()) return true;
+        return this.keycloakService.isUserExpert() && this.hasStudyAdminRight();
     }
 
     public async hasDeleteRight(): Promise<boolean> {
-        if (this.keycloakService.isUserAdmin()) return true;
-        if (!this.study.studyUserList) return false;
-        const studyUser: StudyUser = this.study.studyUserList.filter(su => su.userId == KeycloakService.auth.userId)[0];
-        if (!studyUser) return false;
-        return studyUser.studyUserRights && studyUser.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE);
+        return this.hasEditRight();
     }
 
     private newStudy(): Study {

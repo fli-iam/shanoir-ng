@@ -72,13 +72,14 @@ public class SubjectApiController implements SubjectApi {
 
     @Override
     public ResponseEntity<Void> deleteSubject(
-            @Parameter(description = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId) {
+            @Parameter(description = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId) throws RestServiceException {
         try {
-            // Delete all associated BIDS folders
             subjectService.deleteById(subjectId);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (EntityNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (ShanoirException e) {
+            throw new RestServiceException(e, new ErrorModel(e.getErrorCode(), e.getMessage()));
         }
     }
 

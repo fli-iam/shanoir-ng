@@ -351,7 +351,7 @@ public class DatasetServiceImpl implements DatasetService {
         datasetDb.setCreationDate(dataset.getCreationDate());
         datasetDb.setId(dataset.getId());
         datasetDb.setProcessings(dataset.getProcessings());
-        datasetDb.setSubjectId(dataset.getSubjectId());
+        // the subject is not editable: keep the database value, never the one sent in the body
         if (dataset.getUpdatedMetadata().getId().equals(dataset.getOriginMetadata().getId())) {
             // Force creation of a new dataset metadata
             dataset.getUpdatedMetadata().setId(null);

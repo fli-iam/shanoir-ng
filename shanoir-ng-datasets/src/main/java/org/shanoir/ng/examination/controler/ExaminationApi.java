@@ -181,7 +181,7 @@ public interface ExaminationApi {
             @ApiResponse(responseCode = "500", description = "unexpected error, examination not updated") })
     @PutMapping(value = "/{examinationId}", produces = { "application/json" }, consumes = {
             "multipart/form-data" })
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and #examination.getId().equals(#examinationId) and @datasetSecurityService.hasRightOnExamination(#examination.getId(), 'CAN_IMPORT'))")
+    @PreAuthorize("#examinationId.equals(#examination.getId()) and (hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and (@datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_IMPORT') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_ADMINISTRATE')))))")
     ResponseEntity<Void> updateExamination(
             @Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
             @Parameter(description = "examination to update", required = true) @Valid @RequestPart("examination") ExaminationDTO examination,

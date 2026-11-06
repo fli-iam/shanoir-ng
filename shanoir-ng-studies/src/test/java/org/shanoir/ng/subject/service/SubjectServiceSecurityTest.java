@@ -140,7 +140,12 @@ public class SubjectServiceSecurityTest {
         given(studyRepository.findAllById(Arrays.asList(new Long[]{1L}))).willReturn(studiesMock);
         given(studyUserRepository.findByStudy_Id(1L)).willReturn(studiesMock.get(0).getStudyUserList());
         given(repository.findById(ENTITY_ID)).willReturn(Optional.of(subjectMock1));
-        assertAccessAuthorized(service::update, subjectMock1);
+        assertAccessDenied(service::update, subjectMock1);
+
+        Subject subjectMockAdmin = buildSubjectMock(ENTITY_ID);
+        addStudyToMock(subjectMockAdmin, 1L, StudyUserRight.CAN_ADMINISTRATE);
+        given(repository.findById(ENTITY_ID)).willReturn(Optional.of(subjectMockAdmin));
+        assertAccessAuthorized(service::update, subjectMockAdmin);
 
         Subject subjectMock2 = buildSubjectMock(ENTITY_ID);
         addStudyToMock(subjectMock2, 1L, StudyUserRight.CAN_SEE_ALL);

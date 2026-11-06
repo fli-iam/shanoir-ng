@@ -163,6 +163,17 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
      */
     Examination findBySourceIdAndStudy_Id(Long sourceId, Long studyId);
 
+    /**
+     * Say if an examination of this subject has been copied to another subject (i.e. into another study).
+     * Copying a dataset always copies its examination, so this covers acquisitions and datasets too.
+     *
+     * @param subjectId the subject id
+     * @return true if at least one copy exists
+     */
+    @Query("SELECT COUNT(e) > 0 FROM Examination e WHERE e.source.subject.id = :subjectId"
+            + " AND (e.subject IS NULL OR e.subject.id <> :subjectId)")
+    boolean existsCopyOfSubjectExaminations(@Param("subjectId") Long subjectId);
+
     Page<Examination> findPageByComment(String comment, Pageable pageable);
 
     @Query("""
