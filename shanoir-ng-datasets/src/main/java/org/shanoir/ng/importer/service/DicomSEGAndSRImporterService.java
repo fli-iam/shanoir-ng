@@ -147,6 +147,35 @@ public class DicomSEGAndSRImporterService {
     }
 
     /**
+     * Whether a SR or SEG is an annotation of a dataset, that must be linked to it
+     * by this service: every object of the viewer is, and so is any other that names
+     * the series it was made from. A SR or SEG that names none, e.g. a radiation dose
+     * report, has nothing to be linked to and follows the same path as the other
+     * modalities.
+     */
+    public boolean needsSourceDataset(Attributes datasetAttributes, boolean nonOhifRequest) {
+        String studyInstanceUID = datasetAttributes.getString(Tag.StudyInstanceUID);
+        boolean fromOhif = !nonOhifRequest && studyInstanceUID != null
+                && studyInstanceUID.contains(StudyInstanceUIDAndSubjectNameHandler.PREFIX);
+        return fromOhif || referencesSourceDataset(datasetAttributes);
+    }
+
+    private static boolean referencesSourceDataset(Attributes datasetAttributes) {
+        Sequence evidenceSequence = datasetAttributes.getSequence(Tag.CurrentRequestedProcedureEvidenceSequence);
+        if (evidenceSequence != null) {
+            for (Attributes itemEvidenceSequence : evidenceSequence) {
+                Sequence seriesSequence = itemEvidenceSequence.getSequence(Tag.ReferencedSeriesSequence);
+                if (seriesSequence != null && !seriesSequence.isEmpty()) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        Sequence referencedSeriesSequence = datasetAttributes.getSequence(Tag.ReferencedSeriesSequence);
+        return referencedSeriesSequence != null && !referencedSeriesSequence.isEmpty();
+    }
+
+    /**
      * This method replaces values of dicom tags within the DICOM SR file
      * and searches the corresponding examination and returns it:
      * - use user name as person name, who created the measurement
