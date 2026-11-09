@@ -222,6 +222,10 @@ public class SolrJWrapperImpl implements SolrJWrapper {
 
     public Page<ShanoirSolrDocument> findByStudyIdInAndDatasetIdIn(Map<Long, List<String>> studiesCenter, Collection<Long> datasetIds,
             Pageable pageable) throws RestServiceException {
+        // An empty study filter would produce an empty fq, which Solr ignores: return nothing instead
+        if (studiesCenter == null || studiesCenter.isEmpty()) {
+            return new SolrResultPage<>(new ArrayList<>());
+        }
         final SolrQuery query = new SolrQuery();
         filterByDatasetIds(datasetIds, query);
         addFilterQueryForCenterStudy(query, studiesCenter);
