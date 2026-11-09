@@ -44,6 +44,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.aot.DisabledInAotMode;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -65,6 +66,7 @@ import tools.jackson.databind.json.JsonMapper;
 )
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
+@TestPropertySource(properties = { "service-account.user.blacklist-mail=gmail.com, yahoo.com" })
 @DisabledInAotMode
 public class AccountRequestApiControllerTest {
 
@@ -158,6 +160,66 @@ public class AccountRequestApiControllerTest {
                 .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(user)))
                 .andExpect(status().isNoContent());
 
+    }
+
+    @Test
+    public void saveNewAccountRequestBlacklistedMailTest() throws Exception {
+        final User user = createAccountRequestUser("test@gmail.com");
+
+        mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(user)))
+                .andExpect(status().isUnprocessableContent());
+
+        Mockito.verify(userService, Mockito.never()).createAccountRequest(Mockito.any(User.class));
+    }
+
+    @Test
+    public void saveNewAccountRequestBlacklistedMailUpperCaseTest() throws Exception {
+        final User user = createAccountRequestUser("Test@GMail.COM");
+
+        mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(user)))
+                .andExpect(status().isUnprocessableContent());
+
+        Mockito.verify(userService, Mockito.never()).createAccountRequest(Mockito.any(User.class));
+    }
+
+    @Test
+    public void saveNewAccountRequestBlacklistedMailTrimmedConfigTest() throws Exception {
+        // " yahoo.com" in the property, the leading space must be ignored
+        final User user = createAccountRequestUser("test@yahoo.com");
+
+        mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(user)))
+                .andExpect(status().isUnprocessableContent());
+
+        Mockito.verify(userService, Mockito.never()).createAccountRequest(Mockito.any(User.class));
+    }
+
+    @Test
+    public void saveNewAccountRequestMailEndingLikeBlacklistedTest() throws Exception {
+        final User user = createAccountRequestUser("test@notgmail.com");
+
+        given(userService.createAccountRequest(Mockito.any(User.class))).willReturn(user);
+
+        mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(user)))
+                .andExpect(status().isNoContent());
+
+        Mockito.verify(userService).createAccountRequest(Mockito.any(User.class));
+    }
+
+    private User createAccountRequestUser(final String email) {
+        final User user = ModelsUtil.createUser(null);
+        user.setEmail(email);
+        user.setUsername("test");
+        final AccountRequestInfo info = new AccountRequestInfo();
+        info.setContact("contact");
+        info.setFunction("function");
+        info.setInstitution("institution");
+        info.setStudyId(1L);
+        user.setAccountRequestInfo(info);
+        return user;
     }
 
 }

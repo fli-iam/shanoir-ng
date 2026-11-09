@@ -224,6 +224,44 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
         return acq;
     }
 
+    @Override
+    @Transactional(rollbackFor = { ShanoirException.class, StorageException.class })
+    public DatasetAcquisition update(DatasetAcquisition entity, List<MultipartFile> files) throws ShanoirException, StorageException {
+        if (CollectionUtils.isEmpty(files)) {
+            return update(entity);
+        }
+        Long acquisitionId = entity.getId();
+        // A new file must not overwrite an existing one: it would be lost when cleaning up on failure
+        for (MultipartFile file : files) {
+            if (storageService.existsAcquisitionExtraData(acquisitionId, file.getOriginalFilename())) {
+                throw new ShanoirException("A file named " + file.getOriginalFilename() + " already exists on this dataset acquisition.",
+                        HttpStatus.UNPROCESSABLE_ENTITY.value());
+            }
+        }
+        // Store the files before the update, as the update deletes from the storage the files removed from the list
+        List<String> storedFileNames = new ArrayList<>();
+        try {
+            for (MultipartFile file : files) {
+                if (addExtraData(acquisitionId, file) == null) {
+                    throw new StorageException("Could not store extra data file " + file.getOriginalFilename()
+                            + ", dataset acquisition not updated.", null);
+                }
+                storedFileNames.add(file.getOriginalFilename());
+            }
+            return update(entity);
+        } catch (ShanoirException | StorageException | RuntimeException e) {
+            // DB changes are rolled back, but files stored by this call are not: remove them
+            for (String fileName : storedFileNames) {
+                try {
+                    storageService.deleteAcquisitionExtraData(acquisitionId, fileName);
+                } catch (StorageException deleteException) {
+                    LOG.error("Could not clean extra data file {} of dataset acquisition {}", fileName, acquisitionId, deleteException);
+                }
+            }
+            throw e;
+        }
+    }
+
     @Transactional
     public Iterable<DatasetAcquisition> update(List<DatasetAcquisition> entities) {
         List<Long> ids = new ArrayList<>();
@@ -457,8 +495,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
         return repository.existsByStudyCard_Id(studyCardId);
     }
 
-    @Override
-    public String addExtraData(final Long acquisitionId, final MultipartFile file) {
+    private String addExtraData(final Long acquisitionId, final MultipartFile file) {
         try {
             LOG.info("Saving file {} for dataset acquisition: {}", file.getOriginalFilename(), acquisitionId);
             return storageService.storeAcquisitionExtraData(

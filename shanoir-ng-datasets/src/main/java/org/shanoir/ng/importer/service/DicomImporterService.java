@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,7 +38,6 @@ import org.dcm4che3.data.Sequence;
 import org.dcm4che3.data.Tag;
 import org.dcm4che3.data.UID;
 import org.dcm4che3.io.DicomOutputStream;
-import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
@@ -45,18 +45,21 @@ import org.shanoir.ng.dataset.repository.DatasetExpressionRepository;
 import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.dicom.web.service.DICOMWebService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.importer.dto.Serie;
+import org.shanoir.ng.importer.util.DicomExaminationMetadataResolver;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.dicom.DicomUtils;
 import org.shanoir.ng.shared.dicom.EchoTime;
 import org.shanoir.ng.shared.dicom.EquipmentDicom;
 import org.shanoir.ng.shared.dicom.InstitutionDicom;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.dicom.SerieToDatasetsSeparator;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
@@ -88,6 +91,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -176,6 +181,12 @@ public class DicomImporterService {
     private DatasetExpressionRepository datasetExpressionRepository;
 
     @Autowired
+    private StowImportCounters stowImportCounters;
+
+    @Autowired
+    private ShanoirEventService eventService;
+
+    @Autowired
     private AcquisitionEquipmentRepository acquisitionEquipmentRepository;
 
     @Autowired
@@ -244,12 +255,19 @@ public class DicomImporterService {
             Long centerId = manageCenter(serie.getInstitution(), study.getId());
             Examination examination = manageExamination(attributes, study, subjectId, centerId);
             DatasetAcquisition acquisition = manageAcquisitionAndEquipment(attributes, examination, centerId, serie);
+            if (isAlreadyImported(acquisition, attributes)) {
+                LOG.info("DICOM instance of serie {} already imported, skipped.", serie.getSeriesDescription());
+                return true;
+            }
             Dataset dataset = manageDataset(attributes, studyId, subjectId, acquisition, serie);
             DatasetExpression expression = manageDatasetExpression(attributes, dataset);
             datasetExpressionRepository.save(expression);
             solrService.indexDataset(dataset.getId());
-            sendToPacs(metaInformationAttributes, attributes);
+            long bytes = sendToPacs(metaInformationAttributes, attributes);
             countNumberOfFiles(examination, acquisition, serie.getSeriesDescription());
+            // Last, so the row locks they take are held for as short a time as possible.
+            stowImportCounters.addInstanceToAcquisition(acquisition);
+            stowImportCounters.addBytesToExpression(expression, bytes);
         } else {
             // Not an error: the ZIP import drops these series too. Failing the request would make
             // every sender report an error for each presentation state or secondary capture.
@@ -257,6 +275,32 @@ public class DicomImporterService {
                     serie.getSeriesDescription());
         }
         return true;
+    }
+
+    /**
+     * A sender repeats an instance when a request timed out or when an extraction
+     * is restarted. Importing it again would be refused when its file is added to
+     * the dataset, so it is recognised first and skipped.
+     */
+    private boolean isAlreadyImported(DatasetAcquisition acquisition, Attributes attributes)
+            throws MalformedURLException {
+        List<Dataset> datasets = acquisition.getDatasets();
+        if (datasets == null || datasets.isEmpty()) {
+            return false;
+        }
+        String path = instancePath(attributes);
+        for (Dataset dataset : datasets) {
+            if (dataset.getDatasetExpressions() == null) {
+                continue;
+            }
+            for (DatasetExpression expression : dataset.getDatasetExpressions()) {
+                if (expression.getDatasetFiles() != null
+                        && expression.getDatasetFiles().stream().anyMatch(file -> path.equals(file.getPath()))) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private void countNumberOfFiles(Examination examination, DatasetAcquisition acquisition, String seriesDescription) {
@@ -299,12 +343,8 @@ public class DicomImporterService {
         if (currentDataset == null) {
             org.shanoir.ng.importer.dto.Dataset dataset = new org.shanoir.ng.importer.dto.Dataset();
             dataset.setFirstImageSOPInstanceUID(attributes.getString(Tag.SOPInstanceUID));
-            Set<EchoTime> echoTimes = new HashSet<>();
-            EchoTime echoTime = new EchoTime();
-            echoTime.setEchoNumber(attributes.getInt(Tag.EchoNumbers, 0));
-            echoTime.setEchoTime(attributes.getDouble(Tag.EchoTime, 0.0));
-            echoTimes.add(echoTime);
-            dataset.setEchoTimes(echoTimes);
+            dataset.setEchoTimes(DatasetSeparationHelper.echoTimesForDatasetSeparation(acquisition, attributes));
+            addMrTimingParameters(dataset, attributes);
             currentDataset = acquisitionContext.generateFlatDataset(
                     serie, dataset, datasetIndex, subjectId,
                     attributes);
@@ -314,6 +354,27 @@ public class DicomImporterService {
             currentDataset = datasetService.create(currentDataset);
         }
         return currentDataset;
+    }
+
+    /**
+     * The ZIP import reads repetition time, inversion time and flip angle from every
+     * image of a dataset and hands the sets to the dataset strategy; a STOW-RS import
+     * only ever set the echo time, so those three stayed empty on every MR dataset.
+     * They come from the instance that creates the dataset, which is what the echo
+     * time already does: a dataset groups the instances that share echo, acquisition
+     * number and orientation. Absent tags give 0 / "0", as in the ZIP import.
+     */
+    static void addMrTimingParameters(org.shanoir.ng.importer.dto.Dataset dataset, Attributes attributes) {
+        Set<Double> repetitionTimes = new HashSet<>();
+        repetitionTimes.add(attributes.getDouble(Tag.RepetitionTime, 0));
+        dataset.setRepetitionTimes(repetitionTimes);
+        Set<Double> inversionTimes = new HashSet<>();
+        inversionTimes.add(attributes.getDouble(Tag.InversionTime, 0));
+        dataset.setInversionTimes(inversionTimes);
+        String flipAngle = attributes.getString(Tag.FlipAngle);
+        Set<String> flipAngles = new HashSet<>();
+        flipAngles.add(flipAngle != null ? flipAngle : "0");
+        dataset.setFlipAngles(flipAngles);
     }
 
     private Dataset manageDatasetSeparation(Attributes attributes, DatasetAcquisition acquisition,
@@ -333,14 +394,7 @@ public class DicomImporterService {
                     }
                 }
             }
-            Set<EchoTime> echoTimes = new HashSet<EchoTime>();
-            if (acquisition instanceof MrDatasetAcquisition) {
-                if (dataset instanceof MrDataset) {
-                    MrDataset mrDataset = (MrDataset) dataset;
-                    mrDataset.getEchoTime().stream().forEach(
-                            eT -> echoTimes.add(eT.getEchoTimeShared()));
-                }
-            }
+            Set<EchoTime> echoTimes = DatasetSeparationHelper.echoTimesForDatasetSeparation(acquisition, dataset);
             int acquisitionNumber = 0;
             if (acquisition.getAcquisitionNumber() != null) {
                 acquisitionNumber = acquisition.getAcquisitionNumber().intValue();
@@ -351,7 +405,8 @@ public class DicomImporterService {
                     imageOrientationPatient);
             existingDatasetToSeparatorMap.put(existingSeparator, dataset);
         }
-        SerieToDatasetsSeparator currentSeriesToDatasetsSeparator = createSeriesToDatasetsSeparator(attributes);
+        SerieToDatasetsSeparator currentSeriesToDatasetsSeparator = createSeriesToDatasetsSeparator(attributes,
+                acquisition);
         for (Map.Entry<SerieToDatasetsSeparator, Dataset> entry : existingDatasetToSeparatorMap.entrySet()) {
             if (entry.getKey().equals(currentSeriesToDatasetsSeparator)) {
                 return entry.getValue();
@@ -360,26 +415,15 @@ public class DicomImporterService {
         return null;
     }
 
-    private SerieToDatasetsSeparator createSeriesToDatasetsSeparator(Attributes attributes) {
+    private SerieToDatasetsSeparator createSeriesToDatasetsSeparator(Attributes attributes,
+            DatasetAcquisition acquisition) {
         // Acquisition number
         final int acquisitionNumber = attributes.getInt(Tag.AcquisitionNumber, 0);
         // Echo times
-        Set<EchoTime> echoTimes = new HashSet<>();
-        EchoTime echoTime = new EchoTime();
-        echoTime.setEchoNumber(attributes.getInt(Tag.EchoNumbers, 0));
-        echoTime.setEchoTime(attributes.getDouble(Tag.EchoTime, 0.0));
-        echoTimes.add(echoTime);
+        Set<EchoTime> echoTimes = DatasetSeparationHelper.echoTimesForDatasetSeparation(acquisition, attributes);
         // Image orientation patient
-        List<Double> imageOrientationPatient = new ArrayList<>();
-        double[] imageOrientationPatientArray = attributes.getDoubles(Tag.ImageOrientationPatient);
-        if (imageOrientationPatientArray != null) {
-            for (int i = 0; i < imageOrientationPatientArray.length; i++) {
-                imageOrientationPatient.add(imageOrientationPatientArray[i]);
-            }
-        }
-        double[] imageOrientationPatientsDoubleArray = imageOrientationPatient == null
-                ? null
-                : imageOrientationPatient.stream().mapToDouble(i -> i).toArray();
+        double[] imageOrientationPatientsDoubleArray = DatasetSeparationHelper
+                .imageOrientationForDatasetSeparation(attributes);
         SerieToDatasetsSeparator seriesToDatasetsSeparator =
                 new SerieToDatasetsSeparator(
                 acquisitionNumber, echoTimes,
@@ -533,7 +577,7 @@ public class DicomImporterService {
         org.shanoir.ng.importer.dto.Study studyDICOM = new org.shanoir.ng.importer.dto.Study(attributes);
         List<Examination> examinations = examinationService.findBySubjectIdStudyId(subjectId, study.getId());
         Optional<Examination> existingExamination = examinations.stream()
-                .filter(e -> e.getStudyInstanceUID().equals(studyDICOM.getStudyInstanceUID()))
+                .filter(e -> java.util.Objects.equals(e.getStudyInstanceUID(), studyDICOM.getStudyInstanceUID()))
                 .findFirst();
         if (existingExamination.isPresent()) {
             examination = existingExamination.get();
@@ -543,14 +587,48 @@ public class DicomImporterService {
             examination = new Examination();
             examination.setStudy(study);
             examination.setSubject(subject);
-            examination.setExaminationDate(studyDICOM.getStudyDate());
+            LocalDate examinationDate = DicomExaminationMetadataResolver.resolveExaminationDate(attributes);
+            if (examinationDate == null) {
+                LOG.warn("No Study Date or Series Date in DICOM for StudyInstanceUID {}, using today",
+                        studyDICOM.getStudyInstanceUID());
+                examinationDate = LocalDate.now();
+            }
+            examination.setExaminationDate(examinationDate);
             examination.setStudyInstanceUID(studyDICOM.getStudyInstanceUID());
-            examination.setComment(studyDICOM.getStudyDescription());
+            examination.setComment(DicomExaminationMetadataResolver.resolveComment(attributes));
             examination.setCenterId(centerId);
             examination = examinationService.save(examination);
             LOG.info("Examination created: {}", examination.toString());
-        } // Avoid, that the examination creation makes RabbitMQ calls
+            announceNewExamination(examination, study.getId(), subjectId, centerId);
+        }
         return examination;
+    }
+
+    /**
+     * MS Studies keeps its own list of the examinations of a study (study_examination)
+     * and learns of one only from a CREATE_EXAMINATION_EVENT: the ZIP import sends it,
+     * the study list's "Examinations" column counts those rows. Without it a study
+     * filled by STOW-RS shows no examination at all.
+     *
+     * One event per new examination, never per instance, so it adds nothing to the
+     * per-instance cost. It is sent after the import transaction commits: an import
+     * that rolls back must not leave MS Studies counting an examination that does
+     * not exist.
+     */
+    void announceNewExamination(Examination examination, Long studyId, Long subjectId, Long centerId) {
+        ShanoirEvent event = new ShanoirEvent(ShanoirEventType.CREATE_EXAMINATION_EVENT,
+                examination.getId().toString(), KeycloakUtil.getTokenUserId(),
+                "centerId:" + centerId + ";subjectId:" + subjectId, ShanoirEvent.SUCCESS, studyId);
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    eventService.publishEvent(event);
+                }
+            });
+        } else {
+            eventService.publishEvent(event);
+        }
     }
 
     private Long manageSubject(Attributes attributes, Study study)
@@ -621,10 +699,11 @@ public class DicomImporterService {
      *
      * @param metaInformationAttributes
      * @param datasetAttributes
+     * @return the size in bytes of the DICOM file that was sent
      * @throws IOException
      * @throws Exception
      */
-    public void sendToPacs(Attributes metaInformationAttributes, Attributes datasetAttributes)
+    public long sendToPacs(Attributes metaInformationAttributes, Attributes datasetAttributes)
             throws IOException, Exception {
         /**
          * Create a new output stream to write the changes into and use its bytes
@@ -642,6 +721,7 @@ public class DicomImporterService {
                 dicomWebService.sendDicomInputStreamToPacs(finalInputStream);
             }
         }
+        return bAOS.size();
     }
 
     /**
@@ -689,8 +769,10 @@ public class DicomImporterService {
      * @throws MalformedURLException
      * @throws ShanoirException
      */
-    private void addDatasetFile(Attributes attributes, DatasetExpression expression)
-            throws MalformedURLException, ShanoirException {
+    /**
+     * The WADO-RS URL of an instance in the PACS, which is the path of its dataset file.
+     */
+    private String instancePath(Attributes attributes) throws MalformedURLException {
         final String studyInstanceUID = attributes.getString(Tag.StudyInstanceUID);
         final String seriesInstanceUID = attributes.getString(Tag.SeriesInstanceUID);
         final String sOPInstanceUID = attributes.getString(Tag.SOPInstanceUID);
@@ -699,7 +781,12 @@ public class DicomImporterService {
         wadoStrBuf.append(dicomWebRS + "/" + studyInstanceUID
                 + "/series/" + seriesInstanceUID + "/instances/" + sOPInstanceUID);
         URL wadoURL = new URL(wadoStrBuf.toString());
-        String newPath = wadoURL.toString();
+        return wadoURL.toString();
+    }
+
+    private void addDatasetFile(Attributes attributes, DatasetExpression expression)
+            throws MalformedURLException, ShanoirException {
+        String newPath = instancePath(attributes);
         List<DatasetFile> datasetFilesDb = expression.getDatasetFiles();
         if (datasetFilesDb == null) {
             datasetFilesDb = new ArrayList<DatasetFile>();

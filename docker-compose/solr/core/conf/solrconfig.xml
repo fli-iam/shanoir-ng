@@ -339,7 +339,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
       -->
 
     <autoSoftCommit>
-      <maxTime>${solr.autoSoftCommit.maxTime:-1}</maxTime>
+      <maxTime>${solr.autoSoftCommit.maxTime:3000}</maxTime>
     </autoSoftCommit>
 
     <!-- Update Related Event Listeners
@@ -806,6 +806,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
   <initParams path="/update/**,/query,/select,/tvrh,/elevate,/spell,/browse">
     <lst name="defaults">
       <str name="df">_text_</str>
+      <str name="processor">trim</str>
     </lst>
   </initParams>
 
@@ -1152,6 +1153,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
        See http://wiki.apache.org/solr/GuessingFieldTypes
     -->
   <updateProcessor class="solr.UUIDUpdateProcessorFactory" name="uuid"/>
+  <updateProcessor class="solr.TrimFieldUpdateProcessorFactory" name="trim"/>
   <updateProcessor class="solr.RemoveBlankFieldUpdateProcessorFactory" name="remove-blank"/>
   <updateProcessor class="solr.FieldNameMutatingUpdateProcessorFactory" name="field-name-mutating">
     <str name="pattern">[^\w-\.]</str>
