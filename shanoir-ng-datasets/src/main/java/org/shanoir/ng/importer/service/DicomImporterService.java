@@ -269,8 +269,10 @@ public class DicomImporterService {
             stowImportCounters.addInstanceToAcquisition(acquisition);
             stowImportCounters.addBytesToExpression(expression, bytes);
         } else {
-            LOG.error("DICOM file of serie {} ignored.", serie.getSeriesDescription());
-            return false;
+            // Not an error: the ZIP import drops these series too. Failing the request would make
+            // every sender report an error for each presentation state or secondary capture.
+            LOG.warn("DICOM file of serie {} ignored, its modality is not managed by Shanoir.",
+                    serie.getSeriesDescription());
         }
         return true;
     }

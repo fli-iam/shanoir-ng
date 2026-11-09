@@ -95,14 +95,6 @@ public class STOWRSMultipartRequestFilter extends GenericFilterBean {
 
     private static final String DICOM_MODALITY_SR = "SR";
 
-    private static final String DICOM_MODALITY_MR = "MR";
-
-    private static final String DICOM_MODALITY_CT = "CT";
-
-    private static final String DICOM_MODALITY_PT = "PT";
-
-    private static final String DICOM_MODALITY_NM = "NM";
-
     @Autowired
     @Lazy
     private DicomSEGAndSRImporterService dicomSEGAndSRImporterService;
@@ -181,22 +173,21 @@ public class STOWRSMultipartRequestFilter extends GenericFilterBean {
 
     private void importInstance(Attributes metaInformationAttributes, Attributes datasetAttributes,
             String modality, boolean nonOhifRequest) throws Exception {
-        if (DICOM_MODALITY_SEG.equals(modality) || DICOM_MODALITY_SR.equals(modality)) {
+        if ((DICOM_MODALITY_SEG.equals(modality) || DICOM_MODALITY_SR.equals(modality))
+                && dicomSEGAndSRImporterService.needsSourceDataset(datasetAttributes, nonOhifRequest)) {
             if (!dicomSEGAndSRImporterService.importDicomSEGAndSR(metaInformationAttributes, datasetAttributes, modality, nonOhifRequest)) {
                 LOG.error("Error during import of DICOM SEG/SR.");
                 throw new ServletException("Error during import of DICOM SEG/SR.");
             }
-        } else if (DICOM_MODALITY_MR.equals(modality)
-                || DICOM_MODALITY_CT.equals(modality)
-                || DICOM_MODALITY_PT.equals(modality)
-                || DICOM_MODALITY_NM.equals(modality)) {
+        } else if (modality != null && !modality.isBlank()) {
+            // Every other modality has its acquisition strategy, the generic one by default.
             if (!dicomImporterService.importDicom(metaInformationAttributes, datasetAttributes)) {
-                LOG.error("Error during import of DICOM MR/CT/PT/NM.");
-                throw new ServletException("Error during import of DICOM MR/CT/PT/NM.");
+                LOG.error("Error during import of DICOM {}.", modality);
+                throw new ServletException("Error during import of DICOM " + modality + ".");
             }
         } else {
-            LOG.error("Not supported DICOM modality sent: {}", modality);
-            throw new ServletException("Not supported DICOM modality sent: " + modality);
+            LOG.error("DICOM file without modality sent.");
+            throw new ServletException("DICOM file without modality sent.");
         }
     }
 
