@@ -35,7 +35,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<dcm4che.version>5.31.1</dcm4che.version>
 		<keycloak.version>26.8.0</keycloak.version>
 		<jackson.version>2.13.4</jackson.version>
-		<json.version>20231013</json.version>
+		<json.version>20260719</json.version>
 		<junit.jupiter.version>5.8.2</junit.jupiter.version>
 		<junit.platform.version>1.8.2</junit.platform.version>
 		<poi.version>5.4.0</poi.version>
