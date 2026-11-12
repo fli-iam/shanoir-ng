@@ -1,0 +1,12 @@
+# Config of nb-node.sh. Copy to nb.conf next to the script and protect it:
+#   cp nb.conf.example nb.conf && chmod 600 nb.conf
+SHANOIR_URL=
+# secret of the Keycloak client neurobagel-export
+NB_CLIENT_SECRET=
+
+# optional
+#NB_CLIENT_ID=neurobagel-export
+#API_PORT=8000
+#RECIPES=$HOME/neurobagel-recipes
+# used only when no 'bagel' command is in PATH
+#BAGEL_IMAGE=neurobagel/bagelcli:latest
