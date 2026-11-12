@@ -157,32 +157,42 @@ public class ExaminationServiceTest {
 
     @Test
     @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_USER" })
-    public void updateAsImporterChangesOnlyTheExtraDataFiles() throws Exception {
-        assertImporterChangesOnlyTheExtraDataFiles();
+    public void updateAsImporterChangesTheFieldsAndTheExtraDataFiles() throws Exception {
+        assertImporterChangesTheFieldsAndTheExtraDataFiles();
     }
 
     @Test
     @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_EXPERT" })
-    public void updateAsExpertImporterWithoutAdministrateRightChangesOnlyTheExtraDataFiles() throws Exception {
-        assertImporterChangesOnlyTheExtraDataFiles();
+    public void updateAsExpertImporterWithoutAdministrateRightChangesTheFieldsAndTheExtraDataFiles() throws Exception {
+        assertImporterChangesTheFieldsAndTheExtraDataFiles();
     }
 
-    private void assertImporterChangesOnlyTheExtraDataFiles() throws Exception {
+    private void assertImporterChangesTheFieldsAndTheExtraDataFiles() throws Exception {
         Examination examinationDb = ModelsUtil.createExamination();
         examinationDb.setExtraDataFilePathList(new ArrayList<>(List.of("a.pdf", "c.pdf")));
-        String commentDb = examinationDb.getComment();
         given(examinationRepository.findById(EXAMINATION_ID)).willReturn(Optional.of(examinationDb));
+        given(datasetSecurityService.hasRightOnExamination(EXAMINATION_ID, "CAN_IMPORT")).willReturn(true);
         given(datasetSecurityService.hasRightOnExamination(EXAMINATION_ID, "CAN_ADMINISTRATE")).willReturn(false);
         Examination examination = createExamination();
         examination.setExtraDataFilePathList(new ArrayList<>(List.of("a.pdf", "b.pdf")));
 
         final Examination updatedExamination = examinationService.update(examination);
 
-        Assertions.assertNotEquals(UPDATED_EXAMINATION_COMMENT, commentDb);
-        Assertions.assertEquals(commentDb, updatedExamination.getComment());
+        Assertions.assertEquals(UPDATED_EXAMINATION_COMMENT, updatedExamination.getComment());
         Assertions.assertEquals(List.of("a.pdf", "b.pdf"), updatedExamination.getExtraDataFilePathList());
         Mockito.verify(storageService).deleteExtraData(EXAMINATION_ID, "c.pdf");
         Mockito.verify(examinationRepository).save(examinationDb);
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_USER" })
+    public void updateAsImporterCannotChangeTheSubject() throws Exception {
+        given(datasetSecurityService.hasRightOnExamination(EXAMINATION_ID, "CAN_IMPORT")).willReturn(true);
+        Examination examination = createExamination();
+        examination.setSubject(new Subject(5L, "new name"));
+
+        Assertions.assertThrows(AccessDeniedException.class, () -> examinationService.update(examination));
+        Mockito.verify(examinationRepository, Mockito.never()).save(Mockito.any(Examination.class));
     }
 
     @Test

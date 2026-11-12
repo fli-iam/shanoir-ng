@@ -273,11 +273,11 @@ public class SubjectApiSecurityTest {
     }
 
     private void testUpdate(String role) throws ShanoirException {
-        // importers without the administrate right may not update the subject, whatever their role
+        // importers may update the subject, whatever their role
         Subject mock = buildSubjectMock(ENTITY_ID);
         addStudyToMock(mock, 1L, StudyUserRight.CAN_IMPORT);
         given(repository.findById(ENTITY_ID)).willReturn(Optional.of(mock));
-        assertAccessDenied(api::updateSubject, ENTITY_ID, mock, mockBindingResult);
+        assertAccessAuthorized(api::updateSubject, ENTITY_ID, mock, mockBindingResult);
 
         // study administrators: with the expert role only
         mock = buildSubjectMock(ENTITY_ID);

@@ -361,12 +361,13 @@ public class ExaminationServiceImpl implements ExaminationService {
         if (examinationDb == null) {
             throw new EntityNotFoundException(Examination.class, examination.getId());
         }
-        // The examination fields are edited by study administrators with the expert role, the extra-data
-        // files by importers: whatever the user is not allowed to change is dropped, not refused.
-        if (!datasetSecurityService.hasRightOnExamination(examination.getId(), "CAN_IMPORT")) {
+        // The examination fields are edited by importers and by study administrators with the expert role,
+        // the extra-data files by importers only: whatever the user is not allowed to change is dropped, not refused.
+        boolean canImport = datasetSecurityService.hasRightOnExamination(examination.getId(), "CAN_IMPORT");
+        if (!canImport) {
             examination.setExtraDataFilePathList(examinationDb.getExtraDataFilePathList());
         }
-        boolean canEditFields = KeycloakUtil.isAdmin() || (KeycloakUtil.getTokenRoles().contains("ROLE_EXPERT")
+        boolean canEditFields = KeycloakUtil.isAdmin() || canImport || (KeycloakUtil.getTokenRoles().contains("ROLE_EXPERT")
                 && datasetSecurityService.hasRightOnExamination(examination.getId(), "CAN_ADMINISTRATE"));
         if (!canEditFields) {
             updateExtraDataFilePathList(examinationDb, examination);

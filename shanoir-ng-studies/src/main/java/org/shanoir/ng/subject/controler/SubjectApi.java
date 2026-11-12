@@ -145,7 +145,7 @@ public interface SubjectApi {
             @ApiResponse(responseCode = "500", description = "unexpected error") })
     @PutMapping(value = "/{subjectId}", produces = { "application/json" }, consumes = {
             "application/json" })
-    @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @studySecurityService.hasRightOnSubject(#subjectId, 'CAN_ADMINISTRATE'))")
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and (@studySecurityService.hasRightOnSubject(#subjectId, 'CAN_IMPORT') or (hasRole('EXPERT') and @studySecurityService.hasRightOnSubject(#subjectId, 'CAN_ADMINISTRATE'))))")
     ResponseEntity<Void> updateSubject(
             @Parameter(description = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
             @Parameter(description = "subject to update", required = true) @RequestBody Subject subject,
