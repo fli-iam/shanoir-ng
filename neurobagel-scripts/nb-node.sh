@@ -1,21 +1,23 @@
 #!/usr/bin/env bash
-# Neurobagel node fed by Shanoir, in one script: install, fetch + bagel build + (re)load, made for cron.
-# Replaces fetch.sh + run.sh + nb-docker.sh (same compose project, same data/ folder).
+# Neurobagel nodes fed by Shanoir, one per Shanoir instance: install, fetch + bagel build + (re)load, made for cron.
 #
-#   bash nb-node.sh install        # once (sync also does it if needed): recipes, .env, GraphDB passwords, images
-#   bash nb-node.sh sync           # fetch every exported study, build the JSONLDs, reload the node if the inputs changed
-#   FORCE=1 bash nb-node.sh sync   # reload even if nothing changed
-#   bash nb-node.sh cron-install   # daily sync in the user's crontab, at 04:20 (CRON_AT="30 5" to change)
-#   bash nb-node.sh cron-remove
-#   bash nb-node.sh status | logs | down | wipe
-#   bash nb-node.sh uninstall      # remove everything above: cron, containers, volumes, images, recipes, data, state, nb.conf (YES=1 to skip the prompt)
+#   bash nb-node.sh <command> <instance>
+#   bash nb-node.sh install <instance>        # once (sync also does it if needed): recipes, .env, GraphDB passwords, images
+#   bash nb-node.sh sync <instance>           # fetch every exported study, build the JSONLDs, reload the node if the inputs changed
+#   FORCE=1 bash nb-node.sh sync <instance>   # reload even if nothing changed
+#   bash nb-node.sh cron-install <instance>   # daily sync in the user's crontab at CRON_AT (default "20 4" = 04:20)
+#   bash nb-node.sh cron-remove <instance>
+#   bash nb-node.sh status|logs|down|wipe <instance>
+#   bash nb-node.sh uninstall <instance>      # remove the instance: cron, containers, volumes, images, recipes, data, state, config (YES=1: no prompt)
 #
-# Config: nb.conf next to this script (chmod 600), see nb.conf.example.
-# Node: compose project 'shanoir_nb_node' (never the recipes' default 'neurobagel_node'), API on 127.0.0.1 only.
-# Files: data/ = JSONLDs the node loads; state/ = log, last downloaded inputs, lock (private, 700).
+# Everything of an instance NAME is derived from its name (lowercase letters, digits, - and _):
+#   config nb-NAME.conf (chmod 600, see nb.conf.example), compose project shanoir_nb_NAME,
+#   data-NAME/ = JSONLDs the node loads, state-NAME/ = log, last downloaded inputs, lock (private, 700),
+#   ~/neurobagel-recipes-NAME = recipes clone, .env, GraphDB passwords.
+# Each config sets its own API_PORT (unique, bound to 127.0.0.1 only) and should set its own CRON_AT.
 # Cron cannot type a sudo password: the user must be in the docker group, or 'sudo -n docker' must work (NOPASSWD).
 #
-# A sync never breaks a running node on a download error: everything is fetched and built in state/staging
+# A sync never breaks a running node on a download error: everything is fetched and built in state-NAME/staging
 # first, the node is only touched once at least one JSONLD is ready. A study whose build fails keeps its
 # previous JSONLD if there is one (exit code 2, see the log). A study no longer exposed disappears from the node.
 set -euo pipefail
@@ -24,22 +26,31 @@ export PATH="$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin:$PATH"
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
 SELF="$HERE/$(basename "$0")"
-CONF="${NB_CONF:-$HERE/nb.conf}"
+usage() { awk 'NR > 1 && !/^#/ { exit } NR > 1' "$SELF"; exit 1; }
+
+INSTANCE="${2:-}"
+[ -n "$INSTANCE" ] || usage
+[[ $INSTANCE =~ ^[a-z0-9][a-z0-9_-]*$ ]] || { echo "instance name: lowercase letters, digits, - and _ only" >&2; exit 1; }
+PROJECT="shanoir_nb_$INSTANCE"
+CONF="$HERE/nb-$INSTANCE.conf"
 # shellcheck source=/dev/null
 [ -f "$CONF" ] && . "$CONF"
 
-RECIPES="${RECIPES:-$HOME/neurobagel-recipes}"
-NB_DATA="${NB_DATA:-$HERE/data}"
-STATE="$HERE/state"
+RECIPES="${RECIPES:-$HOME/neurobagel-recipes-$INSTANCE}"
+NB_DATA="${NB_DATA:-$HERE/data-$INSTANCE}"
+STATE="$HERE/state-$INSTANCE"
 STAGE="$STATE/staging"
 LOG="$STATE/nb-node.log"
-PROJECT="shanoir_nb_node"
-API_PORT="${API_PORT:-8000}"
+API_PORT="${API_PORT:-}"
 NB_CLIENT_ID="${NB_CLIENT_ID:-neurobagel-export}"
 BAGEL_IMAGE="${BAGEL_IMAGE:-neurobagel/bagelcli:latest}"
+CMD_ARGS=" $INSTANCE"   # appended to the commands the script prints or puts in cron
 
-log() { echo "$(date '+%F %T') [nb] $*"; }
+log() { echo "$(date '+%F %T') [nb:$INSTANCE] $*"; }
 die() { log "ERROR: $*" >&2; exit 1; }
+need_port() {
+    [[ $API_PORT =~ ^[0-9]+$ ]] || die "set API_PORT in $CONF (a port no other instance uses)"
+}
 
 # docker without sudo if allowed, else sudo (non-interactive under cron)
 if docker info >/dev/null 2>&1; then DOCKER=(docker)
@@ -63,7 +74,7 @@ wait_api() {
         api_ok && { log "node ready: http://127.0.0.1:$API_PORT/docs"; return; }
         sleep 2
     done
-    die "API did not answer, see: bash $0 logs"
+    die "API did not answer, see: bash $0 logs$CMD_ARGS"
 }
 
 sync_data_path() {
@@ -84,6 +95,7 @@ latest_tag() {
 }
 
 cmd_install() {
+    need_port
     command -v git >/dev/null || die "git not found"
     command -v python3 >/dev/null || die "python3 not found"
     "${DOCKER[@]}" compose version >/dev/null || die "docker compose not available (or sudo needs a password)"
@@ -92,6 +104,14 @@ cmd_install() {
         [ -n "$tag" ] || die "could not read the neurobagel/recipes tags (network?)"
         log "cloning neurobagel/recipes $tag into $RECIPES..."
         git -c advice.detachedHead=false clone -q --depth 1 --branch "$tag" https://github.com/neurobagel/recipes.git "$RECIPES"
+    fi
+
+    if [ -f "$RECIPES/.env" ] && ! grep -qx "COMPOSE_PROJECT_NAME=$PROJECT" "$RECIPES/.env"; then
+        die "$RECIPES belongs to another node ($(grep -m1 '^COMPOSE_PROJECT_NAME=' "$RECIPES/.env")): give each instance its own RECIPES"
+    fi
+    if ss -tln 2>/dev/null | grep -qE "127\.0\.0\.1:$API_PORT\b|\*:$API_PORT\b|0\.0\.0\.0:$API_PORT\b" \
+        && [ -z "$(compose ps -q api 2>/dev/null)" ]; then
+        die "port $API_PORT is already used (another instance?): set a different API_PORT in $CONF"
     fi
 
     log "writing $RECIPES/.env"
@@ -132,7 +152,7 @@ EOF
         log "no bagel CLI in PATH: pulling $BAGEL_IMAGE"
         "${DOCKER[@]}" pull -q "$BAGEL_IMAGE"
     fi
-    log "install done. Next: write $CONF, then: bash $0 sync"
+    log "install done. Next: write $CONF, then: bash $0 sync$CMD_ARGS"
 }
 
 # ---------------------------------------------------------------- fetch
@@ -243,6 +263,7 @@ cmd_sync() {
     start_log
     log "======== sync start ========"
     [ -n "${SHANOIR_URL:-}" ] && [ -n "${NB_CLIENT_SECRET:-}" ] || die "set SHANOIR_URL and NB_CLIENT_SECRET in $CONF"
+    need_port
     SHANOIR_URL="${SHANOIR_URL%/}"
     [ -f "$RECIPES/.env" ] || { log "node not installed yet: installing"; cmd_install; }
 
@@ -312,25 +333,26 @@ cmd_sync() {
 cmd_cron_install() {
     local at="${CRON_AT:-20 4}"
     [ -f "$CONF" ] || die "write $CONF first (see nb.conf.example)"
+    need_port
     if ! docker info >/dev/null 2>&1 && ! sudo -n docker info >/dev/null 2>&1; then
         die "cron could not use docker: add $USER to the docker group, or allow it 'sudo -n docker' (NOPASSWD)"
     fi
-    local line="$at * * * /usr/bin/env bash $SELF sync >/dev/null 2>&1"
-    { crontab -l 2>/dev/null | grep -vF "$SELF sync" || true; echo "$line"; } | crontab -
+    local line="$at * * * /usr/bin/env bash $SELF sync$CMD_ARGS >/dev/null 2>&1"
+    { crontab -l 2>/dev/null | grep -vF "$SELF sync$CMD_ARGS >" || true; echo "$line"; } | crontab -
     log "crontab entry: $line"
     log "log file: $LOG"
 }
 
 cmd_cron_remove() {
-    { crontab -l 2>/dev/null | grep -vF "$SELF sync" || true; } | crontab -
+    { crontab -l 2>/dev/null | grep -vF "$SELF sync$CMD_ARGS >" || true; } | crontab -
     log "crontab entry removed"
 }
 
 cmd_status() {
     compose ps -a
     log "listening sockets (API must be 127.0.0.1 only, nothing on 7200):"
-    ss -tln 2>/dev/null | grep -E ":($API_PORT|7200)\b" || true
-    log "cron: $(crontab -l 2>/dev/null | grep -F "$SELF sync" || echo 'not installed')"
+    ss -tln 2>/dev/null | grep -E ":(${API_PORT:-none}|7200)\b" || true
+    log "cron: $(crontab -l 2>/dev/null | grep -F "$SELF sync$CMD_ARGS >" || echo 'not installed')"
     [ -f "$LOG" ] && { log "last sync lines:"; grep -E '======== sync' "$LOG" | tail -n 4; }
 }
 
@@ -351,7 +373,7 @@ cmd_uninstall() {
     echo "This removes everything this script set up on this machine:"
     echo "  - the cron entry"
     echo "  - the containers, network, volumes and images of compose project '$PROJECT'"
-    echo "  - the bagel CLI image $BAGEL_IMAGE"
+    echo "  - the api, graph and bagel CLI images, unless another node on this machine still uses them"
     printf '  - %s\n' "${paths[@]}"
     if [ "${YES:-0}" != 1 ]; then
         [ -t 0 ] || die "not interactive: run with YES=1 to confirm"
@@ -364,9 +386,14 @@ cmd_uninstall() {
         flock -n 9 || die "a sync is running, try again later"
     fi
     cmd_cron_remove
+    # api, graph and bagel images are shared by every instance: remove them only with the last one
+    local others rmi=all
+    others=$("${DOCKER[@]}" ps -a --format '{{.Label "com.docker.compose.project"}}' \
+        | grep '^shanoir_nb_' | grep -vx "$PROJECT" | sort -u | tr '\n' ' ' || true)
+    [ -z "$others" ] || { rmi=local; log "other nodes on this machine ($others): keeping the shared images"; }
     if [ -f "$RECIPES/docker-compose.noproxy.prod.yml" ]; then
         log "stopping the node and removing its images..."
-        compose down -v --remove-orphans --rmi all || log "WARNING: compose down failed, cleaning by label"
+        compose down -v --remove-orphans --rmi "$rmi" || log "WARNING: compose down failed, cleaning by label"
     fi
     # leftovers (or recipes already deleted): everything compose labelled with our project
     local label="label=com.docker.compose.project=$PROJECT" ids
@@ -374,7 +401,9 @@ cmd_uninstall() {
     ids=$("${DOCKER[@]}" volume ls -q --filter "$label"); [ -z "$ids" ] || "${DOCKER[@]}" volume rm $ids >/dev/null
     ids=$("${DOCKER[@]}" network ls -q --filter "$label"); [ -z "$ids" ] || "${DOCKER[@]}" network rm $ids >/dev/null
     ids=$("${DOCKER[@]}" images -q --filter "$label"); [ -z "$ids" ] || "${DOCKER[@]}" rmi -f $ids >/dev/null
-    "${DOCKER[@]}" rmi "$BAGEL_IMAGE" >/dev/null 2>&1 && log "removed image $BAGEL_IMAGE" || true
+    if [ -z "$others" ]; then
+        "${DOCKER[@]}" rmi "$BAGEL_IMAGE" >/dev/null 2>&1 && log "removed image $BAGEL_IMAGE" || true
+    fi
     exec 9>&-
 
     log "deleting files..."
@@ -392,5 +421,5 @@ case "${1:-}" in
     logs)         cmd_logs ;;
     down)         compose down ;;
     wipe)         compose down -v ;;
-    *) sed -n '2,20p' "$0"; exit 1 ;;
+    *)            usage ;;
 esac
