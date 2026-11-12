@@ -61,7 +61,8 @@ Set `NB_CONF=/path/to/file` to use a configuration file somewhere else.
 | `bash nb-node.sh status` | Shows the containers, the listening sockets, the cron entry and the last sync results. |
 | `bash nb-node.sh logs` | Shows the last container logs (`init_data`, `graph`, `api`). |
 | `bash nb-node.sh down` | Stops the node and keeps its volumes. |
-| `bash nb-node.sh wipe` | Stops the node and removes its volumes. The next `sync` reloads it. |
+| `bash nb-node.sh wipe` | Stops the node and removes its volumes. The next `sync` reloads it. Images, recipes, data, state, config and cron are kept. |
+| `bash nb-node.sh uninstall` | Removes everything the script set up (see [Uninstall](#uninstall)). Asks for confirmation; `YES=1` skips the prompt. |
 
 ### Exit codes of `sync`
 
@@ -110,6 +111,24 @@ python3 query.py --port 8001                  # other API port (or API_PORT=8001
 ```
 
 Modalities: `T1w T2w dwi bold asl eeg meg pet`.
+
+## Uninstall
+
+```bash
+bash nb-node.sh uninstall          # asks you to type 'uninstall'
+YES=1 bash nb-node.sh uninstall    # no prompt (required when not run from a terminal)
+```
+
+This removes:
+
+- the cron entry
+- the containers, network, volumes and images of compose project `shanoir_nb_node` (api, graph and the
+  locally built init_data image), and the bagel CLI image
+- `data/`, `data.old/`, `state/`, the `$RECIPES` clone (including the GraphDB passwords) and `nb.conf`
+
+It stops if a sync is running, and refuses to delete `/`, `$HOME` or the scripts folder if a path
+variable points there. It does not remove the scripts or the Keycloak client in Shanoir. Disable or delete
+that client in Keycloak if the node is gone for good.
 
 ## Troubleshooting
 

@@ -8,6 +8,7 @@
 #   bash nb-node.sh cron-install   # daily sync in the user's crontab, at 04:20 (CRON_AT="30 5" to change)
 #   bash nb-node.sh cron-remove
 #   bash nb-node.sh status | logs | down | wipe
+#   bash nb-node.sh uninstall      # remove everything above: cron, containers, volumes, images, recipes, data, state, nb.conf (YES=1 to skip the prompt)
 #
 # Config: nb.conf next to this script (chmod 600), see nb.conf.example.
 # Node: compose project 'shanoir_nb_node' (never the recipes' default 'neurobagel_node'), API on 127.0.0.1 only.
@@ -339,8 +340,51 @@ cmd_logs() {
     compose logs --no-color api | tail -n 30
 }
 
+safe_dir() {  # refuse to delete an empty path, /, $HOME or this script's folder
+    local p; p=$(realpath -m -- "$1")
+    [ -n "$1" ] && [ "$p" != / ] && [ "$p" != "$(realpath -m -- "$HOME")" ] && [ "$p" != "$HERE" ]
+}
+
+cmd_uninstall() {
+    local paths=("$NB_DATA" "$NB_DATA.old" "$STATE" "$RECIPES" "$CONF") p
+    for p in "${paths[@]}"; do safe_dir "$p" || die "refusing to delete '$p'"; done
+    echo "This removes everything this script set up on this machine:"
+    echo "  - the cron entry"
+    echo "  - the containers, network, volumes and images of compose project '$PROJECT'"
+    echo "  - the bagel CLI image $BAGEL_IMAGE"
+    printf '  - %s\n' "${paths[@]}"
+    if [ "${YES:-0}" != 1 ]; then
+        [ -t 0 ] || die "not interactive: run with YES=1 to confirm"
+        read -rp "Type 'uninstall' to confirm: " answer
+        [ "$answer" = uninstall ] || die "aborted"
+    fi
+
+    if [ -d "$STATE" ]; then
+        exec 9>>"$STATE/.lock"
+        flock -n 9 || die "a sync is running, try again later"
+    fi
+    cmd_cron_remove
+    if [ -f "$RECIPES/docker-compose.noproxy.prod.yml" ]; then
+        log "stopping the node and removing its images..."
+        compose down -v --remove-orphans --rmi all || log "WARNING: compose down failed, cleaning by label"
+    fi
+    # leftovers (or recipes already deleted): everything compose labelled with our project
+    local label="label=com.docker.compose.project=$PROJECT" ids
+    ids=$("${DOCKER[@]}" ps -aq --filter "$label"); [ -z "$ids" ] || "${DOCKER[@]}" rm -f $ids >/dev/null
+    ids=$("${DOCKER[@]}" volume ls -q --filter "$label"); [ -z "$ids" ] || "${DOCKER[@]}" volume rm $ids >/dev/null
+    ids=$("${DOCKER[@]}" network ls -q --filter "$label"); [ -z "$ids" ] || "${DOCKER[@]}" network rm $ids >/dev/null
+    ids=$("${DOCKER[@]}" images -q --filter "$label"); [ -z "$ids" ] || "${DOCKER[@]}" rmi -f $ids >/dev/null
+    "${DOCKER[@]}" rmi "$BAGEL_IMAGE" >/dev/null 2>&1 && log "removed image $BAGEL_IMAGE" || true
+    exec 9>&-
+
+    log "deleting files..."
+    rm_any "${paths[@]}"
+    log "uninstall done. Not removed: the scripts in $HERE, and the Keycloak client in Shanoir."
+}
+
 case "${1:-}" in
     install)      cmd_install ;;
+    uninstall)    cmd_uninstall ;;
     sync)         cmd_sync ;;
     cron-install) cmd_cron_install ;;
     cron-remove)  cmd_cron_remove ;;
@@ -348,5 +392,5 @@ case "${1:-}" in
     logs)         cmd_logs ;;
     down)         compose down ;;
     wipe)         compose down -v ;;
-    *) sed -n '2,19p' "$0"; exit 1 ;;
+    *) sed -n '2,20p' "$0"; exit 1 ;;
 esac
