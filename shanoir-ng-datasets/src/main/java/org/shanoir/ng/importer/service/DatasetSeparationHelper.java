@@ -40,6 +40,32 @@ final class DatasetSeparationHelper {
     }
 
     /**
+     * AcquisitionNumber of an incoming DICOM instance for the separation key. Only
+     * MR separates by it. For the other modalities the series is the stack: the
+     * AcquisitionNumber may step inside one series (table segments of a CT, for
+     * example) and, as it is only stored once on the acquisition, an existing
+     * dataset can never be matched on it: every instance after the first segment
+     * would open a dataset of its own.
+     */
+    static int acquisitionNumberForDatasetSeparation(DatasetAcquisition acquisition, Attributes attributes) {
+        if (acquisition instanceof MrDatasetAcquisition) {
+            return attributes.getInt(Tag.AcquisitionNumber, 0);
+        }
+        return 0;
+    }
+
+    /**
+     * AcquisitionNumber of an existing dataset, rebuilt from its acquisition. Follows
+     * the same rule as the one of an incoming instance.
+     */
+    static int acquisitionNumberForDatasetSeparation(DatasetAcquisition acquisition) {
+        if (acquisition instanceof MrDatasetAcquisition && acquisition.getAcquisitionNumber() != null) {
+            return acquisition.getAcquisitionNumber().intValue();
+        }
+        return 0;
+    }
+
+    /**
      * Echo times of an incoming DICOM instance, to match against existing datasets.
      */
     static Set<EchoTime> echoTimesForDatasetSeparation(DatasetAcquisition acquisition, Attributes attributes) {
