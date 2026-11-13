@@ -11,17 +11,12 @@
 -- along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 
--- This script sets import and users expiration_date values with studies.study_user expiration_date value
+-- This script sets import expiration_date values with studies.study_user expiration_date value
 -- for matching user_id and study_id.
 
--- This fixes the cases where import and users expiration_date were not updated with study_user.expiration_date
--- due to a regression during ms import and users jackson3 migration
+-- This fixes the cases where import expiration_date was not updated with study_user.expiration_date
+-- due to a regression during ms import jackson3 migration
 UPDATE import.study_user r
-JOIN studies.study_user s ON s.study_id = r.study_id AND s.user_id = r.user_id
-SET r.expiration_date = s.expiration_date
-WHERE NOT (s.expiration_date <=> r.expiration_date);
-
-UPDATE users.study_user r
 JOIN studies.study_user s ON s.study_id = r.study_id AND s.user_id = r.user_id
 SET r.expiration_date = s.expiration_date
 WHERE NOT (s.expiration_date <=> r.expiration_date);
