@@ -13,7 +13,7 @@ For each instance, `nb-node.sh` does the following every day from cron:
 |---|---|
 | `nb-node.sh` | Installs, syncs, manages and removes the nodes |
 | `nb.conf.example` | Template of an instance config |
-| `query.py` | Queries a node's API, for checks |
+| `query.py` | Queries the nodes by instance name, for checks |
 
 On the VM, the scripts and the instance configs live together in your home directory, and each instance
 gets its own folder next to them:
@@ -99,8 +99,7 @@ Check the result:
 ```bash
 bash nb-node.sh status neurinfo
 bash nb-node.sh status ofsep
-python3 query.py --port 8000            # query test for datasets on the Neurinfo node
-python3 query.py --port 8001            # query test for datasets on the OFSEP node
+python3 query.py                        # datasets on every node
 ```
 
 ### Instance config (`nb-<name>.conf`)
@@ -182,22 +181,90 @@ for i in neurinfo ofsep; do bash nb-node.sh status "$i"; done
 
 ## How a sync works
 
-A sync handles one instance:
+A sync handles one instance. Its files go through three places inside `~/neurobagel-<name>/`:
+`state/staging/` (work in progress), `data/` (what the node serves) and `state/last/` (raw inputs kept
+for debugging).
 
-1. It takes the instance lock (`~/neurobagel-<name>/state/.lock`), so two syncs of the same instance never overlap.
-2. It gets a `client_credentials` token from the instance's Keycloak and downloads into `~/neurobagel-<name>/state/staging/`:
-   - `studies` (the exported studies) and `participants.json` (the data dictionary)
-   - for each study: `participants.tsv`, `dataset_description.json`, `imaging.tsv`
-3. If no study is exported, it stops the node and removes its data.
-4. If the inputs have the same hash as the last loaded ones and the API answers, it stops here.
-5. It builds one `study-<id>.jsonld` per study with `bagel pheno`, then `bagel bids` when the study has
-   imaging rows. A study that fails to build keeps its previous JSONLD if there is one.
-6. It restarts the node on the new data folder, waits until the node answers queries, and logs a summary of
-   the datasets it serves.
+### 1. Download
 
-Nothing on the running node changes until at least one JSONLD has been built, so a Shanoir outage or a failed
-download leaves the node as it was. A study that is no longer exported disappears from the node at the next
-reload.
+The sync takes the instance lock (`state/.lock`), so two syncs of the same instance never overlap. It
+empties `state/staging/`, gets a `client_credentials` token from the instance's Keycloak, and downloads
+from `<SHANOIR_URL>/shanoir-ng/studies/neurobagel/`:
+
+```
+state/staging/
+├── studies.json                     list of the exported studies (id, name)
+├── participants.json                data dictionary, shared by all studies
+├── studies/
+│   └── study-<id>/
+│       ├── participants.tsv         one row per subject (age, sex, diagnosis…)
+│       ├── dataset_description.json study name, authors, homepage…
+│       └── imaging.tsv              one row per imaging session and modality
+└── data/                            empty: the JSONLDs are built here
+```
+
+A new token is requested for each study, so a slow download cannot make the next ones expire. If any
+download fails, the sync stops (exit code 1) and the node and `data/` are not touched.
+
+### 2. Decide
+
+| Case | What happens |
+|---|---|
+| No study is exported | The node is stopped, and `data/`, `state/staging/` and the hash are deleted. |
+| Same inputs as the last reload, and the API answers | `state/staging/` is deleted and nothing else changes. |
+| Inputs changed (or `FORCE=1`) | Build and reload, below. |
+
+The inputs are compared through a hash of `participants.json` and everything under `studies/`
+(`state/inputs.sha256`). `studies.json` is not part of the hash, so renaming a study changes nothing on the
+node until its own files change.
+
+### 3. Build
+
+For each study, in `state/staging/`:
+
+1. The study is skipped if `imaging.tsv` lists subjects that are missing from `participants.tsv`.
+2. `bagel pheno` turns `participants.tsv`, `participants.json` and `dataset_description.json` into a JSONLD.
+3. If `imaging.tsv` has rows, `bagel bids` adds the imaging to it. Otherwise the study is phenotypic only.
+4. The result goes to `state/staging/data/study-<id>.jsonld`.
+
+If a study fails to build, its previous JSONLD is copied from `data/` and the sync will end with exit
+code 2. If it has no previous JSONLD, it is left off the node. If no JSONLD at all could be built, the sync
+stops and the node is left as it was.
+
+### 4. Reload
+
+1. The node is stopped and its GraphDB volume removed.
+2. `data/` is renamed to `data.old/`, and `state/staging/data/` becomes the new `data/`.
+3. The rest of `state/staging/` (the raw files from Shanoir) replaces `state/last/`.
+4. The node starts on the new `data/`, and GraphDB loads every JSONLD in it.
+5. Once the API answers queries, the new hash is written, `data.old/` is deleted, and a summary of the
+   served datasets is logged.
+
+After a successful reload, the instance folder looks like this:
+
+```
+~/neurobagel-<name>/
+├── recipes/                 neurobagel/recipes clone, .env, GraphDB passwords
+├── data/
+│   └── study-<id>.jsonld    what the node serves, one file per exported study
+└── state/                   private (700)
+    ├── last/                raw files of the last reload, same layout as staging/
+    ├── inputs.sha256        hash of the inputs loaded in the node
+    ├── nb-node.log          log of every sync (nb-node.log.1 after 5 MB)
+    └── .lock
+```
+
+### What stays on disk
+
+- **Subject-level data:** `state/last/` keeps the raw `participants.tsv` files (ages, sex, diagnoses)
+  until the next reload replaces them. `state/` is readable only by the user running the script (and root).
+  The node itself only returns counts.
+- **After a failed sync:** a download or build error leaves the partial `state/staging/` behind. The next
+  sync empties it first, so files never pile up.
+- **After a failed restart:** `data.old/` and the new `state/last/` stay, and the hash is not written. The
+  next sync therefore rebuilds and reloads everything.
+
+A study that is no longer exported disappears from the node at the next reload.
 
 ## Files
 
@@ -217,12 +284,39 @@ is never exposed. The API docs are at `http://127.0.0.1:<API_PORT>/docs`.
 
 ## Querying a node
 
+`query.py` queries the nodes by instance name. It finds every `nb-<name>.conf` next to it and reads the
+node's port (`API_PORT`) from it.
+
 ```bash
-python3 query.py --port 8001                             # every dataset on the OFSEP node
-python3 query.py --port 8001 --modality T1w --min-age 35 # filtered
+python3 query.py                                    # every instance, every dataset
+python3 query.py ofsep                              # one instance
+python3 query.py neurinfo ofsep --modality T1w      # several instances, filtered
+python3 query.py ofsep --min-age 35 --max-age 60
+python3 query.py --help                             # options and configured instances
 ```
 
-`API_PORT=8001 python3 query.py` works too. Modalities: `T1w T2w dwi bold asl eeg meg pet`.
+Modalities: `T1w T2w dwi bold asl eeg meg pet`. Example output:
+
+```
+Query: subjects with T1-weighted imaging, aged 35 or more
+
+== ofsep  (https://shanoir-ofsep.irisa.fr)
+
+   Study A
+     Matching subjects: 12 of 40
+     Imaging:           T1-weighted, diffusion-weighted
+     Homepage:          https://example.org/study-a
+     Subject details:   hidden (counts only)
+
+   1 dataset(s), 12 matching subject(s)
+
+== neurinfo  (https://shanoir.irisa.fr)
+   The node does not answer on port 8000 ([Errno 111] Connection refused).
+   Check it with: bash nb-node.sh status neurinfo
+```
+
+It exits with code 1 if a node could not be queried, so it can be used in checks. It queries each node
+separately; it does not replace a federation.
 
 ## Searching all nodes at once
 
