@@ -14,7 +14,26 @@ For each instance, `nb-node.sh` does the following every day from cron:
 | `nb-node.sh` | Installs, syncs, manages and removes the nodes |
 | `nb.conf.example` | Template of an instance config |
 | `query.py` | Queries a node's API, for checks |
-| `.gitignore` | Keeps the configs (secrets), data and state folders out of git |
+
+On the VM, the scripts and the instance configs live together in your home directory, and each instance
+gets its own folder next to them:
+
+```
+~/
+├── nb-node.sh
+├── query.py
+├── nb.conf.example
+├── nb-neurinfo.conf
+├── nb-ofsep.conf
+├── neurobagel-neurinfo/
+│   ├── recipes/   neurobagel/recipes clone, .env, GraphDB passwords
+│   ├── data/      JSONLD files loaded by the node
+│   └── state/     log, lock, last downloaded inputs
+└── neurobagel-ofsep/
+    ├── recipes/
+    ├── data/
+    └── state/
+```
 
 ## How the instances are separated
 
@@ -30,9 +49,7 @@ Everything that belongs to an instance is derived from its name, so instances ne
 |---|---|---|---|
 | Config | `nb-neurinfo.conf` | `nb-ofsep.conf` | `nb-<name>.conf` |
 | Compose project | `shanoir_nb_neurinfo` | `shanoir_nb_ofsep` | `shanoir_nb_<name>` |
-| JSONLD folder | `data-neurinfo/` | `data-ofsep/` | `data-<name>/` |
-| State folder (log, lock, last inputs) | `state-neurinfo/` | `state-ofsep/` | `state-<name>/` |
-| Recipes clone (`.env`, GraphDB passwords) | `~/neurobagel-recipes-neurinfo` | `~/neurobagel-recipes-ofsep` | `~/neurobagel-recipes-<name>` |
+| Instance folder (`recipes/`, `data/`, `state/`) | `~/neurobagel-neurinfo/` | `~/neurobagel-ofsep/` | `~/neurobagel-<name>/` |
 | API port (set in the config) | `8000` | `8001` | next free port |
 | Daily sync (set in the config) | `04:20` | `04:50` | next free slot |
 
@@ -63,13 +80,15 @@ On each Shanoir instance:
 Run this once per instance (here Neurinfo and OFSEP):
 
 ```bash
-cd neurobagel-scripts
+cd ~        # where nb-node.sh, query.py and nb.conf.example are
 
 cp nb.conf.example nb-neurinfo.conf && chmod 600 nb-neurinfo.conf
 cp nb.conf.example nb-ofsep.conf    && chmod 600 nb-ofsep.conf
 # edit both files: SHANOIR_URL, NB_CLIENT_SECRET, API_PORT, CRON_AT (see below)
 
-bash nb-node.sh sync neurinfo           # first run installs the node, then fetches, builds and loads
+bash nb-node.sh install neurinfo           # Installs the node
+bash nb-node.sh install ofsep
+bash nb-node.sh sync neurinfo           # Fetches exported studies, builds and loads data
 bash nb-node.sh sync ofsep
 bash nb-node.sh cron-install neurinfo   # daily sync
 bash nb-node.sh cron-install ofsep
@@ -79,8 +98,9 @@ Check the result:
 
 ```bash
 bash nb-node.sh status neurinfo
-python3 query.py --port 8000            # datasets on the Neurinfo node
-python3 query.py --port 8001            # datasets on the OFSEP node
+bash nb-node.sh status ofsep
+python3 query.py --port 8000            # query test for datasets on the Neurinfo node
+python3 query.py --port 8001            # query test for datasets on the OFSEP node
 ```
 
 ### Instance config (`nb-<name>.conf`)
@@ -92,14 +112,13 @@ python3 query.py --port 8001            # datasets on the OFSEP node
 | `API_PORT` | yes | | Port of the node API, bound to `127.0.0.1` only. **Must be unique per instance.** |
 | `CRON_AT` | recommended | `20 4` | Daily sync time (`minute hour`). Give each instance its own slot. |
 | `NB_CLIENT_ID` | no | `neurobagel-export` | Keycloak client id |
-| `RECIPES` | no | `$HOME/neurobagel-recipes-<name>` | Recipes clone. **Never share it between instances.** |
-| `NB_DATA` | no | `./data-<name>` | Folder of the JSONLD files loaded by the node |
+| `NB_HOME` | no | `$HOME/neurobagel-<name>` | Instance folder, e.g. on a bigger disk. **Never share it between instances.** |
 | `BAGEL_IMAGE` | no | `neurobagel/bagelcli:latest` | Image used when no `bagel` command is in `PATH` |
 
 Example `nb-ofsep.conf`:
 
 ```bash
-SHANOIR_URL=https://ofsep-shanoir.example.org
+SHANOIR_URL=https://shanoir-ofsep.irisa.fr
 NB_CLIENT_SECRET=...
 API_PORT=8001
 CRON_AT="50 4"
@@ -118,6 +137,7 @@ Spreading them over separate slots keeps the VM responsive; 30 minutes apart is 
    ```
 3. Start it and schedule it:
    ```bash
+   bash nb-node.sh install <name>
    bash nb-node.sh sync <name>
    bash nb-node.sh cron-install <name>
    ```
@@ -126,7 +146,7 @@ Spreading them over separate slots keeps the VM responsive; 30 minutes apart is 
 
 Check that the VM has enough RAM first: each instance adds a GraphDB of about 2 GB.
 
-The install stops if the port is already in use or if `RECIPES` points to another instance's clone. A config
+The install stops if the port is already in use or if `NB_HOME` points to another instance's folder. A config
 copied from another instance and not edited cannot break a running node.
 
 ## Commands
@@ -164,8 +184,8 @@ for i in neurinfo ofsep; do bash nb-node.sh status "$i"; done
 
 A sync handles one instance:
 
-1. It takes the instance lock (`state-<name>/.lock`), so two syncs of the same instance never overlap.
-2. It gets a `client_credentials` token from the instance's Keycloak and downloads into `state-<name>/staging/`:
+1. It takes the instance lock (`~/neurobagel-<name>/state/.lock`), so two syncs of the same instance never overlap.
+2. It gets a `client_credentials` token from the instance's Keycloak and downloads into `~/neurobagel-<name>/state/staging/`:
    - `studies` (the exported studies) and `participants.json` (the data dictionary)
    - for each study: `participants.tsv`, `dataset_description.json`, `imaging.tsv`
 3. If no study is exported, it stops the node and removes its data.
@@ -181,18 +201,18 @@ reload.
 
 ## Files
 
-For each instance, in `neurobagel-scripts/` unless noted otherwise:
+For each instance:
 
 | Path | Content |
 |---|---|
-| `nb-<name>.conf` | Config and secret (`chmod 600`, ignored by git) |
-| `data-<name>/` | JSONLD files loaded by the node |
-| `state-<name>/nb-node.log` | Log of every sync, rotated at 5 MB (`nb-node.log.1`) |
-| `state-<name>/last/` | Inputs of the last reload, for debugging |
-| `state-<name>/inputs.sha256` | Hash of the last loaded inputs |
-| `~/neurobagel-recipes-<name>/` | Recipes clone, its `.env` and the GraphDB passwords |
+| `~/nb-<name>.conf` | Config and secret (`chmod 600`) |
+| `~/neurobagel-<name>/recipes/` | Recipes clone, its `.env` and the GraphDB passwords |
+| `~/neurobagel-<name>/data/` | JSONLD files loaded by the node |
+| `~/neurobagel-<name>/state/nb-node.log` | Log of every sync, rotated at 5 MB (`nb-node.log.1`) |
+| `~/neurobagel-<name>/state/last/` | Inputs of the last reload, for debugging |
+| `~/neurobagel-<name>/state/inputs.sha256` | Hash of the last loaded inputs |
 
-`state-<name>/` is private (`700`). Each API listens on `127.0.0.1:<API_PORT>` only, and GraphDB (port 7200)
+`state/` is private (`700`). Each API listens on `127.0.0.1:<API_PORT>` only, and GraphDB (port 7200)
 is never exposed. The API docs are at `http://127.0.0.1:<API_PORT>/docs`.
 
 ## Querying a node
@@ -222,24 +242,25 @@ For that instance only, this removes:
 
 - its cron entry
 - the containers, network and volumes of its compose project, and its locally built init_data image
-- its data folder, state folder, recipes clone (with the GraphDB passwords) and config file
+- its whole instance folder `~/neurobagel-<name>/` (recipes clone with the GraphDB passwords, data,
+  state) and its config file `~/nb-<name>.conf`
 
 The shared api, graph and bagel images are removed only when no other node is left on the VM.
 
-The uninstall stops if a sync of that instance is running. It refuses to delete `/`, `$HOME` or the scripts
-folder if a path in the config points there. It does not remove the scripts or the Keycloak client. If the
+The uninstall stops if a sync of that instance is running. It refuses to delete `/`, `$HOME`, the scripts
+folder or one of its parents if `NB_HOME` points there. It does not remove the scripts or the Keycloak client. If the
 instance is gone for good, disable or delete that client in Keycloak and remove the node from the federation.
 
 ## Troubleshooting
 
 Replace `<name>` with the instance name.
 
-- **Check the last sync:** `bash nb-node.sh status <name>`, then `tail -n 100 state-<name>/nb-node.log`.
+- **Check the last sync:** `bash nb-node.sh status <name>`, then `tail -n 100 ~/neurobagel-<name>/state/nb-node.log`.
 - **`token request failed`:** `SHANOIR_URL`, `NB_CLIENT_ID` or `NB_CLIENT_SECRET` is wrong in
   `nb-<name>.conf`, or the client has no service account.
 - **`port ... is already used`:** another instance (or another service) uses that `API_PORT`. Give the
   instance a free port.
-- **`... belongs to another node`:** two configs point `RECIPES` to the same folder. Remove `RECIPES` from
+- **`... belongs to another node`:** two configs point `NB_HOME` to the same folder. Remove `NB_HOME` from
   the configs to use the per-instance default.
 - **`another sync is running`:** a sync of that instance is still running
   (`pgrep -af "nb-node.sh sync <name>"`). The lock is released when that sync exits, so there is never a
