@@ -66,7 +66,7 @@ On the VM:
 - Linux with `bash`, `git`, `curl`, `python3`, `flock`, `ss`
 - Docker with the `docker compose` plugin
 - Network access to every Shanoir instance, and to GitHub / Docker Hub for the install
-- About **2 GB of RAM per instance** for GraphDB (`NB_GRAPH_MEMORY=2G`), plus the API containers
+- About **2 GB of RAM per instance** for GraphDB (`NB_GRAPH_MEMORY`, 2G by default), plus the API containers
 - For cron, the user must be able to run docker **without a password**: either membership in the `docker`
   group, or a `NOPASSWD` sudo rule for `docker` (the script then uses `sudo -n docker`)
 
@@ -112,7 +112,21 @@ python3 query.py                        # datasets on every node
 | `CRON_AT` | recommended | `20 4` | Daily sync time (`minute hour`). Give each instance its own slot. |
 | `NB_CLIENT_ID` | no | `neurobagel-export` | Keycloak client id |
 | `NB_HOME` | no | `$HOME/neurobagel-<name>` | Instance folder, e.g. on a bigger disk. **Never share it between instances.** |
-| `BAGEL_IMAGE` | no | `neurobagel/bagelcli:latest` | Image used when no `bagel` command is in `PATH` |
+| `BAGEL_IMAGE` | no | `neurobagel/bagelcli:latest` | Image used when no `bagel` command is in `PATH`. Pin it together with `NB_NAPI_TAG`. |
+
+#### Node settings
+
+These configure the node itself. The script writes them into `~/neurobagel-<name>/recipes/.env`, which it
+owns: **edit the config, never the `.env`**, which is rewritten at every reload. A changed setting reloads
+the node at the next `sync`, even if the data did not change.
+
+| Variable | Default | Description |
+|---|---|---|
+| `NB_RETURN_AGG` | `true` | `true`: the node returns only dataset-level counts. `false`: it also returns subject-level results (age, sex, diagnosis, sessions… of each matching subject). **Keep `true` on any node reachable from outside.** Every sync logs a warning when it is `false`. |
+| `NB_MIN_CELL_SIZE` | `0` | Datasets with this many matching subjects **or fewer** are left out of query results. Hides small groups that could point to individuals. `0` shows every dataset. |
+| `NB_NAPI_TAG` | `latest` | Image tag of `neurobagel/api`. Pin a version in production, compatible with the JSONLDs the bagel CLI (`BAGEL_IMAGE`) produces. |
+| `NB_NAPI_BASE_PATH` | empty | Public sub-path of the node when the reverse proxy serves it under one, e.g. `/ofsep` for `https://<domain>/ofsep`. Leading `/`, no trailing `/`. Empty when the node has its own domain. |
+| `NB_GRAPH_MEMORY` | `2G` | Maximum memory of the instance's GraphDB (e.g. `2G`, `1500M`). |
 
 Example `nb-ofsep.conf`:
 
@@ -121,6 +135,12 @@ SHANOIR_URL=https://shanoir-ofsep.irisa.fr
 NB_CLIENT_SECRET=...
 API_PORT=8001
 CRON_AT="50 4"
+
+NB_RETURN_AGG=true
+NB_MIN_CELL_SIZE=10
+NB_NAPI_TAG=<pinned version>
+NB_NAPI_BASE_PATH=/ofsep
+NB_GRAPH_MEMORY=2G
 ```
 
 Syncs of different instances can run at the same time, but each one builds JSONLDs and restarts a GraphDB.
@@ -211,12 +231,12 @@ download fails, the sync stops (exit code 1) and the node and `data/` are not to
 | Case | What happens |
 |---|---|
 | No study is exported | The node is stopped, and `data/`, `state/staging/` and the hash are deleted. |
-| Same inputs as the last reload, and the API answers | `state/staging/` is deleted and nothing else changes. |
-| Inputs changed (or `FORCE=1`) | Build and reload, below. |
+| Same inputs and node settings as the last reload, and the API answers | `state/staging/` is deleted and nothing else changes. |
+| Inputs or node settings changed (or `FORCE=1`) | Build and reload, below. |
 
-The inputs are compared through a hash of `participants.json` and everything under `studies/`
-(`state/inputs.sha256`). `studies.json` is not part of the hash, so renaming a study changes nothing on the
-node until its own files change.
+The comparison uses a hash (`state/inputs.sha256`) of `participants.json`, everything under `studies/`, and
+the `.env` generated from the [node settings](#node-settings). `studies.json` is not part of the hash, so
+renaming a study changes nothing on the node until its own files change.
 
 ### 3. Build
 
@@ -236,8 +256,9 @@ stops and the node is left as it was.
 1. The node is stopped and its GraphDB volume removed.
 2. `data/` is renamed to `data.old/`, and `state/staging/data/` becomes the new `data/`.
 3. The rest of `state/staging/` (the raw files from Shanoir) replaces `state/last/`.
-4. The node starts on the new `data/`, and GraphDB loads every JSONLD in it.
-5. Once the API answers queries, the new hash is written, `data.old/` is deleted, and a summary of the
+4. `recipes/.env` is rewritten from the config, so the node starts with the current node settings.
+5. The node starts on the new `data/`, and GraphDB loads every JSONLD in it.
+6. Once the API answers queries, the new hash is written, `data.old/` is deleted, and a summary of the
    served datasets is logged.
 
 After a successful reload, the instance folder looks like this:
@@ -249,7 +270,7 @@ After a successful reload, the instance folder looks like this:
 │   └── study-<id>.jsonld    what the node serves, one file per exported study
 └── state/                   private (700)
     ├── last/                raw files of the last reload, same layout as staging/
-    ├── inputs.sha256        hash of the inputs loaded in the node
+    ├── inputs.sha256        hash of the inputs and settings loaded in the node
     ├── nb-node.log          log of every sync (nb-node.log.1 after 5 MB)
     └── .lock
 ```

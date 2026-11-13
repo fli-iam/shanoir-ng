@@ -18,5 +18,17 @@ API_PORT=
 #NB_CLIENT_ID=neurobagel-export
 # instance folder (recipes/, data/, state/), default $HOME/neurobagel-<instance>: never share it between instances
 #NB_HOME=$HOME/neurobagel-<instance>
-# used only when no 'bagel' command is in PATH
+# used only when no 'bagel' command is in PATH; pin it together with NB_NAPI_TAG in production
 #BAGEL_IMAGE=neurobagel/bagelcli:latest
+
+# node settings: written into recipes/.env, a change reloads the node at the next sync
+# true: dataset-level counts only; false: subject-level results too (never on a public node)
+#NB_RETURN_AGG=true
+# datasets with this many matching subjects or fewer are hidden from query results (0 = show all)
+#NB_MIN_CELL_SIZE=0
+# neurobagel/api image tag: pin a version in production
+#NB_NAPI_TAG=latest
+# public sub-path of this node behind the reverse proxy, e.g. /ofsep (leading /, no trailing /), empty if none
+#NB_NAPI_BASE_PATH=
+# maximum memory of this instance's GraphDB
+#NB_GRAPH_MEMORY=2G

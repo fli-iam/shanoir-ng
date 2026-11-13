@@ -18,6 +18,8 @@
 #     data/    = JSONLDs the node loads
 #     state/   = log, last downloaded inputs, lock (private, 700)
 # Each config sets its own API_PORT (unique, bound to 127.0.0.1 only) and should set its own CRON_AT.
+# Node settings (NB_RETURN_AGG, NB_MIN_CELL_SIZE, NB_NAPI_TAG, NB_NAPI_BASE_PATH, NB_GRAPH_MEMORY) also come from the config:
+# the script writes recipes/.env from it, and a changed setting reloads the node at the next sync.
 # Cron cannot type a sudo password: the user must be in the docker group, or 'sudo -n docker' must work (NOPASSWD).
 #
 # A sync never breaks a running node on a download error: everything is fetched and built in state/staging
@@ -49,12 +51,24 @@ LOG="$STATE/nb-node.log"
 API_PORT="${API_PORT:-}"
 NB_CLIENT_ID="${NB_CLIENT_ID:-neurobagel-export}"
 BAGEL_IMAGE="${BAGEL_IMAGE:-neurobagel/bagelcli:latest}"
+# node settings, written into recipes/.env
+NB_RETURN_AGG="${NB_RETURN_AGG:-true}"
+NB_MIN_CELL_SIZE="${NB_MIN_CELL_SIZE:-0}"
+NB_NAPI_TAG="${NB_NAPI_TAG:-latest}"
+NB_NAPI_BASE_PATH="${NB_NAPI_BASE_PATH:-}"
+NB_GRAPH_MEMORY="${NB_GRAPH_MEMORY:-2G}"
 CMD_ARGS=" $INSTANCE"   # appended to the commands the script prints or puts in cron
 
 log() { echo "$(date '+%F %T') [nb:$INSTANCE] $*"; }
 die() { log "ERROR: $*" >&2; exit 1; }
-need_port() {
+check_conf() {
     [[ $API_PORT =~ ^[0-9]+$ ]] || die "set API_PORT in $CONF (a port no other instance uses)"
+    [[ $NB_RETURN_AGG =~ ^(true|false)$ ]] || die "NB_RETURN_AGG in $CONF: true (counts only) or false (subject-level results too)"
+    [[ $NB_MIN_CELL_SIZE =~ ^[0-9]+$ ]] || die "NB_MIN_CELL_SIZE in $CONF: a number of subjects, e.g. 5"
+    [[ $NB_NAPI_TAG =~ ^[A-Za-z0-9._-]+$ ]] || die "NB_NAPI_TAG in $CONF: an image tag of neurobagel/api, e.g. v0.4.0"
+    [[ -z $NB_NAPI_BASE_PATH || $NB_NAPI_BASE_PATH =~ ^(/[A-Za-z0-9._-]+)+$ ]] \
+        || die "NB_NAPI_BASE_PATH in $CONF: empty, or a path like /ofsep (leading /, no trailing /)"
+    [[ $NB_GRAPH_MEMORY =~ ^[0-9]+[KkMmGg]?$ ]] || die "NB_GRAPH_MEMORY in $CONF: a size like 2G or 1500M"
 }
 
 # docker without sudo if allowed, else sudo (non-interactive under cron)
@@ -82,8 +96,30 @@ wait_api() {
     die "API did not answer, see: bash $0 logs$CMD_ARGS"
 }
 
-sync_data_path() {
-    sed -i "s|^LOCAL_GRAPH_DATA=.*|LOCAL_GRAPH_DATA=$NB_DATA|" "$RECIPES/.env"
+env_file() {  # the recipes .env of this instance, from its config
+    cat <<EOF
+# written by nb-node.sh from $CONF: edit the config, not this file
+COMPOSE_PROJECT_NAME=$PROJECT
+COMPOSE_PROFILES=node
+NB_GRAPH_USERNAME=nbuser
+NB_GRAPH_DB=repositories/my_db
+NB_GRAPH_MEMORY=$NB_GRAPH_MEMORY
+LOCAL_GRAPH_DATA=$NB_DATA
+NB_RETURN_AGG=$NB_RETURN_AGG
+NB_MIN_CELL_SIZE=$NB_MIN_CELL_SIZE
+NB_NAPI_TAG=$NB_NAPI_TAG
+NB_NAPI_PORT_HOST=127.0.0.1:$API_PORT
+NB_NAPI_BASE_PATH=$NB_NAPI_BASE_PATH
+# unused by the node profile, set empty only to silence the compose warnings
+NB_FAPI_DOMAIN=
+NB_FAPI_BASE_PATH=
+NB_QUERY_CLIENT_ID=
+NB_QUERY_HEADER_SCRIPT=
+EOF
+}
+
+write_env() {
+    env_file > "$RECIPES/.env"
 }
 
 rm_any() {
@@ -100,7 +136,7 @@ latest_tag() {
 }
 
 cmd_install() {
-    need_port
+    check_conf
     command -v git >/dev/null || die "git not found"
     command -v python3 >/dev/null || die "python3 not found"
     "${DOCKER[@]}" compose version >/dev/null || die "docker compose not available (or sudo needs a password)"
@@ -122,23 +158,7 @@ cmd_install() {
 
     log "writing $RECIPES/.env"
     mkdir -p "$NB_DATA"
-    cat > "$RECIPES/.env" <<EOF
-COMPOSE_PROJECT_NAME=$PROJECT
-COMPOSE_PROFILES=node
-NB_GRAPH_USERNAME=nbuser
-NB_GRAPH_DB=repositories/my_db
-NB_GRAPH_MEMORY=2G
-LOCAL_GRAPH_DATA=$NB_DATA
-NB_RETURN_AGG=true
-NB_MIN_CELL_SIZE=0
-NB_NAPI_PORT_HOST=127.0.0.1:$API_PORT
-# unused by the node profile, set empty only to silence the compose warnings
-NB_NAPI_BASE_PATH=
-NB_FAPI_DOMAIN=
-NB_FAPI_BASE_PATH=
-NB_QUERY_CLIENT_ID=
-NB_QUERY_HEADER_SCRIPT=
-EOF
+    write_env
 
     # the recipes ship placeholder passwords (ADMINPASSWORD / DBPASSWORD): replace them once
     if grep -qx ADMINPASSWORD "$RECIPES/secrets/NB_GRAPH_ADMIN_PASSWORD.txt" 2>/dev/null; then
@@ -207,8 +227,11 @@ for s in json.load(open(sys.argv[1])): print("  exported: %s %s" % (s["id"], s["
     done
 }
 
-inputs_hash() {
-    (cd "$STAGE" && find participants.json studies -type f | sort | xargs sha256sum | sha256sum | cut -c1-64)
+inputs_hash() {  # downloaded files + node settings: a change in either reloads the node
+    {
+        (cd "$STAGE" && find participants.json studies -type f | sort | xargs sha256sum)
+        env_file
+    } | sha256sum | cut -c1-64
 }
 
 # ---------------------------------------------------------------- build
@@ -269,7 +292,8 @@ cmd_sync() {
     start_log
     log "======== sync start ========"
     [ -n "${SHANOIR_URL:-}" ] && [ -n "${NB_CLIENT_SECRET:-}" ] || die "set SHANOIR_URL and NB_CLIENT_SECRET in $CONF"
-    need_port
+    check_conf
+    [ "$NB_RETURN_AGG" = true ] || log "WARNING: NB_RETURN_AGG=false: the node returns subject-level results, not only counts"
     SHANOIR_URL="${SHANOIR_URL%/}"
     [ -f "$RECIPES/.env" ] || { log "node not installed yet: installing"; cmd_install; }
 
@@ -287,7 +311,7 @@ cmd_sync() {
 
     local hash; hash=$(inputs_hash)
     if [ "${FORCE:-0}" != 1 ] && [ "$hash" = "$(cat "$STATE/inputs.sha256" 2>/dev/null || true)" ] && api_ok; then
-        log "inputs unchanged and node up: nothing to do"
+        log "inputs and settings unchanged, node up: nothing to do"
         rm_any "$STAGE"
         log "======== sync done (no change) ========"
         return
@@ -319,7 +343,7 @@ cmd_sync() {
     chmod 644 "$NB_DATA"/*.jsonld
     rm_any "$STATE/last"
     mv "$STAGE" "$STATE/last"   # keep the last inputs for debugging (state/ is private)
-    sync_data_path
+    write_env
     compose up -d
     wait_api
     echo "$hash" > "$STATE/inputs.sha256"
@@ -339,7 +363,7 @@ cmd_sync() {
 cmd_cron_install() {
     local at="${CRON_AT:-20 4}"
     [ -f "$CONF" ] || die "write $CONF first (see nb.conf.example)"
-    need_port
+    check_conf
     if ! docker info >/dev/null 2>&1 && ! sudo -n docker info >/dev/null 2>&1; then
         die "cron could not use docker: add $USER to the docker group, or allow it 'sudo -n docker' (NOPASSWD)"
     fi
