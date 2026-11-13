@@ -11,13 +11,16 @@
 #   bash nb-node.sh uninstall <instance>      # remove the instance: cron, containers, volumes, images, recipes, data, state, config (YES=1: no prompt)
 #
 # Everything of an instance NAME is derived from its name (lowercase letters, digits, - and _):
-#   config nb-NAME.conf (chmod 600, see nb.conf.example), compose project shanoir_nb_NAME,
-#   data-NAME/ = JSONLDs the node loads, state-NAME/ = log, last downloaded inputs, lock (private, 700),
-#   ~/neurobagel-recipes-NAME = recipes clone, .env, GraphDB passwords.
+#   config:          nb-NAME.conf next to this script (chmod 600, see nb.conf.example)
+#   compose project: shanoir_nb_NAME
+#   instance folder: ~/neurobagel-NAME (NB_HOME in the config to change it), containing
+#     recipes/ = neurobagel/recipes clone, .env, GraphDB passwords
+#     data/    = JSONLDs the node loads
+#     state/   = log, last downloaded inputs, lock (private, 700)
 # Each config sets its own API_PORT (unique, bound to 127.0.0.1 only) and should set its own CRON_AT.
 # Cron cannot type a sudo password: the user must be in the docker group, or 'sudo -n docker' must work (NOPASSWD).
 #
-# A sync never breaks a running node on a download error: everything is fetched and built in state-NAME/staging
+# A sync never breaks a running node on a download error: everything is fetched and built in state/staging
 # first, the node is only touched once at least one JSONLD is ready. A study whose build fails keeps its
 # previous JSONLD if there is one (exit code 2, see the log). A study no longer exposed disappears from the node.
 set -euo pipefail
@@ -36,9 +39,11 @@ CONF="$HERE/nb-$INSTANCE.conf"
 # shellcheck source=/dev/null
 [ -f "$CONF" ] && . "$CONF"
 
-RECIPES="${RECIPES:-$HOME/neurobagel-recipes-$INSTANCE}"
-NB_DATA="${NB_DATA:-$HERE/data-$INSTANCE}"
-STATE="$HERE/state-$INSTANCE"
+NB_HOME="${NB_HOME:-$HOME/neurobagel-$INSTANCE}"
+NB_HOME="$(realpath -m -- "$NB_HOME")"   # absolute, no trailing /
+RECIPES="$NB_HOME/recipes"
+NB_DATA="$NB_HOME/data"
+STATE="$NB_HOME/state"
 STAGE="$STATE/staging"
 LOG="$STATE/nb-node.log"
 API_PORT="${API_PORT:-}"
@@ -99,6 +104,7 @@ cmd_install() {
     command -v git >/dev/null || die "git not found"
     command -v python3 >/dev/null || die "python3 not found"
     "${DOCKER[@]}" compose version >/dev/null || die "docker compose not available (or sudo needs a password)"
+    mkdir -p "$NB_HOME"
     if [ ! -d "$RECIPES" ]; then
         local tag; tag=$(latest_tag https://github.com/neurobagel/recipes.git)
         [ -n "$tag" ] || die "could not read the neurobagel/recipes tags (network?)"
@@ -107,7 +113,7 @@ cmd_install() {
     fi
 
     if [ -f "$RECIPES/.env" ] && ! grep -qx "COMPOSE_PROJECT_NAME=$PROJECT" "$RECIPES/.env"; then
-        die "$RECIPES belongs to another node ($(grep -m1 '^COMPOSE_PROJECT_NAME=' "$RECIPES/.env")): give each instance its own RECIPES"
+        die "$NB_HOME belongs to another node ($(grep -m1 '^COMPOSE_PROJECT_NAME=' "$RECIPES/.env")): give each instance its own NB_HOME"
     fi
     if ss -tln 2>/dev/null | grep -qE "127\.0\.0\.1:$API_PORT\b|\*:$API_PORT\b|0\.0\.0\.0:$API_PORT\b" \
         && [ -z "$(compose ps -q api 2>/dev/null)" ]; then
@@ -362,13 +368,14 @@ cmd_logs() {
     compose logs --no-color api | tail -n 30
 }
 
-safe_dir() {  # refuse to delete an empty path, /, $HOME or this script's folder
+safe_dir() {  # refuse to delete an empty path, /, $HOME, or this script's folder or one of its parents
     local p; p=$(realpath -m -- "$1")
-    [ -n "$1" ] && [ "$p" != / ] && [ "$p" != "$(realpath -m -- "$HOME")" ] && [ "$p" != "$HERE" ]
+    [ -n "$1" ] && [ "$p" != / ] && [ "$p" != "$(realpath -m -- "$HOME")" ] \
+        && [ "$p" != "$HERE" ] && [[ $HERE != "$p"/* ]]
 }
 
 cmd_uninstall() {
-    local paths=("$NB_DATA" "$NB_DATA.old" "$STATE" "$RECIPES" "$CONF") p
+    local paths=("$NB_HOME" "$CONF") p
     for p in "${paths[@]}"; do safe_dir "$p" || die "refusing to delete '$p'"; done
     echo "This removes everything this script set up on this machine:"
     echo "  - the cron entry"

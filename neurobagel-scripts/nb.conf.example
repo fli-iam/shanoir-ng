@@ -16,9 +16,7 @@ API_PORT=
 
 # optional
 #NB_CLIENT_ID=neurobagel-export
-# default $HOME/neurobagel-recipes-<instance>: never share it between instances
-#RECIPES=$HOME/neurobagel-recipes-<instance>
-# default <script folder>/data-<instance>
-#NB_DATA=
+# instance folder (recipes/, data/, state/), default $HOME/neurobagel-<instance>: never share it between instances
+#NB_HOME=$HOME/neurobagel-<instance>
 # used only when no 'bagel' command is in PATH
 #BAGEL_IMAGE=neurobagel/bagelcli:latest
