@@ -41,6 +41,9 @@ import { XaProtocolComponent } from '../modality/xa/xa-protocol.component';
 import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
 import { LocalDateFormatPipe } from '../../shared/localLanguage/localDateFormat.pipe';
 
+// upper bound of the backend Integer / MySQL INT columns
+const MAX_INT = 2147483647;
+
 @Component({
     selector: 'dataset-acquisition-detail',
     templateUrl: 'dataset-acquisition.component.html',
@@ -54,6 +57,7 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
     public acquisitionEquipments: AcquisitionEquipment[];
     hasDownloadRight: boolean = false;
     hasAdministrateRight: boolean = false;
+    hasImportRight: boolean = false;
     noDatasets: boolean = false;
     hasDicom: boolean = false;
     protected downloadState: TaskState = new TaskState();
@@ -106,22 +110,38 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
                 }
             });
         })
+        return this.loadRights();
+    }
+
+    private loadRights(): Promise<void> {
         if (this.keycloakService.isUserAdmin()) {
             this.hasDownloadRight = true;
             this.hasAdministrateRight = true;
+            this.hasImportRight = true;
             return Promise.resolve();
         } else {
             return this.studyRightsService.getMyRightsForStudy(this.datasetAcquisition.examination.study.id).then(rights => {
                 this.hasDownloadRight = rights.includes(StudyUserRight.CAN_DOWNLOAD);
                 this.hasAdministrateRight = rights.includes(StudyUserRight.CAN_ADMINISTRATE);
+                this.hasImportRight = rights.includes(StudyUserRight.CAN_IMPORT);
             });
         }
+    }
+
+    // as in the backend: the fields are edited by study administrators with the expert role,
+    // the extra-data files by importers
+    get canEditFields(): boolean {
+        return this.keycloakService.isUserAdmin() || (this.keycloakService.isUserExpert() && this.hasAdministrateRight);
+    }
+
+    get canEditFiles(): boolean {
+        return this.keycloakService.isUserAdmin() || this.hasImportRight;
     }
 
     initEdit(): Promise<void> {
         this.studyCardService.getAll().then(scs => this.studyCards = scs);
         this.acqEqService.getAll().then(aes => this.acquisitionEquipments = aes);
-        return Promise.resolve();
+        return this.loadRights();
     }
 
     initCreate(): Promise<void> {
@@ -132,20 +152,27 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
     }
 
     buildForm(): UntypedFormGroup {
-        return this.formBuilder.group({
+        const form: UntypedFormGroup = this.formBuilder.group({
             'type': [this.datasetAcquisition.type],
             'studyCard': [this.datasetAcquisition.studyCard],
             'acquisitionEquipment': [this.datasetAcquisition.acquisitionEquipment, [Validators.required]],
-            'rank': [this.datasetAcquisition.rank, [Validators.pattern(/^[0-9]*$/)]],
+            'rank': [this.datasetAcquisition.rank, [Validators.pattern(/^[0-9]*$/), Validators.max(MAX_INT)]],
             'acquisitionStartTime': [this.datasetAcquisition.acquisitionStartTime],
             'softwareRelease': [this.datasetAcquisition.softwareRelease],
-            'sortingIndex': [this.datasetAcquisition.sortingIndex],
+            'sortingIndex': [this.datasetAcquisition.sortingIndex, [Validators.pattern(/^[0-9]*$/), Validators.max(MAX_INT)]],
             'protocol': [this.datasetAcquisition.protocol]
         });
+        // files-only edit: every field is read-only, only the extra-data files can change
+        if (this.mode == 'edit' && !this.canEditFields) form.disable({emitEvent: false});
+        return form;
     }
 
     public async hasEditRight(): Promise<boolean> {
-        return this.keycloakService.isUserAdminOrExpert(); // TODO
+        return this.canEditFields || this.canEditFiles;
+    }
+
+    public async hasDeleteRight(): Promise<boolean> {
+        return this.canEditFields;
     }
 
     downloadAll() {

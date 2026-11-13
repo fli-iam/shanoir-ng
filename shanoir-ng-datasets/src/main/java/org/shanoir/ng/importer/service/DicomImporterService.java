@@ -25,6 +25,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -56,6 +57,9 @@ import org.shanoir.ng.shared.dicom.DicomUtils;
 import org.shanoir.ng.shared.dicom.EchoTime;
 import org.shanoir.ng.shared.dicom.EquipmentDicom;
 import org.shanoir.ng.shared.dicom.InstitutionDicom;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.dicom.SerieToDatasetsSeparator;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
@@ -87,6 +91,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -175,6 +181,12 @@ public class DicomImporterService {
     private DatasetExpressionRepository datasetExpressionRepository;
 
     @Autowired
+    private StowImportCounters stowImportCounters;
+
+    @Autowired
+    private ShanoirEventService eventService;
+
+    @Autowired
     private AcquisitionEquipmentRepository acquisitionEquipmentRepository;
 
     @Autowired
@@ -251,11 +263,16 @@ public class DicomImporterService {
             DatasetExpression expression = manageDatasetExpression(attributes, dataset);
             datasetExpressionRepository.save(expression);
             solrService.indexDataset(dataset.getId());
-            sendToPacs(metaInformationAttributes, attributes);
+            long bytes = sendToPacs(metaInformationAttributes, attributes);
             countNumberOfFiles(examination, acquisition, serie.getSeriesDescription());
+            // Last, so the row locks they take are held for as short a time as possible.
+            stowImportCounters.addInstanceToAcquisition(acquisition);
+            stowImportCounters.addBytesToExpression(expression, bytes);
         } else {
-            LOG.error("DICOM file of serie {} ignored.", serie.getSeriesDescription());
-            return false;
+            // Not an error: the ZIP import drops these series too. Failing the request would make
+            // every sender report an error for each presentation state or secondary capture.
+            LOG.warn("DICOM file of serie {} ignored, its modality is not managed by Shanoir.",
+                    serie.getSeriesDescription());
         }
         return true;
     }
@@ -327,6 +344,7 @@ public class DicomImporterService {
             org.shanoir.ng.importer.dto.Dataset dataset = new org.shanoir.ng.importer.dto.Dataset();
             dataset.setFirstImageSOPInstanceUID(attributes.getString(Tag.SOPInstanceUID));
             dataset.setEchoTimes(DatasetSeparationHelper.echoTimesForDatasetSeparation(acquisition, attributes));
+            addMrTimingParameters(dataset, attributes);
             currentDataset = acquisitionContext.generateFlatDataset(
                     serie, dataset, datasetIndex, subjectId,
                     attributes);
@@ -336,6 +354,27 @@ public class DicomImporterService {
             currentDataset = datasetService.create(currentDataset);
         }
         return currentDataset;
+    }
+
+    /**
+     * The ZIP import reads repetition time, inversion time and flip angle from every
+     * image of a dataset and hands the sets to the dataset strategy; a STOW-RS import
+     * only ever set the echo time, so those three stayed empty on every MR dataset.
+     * They come from the instance that creates the dataset, which is what the echo
+     * time already does: a dataset groups the instances that share echo, acquisition
+     * number and orientation. Absent tags give 0 / "0", as in the ZIP import.
+     */
+    static void addMrTimingParameters(org.shanoir.ng.importer.dto.Dataset dataset, Attributes attributes) {
+        Set<Double> repetitionTimes = new HashSet<>();
+        repetitionTimes.add(attributes.getDouble(Tag.RepetitionTime, 0));
+        dataset.setRepetitionTimes(repetitionTimes);
+        Set<Double> inversionTimes = new HashSet<>();
+        inversionTimes.add(attributes.getDouble(Tag.InversionTime, 0));
+        dataset.setInversionTimes(inversionTimes);
+        String flipAngle = attributes.getString(Tag.FlipAngle);
+        Set<String> flipAngles = new HashSet<>();
+        flipAngles.add(flipAngle != null ? flipAngle : "0");
+        dataset.setFlipAngles(flipAngles);
     }
 
     private Dataset manageDatasetSeparation(Attributes attributes, DatasetAcquisition acquisition,
@@ -560,8 +599,36 @@ public class DicomImporterService {
             examination.setCenterId(centerId);
             examination = examinationService.save(examination);
             LOG.info("Examination created: {}", examination.toString());
-        } // Avoid, that the examination creation makes RabbitMQ calls
+            announceNewExamination(examination, study.getId(), subjectId, centerId);
+        }
         return examination;
+    }
+
+    /**
+     * MS Studies keeps its own list of the examinations of a study (study_examination)
+     * and learns of one only from a CREATE_EXAMINATION_EVENT: the ZIP import sends it,
+     * the study list's "Examinations" column counts those rows. Without it a study
+     * filled by STOW-RS shows no examination at all.
+     *
+     * One event per new examination, never per instance, so it adds nothing to the
+     * per-instance cost. It is sent after the import transaction commits: an import
+     * that rolls back must not leave MS Studies counting an examination that does
+     * not exist.
+     */
+    void announceNewExamination(Examination examination, Long studyId, Long subjectId, Long centerId) {
+        ShanoirEvent event = new ShanoirEvent(ShanoirEventType.CREATE_EXAMINATION_EVENT,
+                examination.getId().toString(), KeycloakUtil.getTokenUserId(),
+                "centerId:" + centerId + ";subjectId:" + subjectId, ShanoirEvent.SUCCESS, studyId);
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    eventService.publishEvent(event);
+                }
+            });
+        } else {
+            eventService.publishEvent(event);
+        }
     }
 
     private Long manageSubject(Attributes attributes, Study study)
@@ -632,10 +699,11 @@ public class DicomImporterService {
      *
      * @param metaInformationAttributes
      * @param datasetAttributes
+     * @return the size in bytes of the DICOM file that was sent
      * @throws IOException
      * @throws Exception
      */
-    public void sendToPacs(Attributes metaInformationAttributes, Attributes datasetAttributes)
+    public long sendToPacs(Attributes metaInformationAttributes, Attributes datasetAttributes)
             throws IOException, Exception {
         /**
          * Create a new output stream to write the changes into and use its bytes
@@ -653,6 +721,7 @@ public class DicomImporterService {
                 dicomWebService.sendDicomInputStreamToPacs(finalInputStream);
             }
         }
+        return bAOS.size();
     }
 
     /**

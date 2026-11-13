@@ -89,6 +89,12 @@ export class SubjectListComponent extends EntityListComponent<Subject> {
         };
     }
 
+    // study administrators with the expert role, as in the backend
+    canEdit(subject: Subject): boolean {
+        return this.keycloakService.isUserAdmin()
+            || (this.keycloakService.isUserExpert() && !!this.studyIdsForCurrentUser?.includes(subject.studyId));
+    }
+
     canDelete(subject: Subject): boolean {
         return this.keycloakService.isUserAdmin() || this.studyIdsForCurrentUser.includes(subject.studyId);
     }
