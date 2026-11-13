@@ -38,6 +38,8 @@ public class IdNameCenterStudyDTO extends IdName {
 
     private Integer studyCardPolicy;
 
+    private String subjectNamePattern;
+
     /**
      * Ids of the centers the connected user is restricted to on this study, mirroring
      * StudyUser.centerIds. Null or empty means the user has no center restriction.
@@ -94,6 +96,14 @@ public class IdNameCenterStudyDTO extends IdName {
 
     public void setStudyCardPolicy(Integer studyCardPolicy) {
         this.studyCardPolicy = studyCardPolicy;
+    }
+
+    public String getSubjectNamePattern() {
+        return subjectNamePattern;
+    }
+
+    public void setSubjectNamePattern(String subjectNamePattern) {
+        this.subjectNamePattern = subjectNamePattern;
     }
 
     public List<Long> getRestrictedCenterIds() {

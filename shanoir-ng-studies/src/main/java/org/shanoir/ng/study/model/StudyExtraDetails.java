@@ -83,6 +83,10 @@ public class StudyExtraDetails extends HalEntity {
     @Column(name = "scientific_advisor")
     private String scientificAdvisor;
 
+    /** Regex pattern the commonName of a new subject must respect if set. */
+    @Column(name = "subject_name_pattern")
+    private String subjectNamePattern;
+
     /**
      * @return the expectedNbOfSubjects
      */
@@ -209,5 +213,19 @@ public class StudyExtraDetails extends HalEntity {
      */
     public void setScientificAdvisor(String scientificAdvisor) {
         this.scientificAdvisor = scientificAdvisor;
+    }
+
+    /**
+     * @return the subjectNamePattern
+     */
+    public String getSubjectNamePattern() {
+        return subjectNamePattern;
+    }
+
+    /**
+     * @param subjectNamePattern the subjectNamePattern to set
+     */
+    public void setSubjectNamePattern(String subjectNamePattern) {
+        this.subjectNamePattern = subjectNamePattern;
     }
 }

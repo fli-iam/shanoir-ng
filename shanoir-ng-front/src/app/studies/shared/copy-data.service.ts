@@ -48,7 +48,9 @@ export class CopyDataService {
                 .filter(s => subjectIdSet.has(s.id))
                 .map(s => ({
                     id: s.id,
-                    newName: s.newName
+                    newName: s.newName,
+                    // used by the backend to build a name matching the target study's pattern
+                    centerId: copyData.datasets.find(d => d.subjectId == s.id)?.centerId
                 }))
         };
     }
@@ -59,6 +61,7 @@ export interface DataCopyDTO {
     subjects: {
         id: number;
         newName: string;
+        centerId?: number;
     }[];
     centerIds: number[];
     targetStudyId?: number;

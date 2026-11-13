@@ -133,6 +133,17 @@ public interface SubjectService {
     Subject create(Subject subject, boolean withAMQP) throws ShanoirException;
 
     /**
+     * Save a subject.
+     *
+     * @param subject subject to create.
+     * @param checkNamePattern false to skip the study's subject name pattern check, for names
+     *                         not chosen by a user (imports building them from their data).
+     * @return created subject.
+     */
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnTrustedSubject(#subject, 'CAN_IMPORT'))")
+    Subject create(Subject subject, boolean withAMQP, boolean checkNamePattern) throws ShanoirException;
+
+    /**
      * Save a subject and auto-increment the common name on using the centerId.
      *
      * @param subject subject to create.

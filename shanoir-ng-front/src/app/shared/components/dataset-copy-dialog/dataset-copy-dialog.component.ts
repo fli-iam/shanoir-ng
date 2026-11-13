@@ -18,6 +18,7 @@ import { FormsModule } from '@angular/forms';
 
 import { CopyData, CopyDataService } from '@app/studies/shared/copy-data.service';
 import { StudyService } from '@app/studies/shared/study.service';
+import { regexExamples } from '@app/utils/regex-example.util';
 
 import { StudyRightsService } from "../../../studies/shared/study-rights.service";
 import { StudyUserRight } from "../../../studies/shared/study-user-right.enum";
@@ -55,6 +56,10 @@ export class DatasetCopyDialogComponent {
     protected centerIds: number[] = [];
     protected subjectIds: number[] = [];
     protected consoleService = inject(ConsoleService);
+    /** Subject name pattern of the selected target study, null if it has none. */
+    protected targetPattern: string = null;
+    protected targetPatternExamples: string[] = [];
+    private patternByStudyId: Promise<Map<number, string>>;
 
     constructor(private http: HttpClient,
         private studyRightsService: StudyRightsService,
@@ -123,6 +128,10 @@ export class DatasetCopyDialogComponent {
                     this.canCopy = false;
                     if (reason.status == 403) {
                         this.statusMessage = "You must have IMPORT right.";
+                    } else if (reason.status == 422) {
+                        // e.g. no subject name matching the target study's pattern could be built
+                        this.statusMessage = this.extractErrorMessage(reason);
+                        this.canCopy = true;
                     } else {
                         this.close();
                         throw Error(reason);
@@ -172,6 +181,37 @@ export class DatasetCopyDialogComponent {
 
     pickStudy(study: IdName) {
         this.selectedStudy = study;
+        this.targetPattern = null;
+        this.targetPatternExamples = [];
+        if (!study) return;
+        if (!this.patternByStudyId) {
+            this.patternByStudyId = this.studyService.getStudyNamesAndCenters().then(studies =>
+                new Map((studies ?? []).map(s => [s.id, s.subjectNamePattern] as [number, string])));
+        }
+        this.patternByStudyId.then(patterns => {
+            if (this.selectedStudy?.id != study.id) return; // another study was picked meanwhile
+            this.targetPattern = patterns.get(study.id) || null;
+            this.targetPatternExamples = this.targetPattern ? regexExamples(this.targetPattern) : [];
+        }).catch(() => { /* no pattern check in the dialog, the backend still enforces it */ });
+    }
+
+    /** A name typed for the copied subject must match the target study's pattern; empty = generated. */
+    get subjectNameInvalid(): boolean {
+        if (this.subjectIds.length !== 1 || !this.targetPattern || !this.subjectName?.trim()) return false;
+        try {
+            return !new RegExp(this.targetPattern).test(this.subjectName);
+        } catch {
+            return false;
+        }
+    }
+
+    private extractErrorMessage(reason: any): string {
+        // the copy request uses responseType 'text', so the error body is a JSON string
+        try {
+            const error = typeof reason.error == 'string' ? JSON.parse(reason.error) : reason.error;
+            if (error?.message) return error.message;
+        } catch { /* not JSON */ }
+        return 'The copy could not be done.';
     }
 
     close() {
