@@ -1,0 +1,36 @@
+# Config of one Shanoir instance for nb-node.sh. Copy it next to the script, named after the instance,
+# and protect it (it holds a secret):
+#   cp nb.conf.example nb-ofsep.conf && chmod 600 nb-ofsep.conf
+# then use the same name in every command: bash nb-node.sh sync ofsep
+
+# required
+# base URL of the Shanoir instance, e.g. https://shanoir.example.org
+SHANOIR_URL=
+# secret of the instance's Keycloak client (NB_CLIENT_ID)
+NB_CLIENT_SECRET=
+# API port of this instance's node, bound to 127.0.0.1: unique per instance (8000, 8001, ...)
+API_PORT=
+
+# recommended: daily sync time (minute hour), a different slot per instance (e.g. "20 4", "50 4", "20 5")
+#CRON_AT="20 4"
+
+# optional
+#NB_CLIENT_ID=neurobagel-export
+# instance folder (recipes/, data/, state/), default $HOME/neurobagel-<instance>: never share it between instances
+#NB_HOME=$HOME/neurobagel-<instance>
+# used only when no 'bagel' command is in PATH; pin it together with NB_NAPI_TAG in production
+#BAGEL_IMAGE=neurobagel/bagelcli:latest
+
+# node settings: written into recipes/.env, a change reloads the node at the next sync
+# true: dataset-level counts only; false: subject-level results too (never on a public node)
+#NB_RETURN_AGG=true
+# datasets with this many matching subjects or fewer are hidden from query results (0 = show all)
+#NB_MIN_CELL_SIZE=5
+# neurobagel/api image tag: pin a version in production
+#NB_NAPI_TAG=latest
+# public domain of this node (no https://, no path): set it to publish the node through nb-proxy.sh, empty = local only
+#NB_NAPI_DOMAIN=neurobagel.irisa.fr
+# public sub-path of this node on that domain, e.g. /ofsep (leading /, no trailing /): unique when nodes share a domain
+#NB_NAPI_BASE_PATH=
+# maximum memory of this instance's GraphDB
+#NB_GRAPH_MEMORY=2G
