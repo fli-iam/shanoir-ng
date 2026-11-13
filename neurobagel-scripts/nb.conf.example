@@ -25,10 +25,12 @@ API_PORT=
 # true: dataset-level counts only; false: subject-level results too (never on a public node)
 #NB_RETURN_AGG=true
 # datasets with this many matching subjects or fewer are hidden from query results (0 = show all)
-#NB_MIN_CELL_SIZE=0
+#NB_MIN_CELL_SIZE=5
 # neurobagel/api image tag: pin a version in production
 #NB_NAPI_TAG=latest
-# public sub-path of this node behind the reverse proxy, e.g. /ofsep (leading /, no trailing /), empty if none
+# public domain of this node (no https://, no path): set it to publish the node through nb-proxy.sh, empty = local only
+#NB_NAPI_DOMAIN=neurobagel.irisa.fr
+# public sub-path of this node on that domain, e.g. /ofsep (leading /, no trailing /): unique when nodes share a domain
 #NB_NAPI_BASE_PATH=
 # maximum memory of this instance's GraphDB
 #NB_GRAPH_MEMORY=2G

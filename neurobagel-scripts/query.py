@@ -35,8 +35,8 @@ LABELS = {term: label for term, label in MODALITIES.values()}
 
 
 def instances():
-    """Every instance configured next to this script, by name."""
-    return sorted(p.name[3:-5] for p in HERE.glob("nb-*.conf"))
+    """Every instance configured next to this script, by name (nb-proxy.conf is the proxy's, not an instance)."""
+    return sorted(name for name in (p.name[3:-5] for p in HERE.glob("nb-*.conf")) if name != "proxy")
 
 
 def read_conf(name):

@@ -18,8 +18,13 @@
 #     data/    = JSONLDs the node loads
 #     state/   = log, last downloaded inputs, lock (private, 700)
 # Each config sets its own API_PORT (unique, bound to 127.0.0.1 only) and should set its own CRON_AT.
-# Node settings (NB_RETURN_AGG, NB_MIN_CELL_SIZE, NB_NAPI_TAG, NB_NAPI_BASE_PATH, NB_GRAPH_MEMORY) also come from the config:
-# the script writes recipes/.env from it, and a changed setting reloads the node at the next sync.
+# Node settings (NB_RETURN_AGG, NB_MIN_CELL_SIZE, NB_NAPI_TAG, NB_NAPI_DOMAIN, NB_NAPI_BASE_PATH, NB_GRAPH_MEMORY) also
+# come from the config: the script writes recipes/.env from it, and a changed setting reloads the node at the next sync.
+#
+# Public node: set NB_NAPI_DOMAIN (and NB_NAPI_BASE_PATH when several nodes share the domain). The node then runs on the
+# recipes' docker-compose.prod.yml, behind the shared proxy of nb-proxy.sh (nginx-proxy + Let's Encrypt), which must be
+# running first. Without NB_NAPI_DOMAIN the node is local only (docker-compose.noproxy.prod.yml). Either way the API
+# also stays on 127.0.0.1:API_PORT for this script and query.py.
 # Cron cannot type a sudo password: the user must be in the docker group, or 'sudo -n docker' must work (NOPASSWD).
 #
 # A sync never breaks a running node on a download error: everything is fetched and built in state/staging
@@ -36,6 +41,7 @@ usage() { awk 'NR > 1 && !/^#/ { exit } NR > 1' "$SELF"; exit 1; }
 INSTANCE="${2:-}"
 [ -n "$INSTANCE" ] || usage
 [[ $INSTANCE =~ ^[a-z0-9][a-z0-9_-]*$ ]] || { echo "instance name: lowercase letters, digits, - and _ only" >&2; exit 1; }
+[ "$INSTANCE" != proxy ] || { echo "'proxy' is reserved for the shared proxy (nb-proxy.sh)" >&2; exit 1; }
 PROJECT="shanoir_nb_$INSTANCE"
 CONF="$HERE/nb-$INSTANCE.conf"
 # shellcheck source=/dev/null
@@ -55,8 +61,11 @@ BAGEL_IMAGE="${BAGEL_IMAGE:-neurobagel/bagelcli:latest}"
 NB_RETURN_AGG="${NB_RETURN_AGG:-true}"
 NB_MIN_CELL_SIZE="${NB_MIN_CELL_SIZE:-0}"
 NB_NAPI_TAG="${NB_NAPI_TAG:-latest}"
+NB_NAPI_DOMAIN="${NB_NAPI_DOMAIN:-}"
 NB_NAPI_BASE_PATH="${NB_NAPI_BASE_PATH:-}"
 NB_GRAPH_MEMORY="${NB_GRAPH_MEMORY:-2G}"
+PROXY_NET="NB_proxynet"   # network created by the shared proxy (recipes' docker-compose.proxy.yml)
+LOCAL_COMPOSE="$NB_HOME/compose.local.yml"
 CMD_ARGS=" $INSTANCE"   # appended to the commands the script prints or puts in cron
 
 log() { echo "$(date '+%F %T') [nb:$INSTANCE] $*"; }
@@ -66,6 +75,8 @@ check_conf() {
     [[ $NB_RETURN_AGG =~ ^(true|false)$ ]] || die "NB_RETURN_AGG in $CONF: true (counts only) or false (subject-level results too)"
     [[ $NB_MIN_CELL_SIZE =~ ^[0-9]+$ ]] || die "NB_MIN_CELL_SIZE in $CONF: a number of subjects, e.g. 5"
     [[ $NB_NAPI_TAG =~ ^[A-Za-z0-9._-]+$ ]] || die "NB_NAPI_TAG in $CONF: an image tag of neurobagel/api, e.g. v0.4.0"
+    [[ -z $NB_NAPI_DOMAIN || $NB_NAPI_DOMAIN =~ ^([A-Za-z0-9-]+\.)+[A-Za-z]{2,}$ ]] \
+        || die "NB_NAPI_DOMAIN in $CONF: empty (local only), or a domain like neurobagel.example.org (no https://, no path)"
     [[ -z $NB_NAPI_BASE_PATH || $NB_NAPI_BASE_PATH =~ ^(/[A-Za-z0-9._-]+)+$ ]] \
         || die "NB_NAPI_BASE_PATH in $CONF: empty, or a path like /ofsep (leading /, no trailing /)"
     [[ $NB_GRAPH_MEMORY =~ ^[0-9]+[KkMmGg]?$ ]] || die "NB_GRAPH_MEMORY in $CONF: a size like 2G or 1500M"
@@ -77,8 +88,34 @@ elif [ -t 0 ]; then DOCKER=(sudo docker)
 else DOCKER=(sudo -n docker)
 fi
 
+public() { [ -n "$NB_NAPI_DOMAIN" ]; }
+
+public_url() { echo "https://$NB_NAPI_DOMAIN$NB_NAPI_BASE_PATH"; }
+
+local_compose() {  # docker-compose.prod.yml removes the API host port: give it back, on 127.0.0.1 only
+    cat <<EOF
+# written by nb-node.sh: keeps the node API on 127.0.0.1:$API_PORT for nb-node.sh and query.py
+services:
+  api:
+    ports:
+      - "127.0.0.1:$API_PORT:8000"
+EOF
+}
+
 compose() {
-    (cd "$RECIPES" && "${DOCKER[@]}" compose -p "$PROJECT" -f docker-compose.noproxy.prod.yml "$@")
+    local files=(-f docker-compose.noproxy.prod.yml)
+    if public; then
+        mkdir -p "$NB_HOME"
+        local_compose > "$LOCAL_COMPOSE"
+        files=(-f docker-compose.prod.yml -f "$LOCAL_COMPOSE")
+    fi
+    (cd "$RECIPES" && "${DOCKER[@]}" compose -p "$PROJECT" "${files[@]}" "$@")
+}
+
+proxy_ready() {
+    public || return 0
+    "${DOCKER[@]}" network inspect "$PROXY_NET" >/dev/null 2>&1 \
+        || die "public node ($NB_NAPI_DOMAIN) but the proxy is not running: bash $HERE/nb-proxy.sh up"
 }
 
 api_ok() {
@@ -90,7 +127,11 @@ wait_api() {
     # the API answers before GraphDB has finished loading: wait for a real query to succeed
     log "waiting for the node to answer queries (GraphDB setup and data load first)..."
     for _ in $(seq 1 150); do
-        api_ok && { log "node ready: http://127.0.0.1:$API_PORT/docs"; return; }
+        if api_ok; then
+            log "node ready: http://127.0.0.1:$API_PORT/docs"
+            public && log "public URL: $(public_url)/docs (certificate: up to a few minutes on the first start)"
+            return
+        fi
         sleep 2
     done
     die "API did not answer, see: bash $0 logs$CMD_ARGS"
@@ -109,12 +150,14 @@ NB_RETURN_AGG=$NB_RETURN_AGG
 NB_MIN_CELL_SIZE=$NB_MIN_CELL_SIZE
 NB_NAPI_TAG=$NB_NAPI_TAG
 NB_NAPI_PORT_HOST=127.0.0.1:$API_PORT
+NB_NAPI_DOMAIN=$NB_NAPI_DOMAIN
 NB_NAPI_BASE_PATH=$NB_NAPI_BASE_PATH
 # unused by the node profile, set empty only to silence the compose warnings
 NB_FAPI_DOMAIN=
 NB_FAPI_BASE_PATH=
 NB_QUERY_CLIENT_ID=
 NB_QUERY_HEADER_SCRIPT=
+NB_QUERY_DOMAIN=
 EOF
 }
 
@@ -154,6 +197,10 @@ cmd_install() {
     if ss -tln 2>/dev/null | grep -qE "127\.0\.0\.1:$API_PORT\b|\*:$API_PORT\b|0\.0\.0\.0:$API_PORT\b" \
         && [ -z "$(compose ps -q api 2>/dev/null)" ]; then
         die "port $API_PORT is already used (another instance?): set a different API_PORT in $CONF"
+    fi
+
+    if public && [ ! -f "$RECIPES/docker-compose.prod.yml" ]; then
+        die "public node, but $RECIPES has no docker-compose.prod.yml (recipes release too old?)"
     fi
 
     log "writing $RECIPES/.env"
@@ -334,7 +381,8 @@ cmd_sync() {
     local n; n=$(find "$STAGE/data" -name '*.jsonld' | wc -l)
     [ "$n" -gt 0 ] || die "no JSONLD could be built: node left as it was"
 
-    log "reloading the node with $n JSONLD file(s)"
+    proxy_ready
+    log "reloading the node with $n JSONLD file(s)$(public && echo ", public at $(public_url)")"
     compose down -v --remove-orphans
     rm_any "$NB_DATA.old"
     [ -d "$NB_DATA" ] && mv "$NB_DATA" "$NB_DATA.old"
@@ -379,6 +427,12 @@ cmd_cron_remove() {
 }
 
 cmd_status() {
+    if public; then
+        log "public node: $(public_url) (through the proxy, network $PROXY_NET)"
+        "${DOCKER[@]}" network inspect "$PROXY_NET" >/dev/null 2>&1 || log "WARNING: the proxy is not running: bash $HERE/nb-proxy.sh up"
+    else
+        log "local node only (no NB_NAPI_DOMAIN)"
+    fi
     compose ps -a
     log "listening sockets (API must be 127.0.0.1 only, nothing on 7200):"
     ss -tln 2>/dev/null | grep -E ":(${API_PORT:-none}|7200)\b" || true
@@ -420,9 +474,9 @@ cmd_uninstall() {
     # api, graph and bagel images are shared by every instance: remove them only with the last one
     local others rmi=all
     others=$("${DOCKER[@]}" ps -a --format '{{.Label "com.docker.compose.project"}}' \
-        | grep '^shanoir_nb_' | grep -vx "$PROJECT" | sort -u | tr '\n' ' ' || true)
+        | grep '^shanoir_nb_' | grep -vx -e "$PROJECT" -e shanoir_nb_proxy | sort -u | tr '\n' ' ' || true)
     [ -z "$others" ] || { rmi=local; log "other nodes on this machine ($others): keeping the shared images"; }
-    if [ -f "$RECIPES/docker-compose.noproxy.prod.yml" ]; then
+    if [ -f "$RECIPES/docker-compose.noproxy.prod.yml" ] && { ! public || [ -f "$RECIPES/docker-compose.prod.yml" ]; }; then
         log "stopping the node and removing its images..."
         compose down -v --remove-orphans --rmi "$rmi" || log "WARNING: compose down failed, cleaning by label"
     fi

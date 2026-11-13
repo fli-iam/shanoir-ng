@@ -1,7 +1,8 @@
 # Neurobagel nodes for Shanoir
 
 These scripts run one [Neurobagel](https://neurobagel.org) node per Shanoir instance on the Neurobagel VM:
-today **Neurinfo** and **OFSEP**, and more can be added later.
+today **Neurinfo** and **OFSEP**, and more can be added later. A shared HTTPS proxy can publish them so the
+public Neurobagel query tool can search them (see [Making the nodes public](#making-the-nodes-public)).
 
 For each instance, `nb-node.sh` does the following every day from cron:
 
@@ -13,6 +14,8 @@ For each instance, `nb-node.sh` does the following every day from cron:
 |---|---|
 | `nb-node.sh` | Installs, syncs, manages and removes the nodes |
 | `nb.conf.example` | Template of an instance config |
+| `nb-proxy.sh` | Runs the shared HTTPS proxy of the public nodes (nginx-proxy + Let's Encrypt) |
+| `nb-proxy.conf.example` | Template of the optional proxy config |
 | `query.py` | Queries the nodes by instance name, for checks |
 
 On the VM, the scripts and the instance configs live together in your home directory, and each instance
@@ -21,10 +24,16 @@ gets its own folder next to them:
 ```
 ~/
 ├── nb-node.sh
+├── nb-proxy.sh
 ├── query.py
 ├── nb.conf.example
+├── nb-proxy.conf.example
 ├── nb-neurinfo.conf
 ├── nb-ofsep.conf
+├── nb-proxy.conf     optional
+├── neurobagel-proxy/
+│   ├── recipes/              neurobagel/recipes clone (docker-compose.proxy.yml)
+│   └── compose.local.yml     image versions, Let's Encrypt email
 ├── neurobagel-neurinfo/
 │   ├── recipes/   neurobagel/recipes clone, .env, GraphDB passwords
 │   ├── data/      JSONLD files loaded by the node
@@ -125,7 +134,8 @@ the node at the next `sync`, even if the data did not change.
 | `NB_RETURN_AGG` | `true` | `true`: the node returns only dataset-level counts. `false`: it also returns subject-level results (age, sex, diagnosis, sessions… of each matching subject). **Keep `true` on any node reachable from outside.** Every sync logs a warning when it is `false`. |
 | `NB_MIN_CELL_SIZE` | `0` | Datasets with this many matching subjects **or fewer** are left out of query results. Hides small groups that could point to individuals. `0` shows every dataset. |
 | `NB_NAPI_TAG` | `latest` | Image tag of `neurobagel/api`. Pin a version in production, compatible with the JSONLDs the bagel CLI (`BAGEL_IMAGE`) produces. |
-| `NB_NAPI_BASE_PATH` | empty | Public sub-path of the node when the reverse proxy serves it under one, e.g. `/ofsep` for `https://<domain>/ofsep`. Leading `/`, no trailing `/`. Empty when the node has its own domain. |
+| `NB_NAPI_DOMAIN` | empty | Public domain of the node, e.g. `neurobagel.example.org` (no `https://`, no path). Set: the node is published through the shared proxy (see [Making the nodes public](#making-the-nodes-public)). Empty: local only. |
+| `NB_NAPI_BASE_PATH` | empty | Public sub-path of the node on that domain, e.g. `/ofsep` for `https://<domain>/ofsep`. Leading `/`, no trailing `/`. **Unique per instance** when instances share a domain; empty when the node has its own domain. |
 | `NB_GRAPH_MEMORY` | `2G` | Maximum memory of the instance's GraphDB (e.g. `2G`, `1500M`). |
 
 Example `nb-ofsep.conf`:
@@ -139,6 +149,7 @@ CRON_AT="50 4"
 NB_RETURN_AGG=true
 NB_MIN_CELL_SIZE=10
 NB_NAPI_TAG=<pinned version>
+NB_NAPI_DOMAIN=neurobagel.example.org
 NB_NAPI_BASE_PATH=/ofsep
 NB_GRAPH_MEMORY=2G
 ```
@@ -153,6 +164,7 @@ Spreading them over separate slots keeps the VM responsive; 30 minutes apart is 
    ```bash
    cp nb.conf.example nb-<name>.conf && chmod 600 nb-<name>.conf
    # SHANOIR_URL, NB_CLIENT_SECRET, API_PORT=8002, CRON_AT="20 5"
+   # public: NB_NAPI_DOMAIN (same as the others) and its own NB_NAPI_BASE_PATH, e.g. /<name>
    ```
 3. Start it and schedule it:
    ```bash
@@ -161,7 +173,8 @@ Spreading them over separate slots keeps the VM responsive; 30 minutes apart is 
    bash nb-node.sh cron-install <name>
    ```
 4. Add a column for it to the table in [How the instances are separated](#how-the-instances-are-separated).
-   If you run a federation, add the new node's API to it (see [Searching all nodes at once](#searching-all-nodes-at-once)).
+5. If it is public, check it with `bash nb-proxy.sh status` and register it with Neurobagel (see
+   [Registering the nodes with Neurobagel](#registering-the-nodes-with-neurobagel)).
 
 Check that the VM has enough RAM first: each instance adds a GraphDB of about 2 GB.
 
@@ -300,8 +313,11 @@ For each instance:
 | `~/neurobagel-<name>/state/last/` | Inputs of the last reload, for debugging |
 | `~/neurobagel-<name>/state/inputs.sha256` | Hash of the last loaded inputs |
 
-`state/` is private (`700`). Each API listens on `127.0.0.1:<API_PORT>` only, and GraphDB (port 7200)
-is never exposed. The API docs are at `http://127.0.0.1:<API_PORT>/docs`.
+| `~/neurobagel-<name>/compose.local.yml` | Public nodes only: keeps the API on `127.0.0.1:<API_PORT>` (generated) |
+
+`state/` is private (`700`). Each API listens on `127.0.0.1:<API_PORT>`, and GraphDB (port 7200) is never
+exposed. A public node is also reachable through the proxy, and only through it. The API docs are at
+`http://127.0.0.1:<API_PORT>/docs` (and `https://<domain><base path>/docs` for a public node).
 
 ## Querying a node
 
@@ -339,12 +355,112 @@ Query: subjects with T1-weighted imaging, aged 35 or more
 It exits with code 1 if a node could not be queried, so it can be used in checks. It queries each node
 separately; it does not replace a federation.
 
+## Making the nodes public
+
+The public Neurobagel query tool ([query.neurobagel.org](https://query.neurobagel.org)) searches the nodes
+registered in the Neurobagel public federation. To be searchable, a node must answer over HTTPS from the
+internet. This follows the [Neurobagel production deployment](https://neurobagel.org/user_guide/production_deployment/#proxy-server)
+with one proxy for all instances:
+
+```
+                     internet :80 / :443
+                            │
+   ┌────────────────────────▼─────────────────────────┐
+   │  nb-proxy.sh (recipes' docker-compose.proxy.yml)  │
+   │   nginx-proxy     routes by domain + path         │
+   │   acme-companion  Let's Encrypt certificates      │
+   └───────────┬──────────────────────────┬────────────┘
+               │   docker network NB_proxynet           │
+   ┌───────────▼───────────┐  ┌───────────▼───────────┐
+   │ node neurinfo  (api)  │  │ node ofsep  (api)     │
+   │ <domain>/neurinfo     │  │ <domain>/ofsep        │
+   │ graph: private        │  │ graph: private        │
+   └───────────────────────┘  └───────────────────────┘
+```
+
+- The proxy runs once for the whole VM, from its own recipes clone in `~/neurobagel-proxy/`. It creates the
+  `NB_proxynet` network and is the only thing listening on ports 80 and 443.
+- A node with `NB_NAPI_DOMAIN` in its config runs on the recipes' `docker-compose.prod.yml`: its API joins
+  `NB_proxynet` with its domain and base path, and nginx-proxy routes `https://<domain><base path>` to it.
+  acme-companion gets and renews the certificate of each domain, one for all nodes that share it.
+- The API also stays on `127.0.0.1:<API_PORT>` (through the generated `compose.local.yml`), for the
+  script's checks and `query.py`. GraphDB is never reachable from outside.
+
+### Prerequisites
+
+- A DNS entry of the domain (e.g. `neurobagel.example.org`) pointing to the VM's public IP.
+- Ports **80 and 443** open from the internet. Let's Encrypt validates on port 80, so no port 80 = no certificate.
+- Nothing else on the VM listening on 80 or 443 (e.g. a system nginx or apache).
+- The data owners' approval, and the [node settings](#node-settings) chosen for public use: `NB_RETURN_AGG=true`,
+  a `NB_MIN_CELL_SIZE` agreed with them, and pinned `NB_NAPI_TAG` / `BAGEL_IMAGE`.
+
+### Steps
+
+```bash
+# 1. the proxy, once
+cp nb-proxy.conf.example nb-proxy.conf          # optional: LETSENCRYPT_EMAIL, pinned image versions
+bash nb-proxy.sh up
+
+# 2. each node: in nb-<name>.conf
+#      NB_NAPI_DOMAIN=neurobagel.example.org
+#      NB_NAPI_BASE_PATH=/neurinfo              (/ofsep for the other one)
+FORCE=1 bash nb-node.sh sync neurinfo           # restarts the node behind the proxy
+FORCE=1 bash nb-node.sh sync ofsep
+
+# 3. check
+bash nb-proxy.sh status                         # routed nodes and their HTTP answer
+curl -s -X POST https://neurobagel.example.org/ofsep/datasets -H 'Content-Type: application/json' -d '{}'
+```
+
+The first certificate can take a few minutes after the first start. From a machine outside the VM's
+network, also check that `https://<domain>/<name>/docs` opens and that ports 8000, 8001 and 7200 are
+closed.
+
+Without `FORCE=1` the change is applied at the next daily sync anyway, since the domain is a node setting.
+A public node refuses to reload while the proxy is not running ("start the proxy first"), and leaves the
+running node as it was.
+
+### Registering the nodes with Neurobagel
+
+Ask the Neurobagel team to add each node to the public federation (see their documentation for the
+current process). They typically need, per node: a name (e.g. "Shanoir – OFSEP"), its public API URL
+(e.g. `https://neurobagel.example.org/ofsep`) and a contact. Then check on
+[query.neurobagel.org](https://query.neurobagel.org) that both nodes are listed and answer.
+
+### Proxy commands
+
+| Command | Description |
+|---|---|
+| `bash nb-proxy.sh up` | Clones the recipes into `~/neurobagel-proxy` if needed, then starts (or updates) nginx-proxy and acme-companion. Safe to run again, e.g. after changing `nb-proxy.conf`. |
+| `bash nb-proxy.sh status` | Containers, routed nodes, and the HTTP code each public URL answers (`200` = OK). |
+| `bash nb-proxy.sh logs` | Last proxy logs, e.g. certificate errors. |
+| `bash nb-proxy.sh down` | Stops the proxy. Every public node becomes unreachable, but keeps running; `up` brings them back. |
+| `bash nb-proxy.sh uninstall` | Removes the proxy, its certificates and `~/neurobagel-proxy`. Refused while a node still uses it: remove `NB_NAPI_DOMAIN` from those configs and sync them first. |
+
+Proxy config (`nb-proxy.conf`, optional):
+
+| Variable | Default | Description |
+|---|---|---|
+| `LETSENCRYPT_EMAIL` | empty | Email of the Let's Encrypt account, warned if renewals fail. Recommended. |
+| `NGINX_PROXY_TAG` | `latest` | Image tag of `nginxproxy/nginx-proxy`. Pin it in production. |
+| `ACME_COMPANION_TAG` | `latest` | Image tag of `nginxproxy/acme-companion`. Pin it in production. |
+| `PROXY_HOME` | `$HOME/neurobagel-proxy` | Proxy folder. |
+
+Certificates are kept in the proxy's Docker volumes: `down` and `up` keep them, `uninstall` deletes them.
+Let's Encrypt limits how many certificates a domain gets per week, so avoid reinstalling the proxy in a loop.
+
+To take a node offline again, remove `NB_NAPI_DOMAIN` from its config and sync it, and ask Neurobagel to
+remove it from the federation.
+
 ## Searching all nodes at once
 
-Each node answers only for its own instance. To search Neurinfo, OFSEP and any future instance in a single
-query, run a Neurobagel **federation API** that lists every node's API (`http://127.0.0.1:8000`,
-`http://127.0.0.1:8001`, …), and point the query tool at it. Each node can also be registered separately in
-the public Neurobagel federation. These scripts do not set up the federation.
+Each node answers only for its own instance. A **federation API** sends one query to many nodes and merges
+the answers; the query tool talks to a federation, never to the nodes directly.
+
+The nodes are made searchable together through the **public** Neurobagel federation and query tool, run by
+the Neurobagel team: once the nodes are public and registered (see [Making the nodes public](#making-the-nodes-public)),
+[query.neurobagel.org](https://query.neurobagel.org) searches them alongside the other public nodes. These
+scripts do not run a federation or query tool of their own (the recipes' `portal` profile would).
 
 ## Removing an instance
 
@@ -375,6 +491,14 @@ Replace `<name>` with the instance name.
   `nb-<name>.conf`, or the client has no service account.
 - **`port ... is already used`:** another instance (or another service) uses that `API_PORT`. Give the
   instance a free port.
+- **`the proxy is not running`:** a public node (`NB_NAPI_DOMAIN` set) cannot reload without the proxy.
+  Run `bash nb-proxy.sh up`, then sync again.
+- **Public URL gives 502/503, or `nb-proxy.sh status` shows no node:** the node is not attached to the proxy.
+  Check `bash nb-node.sh status <name>` (it says whether the node is public), then `FORCE=1 bash nb-node.sh sync <name>`.
+- **No certificate / browser warning:** the DNS entry does not point to the VM yet, or port 80 is not open
+  from the internet. See `bash nb-proxy.sh logs`.
+- **`port 80 or 443 is already used`:** another web server runs on the VM. Stop it, or put the nodes behind
+  that server instead of `nb-proxy.sh`.
 - **`... belongs to another node`:** two configs point `NB_HOME` to the same folder. Remove `NB_HOME` from
   the configs to use the per-instance default.
 - **`another sync is running`:** a sync of that instance is still running

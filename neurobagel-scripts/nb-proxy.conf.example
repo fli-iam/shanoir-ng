@@ -1,0 +1,12 @@
+# Config of nb-proxy.sh, the shared HTTPS proxy of the public nodes. Optional: copy it next to the script as nb-proxy.conf
+#   cp nb-proxy.conf.example nb-proxy.conf
+
+# email of the Let's Encrypt account: expiry warnings if renewals fail (recommended)
+#LETSENCRYPT_EMAIL=admin@example.org
+
+# image versions of nginx-proxy and acme-companion: pin them in production
+#NGINX_PROXY_TAG=latest
+#ACME_COMPANION_TAG=latest
+
+# proxy folder (recipes clone + compose.local.yml)
+#PROXY_HOME=$HOME/neurobagel-proxy
