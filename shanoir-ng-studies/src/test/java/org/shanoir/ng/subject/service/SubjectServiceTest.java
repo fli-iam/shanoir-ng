@@ -16,6 +16,7 @@ package org.shanoir.ng.subject.service;
 
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.BDDMockito.given;
 
@@ -30,8 +31,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.event.ShanoirEventService;
-import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.subject.model.HemisphericDominance;
@@ -96,9 +97,28 @@ public class SubjectServiceTest {
 
     @Test
     @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
-    public void deleteByIdTest() throws EntityNotFoundException {
+    public void deleteByIdTest() throws ShanoirException {
+        given(rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECT_HAS_COPIED_DATA_QUEUE, TEMP_ID)).willReturn(false);
         subjectService.deleteById(TEMP_ID);
         Mockito.verify(subjectRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    public void deleteByIdWithCopiedDataTest() {
+        given(rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECT_HAS_COPIED_DATA_QUEUE, TEMP_ID)).willReturn(true);
+        ShanoirException e = assertThrows(ShanoirException.class, () -> subjectService.deleteById(TEMP_ID));
+        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY.value(), e.getErrorCode());
+        Mockito.verify(subjectRepository, Mockito.never()).deleteById(Mockito.anyLong());
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    public void deleteByIdWithoutDatasetsAnswerTest() {
+        given(rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECT_HAS_COPIED_DATA_QUEUE, TEMP_ID)).willReturn(null);
+        ShanoirException e = assertThrows(ShanoirException.class, () -> subjectService.deleteById(TEMP_ID));
+        assertEquals(HttpStatus.SERVICE_UNAVAILABLE.value(), e.getErrorCode());
+        Mockito.verify(subjectRepository, Mockito.never()).deleteById(Mockito.anyLong());
     }
 
     @Test

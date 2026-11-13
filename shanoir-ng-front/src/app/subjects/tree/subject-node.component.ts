@@ -76,7 +76,7 @@ export class SubjectNodeComponent extends TreeNodeAbstractComponent<SubjectNode>
                     [],
                     UNLOADED,
                     null,
-                    this.rights.includes(StudyUserRight.CAN_ADMINISTRATE),
+                    this.treeService.hasDeleteRight(this.rights),
                     this.rights.includes(StudyUserRight.CAN_DOWNLOAD),
                 );
             } else {
@@ -87,7 +87,7 @@ export class SubjectNodeComponent extends TreeNodeAbstractComponent<SubjectNode>
                     [],
                     UNLOADED,
                     null,
-                    this.rights.includes(StudyUserRight.CAN_ADMINISTRATE),
+                    this.treeService.hasDeleteRight(this.rights),
                     this.rights.includes(StudyUserRight.CAN_DOWNLOAD)
                 );
             }

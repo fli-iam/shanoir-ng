@@ -63,6 +63,8 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
     dicomPatientName: string;
     downloadState: TaskState = new TaskState();
     hasDownloadRight: boolean = false;
+    hasAdministrateRight: boolean = false;
+    hasImportRight: boolean = false;
     importMode: string = "";
     isImporting: boolean = false;
     tags: Tag[] = [];
@@ -145,15 +147,17 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
         this.loadAllStudies();
         if (this.keycloakService.isUserAdmin()) {
             this.hasDownloadRight = true;
-            return;
+            this.hasAdministrateRight = true;
+            this.hasImportRight = true;
+            return Promise.resolve();
         } else {
-            this.treeService.studyPromise.then(study => {
-                return this.studyRightsService.getMyRightsForStudy(study.id).then(rights => {
-                    this.hasDownloadRight = rights.includes(StudyUserRight.CAN_DOWNLOAD);
-                });
+            // awaited: the footer edit and delete buttons depend on these rights
+            return this.studyRightsService.getMyRightsForStudy(this.subject.study.id).then(rights => {
+                this.hasDownloadRight = rights.includes(StudyUserRight.CAN_DOWNLOAD);
+                this.hasAdministrateRight = rights.includes(StudyUserRight.CAN_ADMINISTRATE);
+                this.hasImportRight = rights.includes(StudyUserRight.CAN_IMPORT);
             });
         }
-        return Promise.resolve();
     }
 
     initEdit(): Promise<void> {
@@ -332,8 +336,13 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
         this.subject.birthDate = newDate;
     }
 
+    // as in the backend: importers and study administrators with the expert role
     public async hasEditRight(): Promise<boolean> {
-        return this.keycloakService.isUserAdminOrExpert();
+        return this.keycloakService.isUserAdmin() || this.hasImportRight || (this.keycloakService.isUserExpert() && this.hasAdministrateRight);
+    }
+
+    public async hasDeleteRight(): Promise<boolean> {
+        return this.keycloakService.isUserAdmin() || (this.keycloakService.isUserExpert() && this.hasAdministrateRight);
     }
 
     public toggleAnonymised(isAlreadyAnonymized: boolean) {
@@ -351,7 +360,11 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
     getOnDeleteConfirmMessage(subject: Subject): string {
         let msg : string = 'Are you sure you want to finally delete the subject '
             + (subject.name + ' with id n° ' + subject.id) + ' ?';
-        msg += "\n\nThis subject belongs to the study " + this.studies.find(st => st.id === subject.study.id).name;
+        // the subject's own study, not this.studies: that list only holds the studies the user can import into
+        const studyName: string = subject.study?.name ?? this.studies?.find(st => st.id === subject.study?.id)?.name;
+        if (studyName) {
+            msg += "\n\nThis subject belongs to the study " + studyName;
+        }
         msg += '\n\nWarning: this action deletes ALL datasets from this subject.';
         return msg;
     }

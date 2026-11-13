@@ -267,16 +267,20 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         </ul>
                                     }
                                     @default {
-                                        <input #input hidden multiple type="file" (change)="attachNewFile($event)" />
-                                        <button (click)="setFile()" class="left-icon">
-                                            <i class="fas fa-upload"></i>
-                                            Choose file
-                                        </button>
+                                        @if (mode == 'create' || canEditFiles) {
+                                            <input #input hidden multiple type="file" (change)="attachNewFile($event)" />
+                                            <button (click)="setFile()" class="left-icon">
+                                                <i class="fas fa-upload"></i>
+                                                Choose file
+                                            </button>
+                                        }
                                         <ul>
                                             @for (file of examination.extraDataFilePathList; track file) {
                                                 <li>
                                                     {{ getFileName(file) }}
-                                                    <button (click)="deleteFile(file)"><i class="fa-regular fa-trash-can"></i></button>
+                                                    @if (mode == 'create' || canEditFiles) {
+                                                        <button (click)="deleteFile(file)"><i class="fa-regular fa-trash-can"></i></button>
+                                                    }
                                                 </li>
                                             }
                                         </ul>

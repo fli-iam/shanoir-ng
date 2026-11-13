@@ -350,6 +350,21 @@ public class RabbitMQDatasetsService {
     }
 
     /**
+     * Receives a subject id and says if some of its examinations were copied into another study.
+     * Called synchronously by the studies microservice before deleting a subject: such a subject
+     * cannot be deleted, as the deletion of its copied examinations would be refused.
+     *
+     * @param subjectId the subject id
+     * @return true if at least one examination of the subject has been copied
+     */
+    @RabbitListener(queues = RabbitMQConfiguration.SUBJECT_HAS_COPIED_DATA_QUEUE, containerFactory = "multipleConsumersFactory")
+    @RabbitHandler
+    @Transactional
+    public boolean subjectHasCopiedData(Long subjectId) {
+        return examinationRepository.existsCopyOfSubjectExaminations(subjectId);
+    }
+
+    /**
      * Receives the deletion event of a subject and deletes its data, completing the task
      * carried by the event: its progress follows the examinations, and the errors met are
      * gathered in its report.
