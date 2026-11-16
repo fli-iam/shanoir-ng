@@ -207,6 +207,9 @@ public abstract class Dataset extends AbstractEntity {
     private List<Study> relatedStudies;
 
     @JsonIgnore
+    private boolean isConsistent;
+
+    @JsonIgnore
     @Transient
     private String sopInstanceUID;
 
@@ -574,5 +577,13 @@ public abstract class Dataset extends AbstractEntity {
 
     public void setRelatedStudies(List<Study> relatedStudies) {
         this.relatedStudies = relatedStudies;
+    }
+
+    public boolean isConsistent() {
+        return isConsistent;
+    }
+
+    public void setConsistent(boolean consistent) {
+        isConsistent = consistent;
     }
 }
