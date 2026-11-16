@@ -6,9 +6,9 @@ which gives the port of its node (API_PORT).
 
 Usage:
   python3 query.py                                   # every instance, every dataset
-  python3 query.py ofsep                             # one instance
+  python3 query.py neurinfo                          # one instance
   python3 query.py neurinfo ofsep --modality T1w     # several instances, filtered
-  python3 query.py ofsep --min-age 35 --max-age 60
+  python3 query.py neurinfo --min-age 35 --max-age 60
 """
 import argparse
 import json

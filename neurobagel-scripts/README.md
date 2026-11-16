@@ -76,7 +76,7 @@ The node now answers on `http://127.0.0.1:8000` (API docs at `/docs`). It is onl
 ## Make a node public
 
 The node must answer over HTTPS from the internet. One proxy serves every public node of the VM, each on
-its own path of the same domain, e.g. `https://neurobagel.irisa.fr/neurinfo`.
+its own path of the same domain, e.g. `https://neurobagel.irisa.fr/node`.
 
 > **Why a separate proxy for a single node?** Only the Neurinfo node is public today, so the proxy could simply
 > run from that node's own recipes folder, with the recipes' `docker-compose.proxy.yml`
@@ -111,7 +111,7 @@ bash nb-proxy.sh up
 
 ```bash
 NB_NAPI_DOMAIN=neurobagel.irisa.fr
-NB_NAPI_BASE_PATH=/neurinfo                # unique per instance
+NB_NAPI_BASE_PATH=/node                    # unique per instance
 ```
 
 then reload it:
@@ -126,13 +126,15 @@ FORCE=1 bash nb-node.sh sync neurinfo
 bash nb-proxy.sh status                    # each public node should answer 200
 ```
 
-The first certificate can take a few minutes. Then `https://neurobagel.irisa.fr/neurinfo/docs` must open
+The first certificate can take a few minutes. Then `https://neurobagel.irisa.fr/node/docs` must open
 from outside the institute's network.
 
 **4. Register the node** with the Neurobagel team, so that it is added to the public federation
 ([list of public nodes](https://github.com/neurobagel/menu/blob/main/node_directory/neurobagel_public_nodes.json)).
-Give them a name (e.g. "Shanoir – Neurinfo"), the URL `https://neurobagel.irisa.fr/neurinfo` and a contact.
-Then check that the node shows up on [query.neurobagel.org](https://query.neurobagel.org).
+`https://neurobagel.irisa.fr/node` is already listed there, as "Shanoir": the Neurinfo node needs no new
+registration, only a check that it shows up on [query.neurobagel.org](https://query.neurobagel.org) once it
+answers. Any other public node needs its own entry: give them a name (e.g. "Shanoir – OFSEP"), its URL and a
+contact.
 
 To take a node offline again: remove `NB_NAPI_DOMAIN` from its config, sync it, and ask Neurobagel to remove
 it from the federation.
@@ -152,8 +154,8 @@ it from the federation.
 | `NB_RETURN_AGG` | `true` | `true`: counts only. `false`: subject-level results too, **never on a public node** |
 | `NB_MIN_CELL_SIZE` | `0` | Datasets with this many matching subjects or fewer are hidden |
 | `NB_NAPI_TAG` | *required* | `neurobagel/api` image tag, e.g. `v0.12.0` |
-| `NB_NAPI_DOMAIN` | `neurobagel.irisa.fr` | Public domain of the node; empty = local only |
-| `NB_NAPI_BASE_PATH` | `/node` | Public path on that domain, e.g. `/node` |
+| `NB_NAPI_DOMAIN` | empty | Public domain of the node, e.g. `neurobagel.irisa.fr`; empty = local only |
+| `NB_NAPI_BASE_PATH` | empty | Public path on that domain, e.g. `/node`; unique per instance |
 
 The node settings (`NB_RETURN_AGG` and below) are written by the script into
 `~/neurobagel-<instance>/recipes/.env`: edit the config, never that `.env`. A change is applied at the next
@@ -164,7 +166,7 @@ sync.
 | Variable | Default | Description |
 |---|---|---|
 | `LETSENCRYPT_EMAIL` | empty | Warned by Let's Encrypt if renewals fail (recommended) |
-| `NGINX_PROXY_TAG` | *required* | `nginxproxy/nginx-proxy` release, e.g. `1.11.6` (avoid `latest`: as  it's the development build) |
+| `NGINX_PROXY_TAG` | *required* | `nginxproxy/nginx-proxy` release, e.g. `1.11.6` (not `latest`: it is a development build) |
 | `ACME_COMPANION_TAG` | *required* | `nginxproxy/acme-companion` release, e.g. `2.8.2` |
 
 ## Commands

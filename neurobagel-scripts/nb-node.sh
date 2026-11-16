@@ -79,7 +79,7 @@ check_conf() {
     [[ -z $NB_NAPI_DOMAIN || $NB_NAPI_DOMAIN =~ ^([A-Za-z0-9-]+\.)+[A-Za-z]{2,}$ ]] \
         || die "NB_NAPI_DOMAIN in $CONF: empty (local only), or a domain like neurobagel.example.org (no https://, no path)"
     [[ -z $NB_NAPI_BASE_PATH || $NB_NAPI_BASE_PATH =~ ^(/[A-Za-z0-9._-]+)+$ ]] \
-        || die "NB_NAPI_BASE_PATH in $CONF: empty, or a path like /ofsep (leading /, no trailing /)"
+        || die "NB_NAPI_BASE_PATH in $CONF: empty, or a path like /node (leading /, no trailing /)"
 }
 
 # docker without sudo if allowed, else sudo (non-interactive under cron)
