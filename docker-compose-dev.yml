@@ -456,6 +456,8 @@ services:
     ports:
       - "5432:5432"
     env_file: ./docker-compose/dcm4chee/variables.env
+    environment:
+      POSTGRES_PASSWORD: "${SHANOIR_PACS_DATABASE_PASSWORD:?is not set, see .env.example}"
     volumes:
       - "dcm4chee-database-data:/var/lib/postgresql/data"
   dcm4chee-arc:
@@ -476,6 +478,7 @@ services:
     env_file: ./docker-compose/dcm4chee/variables.env
     environment:
       POSTGRES_HOST: "${SHANOIR_PREFIX}dcm4chee-database"
+      POSTGRES_PASSWORD: "${SHANOIR_PACS_DATABASE_PASSWORD:?is not set, see .env.example}"
       WILDFLY_CHOWN: /storage
       WILDFLY_WAIT_FOR: "${SHANOIR_PREFIX}ldap:389 ${SHANOIR_PREFIX}dcm4chee-database:5432"
     depends_on:
