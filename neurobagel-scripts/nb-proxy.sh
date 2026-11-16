@@ -8,8 +8,8 @@
 #   bash nb-proxy.sh down        # stop the proxy: every public node becomes unreachable (nodes keep running)
 #   bash nb-proxy.sh uninstall   # remove the proxy, its certificates and ~/neurobagel-proxy (no node may use it; YES=1: no prompt)
 #
-# Config (optional): nb-proxy.conf next to this script, see nb-proxy.conf.example.
-# Folder: ~/neurobagel-proxy (PROXY_HOME to change it) = recipes clone + compose.local.yml. Compose project: shanoir_nb_proxy.
+# Config: nb-proxy.conf next to this script, see nb-proxy.conf.example (NGINX_PROXY_TAG and ACME_COMPANION_TAG required).
+# Folder: ~/neurobagel-proxy = recipes clone + compose.local.yml. Compose project: shanoir_nb_proxy.
 # It creates the docker network NB_proxynet. A node joins it when its nb-<instance>.conf sets NB_NAPI_DOMAIN:
 # nginx-proxy routes https://NB_NAPI_DOMAIN/NB_NAPI_BASE_PATH to it and acme-companion gets the certificate.
 # Needs: a DNS entry of each domain to this machine, and ports 80 + 443 open from the internet (Let's Encrypt uses 80).
@@ -24,14 +24,14 @@ CONF="$HERE/nb-proxy.conf"
 # shellcheck source=/dev/null
 [ -f "$CONF" ] && . "$CONF"
 
-PROXY_HOME="$(realpath -m -- "${PROXY_HOME:-$HOME/neurobagel-proxy}")"
+PROXY_HOME="$(realpath -m -- "$HOME/neurobagel-proxy")"
 RECIPES="$PROXY_HOME/recipes"
 LOCAL_COMPOSE="$PROXY_HOME/compose.local.yml"
 PROJECT="shanoir_nb_proxy"
 PROXY_NET="NB_proxynet"
 LETSENCRYPT_EMAIL="${LETSENCRYPT_EMAIL:-}"
-NGINX_PROXY_TAG="${NGINX_PROXY_TAG:-latest}"
-ACME_COMPANION_TAG="${ACME_COMPANION_TAG:-latest}"
+NGINX_PROXY_TAG="${NGINX_PROXY_TAG:-}"
+ACME_COMPANION_TAG="${ACME_COMPANION_TAG:-}"
 
 log() { echo "$(date '+%F %T') [nb:proxy] $*"; }
 die() { log "ERROR: $*" >&2; exit 1; }
@@ -45,8 +45,9 @@ fi
 check_conf() {
     [[ -z $LETSENCRYPT_EMAIL || $LETSENCRYPT_EMAIL =~ ^[^@[:space:]]+@[^@[:space:]]+\.[^@[:space:]]+$ ]] \
         || die "LETSENCRYPT_EMAIL in $CONF: an email address, or empty"
-    [[ $NGINX_PROXY_TAG =~ ^[A-Za-z0-9._-]+$ ]] || die "NGINX_PROXY_TAG in $CONF: an image tag, e.g. 1.6"
-    [[ $ACME_COMPANION_TAG =~ ^[A-Za-z0-9._-]+$ ]] || die "ACME_COMPANION_TAG in $CONF: an image tag, e.g. 2.5"
+    [ -f "$CONF" ] || die "write $CONF first (see nb-proxy.conf.example)"
+    [[ $NGINX_PROXY_TAG =~ ^[A-Za-z0-9._-]+$ ]] || die "set NGINX_PROXY_TAG in $CONF: a release of nginxproxy/nginx-proxy, e.g. 1.11.6"
+    [[ $ACME_COMPANION_TAG =~ ^[A-Za-z0-9._-]+$ ]] || die "set ACME_COMPANION_TAG in $CONF: a release of nginxproxy/acme-companion, e.g. 2.8.2"
 }
 
 local_compose() {  # image versions and Let's Encrypt account email, on top of the recipes' proxy file

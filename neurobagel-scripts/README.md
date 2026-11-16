@@ -13,7 +13,7 @@ API) if the data changed.
 | `nb-node.sh` | Installs, syncs and manages the node of an instance |
 | `nb.conf.example` | Template of an instance config |
 | `nb-proxy.sh` | Runs the HTTPS proxy shared by the public nodes (nginx-proxy + Let's Encrypt) |
-| `nb-proxy.conf.example` | Template of the optional proxy config |
+| `nb-proxy.conf.example` | Template of the proxy config |
 | `query.py` | Queries the nodes, for checks |
 
 ## Requirements
@@ -103,7 +103,7 @@ its own path of the same domain, e.g. `https://neurobagel.irisa.fr/neurinfo`.
 **1. Start the proxy (once for the VM)**
 
 ```bash
-cp nb-proxy.conf.example nb-proxy.conf     # optional: Let's Encrypt email, image versions
+cp nb-proxy.conf.example nb-proxy.conf     # Let's Encrypt email, image versions
 bash nb-proxy.sh up
 ```
 
@@ -152,21 +152,20 @@ it from the federation.
 | `NB_RETURN_AGG` | `true` | `true`: counts only. `false`: subject-level results too, **never on a public node** |
 | `NB_MIN_CELL_SIZE` | `0` | Datasets with this many matching subjects or fewer are hidden |
 | `NB_NAPI_TAG` | *required* | `neurobagel/api` image tag, e.g. `v0.12.0` |
-| `NB_NAPI_DOMAIN` | empty | Public domain of the node; empty = local only |
-| `NB_NAPI_BASE_PATH` | empty | Public path on that domain, e.g. `/neurinfo` |
+| `NB_NAPI_DOMAIN` | `neurobagel.irisa.fr` | Public domain of the node; empty = local only |
+| `NB_NAPI_BASE_PATH` | `/node` | Public path on that domain, e.g. `/node` |
 
 The node settings (`NB_RETURN_AGG` and below) are written by the script into
 `~/neurobagel-<instance>/recipes/.env`: edit the config, never that `.env`. A change is applied at the next
 sync.
 
-### Proxy config (`nb-proxy.conf`, optional)
+### Proxy config (`nb-proxy.conf`)
 
 | Variable | Default | Description |
 |---|---|---|
 | `LETSENCRYPT_EMAIL` | empty | Warned by Let's Encrypt if renewals fail (recommended) |
-| `NGINX_PROXY_TAG` | `latest` | `nginxproxy/nginx-proxy` image tag; pin in production |
-| `ACME_COMPANION_TAG` | `latest` | `nginxproxy/acme-companion` image tag; pin in production |
-| `PROXY_HOME` | `~/neurobagel-proxy` | Proxy folder |
+| `NGINX_PROXY_TAG` | *required* | `nginxproxy/nginx-proxy` release, e.g. `1.11.6` (avoid `latest`: as  it's the development build) |
+| `ACME_COMPANION_TAG` | *required* | `nginxproxy/acme-companion` release, e.g. `2.8.2` |
 
 ## Commands
 
@@ -203,7 +202,7 @@ python3 query.py --help
 ~/
 ├── nb-node.sh, nb-proxy.sh, query.py, *.example
 ├── nb-neurinfo.conf          config + secret (chmod 600)
-├── nb-proxy.conf             optional
+├── nb-proxy.conf             proxy config (public nodes only)
 ├── neurobagel-neurinfo/
 │   ├── recipes/              neurobagel/recipes clone, generated .env, GraphDB passwords
 │   ├── data/                 JSONLD files served by the node
