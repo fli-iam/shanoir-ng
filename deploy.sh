@@ -22,7 +22,9 @@ export SHANOIR_VIEWER_VIDEPE_URL_SCHEME=https
 export SHANOIR_PREFIX=
 export SHANOIR_NOTIFICATION_EMAIL="notification@inria.fr"
 export SHANOIR_KEYCLOAK_USER=admin
-export SHANOIR_KEYCLOAK_PASSWORD="&a1A&a1A"
+# The secrets (SHANOIR_KEYCLOAK_PASSWORD, ...) come from .env
+
+./check-env.sh || exit 1
 
 cd ./shanoir-ng-parent
 
