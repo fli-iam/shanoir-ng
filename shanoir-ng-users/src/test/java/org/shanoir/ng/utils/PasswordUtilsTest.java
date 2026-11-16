@@ -14,55 +14,54 @@
 
 package org.shanoir.ng.utils;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.test.context.aot.DisabledInAotMode;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.junit.jupiter.api.RepeatedTest;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 /**
- * @author msimon
+ * Tests for {@link PasswordUtils}: passwords are at least 12 characters long and contain a
+ * lower-case letter, an upper-case letter, a digit and one of the special characters %$#@.
  *
+ * @author msimon
  */
-@RunWith(MockitoJUnitRunner.class)
-@DisabledInAotMode
 public class PasswordUtilsTest {
 
-    @Test
+    private static final int PASSWORD_LENGTH = 12;
+
+    /** Generated passwords are random, so check several of them. */
+    @RepeatedTest(50)
     public void generatePasswordTest() {
         final String password = PasswordUtils.generatePassword();
-        Assert.assertNotNull(password);
-        Assert.assertTrue(password.length() == 8);
+        assertNotNull(password);
+        assertEquals(PASSWORD_LENGTH, password.length());
+        assertTrue(password.matches("[a-zA-Z0-9%$#@]+"), "Unexpected character in " + password);
+        assertTrue(PasswordUtils.checkPasswordPolicy(password), "Policy not met by " + password);
     }
 
-    @Test
-    public void checkPasswordPolicyTest() {
-        Assert.assertTrue(PasswordUtils.checkPasswordPolicy("aA11@@22"));
+    @ParameterizedTest
+    @ValueSource(strings = {"aA11@@22bbCC", "aA1%bB2$cC3#dD4@", "Zz9#Zz9#Zz9#"})
+    public void checkPasswordPolicyValidTest(final String password) {
+        assertTrue(PasswordUtils.checkPasswordPolicy(password));
     }
 
-    @Test
-    public void checkGeneratedPasswordPolicyTest() {
-        Assert.assertTrue(PasswordUtils.checkPasswordPolicy(PasswordUtils.generatePassword()));
-    }
-
-    @Test
-    public void checkPasswordPolicyBadPwdTest1() {
-        Assert.assertFalse(PasswordUtils.checkPasswordPolicy("aa11@"));
-    }
-
-    @Test
-    public void checkPasswordPolicyBadPwdTest2() {
-        Assert.assertFalse(PasswordUtils.checkPasswordPolicy("@@11@@22"));
-    }
-
-    @Test
-    public void checkPasswordPolicyBadPwdTest3()  {
-        Assert.assertFalse(PasswordUtils.checkPasswordPolicy("aabb@@cc"));
-    }
-
-    @Test
-    public void checkPasswordPolicyBadPwdTest4() {
-        Assert.assertFalse(PasswordUtils.checkPasswordPolicy("aa11aa22"));
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = {
+        "aA1@aA1@aA1",  // 11 characters
+        "aa11@@22bbcc", // no upper-case letter
+        "AA11@@22BBCC", // no lower-case letter
+        "aA@@aA@@aAbB", // no digit
+        "aA11aA22bB33", // no special character
+        "aA11!!22bbCC"  // '!' is not an allowed special character
+    })
+    public void checkPasswordPolicyInvalidTest(final String password) {
+        assertFalse(PasswordUtils.checkPasswordPolicy(password));
     }
 
 }
