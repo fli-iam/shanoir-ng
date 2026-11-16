@@ -129,10 +129,10 @@ it from the federation.
 | `CRON_AT` | `20 4` | Daily sync time (`minute hour`) |
 | `NB_CLIENT_ID` | `neurobagel-export` | Keycloak client id |
 | `NB_HOME` | `~/neurobagel-<instance>` | Instance folder, never shared between instances |
-| `BAGEL_IMAGE` | `neurobagel/bagelcli:latest` | bagel CLI image; pin a version in production |
+| `BAGEL_IMAGE` | *required* | bagel CLI image with its version, e.g. `neurobagel/bagelcli:v0.11.7` |
 | `NB_RETURN_AGG` | `true` | `true`: counts only. `false`: subject-level results too, **never on a public node** |
 | `NB_MIN_CELL_SIZE` | `0` | Datasets with this many matching subjects or fewer are hidden |
-| `NB_NAPI_TAG` | `latest` | `neurobagel/api` image tag; pin a version in production |
+| `NB_NAPI_TAG` | *required* | `neurobagel/api` image tag, e.g. `v0.12.0` |
 | `NB_NAPI_DOMAIN` | empty | Public domain of the node; empty = local only |
 | `NB_NAPI_BASE_PATH` | empty | Public path on that domain, e.g. `/neurinfo` |
 | `NB_GRAPH_MEMORY` | `2G` | Maximum memory of GraphDB |

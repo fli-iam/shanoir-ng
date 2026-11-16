@@ -56,11 +56,11 @@ STAGE="$STATE/staging"
 LOG="$STATE/nb-node.log"
 API_PORT="${API_PORT:-}"
 NB_CLIENT_ID="${NB_CLIENT_ID:-neurobagel-export}"
-BAGEL_IMAGE="${BAGEL_IMAGE:-neurobagel/bagelcli:latest}"
+BAGEL_IMAGE="${BAGEL_IMAGE:-}"
 # node settings, written into recipes/.env
 NB_RETURN_AGG="${NB_RETURN_AGG:-true}"
 NB_MIN_CELL_SIZE="${NB_MIN_CELL_SIZE:-0}"
-NB_NAPI_TAG="${NB_NAPI_TAG:-latest}"
+NB_NAPI_TAG="${NB_NAPI_TAG:-}"
 NB_NAPI_DOMAIN="${NB_NAPI_DOMAIN:-}"
 NB_NAPI_BASE_PATH="${NB_NAPI_BASE_PATH:-}"
 NB_GRAPH_MEMORY="${NB_GRAPH_MEMORY:-2G}"
@@ -74,7 +74,9 @@ check_conf() {
     [[ $API_PORT =~ ^[0-9]+$ ]] || die "set API_PORT in $CONF (a port no other instance uses)"
     [[ $NB_RETURN_AGG =~ ^(true|false)$ ]] || die "NB_RETURN_AGG in $CONF: true (counts only) or false (subject-level results too)"
     [[ $NB_MIN_CELL_SIZE =~ ^[0-9]+$ ]] || die "NB_MIN_CELL_SIZE in $CONF: a number of subjects, e.g. 5"
-    [[ $NB_NAPI_TAG =~ ^[A-Za-z0-9._-]+$ ]] || die "NB_NAPI_TAG in $CONF: an image tag of neurobagel/api, e.g. v0.4.0"
+    [[ $BAGEL_IMAGE =~ ^[A-Za-z0-9._/-]+(:[A-Za-z0-9._-]+)?(@sha256:[0-9a-f]{64})?$ && $BAGEL_IMAGE == *[:@]* ]] \
+        || die "set BAGEL_IMAGE in $CONF: the bagel CLI image with its version, e.g. neurobagel/bagelcli:v0.11.7"
+    [[ $NB_NAPI_TAG =~ ^[A-Za-z0-9._-]+$ ]] || die "set NB_NAPI_TAG in $CONF: an image tag of neurobagel/api, e.g. v0.12.0"
     [[ -z $NB_NAPI_DOMAIN || $NB_NAPI_DOMAIN =~ ^([A-Za-z0-9-]+\.)+[A-Za-z]{2,}$ ]] \
         || die "NB_NAPI_DOMAIN in $CONF: empty (local only), or a domain like neurobagel.example.org (no https://, no path)"
     [[ -z $NB_NAPI_BASE_PATH || $NB_NAPI_BASE_PATH =~ ^(/[A-Za-z0-9._-]+)+$ ]] \
@@ -221,10 +223,8 @@ cmd_install() {
     compose pull api graph
     log "building the init_data image (local Dockerfile of the recipes)..."
     compose build init_data
-    if ! command -v bagel >/dev/null; then
-        log "no bagel CLI in PATH: pulling $BAGEL_IMAGE"
-        "${DOCKER[@]}" pull -q "$BAGEL_IMAGE"
-    fi
+    log "pulling the bagel CLI image $BAGEL_IMAGE..."
+    "${DOCKER[@]}" pull -q "$BAGEL_IMAGE"
     log "install done. Next: write $CONF, then: bash $0 sync$CMD_ARGS"
 }
 
@@ -283,12 +283,8 @@ inputs_hash() {  # downloaded files + node settings: a change in either reloads 
 
 # ---------------------------------------------------------------- build
 
-run_bagel() {
-    if command -v bagel >/dev/null; then
-        bagel "$@"
-    else
-        "${DOCKER[@]}" run --rm --user "$(id -u):$(id -g)" --volume "$STAGE:$STAGE" -w "$STAGE" "$BAGEL_IMAGE" "$@"
-    fi
+run_bagel() {  # always the BAGEL_IMAGE container, never a bagel installed on the machine
+    "${DOCKER[@]}" run --rm --user "$(id -u):$(id -g)" --volume "$STAGE:$STAGE" -w "$STAGE" "$BAGEL_IMAGE" "$@"
 }
 
 build_study() {  # returns 1 on failure (no set -e inside an 'if')
