@@ -149,8 +149,8 @@ wait_api() {
     for _ in $(seq 1 150); do
         if api_ok; then
             log "node ready: http://127.0.0.1:$API_PORT/docs"
-            public && log "public URL: $(public_url)/docs (certificate: up to a few minutes on the first start)"
-            return
+            if public; then log "public URL: $(public_url)/docs (certificate: up to a few minutes on the first start)"; fi
+            return 0
         fi
         sleep 2
     done
@@ -362,6 +362,9 @@ cmd_sync() {
     log "======== sync start ========"
     # a sync stopped by an error gets an end line too, for the log and 'status' (exit 2 logs its own)
     trap 'rc=$?; [ "$rc" = 0 ] || [ "$rc" = 2 ] || log "======== sync FAILED (exit $rc) ========"' EXIT
+    # a command failing outside die (set -e) would otherwise stop the sync without saying why
+    trap 'log "ERROR: unexpected failure at line $LINENO of $SELF: $BASH_COMMAND"' ERR
+    set -o errtrace
     [ -n "${SHANOIR_URL:-}" ] && [ -n "${NB_CLIENT_SECRET:-}" ] || die "set SHANOIR_URL and NB_CLIENT_SECRET in $CONF"
     check_conf
     proxy_ready   # before fetching and building: a public node cannot start without the proxy
@@ -462,7 +465,7 @@ cmd_status() {
     log "listening sockets (API must be 127.0.0.1 only, nothing on 7200):"
     ss -tln 2>/dev/null | grep -E ":(${API_PORT:-none}|7200)\b" || true
     log "cron: $(crontab -l 2>/dev/null | grep -F "$SELF sync$CMD_ARGS >" || echo 'not installed')"
-    [ -f "$LOG" ] && { log "last sync lines:"; grep -E '======== sync|ERROR' "$LOG" | tail -n 6; }
+    if [ -f "$LOG" ]; then log "last sync lines:"; grep -E '======== sync|ERROR' "$LOG" | tail -n 6 || true; fi
 }
 
 cmd_logs() {
