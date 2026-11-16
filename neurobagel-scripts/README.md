@@ -117,7 +117,7 @@ NB_NAPI_BASE_PATH=/node                    # unique per instance
 then reload it:
 
 ```bash
-FORCE=1 bash nb-node.sh sync neurinfo
+bash nb-node.sh sync neurinfo --force
 ```
 
 **3. Check**
@@ -176,13 +176,13 @@ sync.
 | Command | Description |
 |---|---|
 | `install` | Installs the node (recipes clone, `.env`, random GraphDB passwords, images). Safe to rerun. |
-| `sync` | Downloads, builds and reloads the node if the data or settings changed. `FORCE=1`: reload anyway. |
+| `sync` | Downloads, builds and reloads the node if the data or settings changed. `--force`: reload anyway. |
 | `cron-install` / `cron-remove` | Adds / removes the daily sync |
 | `status` | Containers, ports, cron entry, last sync |
 | `logs` | Container logs |
 | `down` | Stops the node |
 | `wipe` | Stops the node and deletes its database; the next `sync` reloads it |
-| `uninstall` | Removes the instance completely (`YES=1`: no prompt) |
+| `uninstall` | Removes the instance completely (`--yes`: no prompt) |
 
 `bash nb-proxy.sh <command>`: `up`, `status`, `logs`, `down` (all public nodes go offline), `uninstall`.
 

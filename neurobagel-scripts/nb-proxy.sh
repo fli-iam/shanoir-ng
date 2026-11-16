@@ -7,7 +7,7 @@
 #   bash nb-proxy.sh status      # containers, routed nodes and the HTTP code of each public URL (200 = OK)
 #   bash nb-proxy.sh logs        # last 100 log lines of nginx-proxy and of acme-companion (routing, certificates)
 #   bash nb-proxy.sh down        # stop the proxy, keep its certificates: public nodes go offline, but keep running
-#   bash nb-proxy.sh uninstall   # remove the proxy, its certificates and ~/neurobagel-proxy (no node may use it; YES=1: no prompt)
+#   bash nb-proxy.sh uninstall   # remove the proxy, its certificates and ~/neurobagel-proxy (no node may use it; --yes: no prompt)
 #
 # Config: nb-proxy.conf next to this script, see nb-proxy.conf.example (NGINX_PROXY_TAG and ACME_COMPANION_TAG required).
 # Folder: ~/neurobagel-proxy = recipes clone + compose.local.yml. Compose project: shanoir_nb_proxy.
@@ -165,8 +165,8 @@ cmd_uninstall() {
 $nodes"
     echo "This removes the proxy containers, its network $PROXY_NET, its volumes (certificates included),"
     echo "its images, and $PROXY_HOME."
-    if [ "${YES:-0}" != 1 ]; then
-        [ -t 0 ] || die "not interactive: run with YES=1 to confirm"
+    if [ "$YES" != 1 ]; then
+        [ -t 0 ] || die "not interactive: add --yes to confirm"
         read -rp "Type 'uninstall' to confirm: " answer
         [ "$answer" = uninstall ] || die "aborted"
     fi
@@ -181,6 +181,14 @@ $nodes"
     rm -rf -- "$PROXY_HOME"
     log "proxy removed"
 }
+
+YES=0   # option: uninstall --yes
+for opt in "${@:2}"; do
+    case "${1:-} $opt" in
+        "uninstall --yes"|"uninstall -y") YES=1 ;;
+        *) echo "unknown option '$opt' for '${1:-}' (see: bash $0 --help)" >&2; exit 1 ;;
+    esac
+done
 
 case "${1:-}" in
     up)        cmd_up ;;

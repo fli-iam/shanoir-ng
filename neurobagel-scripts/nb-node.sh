@@ -5,14 +5,14 @@
 #   bash nb-node.sh --help                    # this help
 #   bash nb-node.sh install <instance>        # once (sync also does it if needed): recipes, .env, GraphDB passwords, images
 #   bash nb-node.sh sync <instance>           # fetch every exported study, build the JSONLDs, reload the node if the inputs changed
-#   FORCE=1 bash nb-node.sh sync <instance>   # reload even if nothing changed
+#   bash nb-node.sh sync <instance> --force   # reload even if nothing changed
 #   bash nb-node.sh cron-install <instance>   # daily sync in the user's crontab at CRON_AT (default "20 4" = 04:20)
 #   bash nb-node.sh cron-remove <instance>    # remove the daily sync from the user's crontab (the node keeps running)
 #   bash nb-node.sh status <instance>         # public or local, containers, listening ports, cron entry, last syncs
 #   bash nb-node.sh logs <instance>           # last logs of the init_data, graph and api containers
 #   bash nb-node.sh down <instance>           # stop the node, keep its database (the next sync brings it back)
 #   bash nb-node.sh wipe <instance>           # stop the node and delete its database (the next sync reloads it)
-#   bash nb-node.sh uninstall <instance>      # remove the instance: cron, containers, volumes, images, recipes, data, state, config (YES=1: no prompt)
+#   bash nb-node.sh uninstall <instance>      # remove the instance: cron, containers, volumes, images, recipes, data, state, config (--yes: no prompt)
 #
 # Everything of an instance NAME is derived from its name (lowercase letters, digits, - and _):
 #   config:          nb-NAME.conf next to this script (chmod 600, see nb-node.conf.example)
@@ -54,6 +54,14 @@ INSTANCE="${2:-}"
 [ -n "$INSTANCE" ] || usage
 [[ $INSTANCE =~ ^[a-z0-9][a-z0-9_-]*$ ]] || { echo "instance name: lowercase letters, digits, - and _ only" >&2; exit 1; }
 [ "$INSTANCE" != proxy ] || { echo "'proxy' is reserved for the shared proxy (nb-proxy.sh)" >&2; exit 1; }
+FORCE=0 YES=0   # options after the instance: --force (sync), --yes (uninstall)
+for opt in "${@:3}"; do
+    case "$1 $opt" in
+        "sync --force"|"sync -f")       FORCE=1 ;;
+        "uninstall --yes"|"uninstall -y") YES=1 ;;
+        *) echo "unknown option '$opt' for '$1' (see: bash $0 --help)" >&2; exit 1 ;;
+    esac
+done
 PROJECT="shanoir_nb_$INSTANCE"
 CONF="$HERE/nb-$INSTANCE.conf"
 # shellcheck source=/dev/null
@@ -359,7 +367,7 @@ cmd_sync() {
     fi
 
     local hash; hash=$(inputs_hash)
-    if [ "${FORCE:-0}" != 1 ] && [ "$hash" = "$(cat "$STATE/inputs.sha256" 2>/dev/null || true)" ] && api_ok; then
+    if [ "$FORCE" != 1 ] && [ "$hash" = "$(cat "$STATE/inputs.sha256" 2>/dev/null || true)" ] && api_ok; then
         log "inputs and settings unchanged, node up: nothing to do"
         rm_any "$STAGE"
         log "======== sync done (no change) ========"
@@ -462,8 +470,8 @@ cmd_uninstall() {
     echo "  - the containers, network, volumes and images of compose project '$PROJECT'"
     echo "  - the api, graph and bagel CLI images, unless another node on this machine still uses them"
     printf '  - %s\n' "${paths[@]}"
-    if [ "${YES:-0}" != 1 ]; then
-        [ -t 0 ] || die "not interactive: run with YES=1 to confirm"
+    if [ "$YES" != 1 ]; then
+        [ -t 0 ] || die "not interactive: add --yes to confirm"
         read -rp "Type 'uninstall' to confirm: " answer
         [ "$answer" = uninstall ] || die "aborted"
     fi
