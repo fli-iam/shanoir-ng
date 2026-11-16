@@ -135,7 +135,7 @@ compose() {
 proxy_ready() {
     public || return 0
     "${DOCKER[@]}" network inspect "$PROXY_NET" >/dev/null 2>&1 \
-        || die "public node ($NB_NAPI_DOMAIN) but the proxy is not running: bash $HERE/nb-proxy.sh up"
+        || die "public node ($NB_NAPI_DOMAIN) but the proxy is not running: start it (bash $HERE/nb-proxy.sh up), or empty NB_NAPI_DOMAIN in $CONF to run the node locally first"
 }
 
 api_ok() {
@@ -350,6 +350,7 @@ cmd_sync() {
     log "======== sync start ========"
     [ -n "${SHANOIR_URL:-}" ] && [ -n "${NB_CLIENT_SECRET:-}" ] || die "set SHANOIR_URL and NB_CLIENT_SECRET in $CONF"
     check_conf
+    proxy_ready   # before fetching and building: a public node cannot start without the proxy
     [ "$NB_RETURN_AGG" = true ] || log "WARNING: NB_RETURN_AGG=false: the node returns subject-level results, not only counts"
     SHANOIR_URL="${SHANOIR_URL%/}"
     [ -f "$RECIPES/.env" ] || { log "node not installed yet: installing"; cmd_install; }

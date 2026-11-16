@@ -23,7 +23,8 @@ NB_NAPI_TAG=v0.12.0
 NB_RETURN_AGG=true
 # datasets with this many matching subjects or fewer are hidden from query results (0 = show all)
 NB_MIN_CELL_SIZE=5
-# public domain of this node (no https://, no path): set it to publish the node through nb-proxy.sh, empty = local only
-NB_NAPI_DOMAIN=neurobagel.irisa.fr
+# public domain of this node (no https://, no path), e.g. neurobagel.irisa.fr. Empty = local only: start local,
+# and set it once the proxy runs (bash nb-proxy.sh up), see "Make a node public" in the README
+NB_NAPI_DOMAIN=
 # public sub-path of this node on that domain, e.g. /node (leading /, no trailing /): unique when nodes share a domain
-NB_NAPI_BASE_PATH=/node
+NB_NAPI_BASE_PATH=
