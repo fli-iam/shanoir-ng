@@ -115,6 +115,34 @@ class DatasetSeparationHelperTest {
                 new SerieToDatasetsSeparator(1, Set.of(), null));
     }
 
+    @Test
+    void ctAcquisitionNumberDoesNotSeparateTheSeries() {
+        CtDatasetAcquisition acquisition = new CtDatasetAcquisition();
+        acquisition.setAcquisitionNumber(1);
+        Attributes otherSegment = slice();
+        otherSegment.setInt(Tag.AcquisitionNumber, VR.IS, 3);
+
+        int stored = DatasetSeparationHelper.acquisitionNumberForDatasetSeparation(acquisition);
+        int incoming = DatasetSeparationHelper.acquisitionNumberForDatasetSeparation(acquisition, otherSegment);
+
+        assertEquals(stored, incoming);
+        assertEquals(new SerieToDatasetsSeparator(stored, Set.of(), IOP),
+                new SerieToDatasetsSeparator(incoming, Set.of(), IOP));
+    }
+
+    @Test
+    void mrAcquisitionNumberIsKept() {
+        MrDatasetAcquisition acquisition = new MrDatasetAcquisition();
+        acquisition.setAcquisitionNumber(1);
+        Attributes sameNumber = slice();
+        Attributes otherNumber = slice();
+        otherNumber.setInt(Tag.AcquisitionNumber, VR.IS, 3);
+
+        assertEquals(1, DatasetSeparationHelper.acquisitionNumberForDatasetSeparation(acquisition));
+        assertEquals(1, DatasetSeparationHelper.acquisitionNumberForDatasetSeparation(acquisition, sameNumber));
+        assertEquals(3, DatasetSeparationHelper.acquisitionNumberForDatasetSeparation(acquisition, otherNumber));
+    }
+
     private static void assertSameKey(Set<EchoTime> stored, Set<EchoTime> incoming) {
         assertEquals(key(stored), key(incoming));
         assertEquals(key(stored).hashCode(), key(incoming).hashCode());
