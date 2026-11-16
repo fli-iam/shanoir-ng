@@ -1,7 +1,7 @@
 # Config of one Shanoir instance for nb-node.sh. Copy it next to the script, named after the instance,
 # and protect it (it holds a secret):
-#   cp nb.conf.example nb-node.conf && chmod 600 nb-node.conf
-# then use the same name in every command: bash nb-node.sh sync node
+#   cp nb-node.conf.example nb-neurinfo.conf && chmod 600 nb-neurinfo.conf
+# then use the same name in every command: bash nb-node.sh sync neurinfo
 
 # required
 # base URL of the Shanoir instance, e.g. https://shanoir.example.org

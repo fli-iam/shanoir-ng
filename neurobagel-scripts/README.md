@@ -11,7 +11,7 @@ API) if the data changed.
 | File | Role |
 |---|---|
 | `nb-node.sh` | Installs, syncs and manages the node of an instance |
-| `nb.conf.example` | Template of an instance config |
+| `nb-node.conf.example` | Template of an instance config |
 | `nb-proxy.sh` | Runs the HTTPS proxy shared by the public nodes (nginx-proxy + Let's Encrypt) |
 | `nb-proxy.conf.example` | Template of the proxy config |
 | `query.py` | Queries the nodes, for checks |
@@ -36,7 +36,7 @@ Copy the scripts to the VM (e.g. into your home directory), then:
 **1. Write the config**
 
 ```bash
-cp nb.conf.example nb-neurinfo.conf && chmod 600 nb-neurinfo.conf
+cp nb-node.conf.example nb-neurinfo.conf && chmod 600 nb-neurinfo.conf
 ```
 
 Edit `nb-neurinfo.conf`:

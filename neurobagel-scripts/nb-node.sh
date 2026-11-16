@@ -11,7 +11,7 @@
 #   bash nb-node.sh uninstall <instance>      # remove the instance: cron, containers, volumes, images, recipes, data, state, config (YES=1: no prompt)
 #
 # Everything of an instance NAME is derived from its name (lowercase letters, digits, - and _):
-#   config:          nb-NAME.conf next to this script (chmod 600, see nb.conf.example)
+#   config:          nb-NAME.conf next to this script (chmod 600, see nb-node.conf.example)
 #   compose project: shanoir_nb_NAME
 #   instance folder: ~/neurobagel-NAME, containing
 #     recipes/ = neurobagel/recipes clone, .env, GraphDB passwords
@@ -400,7 +400,7 @@ cmd_sync() {
 
 cmd_cron_install() {
     local at="${CRON_AT:-20 4}"
-    [ -f "$CONF" ] || die "write $CONF first (see nb.conf.example)"
+    [ -f "$CONF" ] || die "write $CONF first (see nb-node.conf.example)"
     check_conf
     if ! docker info >/dev/null 2>&1 && ! sudo -n docker info >/dev/null 2>&1; then
         die "cron could not use docker: add $USER to the docker group, or allow it 'sudo -n docker' (NOPASSWD)"
