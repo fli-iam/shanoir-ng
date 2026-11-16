@@ -78,6 +78,21 @@ The node now answers on `http://127.0.0.1:8000` (API docs at `/docs`). It is onl
 The node must answer over HTTPS from the internet. One proxy serves every public node of the VM, each on
 its own path of the same domain, e.g. `https://neurobagel.irisa.fr/neurinfo`.
 
+> **Why a separate proxy for a single node?** Only the Neurinfo node is public today, so the proxy could simply
+> run from that node's own recipes folder, with the recipes' `docker-compose.proxy.yml`
+> ([Neurobagel production docs](https://neurobagel.org/user_guide/production_deployment/#proxy-server)).
+> It runs instead from its own recipes clone (`~/neurobagel-proxy`, managed by `nb-proxy.sh`), on purpose, for
+> future scaling, i.e. publishing more Neurobagel nodes later (e.g. one for OFSEP):
+>
+> - **One proxy for every node.** Only one program can listen on ports 80 and 443, so all public nodes must
+>   share one proxy. Owned by no node, it does not depend on which instance was installed first.
+> - **Independent lifecycles.** `down`, `wipe`, `uninstall` or a recipes upgrade of a node never stop the
+>   proxy, the other public nodes, or lose the HTTPS certificate (kept in the proxy's own volumes).
+> - **Adding a node is only a config change.** To publish another instance (e.g. OFSEP), set `NB_NAPI_DOMAIN`
+>   and its own `NB_NAPI_BASE_PATH` in its config and sync it. The proxy finds it on the `NB_proxynet`
+>   network and routes it, under the same domain and certificate, without touching the proxy or the
+>   Neurinfo node.
+
 **Before you start**
 
 - A DNS entry of the domain pointing to the VM.
