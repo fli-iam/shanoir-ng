@@ -52,9 +52,7 @@ public final class ModelsUtil {
     public static final String NEW_USER_LOGIN = "user";
     public static final Long USER_ID = 1L;
     public static final String USER_LOGIN = "admin";
-    public static final String USER_PASSWORD = "D0-483351E2-30";
     public static final String USER_LOGIN_GUEST = "wopa";
-    public static final String USER_PASSWORD_GUEST = "1117DC-36DE-34";
 
     /**
      * Create a role 'admin'.
