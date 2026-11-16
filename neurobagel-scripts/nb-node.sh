@@ -244,12 +244,24 @@ cmd_install() {
 
 # ---------------------------------------------------------------- fetch
 
-token() {
-    # secret on stdin, not in the process list
-    printf %s "$NB_CLIENT_SECRET" | curl -sS --fail-with-body --max-time 60 \
+token() {  # prints the access token; on failure, Keycloak's reason on stderr (secret and token never in argv)
+    local body
+    body=$(printf %s "$NB_CLIENT_SECRET" | curl -sS --fail-with-body --max-time 60 \
         -d grant_type=client_credentials -d client_id="$NB_CLIENT_ID" --data-urlencode client_secret@- \
-        "$SHANOIR_URL/auth/realms/shanoir-ng/protocol/openid-connect/token" \
-        | python3 -c 'import json,sys; print(json.load(sys.stdin)["access_token"])'
+        "$SHANOIR_URL/auth/realms/shanoir-ng/protocol/openid-connect/token") || {
+        python3 -c 'import json,sys
+try:
+    d = json.load(sys.stdin)
+    print("Keycloak:", d.get("error_description") or d.get("error"), file=sys.stderr)
+except Exception:
+    pass' <<< "$body"
+        return 1
+    }
+    python3 -c 'import json,sys
+try:
+    print(json.load(sys.stdin)["access_token"])
+except Exception:
+    print("Keycloak answered without an access token", file=sys.stderr); sys.exit(1)' <<< "$body"
 }
 
 get() {  # get <api path> <output file>; token in a curl config on stdin, not in the process list
@@ -348,6 +360,8 @@ start_log() {
 cmd_sync() {
     start_log
     log "======== sync start ========"
+    # a sync stopped by an error gets an end line too, for the log and 'status' (exit 2 logs its own)
+    trap 'rc=$?; [ "$rc" = 0 ] || [ "$rc" = 2 ] || log "======== sync FAILED (exit $rc) ========"' EXIT
     [ -n "${SHANOIR_URL:-}" ] && [ -n "${NB_CLIENT_SECRET:-}" ] || die "set SHANOIR_URL and NB_CLIENT_SECRET in $CONF"
     check_conf
     proxy_ready   # before fetching and building: a public node cannot start without the proxy
@@ -448,7 +462,7 @@ cmd_status() {
     log "listening sockets (API must be 127.0.0.1 only, nothing on 7200):"
     ss -tln 2>/dev/null | grep -E ":(${API_PORT:-none}|7200)\b" || true
     log "cron: $(crontab -l 2>/dev/null | grep -F "$SELF sync$CMD_ARGS >" || echo 'not installed')"
-    [ -f "$LOG" ] && { log "last sync lines:"; grep -E '======== sync' "$LOG" | tail -n 4; }
+    [ -f "$LOG" ] && { log "last sync lines:"; grep -E '======== sync|ERROR' "$LOG" | tail -n 6; }
 }
 
 cmd_logs() {
