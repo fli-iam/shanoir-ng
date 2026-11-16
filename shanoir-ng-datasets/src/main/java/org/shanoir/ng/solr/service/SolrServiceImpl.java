@@ -40,6 +40,7 @@ import org.shanoir.ng.shared.model.Center;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.shanoir.ng.shared.quality.QualityTag;
 import org.shanoir.ng.shared.repository.CenterRepository;
+import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.shared.subjectstudy.SubjectType;
 import org.shanoir.ng.solr.model.ShanoirMetadata;
 import org.shanoir.ng.solr.model.ShanoirSolrDocument;
@@ -244,7 +245,7 @@ public class SolrServiceImpl implements SolrService {
     }
 
     /**
-     * Get all study centers relative to the current user
+     * Get all study centers the current user can see (valid membership with CAN_SEE_ALL)
      * @return a map with all study relative to the current user and their associated centers
      */
     private Map<Long, List<String>> getStudiesCenter() {
@@ -252,7 +253,7 @@ public class SolrServiceImpl implements SolrService {
         Map<Long, List<String>> studiesCenter = new HashMap<>();
         List<Center> centers = Utils.toList(centerRepository.findAll());
         for (StudyUser su : studyUsers) {
-            if (su.canAccessStudy()) {
+            if (su.canAccessStudy() && su.getStudyUserRights().contains(StudyUserRight.CAN_SEE_ALL)) {
                 studiesCenter.put(su.getStudyId(), su.getCenterIds().stream().map(centerId -> findCenterName(centers, centerId)).collect(Collectors.toList()));
             }
         }
