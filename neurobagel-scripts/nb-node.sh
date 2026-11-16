@@ -2,12 +2,16 @@
 # Neurobagel nodes fed by Shanoir, one per Shanoir instance: install, fetch + bagel build + (re)load, made for cron.
 #
 #   bash nb-node.sh <command> <instance>
+#   bash nb-node.sh --help                    # this help
 #   bash nb-node.sh install <instance>        # once (sync also does it if needed): recipes, .env, GraphDB passwords, images
 #   bash nb-node.sh sync <instance>           # fetch every exported study, build the JSONLDs, reload the node if the inputs changed
 #   FORCE=1 bash nb-node.sh sync <instance>   # reload even if nothing changed
 #   bash nb-node.sh cron-install <instance>   # daily sync in the user's crontab at CRON_AT (default "20 4" = 04:20)
-#   bash nb-node.sh cron-remove <instance>
-#   bash nb-node.sh status|logs|down|wipe <instance>
+#   bash nb-node.sh cron-remove <instance>    # remove the daily sync from the user's crontab (the node keeps running)
+#   bash nb-node.sh status <instance>         # public or local, containers, listening ports, cron entry, last syncs
+#   bash nb-node.sh logs <instance>           # last logs of the init_data, graph and api containers
+#   bash nb-node.sh down <instance>           # stop the node, keep its database (the next sync brings it back)
+#   bash nb-node.sh wipe <instance>           # stop the node and delete its database (the next sync reloads it)
 #   bash nb-node.sh uninstall <instance>      # remove the instance: cron, containers, volumes, images, recipes, data, state, config (YES=1: no prompt)
 #
 # Everything of an instance NAME is derived from its name (lowercase letters, digits, - and _):
@@ -17,6 +21,7 @@
 #     recipes/ = neurobagel/recipes clone, .env, GraphDB passwords
 #     data/    = JSONLDs the node loads
 #     state/   = log, last downloaded inputs, lock (private, 700)
+#
 # Required in each config: SHANOIR_URL, NB_CLIENT_ID, NB_CLIENT_SECRET, API_PORT (unique, bound to 127.0.0.1 only),
 # BAGEL_IMAGE and NB_NAPI_TAG (pinned versions). CRON_AT should differ per instance.
 # Node settings (NB_RETURN_AGG, NB_MIN_CELL_SIZE, NB_NAPI_TAG, NB_NAPI_DOMAIN, NB_NAPI_BASE_PATH) also
@@ -37,8 +42,14 @@ export PATH="$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin:$PATH"
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
 SELF="$HERE/$(basename "$0")"
-usage() { awk 'NR > 1 && !/^#/ { exit } NR > 1' "$SELF"; exit 1; }
+usage() {  # the header comment above as help: exit 0 for --help (stdout), 1 for a wrong call (stderr)
+    local code="${1:-1}"
+    if [ "$code" = 0 ]; then help_text; else help_text >&2; fi
+    exit "$code"
+}
+help_text() { awk 'NR > 1 && !/^#/ { exit } NR > 1' "$SELF" | sed -E 's/^# ?//'; }
 
+case "${1:-}" in -h|--help|help) usage 0 ;; esac
 INSTANCE="${2:-}"
 [ -n "$INSTANCE" ] || usage
 [[ $INSTANCE =~ ^[a-z0-9][a-z0-9_-]*$ ]] || { echo "instance name: lowercase letters, digits, - and _ only" >&2; exit 1; }

@@ -2,10 +2,11 @@
 # Shared HTTPS reverse proxy for the public Neurobagel nodes of nb-node.sh: nginx-proxy + acme-companion
 # (Let's Encrypt), from the neurobagel/recipes docker-compose.proxy.yml. One proxy serves every instance.
 #
-#   bash nb-proxy.sh up          # install if needed, then start (or restart) the proxy
-#   bash nb-proxy.sh status      # containers, routed nodes and whether their public URL answers
-#   bash nb-proxy.sh logs
-#   bash nb-proxy.sh down        # stop the proxy: every public node becomes unreachable (nodes keep running)
+#   bash nb-proxy.sh --help      # this help
+#   bash nb-proxy.sh up          # install if needed (recipes clone), then start or update the proxy from nb-proxy.conf
+#   bash nb-proxy.sh status      # containers, routed nodes and the HTTP code of each public URL (200 = OK)
+#   bash nb-proxy.sh logs        # last 100 log lines of nginx-proxy and of acme-companion (routing, certificates)
+#   bash nb-proxy.sh down        # stop the proxy, keep its certificates: public nodes go offline, but keep running
 #   bash nb-proxy.sh uninstall   # remove the proxy, its certificates and ~/neurobagel-proxy (no node may use it; YES=1: no prompt)
 #
 # Config: nb-proxy.conf next to this script, see nb-proxy.conf.example (NGINX_PROXY_TAG and ACME_COMPANION_TAG required).
@@ -13,6 +14,7 @@
 # It creates the docker network NB_proxynet. A node joins it when its nb-<instance>.conf sets NB_NAPI_DOMAIN:
 # nginx-proxy routes https://<NB_NAPI_DOMAIN><NB_NAPI_BASE_PATH> (e.g. https://neurobagel.irisa.fr/node) to it and
 # acme-companion gets the certificate.
+#
 # Needs: a DNS entry of each domain to this machine, and ports 80 + 443 open from the internet (Let's Encrypt uses 80).
 # The proxy containers read the docker socket (that is how they discover the nodes).
 set -euo pipefail
@@ -36,7 +38,12 @@ ACME_COMPANION_TAG="${ACME_COMPANION_TAG:-}"
 
 log() { echo "$(date '+%F %T') [nb:proxy] $*"; }
 die() { log "ERROR: $*" >&2; exit 1; }
-usage() { awk 'NR > 1 && !/^#/ { exit } NR > 1' "$SELF"; exit 1; }
+usage() {  # the header comment above as help: exit 0 for --help (stdout), 1 for a wrong call (stderr)
+    local code="${1:-1}"
+    if [ "$code" = 0 ]; then help_text; else help_text >&2; fi
+    exit "$code"
+}
+help_text() { awk 'NR > 1 && !/^#/ { exit } NR > 1' "$SELF" | sed -E 's/^# ?//'; }
 
 if docker info >/dev/null 2>&1; then DOCKER=(docker)
 elif [ -t 0 ]; then DOCKER=(sudo docker)
@@ -181,5 +188,6 @@ case "${1:-}" in
     logs)      [ -d "$RECIPES" ] || die "proxy not installed"; compose logs --no-color --tail 100 ;;
     down)      cmd_down ;;
     uninstall) cmd_uninstall ;;
+    -h|--help|help) usage 0 ;;
     *)         usage ;;
 esac

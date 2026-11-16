@@ -186,6 +186,8 @@ sync.
 
 `bash nb-proxy.sh <command>`: `up`, `status`, `logs`, `down` (all public nodes go offline), `uninstall`.
 
+`bash nb-node.sh --help` and `bash nb-proxy.sh --help` (or `-h`) print the full usage of each script.
+
 `sync` exits with `0` (success or nothing to do), `1` (error, the node is left as it was) or `2` (reloaded,
 but some studies failed to build). Its log is `~/neurobagel-<instance>/state/nb-node.log`.
 
