@@ -17,14 +17,15 @@
 #     recipes/ = neurobagel/recipes clone, .env, GraphDB passwords
 #     data/    = JSONLDs the node loads
 #     state/   = log, last downloaded inputs, lock (private, 700)
-# Each config sets its own API_PORT (unique, bound to 127.0.0.1 only) and should set its own CRON_AT.
+# Required in each config: SHANOIR_URL, NB_CLIENT_ID, NB_CLIENT_SECRET, API_PORT (unique, bound to 127.0.0.1 only),
+# BAGEL_IMAGE and NB_NAPI_TAG (pinned versions). CRON_AT should differ per instance.
 # Node settings (NB_RETURN_AGG, NB_MIN_CELL_SIZE, NB_NAPI_TAG, NB_NAPI_DOMAIN, NB_NAPI_BASE_PATH) also
 # come from the config: the script writes recipes/.env from it, and a changed setting reloads the node at the next sync.
 #
-# Public node: set NB_NAPI_DOMAIN (and NB_NAPI_BASE_PATH when several nodes share the domain). The node then runs on the
-# recipes' docker-compose.prod.yml, behind the shared proxy of nb-proxy.sh (nginx-proxy + Let's Encrypt), which must be
-# running first. Without NB_NAPI_DOMAIN the node is local only (docker-compose.noproxy.prod.yml). Either way the API
-# also stays on 127.0.0.1:API_PORT for this script and query.py.
+# Public node: set NB_NAPI_DOMAIN and NB_NAPI_BASE_PATH (e.g. neurobagel.irisa.fr + /node, a different path per instance).
+# The node then runs on the recipes' docker-compose.prod.yml, behind the shared proxy of nb-proxy.sh (nginx-proxy +
+# Let's Encrypt), which must be running first. Without NB_NAPI_DOMAIN the node is local only
+# (docker-compose.noproxy.prod.yml). Either way the API also stays on 127.0.0.1:API_PORT for this script and query.py.
 # Cron cannot type a sudo password: the user must be in the docker group, or 'sudo -n docker' must work (NOPASSWD).
 #
 # A sync never breaks a running node on a download error: everything is fetched and built in state/staging

@@ -13,7 +13,7 @@ NB_CLIENT_SECRET=
 API_PORT=
 # daily sync time (minute hour), a different slot per instance (e.g. "20 4", "50 4", "20 5"), empty = "20 4"
 CRON_AT=
-# image of the bagel CLI that builds the JSONLDs
+# image of the bagel CLI that builds the JSONLDs, with its version
 BAGEL_IMAGE=neurobagel/bagelcli:v0.11.7
 # neurobagel/api image tag
 NB_NAPI_TAG=v0.12.0

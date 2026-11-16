@@ -11,7 +11,8 @@
 # Config: nb-proxy.conf next to this script, see nb-proxy.conf.example (NGINX_PROXY_TAG and ACME_COMPANION_TAG required).
 # Folder: ~/neurobagel-proxy = recipes clone + compose.local.yml. Compose project: shanoir_nb_proxy.
 # It creates the docker network NB_proxynet. A node joins it when its nb-<instance>.conf sets NB_NAPI_DOMAIN:
-# nginx-proxy routes https://NB_NAPI_DOMAIN/NB_NAPI_BASE_PATH to it and acme-companion gets the certificate.
+# nginx-proxy routes https://<NB_NAPI_DOMAIN><NB_NAPI_BASE_PATH> (e.g. https://neurobagel.irisa.fr/node) to it and
+# acme-companion gets the certificate.
 # Needs: a DNS entry of each domain to this machine, and ports 80 + 443 open from the internet (Let's Encrypt uses 80).
 # The proxy containers read the docker socket (that is how they discover the nodes).
 set -euo pipefail
