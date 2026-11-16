@@ -399,4 +399,11 @@ public interface DatasetApi {
             @Parameter(description = "Keys of the metadata to extract", required = true) @Valid
             @RequestParam List<String> metadataKeys) throws Exception;
 
+    @Operation(summary = "Check consistency of old datasets", description = "Check the PACS consistency of old and not checked datasets. A .csv file is created.")
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "check launched"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @PostMapping(value = "/checkPastImports", produces = { "application/json" })
+    @PreAuthorize("hasRole('ADMIN')")
+    ResponseEntity<?> checkPastImport();
 }

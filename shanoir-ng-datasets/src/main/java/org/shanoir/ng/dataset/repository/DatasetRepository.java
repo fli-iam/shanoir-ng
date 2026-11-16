@@ -395,6 +395,14 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
     @Query(value = "SELECT d.id FROM Dataset d")
     List<Long> findAllIds(Sort sort);
 
+    @Query(value = "SELECT d.id from Dataset d WHERE d.creation_date = CURDATE() - INTERVAL 1 DAY",
+            nativeQuery = true)
+    List<Long> findNewIds();
+
+    @Query(value = "SELECT d.id from Dataset d WHERE d.is_consistent is null",
+            nativeQuery = true)
+    List<Long> findNotCheckedIds();
+
     default Page<Dataset> findAllWithProcessingAncestorsAndExamination(Pageable pageable) {
         Page<Long> idPage = findAllIds(pageable);
         List<Dataset> datasetList = findByIdsWithProcessingAncestorsAndExamination(idPage.getContent());
@@ -457,6 +465,17 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
 
     @Transactional(readOnly = true)
     default List<Dataset> findByIdsWithDatasetFilesAndExaminationAndMetadata(List<Long> ids) {
+        List<Dataset> datasets = findByIdsWithDatasetExpression(ids);
+        datasets.forEach(d ->
+                d.getDatasetExpressions().forEach(de -> {
+                    Hibernate.initialize(de.getDatasetFiles());
+                })
+        );
+        return datasets;
+    }
+
+    @Transactional(readOnly = true)
+    default List<Dataset> findByIdsWithDatasetFiles(List<Long> ids) {
         List<Dataset> datasets = findByIdsWithDatasetExpression(ids);
         datasets.forEach(d ->
                 d.getDatasetExpressions().forEach(de -> {
