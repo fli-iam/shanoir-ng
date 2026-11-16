@@ -52,8 +52,8 @@ NB_NAPI_TAG=v0.12.0
 
 NB_RETURN_AGG=true                         # counts only
 NB_MIN_CELL_SIZE=5                         # hide datasets with 5 matching subjects or fewer
-NB_NAPI_DOMAIN=neurobagel.irisa.fr         # The domain of the public node, e.g. neurobagel.irisa.fr
-NB_NAPI_BASE_PATH=/node                    # The path of the public node, e.g. /node --> neurobagel.irisa.fr/node
+NB_NAPI_DOMAIN=                            # empty for now (local node): set in "Make a node public", e.g. neurobagel.irisa.fr
+NB_NAPI_BASE_PATH=                         # same, e.g. /node --> https://neurobagel.irisa.fr/node
 ```
 
 **2. Install, load the data, schedule the daily sync**
@@ -179,7 +179,7 @@ sync.
 | `sync` | Downloads, builds and reloads the node if the data or settings changed. `--force`: reload anyway. |
 | `cron-install` / `cron-remove` | Adds the daily sync at `CRON_AT` |
 | `cron-remove` | Removes the daily sync at `CRON_AT` (removing it leaves the node running) |
-| `status` | Public or local, containers, listening ports, cron entry, last syncs |
+| `status` | Public or local, containers, listening ports, cron entry, last syncs and their errors |
 | `logs` | Last logs of the `init_data`, `graph` and `api` containers |
 | `down` | Stops the node and keeps its database; the next `sync` brings it back |
 | `wipe` | Stops the node and deletes its database; the next `sync` reloads it |

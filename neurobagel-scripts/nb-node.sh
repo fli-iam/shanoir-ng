@@ -8,7 +8,7 @@
 #   bash nb-node.sh sync <instance> --force   # reload even if nothing changed
 #   bash nb-node.sh cron-install <instance>   # daily sync in the user's crontab at CRON_AT (default "20 4" = 04:20)
 #   bash nb-node.sh cron-remove <instance>    # remove the daily sync from the user's crontab (the node keeps running)
-#   bash nb-node.sh status <instance>         # public or local, containers, listening ports, cron entry, last syncs
+#   bash nb-node.sh status <instance>         # public or local, containers, listening ports, cron entry, last syncs and errors
 #   bash nb-node.sh logs <instance>           # last logs of the init_data, graph and api containers
 #   bash nb-node.sh down <instance>           # stop the node, keep its database (the next sync brings it back)
 #   bash nb-node.sh wipe <instance>           # stop the node and delete its database (the next sync reloads it)
