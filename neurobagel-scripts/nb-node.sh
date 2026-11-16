@@ -18,7 +18,7 @@
 #     data/    = JSONLDs the node loads
 #     state/   = log, last downloaded inputs, lock (private, 700)
 # Each config sets its own API_PORT (unique, bound to 127.0.0.1 only) and should set its own CRON_AT.
-# Node settings (NB_RETURN_AGG, NB_MIN_CELL_SIZE, NB_NAPI_TAG, NB_NAPI_DOMAIN, NB_NAPI_BASE_PATH, NB_GRAPH_MEMORY) also
+# Node settings (NB_RETURN_AGG, NB_MIN_CELL_SIZE, NB_NAPI_TAG, NB_NAPI_DOMAIN, NB_NAPI_BASE_PATH) also
 # come from the config: the script writes recipes/.env from it, and a changed setting reloads the node at the next sync.
 #
 # Public node: set NB_NAPI_DOMAIN (and NB_NAPI_BASE_PATH when several nodes share the domain). The node then runs on the
@@ -62,7 +62,6 @@ NB_MIN_CELL_SIZE="${NB_MIN_CELL_SIZE:-0}"
 NB_NAPI_TAG="${NB_NAPI_TAG:-}"
 NB_NAPI_DOMAIN="${NB_NAPI_DOMAIN:-}"
 NB_NAPI_BASE_PATH="${NB_NAPI_BASE_PATH:-}"
-NB_GRAPH_MEMORY="${NB_GRAPH_MEMORY:-2G}"
 PROXY_NET="NB_proxynet"   # network created by the shared proxy (recipes' docker-compose.proxy.yml)
 LOCAL_COMPOSE="$NB_HOME/compose.local.yml"
 CMD_ARGS=" $INSTANCE"   # appended to the commands the script prints or puts in cron
@@ -81,7 +80,6 @@ check_conf() {
         || die "NB_NAPI_DOMAIN in $CONF: empty (local only), or a domain like neurobagel.example.org (no https://, no path)"
     [[ -z $NB_NAPI_BASE_PATH || $NB_NAPI_BASE_PATH =~ ^(/[A-Za-z0-9._-]+)+$ ]] \
         || die "NB_NAPI_BASE_PATH in $CONF: empty, or a path like /ofsep (leading /, no trailing /)"
-    [[ $NB_GRAPH_MEMORY =~ ^[0-9]+[KkMmGg]?$ ]] || die "NB_GRAPH_MEMORY in $CONF: a size like 2G or 1500M"
 }
 
 # docker without sudo if allowed, else sudo (non-interactive under cron)
@@ -146,7 +144,6 @@ COMPOSE_PROJECT_NAME=$PROJECT
 COMPOSE_PROFILES=node
 NB_GRAPH_USERNAME=nbuser
 NB_GRAPH_DB=repositories/my_db
-NB_GRAPH_MEMORY=$NB_GRAPH_MEMORY
 LOCAL_GRAPH_DATA=$NB_DATA
 NB_RETURN_AGG=$NB_RETURN_AGG
 NB_MIN_CELL_SIZE=$NB_MIN_CELL_SIZE

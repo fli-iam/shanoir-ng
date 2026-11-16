@@ -27,5 +27,3 @@ NB_MIN_CELL_SIZE=5
 NB_NAPI_DOMAIN=neurobagel.irisa.fr
 # public sub-path of this node on that domain, e.g. /node (leading /, no trailing /): unique when nodes share a domain
 NB_NAPI_BASE_PATH=/node
-# maximum memory of this instance's GraphDB
-#NB_GRAPH_MEMORY=2G

@@ -139,7 +139,6 @@ it from the federation.
 | `NB_NAPI_TAG` | *required* | `neurobagel/api` image tag, e.g. `v0.12.0` |
 | `NB_NAPI_DOMAIN` | empty | Public domain of the node; empty = local only |
 | `NB_NAPI_BASE_PATH` | empty | Public path on that domain, e.g. `/neurinfo` |
-| `NB_GRAPH_MEMORY` | `2G` | Maximum memory of GraphDB |
 
 The node settings (`NB_RETURN_AGG` and below) are written by the script into
 `~/neurobagel-<instance>/recipes/.env`: edit the config, never that `.env`. A change is applied at the next
