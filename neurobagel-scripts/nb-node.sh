@@ -13,7 +13,7 @@
 # Everything of an instance NAME is derived from its name (lowercase letters, digits, - and _):
 #   config:          nb-NAME.conf next to this script (chmod 600, see nb.conf.example)
 #   compose project: shanoir_nb_NAME
-#   instance folder: ~/neurobagel-NAME (NB_HOME in the config to change it), containing
+#   instance folder: ~/neurobagel-NAME, containing
 #     recipes/ = neurobagel/recipes clone, .env, GraphDB passwords
 #     data/    = JSONLDs the node loads
 #     state/   = log, last downloaded inputs, lock (private, 700)
@@ -47,15 +47,14 @@ CONF="$HERE/nb-$INSTANCE.conf"
 # shellcheck source=/dev/null
 [ -f "$CONF" ] && . "$CONF"
 
-NB_HOME="${NB_HOME:-$HOME/neurobagel-$INSTANCE}"
-NB_HOME="$(realpath -m -- "$NB_HOME")"   # absolute, no trailing /
+NB_HOME="$(realpath -m -- "$HOME/neurobagel-$INSTANCE")"   # instance folder, derived from the name only
 RECIPES="$NB_HOME/recipes"
 NB_DATA="$NB_HOME/data"
 STATE="$NB_HOME/state"
 STAGE="$STATE/staging"
 LOG="$STATE/nb-node.log"
 API_PORT="${API_PORT:-}"
-NB_CLIENT_ID="${NB_CLIENT_ID:-neurobagel-export}"
+NB_CLIENT_ID="${NB_CLIENT_ID:-}"
 BAGEL_IMAGE="${BAGEL_IMAGE:-}"
 # node settings, written into recipes/.env
 NB_RETURN_AGG="${NB_RETURN_AGG:-true}"
@@ -71,6 +70,7 @@ CMD_ARGS=" $INSTANCE"   # appended to the commands the script prints or puts in 
 log() { echo "$(date '+%F %T') [nb:$INSTANCE] $*"; }
 die() { log "ERROR: $*" >&2; exit 1; }
 check_conf() {
+    [[ $NB_CLIENT_ID =~ ^[A-Za-z0-9._-]+$ ]] || die "set NB_CLIENT_ID in $CONF: the instance's Keycloak client, e.g. neurobagel-export"
     [[ $API_PORT =~ ^[0-9]+$ ]] || die "set API_PORT in $CONF (a port no other instance uses)"
     [[ $NB_RETURN_AGG =~ ^(true|false)$ ]] || die "NB_RETURN_AGG in $CONF: true (counts only) or false (subject-level results too)"
     [[ $NB_MIN_CELL_SIZE =~ ^[0-9]+$ ]] || die "NB_MIN_CELL_SIZE in $CONF: a number of subjects, e.g. 5"
@@ -193,9 +193,6 @@ cmd_install() {
         git -c advice.detachedHead=false clone -q --depth 1 --branch "$tag" https://github.com/neurobagel/recipes.git "$RECIPES"
     fi
 
-    if [ -f "$RECIPES/.env" ] && ! grep -qx "COMPOSE_PROJECT_NAME=$PROJECT" "$RECIPES/.env"; then
-        die "$NB_HOME belongs to another node ($(grep -m1 '^COMPOSE_PROJECT_NAME=' "$RECIPES/.env")): give each instance its own NB_HOME"
-    fi
     if ss -tln 2>/dev/null | grep -qE "127\.0\.0\.1:$API_PORT\b|\*:$API_PORT\b|0\.0\.0\.0:$API_PORT\b" \
         && [ -z "$(compose ps -q api 2>/dev/null)" ]; then
         die "port $API_PORT is already used (another instance?): set a different API_PORT in $CONF"

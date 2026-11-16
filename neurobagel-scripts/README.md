@@ -26,7 +26,7 @@ On the VM:
 - Network access to the Shanoir instance, GitHub and Docker Hub
 - About 2 GB of RAM per instance (GraphDB)
 
-On the Shanoir instance: a Keycloak client in the `shanoir-ng` realm (default `neurobagel-export`), with
+On the Shanoir instance: a Keycloak client in the `shanoir-ng` realm (e.g. `neurobagel-export`), with
 *client authentication* and *service accounts* enabled, allowed to call `/shanoir-ng/studies/neurobagel/*`.
 
 ## Install a node
@@ -43,12 +43,17 @@ Edit `nb-neurinfo.conf`:
 
 ```bash
 SHANOIR_URL=https://shanoir.irisa.fr
+NB_CLIENT_ID=neurobagel-export
 NB_CLIENT_SECRET=<secret of the Keycloak client>
-API_PORT=8000          # unique per instance: 8000, 8001, ...
-CRON_AT="20 4"         # daily sync at 04:20, a different slot per instance
+API_PORT=8000                              # unique per instance: 8000, 8001, ...
+CRON_AT="20 4"                             # daily sync at 04:20, a different slot per instance
+BAGEL_IMAGE=neurobagel/bagelcli:v0.11.7
+NB_NAPI_TAG=v0.12.0
 
-NB_RETURN_AGG=true     # counts only
-NB_MIN_CELL_SIZE=5     # hide datasets with 5 matching subjects or fewer
+NB_RETURN_AGG=true                         # counts only
+NB_MIN_CELL_SIZE=5                         # hide datasets with 5 matching subjects or fewer
+NB_NAPI_DOMAIN=                            # empty: local node first, see "Make a node public"
+NB_NAPI_BASE_PATH=
 ```
 
 **2. Install, load the data, schedule the daily sync**
@@ -87,7 +92,7 @@ cp nb-proxy.conf.example nb-proxy.conf     # optional: Let's Encrypt email, imag
 bash nb-proxy.sh up
 ```
 
-**2. Publish the node**: add to `nb-neurinfo.conf`:
+**2. Publish the node**: set in `nb-neurinfo.conf`:
 
 ```bash
 NB_NAPI_DOMAIN=neurobagel.irisa.fr
@@ -124,11 +129,10 @@ it from the federation.
 | Variable | Default | Description |
 |---|---|---|
 | `SHANOIR_URL` | *required* | Base URL of the Shanoir instance |
+| `NB_CLIENT_ID` | *required* | Keycloak client id, e.g. `neurobagel-export` |
 | `NB_CLIENT_SECRET` | *required* | Secret of the Keycloak client |
 | `API_PORT` | *required* | Port of the node API on `127.0.0.1`, unique per instance |
-| `CRON_AT` | `20 4` | Daily sync time (`minute hour`) |
-| `NB_CLIENT_ID` | `neurobagel-export` | Keycloak client id |
-| `NB_HOME` | `~/neurobagel-<instance>` | Instance folder, never shared between instances |
+| `CRON_AT` | `20 4` | Daily sync time (`minute hour`), a different slot per instance |
 | `BAGEL_IMAGE` | *required* | bagel CLI image with its version, e.g. `neurobagel/bagelcli:v0.11.7` |
 | `NB_RETURN_AGG` | `true` | `true`: counts only. `false`: subject-level results too, **never on a public node** |
 | `NB_MIN_CELL_SIZE` | `0` | Datasets with this many matching subjects or fewer are hidden |
