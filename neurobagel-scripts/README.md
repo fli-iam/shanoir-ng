@@ -52,8 +52,8 @@ NB_NAPI_TAG=v0.12.0
 
 NB_RETURN_AGG=true                         # counts only
 NB_MIN_CELL_SIZE=5                         # hide datasets with 5 matching subjects or fewer
-NB_NAPI_DOMAIN=                            # empty: local node first, see "Make a node public"
-NB_NAPI_BASE_PATH=
+NB_NAPI_DOMAIN=neurobagel.irisa.fr         # The domain of the public node, e.g. neurobagel.irisa.fr
+NB_NAPI_BASE_PATH=/node                    # The path of the public node, e.g. /node --> neurobagel.irisa.fr/node
 ```
 
 **2. Install, load the data, schedule the daily sync**
@@ -177,14 +177,23 @@ sync.
 |---|---|
 | `install` | Installs the node (recipes clone, `.env`, random GraphDB passwords, images). Safe to rerun. |
 | `sync` | Downloads, builds and reloads the node if the data or settings changed. `--force`: reload anyway. |
-| `cron-install` / `cron-remove` | Adds / removes the daily sync |
-| `status` | Containers, ports, cron entry, last sync |
-| `logs` | Container logs |
-| `down` | Stops the node |
+| `cron-install` / `cron-remove` | Adds the daily sync at `CRON_AT` |
+| `cron-remove` | Removes the daily sync at `CRON_AT` (removing it leaves the node running) |
+| `status` | Public or local, containers, listening ports, cron entry, last syncs |
+| `logs` | Last logs of the `init_data`, `graph` and `api` containers |
+| `down` | Stops the node and keeps its database; the next `sync` brings it back |
 | `wipe` | Stops the node and deletes its database; the next `sync` reloads it |
-| `uninstall` | Removes the instance completely (`--yes`: no prompt) |
+| `uninstall` | Removes the instance completely: cron, containers, volumes, recipes, data, state, config (`--yes`: no prompt) |
 
-`bash nb-proxy.sh <command>`: `up`, `status`, `logs`, `down` (all public nodes go offline), `uninstall`.
+`bash nb-proxy.sh <command>`:
+
+| Command | Description |
+|---|---|
+| `up` | Installs the proxy if needed, then starts it or applies a changed `nb-proxy.conf` |
+| `status` | Containers, routed nodes and the HTTP code of each public URL (`200` = OK) |
+| `logs` | Last logs of nginx-proxy and acme-companion (routing, certificates) |
+| `down` | Stops the proxy and keeps its certificates: public nodes go offline but keep running |
+| `uninstall` | Removes the proxy, its certificates and `~/neurobagel-proxy`; refused while a node uses it (`--yes`: no prompt) |
 
 `bash nb-node.sh --help` and `bash nb-proxy.sh --help` (or `-h`) print the full usage of each script.
 

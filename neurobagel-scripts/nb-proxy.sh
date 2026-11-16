@@ -115,7 +115,7 @@ cmd_up() {
     fi
     log "starting nginx-proxy $NGINX_PROXY_TAG and acme-companion $ACME_COMPANION_TAG..."
     compose up -d --remove-orphans
-    log "proxy up, network $PROXY_NET ready. Public nodes: set NB_NAPI_DOMAIN in their config, then: bash nb-node.sh sync <instance>"
+    log "proxy up, network $PROXY_NET ready. To publish a node: set NB_NAPI_DOMAIN and NB_NAPI_BASE_PATH in its config, then: bash $HERE/nb-node.sh sync <instance> --force"
     show_nodes
 }
 
