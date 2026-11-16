@@ -33,6 +33,7 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -139,7 +140,7 @@ public class DatasetConsistencyChecker {
 
                     Integer inconsistentCount = 0;
 
-                    for (List<Dataset> partition : ListUtils.partition(datasetsToCheck,PARTITION_SIZE)) {
+                    for (List<Dataset> partition : ListUtils.partition(datasetsToCheck, PARTITION_SIZE)) {
                         inconsistentCount += self.checkDatasetPartition(partition, writer);
                     }
                     return inconsistentCount;
@@ -158,10 +159,10 @@ public class DatasetConsistencyChecker {
     @Transactional
     protected Integer checkDatasetPartition(List<Dataset> partition, CSVWriter writer) {
         Integer inconsistentCount = 0;
-        for(Dataset dataset : partition) {
+        for (Dataset dataset : partition) {
             Hibernate.initialize(dataset.getDatasetExpressions());
             checkDataset(dataset, writer);
-            if(!dataset.isConsistent()) {
+            if (!dataset.isConsistent()) {
                 inconsistentCount++;
             }
         }
@@ -199,7 +200,7 @@ public class DatasetConsistencyChecker {
         if (expressions != null && !expressions.isEmpty()) {
             expressions.forEach(e -> {
                 if (DatasetExpressionFormat.DICOM.equals(e.getDatasetExpressionFormat())) {
-                    if(!checkExpression(e, filesInPACS)) {
+                    if (!checkExpression(e, filesInPACS)) {
                         dataset.setConsistent(false);
                     }
                 }
