@@ -10,7 +10,7 @@ fi
 LDAP_STORAGE_ENTRY_DN=${LDAP_STORAGE_ENTRY_DN:-dcmStorageID=fs1,dicomDeviceName=dcm4chee-arc,cn=Devices,cn=DICOM Configuration,dc=dcm4che,dc=org}
 LDAP_BASE_DN=${LDAP_BASE_DN:-dc=dcm4che,dc=org}
 LDAP_BIND_DN="cn=admin,${LDAP_BASE_DN}"
-LDAP_ROOTPASS=${LDAP_ROOTPASS:-secret}
+LDAP_ROOTPASS=${LDAP_ROOTPASS:?LDAP_ROOTPASS is not set}
 LDAP_URLS=${LDAP_URLS:-ldap:///}
 LDAP_PROPERTY_TARGET_DN=${LDAP_PROPERTY_TARGET_DN:-${LDAP_STORAGE_ENTRY_DN}}
 
