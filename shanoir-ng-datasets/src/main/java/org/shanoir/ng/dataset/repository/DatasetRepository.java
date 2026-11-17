@@ -478,7 +478,7 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
     }
 
     @Transactional(readOnly = true)
-    default Optional<Dataset> findByIdWithProcessingAncestorsAndExaminationAndMetadataAndSourceAndCopies(Long id){
+    default Optional<Dataset> findByIdWithProcessingAncestorsAndExaminationAndMetadataAndSourceAndCopies(Long id) {
         Dataset dataset = findByIdWithProcessingAncestorsAndExaminationAndMetadata(id).orElse(null);
         if (dataset != null) {
             Hibernate.initialize(dataset.getSource());
