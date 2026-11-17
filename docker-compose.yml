@@ -110,8 +110,15 @@ services:
     image: "ghcr.io/fli-iam/shanoir-ng/database:NG_v2.14.0"
     command: --max_allowed_packet 20000000
     environment:
-      - MARIADB_ROOT_PASSWORD=password
+      - "MARIADB_ROOT_PASSWORD=${SHANOIR_DB_ROOT_PASSWORD:?is not set, see .env.example}"
       - MARIADB_AUTO_UPGRADE=1
+      # passwords of the microservices' users, only read when the volume is initialised
+      - "SHANOIR_STUDIES_DB_PASSWORD=${SHANOIR_STUDIES_DB_PASSWORD:?is not set, see .env.example}"
+      - "SHANOIR_USERS_DB_PASSWORD=${SHANOIR_USERS_DB_PASSWORD:?is not set, see .env.example}"
+      - "SHANOIR_IMPORT_DB_PASSWORD=${SHANOIR_IMPORT_DB_PASSWORD:?is not set, see .env.example}"
+      - "SHANOIR_DATASETS_DB_PASSWORD=${SHANOIR_DATASETS_DB_PASSWORD:?is not set, see .env.example}"
+      - "SHANOIR_PRECLINICAL_DB_PASSWORD=${SHANOIR_PRECLINICAL_DB_PASSWORD:?is not set, see .env.example}"
+      - "SHANOIR_MIGRATIONS_DB_PASSWORD=${SHANOIR_MIGRATIONS_DB_PASSWORD:?is not set, see .env.example}"
     ulimits:
       nofile:
         soft: 262144
@@ -123,7 +130,7 @@ services:
     networks:
       - shanoir_ng_network
     healthcheck:
-      test: [ "CMD", "mariadb-admin", "ping", "-h", "localhost", "-u", "root", "-ppassword" ]
+      test: [ "CMD", "mariadb-admin", "ping", "-h", "localhost" ]
       interval: 3s
       timeout: 2s
       retries: 10
@@ -135,6 +142,7 @@ services:
     container_name: "${SHANOIR_PREFIX}database-migrations"
     image: "ghcr.io/fli-iam/shanoir-ng/database-migrations:NG_v2.14.0"
     environment:
+      - "SHANOIR_MIGRATIONS_DB_PASSWORD=${SHANOIR_MIGRATIONS_DB_PASSWORD:?is not set, see .env.example}"
       - SHANOIR_MIGRATION
     networks:
       - shanoir_ng_network
@@ -149,6 +157,7 @@ services:
     container_name: "${SHANOIR_PREFIX}users"
     image: "ghcr.io/fli-iam/shanoir-ng/users:NG_v2.14.0"
     environment:
+      - "SPRING_DATASOURCE_PASSWORD=${SHANOIR_USERS_DB_PASSWORD:?is not set, see .env.example}"
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
       - SHANOIR_URL_HOST
@@ -191,6 +200,7 @@ services:
     container_name: "${SHANOIR_PREFIX}studies"
     image: "ghcr.io/fli-iam/shanoir-ng/studies:NG_v2.14.0"
     environment:
+      - "SPRING_DATASOURCE_PASSWORD=${SHANOIR_STUDIES_DB_PASSWORD:?is not set, see .env.example}"
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
       - SHANOIR_URL_HOST
@@ -232,6 +242,7 @@ services:
     container_name: "${SHANOIR_PREFIX}import"
     image: "ghcr.io/fli-iam/shanoir-ng/import:NG_v2.14.0"
     environment:
+      - "SPRING_DATASOURCE_PASSWORD=${SHANOIR_IMPORT_DB_PASSWORD:?is not set, see .env.example}"
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
       - SHANOIR_URL_HOST
@@ -269,6 +280,7 @@ services:
     container_name: "${SHANOIR_PREFIX}datasets"
     image: "ghcr.io/fli-iam/shanoir-ng/datasets:NG_v2.14.0"
     environment:
+      - "SPRING_DATASOURCE_PASSWORD=${SHANOIR_DATASETS_DB_PASSWORD:?is not set, see .env.example}"
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
       - SHANOIR_URL_HOST
@@ -323,6 +335,7 @@ services:
     container_name: "${SHANOIR_PREFIX}preclinical"
     image: "ghcr.io/fli-iam/shanoir-ng/preclinical:NG_v2.14.0"
     environment:
+      - "SPRING_DATASOURCE_PASSWORD=${SHANOIR_PRECLINICAL_DB_PASSWORD:?is not set, see .env.example}"
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
       - SHANOIR_URL_HOST
