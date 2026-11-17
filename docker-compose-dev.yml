@@ -35,7 +35,7 @@ services:
     networks:
       - shanoir_ng_network
     healthcheck:
-      test: [ "CMD", "mariadb-admin", "ping", "-h", "localhost" ]
+      test: [ "CMD", "healthcheck.sh", "--connect", "--innodb_initialized" ]
       interval: 3s
       timeout: 2s
       retries: 10
@@ -145,7 +145,7 @@ services:
     networks:
       - shanoir_ng_network
     healthcheck:
-      test: [ "CMD", "mariadb-admin", "ping", "-h", "localhost" ]
+      test: [ "CMD", "healthcheck.sh", "--connect", "--innodb_initialized" ]
       interval: 3s
       timeout: 2s
       retries: 10
