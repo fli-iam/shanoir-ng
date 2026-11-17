@@ -13,6 +13,11 @@
 
 # Creates the database users of the microservices, with the passwords set in .env (passed by
 # docker compose). Runs only when the database volume is first initialised.
+#
+# Least privilege: each microservice user only gets its own schema. The migrations user gets the
+# six Shanoir schemas (migrations, and the statistics procedures it creates: they run with its
+# rights, so the services only need EXECUTE, included in their schema rights). No global
+# privileges (FILE, SUPER, CREATE USER, ...).
 
 set -eo pipefail
 
@@ -23,6 +28,20 @@ password_of()
 {
 	var="SHANOIR_$(echo "$1" | tr '[:lower:]' '[:upper:]')_DB_PASSWORD"
 	printf '%s' "${!var}"
+}
+
+# schema of a user, eg: SHANOIR_STUDIES_DB_NAME (default: the user name)
+schema_of()
+{
+	var="SHANOIR_$(echo "$1" | tr '[:lower:]' '[:upper:]')_DB_NAME"
+	printf '%s' "${!var:-$1}"
+}
+
+# escape a value for a backquoted SQL identifier
+sql_identifier()
+{
+	# shellcheck disable=SC2016 # literal backquotes
+	printf '%s' "$1" | sed -e 's/`/``/g'
 }
 
 # escape a value for a single-quoted SQL string
@@ -41,6 +60,16 @@ done
 echo "Creating database users, starting..."
 for user in $USERS ; do
 	echo "CREATE USER '$user'@'%' IDENTIFIED BY '$(sql_string "$(password_of "$user")")';"
-	echo "GRANT ALL ON *.* TO '$user'@'%';"
+	if [ "$user" = migrations ] ; then
+		schemas=""
+		for u in $USERS ; do
+			schemas="$schemas $(schema_of "$u")"
+		done
+	else
+		schemas="$(schema_of "$user")"
+	fi
+	for schema in $schemas ; do
+		echo "GRANT ALL ON \`$(sql_identifier "$schema")\`.* TO '$user'@'%';"
+	done
 done | MYSQL_PWD="$MARIADB_ROOT_PASSWORD" mariadb -uroot
 echo "Creating database users, finished."
