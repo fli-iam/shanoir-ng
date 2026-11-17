@@ -14,7 +14,12 @@
 
 package org.shanoir.ng.dataset.modality;
 
-import org.mapstruct.*;
+import org.mapstruct.InheritConfiguration;
+import org.mapstruct.IterableMapping;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Named;
+import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMappingConfig;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.springframework.data.domain.Page;
@@ -25,7 +30,7 @@ import org.springframework.data.domain.Page;
  * @author msimon
  *
  */
-@Mapper(componentModel = "spring", config = DatasetMappingConfig.class)
+@Mapper(componentModel = "spring", config = DatasetMappingConfig.class, uses = DatasetMapper.class)
 public interface MrDatasetMapper {
 
     //Single entity
@@ -47,7 +52,7 @@ public interface MrDatasetMapper {
     MrDatasetDTO mrDatasetToMrDatasetDTOWithProcessingAncestorsAndExamination(MrDataset dataset);
 
     @Named("withProcessingAncestorsAndExaminationAndSourceAndCopies")
-    @InheritConfiguration(name = "datasetToDatasetDTOWithProcessingAncestorsAndExaminationPrototypeAndSourceAndCopies")
+    @InheritConfiguration(name = "datasetToDatasetDTOWithProcessingAncestorsAndExaminationAndSourceAndCopiesPrototype")
     @Mapping(target = "echoTime", expression = "java(null)")
     @Mapping(target = "flipAngle", expression = "java(null)")
     @Mapping(target = "inversionTime", expression = "java(null)")

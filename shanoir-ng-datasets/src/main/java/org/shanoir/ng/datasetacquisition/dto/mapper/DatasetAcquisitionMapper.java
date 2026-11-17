@@ -115,7 +115,7 @@ public interface DatasetAcquisitionMapper {
     @Named("withExaminationAndSourceAndCopies")
     @Mapping(target = "examination", source = "examination", qualifiedByName = "withStudy")
     @Mapping(target = "copies", source = "copies", qualifiedByName = "id")
-    @Mapping(target = "source", source = "copies", qualifiedByName = "id")
+    @Mapping(target = "source", source = "source", qualifiedByName = "id")
     @Mapping(target = "studyCard", expression = "java(null)")
     DatasetAcquisitionDTO acquisitionToAcquisitionWithExaminationAndSourceAndCopiesDTO(DatasetAcquisition datasetAcquisition);
 
