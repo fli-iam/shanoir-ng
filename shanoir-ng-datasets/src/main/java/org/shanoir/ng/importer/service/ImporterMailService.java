@@ -46,8 +46,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
+
+import tools.jackson.core.JacksonException;
 
 @Service
 public class ImporterMailService {
@@ -215,7 +216,7 @@ public class ImporterMailService {
 
         try {
             rabbitTemplate.convertAndSend(queue, objectMapper.writeValueAsString(email));
-        } catch (AmqpException | JsonProcessingException e) {
+        } catch (AmqpException | JacksonException e) {
             LOG.error("Could not send email to queue {}. ", queue, e);
         }
     }

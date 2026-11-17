@@ -36,13 +36,13 @@ import org.shanoir.ng.utils.Utils;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
 
@@ -75,19 +75,19 @@ public class ExaminationApiSecurityTest {
     @Autowired
     private ExaminationApi api;
 
-    @MockBean
+    @MockitoBean
     private StudyRightsService rightsService;
 
-    @MockBean
+    @MockitoBean
     private ExaminationRepository examinationRepository;
 
-    @MockBean
+    @MockitoBean
     private StudyRepository studyRepository;
 
-    @MockBean
+    @MockitoBean
     private StudyUserRightsRepository studyUserRightsRepository;
 
-    @MockBean
+    @MockitoBean
     private StudyInstanceUIDAndSubjectNameHandler studyInstanceUIDHandler;
 
     @BeforeEach

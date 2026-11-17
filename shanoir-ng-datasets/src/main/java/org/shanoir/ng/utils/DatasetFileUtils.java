@@ -51,9 +51,8 @@ import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriUtils;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import jakarta.mail.MessagingException;
+import tools.jackson.databind.json.JsonMapper;
 
 public final class DatasetFileUtils {
 
@@ -259,7 +258,7 @@ public final class DatasetFileUtils {
             input.getSeries().add(serie);
         }
 
-        archive.addEntry(INPUT, new ObjectMapper().writeValueAsBytes(input));
+        archive.addEntry(INPUT, new JsonMapper().writeValueAsBytes(input));
     }
 
     public static String getFileName(boolean keepName, String srcFileName, String subjectName, Dataset dataset,

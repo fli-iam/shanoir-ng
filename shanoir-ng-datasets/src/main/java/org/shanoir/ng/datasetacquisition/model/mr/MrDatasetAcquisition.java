@@ -18,7 +18,11 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToOne;
+
+
 import org.shanoir.ng.dataset.modality.MrDataset;
+
+import java.io.Serial;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 
 /**
@@ -35,6 +39,7 @@ public class MrDatasetAcquisition extends DatasetAcquisition {
     /**
      * UID
      */
+    @Serial
     private static final long serialVersionUID = 2532815427171578710L;
 
     /** MR protocol. */

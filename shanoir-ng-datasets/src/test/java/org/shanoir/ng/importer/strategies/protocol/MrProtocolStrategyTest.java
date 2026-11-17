@@ -29,8 +29,8 @@ import org.shanoir.ng.importer.dto.Serie;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.io.File;
 import java.io.IOException;
@@ -53,7 +53,7 @@ public class MrProtocolStrategyTest {
     @InjectMocks
     private MrProtocolStrategy mrProtocolStrategy;
 
-    @MockBean
+    @MockitoBean
     private StudyInstanceUIDAndSubjectNameHandler studyInstanceUIDHandler;
 
     @BeforeEach

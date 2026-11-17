@@ -26,8 +26,8 @@ import org.shanoir.ng.studycard.repository.StudyCardRepository;
 import org.shanoir.ng.studycard.service.StudyCardServiceImpl;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -50,7 +50,7 @@ public class StudyCardServiceTest {
     @Mock
     private StudyCardRepository studyCardRepository;
 
-    @MockBean
+    @MockitoBean
     private StudyInstanceUIDAndSubjectNameHandler studyInstanceUIDHandler;
 
     @InjectMocks

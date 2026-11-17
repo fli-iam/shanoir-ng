@@ -74,15 +74,15 @@ import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Unit tests for dataset controller.
@@ -101,92 +101,92 @@ public class StudyTagApiControllerTest {
     @Autowired
     private MockMvc mvc;
 
-    @MockBean
+    @MockitoBean
     private DatasetService datasetServiceMock;
 
-    @MockBean
+    @MockitoBean
     private CreateStatisticsService createStatisticsService;
 
-    @MockBean
+    @MockitoBean
     private DatasetRepository datasetRepositoryMock;
 
-    @MockBean
+    @MockitoBean
     private StudyTagService studyTagServiceMock;
 
-    @MockBean
+    @MockitoBean
     private DatasetMapper datasetMapperMock;
 
-    @MockBean
+    @MockitoBean
     private StudyTagMapper studyTagMapperMock;
 
-    @MockBean
+    @MockitoBean
     private MrDatasetMapper mrDatasetMapperMock;
 
-    @MockBean
+    @MockitoBean
     private ExaminationService examinationService;
 
-    @MockBean
+    @MockitoBean
     private SubjectService subjectService;
 
-    @MockBean
+    @MockitoBean
     private StudyInstanceUIDAndSubjectNameHandler studyInstanceUIDAndSubjectNameHandler;
 
-    @MockBean
+    @MockitoBean
     private WADODownloaderService downloader;
 
-    @MockBean(name = "datasetSecurityService")
+    @MockitoBean(name = "datasetSecurityService")
     private DatasetSecurityService datasetSecurityService;
 
-    @MockBean(name = "controllerSecurityService")
+    @MockitoBean(name = "controllerSecurityService")
     private ControllerSecurityService controllerSecurityService;
 
     @TempDir
     private File tempDir;
 
-    @MockBean
+    @MockitoBean
     private EegDatasetMapper eegDatasetMapper;
 
-    @MockBean
+    @MockitoBean
     private BIDSServiceImpl bidsService;
 
-    @MockBean
+    @MockitoBean
     private SubjectRepository subjectRepository;
 
-    @MockBean
+    @MockitoBean
     private ShanoirEventService eventService;
 
-    @MockBean
+    @MockitoBean
     private StudyRepository studyRepo;
 
-    @MockBean
+    @MockitoBean
     private RabbitTemplate rabbitTemplate;
 
-    @MockBean
+    @MockitoBean
     private ProcessedDatasetImporterService processedDatasetImporterService;
 
-    @MockBean
+    @MockitoBean
     private DicomSEGAndSRImporterService dicomSEGAndSRImporterService;
 
-    @MockBean
+    @MockitoBean
     private DicomImporterService dicomImporterService;
 
-    @MockBean
+    @MockitoBean
     private ImporterService importerService;
 
-    @MockBean
+    @MockitoBean
     @Qualifier("datasetDownloaderServiceImpl")
     private DatasetDownloaderServiceImpl datasetDownloaderService;
 
-    @MockBean
+    @MockitoBean
     private SolrService solrService;
 
-    @MockBean
+    @MockitoBean
     private StorageService storageService;
 
-    @MockBean
+    @MockitoBean
     private DatasetAcquisitionService datasetAcquisitionService;
 
-    @MockBean
+    @MockitoBean
     private ExaminationDatasetAcquisitionMapper examinationDatasetAcquisitionMapper;
 
     @Autowired

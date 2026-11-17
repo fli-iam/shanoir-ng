@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
@@ -84,7 +83,6 @@ public class BidsApiController implements BidsApi {
 
     private final HttpServletRequest request;
 
-    @org.springframework.beans.factory.annotation.Autowired
     public BidsApiController(final HttpServletRequest request) {
         this.request = request;
     }
@@ -141,7 +139,7 @@ public class BidsApiController implements BidsApi {
         if (fileToBeZipped.isDirectory()) {
             FileUtils.copyDirectory(fileToBeZipped, new File(fileDir.getPath() + File.separator + fileToBeZipped.getName()));
         } else {
-            Files.copy(Paths.get(fileToBeZipped.getPath()), Paths.get(fileDir.getPath() + File.separator + fileToBeZipped.getName()));
+            Files.copy(Path.of(fileToBeZipped.getPath()), Path.of(fileDir.getPath() + File.separator + fileToBeZipped.getName()));
         }
 
         File zipFile = new File(tmpFile.getAbsolutePath() + File.separator + fileToBeZipped.getName() + ZIP);
@@ -236,11 +234,11 @@ public class BidsApiController implements BidsApi {
      * @throws IOException
      */
     private void zip(final String sourceDirPath, final String zipFilePath) throws IOException {
-        Path p = Paths.get(zipFilePath);
+        Path p = Path.of(zipFilePath);
         // 1. Create an outputstream (zip) on the destination
         try (ZipOutputStream zos = new ZipOutputStream(Files.newOutputStream(p))) {
             // 2. "Walk" => iterate over the source file
-            Path pp = Paths.get(sourceDirPath);
+            Path pp = Path.of(sourceDirPath);
             try (Stream<Path> walker = Files.walk(pp)) {
 
                 // 3. We only consider directories, and we copyt them directly by "relativising" them then copying them to the output

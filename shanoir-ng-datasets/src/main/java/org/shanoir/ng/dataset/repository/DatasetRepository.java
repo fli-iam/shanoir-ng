@@ -31,6 +31,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.NativeQuery;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
@@ -38,7 +39,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 public interface DatasetRepository extends PagingAndSortingRepository<Dataset, Long>, JpaRepository<Dataset, Long> {
 
-    @Query(value = """
+    @NativeQuery("""
             SELECT EXISTS (
             SELECT 1
             FROM dataset ds
@@ -49,7 +50,7 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
             WHERE ds.source_id = :datasetParentId
             AND ex.study_id = :studyId
             )
-            """, nativeQuery = true)
+            """)
     Integer existsBySourceIdAndStudyId(Long datasetParentId, Long studyId);
 
     Iterable<Dataset> findByDatasetAcquisitionExaminationStudy_IdIn(Iterable<Long> studyIds, Sort sort);
@@ -58,21 +59,21 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
 
     int countByDatasetAcquisition_Examination_Study_Id(Long studyId);
 
-    @Query(value = "SELECT ds.id FROM dataset ds "
+    @NativeQuery("SELECT ds.id FROM dataset ds "
             + "INNER JOIN dataset_acquisition acq ON ds.dataset_acquisition_id = acq.id "
             + "INNER JOIN examination ex ON acq.examination_id = ex.id "
-            + "WHERE ex.study_id = ?1", nativeQuery = true)
+            + "WHERE ex.study_id = ?1")
     List<Long> findIdsByStudyId(Long studyId);
 
-    @Query(value = "SELECT ds.id FROM dataset ds "
-            + "WHERE ds.subject_id IN (?1)", nativeQuery = true)
+    @NativeQuery("SELECT ds.id FROM dataset ds "
+            + "WHERE ds.subject_id IN (?1)")
     List<Long> findIdsBySubjectIdIn(List<Long> subjectIds);
 
     List<Dataset> findByDatasetAcquisitionId(Long acquisitionId);
 
     int countByDatasetAcquisitionId(Long acquisitionId);
 
-    @Query(value = "SELECT ds.id FROM dataset ds "
+    @NativeQuery("SELECT ds.id FROM dataset ds "
             + "LEFT JOIN dataset_acquisition acq ON ds.dataset_acquisition_id = acq.id "
             + "WHERE acq.examination_id = :examId "
             + "UNION "
@@ -81,7 +82,7 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
             + "LEFT JOIN input_of_dataset_processing tempo ON tempo.processing_id = processing.id "
             + "LEFT JOIN dataset inputs ON tempo.dataset_id = inputs.id "
             + "LEFT JOIN dataset_acquisition inputAcq ON inputs.dataset_acquisition_id = inputAcq.id "
-            + "WHERE inputAcq.examination_id = :examId", nativeQuery = true)
+            + "WHERE inputAcq.examination_id = :examId")
     List<Long> findDatasetAndOutputByExaminationId(Long examId);
 
     @Query("SELECT expr.datasetExpressionFormat, SUM(expr.size) FROM DatasetExpression expr "
@@ -169,12 +170,12 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
 
     @Transactional
     @Modifying
-    @Query(value = "CALL computeOverallStatistics()", nativeQuery = true)
+    @NativeQuery("CALL computeOverallStatistics()")
     void computeOverallStatistics();
 
     @Modifying
     @Transactional
-    @Query(value = "UPDATE overall_statistics os SET os.storage_size = :totalStorageVolume WHERE os.stats_date = CURDATE()", nativeQuery = true)
+    @NativeQuery("UPDATE overall_statistics os SET os.storage_size = :totalStorageVolume WHERE os.stats_date = CURDATE()")
     void addTotalStorageVolume(@Param("totalStorageVolume") Long totalStorageVolume);
 
     @Query(value = "SELECT os from OverallStatistics os WHERE os.statsDate = (SELECT MAX(os2.statsDate) FROM OverallStatistics os2)")
@@ -211,21 +212,21 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
             """)
     Set<Long> findRelatedStudyIds(@Param("id") Long id);
 
-    @Query(value = "SELECT ds.id FROM dataset ds "
+    @NativeQuery("SELECT ds.id FROM dataset ds "
             + "JOIN dataset_metadata AS meta ON ds.updated_metadata_id = meta.id "
             + "WHERE ds.dataset_acquisition_id IN (?1) "
-            + "AND (?2 = '' OR meta.name LIKE ?2)", nativeQuery = true)
+            + "AND (?2 = '' OR meta.name LIKE ?2)")
     List<Long> findFilteredIdsByDatasetAcquisitionIdIn(List<Long> acquisitionIds, String filter);
 
-    @Query(value = "SELECT ds.id FROM dataset ds "
+    @NativeQuery("SELECT ds.id FROM dataset ds "
             + "JOIN dataset_metadata AS meta ON ds.updated_metadata_id = meta.id "
             + "WHERE ds.dataset_acquisition_id = ?1 "
-            + "AND (?2 = '' OR meta.name LIKE ?2)", nativeQuery = true)
+            + "AND (?2 = '' OR meta.name LIKE ?2)")
     List<Long> findFilteredIdsByDatasetAcquisitionId(Long acquisitionId, String filter);
 
-    @Query(value = "SELECT dataset.id FROM dataset "
+    @NativeQuery("SELECT dataset.id FROM dataset "
             + "JOIN dataset_acquisition acq ON acq.id = dataset.dataset_acquisition_id "
-            + "WHERE acq.examination_id = ?1", nativeQuery = true)
+            + "WHERE acq.examination_id = ?1")
     List<Long> findIdsByExaminationId(Long examinationId);
 
     @Query("SELECT DISTINCT de.dataset.id FROM DatasetExpression de WHERE de.dataset.id IN :ids")

@@ -42,12 +42,12 @@ import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.util.Pair;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
 
@@ -76,21 +76,21 @@ public class DatasetAcquisitionApiSecurityTest {
     @Autowired
     private DatasetAcquisitionApi api;
 
-    @MockBean
+    @MockitoBean
     private StudyUserRightsRepository rightsRepository;
 
     private BindingResult mockBindingResult;
 
-    @MockBean
+    @MockitoBean
     private StudyRightsService rightsService;
 
-    @MockBean
+    @MockitoBean
     private ExaminationRepository examinationRepository;
 
-    @MockBean
+    @MockitoBean
     private StudyRepository studyRepository;
 
-    @MockBean
+    @MockitoBean
     private DatasetAcquisitionRepository datasetAcquisitionRepository;
 
 

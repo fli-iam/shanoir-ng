@@ -19,7 +19,11 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.validation.constraints.NotNull;
+
+
 import org.shanoir.ng.dataset.modality.MrDataset;
+
+import java.io.Serial;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 
 /**
@@ -35,6 +39,7 @@ public class InversionTime extends AbstractEntity {
     /**
      * UID
      */
+    @Serial
     private static final long serialVersionUID = -4243060486957154039L;
 
     /** MR dataset. */

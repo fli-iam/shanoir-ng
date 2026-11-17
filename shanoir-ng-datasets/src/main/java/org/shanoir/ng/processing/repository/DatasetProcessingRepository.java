@@ -21,6 +21,7 @@ import java.util.stream.Stream;
 import org.hibernate.Hibernate;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.NativeQuery;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.transaction.annotation.Transactional;
@@ -77,7 +78,7 @@ public interface DatasetProcessingRepository extends CrudRepository<DatasetProce
      * @param type Dataset processing type.
      * @return List of dataset processing.
      */
-    @Query(value = "WITH candidates AS ( "
+    @NativeQuery("WITH candidates AS ( "
             + "SELECT processing.id AS id "
             + "FROM dataset_processing AS processing "
             + "    INNER JOIN execution_monitoring AS monitoring ON monitoring.id = processing.id "
@@ -98,7 +99,7 @@ public interface DatasetProcessingRepository extends CrudRepository<DatasetProce
             + "    ROW_NUMBER() OVER (PARTITION BY pi.input_signature ORDER BY monitoring.start_date DESC) AS rn "
             + "FROM processing_inputs pi "
             + "    INNER JOIN execution_monitoring monitoring ON monitoring.id = pi.monitoring_id) "
-            + "SELECT id FROM ranked WHERE rn = 1 ORDER BY id", nativeQuery = true)
+            + "SELECT id FROM ranked WHERE rn = 1 ORDER BY id")
     List<Long> findIdsByCommentAndDatasetProcessingTypeWithStatusFinished(String comment, int type);
 
     /**
@@ -107,8 +108,8 @@ public interface DatasetProcessingRepository extends CrudRepository<DatasetProce
      * @param monitoringId
      * @return
      */
-    @Query(value = "SELECT DISTINCT processing.id FROM dataset_processing as processing "
-            + "WHERE processing.parent_id = :monitoringId", nativeQuery = true)
+    @NativeQuery("SELECT DISTINCT processing.id FROM dataset_processing as processing "
+            + "WHERE processing.parent_id = :monitoringId")
     List<Long> findAllIdsByMonitoringId(Long monitoringId);
 
     List<DatasetProcessing> findAllByParentId(Long id);
@@ -119,11 +120,11 @@ public interface DatasetProcessingRepository extends CrudRepository<DatasetProce
      * @param examinationIds
      * @return
      */
-    @Query(value = "SELECT DISTINCT processing.id FROM dataset_processing as processing "
+    @NativeQuery("SELECT DISTINCT processing.id FROM dataset_processing as processing "
             + "INNER JOIN input_of_dataset_processing as input ON processing.id=input.processing_id "
             + "INNER JOIN dataset as dataset ON dataset.id=input.dataset_id "
             + "INNER JOIN dataset_acquisition as acquisition ON acquisition.id=dataset.dataset_acquisition_id "
-            + "WHERE acquisition.examination_id IN (:examinationIds)", nativeQuery = true)
+            + "WHERE acquisition.examination_id IN (:examinationIds)")
     List<Long> findAllIdsByExaminationIds(List<Long> examinationIds);
 
     @Query("SELECT processing FROM DatasetProcessing processing "
@@ -197,10 +198,10 @@ public interface DatasetProcessingRepository extends CrudRepository<DatasetProce
      * @param processingId
      * @return
      */
-    @Query(value = "SELECT processing.monitoring_index as monitoringIndex, monitoring.identifier as monitoringIdentifier FROM dataset_processing as processing "
+    @NativeQuery("SELECT processing.monitoring_index as monitoringIndex, monitoring.identifier as monitoringIdentifier FROM dataset_processing as processing "
             + "INNER JOIN dataset_processing as parent on parent.id = processing.parent_id "
             + "INNER JOIN execution_monitoring as monitoring on monitoring.id = parent.id "
-            + "WHERE processing.id = :processingId", nativeQuery = true)
+            + "WHERE processing.id = :processingId")
     IdentificationData findIdentificationDataFromProcessingId(Long processingId);
 
     interface IdentificationData {

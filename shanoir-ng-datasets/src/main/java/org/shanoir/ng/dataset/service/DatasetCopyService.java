@@ -21,8 +21,6 @@ import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.springframework.security.access.prepost.PreAuthorize;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-
 public interface DatasetCopyService {
 
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnDataset(#dsId, 'CAN_IMPORT'))")
@@ -35,8 +33,7 @@ public interface DatasetCopyService {
             Long userId
     ) throws
             DatasetCopyService.NotFoundSubjectIdException,
-            DatasetCopyService.NotFoundDatasetIdException,
-            JsonProcessingException;
+            DatasetCopyService.NotFoundDatasetIdException;
 
     public class DatasetCopyResult {
 

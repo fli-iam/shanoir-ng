@@ -36,13 +36,13 @@ import org.shanoir.ng.utils.Utils;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.util.Pair;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -71,19 +71,19 @@ public class ExaminationServiceSecurityTest {
     @Autowired
     private ExaminationService service;
 
-    @MockBean
+    @MockitoBean
     private ExaminationRepository examinationRepository;
 
-    @MockBean
+    @MockitoBean
     private StudyUserRightsRepository rightsRepository;
 
-    @MockBean
+    @MockitoBean
     private StudyRepository studyRepository;
 
-    @MockBean
+    @MockitoBean
     private StudyRightsService rightsService;
 
-    @MockBean
+    @MockitoBean
     private StudyInstanceUIDAndSubjectNameHandler studyInstanceUIDHandler;
     @BeforeEach
     public void setup() {

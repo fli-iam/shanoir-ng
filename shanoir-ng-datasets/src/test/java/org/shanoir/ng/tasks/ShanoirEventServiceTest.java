@@ -27,8 +27,8 @@ import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 /**
  * Test class for AsyncTaskService.
@@ -47,7 +47,7 @@ public class ShanoirEventServiceTest {
     @Autowired
     private RabbitTemplate rabbitTemplate;
 
-    @MockBean
+    @MockitoBean
     private StudyInstanceUIDAndSubjectNameHandler studyInstanceUIDHandler;
 
     @Test

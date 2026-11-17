@@ -17,7 +17,10 @@ package org.shanoir.ng.datasetacquisition.model.rt;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import jakarta.persistence.Entity;
 
+
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+
+import java.io.Serial;
 
 @Entity
 @JsonTypeName("Rt")
@@ -25,6 +28,7 @@ public class RtDatasetAcquisition extends DatasetAcquisition {
 
     public static final String DATASET_ACQUISITION_TYPE = "Rt";
 
+    @Serial
     private static final long serialVersionUID = -8826440216825057113L;
 
     public RtDatasetAcquisition() {

@@ -70,7 +70,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Examination service implementation.
@@ -130,7 +130,7 @@ public class ExaminationServiceImpl implements ExaminationService {
     @Transactional
     public void deleteById(final Long id, ShanoirEvent event) throws ShanoirException, SolrServerException, IOException, RestServiceException {
         Optional<Examination> examinationOpt = examinationRepository.findById(id);
-        if (!examinationOpt.isPresent()) {
+        if (examinationOpt.isEmpty()) {
             throw new EntityNotFoundException(Examination.class, id);
         }
         Examination examination = examinationOpt.get();
@@ -198,7 +198,7 @@ public class ExaminationServiceImpl implements ExaminationService {
     @Async
     public void deleteEmptyExamination(Long id) throws EntityNotFoundException {
         Optional<Examination> examinationOpt = examinationRepository.findById(id);
-        if (!examinationOpt.isPresent()) {
+        if (examinationOpt.isEmpty()) {
             throw new EntityNotFoundException(Examination.class, id);
         }
         List<DatasetAcquisition> acquisitions = acquisitionRepository.findByExaminationIdWithDatasets(id);

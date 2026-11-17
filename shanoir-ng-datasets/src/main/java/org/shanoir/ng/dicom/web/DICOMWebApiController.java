@@ -42,14 +42,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 import jakarta.servlet.http.HttpServletRequest;
+import tools.jackson.databind.DatabindException;
 
 @Controller
 public class DICOMWebApiController implements DICOMWebApi {
@@ -120,7 +119,7 @@ public class DICOMWebApiController implements DICOMWebApi {
     }
 
     @Override
-    public ResponseEntity<String> findStudies(Map<String, String> allParams) throws RestServiceException, JsonMappingException, JsonProcessingException {
+    public ResponseEntity<String> findStudies(Map<String, String> allParams) throws RestServiceException, DatabindException {
         Page<Examination> examinations = null;
         int offset = Integer.valueOf(allParams.get(OFFSET));
         int limit = Integer.valueOf(allParams.get(LIMIT));
@@ -164,7 +163,7 @@ public class DICOMWebApiController implements DICOMWebApi {
     }
 
     private String queryDicomServerForDicomWeb(Page<Examination> examinations, String includeField)
-            throws JsonProcessingException, JsonMappingException {
+            throws DatabindException {
         StringBuffer studies = new StringBuffer();
         studies.append("[");
         Iterator<Examination> iterator = examinations.iterator();
@@ -204,7 +203,7 @@ public class DICOMWebApiController implements DICOMWebApi {
 
     @Override
     public ResponseEntity<String> findSeriesOfStudy(String examinationUID, Map<String, String> allParams)
-            throws JsonProcessingException, ShanoirException {
+            throws ShanoirException {
         String includefield = "";
         String seriesInstanceUID = "";
         String studyInstanceUID = studyInstanceUIDAndSubjectNameHandler.findStudyInstanceUIDFromCacheOrDatabase(examinationUID);
@@ -251,7 +250,7 @@ public class DICOMWebApiController implements DICOMWebApi {
             arrayNode.forEach(jsonNodes::add);
             List<JsonNode> filteredAndSorted = jsonNodes.stream()
                     .filter(node -> {
-                        String seriesInstanceUID = node.path(SERIES_INSTANCE_UID_TAG).path(VALUE).path(0).asText();
+                        String seriesInstanceUID = node.path(SERIES_INSTANCE_UID_TAG).path(VALUE).path(0).asString();
                         String virtualUID = seriesToVirtualUIDs.get(seriesInstanceUID);
                         // keep only series of this exam (in the map) the user is
                         // allowed to visualize: an owned annotation, e.g. a SEG/SR,
@@ -271,7 +270,7 @@ public class DICOMWebApiController implements DICOMWebApi {
 
     @Override
     public ResponseEntity<String> findSerieMetadataOfStudy(String examinationUID, String serieId)
-            throws RestServiceException, JsonMappingException, JsonProcessingException {
+            throws RestServiceException, DatabindException {
         String studyInstanceUID = studyInstanceUIDAndSubjectNameHandler.findStudyInstanceUIDFromCacheOrDatabase(examinationUID);
         String subjectName = studyInstanceUIDAndSubjectNameHandler
                 .findSubjectNameFromCacheOrDatabase(examinationUID);
@@ -315,15 +314,15 @@ public class DICOMWebApiController implements DICOMWebApi {
             }
         } else if (root.isObject()) {
             JsonNode bulkDataURINode = root.get(BULK_DATA_URI);
-            if (bulkDataURINode != null && bulkDataURINode.isTextual()) {
-                String rewritten = rewriteBulkDataURI(bulkDataURINode.asText(), studyInstanceUID, examinationUID,
+            if (bulkDataURINode != null && bulkDataURINode.isString()) {
+                String rewritten = rewriteBulkDataURI(bulkDataURINode.asString(), studyInstanceUID, examinationUID,
                         serieInstanceUID, acquisitionUID);
                 if (rewritten != null) {
                     ((ObjectNode) root).put(BULK_DATA_URI, rewritten);
                 }
             }
             for (JsonNode child : root) {
-                if (child.isContainerNode()) {
+                if (child.isContainer()) {
                     rewriteBulkDataURIs(child, studyInstanceUID, examinationUID, serieInstanceUID, acquisitionUID);
                 }
             }

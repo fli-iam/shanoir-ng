@@ -21,14 +21,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-import com.fasterxml.jackson.core.Version;
-import com.fasterxml.jackson.databind.Module;
-import com.fasterxml.jackson.databind.module.SimpleModule;
+import tools.jackson.core.Version;
+import tools.jackson.databind.module.SimpleModule;
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.servers.Server;
+import tools.jackson.databind.JacksonModule;
 
 /**
  * Datasets microservice.
@@ -48,7 +48,7 @@ public class ShanoirDatasetApplication {
     }
 
     @Bean
-    public Module jacksonPageWithJsonViewModule() {
+    public JacksonModule jacksonPageWithJsonViewModule() {
         SimpleModule module = new SimpleModule("jackson-page-with-jsonview", Version.unknownVersion());
         module.addSerializer(org.shanoir.ng.shared.paging.PageImpl.class, new PageSerializer());
         return module;

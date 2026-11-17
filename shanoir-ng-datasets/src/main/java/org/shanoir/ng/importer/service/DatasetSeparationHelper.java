@@ -58,8 +58,8 @@ final class DatasetSeparationHelper {
      */
     static Set<EchoTime> echoTimesForDatasetSeparation(DatasetAcquisition acquisition, Dataset dataset) {
         Set<EchoTime> echoTimes = new HashSet<>();
-        if (acquisition instanceof MrDatasetAcquisition && dataset instanceof MrDataset) {
-            ((MrDataset) dataset).getEchoTime().forEach(eT -> echoTimes.add(eT.getEchoTimeShared()));
+        if (acquisition instanceof MrDatasetAcquisition && dataset instanceof MrDataset mrDataset) {
+            mrDataset.getEchoTime().forEach(eT -> echoTimes.add(eT.getEchoTimeShared()));
         }
         return echoTimes;
     }

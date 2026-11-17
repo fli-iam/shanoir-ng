@@ -18,6 +18,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,6 +34,7 @@ public class InstrumentBasedAssessment extends AbstractEntity {
     /**
      * UID
      */
+    @Serial
     private static final long serialVersionUID = -2356266338557542044L;
 
     /** Related Examination. */

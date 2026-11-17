@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.examination.model;
 
+import java.io.Serial;
 import java.sql.Types;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -57,6 +58,7 @@ public class Examination extends HalEntity {
     /**
      * UID
      */
+    @Serial
     private static final long serialVersionUID = -5513725630019270395L;
 
     /** Acquisition Center. */

@@ -47,8 +47,8 @@ import org.shanoir.ng.studycard.repository.QualityCardRepository;
 import org.shanoir.ng.studycard.service.QualityCardServiceImpl;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -90,7 +90,7 @@ public class QualityCardServiceTest {
     @Mock
     private DatasetAcquisitionService datasetAcquisitionService;
 
-    @MockBean
+    @MockitoBean
     private StudyInstanceUIDAndSubjectNameHandler studyInstanceUIDHandler;
 
     @InjectMocks

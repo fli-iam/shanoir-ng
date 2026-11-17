@@ -56,9 +56,9 @@ import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.io.File;
 import java.io.IOException;
@@ -81,49 +81,49 @@ public class DatasetDownloaderServiceTest {
     @Autowired
     private DatasetDownloaderServiceImpl datasetDownloaderService;
 
-    @MockBean
+    @MockitoBean
     private DatasetService datasetServiceMock;
 
-    @MockBean
+    @MockitoBean
     private DatasetMapper datasetMapperMock;
 
-    @MockBean
+    @MockitoBean
     private MrDatasetMapper mrDatasetMapperMock;
 
-    @MockBean
+    @MockitoBean
     private ExaminationService examinationService;
 
-    @MockBean
+    @MockitoBean
     private WADODownloaderService downloader;
 
-    @MockBean(name = "datasetSecurityService")
+    @MockitoBean(name = "datasetSecurityService")
     private DatasetSecurityService datasetSecurityService;
 
-    @MockBean(name = "controllerSecurityService")
+    @MockitoBean(name = "controllerSecurityService")
     private ControllerSecurityService controllerSecurityService;
 
     @TempDir
     private File tempDir;
 
-    @MockBean
+    @MockitoBean
     private EegDatasetMapper eegDatasetMapper;
 
-    @MockBean
+    @MockitoBean
     private BIDSServiceImpl bidsService;
 
-    @MockBean
+    @MockitoBean
     private SubjectRepository subjectRepository;
 
-    @MockBean
+    @MockitoBean
     private ShanoirEventService eventService;
 
-    @MockBean
+    @MockitoBean
     private StudyRepository studyRepo;
 
-    @MockBean
+    @MockitoBean
     private ImporterService importerService;
 
-    @MockBean
+    @MockitoBean
     private DicomSEGAndSRImporterService dicomSRImporterService;
 
     private Subject subject = new Subject(3L, "name");

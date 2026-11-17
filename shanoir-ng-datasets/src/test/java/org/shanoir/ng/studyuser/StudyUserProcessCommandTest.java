@@ -24,8 +24,8 @@ import org.shanoir.ng.study.rights.command.CommandType;
 import org.shanoir.ng.study.rights.command.StudyUserCommand;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +40,7 @@ public class StudyUserProcessCommandTest {
     @Autowired
     private StudyUserUpdateService service;
 
-    @MockBean
+    @MockitoBean
     private StudyUserRightsRepository studyUserRepository;
 
     @Test

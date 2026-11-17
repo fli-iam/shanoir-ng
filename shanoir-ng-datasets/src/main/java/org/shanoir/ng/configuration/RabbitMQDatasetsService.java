@@ -14,7 +14,6 @@
 
 package org.shanoir.ng.configuration;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -81,9 +80,10 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
+
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.DatabindException;
 
 /**
  * RabbitMQ configuration.
@@ -227,11 +227,11 @@ public class RabbitMQDatasetsService {
      * the the Amqp exception correctly arrives back to rabbitmq.
      *
      * @param subjectStr
-     * @throws JsonProcessingException
-     * @throws JsonMappingException
+     * @throws JacksonException
+     * @throws DatabindException
      */
     @Transactional
-    protected void manageSubjectUpdate(final String subjectStr) throws JsonProcessingException, JsonMappingException {
+    protected void manageSubjectUpdate(final String subjectStr) throws DatabindException {
         Subject subject = objectMapper.readValue(subjectStr, Subject.class);
         subject = subjectRepository.save(subject);
         LOG.info("Subject replicated in MS Datasets with ID: {} and Name: {}",
@@ -267,7 +267,7 @@ public class RabbitMQDatasetsService {
     }
 
     @Transactional
-    protected void manageSubjectBatchUpdate(final String subjectBatchStr) throws JsonProcessingException {
+    protected void manageSubjectBatchUpdate(final String subjectBatchStr) {
         SubjectBatchDTO batchDTO = objectMapper.readValue(subjectBatchStr, SubjectBatchDTO.class);
         Set<Long> allStudyIds = new HashSet<>();
         List<Long> allSubjectIds = new ArrayList<>();
@@ -300,7 +300,7 @@ public class RabbitMQDatasetsService {
 
     @RabbitListener(queues = RabbitMQConfiguration.CENTER_UPDATE_QUEUE, containerFactory = "singleConsumerFactory")
     @RabbitHandler
-    public void receiveCenterUpdate(final String centerStr) throws JsonMappingException, JsonProcessingException {
+    public void receiveCenterUpdate(final String centerStr) throws DatabindException {
         Center center = objectMapper.readValue(centerStr, Center.class);
         saveCenter(center);
     }
@@ -312,7 +312,7 @@ public class RabbitMQDatasetsService {
 
     @RabbitListener(queues = RabbitMQConfiguration.CENTER_DELETE_QUEUE, containerFactory = "singleConsumerFactory")
     @RabbitHandler
-    public void receiveCenterDelete(final Long centerId) throws JsonMappingException, JsonProcessingException {
+    public void receiveCenterDelete(final Long centerId) throws DatabindException {
         deleteCenter(centerId);
     }
 
@@ -343,7 +343,7 @@ public class RabbitMQDatasetsService {
                     throw new AmqpRejectAndDontRequeueException("Cannot instanciate " + clazz.getSimpleName() + " class through reflection. It is a programming error.", e);
                 }
             }
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             LOG.error("Could not read value transmit as Subject class through RabbitMQ", e);
             throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR);
         }
@@ -501,7 +501,7 @@ public class RabbitMQDatasetsService {
                 examinationService.getExtraDataSizeByStudyId(studyId));
         try {
             return objectMapper.writeValueAsString(dto);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             LOG.error("Error while serializing StudyVolumeStorageDTO.", e);
             throw new AmqpRejectAndDontRequeueException(e);
         }
@@ -522,7 +522,7 @@ public class RabbitMQDatasetsService {
         });
         try {
             return objectMapper.writeValueAsString(studyStorageVolumes);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             LOG.error("Error while serializing HashMap<Long, StudyVolumeStorageDTO>.", e);
             throw new AmqpRejectAndDontRequeueException(e);
         }
@@ -631,7 +631,7 @@ public class RabbitMQDatasetsService {
                     } catch (DatasetCopyService.NotFoundDatasetIdException e) {
                         LOG.error("[CopyDatasets] No dataset found with id = " + e.getDatasetId() + ", copy aborted for dataset " + datasetParentId);
                         errors.add("No dataset found with id = " + e.getDatasetId() + ", copy aborted for dataset " + datasetParentId);
-                    } catch (JsonProcessingException e) {
+                    } catch (JacksonException e) {
                         LOG.error("[CopyDatasets] Error processing json during the copy of dataset " + datasetParentId, e);
                         errors.add("Error processing json during the copy of dataset " + datasetParentId + ": " + e.getMessage());
                     } catch (Exception e) {
@@ -693,7 +693,7 @@ public class RabbitMQDatasetsService {
                             objectMapper.writeValueAsString(propagatedExams),
                             ShanoirEvent.SUCCESS,
                             propagatedExams.getStudyId()));
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new ShanoirException("Error processing json during the propagation of examinations after dataset copy.", e);
         }
     }

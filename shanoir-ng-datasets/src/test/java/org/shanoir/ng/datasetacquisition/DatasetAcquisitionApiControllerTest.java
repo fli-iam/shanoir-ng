@@ -55,15 +55,15 @@ import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -80,46 +80,46 @@ import java.util.List;
 @ActiveProfiles("test")
 public class DatasetAcquisitionApiControllerTest {
 
-    @MockBean
+    @MockitoBean
     private ImporterService importerService;
 
-    @MockBean
+    @MockitoBean
     private EegImporterService eegImporterService;
 
-    @MockBean
+    @MockitoBean
     private DicomSEGAndSRImporterService dicomSEGAndSRImporterService;
 
-    @MockBean
+    @MockitoBean
     private DicomImporterService dicomImporterService;
 
-    @MockBean
+    @MockitoBean
     private DatasetAcquisitionService datasetAcquisitionService;
 
-    @MockBean
+    @MockitoBean
     private DatasetAcquisitionMapper dsAcqMapper;
 
-    @MockBean
+    @MockitoBean
     private ExaminationDatasetAcquisitionMapper examDsAcqMapper;
 
-    @MockBean
+    @MockitoBean
     private DatasetAcquisitionWithDatasetsMapper dsAcqDsMapper;
 
-    @MockBean
+    @MockitoBean
     private SolrService solrService;
 
-    @MockBean
+    @MockitoBean
     private ShanoirEventService eventService;
 
-    @MockBean
+    @MockitoBean
     private RabbitTemplate rabbitTemplate;
 
-    @MockBean
+    @MockitoBean
     private DatasetAcquisitionRepository datasetAcquisitionRepository;
 
-    @MockBean
+    @MockitoBean
     private StorageService storageService;
 
-    @MockBean
+    @MockitoBean
     private ImporterMailService importerMailService;
 
     @Autowired

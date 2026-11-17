@@ -14,18 +14,20 @@
 
 package org.shanoir.ng.solr.model;
 
-import java.io.IOException;
+import java.io.Serial;
 
 import org.springframework.boot.jackson.JsonComponent;
 import org.springframework.data.solr.core.query.result.SolrResultPage;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.ser.std.StdSerializer;
+
+import tools.jackson.databind.SerializationContext;
 
 @JsonComponent
 public class SolrPageSerializer extends StdSerializer<SolrResultPage> {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     public SolrPageSerializer() {
@@ -33,15 +35,15 @@ public class SolrPageSerializer extends StdSerializer<SolrResultPage> {
     }
 
     @Override
-    public void serialize(SolrResultPage value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+    public void serialize(SolrResultPage value, JsonGenerator gen, SerializationContext provider) {
         gen.writeStartObject();
-        gen.writeNumberField("number", value.getNumber());
-        gen.writeNumberField("numberOfElements", value.getNumberOfElements());
-        gen.writeNumberField("totalElements", value.getTotalElements());
-        gen.writeNumberField("totalPages", value.getTotalPages());
-        gen.writeNumberField("size", value.getSize());
-        gen.writeObjectField("facetResultPages", value.getFacetResultPages());
-        gen.writeFieldName("content");
+        gen.writeNumberProperty("number", value.getNumber());
+        gen.writeNumberProperty("numberOfElements", value.getNumberOfElements());
+        gen.writeNumberProperty("totalElements", value.getTotalElements());
+        gen.writeNumberProperty("totalPages", value.getTotalPages());
+        gen.writeNumberProperty("size", value.getSize());
+        gen.writePOJOProperty("facetResultPages", value.getFacetResultPages());
+        gen.writeName("content");
         provider.defaultSerializeValue(value.getContent(), gen);
         gen.writeEndObject();
     }
