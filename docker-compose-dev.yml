@@ -117,8 +117,15 @@ services:
       target: database
     command: --max_allowed_packet 20000000
     environment:
-      - MARIADB_ROOT_PASSWORD=password
+      - "MARIADB_ROOT_PASSWORD=${SHANOIR_DB_ROOT_PASSWORD:?is not set, see .env.example}"
       - MARIADB_AUTO_UPGRADE=1
+      # passwords of the microservices' users, only read when the volume is initialised
+      - "SHANOIR_STUDIES_DB_PASSWORD=${SHANOIR_STUDIES_DB_PASSWORD:?is not set, see .env.example}"
+      - "SHANOIR_USERS_DB_PASSWORD=${SHANOIR_USERS_DB_PASSWORD:?is not set, see .env.example}"
+      - "SHANOIR_IMPORT_DB_PASSWORD=${SHANOIR_IMPORT_DB_PASSWORD:?is not set, see .env.example}"
+      - "SHANOIR_DATASETS_DB_PASSWORD=${SHANOIR_DATASETS_DB_PASSWORD:?is not set, see .env.example}"
+      - "SHANOIR_PRECLINICAL_DB_PASSWORD=${SHANOIR_PRECLINICAL_DB_PASSWORD:?is not set, see .env.example}"
+      - "SHANOIR_MIGRATIONS_DB_PASSWORD=${SHANOIR_MIGRATIONS_DB_PASSWORD:?is not set, see .env.example}"
     ulimits:
       nofile:
         soft: 262144
@@ -130,7 +137,7 @@ services:
     networks:
       - shanoir_ng_network
     healthcheck:
-      test: [ "CMD", "mariadb-admin", "ping", "-h", "localhost", "-u", "root", "-ppassword" ]
+      test: [ "CMD", "mariadb-admin", "ping", "-h", "localhost" ]
       interval: 3s
       timeout: 2s
       retries: 10
@@ -144,6 +151,7 @@ services:
       context: docker-compose
       target: database-migrations
     environment:
+      - "SHANOIR_MIGRATIONS_DB_PASSWORD=${SHANOIR_MIGRATIONS_DB_PASSWORD:?is not set, see .env.example}"
       - SHANOIR_MIGRATION
     networks:
       - shanoir_ng_network
@@ -160,6 +168,7 @@ services:
       context: docker-compose
       target: users
     environment:
+      - "SPRING_DATASOURCE_PASSWORD=${SHANOIR_USERS_DB_PASSWORD:?is not set, see .env.example}"
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
       - SHANOIR_URL_HOST
@@ -207,6 +216,7 @@ services:
       context: docker-compose
       target: studies
     environment:
+      - "SPRING_DATASOURCE_PASSWORD=${SHANOIR_STUDIES_DB_PASSWORD:?is not set, see .env.example}"
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
       - SHANOIR_URL_HOST
@@ -250,6 +260,7 @@ services:
       context: docker-compose
       target: import
     environment:
+      - "SPRING_DATASOURCE_PASSWORD=${SHANOIR_IMPORT_DB_PASSWORD:?is not set, see .env.example}"
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
       - SHANOIR_URL_HOST
@@ -289,6 +300,7 @@ services:
       context: docker-compose
       target: datasets
     environment:
+      - "SPRING_DATASOURCE_PASSWORD=${SHANOIR_DATASETS_DB_PASSWORD:?is not set, see .env.example}"
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
       - SHANOIR_URL_HOST
@@ -345,6 +357,7 @@ services:
       context: docker-compose
       target: preclinical
     environment:
+      - "SPRING_DATASOURCE_PASSWORD=${SHANOIR_PRECLINICAL_DB_PASSWORD:?is not set, see .env.example}"
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
       - SHANOIR_URL_HOST
