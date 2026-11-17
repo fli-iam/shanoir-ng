@@ -19,7 +19,10 @@ services:
     image: "ghcr.io/fli-iam/shanoir-ng/keycloak-database:NG_v2.14.0"
     environment:
       - MARIADB_DATABASE=keycloak
-      - MARIADB_ROOT_PASSWORD=password
+      - "MARIADB_ROOT_PASSWORD=${SHANOIR_KEYCLOAK_DB_ROOT_PASSWORD:?is not set, see .env.example}"
+      # user of Keycloak, with rights on the keycloak schema only
+      - MARIADB_USER=keycloak
+      - "MARIADB_PASSWORD=${SHANOIR_KEYCLOAK_DB_PASSWORD:?is not set, see .env.example}"
       - MARIADB_AUTO_UPGRADE=1
     ulimits:
       nofile:
@@ -30,7 +33,7 @@ services:
     networks:
       - shanoir_ng_network
     healthcheck:
-      test: [ "CMD", "mariadb-admin", "ping", "-h", "localhost", "-u", "root", "-ppassword" ]
+      test: [ "CMD", "mariadb-admin", "ping", "-h", "localhost" ]
       interval: 3s
       timeout: 2s
       retries: 10
@@ -39,6 +42,7 @@ services:
     container_name: "${SHANOIR_PREFIX}keycloak"
     #command: ["start-dev"]   # default is "start" to run in production mode
     environment:
+      - "DB_PASSWORD=${SHANOIR_KEYCLOAK_DB_PASSWORD:?is not set, see .env.example}"
       - SHANOIR_NOTIFICATION_EMAIL
       - SHANOIR_NOTIFICATION_NAME
       - SHANOIR_URL_SCHEME

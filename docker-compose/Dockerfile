@@ -414,7 +414,7 @@ CMD []
 
 FROM mariadb:11.4 AS keycloak-database
 
-COPY --link --chmod=0755 keycloak-database/1_add_users.sql /docker-entrypoint-initdb.d/
+# the keycloak user and schema are created by the image (MARIADB_USER, MARIADB_DATABASE)
 
 
 
