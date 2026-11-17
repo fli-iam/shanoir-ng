@@ -86,6 +86,10 @@ services:
   rabbitmq:
     container_name: "${SHANOIR_PREFIX}rabbitmq"
     image: rabbitmq:3.10.7
+    environment:
+      # created at the first start, instead of the default guest/guest
+      - "RABBITMQ_DEFAULT_USER=${SHANOIR_RABBITMQ_USER:?is not set, see .env.example}"
+      - "RABBITMQ_DEFAULT_PASS=${SHANOIR_RABBITMQ_PASSWORD:?is not set, see .env.example}"
     volumes:
       - "rabbitmq-data:/var/lib/rabbitmq/mnesia/rabbitmq"
     ports:
@@ -172,6 +176,8 @@ services:
       context: docker-compose
       target: users
     environment:
+      - "SPRING_RABBITMQ_USERNAME=${SHANOIR_RABBITMQ_USER:?is not set, see .env.example}"
+      - "SPRING_RABBITMQ_PASSWORD=${SHANOIR_RABBITMQ_PASSWORD:?is not set, see .env.example}"
       - "SPRING_DATASOURCE_PASSWORD=${SHANOIR_USERS_DB_PASSWORD:?is not set, see .env.example}"
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
@@ -220,6 +226,8 @@ services:
       context: docker-compose
       target: studies
     environment:
+      - "SPRING_RABBITMQ_USERNAME=${SHANOIR_RABBITMQ_USER:?is not set, see .env.example}"
+      - "SPRING_RABBITMQ_PASSWORD=${SHANOIR_RABBITMQ_PASSWORD:?is not set, see .env.example}"
       - "SPRING_DATASOURCE_PASSWORD=${SHANOIR_STUDIES_DB_PASSWORD:?is not set, see .env.example}"
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
@@ -264,6 +272,8 @@ services:
       context: docker-compose
       target: import
     environment:
+      - "SPRING_RABBITMQ_USERNAME=${SHANOIR_RABBITMQ_USER:?is not set, see .env.example}"
+      - "SPRING_RABBITMQ_PASSWORD=${SHANOIR_RABBITMQ_PASSWORD:?is not set, see .env.example}"
       - "SPRING_DATASOURCE_PASSWORD=${SHANOIR_IMPORT_DB_PASSWORD:?is not set, see .env.example}"
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
@@ -304,6 +314,8 @@ services:
       context: docker-compose
       target: datasets
     environment:
+      - "SPRING_RABBITMQ_USERNAME=${SHANOIR_RABBITMQ_USER:?is not set, see .env.example}"
+      - "SPRING_RABBITMQ_PASSWORD=${SHANOIR_RABBITMQ_PASSWORD:?is not set, see .env.example}"
       - "SPRING_DATASOURCE_PASSWORD=${SHANOIR_DATASETS_DB_PASSWORD:?is not set, see .env.example}"
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
@@ -361,6 +373,8 @@ services:
       context: docker-compose
       target: preclinical
     environment:
+      - "SPRING_RABBITMQ_USERNAME=${SHANOIR_RABBITMQ_USER:?is not set, see .env.example}"
+      - "SPRING_RABBITMQ_PASSWORD=${SHANOIR_RABBITMQ_PASSWORD:?is not set, see .env.example}"
       - "SPRING_DATASOURCE_PASSWORD=${SHANOIR_PRECLINICAL_DB_PASSWORD:?is not set, see .env.example}"
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
@@ -406,6 +420,8 @@ services:
       context: docker-compose
       target: nifti-conversion
     environment:
+      - "SPRING_RABBITMQ_USERNAME=${SHANOIR_RABBITMQ_USER:?is not set, see .env.example}"
+      - "SPRING_RABBITMQ_PASSWORD=${SHANOIR_RABBITMQ_PASSWORD:?is not set, see .env.example}"
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
       - SHANOIR_URL_HOST
@@ -557,7 +573,7 @@ services:
       context: docker-compose
       target: bids-validator
     environment:
-      - AMQP_URL=amqp://guest:guest@rabbitmq:5672/
+      - "AMQP_URL=amqp://${SHANOIR_RABBITMQ_USER:?is not set, see .env.example}:${SHANOIR_RABBITMQ_PASSWORD:?is not set, see .env.example}@rabbitmq:5672/"
       - IN_QUEUE=bids.validate
       - OUT_QUEUE=bids.validated
       - DATA_ROOT=/var/bids-data
