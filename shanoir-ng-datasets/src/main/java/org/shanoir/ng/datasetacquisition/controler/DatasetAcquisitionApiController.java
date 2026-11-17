@@ -319,14 +319,12 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
     }
 
     @Override
-    public ResponseEntity<DatasetAcquisitionDTO> findDatasetAcquisitionById(
-              Long datasetAcquisitionId) {
-
-        final DatasetAcquisition datasetAcquisition = datasetAcquisitionService.findById(datasetAcquisitionId);
+    public ResponseEntity<DatasetAcquisitionDTO> findDatasetAcquisitionById(Long datasetAcquisitionId) {
+        final DatasetAcquisition datasetAcquisition = repository.findByIdWithSourceAndCopies(datasetAcquisitionId).orElse(null);
         if (datasetAcquisition == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity<>(dsAcqMapper.acquisitionToAcquisitionWithExaminationDTO(datasetAcquisition), HttpStatus.OK);
+        return new ResponseEntity<>(dsAcqMapper.acquisitionToAcquisitionWithExaminationAndSourceAndCopiesDTO(datasetAcquisition), HttpStatus.OK);
     }
 
     @Override

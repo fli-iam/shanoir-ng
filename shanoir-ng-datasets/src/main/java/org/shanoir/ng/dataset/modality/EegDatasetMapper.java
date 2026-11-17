@@ -36,6 +36,12 @@ public interface EegDatasetMapper {
     @Mapping(target = "events", expression = "java(null)")
     EegDatasetDTO eegDatasetToEegDatasetDTOWithProcessingAncestorsAndExamination(EegDataset dataset);
 
+    @Named("withProcessingAncestorsAndExaminationAndSourceAndCopies")
+    @InheritConfiguration(name = "datasetToDatasetDTOWithProcessingAncestorsAndExaminationAndSourceAndCopiesPrototype")
+    @Mapping(target = "channels", expression = "java(null)")
+    @Mapping(target = "events", expression = "java(null)")
+    EegDatasetDTO eegDatasetToEegDatasetDTOWithProcessingAncestorsAndExaminationAndSourceAndCopies(EegDataset dataset);
+
     @Named("withMetadata")
     @InheritConfiguration(name = "datasetToDatasetDTOWithMetadataPrototype")
     EegDatasetDTO eegDatasetToEegDatasetDTOWithMetadata(EegDataset dataset);
