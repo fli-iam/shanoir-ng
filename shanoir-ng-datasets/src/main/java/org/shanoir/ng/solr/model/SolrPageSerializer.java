@@ -14,8 +14,6 @@
 
 package org.shanoir.ng.solr.model;
 
-import java.io.Serial;
-
 import org.springframework.boot.jackson.JacksonComponent;
 import org.springframework.data.solr.core.query.result.SolrResultPage;
 
@@ -25,9 +23,6 @@ import tools.jackson.databind.ser.std.StdSerializer;
 
 @JacksonComponent
 public class SolrPageSerializer extends StdSerializer<SolrResultPage> {
-
-    @Serial
-    private static final long serialVersionUID = 1L;
 
     public SolrPageSerializer() {
         super(SolrResultPage.class);
@@ -42,8 +37,7 @@ public class SolrPageSerializer extends StdSerializer<SolrResultPage> {
         gen.writeNumberProperty("totalPages", value.getTotalPages());
         gen.writeNumberProperty("size", value.getSize());
         gen.writePOJOProperty("facetResultPages", value.getFacetResultPages());
-        gen.writeName("content");
-        provider.defaultSerializeValue(value.getContent(), gen);
+        gen.writePOJOProperty("content", value.getContent());
         gen.writeEndObject();
     }
 
