@@ -206,7 +206,7 @@ public class StudyTagApiControllerTest {
         datasetToReturn.getDatasetAcquisition().setExamination(exam);
         datasetToReturn.getDatasetAcquisition().getExamination().setStudy(study);
 
-        given(datasetServiceMock.findByIdWithProcessingAncestorsAndExaminationAndMetadata(1L)).willReturn(datasetToReturn);
+        given(datasetServiceMock.findByIdWithProcessingAncestorsAndExaminationAndMetadataAndSourceAndCopies(1L)).willReturn(datasetToReturn);
         doNothing().when(datasetServiceMock).deleteById(1L);
         given(datasetServiceMock.create(Mockito.mock(MrDataset.class))).willReturn(new MrDataset());
         given(studyRepo.findById(Mockito.anyLong())).willReturn(Optional.of(study));
