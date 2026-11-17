@@ -53,5 +53,10 @@ $(echo "$missing" | sed 's/^/	/')
 Copy them from .env.example into .env and set their values."
 fi
 
+if [ -f docker-compose/dcm4chee/variables.env ] ; then
+	die "docker-compose/dcm4chee/variables.env is no longer used: its settings are now the
+SHANOIR_PACS_* variables of .env (see .env.example). Move your values there, then delete the file."
+fi
+
 docker compose config --quiet \
 	|| die "docker compose refused the configuration (see above): set the missing values in .env"
