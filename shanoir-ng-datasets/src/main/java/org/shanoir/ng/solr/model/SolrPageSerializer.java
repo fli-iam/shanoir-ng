@@ -16,15 +16,14 @@ package org.shanoir.ng.solr.model;
 
 import java.io.Serial;
 
-import org.springframework.boot.jackson.JsonComponent;
+import org.springframework.boot.jackson.JacksonComponent;
 import org.springframework.data.solr.core.query.result.SolrResultPage;
 
 import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
 import tools.jackson.databind.ser.std.StdSerializer;
 
-import tools.jackson.databind.SerializationContext;
-
-@JsonComponent
+@JacksonComponent
 public class SolrPageSerializer extends StdSerializer<SolrResultPage> {
 
     @Serial
