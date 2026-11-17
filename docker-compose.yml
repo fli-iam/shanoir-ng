@@ -437,6 +437,9 @@ services:
     image: dcm4che/slapd-dcm4chee:2.6.2-27.0
     environment:
       LDAP_INIT_CMDS: /etc/openldap/configure.sh /opt/shanoir/ldap-first-start.sh
+      # passwords of the LDAP admin accounts, only read when the volume is initialised
+      LDAP_ROOTPASS: "${SHANOIR_PACS_LDAP_ROOT_PASSWORD:?is not set, see .env.example}"
+      LDAP_CONFIGPASS: "${SHANOIR_PACS_LDAP_CONFIG_PASSWORD:?is not set, see .env.example}"
     logging:
       driver: json-file
       options:
@@ -485,6 +488,7 @@ services:
     environment:
       POSTGRES_HOST: "${SHANOIR_PREFIX}dcm4chee-database"
       POSTGRES_PASSWORD: "${SHANOIR_PACS_DATABASE_PASSWORD:?is not set, see .env.example}"
+      LDAP_ROOTPASS: "${SHANOIR_PACS_LDAP_ROOT_PASSWORD:?is not set, see .env.example}"
       WILDFLY_CHOWN: /storage
       WILDFLY_WAIT_FOR: "${SHANOIR_PREFIX}ldap:389 ${SHANOIR_PREFIX}dcm4chee-database:5432"
     depends_on:
