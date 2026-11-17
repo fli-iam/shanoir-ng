@@ -95,6 +95,16 @@ public interface DatasetService {
      * @param id dataset id.
      * @return a dataset or null.
      */
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    @PostAuthorize("hasRole('ADMIN') or returnObject == null or @datasetSecurityService.hasRightOnTrustedDataset(returnObject, 'CAN_SEE_ALL')")
+    Dataset findByIdWithProcessingAncestorsAndExaminationAndMetadataAndSourceAndCopies(Long id) throws EntityNotFoundException;
+
+    /**
+     * Find dataset by its id.
+     *
+     * @param id dataset id.
+     * @return a dataset or null.
+     */
     Dataset findByIdWithDatasetFilesAndExaminationAndMetadata(Long id) throws EntityNotFoundException;
 
     /**

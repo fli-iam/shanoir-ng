@@ -256,6 +256,22 @@ public class DatasetServiceImpl implements DatasetService {
         return dataset;
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public Dataset findByIdWithProcessingAncestorsAndExaminationAndMetadataAndSourceAndCopies(final Long id) throws EntityNotFoundException {
+        Dataset dataset = repository.findByIdWithProcessingAncestorsAndExaminationAndMetadataAndSourceAndCopies(id).orElseThrow(() -> new EntityNotFoundException(Dataset.class, id));
+        if (dataset.getDatasetProcessing() != null) {
+            dataset.setDatasetAcquisition(dataset.getDatasetProcessing().getInputDatasets().stream().map(Dataset::getDatasetAcquisition).filter(Objects::nonNull).findFirst().orElse(null));
+            if (dataset.getDatasetAcquisition() != null) {
+                Hibernate.initialize(dataset.getDatasetAcquisition().getExamination());
+
+            }
+        }
+        populateInPacs(List.of(dataset));
+        populateCenterId(List.of(dataset));
+        return dataset;
+    }
+
     @Transactional(readOnly = true)
     public Dataset findByIdWithDatasetFilesAndExaminationAndMetadata(final Long id) throws EntityNotFoundException {
         return repository.findByIdWithDatasetFilesAndExaminationAndMetadata(id).orElseThrow(() -> new EntityNotFoundException(Dataset.class, id));

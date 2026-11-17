@@ -46,6 +46,15 @@ public interface MrDatasetMapper {
     @Mapping(target = "repetitionTime", expression = "java(null)")
     MrDatasetDTO mrDatasetToMrDatasetDTOWithProcessingAncestorsAndExamination(MrDataset dataset);
 
+    @Named("withProcessingAncestorsAndExaminationAndSourceAndCopies")
+    @InheritConfiguration(name = "datasetToDatasetDTOWithProcessingAncestorsAndExaminationPrototypeAndSourceAndCopies")
+    @Mapping(target = "echoTime", expression = "java(null)")
+    @Mapping(target = "flipAngle", expression = "java(null)")
+    @Mapping(target = "inversionTime", expression = "java(null)")
+    @Mapping(target = "repetitionTime", expression = "java(null)")
+    MrDatasetDTO mrDatasetToMrDatasetDTOWithProcessingAncestorsAndExaminationAndSourceAndCopies(MrDataset dataset);
+
+
     @Named("withMetadata")
     @InheritConfiguration(name = "datasetToDatasetDTOWithMetadataPrototype")
     @Mapping(target = "echoTime", expression = "java(null)")

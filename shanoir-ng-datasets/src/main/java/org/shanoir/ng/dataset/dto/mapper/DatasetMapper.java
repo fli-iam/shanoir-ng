@@ -106,9 +106,9 @@ public interface DatasetMapper {
      * Some context of usage :
      * - When opening a dataset form
      */
-    @Named("withProcessingAncestorsAndExamination")
-    @InheritConfiguration(name = "datasetToDatasetDTOWithProcessingAncestorsAndExaminationPrototype")
-    DatasetDTO datasetToDatasetDTOWithProcessingAncestorsAndExamination(Dataset dataset);
+    @Named("withProcessingAncestorsAndExaminationAndSourceAndCopies")
+    @InheritConfiguration(name = "datasetToDatasetDTOWithProcessingAncestorsAndExaminationPrototypeAndSourceAndCopies")
+    DatasetDTO datasetToDatasetDTOWithProcessingAncestorsAndExaminationAndSourceAndCopies(Dataset dataset);
 
     /**
      * Some context of usage :

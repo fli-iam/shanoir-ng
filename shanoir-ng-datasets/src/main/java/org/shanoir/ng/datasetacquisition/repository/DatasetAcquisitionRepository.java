@@ -110,6 +110,12 @@ public interface DatasetAcquisitionRepository extends PagingAndSortingRepository
             + "WHERE da.id IN :ids")
     List<DatasetAcquisition> findByIdsWithDatasets(List<Long> ids);
 
+    @Query("SELECT da FROM DatasetAcquisition da "
+            + "LEFT JOIN FETCH da.copies "
+            + "LEFT JOIN FETCH da.source "
+            + "WHERE da.id = :id")
+    Optional<DatasetAcquisition> findByIdWithSourceAndCopies(Long id);
+
     @Transactional(readOnly = true)
     default List<DatasetAcquisition> findByIdsWithDatasetsAndCopies(List<Long> ids) {
         List<DatasetAcquisition> acquisitions = findByIdsWithDatasets(ids);

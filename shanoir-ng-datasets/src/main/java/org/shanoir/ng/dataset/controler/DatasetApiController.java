@@ -227,18 +227,18 @@ public class DatasetApiController implements DatasetApi {
     public ResponseEntity<DatasetDTO> findDatasetById(
             final Long datasetId) throws EntityNotFoundException {
 
-        final Dataset dataset = datasetService.findByIdWithProcessingAncestorsAndExaminationAndMetadata(datasetId);
+        final Dataset dataset = datasetService.findByIdWithProcessingAncestorsAndExaminationAndMetadataAndSourceAndCopies(datasetId);
 
         if (dataset == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
         if (dataset instanceof MrDataset) {
-            return new ResponseEntity<>(mrDatasetMapper.mrDatasetToMrDatasetDTOWithProcessingAncestorsAndExamination((MrDataset) dataset), HttpStatus.OK);
+            return new ResponseEntity<>(mrDatasetMapper.mrDatasetToMrDatasetDTOWithProcessingAncestorsAndExaminationAndSourceAndCopies((MrDataset) dataset), HttpStatus.OK);
         } else if (dataset instanceof EegDataset) {
-            return new ResponseEntity<>(eegDatasetMapper.eegDatasetToEegDatasetDTOWithProcessingAncestorsAndExamination((EegDataset) dataset), HttpStatus.OK);
+            return new ResponseEntity<>(eegDatasetMapper.eegDatasetToEegDatasetDTOWithProcessingAncestorsAndExaminationAndSourceAndCopies((EegDataset) dataset), HttpStatus.OK);
         } else {
-            return new ResponseEntity<>(datasetMapper.datasetToDatasetDTOWithProcessingAncestorsAndExamination(dataset), HttpStatus.OK);
+            return new ResponseEntity<>(datasetMapper.datasetToDatasetDTOWithProcessingAncestorsAndExaminationAndSourceAndCopies(dataset), HttpStatus.OK);
         }
     }
 
