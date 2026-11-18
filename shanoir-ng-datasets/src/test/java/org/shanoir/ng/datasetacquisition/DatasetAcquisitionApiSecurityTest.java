@@ -119,7 +119,7 @@ public class DatasetAcquisitionApiSecurityTest {
         assertAccessDenied(api::findByStudyCard, 1L);
         assertAccessDenied(api::findDatasetAcquisitions, PageRequest.of(0, 10));
         assertAccessDenied(api::createNewDatasetAcquisition, new ImportJob());
-        assertAccessDenied(api::updateDatasetAcquisition, 1L, mockDsAcqDTO(1L), mockBindingResult);
+        assertAccessDenied(api::updateDatasetAcquisition, 1L, mockDsAcqDTO(1L), mockBindingResult, null);
         assertAccessDenied(api::deleteDatasetAcquisition, 1L);
         assertAccessDenied(api::findEmptyDatasetAcquisitions, 1L);
         assertAccessDenied(api::deleteEmptyDatasetAcquisitions, 1L);
@@ -153,7 +153,9 @@ public class DatasetAcquisitionApiSecurityTest {
         //assertEquals(3, api.findDatasetAcquisitions(PageRequest.of(0, 10)).getBody().getTotalElements());
 
         assertAccessAuthorized(api::createNewDatasetAcquisition, new ImportJob());
-        assertAccessAuthorized(api::updateDatasetAcquisition, 1L, mockDsAcqDTO(1L), mockBindingResult);
+        assertAccessAuthorized(api::updateDatasetAcquisition, 1L, mockDsAcqDTO(1L), mockBindingResult, null);
+        // the path id must match the body id, for admins too
+        assertAccessDenied(api::updateDatasetAcquisition, 2L, mockDsAcqDTO(1L), mockBindingResult, null);
         assertAccessAuthorized(api::deleteDatasetAcquisition, 4L);
         assertAccessAuthorized(api::findEmptyDatasetAcquisitions, 1L);
         assertAccessAuthorized(api::deleteEmptyDatasetAcquisitions, 1L);
@@ -267,13 +269,17 @@ public class DatasetAcquisitionApiSecurityTest {
         given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(true);
         // updateDatasetAcquisition(Long, DatasetAcquisitionDTO, BindingResult)
         if ("ROLE_USER".equals(role)) {
-            assertAccessDenied(api::updateDatasetAcquisition, 1L, mockDsAcqDTO(1L), mockBindingResult);
+            assertAccessDenied(api::updateDatasetAcquisition, 1L, mockDsAcqDTO(1L), mockBindingResult, null);
+            // an importer may save the acquisition, but only its extra-data files are kept
+            given(rightsService.hasRightOnStudy(1L, "CAN_IMPORT")).willReturn(true);
+            assertAccessAuthorized(api::updateDatasetAcquisition, 1L, mockDsAcqDTO(1L), mockBindingResult, null);
+            given(rightsService.hasRightOnStudy(1L, "CAN_IMPORT")).willReturn(false);
         } else if ("ROLE_EXPERT".equals(role)) {
-            assertAccessAuthorized(api::updateDatasetAcquisition, 1L, mockDsAcqDTO(1L), mockBindingResult);
+            assertAccessAuthorized(api::updateDatasetAcquisition, 1L, mockDsAcqDTO(1L), mockBindingResult, null);
         }
-        assertAccessDenied(api::updateDatasetAcquisition, 1L, mockDsAcqDTO(2L), mockBindingResult);
-        assertAccessDenied(api::updateDatasetAcquisition, 1L, mockDsAcqDTO(3L), mockBindingResult);
-        assertAccessDenied(api::updateDatasetAcquisition, 1L, mockDsAcqDTO(4L), mockBindingResult);
+        assertAccessDenied(api::updateDatasetAcquisition, 1L, mockDsAcqDTO(2L), mockBindingResult, null);
+        assertAccessDenied(api::updateDatasetAcquisition, 1L, mockDsAcqDTO(3L), mockBindingResult, null);
+        assertAccessDenied(api::updateDatasetAcquisition, 1L, mockDsAcqDTO(4L), mockBindingResult, null);
     }
 
 
@@ -309,6 +315,7 @@ public class DatasetAcquisitionApiSecurityTest {
         dto.setId(id);
         dto.setAcquisitionEquipmentId(1L);
         dto.setExamination(new ExaminationDTO());
+        dto.getExamination().setId(id);
         dto.getExamination().setStudyId(1L);
         dto.getExamination().setCenterId(1L);
         dto.setRank(1);

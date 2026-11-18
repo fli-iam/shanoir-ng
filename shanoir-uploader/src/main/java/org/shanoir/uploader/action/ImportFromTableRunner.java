@@ -326,7 +326,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
         // Profile OFSEP: in Excel table: SHANOIR_SUBJECT_NAME column is ignored
         } else {
             try {
-                subjectREST = shanoirUploaderServiceClientNG.findSubjectBySubjectIdentifier(subject.getIdentifier());
+                subjectREST = shanoirUploaderServiceClientNG.findSubjectByStudyIdAndSubjectIdentifier(studyREST.getId(), subject.getIdentifier());
                 // If the name does not match, change the subjectStudyIdentifier for this study
                 if (subjectREST != null && !subjectREST.getName().equals(importJob.getSubjectName())) {
                     subjectStudyIdentifier = importJob.getSubjectName();

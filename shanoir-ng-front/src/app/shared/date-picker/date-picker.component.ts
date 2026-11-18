@@ -75,6 +75,10 @@ export class DatepickerComponent implements ControlValueAccessor {
     registerOnTouched(fn: any): void {
         this.onTouch = fn;
     }
+
+    setDisabledState(isDisabled: boolean): void {
+        this.disabled = isDisabled;
+    }
     
     public static validator = (control: AbstractControl): ValidationErrors | null => {
         if (control.value == 'invalid') {

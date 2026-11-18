@@ -75,6 +75,21 @@ public class ExaminationRepositoryTest {
     // }
 
     @Test
+    public void existsCopyOfSubjectExaminations() throws Exception {
+        assertThat(repository.existsCopyOfSubjectExaminations(SUBJECT_TEST_1_ID)).isFalse();
+
+        // examination 2 (subject 2) becomes a copy of examination 1 (subject 1)
+        Examination source = repository.findById(EXAMINATION_TEST_1_ID).orElseThrow();
+        Examination copy = repository.findById(2L).orElseThrow();
+        copy.setSource(source);
+        repository.save(copy);
+
+        assertThat(repository.existsCopyOfSubjectExaminations(SUBJECT_TEST_1_ID)).isTrue();
+        // the copy itself has not been copied
+        assertThat(repository.existsCopyOfSubjectExaminations(2L)).isFalse();
+    }
+
+    @Test
     public void findBySubjectId() throws Exception {
         List<Examination> examinationsDb = repository.findBySubjectId(SUBJECT_TEST_1_ID);
         assertThat(examinationsDb.size()).isEqualTo(1);

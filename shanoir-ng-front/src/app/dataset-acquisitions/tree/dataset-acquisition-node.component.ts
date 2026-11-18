@@ -86,7 +86,7 @@ export class DatasetAcquisitionNodeComponent extends TreeNodeAbstractComponent<D
                     UNLOADED,
                     null,
                     this.input.datasetAcquisition.extraDataFilePathList,
-                    this.input.studyRights.includes(StudyUserRight.CAN_ADMINISTRATE),
+                    this.treeService.hasDeleteRight(this.input.studyRights),
                     this.input.studyRights.includes(StudyUserRight.CAN_DOWNLOAD)
                 );
             }

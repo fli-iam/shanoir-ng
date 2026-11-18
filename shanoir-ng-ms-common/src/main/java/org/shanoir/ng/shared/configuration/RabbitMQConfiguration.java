@@ -224,6 +224,12 @@ public class RabbitMQConfiguration {
     /** Send a mail from dataset microservice to ms users */
     public static final String IMPORT_DATASET_MAIL_QUEUE = "import-dataset-mail-queue";
 
+    /** Send a mail from dataset microservice to ms users when extra data files are added */
+    public static final String EXTRA_DATA_MAIL_QUEUE = "extra-data-mail-queue";
+
+    /** Send a mail from dataset microservice to ms users when datasets are copied into a study */
+    public static final String DATASETS_COPIED_MAIL_QUEUE = "datasets-copied-mail-queue";
+
     /** Queue used to import eeg data */
     public static final String IMPORT_EEG_QUEUE = "import-eeg-queue";
 
@@ -313,6 +319,9 @@ public class RabbitMQConfiguration {
 
     /** Preclinical subject creation => Check if a subject with this name already exists **/
     public static final String SUBJECTS_NAME_QUEUE = "subjects-name-queue";
+
+    /** Subject deletion => Check if some data of the subject was copied into another study **/
+    public static final String SUBJECT_HAS_COPIED_DATA_QUEUE = "subject-has-copied-data-queue";
 
     ////////////////// EXCHANGES //////////////////
 
@@ -455,6 +464,16 @@ public class RabbitMQConfiguration {
     }
 
     @Bean
+    public static Queue extraDataMailQueue() {
+        return new Queue(EXTRA_DATA_MAIL_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue datasetsCopiedMailQueue() {
+        return new Queue(DATASETS_COPIED_MAIL_QUEUE, true);
+    }
+
+    @Bean
     public static Queue importEEGQueue() {
         return new Queue(IMPORT_EEG_QUEUE, true);
     }
@@ -587,6 +606,11 @@ public class RabbitMQConfiguration {
     @Bean
     public static Queue subjectsNameQueue() {
         return new Queue(SUBJECTS_NAME_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue subjectHasCopiedDataQueue() {
+        return new Queue(SUBJECT_HAS_COPIED_DATA_QUEUE, true);
     }
 
     @Bean
