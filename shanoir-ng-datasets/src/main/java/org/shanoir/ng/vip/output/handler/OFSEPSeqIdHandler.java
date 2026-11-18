@@ -467,7 +467,7 @@ public class OFSEPSeqIdHandler extends OutputHandler {
 
         JSONObject volume = json.getJSONObject("volume");
         JSONObject serie = json.getJSONObject("serie");
-        JSONObject dicom = json.getJSONObject("champs_DICOM");
+        JSONObject dicom = serie.getJSONObject("champs_DICOM");
 
 
         for (String name : SERIE_PROPERTIES) {
