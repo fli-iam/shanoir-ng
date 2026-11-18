@@ -537,6 +537,8 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
             return false;
         }
         importJob.setSeries(selectedSeries);
+        // PACS query result is not needed anymore: avoid writing it into import-job.json
+        importJob.setPatients(null);
         return true;
     }
 
