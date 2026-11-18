@@ -14,6 +14,8 @@
 
 package org.shanoir.ng.configuration;
 
+import java.util.concurrent.ThreadPoolExecutor;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.TaskExecutor;
@@ -33,6 +35,10 @@ public class AsyncConfiguration implements AsyncConfigurer {
         executor.setCorePoolSize(100);
         executor.setMaxPoolSize(100);
         executor.setQueueCapacity(500);
+        // When to much async tasks and the queue is full, the calling thread is running the task by itself
+        // (e.g. : queue is full with 500 tasks, calling thread has 4 more tasks to submit, A, B, C and D.
+        // It will run A by itself, then try to submit B to the queue, if not possible, it runs B itself etc...)
+        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
         executor.setThreadNamePrefix("AsyncThread-");
         executor.initialize();
         return new DelegatingSecurityContextAsyncTaskExecutor(executor);

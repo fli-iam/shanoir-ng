@@ -20,6 +20,7 @@ import java.util.List;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
+import org.shanoir.ng.processing.dto.DatasetProcessingCleanupRecord;
 import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
@@ -197,4 +198,16 @@ public interface DatasetProcessingApi {
     ResponseEntity<String> complexMassiveDownload(
             @Parameter(description = "parameters for download", required = true)
             @Valid @RequestBody JsonNode request);
+
+    @Operation(summary = "cleanup", description = "Removes the execution artifacts. By default only returns what would be removed")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "what would be removed"),
+            @ApiResponse(responseCode = "202", description = "cleanup started, followed through its job"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "500", description = "unexpected error")})
+    @PostMapping(value = "/cleanup", produces = {"application/json"})
+    @PreAuthorize("hasRole('ADMIN')")
+    ResponseEntity<DatasetProcessingCleanupRecord> cleanup(
+            @Parameter(description = "only compute what would be removed") @RequestParam(value = "dryRun", defaultValue = "true") boolean dryRun);
 }

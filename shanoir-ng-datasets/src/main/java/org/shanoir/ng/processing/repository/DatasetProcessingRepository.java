@@ -32,6 +32,47 @@ import org.springframework.transaction.annotation.Transactional;
  */
 public interface DatasetProcessingRepository extends CrudRepository<DatasetProcessing, Long> {
 
+    interface CleanupProcessing {
+        Long getId();
+        Long getParentId();
+        String getComment();
+        Integer getProcessingStatus();
+        /** Own id for a monitoring, parent id for its children, else null */
+        Long getMonitoringId();
+        Integer getMonitoringStatus();
+        Long getStartDate();
+    }
+
+    interface CleanupLink {
+        Long getProcessingId();
+        Long getDatasetId();
+    }
+
+    interface CleanupDataset {
+        Long getId();
+        Long getProcessingId();
+        Long getSourceId();
+    }
+
+    @Query(value = "SELECT p.id AS id, p.parent_id AS parentId, p.comment AS comment, "
+            + "p.processing_status AS processingStatus, em.id AS monitoringId, "
+            + "em.status AS monitoringStatus, em.start_date AS startDate "
+            + "FROM dataset_processing p "
+            + "LEFT JOIN execution_monitoring em ON em.id = COALESCE(p.parent_id, p.id)", nativeQuery = true)
+    List<CleanupProcessing> findCleanupProcessings();
+
+    @Query(value = "SELECT processing_id AS processingId, dataset_id AS datasetId "
+            + "FROM input_of_dataset_processing", nativeQuery = true)
+    List<CleanupLink> findCleanupInputs();
+
+    @Query(value = "SELECT processing_id AS processingId, dataset_id AS datasetId "
+            + "FROM processing_resource WHERE dataset_id IS NOT NULL", nativeQuery = true)
+    List<CleanupLink> findCleanupResources();
+
+    @Query(value = "SELECT id AS id, dataset_processing_id AS processingId, source_id AS sourceId "
+            + "FROM dataset WHERE dataset_processing_id IS NOT NULL OR source_id IS NOT NULL", nativeQuery = true)
+    List<CleanupDataset> findCleanupDatasets();
+
     /**
      * Find dataset processings by ids.
      *

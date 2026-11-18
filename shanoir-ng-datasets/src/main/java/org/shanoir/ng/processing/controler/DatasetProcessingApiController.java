@@ -25,14 +25,20 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
+import org.shanoir.ng.processing.dto.DatasetProcessingCleanupRecord;
 import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
 import org.shanoir.ng.processing.dto.mapper.DatasetProcessingMapper;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.processing.repository.DatasetProcessingRepository;
+import org.shanoir.ng.processing.service.DatasetProcessingCleanupService;
 import org.shanoir.ng.processing.service.DatasetProcessingService;
 import org.shanoir.ng.processing.service.ProcessingDownloaderService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
-import org.shanoir.ng.shared.exception.*;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.ErrorDetails;
+import org.shanoir.ng.shared.exception.ErrorModel;
+import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
 import org.shanoir.ng.vip.executionMonitoring.model.ExecutionStatus;
@@ -67,6 +73,9 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 
     @Autowired
     private DatasetProcessingService datasetProcessingService;
+
+    @Autowired
+    private DatasetProcessingCleanupService cleanupService;
 
     @Autowired
     private DatasetProcessingRepository repository;
@@ -247,5 +256,15 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
             LOG.error("Error while preparing complex processed data download.", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error while preparing complex processed data download: " + e.getMessage());
         }
+    }
+
+    @Override
+    public ResponseEntity<DatasetProcessingCleanupRecord> cleanup(boolean dryRun) {
+        DatasetProcessingCleanupRecord plan = cleanupService.plan();
+        if (dryRun) {
+            return ResponseEntity.ok(plan);
+        }
+        cleanupService.clean(plan);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(plan);
     }
 }

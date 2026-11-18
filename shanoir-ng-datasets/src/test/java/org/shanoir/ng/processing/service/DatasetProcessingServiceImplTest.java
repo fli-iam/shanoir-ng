@@ -43,6 +43,7 @@ import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.processing.repository.DatasetProcessingRepository;
+import org.shanoir.ng.property.repository.DatasetPropertyRepository;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
@@ -73,6 +74,9 @@ class DatasetProcessingServiceImplTest {
 
     @Mock
     private ProcessingResourceRepository processingResourceRepository;
+
+    @Mock
+    private DatasetPropertyRepository propertyRepository;
 
     @Mock
     private DatasetService datasetService;
