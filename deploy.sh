@@ -12,17 +12,7 @@
 
 #!/bin/sh
 # script that helps with local dev/deploy tasks
-
-export SHANOIR_URL_HOST=shanoir-ng-nginx
-export SHANOIR_URL_SCHEME=https
-export SHANOIR_VIEWER_OHIF_URL_HOST=viewer
-export SHANOIR_VIEWER_OHIF_URL_SCHEME=https
-export SHANOIR_VIEWER_VIDEPE_URL_HOST=videpe
-export SHANOIR_VIEWER_VIDEPE_URL_SCHEME=https
-export SHANOIR_PREFIX=
-export SHANOIR_NOTIFICATION_EMAIL="notification@inria.fr"
-export SHANOIR_KEYCLOAK_USER=admin
-# The secrets (SHANOIR_KEYCLOAK_PASSWORD, ...) come from .env
+# The configuration and the secrets come from .env (see .env.example)
 
 ./check-env.sh || exit 1
 
