@@ -17,6 +17,7 @@ package org.shanoir.ng.examination;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.shanoir.ng.configuration.RabbitMQDatasetsService;
 import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
 import org.shanoir.ng.examination.controler.ExaminationApi;
 import org.shanoir.ng.examination.dto.ExaminationDTO;
@@ -34,6 +35,7 @@ import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.Utils;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
@@ -89,6 +91,12 @@ public class ExaminationApiSecurityTest {
 
     @MockitoBean
     private StudyInstanceUIDAndSubjectNameHandler studyInstanceUIDHandler;
+
+    @MockitoBean
+    private ConnectionFactory connectionFactory;
+
+    @MockitoBean
+    private RabbitMQDatasetsService rabbitMQDatasetsService;
 
     @BeforeEach
     public void setup() {

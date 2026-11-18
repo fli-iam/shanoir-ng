@@ -14,14 +14,19 @@
 
 package org.shanoir.ng.examination;
 
-import tools.jackson.databind.ObjectMapper;
+import static org.mockito.BDDMockito.given;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
 import org.apache.solr.client.solrj.SolrServerException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.shanoir.ng.configuration.RabbitMQDatasetsService;
 import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
 import org.shanoir.ng.dicom.web.service.DICOMWebService;
@@ -37,19 +42,15 @@ import org.shanoir.ng.storage.StorageService;
 import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.ActiveProfiles;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
-import static org.mockito.BDDMockito.given;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 /**
  * Examination service test.
@@ -63,41 +64,44 @@ import static org.mockito.BDDMockito.given;
 public class ExaminationServiceTest {
 
     private static final Long EXAMINATION_ID = 1L;
+
     private static final String UPDATED_EXAMINATION_COMMENT = "examination 2";
 
-    @Mock
+    @MockitoBean
     private ExaminationRepository examinationRepository;
 
-    @InjectMocks
+    @Autowired
     private ExaminationServiceImpl examinationService;
 
-    @Mock
+    @MockitoBean
     private StudyRightsService rightsService;
 
-    @Mock
+    @MockitoBean
     private ShanoirEventService eventService;
 
-    @Mock
+    @MockitoBean
     private SubjectRepository subjectService;
 
-    @Mock
+    @MockitoBean
     private RabbitTemplate rabbitTemplate;
 
-    @Mock
-    private ObjectMapper mapper;
-
-    @Mock
+    @MockitoBean
     private StudyInstanceUIDAndSubjectNameHandler studyInstanceUIDHandler;
 
-    @Mock
+    @MockitoBean
     private DICOMWebService dicomWebService;
 
-    @Mock
+    @MockitoBean
     private DatasetSecurityService datasetSecurityService;
 
-    @Mock
+    @MockitoBean
     private StorageService storageService;
 
+    @MockitoBean
+    private ConnectionFactory connectionFactory;
+
+    @MockitoBean
+    private RabbitMQDatasetsService rabbitMQDatasetsService;
 
     @BeforeEach
     public void setup() throws ShanoirException {
@@ -226,14 +230,12 @@ public class ExaminationServiceTest {
 
     private Examination createExamination() {
         Examination oldExam  = ModelsUtil.createExamination();
-
         final Examination examination = new Examination();
         examination.setId(EXAMINATION_ID);
         examination.setComment(UPDATED_EXAMINATION_COMMENT);
         examination.setCenterId(oldExam.getCenterId());
         examination.setStudy(oldExam.getStudy());
         examination.setSubject(oldExam.getSubject());
-
         return examination;
     }
 
