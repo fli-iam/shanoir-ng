@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import javax.swing.JTabbedPane;
@@ -209,9 +210,23 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
         downloadImportJobs.put(importJob.getStudy().getStudyInstanceUID(), importJob);
         Runnable downloadOrCopyRunnable = new DownloadOrCopyRunnable(true, true, importFromTableWindow.frame, importFromTableWindow.downloadProgressBar,  dicomServerClient, dicomFileAnalyzer,  null, downloadImportJobs);
         Thread downloadThread = new Thread(downloadOrCopyRunnable);
+        AtomicReference<Throwable> downloadError = new AtomicReference<>();
+        downloadThread.setUncaughtExceptionHandler((thread, throwable) -> downloadError.set(throwable));
         downloadThread.start();
         // Wait for thread to finish
         downloadThread.join();
+        // Stop here if the download failed, before creating subject and examination on the server
+        if (downloadError.get() != null || importJob.getUploadState() != UploadState.READY) {
+            if (downloadError.get() != null) {
+                logger.error("Download from PACS failed: " + downloadError.get().getMessage(), downloadError.get());
+            }
+            importJob.setUploadState(UploadState.ERROR);
+            importJob.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.table.error.pacs.copy"));
+            line[6] = importJob.getErrorMessage();
+            csvWriter.addExaminationLine(false, line);
+            logger.error(importJob.getErrorMessage());
+            return false;
+        }
 
         EquipmentDicom equipmentDicom = getAndCheckEquipmentDicom(importJob);
         if (equipmentDicom == null) {
@@ -521,7 +536,9 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
             importJob.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.table.error.missing.data"));
             return false;
         }
-        importJob.setSelectedSeries(selectedSeries);
+        importJob.setSeries(selectedSeries);
+        // PACS query result is not needed anymore: avoid writing it into import-job.json
+        importJob.setPatients(null);
         return true;
     }
 
