@@ -124,7 +124,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                     }
                                 </span>
                             </li>
-                            @if (panelStudyUser.expirationDate || mode != 'view') {
+                            @if ((panelStudyUser.expirationDate || mode != 'view') && !panelStudyUser.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE)) {
                                 <li>
                                     <label>Expiration</label>
                                     <span class="right-col fix-icon left-icon">
