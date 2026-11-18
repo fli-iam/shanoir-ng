@@ -14,8 +14,12 @@
 
 package org.shanoir.ng.vip.execution.service;
 
-import jakarta.annotation.PostConstruct;
-import org.keycloak.representations.AccessTokenResponse;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.processing.dto.ParameterResourceDTO;
@@ -32,8 +36,8 @@ import org.shanoir.ng.vip.execution.dto.VipExecutionDTO;
 import org.shanoir.ng.vip.executionMonitoring.model.ExecutionMonitoring;
 import org.shanoir.ng.vip.executionMonitoring.model.ExecutionStatus;
 import org.shanoir.ng.vip.executionMonitoring.service.ExecutionMonitoringServiceImpl;
-import org.shanoir.ng.vip.processingResource.service.ProcessingResourceServiceImpl;
 import org.shanoir.ng.vip.output.exception.ResultHandlerException;
+import org.shanoir.ng.vip.processingResource.service.ProcessingResourceServiceImpl;
 import org.shanoir.ng.vip.shared.dto.DatasetParameterDTO;
 import org.shanoir.ng.vip.shared.service.Utils;
 import org.slf4j.Logger;
@@ -49,9 +53,9 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
-import reactor.core.publisher.Mono;
 
-import java.util.*;
+import jakarta.annotation.PostConstruct;
+import reactor.core.publisher.Mono;
 
 @Service
 public class ExecutionServiceImpl implements ExecutionService {
@@ -329,12 +333,11 @@ public class ExecutionServiceImpl implements ExecutionService {
      * @throws SecurityException
      */
     private HttpHeaders getServiceAccountHttpHeaders() throws SecurityException {
-        AccessTokenResponse accessTokenResponse = keycloakServiceAccountUtils.getServiceAccountAccessToken();
-        String token = accessTokenResponse.getToken();
-
+        String token = keycloakServiceAccountUtils.getAccessTokenString();
         // init headers with the active access token
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + token);
         return headers;
     }
+
 }
