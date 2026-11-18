@@ -53,6 +53,7 @@ import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.processing.repository.DatasetProcessingRepository;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.security.oauth2.server.resource.autoconfigure.servlet.OAuth2ResourceServerAutoConfiguration;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
@@ -77,7 +78,10 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
  * UIDs (examinationUID, acquisitionUID, datasetUID), never the real
  * StudyInstanceUID/SeriesInstanceUIDs of the PACS.
  */
-@WebMvcTest(controllers = DICOMWebApiController.class)
+@WebMvcTest(controllers = DICOMWebApiController.class,
+        excludeAutoConfiguration = {
+                OAuth2ResourceServerAutoConfiguration.class
+        })
 @AutoConfigureMockMvc(addFilters = false)
 @ContextConfiguration()
 @Import({ SeriesInstanceUIDHandler.class, StudyInstanceUIDAndSubjectNameHandler.class })

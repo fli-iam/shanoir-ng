@@ -29,6 +29,7 @@ import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.service.StudyService;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.security.oauth2.server.resource.autoconfigure.servlet.OAuth2ResourceServerAutoConfiguration;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -42,7 +43,10 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
  *
  */
 
-@WebMvcTest(controllers = BidsApiController.class)
+@WebMvcTest(controllers = BidsApiController.class,
+        excludeAutoConfiguration = {
+                OAuth2ResourceServerAutoConfiguration.class
+        })
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
 public class BidsApiControllerTest {

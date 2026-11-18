@@ -35,6 +35,7 @@ import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.security.oauth2.server.resource.autoconfigure.servlet.OAuth2ResourceServerAutoConfiguration;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.data.domain.PageRequest;
@@ -51,7 +52,10 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 
-@WebMvcTest(controllers = DICOMJsonApiController.class)
+@WebMvcTest(controllers = DICOMJsonApiController.class,
+        excludeAutoConfiguration = {
+                OAuth2ResourceServerAutoConfiguration.class
+        })
 @AutoConfigureMockMvc(addFilters = false)
 @ContextConfiguration()
 @EnableSpringDataWebSupport
