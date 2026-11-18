@@ -62,6 +62,12 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
         return query.getResultList();
     }
 
+    @Override
+    public long countSpecificSolrDoc(String queryType) {
+        Query query = em.createNativeQuery("SELECT COUNT(*) FROM (" + queryType + ") AS solr_doc_count");
+        return ((Number) query.getSingleResult()).longValue();
+    }
+
     public ShanoirMetadata findOneSolrDoc(Long datasetId) {
         List<ShanoirMetadata> processed = findSolrProcessed(" AND d.id = " + datasetId);
         if (!processed.isEmpty()) {

@@ -129,6 +129,10 @@ viewer:
 
 solr.host: http://${SHANOIR_SOLR_HOST:${SHANOIR_PREFIX}solr}:8983/solr/shanoir
 
+mail:
+  # maximum number of examinations listed in the "datasets copied" mail, the others are summarized as "... and N more"
+  datasets-copied.max-examinations: ${SHANOIR_MAIL_COPIED_EXAMINATIONS_MAX:50}
+
 storage:
   type: ${SHANOIR_STORAGE_TYPE:file-system} # "file-system" or "s3"
   file-system:

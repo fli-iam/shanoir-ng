@@ -296,7 +296,6 @@ const routes: Routes = [
         path: 'subject/edit/:id',
         component: SubjectComponent,
         data: { mode: 'edit' },
-        canActivate: [AuthAdminOrExpertGuard],
     },
     {
         path: 'subject/create',
@@ -636,7 +635,6 @@ const routes: Routes = [
 		path: 'dataset-acquisition/edit/:id',
 		component: DatasetAcquisitionComponent,
 		data: { mode: 'edit' },
-		canActivate: [AuthAdminOrExpertGuard],
 	},
 	{
 		path: 'dataset-acquisition/create',

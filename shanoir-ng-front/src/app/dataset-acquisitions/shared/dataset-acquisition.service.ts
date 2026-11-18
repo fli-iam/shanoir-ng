@@ -131,11 +131,17 @@ export class DatasetAcquisitionService extends EntityService<DatasetAcquisition>
         return JSON.stringify(dto, this.customReplacer);
     }
 
-    postFile(fileToUpload: File, acquisitionId: number): Promise<any> {
-        const endpoint = this.API_URL + '/extra-data-upload/' + acquisitionId;
+    /**
+     * Updates the acquisition, with its new extra data files if any, in a single request:
+     * the acquisition is not updated if a file can't be stored.
+     */
+    update(id: number, entity: DatasetAcquisition, filesToUpload: File[] = []): Promise<void> {
         const formData: FormData = new FormData();
-        formData.append('file', fileToUpload, fileToUpload.name);
-        return firstValueFrom(this.http.post<any>(endpoint, formData));
+        formData.append('datasetAcquisition', new Blob([this.stringify(entity)], { type: 'application/json' }));
+        for (const file of filesToUpload) {
+            formData.append('files', file, file.name);
+        }
+        return firstValueFrom(this.http.put<void>(this.API_URL + '/' + id, formData));
     }
 
     downloadFile(fileName: string, acquisitionId: number, state?: TaskState): Observable<TaskState> {

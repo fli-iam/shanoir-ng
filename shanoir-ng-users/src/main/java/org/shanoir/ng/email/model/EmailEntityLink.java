@@ -14,7 +14,7 @@
 
 package org.shanoir.ng.email.model;
 
-public class DatasetDetail {
+public class EmailEntityLink {
 
     private String url;
 

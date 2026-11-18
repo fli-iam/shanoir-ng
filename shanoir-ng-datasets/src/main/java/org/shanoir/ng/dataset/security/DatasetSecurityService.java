@@ -233,28 +233,6 @@ public class DatasetSecurityService {
     }
 
     /**
-     * Check that the connected user has the given right for the given subject.
-     *
-     * @param subjectName the study name
-     * @param rightStr the right
-     * @return true or false
-     */
-    public boolean hasRightOnSubjectName(String subjectName, String rightStr) {
-        if (KeycloakUtil.isAdmin()) {
-            return true;
-        }
-        Subject subject = subjectRepository.findByName(subjectName);
-        if (subject == null) {
-            return false;
-        }
-        boolean hasRight = studyRightsService.hasRightOnStudy(subject.getStudy().getId(), rightStr);
-        if (hasRight) {
-            return true;
-        }
-        return false;
-    }
-
-    /**
      * Check that the connected user has the given right for the given study card.
      *
      * @param studyCardId the study card id
