@@ -20,6 +20,8 @@ public class CopyData {
     public static class SubjectCopy {
         private Long id;
         private String newName;
+        /** Center of the subject's copied datasets, used for the target study's subject name pattern. */
+        private Long centerId;
 
         public Long getId() {
             return id;
@@ -35,6 +37,14 @@ public class CopyData {
 
         public void setNewName(String newName) {
             this.newName = newName;
+        }
+
+        public Long getCenterId() {
+            return centerId;
+        }
+
+        public void setCenterId(Long centerId) {
+            this.centerId = centerId;
         }
     }
 

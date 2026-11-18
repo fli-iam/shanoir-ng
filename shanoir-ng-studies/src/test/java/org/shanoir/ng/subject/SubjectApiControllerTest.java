@@ -105,6 +105,7 @@ public class SubjectApiControllerTest {
         Subject subject = new Subject();
         subject.setId(Long.valueOf(123));
         given(subjectServiceMock.create(Mockito.any(Subject.class), Mockito.anyBoolean())).willReturn(subject);
+        given(subjectServiceMock.create(Mockito.any(Subject.class), Mockito.anyBoolean(), Mockito.anyBoolean())).willReturn(subject);
         given(uniqueConstraintManager.validate(Mockito.any(Subject.class))).willReturn(new FieldErrorMap());
     }
 

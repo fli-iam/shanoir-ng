@@ -230,7 +230,8 @@ public class ImportFromFolderRunner extends SwingWorker<Void, Integer>  {
 //            ImportUtils.addSubjectStudy(study, subject, SubjectType.PATIENT, true, null);
 
             // Get center ID from study card
-            subject = shanoirUploaderServiceClientNG.createSubject(subject, true, this.folderimport.getStudyCard().getCenterId());
+            // the name is built from the study and folder names: the study's subject name pattern does not apply
+            subject = shanoirUploaderServiceClientNG.createSubject(subject, true, this.folderimport.getStudyCard().getCenterId(), false);
             this.folderimport.getListOfSubjectsForStudy().add(subject);
         }
         if (subject == null) {
