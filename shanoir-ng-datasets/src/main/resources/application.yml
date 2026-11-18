@@ -37,7 +37,8 @@ spring:
   datasource:
     url: jdbc:mariadb://${SHANOIR_DB_HOST:${SHANOIR_PREFIX}database}:${SHANOIR_DB_PORT:3306}/${SHANOIR_DB_NAME:datasets}?characterEncoding=utf-8
     username: datasets
-    password: password
+    # set by docker compose (SPRING_DATASOURCE_PASSWORD), from .env
+    password: ${SPRING_DATASOURCE_PASSWORD:}
     driver-class-name: org.mariadb.jdbc.Driver
     hikari.maximum-pool-size: 70
     hikari.minimum-idle:  70
