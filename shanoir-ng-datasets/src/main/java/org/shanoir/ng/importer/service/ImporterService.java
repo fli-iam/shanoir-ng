@@ -247,6 +247,8 @@ public class ImporterService {
         QualityCardResult qualityResult = new QualityCardResult();
         List<String> qualityCardNames = Collections.emptyList();
         int rank = 0;
+        int seriesWithoutImages = 0;
+        int seriesInQualityError = 0;
 
         List<Serie> selectedSeries = importJob.getSelectedSeries();
 
@@ -270,6 +272,7 @@ public class ImporterService {
                         dicomAttributes);
 
                 if (acquisition == null) {
+                    seriesWithoutImages++;
                     continue; // skip study card and quality check if no acquisition generated for this serie
                 }
 
@@ -296,6 +299,7 @@ public class ImporterService {
                 if (!QualityTag.ERROR.equals(acquisition.getQualityTag())) {
                     generatedAcquisitions.add(acquisition);
                 } else {
+                    seriesInQualityError++;
                     LOG.info(
                             "Dataset acquisition for serie instance UID {} has control quality tag ERROR and will not be imported.",
                             acquisition.getSeriesInstanceUID());
@@ -310,13 +314,18 @@ public class ImporterService {
                 eventService.publishEvent(event);
             }
         }
-        // If all series to be imported are in error we consider that the whole import failed
+        // If no acquisition could be generated we consider that the whole import failed
         if (generatedAcquisitions.isEmpty()) {
             // if the examination was created for this import, we delete it as it will be empty
             List<DatasetAcquisition> examinationDatasetAcquisitions = acquisitionRepository.findByExaminationIdWithDatasets(examination.getId());
             if (examinationDatasetAcquisitions == null || examinationDatasetAcquisitions.isEmpty()) {
-                LOG.warn("All series to be imported for the new examination {} have control quality tag ERROR, the examination will be deleted if empty.", examination.getComment());
+                LOG.warn("No acquisition generated for the new examination {}, the examination will be deleted if empty.", examination.getComment());
                 examinationService.deleteEmptyExamination(examination.getId());
+            }
+            // the quality check is only to blame if it excluded at least one serie
+            if (seriesInQualityError == 0) {
+                throw new ShanoirException("No dataset acquisition could be generated: "
+                        + seriesWithoutImages + " of the " + totalSeries + " selected serie(s) had no images.");
             }
             throw new QualityException(null, qualityResult, qualityCardNames, new Throwable("All series to be imported have control quality tag ERROR"));
         }
