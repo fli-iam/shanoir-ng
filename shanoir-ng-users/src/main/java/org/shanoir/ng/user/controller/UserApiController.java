@@ -14,11 +14,14 @@
 
 package org.shanoir.ng.user.controller;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.shanoir.ng.accessrequest.controller.AccessRequestService;
 import org.shanoir.ng.accessrequest.model.AccessRequest;
+import org.shanoir.ng.download.CreateUserStatisticsService;
 import org.shanoir.ng.shared.controller.AbstractUserRequestApiController;
 import org.shanoir.ng.shared.core.model.IdList;
 import org.shanoir.ng.shared.core.model.IdName;
@@ -46,6 +49,9 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 
     @Autowired
     private AccessRequestService accessRequestService;
+
+    @Autowired
+    private CreateUserStatisticsService createUserStatisticsService;
 
     @Override
     public ResponseEntity<Void> deleteUser(final Long userId) throws ForbiddenException {
@@ -183,4 +189,8 @@ public class UserApiController extends AbstractUserRequestApiController implemen
         }
     }
 
+    public ResponseEntity<?> downloadUserStatistics(HttpServletResponse response) throws IOException {
+        createUserStatisticsService.downloadUserStatistics(response);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }
