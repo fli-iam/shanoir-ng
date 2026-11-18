@@ -68,6 +68,21 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         due to a bug with openJDK -->
                     </configuration>
                 </plugin>
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                    <version>4.0.2</version>
+                    <executions>
+                        <execution>
+                            <id>process-aot</id>
+                            <configuration>
+                                <arguments>
+                                    <argument>--spring.sql.init.mode=always</argument>
+                                </arguments>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
