@@ -48,6 +48,15 @@ public interface DatasetMappingConfig {
     @Mapping(target = "updatedMetadata", source = "updatedMetadata", qualifiedByName = "standard")
     DatasetDTO datasetToDatasetDTOWithProcessingAncestorsAndExaminationPrototype(Dataset dataset);
 
+    @Mapping(target = "datasetProcessing", source = "datasetProcessing", qualifiedByName = "withInputIds")
+    @Mapping(target = "datasetAcquisition", source = "datasetAcquisition", qualifiedByName = "withExamination")
+    @Mapping(target = "tags", expression = "java(null)")
+    @Mapping(target = "source", source = "source", qualifiedByName = "id")
+    @Mapping(target = "copies", source = "copies", qualifiedByName = "id")
+    @Mapping(target = "originMetadata", source = "originMetadata", qualifiedByName = "standard")
+    @Mapping(target = "updatedMetadata", source = "updatedMetadata", qualifiedByName = "standard")
+    DatasetDTO datasetToDatasetDTOWithProcessingAncestorsAndExaminationAndSourceAndCopiesPrototype(Dataset dataset);
+
     @Mapping(target = "datasetProcessing", source = "datasetProcessing", qualifiedByName = "idOnly")
     @Mapping(target = "datasetAcquisition", expression = "java(null)")
     @Mapping(target = "tags", expression = "java(null)")

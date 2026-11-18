@@ -14,7 +14,11 @@
 
 package org.shanoir.ng.dataset.modality;
 
-import org.mapstruct.*;
+import org.mapstruct.InheritConfiguration;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Named;
+import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMappingConfig;
 
 /**
@@ -23,7 +27,7 @@ import org.shanoir.ng.dataset.dto.mapper.DatasetMappingConfig;
  * @author msimon
  *
  */
-@Mapper(componentModel = "spring", config = DatasetMappingConfig.class)
+@Mapper(componentModel = "spring", config = DatasetMappingConfig.class, uses = DatasetMapper.class)
 public interface EegDatasetMapper {
 
     ////// Entity to DTO
@@ -35,6 +39,12 @@ public interface EegDatasetMapper {
     @Mapping(target = "channels", expression = "java(null)")
     @Mapping(target = "events", expression = "java(null)")
     EegDatasetDTO eegDatasetToEegDatasetDTOWithProcessingAncestorsAndExamination(EegDataset dataset);
+
+    @Named("withProcessingAncestorsAndExaminationAndSourceAndCopies")
+    @InheritConfiguration(name = "datasetToDatasetDTOWithProcessingAncestorsAndExaminationAndSourceAndCopiesPrototype")
+    @Mapping(target = "channels", expression = "java(null)")
+    @Mapping(target = "events", expression = "java(null)")
+    EegDatasetDTO eegDatasetToEegDatasetDTOWithProcessingAncestorsAndExaminationAndSourceAndCopies(EegDataset dataset);
 
     @Named("withMetadata")
     @InheritConfiguration(name = "datasetToDatasetDTOWithMetadataPrototype")
