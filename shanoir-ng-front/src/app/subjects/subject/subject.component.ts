@@ -11,18 +11,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import {Component, OnDestroy} from '@angular/core';
+import {Component, OnDestroy, ChangeDetectionStrategy} from '@angular/core';
 import { AbstractControl, UntypedFormGroup, ValidatorFn, Validators, FormsModule, ReactiveFormsModule, AsyncValidatorFn } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { NgClass } from '@angular/common';
 import shajs from 'sha.js';
 
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import { Selection } from 'src/app/studies/study/tree.service';
-import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
-import { TaskState } from 'src/app/async-tasks/task.model';
-import { StudyUserRight } from 'src/app/studies/shared/study-user-right.enum';
-import { StudyRightsService } from 'src/app/studies/shared/study-rights.service';
+import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
+import { Selection } from '@app/studies/study/tree.service';
+import { MassDownloadService } from '@app/shared/mass-download/mass-download.service';
+import { TaskState } from '@app/async-tasks/task.model';
+import { StudyUserRight } from '@app/studies/shared/study-user-right.enum';
+import { StudyRightsService } from '@app/studies/shared/study-rights.service';
 
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { DatepickerComponent } from '../../shared/date-picker/date-picker.component';
@@ -45,6 +45,7 @@ import { LocalDateFormatPipe } from '../../shared/localLanguage/localDateFormat.
     selector: 'subject-detail',
     templateUrl: 'subject.component.html',
     styleUrls: ['subject.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [FormsModule, ReactiveFormsModule, NgClass, FormFooterComponent, SelectBoxComponent, DatepickerComponent, CheckboxComponent, TagInputComponent, LocalDateFormatPipe]
 })
 
@@ -62,6 +63,8 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
     dicomPatientName: string;
     downloadState: TaskState = new TaskState();
     hasDownloadRight: boolean = false;
+    hasAdministrateRight: boolean = false;
+    hasImportRight: boolean = false;
     importMode: string = "";
     isImporting: boolean = false;
     tags: Tag[] = [];
@@ -144,15 +147,17 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
         this.loadAllStudies();
         if (this.keycloakService.isUserAdmin()) {
             this.hasDownloadRight = true;
-            return;
+            this.hasAdministrateRight = true;
+            this.hasImportRight = true;
+            return Promise.resolve();
         } else {
-            this.treeService.studyPromise.then(study => {
-                return this.studyRightsService.getMyRightsForStudy(study.id).then(rights => {
-                    this.hasDownloadRight = rights.includes(StudyUserRight.CAN_DOWNLOAD);
-                });
+            // awaited: the footer edit and delete buttons depend on these rights
+            return this.studyRightsService.getMyRightsForStudy(this.subject.study.id).then(rights => {
+                this.hasDownloadRight = rights.includes(StudyUserRight.CAN_DOWNLOAD);
+                this.hasAdministrateRight = rights.includes(StudyUserRight.CAN_ADMINISTRATE);
+                this.hasImportRight = rights.includes(StudyUserRight.CAN_IMPORT);
             });
         }
-        return Promise.resolve();
     }
 
     initEdit(): Promise<void> {
@@ -203,7 +208,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
         );
         this.subscriptions.push(
             subjectForm.get('study')!.valueChanges.subscribe(() => {
-                subjectForm.get('name')!.updateValueAndValidity({ onlySelf: true, emitEvent: false });
+                subjectForm.get('name')!.updateValueAndValidity();
             })
         );
         if (!this.subject.name && this.subjectNamePrefix) {
@@ -251,7 +256,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
     }
 
     private updateFormControl(formGroup: UntypedFormGroup) {
-        if (formGroup.get('imagedObjectCategory').value == ImagedObjectCategory.LIVING_HUMAN_BEING && !this.subject.isAlreadyAnonymized && this.mode == 'create') {
+        if (formGroup.get('imagedObjectCategory').value == ImagedObjectCategory.LIVING_HUMAN_BEING && !formGroup.get('isAlreadyAnonymized').value && this.mode == 'create') {
             if (this.importMode != 'EEG') {
                 formGroup.get('firstName').setValidators(this.nameValidators);
                 formGroup.get('lastName').setValidators(this.nameValidators);
@@ -269,7 +274,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
     }
 
     save(): Promise<Subject> {
-        let savedDate: Date;
+        const savedDate: Date = undefined;
         if (this.mode == 'create') {
             this.subject.identifier = this.generateSubjectIdentifier();
             this.setSubjectBirthDateToFirstOfJanuary();
@@ -289,15 +294,16 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
             .getStudiesNames()
             .then(studies => {
                 this.studies = studies;
+                // read from the unfiltered list, the subject's study may not be importable
+                this.studyNameForSubject = studies?.find(s => s.id == this.entity?.study?.id)?.name || '';
                 this.userRightsService.getMyRights().then(rights => {
                     if (!this.keycloakService.isUserAdmin()) {
-                        // filter studies to only those with import or admin rights
+                        // filter studies to only those with import rights
                         this.studies = this.studies.filter(study => {
                             const studyRights = rights.get(study.id);
-                            return studyRights && (studyRights.includes(StudyUserRight.CAN_IMPORT) || studyRights.includes(StudyUserRight.CAN_ADMINISTRATE));
+                            return studyRights?.includes(StudyUserRight.CAN_IMPORT);
                         });
                     }
-                    this.studyNameForSubject = this.studies?.filter(s => s.id == this.entity?.study?.id)?.[0]?.name || '';
                 });
             });
     }
@@ -330,11 +336,18 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
         this.subject.birthDate = newDate;
     }
 
+    // as in the backend: importers and study administrators with the expert role
     public async hasEditRight(): Promise<boolean> {
-        return this.keycloakService.isUserAdminOrExpert();
+        return this.keycloakService.isUserAdmin() || this.hasImportRight || (this.keycloakService.isUserExpert() && this.hasAdministrateRight);
+    }
+
+    public async hasDeleteRight(): Promise<boolean> {
+        return this.keycloakService.isUserAdmin() || (this.keycloakService.isUserExpert() && this.hasAdministrateRight);
     }
 
     public toggleAnonymised(isAlreadyAnonymized: boolean) {
+        // the name is only derived from the DICOM patient name during an import
+        if (!this.dicomPatientName) return;
         this.subject.name = (this.subjectNamePrefix ? this.subjectNamePrefix : '')
             + (isAlreadyAnonymized ? this.dicomPatientName : '');
     }
@@ -347,7 +360,11 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
     getOnDeleteConfirmMessage(subject: Subject): string {
         let msg : string = 'Are you sure you want to finally delete the subject '
             + (subject.name + ' with id n° ' + subject.id) + ' ?';
-        msg += "\n\nThis subject belongs to the study " + this.studies.find(st => st.id === subject.study.id).name;
+        // the subject's own study, not this.studies: that list only holds the studies the user can import into
+        const studyName: string = subject.study?.name ?? this.studies?.find(st => st.id === subject.study?.id)?.name;
+        if (studyName) {
+            msg += "\n\nThis subject belongs to the study " + studyName;
+        }
         msg += '\n\nWarning: this action deletes ALL datasets from this subject.';
         return msg;
     }

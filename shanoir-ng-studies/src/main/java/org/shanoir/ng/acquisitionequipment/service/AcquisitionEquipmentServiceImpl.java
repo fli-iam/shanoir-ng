@@ -39,9 +39,10 @@ import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Acquisition equipment service implementation.
@@ -120,7 +121,7 @@ public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentServ
             rabbitTemplate.convertAndSend(RabbitMQConfiguration.ACQUISITION_EQUIPMENT_UPDATE_QUEUE,
                     objectMapper.writeValueAsString(new IdName(equipment.getId(), datasetAcEqName)));
             return true;
-        } catch (AmqpException | JsonProcessingException e) {
+        } catch (AmqpException | JacksonException e) {
             throw new MicroServiceCommunicationException("Error while communicating with datasets MS to update acquisition equipment name.");
         }
     }
@@ -138,6 +139,7 @@ public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentServ
         return repository.save(entityDb);
     }
 
+    @Transactional
     public void deleteById(final Long id) throws EntityNotFoundException  {
         final Optional<AcquisitionEquipment> entity = repository.findById(id);
         entity.orElseThrow(() -> new EntityNotFoundException("Cannot find entity with id = " + id));

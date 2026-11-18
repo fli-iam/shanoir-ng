@@ -15,8 +15,10 @@
 export const environment = {
     production: true,
     keycloakUrl: window["env"]["keycloakUrl"] || "https://shanoir-ng-nginx/auth",
-    viewerUrl: window["env"]["viewerUrl"] || "https://viewer",
+    ohifUrl: window["env"]["ohifUrl"] || "https://viewer",
+    videpeUrl: window["env"]["videpeUrl"] || "https://videpe",
     vipUrl: window["env"]["vipUrl"] || "https://vip.creatis.insa-lyon.fr",
     dpoMail: window["env"]["dpoMail"] || "dpo@inria.fr",
-    contactMail: window["env"]["contactMail"] || "developers_shanoir@inria.fr"
+    contactMail: window["env"]["contactMail"] || "developers_shanoir@inria.fr",
+    shanoirMailSupplierBlacklist: window["env"]["shanoirMailSupplierBlacklist"]
 };

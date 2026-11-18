@@ -23,8 +23,8 @@ import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.mockito.Mockito;
 import org.shanoir.ng.preclinical.contrast_agent.ContrastAgent;
 import org.shanoir.ng.preclinical.contrast_agent.ContrastAgentRepository;
@@ -51,13 +51,13 @@ public class ContrastAgentServiceTest {
     private static final Long AGENT_ID = 1L;
     private static final String UPDATED_AGENT_DATA = "SuperGadolinium";
 
-    @Mock
+    @MockitoBean
     private ContrastAgentRepository agentsRepository;
 
-    @Mock
+    @MockitoBean
     private RabbitTemplate rabbitTemplate;
 
-    @InjectMocks
+    @Autowired
     private ContrastAgentServiceImpl agentsService;
 
     private RefsServiceImpl refsService;

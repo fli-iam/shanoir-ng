@@ -86,7 +86,7 @@ public class Examination extends HalEntity {
     private Long experimentalGroupOfSubjectsId;
 
     /** List of extra files directly attached to the examinations. */
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "examination_extra_data_file_path",
             joinColumns = @JoinColumn(name = "examination_id"))
     @Column(name = "path")

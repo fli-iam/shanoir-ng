@@ -20,16 +20,16 @@ import java.util.List;
 import org.shanoir.ng.shared.dateTime.LocalDateSerializer;
 import org.shanoir.ng.shared.quality.QualityTag;
 import org.shanoir.ng.shared.subjectstudy.SubjectType;
+import org.shanoir.ng.study.dto.StudyTagsDTO;
 import org.shanoir.ng.subject.model.HemisphericDominance;
 import org.shanoir.ng.subject.model.ImagedObjectCategory;
 import org.shanoir.ng.subject.model.Sex;
-import org.shanoir.ng.subjectstudy.dto.StudyTagsDTO;
 import org.shanoir.ng.tag.model.TagDTO;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
+import tools.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.annotation.JsonSerialize;
+import tools.jackson.databind.ext.javatime.deser.LocalDateDeserializer;
 
 public class SubjectDTO {
 

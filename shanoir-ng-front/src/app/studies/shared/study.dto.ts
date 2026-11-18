@@ -109,8 +109,8 @@ export class StudyDTOService {
         if (dto.studyUserList) {
             entity.studyUserList = dto.studyUserList.map(studyUserDto => {
                 const studyUser: StudyUser = new StudyUser();
-                //studyUser.completeMember = studyUserDto.completeMember;
                 studyUser.confirmed = studyUserDto.confirmed;
+                studyUser.expirationDate = studyUserDto.expirationDate ? new Date(studyUserDto.expirationDate) : null;
                 studyUser.id = studyUserDto.id;
                 studyUser.receiveNewImportReport = studyUserDto.receiveNewImportReport;
                 studyUser.receiveStudyUserReport = studyUserDto.receiveStudyUserReport;
@@ -159,6 +159,7 @@ export class StudyDTOService {
         }
 
         entity.isDraft = dto.isDraft;
+        entity.neurobagelExport = dto.neurobagelExport;
         if (dto.extraDetails) {
             entity.expectedNbOfSubjects = dto.extraDetails.expectedNbOfSubjects;
             entity.averageExaminationSize = dto.extraDetails.averageExaminationSize;
@@ -287,6 +288,7 @@ export class StudyDTO {
     license: string;
     storageVolume: StudyStorageVolumeDTO;
     isDraft: boolean;
+    neurobagelExport: boolean;
     extraDetails: StudyExtraDetailsDTO;
 
     constructor(study: Study) {
@@ -327,6 +329,7 @@ export class StudyDTO {
         this.description = study.description;
         this.license = study.license;
         this.isDraft = study.isDraft;
+        this.neurobagelExport = study.neurobagelExport;
         this.extraDetails = {
             "expectedNbOfSubjects": study.expectedNbOfSubjects,
             "averageExaminationSize": study.averageExaminationSize,
@@ -350,21 +353,56 @@ export class CenterStudyDTO {
 }
 
 export class StudyLight {
-  downloadableByDefault: boolean;
-  challenge: boolean;
-  endDate: Date;
-  id: number;
-  name: string;
-  nbExaminations: number;
-  nbSubjects: number;
-  startDate: Date;
-  studyStatus: "IN_PROGRESS" | "FINISHED";
-  studyType: StudyType;
-  description: string;
-  license: string;
-  studyTags: Tag[];
-  profile: Profile;
-  isDraft: boolean;
+    downloadableByDefault: boolean;
+    challenge: boolean;
+    endDate: Date;
+    id: number;
+    name: string;
+    nbExaminations: number;
+    nbSubjects: number;
+    startDate: Date;
+    studyStatus: "IN_PROGRESS" | "FINISHED";
+    studyType: StudyType;
+    description: string;
+    license: string;
+    studyTags: Tag[];
+    profile: Profile;
+    isDraft: boolean;
+
+    static toStudy(studyLight: StudyLight): Study {
+        const study: Study = new Study();
+        study.id = studyLight.id;
+        study.downloadableByDefault = studyLight.downloadableByDefault;
+        study.endDate = studyLight.endDate;
+        study.name = studyLight.name;
+        study.nbExaminations = studyLight.nbExaminations;
+        study.nbSubjects = studyLight.nbSubjects;
+        study.startDate = studyLight.startDate;
+        study.studyStatus = studyLight.studyStatus;
+        study.studyType = studyLight.studyType;
+        study.description = studyLight.description;
+        study.studyTags = studyLight.studyTags;
+        return study;
+    }
+}
+
+
+export class StudyStatisticsDTO {
+  studyId: number;
+  centerId: number;
+  centerName: string;
+  centerPrefix: string;
+  subjectId: number;
+  commonName: string;
+  examinationId: number;
+  examinationComment: string;
+  examinationDate: string;
+  datasetAcquisitionId: number;
+  importDate: string;
+  datasetId: number;
+  datasetName: string;
+  modality: string;
+  quality: string;
 }
 
 

@@ -15,7 +15,7 @@ import { Directive, Input, OnDestroy, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject, Subscription } from 'rxjs';
 
-import { TreeService } from 'src/app/studies/study/tree.service';
+import { TreeService } from '@app/studies/study/tree.service';
 
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
 import { capitalizeFirstLetter } from '../../../utils/app.utils';
@@ -45,7 +45,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnInit, O
     protected consoleService: ConsoleService;
     protected breadcrumbsService: BreadcrumbsService;
     public windowService: WindowService;
-    private treeService: TreeService;
+    protected treeService: TreeService;
     public onDelete: Subject<{entity: Entity, error?: ShanoirError}> =  new Subject();
     public onAdd: Subject<any> =  new Subject<any>();
     protected subscriptions: Subscription[] = [];
@@ -97,10 +97,10 @@ export abstract class EntityListComponent<T extends Entity> implements OnInit, O
 
     protected completeColDefs(): void {
         if (this.edit) {
-            this.columnDefs.push({ headerName: "", type: "button", awesome: "fa-regular fa-edit", action: item => this.goToEdit(item.id), condition: item => this.canEdit(item) });
+            this.columnDefs.push({ headerName: "Edit", hideHeaderName: true, type: "button", awesome: "fa-regular fa-edit", action: item => this.goToEdit(item.id), condition: item => this.canEdit(item) });
         }
         if (this.delete) {
-            this.columnDefs.push({ headerName: "", type: "button", awesome: "fa-regular fa-trash-can", action: (item) => this.openDeleteConfirmDialog(item) , condition: item => this.canDelete(item)});
+            this.columnDefs.push({ headerName: "Delete", hideHeaderName: true, type: "button", awesome: "fa-regular fa-trash-can", action: (item) => this.openDeleteConfirmDialog(item) , condition: item => this.canDelete(item)});
         }
         if (this.showId && this.keycloakService.isUserAdmin && !this.columnDefs.find(col => col.field == 'id')) {
             this.columnDefs.unshift({ headerName: 'Id', field: 'id', type: 'number', width: '30px'});

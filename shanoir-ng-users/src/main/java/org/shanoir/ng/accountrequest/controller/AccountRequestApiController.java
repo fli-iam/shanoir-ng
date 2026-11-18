@@ -15,6 +15,7 @@
 package org.shanoir.ng.accountrequest.controller;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import org.shanoir.ng.shared.controller.AbstractUserRequestApiController;
 import org.shanoir.ng.shared.exception.ErrorModel;
@@ -28,9 +29,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.RequestBody;
-
-import io.swagger.v3.oas.annotations.Parameter;
 
 @Controller
 public class AccountRequestApiController extends AbstractUserRequestApiController implements AccountRequestApi {
@@ -38,10 +36,18 @@ public class AccountRequestApiController extends AbstractUserRequestApiControlle
     @Value("${vip.enabled}")
     private boolean vipEnabled;
 
+    @Value("${service-account.user.blacklist-mail}")
+    private List<String> blacklistMail;
+
     @Override
     public ResponseEntity<Void> saveNewAccountRequest(
-            @Parameter(name = "user to create from account request", required = true) @RequestBody final User user,
+            final User user,
             final BindingResult result) throws RestServiceException {
+
+        /* First check the mail validity */
+        if (blacklistMail.stream().anyMatch(bm -> user.getEmail().toLowerCase().endsWith("@" + bm.trim()))) {
+            throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_CONTENT.value(), "Mail supplier is not allowed for account request."));
+        }
 
         /* Now we generate a username for the new user creation */
         if (user.getUsername() == null && user.getFirstName() != null && user.getLastName() != null) {

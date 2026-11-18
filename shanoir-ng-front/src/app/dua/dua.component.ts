@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 
 import { BreadcrumbsService } from '../breadcrumbs/breadcrumbs.service';
 import { StudyService } from '../studies/shared/study.service';
@@ -24,6 +24,7 @@ import { DUASigningComponent } from './dua-signing/dua-signing.component';
     selector: 'dua',
     templateUrl: 'dua.component.html',
     styleUrls: ['dua.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [DUASigningComponent]
 })
 

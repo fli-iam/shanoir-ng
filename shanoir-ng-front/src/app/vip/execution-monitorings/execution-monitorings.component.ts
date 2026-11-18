@@ -12,14 +12,14 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { AfterViewInit, Component, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 
-import { BreadcrumbsService } from 'src/app/breadcrumbs/breadcrumbs.service';
-import { EntityListComponent } from 'src/app/shared/components/entity/entity-list.component.abstract';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import { BrowserPaging } from 'src/app/shared/components/table/browser-paging.model';
-import { Page, Pageable } from 'src/app/shared/components/table/pageable.model';
-import { TableComponent } from 'src/app/shared/components/table/table.component';
+import { BreadcrumbsService } from '@app/breadcrumbs/breadcrumbs.service';
+import { EntityListComponent } from '@app/shared/components/entity/entity-list.component.abstract';
+import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
+import { BrowserPaging } from '@app/shared/components/table/browser-paging.model';
+import { Page, Pageable } from '@app/shared/components/table/pageable.model';
+import { TableComponent } from '@app/shared/components/table/table.component';
 
 import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
 import { ExecutionMonitoring } from '../models/execution-monitoring.model';
@@ -30,6 +30,7 @@ import { ExecutionMonitoringService } from './execution-monitoring.service';
     selector: 'app-execution-monitorings',
     templateUrl: './execution-monitorings.component.html',
     styleUrls: ['./execution-monitorings.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [TableComponent]
 })
 export class ExecutionMonitoringsComponent extends EntityListComponent<ExecutionMonitoring> implements AfterViewInit {

@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.study.repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,6 +41,16 @@ public interface StudyRepository extends JpaRepository<Study, Long>, StudyReposi
     @EntityGraph(attributePaths = { "studyTags", "profile" })
     List<Study> findByVisibleByDefaultTrueAndIsDraftFalse();
 
+    /**
+     * Studies exposed to the Neurobagel federation: flagged by an admin and no longer drafts.
+     */
+    List<Study> findByNeurobagelExportTrueAndIsDraftFalseOrderByIdAsc();
+
+    boolean existsByIdAndNeurobagelExportTrueAndIsDraftFalse(Long id);
+
+    @EntityGraph(attributePaths = { "studyTags", "profile" })
+    List<Study> findDistinctByStudyUserListUserIdAndStudyUserListExpirationDateBefore(Long userId, LocalDate date);
+
     List<Study> findByIsDraftTrue();
 
     //@EntityGraph(attributePaths = { "profile", "tags" })
@@ -49,13 +60,15 @@ public interface StudyRepository extends JpaRepository<Study, Long>, StudyReposi
     List<IdName> findAllIdAndName();
 
     @Query("""
-        SELECT s
+        SELECT DISTINCT s
         FROM Study s
-        JOIN FETCH s.studyUserList su
-        WHERE su.study.id = s.id
-        AND su.userId = :userId and :studyUserRightId in elements(su.studyUserRights)
-        AND su.confirmed = :confirmed""")
-
+        LEFT JOIN FETCH s.studyUserList
+        WHERE EXISTS (
+            SELECT su FROM StudyUser su
+            WHERE su.study = s
+            AND su.userId = :userId AND :studyUserRightId IN elements(su.studyUserRights)
+            AND su.confirmed = :confirmed)
+        ORDER BY s.name ASC""")
     List<Study> findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(
             @Param("userId") Long userId,
             @Param("studyUserRightId") Integer studyUserRightId,
@@ -84,6 +97,13 @@ public interface StudyRepository extends JpaRepository<Study, Long>, StudyReposi
     @EntityGraph(attributePaths = "tags")
     @Query("SELECT s FROM Study s WHERE s.id = :studyId")
     Study findStudyWithTagsById(@Param("studyId") Long studyId);
+
+    /**
+     * The study with its own tags, the keywords of its Neurobagel dataset description.
+     */
+    @EntityGraph(attributePaths = "studyTags")
+    @Query("SELECT s FROM Study s WHERE s.id = :studyId")
+    Study findStudyWithStudyTagsById(@Param("studyId") Long studyId);
 
     @Query("SELECT s.protocolFilePaths FROM Study s WHERE s.id = :studyId")
     List<String> findProtocolFilePathsByStudyId(Long studyId);

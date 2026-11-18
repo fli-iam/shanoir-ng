@@ -14,17 +14,16 @@
 
 package org.shanoir.ng.center;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.BDDMockito.given;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Assertions;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import static org.mockito.BDDMockito.given;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.shanoir.ng.center.dto.mapper.CenterMapper;
 import org.shanoir.ng.center.model.Center;
@@ -34,11 +33,15 @@ import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.studycenter.StudyCenter;
 import org.shanoir.ng.utils.ModelsUtil;
+import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Center service test.
@@ -51,22 +54,26 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class CenterServiceTest {
 
     private static final Long CENTER_ID = 1L;
+
     private static final String UPDATED_CENTER_NAME = "test";
 
-    @Mock
+    @MockitoBean
     private CenterMapper centerMapper;
 
-    @Mock
+    @MockitoBean
     private CenterRepository centerRepository;
 
-    @Mock
+    @MockitoBean
     private RabbitTemplate rabbitTemplate;
 
-    @InjectMocks
+    @Autowired
     private CenterServiceImpl centerService;
 
-    @Mock
-    private ObjectMapper objectMapper;
+    @MockitoBean
+    private JsonMapper jsonMapper;
+
+    @MockitoBean
+    private ConnectionFactory connectionFactory;
 
     @BeforeEach
     public void setup() {
@@ -77,6 +84,7 @@ public class CenterServiceTest {
     }
 
     @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
     public void deleteByBadIdTest() throws EntityNotFoundException {
         assertThrows(EntityNotFoundException.class, () -> {
             centerService.deleteById(2L);
@@ -84,13 +92,14 @@ public class CenterServiceTest {
     }
 
     @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
     public void deleteByIdTest() throws EntityNotFoundException {
         centerService.deleteById(CENTER_ID);
-
         Mockito.verify(centerRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
     }
 
     @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
     public void deleteByIdWithAcquisitionEquipmentTest() throws EntityNotFoundException {
         final Center center = ModelsUtil.createCenter();
         center.getAcquisitionEquipments().add(ModelsUtil.createAcquisitionEquipment());
@@ -99,6 +108,7 @@ public class CenterServiceTest {
     }
 
     @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
     public void deleteByIdWithStudyTest() throws EntityNotFoundException {
         final Center center = ModelsUtil.createCenter();
         center.getStudyCenterList().add(new StudyCenter());
@@ -107,40 +117,43 @@ public class CenterServiceTest {
     }
 
     @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
     public void findAllTest() {
         final List<Center> centers = centerService.findAll();
         Assertions.assertNotNull(centers);
         Assertions.assertTrue(centers.size() == 1);
-
         Mockito.verify(centerRepository, Mockito.times(1)).findAll();
     }
 
     @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
     public void findByIdTest() {
         final Center center = centerService.findById(CENTER_ID).orElse(null);
         Assertions.assertNotNull(center);
         Assertions.assertTrue(ModelsUtil.CENTER_NAME.equals(center.getName()));
-
         Mockito.verify(centerRepository, Mockito.times(1)).findById(Mockito.anyLong());
     }
 
     @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
     public void findIdsAndNamesTest() {
         final List<IdName> centers = centerService.findIdsAndNames();
         Assertions.assertNotNull(centers);
         Assertions.assertTrue(centers.size() == 1);
-
         Mockito.verify(centerRepository, Mockito.times(1)).findIdsAndNames();
     }
 
     @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
     public void saveTest() {
-        centerService.create(createCenter(), true);
-
+        Center center = createCenter();
+        center.setId(null);
+        centerService.create(center, true);
         Mockito.verify(centerRepository, Mockito.times(1)).save(Mockito.any(Center.class));
     }
 
     @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
     public void updateTest() throws EntityNotFoundException {
         final Center updatedCenter = centerService.update(createCenter(), true);
         Assertions.assertNotNull(updatedCenter);

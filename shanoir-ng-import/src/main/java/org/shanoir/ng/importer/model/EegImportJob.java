@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.importer.model;
 
+import java.io.Serial;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -23,8 +24,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author JcomeD
  *
  */
-public class EegImportJob extends ImportJob {
+public class EegImportJob extends ImportJobBase {
 
+    @Serial
     private static final long serialVersionUID = -5482473150099609081L;
 
     @JsonProperty("datasets")

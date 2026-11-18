@@ -24,11 +24,11 @@ import org.shanoir.ng.dataset.modality.GenericDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.GenericDatasetAcquisition;
+import org.shanoir.ng.dicom.DicomProcessing;
 import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.importer.dto.DatasetsWrapper;
 import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.importer.strategies.dataset.DatasetStrategy;
-import org.shanoir.ng.shared.dateTime.DateTimeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,9 +69,9 @@ public class GenericDatasetAcquisitionStrategy implements DatasetAcquisitionStra
         datasetAcquisition.setRank(rank);
         datasetAcquisition.setSortingIndex(serie.getSeriesNumber());
         datasetAcquisition.setSoftwareRelease(attributes.getString(Tag.SoftwareVersions));
-        datasetAcquisition.setAcquisitionStartTime(
-                LocalDateTime.of(DateTimeUtils.pacsStringToLocalDate(attributes.getString(Tag.AcquisitionDate)),
-                DateTimeUtils.stringToLocalTime(attributes.getString(Tag.AcquisitionTime))));
+        LocalDateTime acquisitionStartTime = DicomProcessing.parseAcquisitionStartTime(
+                attributes.getString(Tag.AcquisitionDate), attributes.getString(Tag.AcquisitionTime));
+        datasetAcquisition.setAcquisitionStartTime(acquisitionStartTime);
         return datasetAcquisition;
     }
 

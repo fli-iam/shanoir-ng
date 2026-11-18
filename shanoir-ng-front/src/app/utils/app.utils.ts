@@ -15,7 +15,7 @@
 import { HttpResponse } from '@angular/common/http';
 import { Pipe, PipeTransform } from '@angular/core';
 
-import { environment } from '../../environments/environment';
+import { environment } from '@env/environment';
 
 // Emails
 export const SHANOIR_DPO_EMAIL = environment.dpoMail;
@@ -43,7 +43,9 @@ export const BACKEND_API_USER_ACCESS_REQUEST: string = BACKEND_API_USERS_MS_URL 
 export const BACKEND_API_USER_ACCESS_REQUEST_BY_USER: string = BACKEND_API_USERS_MS_URL + '/accessrequest/byUser';
 export const BACKEND_API_USER_ACCESS_REQUEST_BY_ADMIN: string = BACKEND_API_USERS_MS_URL + '/accessrequest/byAdmin';
 export const BACKEND_API_ACCESS_REQUEST_RESOLVE: string = BACKEND_API_USERS_MS_URL + '/accessrequest/resolve/';
+export const BACKEND_API_ACCESS_REQUEST_EXTENSION: string = BACKEND_API_USERS_MS_URL + '/accessrequest/extension';
 export const BACKEND_API_USER_PUBLIC_COUNT: string = BACKEND_API_USER_URL + BACKEND_API_COUNT_ENDPOINT;
+export const BACKEND_API_MASS_EMAIL_URL: string = BACKEND_API_USERS_MS_URL + '/massemail';
 
 // ShanoirEvents http api
 export const BACKEND_API_EVENTS_COUNT_DAYS_PARAM: string = '30';
@@ -68,9 +70,11 @@ export const BACKEND_API_STUDY_RIGHTS: string = BACKEND_API_STUDY_URL + '/rights
 export const BACKEND_API_STUDY_HAS_ONE_STUDY_TO_IMPORT: string = BACKEND_API_STUDY_URL + '/hasOneStudy';
 export const BACKEND_API_STUDY_PUBLIC_STUDIES_URL: string = BACKEND_API_STUDY_URL + '/public';
 export const BACKEND_API_STUDY_PUBLIC_STUDIES_DATA_URL: string = BACKEND_API_STUDY_PUBLIC_STUDIES_URL + '/data';
+export const BACKEND_API_STUDY_EXPIRED_STUDIES_DATA_URL: string = BACKEND_API_STUDY_URL + '/expired';
 export const BACKEND_API_STUDY_PUBLIC_STUDIES_CONNECTED_URL: string = BACKEND_API_STUDY_PUBLIC_STUDIES_URL + '/connected';
 export const BACKEND_API_STUDY_COPY_DATASETS: string = BACKEND_API_STUDY_URL + '/copyDatasets';
 export const BACKEND_API_STUDY_FILES: string = BACKEND_API_STUDY_URL + '/files';
+export const BACKEND_API_STUDY_STATISTICS_URL: string = BACKEND_API_STUDY_URL + '/statistics';
 
 
 // Profile API
@@ -86,9 +90,6 @@ export const BACKEND_API_SUBJECT_URL: string = BACKEND_API_STUDIES_MS_URL + '/su
 export const BACKEND_API_SUBJECT_NAMES_URL: string = BACKEND_API_SUBJECT_URL + '/names';
 export const BACKEND_API_SUBJECT_FILTER_URL: string = BACKEND_API_SUBJECT_URL + '/filter';
 export const BACKEND_API_SUBJECT_FIND_BY_IDENTIFIER: string = BACKEND_API_SUBJECT_URL + '/findByIdentifier';
-
-// Subject Study http api
-export const BACKEND_API_SUBJECT_STUDY_URL: string = BACKEND_API_STUDIES_MS_URL + '/subjectStudy';
 
 // Centers http api
 export const BACKEND_API_COIL_URL: string = BACKEND_API_STUDIES_MS_URL + '/coils';
@@ -167,6 +168,9 @@ export const BACKEND_API_VIP_EXEC_MONITORING_URL: string = BACKEND_API_DATASET_M
 
 // Custom sentence to introduce the Shanoir instance on welcome page
 export const FRONTEND_WELCOME_INTRODUCTION: string = "This is an instance of the Shanoir database.";
+
+// Mail supplier blacklist conf
+export const SHANOIR_MAIL_SUPPLIER_BLACK_LIST: string = environment.shanoirMailSupplierBlacklist;
 
 export function hasUniqueError(error: any, fieldName: string): boolean {
     let hasUniqueError = false;
@@ -336,7 +340,7 @@ function deepEquals(x, y) {
         }
         return true;
     }
-};
+}
 
 export function objectsEqual(value1, value2) {
     if (value1 === value2) return true;
@@ -359,7 +363,7 @@ export function isDarkColor(colorInp: string): boolean {
 }
 
 export function getSizeStr(size: number): string {
-    if (size == null || size == undefined){
+    if (size == null) {
         return "";
     }
     const base: number = 1024;

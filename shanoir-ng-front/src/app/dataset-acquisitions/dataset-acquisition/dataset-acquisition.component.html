@@ -18,7 +18,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <div class="layout">
                 <form-footer [state]="footerState" (save)="save()" (edit)="goToEdit()" (delete)="delete()" (dismiss)="goToView()" (back)="goBack()">
                     @if (mode == 'view' && hasDownloadRight && !noDatasets) {
-                        <button class="right-icon dl-button" type="button" (click)="downloadAll()" [disabled]="downloadState?.isActive()">
+                        <button class="right-icon dl-button" type="button" (click)="downloadAll()" [disabled]="$safeNavigationMigration(downloadState?.isActive())">
                             Download
                             <i class="fas fa-download"></i>
                         </button>
@@ -65,7 +65,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <span class="right-col">
                                 @switch (mode) {
                                     @case ('view') {
-                                        <a [routerLink]="['/study/details/', datasetAcquisition.examination?.study?.id]">
+                                        <a [routerLink]="['/study/details/', $safeNavigationMigration(datasetAcquisition.examination?.study?.id)]">
                                             {{ datasetAcquisition.examination?.study?.name }}
                                         </a>
                                     }
@@ -77,11 +77,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <span class="right-col">
                                 @switch (mode) {
                                     @case ('view') {
-                                        <a [routerLink]="['/examination/details/', datasetAcquisition.examination?.id]">
+                                        <a [routerLink]="['/examination/details/', $safeNavigationMigration(datasetAcquisition.examination?.id)]">
                                             {{
                                                 datasetAcquisition?.examination?.comment
                                                     ? datasetAcquisition?.examination?.comment
-                                                    : (datasetAcquisition?.examination?.examinationDate | localDateFormatPipe)
+                                                    : ($safeNavigationMigration(datasetAcquisition?.examination?.examinationDate) | localDateFormatPipe)
                                             }}
                                         </a>
                                     }
@@ -93,7 +93,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <span class="right-col">
                                 @switch (mode) {
                                     @case ('view') {
-                                        <a [routerLink]="['/study-card/details/', datasetAcquisition.studyCard?.id]">
+                                        <a [routerLink]="['/study-card/details/', $safeNavigationMigration(datasetAcquisition.studyCard?.id)]">
                                             {{ datasetAcquisition.studyCard?.name }}
                                         </a>
                                     }
@@ -145,6 +145,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                     }
                                     @default {
                                         <input type="text" formControlName="rank" />
+                                        @if (hasError('rank', ['pattern'])) {
+                                            <label class="form-validation-alert" i18n>Only digits.</label>
+                                        }
+                                        @if (hasError('rank', ['max'])) {
+                                            <label class="form-validation-alert" i18n>Value too large.</label>
+                                        }
                                     }
                                 }
                             </span>
@@ -184,6 +190,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                     }
                                     @default {
                                         <input type="text" formControlName="sortingIndex" />
+                                        @if (hasError('sortingIndex', ['pattern'])) {
+                                            <label class="form-validation-alert" i18n>Only digits.</label>
+                                        }
+                                        @if (hasError('sortingIndex', ['max'])) {
+                                            <label class="form-validation-alert" i18n>Value too large.</label>
+                                        }
                                     }
                                 }
                             </span>
@@ -197,24 +209,30 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                             @for (file of datasetAcquisition.extraDataFilePathList; track file) {
                                                 <li>
                                                     {{ getFileName(file) }}
-                                                    <button type="button" class="dl-button" (click)="downloadFile(file)">
-                                                        <i class="fas fa-download"></i>
-                                                    </button>
+                                                    @if (hasDownloadRight) {
+                                                        <button type="button" class="dl-button" (click)="downloadFile(file)">
+                                                            <i class="fas fa-download"></i>
+                                                        </button>
+                                                    }
                                                 </li>
                                             }
                                         </ul>
                                     }
                                     @default {
-                                        <input #input hidden multiple type="file" (change)="attachNewFile($event)" />
-                                        <button type="button" (click)="setFile()" class="left-icon">
-                                            <i class="fas fa-upload"></i>
-                                            Choose file
-                                        </button>
+                                        @if (mode == 'create' || canEditFiles) {
+                                            <input #input hidden multiple type="file" (change)="attachNewFile($event)" />
+                                            <button type="button" (click)="setFile()" class="left-icon">
+                                                <i class="fas fa-upload"></i>
+                                                Choose file
+                                            </button>
+                                        }
                                         <ul>
                                             @for (file of datasetAcquisition.extraDataFilePathList; track file) {
                                                 <li>
                                                     {{ getFileName(file) }}
-                                                    <button type="button" (click)="deleteFile(file)"><i class="fa-regular fa-trash-can"></i></button>
+                                                    @if (mode == 'create' || canEditFiles) {
+                                                        <button type="button" (click)="deleteFile(file)"><i class="fa-regular fa-trash-can"></i></button>
+                                                    }
                                                 </li>
                                             }
                                         </ul>
@@ -261,7 +279,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 }
 
                 @if (downloadState.status > 1) {
-                    <progress-bar [progress]="downloadState?.progress" [text]="'Preparing download'" [unknownDownload]="true"></progress-bar>
+                    <progress-bar [progress]="$safeNavigationMigration(downloadState?.progress)" [text]="'Preparing download'" [unknownDownload]="true"></progress-bar>
                 }
             </div>
         </form>

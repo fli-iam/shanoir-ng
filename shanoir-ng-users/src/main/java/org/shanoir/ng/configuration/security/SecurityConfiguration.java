@@ -18,6 +18,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.shanoir.ng.shared.security.NeurobagelAccess;
 import org.shanoir.ng.utils.MDCFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,7 +34,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.access.intercept.FilterSecurityInterceptor;
+import org.springframework.security.web.access.intercept.AuthorizationFilter;
 import org.springframework.security.web.authentication.session.NullAuthenticatedSessionStrategy;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
 import org.springframework.web.cors.CorsConfiguration;
@@ -71,13 +72,13 @@ public class SecurityConfiguration {
         http
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .csrf(AbstractHttpConfigurer::disable)
-                .addFilterAfter(mdcFilter, FilterSecurityInterceptor.class)
+                .addFilterAfter(mdcFilter, AuthorizationFilter.class)
                 .authorizeHttpRequests(
                     matcher -> matcher.requestMatchers("/accountrequest", "/extensionrequest", "/last_login_date", "/users/count", "/events/count")
                         // the swagger API is not exposed here for security reasons (MK)
                         .permitAll()
                     .anyRequest()
-                        .authenticated()
+                        .access(NeurobagelAccess.authenticatedExceptNeurobagel())
                 )
                 .oauth2ResourceServer(oauth2Configurer -> oauth2Configurer.jwt(jwtConfigurer -> jwtConfigurer.jwtAuthenticationConverter(jwt -> {
                     Map<String, Collection<String>> realmAccess = jwt.getClaim("realm_access"); // manage Keycloak specific JWT structure here
@@ -91,7 +92,7 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    FilterRegistrationBean shanoirCorsFilter() {
+    public FilterRegistrationBean shanoirCorsFilter() {
         final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         final CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);

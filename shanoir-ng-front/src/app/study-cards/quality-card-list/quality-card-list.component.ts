@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 
 import { BrowserPaginEntityListComponent } from '../../shared/components/entity/entity-list.browser.component.abstract';
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
@@ -25,6 +25,7 @@ import { QualityCardService } from '../shared/quality-card.service';
 @Component({
     selector: 'quality-card-list',
     templateUrl: 'quality-card-list.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [TableComponent]
 })
 export class QualityCardListComponent extends BrowserPaginEntityListComponent<QualityCard> {

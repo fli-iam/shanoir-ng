@@ -13,6 +13,7 @@
  */
 import { Location } from '@angular/common';
 import {
+    ChangeDetectorRef,
     Directive,
     ElementRef,
     HostListener,
@@ -28,8 +29,8 @@ import { AbstractControl, FormArray, FormGroup, UntypedFormBuilder, UntypedFormG
 import { ActivatedRoute, NavigationExtras, Router } from '@angular/router';
 import { firstValueFrom, Subject, Subscription } from 'rxjs';
 
-import { Selection, TreeService } from 'src/app/studies/study/tree.service';
-import { SuperPromise } from 'src/app/utils/super-promise';
+import { Selection, TreeService } from '@app/studies/study/tree.service';
+import { SuperPromise } from '@app/utils/super-promise';
 
 import { BreadcrumbsService, Step } from '../../../breadcrumbs/breadcrumbs.service';
 import { ConsoleService } from '../../console/console.service';
@@ -70,6 +71,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     private form$: SuperPromise<void> = new SuperPromise<void>();
     protected showTreeByDefault: boolean = true;
     protected abstract getRoutingName(): string;
+    private changeDetectorRef: ChangeDetectorRef;
 
     /* services */
     protected confirmDialogService: ConfirmDialogService;
@@ -102,6 +104,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
         this.consoleService = inject(ConsoleService);
         this.breadcrumbsService = inject(BreadcrumbsService);
         this.treeService = inject(TreeService);
+        this.changeDetectorRef = inject(ChangeDetectorRef);
 
         this.mode = this.activatedRoute.snapshot.data['mode'];
 
@@ -275,6 +278,10 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
                 }
             }
             this.entity = this._entity; // to wrap it as proxy after form is set
+            // The zone flush after this promise chain doesn't reliably schedule a tick
+            // (observed on @angular/core 22.1.3), so the initial form/entity render can be
+            // silently skipped unless we force it explicitly here.
+            this.changeDetectorRef.detectChanges();
         });
 
         // load called tab
@@ -309,7 +316,8 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
         if (this.form) {
             this.subscriptions.push(
                 this.form.statusChanges.subscribe(status => {
-                    this.footerState.valid = status == 'VALID' && (this.form.dirty || this.mode == 'create');
+                    // a fully disabled form (e.g. an edit restricted to the extra-data files) has nothing invalid
+                    this.footerState.valid = (status == 'VALID' || status == 'DISABLED') && (this.form.dirty || this.mode == 'create');
                     this.footerState.dirty = this.form.dirty;
                 }),
             );
@@ -565,7 +573,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
                 fieldControl.updateValueAndValidity({emitEvent: false});
                 if (!fieldControl.valid) fieldControl.markAsTouched();
             }
-            this.footerState.valid = this.form.status == 'VALID';
+            this.footerState.valid = this.form.status == 'VALID' || this.form.status == 'DISABLED';
             return null;
         } else {
             throw reason;
@@ -660,7 +668,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
         const msg = this.getOnDeleteConfirmMessage ? this.getOnDeleteConfirmMessage(entity) : null;
         this.getService().deleteWithConfirmDialog(this.getRoutingName(), entity, msg).then(deleted => {
             if (deleted) {
-                if (this.treeService.treeOpened && this.treeService.treeAvailable) {
+                if (this.treeService.treeOpened && this.treeService.treeAvailable && this.treeService.selectedNode) {
                     this.treeService.removeCurrentNode();
                     this.goToParent();
                 } else {

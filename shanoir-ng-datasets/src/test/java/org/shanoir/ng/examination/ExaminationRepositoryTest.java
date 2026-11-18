@@ -22,8 +22,10 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.time.LocalDate;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -73,10 +75,52 @@ public class ExaminationRepositoryTest {
     // }
 
     @Test
+    public void existsCopyOfSubjectExaminations() throws Exception {
+        assertThat(repository.existsCopyOfSubjectExaminations(SUBJECT_TEST_1_ID)).isFalse();
+
+        // examination 2 (subject 2) becomes a copy of examination 1 (subject 1)
+        Examination source = repository.findById(EXAMINATION_TEST_1_ID).orElseThrow();
+        Examination copy = repository.findById(2L).orElseThrow();
+        copy.setSource(source);
+        repository.save(copy);
+
+        assertThat(repository.existsCopyOfSubjectExaminations(SUBJECT_TEST_1_ID)).isTrue();
+        // the copy itself has not been copied
+        assertThat(repository.existsCopyOfSubjectExaminations(2L)).isFalse();
+    }
+
+    @Test
     public void findBySubjectId() throws Exception {
         List<Examination> examinationsDb = repository.findBySubjectId(SUBJECT_TEST_1_ID);
         assertThat(examinationsDb.size()).isEqualTo(1);
         assertThat(examinationsDb.get(0).getId()).isEqualTo(EXAMINATION_TEST_1_ID);
+    }
+
+    @Test
+    public void findFirstExaminationDatesByStudyId() throws Exception {
+        assertThat(repository.findFirstExaminationDatesByStudyId(STUDY_TEST_1_ID)).isEqualTo(Map.of(
+                1L, LocalDate.of(2017, 1, 1),
+                2L, LocalDate.of(2017, 2, 1)));
+    }
+
+    @Test
+    public void findFirstExaminationDatesByStudyIdKeepsTheEarliestDatedExamination() throws Exception {
+        Examination first = repository.findById(EXAMINATION_TEST_1_ID).orElseThrow();
+        repository.save(examinationOf(first, LocalDate.of(2016, 6, 1)));
+        repository.save(examinationOf(first, LocalDate.of(2018, 6, 1)));
+
+        assertThat(repository.findFirstExaminationDatesByStudyId(STUDY_TEST_1_ID))
+                .containsEntry(SUBJECT_TEST_1_ID, LocalDate.of(2016, 6, 1));
+    }
+
+    private static Examination examinationOf(Examination other, LocalDate examinationDate) {
+        Examination examination = new Examination();
+        examination.setStudy(other.getStudy());
+        examination.setSubject(other.getSubject());
+        examination.setCenterId(other.getCenterId());
+        examination.setInvestigatorId(other.getInvestigatorId());
+        examination.setExaminationDate(examinationDate);
+        return examination;
     }
 
     @Test

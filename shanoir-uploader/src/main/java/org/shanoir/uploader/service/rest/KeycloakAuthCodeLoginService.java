@@ -20,7 +20,9 @@ import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -88,6 +90,13 @@ public class KeycloakAuthCodeLoginService {
         SUCCESS, OTP_REQUIRED, OTP_SETUP_REQUIRED, BAD_CREDENTIALS
     }
 
+    /**
+     * One OTP device (credential) the user can pick on the Keycloak OTP page.
+     * {@code selected} marks the device Keycloak pre-selects (the default one).
+     */
+    public record OtpDevice(String id, String label, boolean selected) {
+    }
+
     public static class AuthResult {
         public final AuthStep step;
         /** Non-null on SUCCESS. */
@@ -96,28 +105,32 @@ public class KeycloakAuthCodeLoginService {
         public final byte[] qrCodeBytes;
         /** Non-null on OTP_SETUP_REQUIRED: base32 key for manual entry. */
         public final String totpManualKey;
+        /** On OTP_REQUIRED: the user's OTP devices, empty when only one is configured. */
+        public final List<OtpDevice> otpDevices;
 
-        private AuthResult(AuthStep step, String accessToken, byte[] qrCodeBytes, String totpManualKey) {
+        private AuthResult(AuthStep step, String accessToken, byte[] qrCodeBytes, String totpManualKey,
+                List<OtpDevice> otpDevices) {
             this.step = step;
             this.accessToken = accessToken;
             this.qrCodeBytes = qrCodeBytes;
             this.totpManualKey = totpManualKey;
+            this.otpDevices = otpDevices;
         }
 
         public static AuthResult success(String accessToken) {
-            return new AuthResult(AuthStep.SUCCESS, accessToken, null, null);
+            return new AuthResult(AuthStep.SUCCESS, accessToken, null, null, List.of());
         }
 
-        public static AuthResult otpRequired() {
-            return new AuthResult(AuthStep.OTP_REQUIRED, null, null, null);
+        public static AuthResult otpRequired(List<OtpDevice> otpDevices) {
+            return new AuthResult(AuthStep.OTP_REQUIRED, null, null, null, otpDevices);
         }
 
         public static AuthResult otpSetupRequired(byte[] qrCodeBytes, String totpManualKey) {
-            return new AuthResult(AuthStep.OTP_SETUP_REQUIRED, null, qrCodeBytes, totpManualKey);
+            return new AuthResult(AuthStep.OTP_SETUP_REQUIRED, null, qrCodeBytes, totpManualKey, List.of());
         }
 
         public static AuthResult badCredentials() {
-            return new AuthResult(AuthStep.BAD_CREDENTIALS, null, null, null);
+            return new AuthResult(AuthStep.BAD_CREDENTIALS, null, null, null, List.of());
         }
     }
 
@@ -189,9 +202,12 @@ public class KeycloakAuthCodeLoginService {
 
         /**
          * Step 2a: POSTs the one-time code to the OTP-input form action URL.
+         * {@code otpDeviceId} is the id of the {@link OtpDevice} the code comes
+         * from; when null, Keycloak checks the code against the default device.
          */
-        public AuthResult submitOtp(String otpCode) throws Exception {
+        public AuthResult submitOtp(String otpCode, String otpDeviceId) throws Exception {
             String postBody = "otp=" + URLEncoder.encode(otpCode, StandardCharsets.UTF_8)
+                + (otpDeviceId != null ? "&selectedCredentialId=" + URLEncoder.encode(otpDeviceId, StandardCharsets.UTF_8) : "")
                 + "&credentialId=";
             return doPost(currentActionUrl, postBody);
         }
@@ -286,7 +302,7 @@ public class KeycloakAuthCodeLoginService {
                 return AuthResult.otpSetupRequired(qrBytes, manualKey);
             } else if (html.contains("id=\"kc-otp-login-form\"")) {
                 currentActionUrl = extractFormAction(html);
-                return AuthResult.otpRequired();
+                return AuthResult.otpRequired(extractOtpDevices(html));
             } else {
                 // Either back on the login page (bad credentials) or an unknown page
                 return AuthResult.badCredentials();
@@ -363,6 +379,43 @@ public class KeycloakAuthCodeLoginService {
             "<form\\b[^>]*\\baction=\"([^\"]+)\"", Pattern.CASE_INSENSITIVE | Pattern.DOTALL
         ).matcher(html);
         return m.find() ? unescapeHtml(m.group(1)) : null;
+    }
+
+    /**
+     * Extracts the OTP devices listed on the OTP-input page. Keycloak renders
+     * one {@code selectedCredentialId} radio per device, labelled by a
+     * {@code <label for>}, only when the user has more than one device.
+     */
+    static List<OtpDevice> extractOtpDevices(String html) {
+        List<OtpDevice> devices = new ArrayList<>();
+        Matcher input = Pattern.compile(
+            "<input\\b[^>]*\\bname=\"selectedCredentialId\"[^>]*>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL
+        ).matcher(html);
+        while (input.find()) {
+            String tag = input.group();
+            String id = extractAttribute(tag, "value");
+            if (id == null) continue;
+            String inputId = extractAttribute(tag, "id");
+            String label = inputId != null ? extractLabelText(html, inputId) : null;
+            boolean selected = Pattern.compile("\\bchecked\\b", Pattern.CASE_INSENSITIVE).matcher(tag).find();
+            devices.add(new OtpDevice(id, label != null && !label.isEmpty() ? label : id, selected));
+        }
+        return devices;
+    }
+
+    private static String extractAttribute(String tag, String name) {
+        Matcher m = Pattern.compile(
+            "\\b" + Pattern.quote(name) + "=\"([^\"]*)\"", Pattern.CASE_INSENSITIVE
+        ).matcher(tag);
+        return m.find() ? unescapeHtml(m.group(1)) : null;
+    }
+
+    private static String extractLabelText(String html, String forId) {
+        Matcher m = Pattern.compile(
+            "<label\\b[^>]*\\bfor=\"" + Pattern.quote(forId) + "\"[^>]*>(.*?)</label>",
+            Pattern.CASE_INSENSITIVE | Pattern.DOTALL
+        ).matcher(html);
+        return m.find() ? unescapeHtml(m.group(1).replaceAll("<[^>]+>", "")).trim() : null;
     }
 
     private static byte[] extractQrCode(String html) {

@@ -14,9 +14,6 @@
 
 package org.shanoir.uploader.dicom;
 
-import jakarta.xml.bind.annotation.XmlType;
-
-@XmlType(propOrder = { "id", "name" })
 public class StudyCard {
 
     private Long id;

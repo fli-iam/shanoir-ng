@@ -11,12 +11,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, firstValueFrom } from 'rxjs';
 
-import { TaskState } from 'src/app/async-tasks/task.model';
-import { SingleDownloadService } from 'src/app/shared/mass-download/single-download.service';
+import { TaskState } from '@app/async-tasks/task.model';
+import { SingleDownloadService } from '@app/shared/mass-download/single-download.service';
 
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
@@ -75,6 +75,47 @@ export class DatasetAcquisitionService extends EntityService<DatasetAcquisition>
         return firstValueFrom(this.http.get<ExaminationDatasetAcquisitionDTO[]>(AppUtils.BACKEND_API_DATASET_ACQUISITION_URL + '/examination/' + examinationId));
     }
 
+    /**
+     * The acquisitions that the deletion of the given datasets would leave empty, and that the
+     * backend would then be able to remove. An empty list means the deletion leaves nothing behind.
+     */
+    getEmptiedByDatasets(datasetIds: number[]): Promise<ExaminationDatasetAcquisitionDTO[]> {
+        return firstValueFrom(this.http.post<ExaminationDatasetAcquisitionDTO[]>(
+            AppUtils.BACKEND_API_DATASET_ACQUISITION_URL + '/emptiedByDatasetIds', datasetIds));
+    }
+
+    /**
+     * What to tell the user before deleting the datasets that would empty those acquisitions.
+     */
+    getEmptiedByDatasetsMessage(acquisitions: ExaminationDatasetAcquisitionDTO[]): string {
+        if (acquisitions.length == 1) {
+            return '<br/><br/>It is the last dataset of the acquisition "' + acquisitions[0].name
+                + '", which will be removed as well.';
+        }
+        return '<br/><br/>They are the last datasets of the following acquisitions, which will be removed as well : '
+            + acquisitions.map(acquisition => '"' + acquisition.name + '"').join(', ') + '.';
+    }
+
+    /**
+     * The acquisitions that hold no dataset at all and that may be removed. Dry run of the
+     * clean up below, admin only.
+     */
+    getEmpty(studyId?: number): Promise<ExaminationDatasetAcquisitionDTO[]> {
+        return firstValueFrom(this.http.get<ExaminationDatasetAcquisitionDTO[]>(
+            AppUtils.BACKEND_API_DATASET_ACQUISITION_URL + '/empty',
+            studyId ? { params: new HttpParams().set('studyId', studyId) } : {}));
+    }
+
+    /**
+     * Removes the acquisitions left empty before their removal was proposed on deletion.
+     * Returns the ids of those actually removed, admin only.
+     */
+    deleteEmpty(studyId?: number): Promise<number[]> {
+        return firstValueFrom(this.http.delete<number[]>(
+            AppUtils.BACKEND_API_DATASET_ACQUISITION_URL + '/empty',
+            studyId ? { params: new HttpParams().set('studyId', studyId) } : {}));
+    }
+
     getAllForDatasets(datasetIds: number[]): Promise<DatasetAcquisition[]> {
         return firstValueFrom(this.http.post<DatasetAcquisitionDatasetsDTO[]>(AppUtils.BACKEND_API_DATASET_ACQUISITION_URL + '/byDatasetIds', Array.from(datasetIds)))
             .then(dtos => this.mapEntityList(dtos));
@@ -90,11 +131,17 @@ export class DatasetAcquisitionService extends EntityService<DatasetAcquisition>
         return JSON.stringify(dto, this.customReplacer);
     }
 
-    postFile(fileToUpload: File, acquisitionId: number): Promise<any> {
-        const endpoint = this.API_URL + '/extra-data-upload/' + acquisitionId;
+    /**
+     * Updates the acquisition, with its new extra data files if any, in a single request:
+     * the acquisition is not updated if a file can't be stored.
+     */
+    update(id: number, entity: DatasetAcquisition, filesToUpload: File[] = []): Promise<void> {
         const formData: FormData = new FormData();
-        formData.append('file', fileToUpload, fileToUpload.name);
-        return firstValueFrom(this.http.post<any>(endpoint, formData));
+        formData.append('datasetAcquisition', new Blob([this.stringify(entity)], { type: 'application/json' }));
+        for (const file of filesToUpload) {
+            formData.append('files', file, file.name);
+        }
+        return firstValueFrom(this.http.put<void>(this.API_URL + '/' + id, formData));
     }
 
     downloadFile(fileName: string, acquisitionId: number, state?: TaskState): Observable<TaskState> {

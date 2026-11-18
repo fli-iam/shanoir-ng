@@ -11,19 +11,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnDestroy, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { AbstractControl, FormGroup, UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { NgClass } from '@angular/common';
 
-import { TaskState } from 'src/app/async-tasks/task.model';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
-import { Selection } from 'src/app/studies/study/tree.service';
+import { TaskState } from '@app/async-tasks/task.model';
+import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
+import { MassDownloadService } from '@app/shared/mass-download/mass-download.service';
+import { Selection } from '@app/studies/study/tree.service';
 
 import { environment } from '../../../environments/environment';
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { CenterService } from '../../centers/shared/center.service';
+import { DatasetService } from '../../datasets/shared/dataset.service';
 import { UnitOfMeasure } from "../../enum/unitofmeasure.enum";
 import { dateDisplay } from "../../shared/./localLanguage/localDate.abstract";
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
@@ -44,6 +45,7 @@ import { LocalDateFormatPipe } from '../../shared/localLanguage/localDateFormat.
 @Component({
     selector: 'examination-detail',
     templateUrl: 'examination.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [FormsModule, ReactiveFormsModule, NgClass, FormFooterComponent, RouterLink, SelectBoxComponent, DatepickerComponent, InstrumentAssessmentComponent, LocalDateFormatPipe]
 })
 
@@ -73,6 +75,7 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
     unit = UnitOfMeasure;
     defaultUnit = this.unit.KG;
     private studyFirstChange: boolean = true;
+    private datasetService: DatasetService = inject(DatasetService);
 
     constructor(
         private route: ActivatedRoute,
@@ -114,6 +117,12 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
         if(!this.examination.weightUnitOfMeasure){
             this.examination.weightUnitOfMeasure = this.defaultUnit;
         }
+        return this.loadRights().then(() => {
+            if (this.hasDownloadRight) this.checkEEG();
+        });
+    }
+
+    private loadRights(): Promise<void> {
         if (this.keycloakService.isUserAdmin()) {
             this.hasAdministrateRight = true;
             this.hasDownloadRight = true;
@@ -128,6 +137,23 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
         }
     }
 
+    // as in the backend: the fields are edited by importers and by study administrators with the expert role,
+    // the extra-data files by importers only
+    get canEditFields(): boolean {
+        return this.keycloakService.isUserAdmin() || this.hasImportRight || (this.keycloakService.isUserExpert() && this.hasAdministrateRight);
+    }
+
+    get canEditFiles(): boolean {
+        return this.keycloakService.isUserAdmin() || this.hasImportRight;
+    }
+
+    // Not awaited: the EEG viewer button just appears once the datasets are loaded
+    private checkEEG(): void {
+        this.datasetService.getByExaminationId(this.examination.id)
+            .then(datasets => this.hasEEG = datasets.some(ds => String(ds.type).toUpperCase() == 'EEG'))
+            .catch(() => this.hasEEG = false);
+    }
+
     initEdit(): Promise<void> {
         this.getStudies();
         this.getSubjects(this.examination.study?.id);
@@ -135,7 +161,7 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
         if(!this.examination.weightUnitOfMeasure){
             this.examination.weightUnitOfMeasure = this.defaultUnit;
         }
-        return Promise.resolve();
+        return this.loadRights();
     }
 
     initCreate(): Promise<void> {
@@ -157,6 +183,8 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
             'subjectWeight': [this.examination.subjectWeight],
             'weightUnitOfMeasure': [this.examination.weightUnitOfMeasure]
         });
+        // files-only edit: every field is read-only, only the extra-data files can change
+        if (this.mode == 'edit' && !this.canEditFields) form.disable({emitEvent: false});
         const examinationDateCtrl: AbstractControl = form.get('examinationDate');
         this.subscriptions.push(
             examinationDateCtrl.valueChanges.subscribe(value => {
@@ -203,12 +231,16 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
         this.downloadService.downloadAllByExaminationId(this.examination?.id,this.downloadState);
     }
 
-    openViewer() {
-	    window.open(environment.viewerUrl + '/viewer?StudyInstanceUIDs=1.4.9.12.34.1.8527.' + this.entity.id, '_blank');
+    openOhifViewer() {
+	    window.open(environment.ohifUrl + '/viewer?StudyInstanceUIDs=1.4.9.12.34.1.8527.' + this.entity.id, '_blank');
     }
 
-    openSegmentationViewer() {
-        window.open(environment.viewerUrl + '/segmentation?StudyInstanceUIDs=1.4.9.12.34.1.8527.' + this.entity.id, '_blank');
+    openOhifSegmentation() {
+        window.open(environment.ohifUrl + '/segmentation?StudyInstanceUIDs=1.4.9.12.34.1.8527.' + this.entity.id, '_blank');
+    }
+
+    openVidepeViewer() {
+        window.open(environment.videpeUrl + '/videpe/?examinationId=' + this.entity.id, '_blank');
     }
 
     getCenters(studyId: number): void {
@@ -226,10 +258,10 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
                 this.studies = studies;
                 this.userRightsService.getMyRights().then(rights => {
                     if (!this.keycloakService.isUserAdmin()) {
-                        // filter studies to only those with import or admin rights
+                        // filter studies to only those with import rights
                         this.studies = this.studies.filter(study => {
                             const studyRights = rights.get(study.id);
-                            return studyRights && (studyRights.includes(StudyUserRight.CAN_IMPORT) || studyRights.includes(StudyUserRight.CAN_ADMINISTRATE));
+                            return studyRights?.includes(StudyUserRight.CAN_IMPORT);
                         });
                     }
                 });
@@ -251,11 +283,11 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
     }
 
     public async hasEditRight(): Promise<boolean> {
-	   return this.keycloakService.isUserAdmin() || this.hasImportRight;
+        return this.canEditFields || this.canEditFiles;
     }
 
     public async hasDeleteRight(): Promise<boolean> {
-         return this.keycloakService.isUserAdmin() || this.hasAdministrateRight;
+         return this.keycloakService.isUserAdmin() || (this.keycloakService.isUserExpert() && this.hasAdministrateRight);
     }
 
     public isAdmin(): boolean {
@@ -270,27 +302,61 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
     }
 
     public attachNewFile(event: any) {
-        const newFile = event.target.files[0];
-        this.examination.extraDataFilePathList.push(newFile.name);
-        this.files.push(newFile);
+        for (const newFile of Array.from(event.target.files as FileList)) {
+            if (this.examination.extraDataFilePathList.includes(newFile.name)) {
+                this.consoleService.log('warn', 'A file named "' + newFile.name + '" is already attached and was skipped.');
+                continue;
+            }
+            this.examination.extraDataFilePathList.push(newFile.name);
+            this.files.push(newFile);
+        }
+        event.target.value = null;
         this.form.markAsDirty();
         this.form.updateValueAndValidity();
     }
 
+    /**
+     * - with new files: exam + files in one request (create or update), nothing is saved if a file can't be stored
+     * - without new files: classic save
+     */
     public save(): Promise<Examination> {
-        return super.save(() => {
-            const uploads: Promise<void>[] = [];
-            // Once the exam is saved, save associated files
-            for (const file of this.files) {
-                uploads.push(this.examinationService.postFile(file, this.entity.id));
-            }
-            return Promise.all(uploads).then(() => null);
-        }).then(() => null).catch(reason => { if (reason.status == 403) {
+        const saving: Promise<Examination> = this.files?.length ? this.saveWithFiles() : super.save();
+        return saving.then(() => null).catch(reason => {
+            if (reason.status != 403) throw reason;
             this.consoleService.log('error', 'Examination ' + this.examination.id + ' Updating study / subject / center of an examination is forbidden.');
             return null;
-        } else {
-            throw reason;
-        }});
+        });
+    }
+
+    /**
+     * Saves (creates or updates) the exam with its new files in one request.
+     * Mirrors what the classic save does around the request (EntityComponent.save / modeSpecificSave).
+     */
+    private saveWithFiles(): Promise<Examination> {
+        this.footerState.loading = true;
+        EntityComponent.mapFormToEntity(this.entity, this.form);
+        const creation: boolean = this.mode == 'create';
+        const request: Promise<Examination> = creation
+            ? this.examinationService.create(this.examination, this.files)
+            : this.examinationService.update(this.examination.id, this.examination, this.files).then(() => this.examination);
+        return request.then(exam => {
+            this.entity.id = exam.id;
+            this.onSave.next(exam);
+            this.chooseRouteAfterSave(exam);
+            this.consoleService.log('info', creation
+                ? 'New examination successfully saved with n° ' + exam.id
+                : 'Examination n°' + exam.id + ' successfully updated');
+            this.treeService.updateTree();
+            return exam;
+        }).catch(reason => {
+            // Files not stored (nothing saved): show the server reason instead of a generic error
+            if (reason?.status == 500 && reason.error?.message) {
+                this.consoleService.log('error', reason.error.message);
+                return null;
+            }
+            this.catchSavingErrors(reason);
+            return null;
+        }).finally(() => this.footerState.loading = false);
     }
 
     getFileName(element): string {

@@ -15,7 +15,7 @@
 package org.shanoir.ng.preclinical.pathologies.pathology_models;
 
 import java.io.IOException;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -289,7 +289,7 @@ public class PathologyModelApiController implements PathologyModelApi {
         List<FileEntryDTO> fileEntries = models.stream()
                 .filter(model -> model.getFilepath() != null && model.getFilename() != null)
                 .map(model -> {
-                    boolean exists = Paths.get(model.getFilepath()).toFile().exists();
+                    boolean exists = Path.of(model.getFilepath()).toFile().exists();
                     return new FileEntryDTO(model.getId(), model.getFilename(), "PATHOLOGY-MODEL", exists);
                 })
                 .collect(Collectors.toList());

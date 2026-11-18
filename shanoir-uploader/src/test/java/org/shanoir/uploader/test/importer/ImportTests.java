@@ -15,38 +15,59 @@
 package org.shanoir.uploader.test.importer;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Properties;
+import java.util.Set;
 import java.util.UUID;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import javax.swing.JProgressBar;
 
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.core5.http.HttpEntity;
+import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.Tag;
+import org.dcm4che3.io.DicomInputStream;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
+import org.shanoir.ng.importer.ImportJobStatusService;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
-import org.shanoir.ng.importer.model.ImportJob;
+import org.shanoir.ng.importer.model.EegImportJob;
+import org.shanoir.ng.importer.model.ImportJobBase;
+import org.shanoir.ng.importer.model.ImportJobStatus;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Subject;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.check.DicomInstanceConsistencyChecker;
+import org.shanoir.uploader.dicom.DicomServerClient;
 import org.shanoir.uploader.dicom.anonymize.Anonymizer;
 import org.shanoir.uploader.dicom.retrieve.DcmRcvManager;
 import org.shanoir.uploader.exception.PseudonymusException;
 import org.shanoir.uploader.model.rest.AcquisitionEquipment;
+import org.shanoir.uploader.model.rest.DatasetLight;
+import org.shanoir.uploader.model.rest.DatasetsImportStatus;
 import org.shanoir.uploader.model.rest.Examination;
 import org.shanoir.uploader.model.rest.HemisphericDominance;
 import org.shanoir.uploader.model.rest.ImagedObjectCategory;
@@ -70,11 +91,31 @@ public class ImportTests extends AbstractTest {
 
     private static final String ACR_PHANTOM_T1_DIR = "acr_phantom_t1/";
 
+    private static final String TEST_MULTIPLE_EXAM_ZIP = "TEST_MET_0001.zip";
+
+    private static final String TEST_EEG_ZIP = "testEDF.zip";
+
+    private static final String TEST_BIDS_ZIP = "testBIDS.zip";
+    
+    private static final String TEST_PACS_AET = "TEST_PACS";
+
+    private static final int TEST_PACS_PORT = 11121;
+
     // The server-side import is asynchronous: give it time to appear before
     // declaring the consistency check failed.
     private static final long CONSISTENCY_CHECK_TIMEOUT_MILLIS = 2 * 60 * 1000; // 2 min
 
     private static final long CONSISTENCY_CHECK_POLL_INTERVAL_MILLIS = 5 * 1000; // 5 sec
+    
+    private static final long DATASET_STATUS_TIMEOUT_MILLIS = 2 * 60 * 1000;
+
+    private static final long DATASET_STATUS_POLL_INTERVAL_MILLIS = 5 * 1000;
+
+    // Local folder where a copy of every import-job JSON sent is dumped
+    private static final File IMPORT_JOB_DUMP_DIR = new File("target/import-job-dumps");
+
+    private static final DateTimeFormatter IMPORT_JOB_DUMP_TIMESTAMP_FORMATTER =
+            DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss-SSS");
 
     private static Study studyWithStudyCards;
 
@@ -85,16 +126,19 @@ public class ImportTests extends AbstractTest {
     @Test
     @Order(1)
     public void testImportFromDicomZip() {
-        logger.info("START testImportFromDicomZip...................");
+        logger.info("......................................................");
+        logger.info("START testImportFromDicomZip..........................");
+        logger.info("......................................................");
         try {
+            ImportJobBase importJob = uploadDicomZip(ACR_PHANTOM_T1_ZIP);
+            logger.info("TempDirId: {}", importJob.getWorkFolder());
             studyWithStudyCards = createStudyAndCenterAndStudyCardAndAddMembers();
-            ImportJob importJob = uploadDicomZip(ACR_PHANTOM_T1_ZIP);
-            if (!importJob.getPatients().isEmpty()) {
+            if (!importJob.getSeries().isEmpty()) {
                 selectAllSeriesForImport(importJob);
                 org.shanoir.uploader.model.rest.Subject subject = createSubject(importJob, studyWithStudyCards);
-                org.shanoir.ng.importer.model.Study dicomStudy = importJob.getPatients().get(0).getStudies().get(0);
+                org.shanoir.ng.importer.model.Study dicomStudy = importJob.getStudy();
                 Examination examination = createExaminationFromDicomStudy(studyWithStudyCards, dicomStudy, subject);
-                startImportJobFromZip(importJob, subject, examination.getId(), studyWithStudyCards);
+                startImportJobFromDicomZip(importJob, subject, examination, studyWithStudyCards);
             }
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
@@ -105,7 +149,9 @@ public class ImportTests extends AbstractTest {
     @Test
     @Order(2)
     public void testImportFromShanoirUploader() throws Exception {
+        logger.info("......................................................");
         logger.info("START testImportFromShanoirUploader...................");
+        logger.info("......................................................");
         URL resource = getClass().getClassLoader().getResource(ACR_PHANTOM_T1_DIR);
         Assertions.assertNotNull(resource, "Test resource folder " + ACR_PHANTOM_T1_DIR + " not found.");
         File dicomSourceDir = new File(resource.toURI());
@@ -116,25 +162,23 @@ public class ImportTests extends AbstractTest {
         Patient patient = patients.get(0);
         Assertions.assertFalse(patient.getStudies().isEmpty(), "No studies found for parsed patient.");
         org.shanoir.ng.importer.model.Study dicomStudy = patient.getStudies().get(0);
-        selectAllSeriesForImport(patient);
 
         List<Serie> selectedSeries = new ArrayList<>();
         for (Serie serie : dicomStudy.getSeries()) {
-            if (serie.getSelected()) {
-                selectedSeries.add(serie);
-            }
+            serie.setSelected(true);
+            selectedSeries.add(serie);
         }
         Assertions.assertFalse(selectedSeries.isEmpty(), "No series selected for import.");
 
-        ImportJob importJob = ImportUtils.createNewImportJob(patient, dicomStudy);
-        importJob.setSelectedSeries(selectedSeries);
+        ImportJobBase importJob = ImportUtils.createNewImportJob(patient, dicomStudy);
+        importJob.setSeries(selectedSeries);
 
         org.shanoir.uploader.model.rest.Subject subject = createSubjectFromLocalPatient(patient, studyWithStudyCards);
         importJob.setSubject(patient.getSubject());
         Examination examination = createExaminationFromDicomStudy(studyWithStudyCards, dicomStudy, subject);
 
         StudyCard studyCard = studyWithStudyCards.getStudyCards().get(0);
-        importJob = ImportUtils.prepareImportJob(importJob, subject.getName(), subject.getId(),
+        importJob = ImportUtils.prepareImportJob(importJob, subject,
                 examination.getId(), examination.getStudyInstanceUID(), studyWithStudyCards, studyCard,
                 studyCard.getAcquisitionEquipment());
         importJob.setFromDicomZip(false);
@@ -162,29 +206,34 @@ public class ImportTests extends AbstractTest {
         importJobJsonFile.createNewFile();
         Util.mapper.writeValue(importJobJsonFile, importJob);
 
-        startImportJobFromShanoirUploader(importJob, uploadFolder);
+        startImportJobFromShanoirUploader(importJob, uploadFolder, "testImportFromShanoirUploader");
+        waitForServerImportJobStatus(importJob.getWorkFolder(), "testImportFromShanoirUploader-before-ds");
 
         // Local files here were pseudonymized before upload, exactly like the
         // server-side copy, so a full tag comparison is meaningful.
         waitAndCheckServerConsistency(uploadFolder, examination.getId(), true);
+        downloadAndCompareDatasetsZip(examination.getId(), uploadFolder, "testImportFromShanoirUploader");
     }
 
     @Test
     @Order(3)
     public void testImportFromDicomZipNoStudyCard() {
-        logger.info("START testImportFromDicomZipNoStudyCard...................");
+        logger.info("......................................................");
+        logger.info("START testImportFromDicomZipNoStudyCard...............");
+        logger.info("......................................................");
         try {
+            ImportJobBase importJob = uploadDicomZip(ACR_PHANTOM_T1_ZIP);
+            logger.info("TempDirId: {}", importJob.getWorkFolder());
             studyNoStudyCards = createStudyAndCenterWithoutStudyCard();
             equipment = createEquipment(
                     studyNoStudyCards.getStudyCenterList().get(0).getCenter());
             Assertions.assertNotNull(equipment);
-            ImportJob importJob = uploadDicomZip(ACR_PHANTOM_T1_ZIP);
-            if (!importJob.getPatients().isEmpty()) {
+            if (!importJob.getSeries().isEmpty()) {
                 selectAllSeriesForImport(importJob);
                 org.shanoir.uploader.model.rest.Subject subject = createSubjectNoStudyCard(importJob, studyNoStudyCards);
-                org.shanoir.ng.importer.model.Study dicomStudy = importJob.getPatients().get(0).getStudies().get(0);
+                org.shanoir.ng.importer.model.Study dicomStudy = importJob.getStudy();
                 Examination examination = createExaminationNoStudyCard(studyNoStudyCards, dicomStudy, subject);
-                startImportJobFromZipNoStudyCard(importJob, subject, examination.getId(), studyNoStudyCards);
+                startImportJobFromDicomZipNoStudyCard(importJob, subject, examination, studyNoStudyCards, equipment.getId());
             }
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
@@ -195,7 +244,9 @@ public class ImportTests extends AbstractTest {
     @Test
     @Order(4)
     public void testImportFromShanoirUploaderNoStudyCard() throws Exception {
-        logger.info("START testImportFromShanoirUploaderNoStudyCard...................");
+        logger.info("......................................................");
+        logger.info("START testImportFromShanoirUploaderNoStudyCard........");
+        logger.info("......................................................");
         URL resource = getClass().getClassLoader().getResource(ACR_PHANTOM_T1_DIR);
         Assertions.assertNotNull(resource, "Test resource folder " + ACR_PHANTOM_T1_DIR + " not found.");
         File dicomSourceDir = new File(resource.toURI());
@@ -206,18 +257,16 @@ public class ImportTests extends AbstractTest {
         Patient patient = patients.get(0);
         Assertions.assertFalse(patient.getStudies().isEmpty(), "No studies found for parsed patient.");
         org.shanoir.ng.importer.model.Study dicomStudy = patient.getStudies().get(0);
-        selectAllSeriesForImport(patient);
 
         List<Serie> selectedSeries = new ArrayList<>();
         for (Serie serie : dicomStudy.getSeries()) {
-            if (serie.getSelected()) {
-                selectedSeries.add(serie);
-            }
+            serie.setSelected(true);
+            selectedSeries.add(serie);
         }
         Assertions.assertFalse(selectedSeries.isEmpty(), "No series selected for import.");
 
-        ImportJob importJob = ImportUtils.createNewImportJob(patient, dicomStudy);
-        importJob.setSelectedSeries(selectedSeries);
+        ImportJobBase importJob = ImportUtils.createNewImportJob(patient, dicomStudy);
+        importJob.setSeries(selectedSeries);
 
         org.shanoir.uploader.model.rest.Subject subject = createSubjectFromLocalPatientNoStudyCard(patient,
                 studyNoStudyCards);
@@ -227,7 +276,7 @@ public class ImportTests extends AbstractTest {
         // No study card for this study (SC_DISABLED policy): pass null instead
         // of a StudyCard/AcquisitionEquipment, mirroring the client-side "no
         // study card" import path.
-        importJob = ImportUtils.prepareImportJob(importJob, subject.getName(), subject.getId(),
+        importJob = ImportUtils.prepareImportJob(importJob, subject,
                 examination.getId(), examination.getStudyInstanceUID(), studyNoStudyCards, null, equipment);
         importJob.setFromDicomZip(false);
         importJob.setFromPacs(false);
@@ -254,11 +303,240 @@ public class ImportTests extends AbstractTest {
         importJobJsonFile.createNewFile();
         Util.mapper.writeValue(importJobJsonFile, importJob);
 
-        startImportJobFromShanoirUploader(importJob, uploadFolder);
-
+        startImportJobFromShanoirUploader(importJob, uploadFolder, "testImportFromShanoirUploaderNoStudyCard");
+        waitForServerImportJobStatus(importJob.getWorkFolder(), "testImportFromShanoirUploaderNoStudyCard-before-ds");
         waitAndCheckServerConsistency(uploadFolder, examination.getId(), true);
+        downloadAndCompareDatasetsZip(examination.getId(), uploadFolder, "testImportFromShanoirUploaderNoStudyCard");
     }
 
+    @Test
+    @Order(5)
+    public void testImportMultipleDicomZipWithStudyCard() throws Exception {
+        logger.info("......................................................");
+        logger.info("START testImportMultipleDicomZipWithStudyCard.........");
+        logger.info("......................................................");
+        URL resource = getClass().getClassLoader().getResource(TEST_MULTIPLE_EXAM_ZIP);
+        Assertions.assertNotNull(resource, "Test resource " + TEST_MULTIPLE_EXAM_ZIP + " not found.");
+        File file = new File(resource.toURI());
+
+        StudyCard studyCard = studyWithStudyCards.getStudyCards().get(0);
+        ImportJobBase importJob = userClient.uploadMultipleDicom(file,
+                studyWithStudyCards.getId(),
+                studyWithStudyCards.getName(),
+                studyCard.getId(),
+                studyCard.getCenterId(),
+                studyCard.getAcquisitionEquipment().getId());
+
+        Assertions.assertNotNull(importJob, "Multiple-examination import returned no import job.");
+        Assertions.assertNotNull(importJob.getExaminationId(),
+                "Multiple-examination import did not create/return an examination id.");
+        logger.info("Multiple-examination import (with study card) created examination: {}",
+                importJob.getExaminationId());
+
+        if (importJob.getWorkFolder() != null && !importJob.getWorkFolder().isEmpty()) {
+            final String tempDirId = ImportJobStatusService.keyOf(importJob.getWorkFolder());
+            waitForServerImportJobStatus(tempDirId, "testImportMultipleDicomZipWithStudyCard-before-ds");
+        }
+        File multiExamExtractDir = Files.createTempDirectory("shanoir-multi-exam-source-").toFile();
+        unzip(file, multiExamExtractDir);
+    }
+
+    @Test
+    @Order(6)
+    public void testImportMultipleDicomZipNoStudyCard() throws Exception {
+        logger.info("......................................................");
+        logger.info("START testImportMultipleDicomZipNoStudyCard...........");
+        logger.info("......................................................");
+        URL resource = getClass().getClassLoader().getResource(TEST_MULTIPLE_EXAM_ZIP);
+        Assertions.assertNotNull(resource, "Test resource " + TEST_MULTIPLE_EXAM_ZIP + " not found.");
+        File file = new File(resource.toURI());
+
+        Long centerId = studyNoStudyCards.getStudyCenterList().get(0).getCenter().getId();
+        // studyCardId 0L: mirrors the SC_DISABLED / "no study card" policy of this
+        // study.
+        ImportJobBase importJob = userClient.uploadMultipleDicom(file,
+                studyNoStudyCards.getId(),
+                studyNoStudyCards.getName(),
+                0L,
+                centerId,
+                equipment.getId());
+
+        Assertions.assertNotNull(importJob, "Multiple-examination import returned no import job.");
+        Assertions.assertNotNull(importJob.getExaminationId(),
+                "Multiple-examination import did not create/return an examination id.");
+        logger.info("Multiple-examination import (no study card) created examination: {}",
+                importJob.getExaminationId());
+
+        if (importJob.getWorkFolder() != null && !importJob.getWorkFolder().isEmpty()) {
+            final String tempDirId = ImportJobStatusService.keyOf(importJob.getWorkFolder());
+            waitForServerImportJobStatus(tempDirId, "testImportMultipleDicomZipNoStudyCard-before-ds");
+        }
+        File multiExamExtractDir = Files.createTempDirectory("shanoir-multi-exam-source-").toFile();
+        unzip(file, multiExamExtractDir);
+    }
+
+    @Test
+    @Order(7)
+    public void testImportEEG() throws Exception {
+        logger.info("......................................................");
+        logger.info("START testImportEEG...................................");
+        logger.info("......................................................");
+        URL resource = getClass().getClassLoader().getResource(TEST_EEG_ZIP);
+        Assertions.assertNotNull(resource, "Test resource " + TEST_EEG_ZIP + " not found.");
+        File file = new File(resource.toURI());
+
+        // 1. Upload the EEG zip: server unzips it and returns a first, near-empty job.
+        EegImportJob uploadedJob = userClient.uploadEEGZip(file);
+        Assertions.assertNotNull(uploadedJob, "EEG upload did not return an import job.");
+        Assertions.assertNotNull(uploadedJob.getWorkFolder(), "EEG upload did not return a work folder.");
+        logger.info("EEG file uploaded, workFolder: {}", uploadedJob.getWorkFolder());
+
+        // 2. Analyze the uploaded file(s) to build channels/events/datasets.
+        EegImportJob analyzedJob = userClient.analyzeEegZipFile(uploadedJob);
+        Assertions.assertNotNull(analyzedJob, "EEG analysis did not return an import job.");
+        Assertions.assertNotNull(analyzedJob.getDatasets(), "EEG analysis did not return any datasets.");
+        Assertions.assertFalse(analyzedJob.getDatasets().isEmpty(), "EEG analysis returned an empty dataset list.");
+        logger.info("EEG file analyzed, {} dataset(s) found.", analyzedJob.getDatasets().size());
+
+        // 3. Create the subject/examination that will receive the dataset(s), then
+        // start the import.
+        org.shanoir.uploader.model.rest.Subject subject = createSubject(studyNoStudyCards);
+        Assertions.assertNotNull(subject, "Subject could not be created for EEG import.");
+        Examination examination = createExamination(studyWithStudyCards.getId(), subject.getId(),
+                studyWithStudyCards.getStudyCards().get(0).getCenterId());
+        Assertions.assertNotNull(examination, "Examination could not be created for EEG import.");
+
+        analyzedJob.setStudyId(studyNoStudyCards.getId());
+        analyzedJob.setStudyName(studyNoStudyCards.getName());
+        analyzedJob.setSubjectName(subject.getName());
+        analyzedJob.setExaminationId(examination.getId());
+        analyzedJob.setAcquisitionEquipmentId(equipment.getId());
+
+        // MS Import is only relaying the job to MS Datasets
+        userClient.startImportEEGJob(analyzedJob);
+        if (analyzedJob.getWorkFolder() != null && !analyzedJob.getWorkFolder().isEmpty()) {
+            final String tempDirId = ImportJobStatusService.keyOf(analyzedJob.getWorkFolder());
+            waitForServerImportJobStatus(tempDirId, "testImportEEG-before-ds");
+        }
+    }
+
+    @Test
+    @Order(8)
+    public void testImportBIDS() throws Exception {
+        logger.info("......................................................");
+        logger.info("START testImportBIDS...................................");
+        logger.info("......................................................");
+        URL resource = getClass().getClassLoader().getResource(TEST_BIDS_ZIP);
+        Assertions.assertNotNull(resource, "Test resource " + TEST_BIDS_ZIP + " not found.");
+        File file = new File(resource.toURI());
+
+        Long centerId = studyWithStudyCards.getStudyCards().get(0).getCenterId();
+
+        // Unlike the DICOM/EEG import paths, the BIDS import endpoint (datasets
+        // microservice) responds with an empty 200 OK and processes the subject/
+        // examination/dataset creation asynchronously over RabbitMQ. There is no
+        // workFolder/tempDirId returned, so we cannot poll ImporterStatus here as
+        // the other tests do - this only verifies the server accepted the upload.
+        userClient.uploadBIDSDataset(file, studyWithStudyCards.getId(), studyWithStudyCards.getName(), centerId);
+        logger.info("BIDS dataset upload accepted by server for study: {}", studyWithStudyCards.getId());
+    }
+    
+    @Test
+    @Order(9)
+    public void testImportFromPACS() throws Exception {
+        logger.info("......................................................");
+        logger.info("START testImportFromPACS..............................");
+        logger.info("......................................................");
+
+        URL resource = getClass().getClassLoader().getResource(ACR_PHANTOM_T1_DIR);
+        Assertions.assertNotNull(resource, "Test resource folder " + ACR_PHANTOM_T1_DIR + " not found.");
+        File dicomSourceDir = new File(resource.toURI());
+        Set<String[]> sopClassesAndTransferSyntaxes =
+                TestDicomServerSeeder.scanSopClassesAndTransferSyntaxes(dicomSourceDir);
+
+        File pacsStorageRoot = Files.createTempDirectory("shanoir-uploader-test-pacs-storage-").toFile();
+        TestDicomServer pacs = new TestDicomServer(TEST_PACS_AET, TEST_PACS_PORT, pacsStorageRoot,
+                sopClassesAndTransferSyntaxes);
+        pacs.addRemoteConnection("SHANOIR-UPLOADER", "127.0.0.1", 44105);
+        pacs.start();
+        try {
+            // Seed the fake PACS exactly once, via a real C-STORE - mirrors data
+            // that would already sit on a real PACS before ShUp queries it.
+            TestDicomServerSeeder.seed(dicomSourceDir, sopClassesAndTransferSyntaxes,
+                    "SEEDER", TEST_PACS_AET, "127.0.0.1", TEST_PACS_PORT);
+
+            Properties dicomServerProperties = new Properties();
+            dicomServerProperties.setProperty("dicom.server.host", "127.0.0.1");
+            dicomServerProperties.setProperty("dicom.server.port", String.valueOf(TEST_PACS_PORT));
+            dicomServerProperties.setProperty("dicom.server.aet.called", TEST_PACS_AET);
+            dicomServerProperties.setProperty("local.dicom.server.aet.calling", "SHANOIR-UPLOADER");
+            dicomServerProperties.setProperty("local.dicom.server.host", "127.0.0.1");
+            dicomServerProperties.setProperty("local.dicom.server.port", "44105");
+
+            File workFolder = Files.createTempDirectory("shanoir-uploader-test-pacs-work-").toFile();
+            DicomServerClient dicomServerClient = new DicomServerClient(dicomServerProperties, workFolder);
+
+            List<Patient> patients = dicomServerClient.queryDicomServer(
+                    true, "MR", "*", "", "", "", "");
+            Assertions.assertNotNull(patients);
+            Assertions.assertFalse(patients.isEmpty(), "PACS C-FIND returned no patients.");
+
+            Patient patient = patients.get(0);
+            org.shanoir.ng.importer.model.Study dicomStudy = patient.getStudies().get(0);
+            List<Serie> selectedSeries = new ArrayList<>();
+            for (Serie serie : dicomStudy.getSeries()) {
+                serie.setSelected(true);
+                selectedSeries.add(serie);
+            }
+            Assertions.assertFalse(selectedSeries.isEmpty(), "No series returned by PACS C-FIND.");
+
+            File uploadFolder = ImportUtils.createUploadFolder(workFolder, "pacs-test-subject");
+            List<String> retrievedFiles = dicomServerClient.retrieveDicomFiles(
+                    new JProgressBar(), new StringBuilder(), dicomStudy.getStudyInstanceUID(),
+                    selectedSeries, uploadFolder);
+            Assertions.assertNotNull(retrievedFiles);
+            Assertions.assertFalse(retrievedFiles.isEmpty(), "No DICOM files retrieved via C-MOVE.");
+            
+            ImportJobBase importJob = ImportUtils.createNewImportJob(patient, dicomStudy);
+            importJob.setSeries(selectedSeries);
+            ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer = new ImagesCreatorAndDicomFileAnalyzerService();
+            for (Serie serie : selectedSeries) {
+                dicomFileAnalyzer.getAdditionalMetaDataFromFirstInstanceOfSerie(uploadFolder.getAbsolutePath(), importJob.getPatient(),
+                        importJob.getStudy(), serie, true);
+            }
+
+            org.shanoir.uploader.model.rest.Subject subject =
+                    createSubjectFromLocalPatient(patient, studyWithStudyCards);
+            importJob.setSubject(patient.getSubject());
+            Examination examination = createExaminationFromDicomStudy(studyWithStudyCards, dicomStudy, subject);
+
+            StudyCard studyCard = studyWithStudyCards.getStudyCards().get(0);
+            importJob = ImportUtils.prepareImportJob(importJob, subject,
+                    examination.getId(), examination.getStudyInstanceUID(), studyWithStudyCards, studyCard,
+                    studyCard.getAcquisitionEquipment());
+            importJob.setFromShanoirUploader(true);
+            importJob.setFromDicomZip(false);
+            importJob.setFromPacs(false);
+
+            Anonymizer anonymizer = new Anonymizer();
+            String anonymizationProfile = ShUpConfig.profileProperties.getProperty(ShUpConfig.ANONYMIZATION_PROFILE);
+            boolean anonymizationSuccess = anonymizer.pseudonymize(
+                    uploadFolder, anonymizationProfile, subject.getName(), examination.getStudyInstanceUID());
+            Assertions.assertTrue(anonymizationSuccess, "Local anonymization of PACS-retrieved DICOM files failed.");
+
+            File importJobJsonFile = new File(uploadFolder, ShUpConfig.IMPORT_JOB_JSON);
+            importJobJsonFile.createNewFile();
+            Util.mapper.writeValue(importJobJsonFile, importJob);
+
+            startImportJobFromShanoirUploader(importJob, uploadFolder, "testImportFromPACS");
+            waitForServerImportJobStatus(importJob.getWorkFolder(), "testImportFromPACS-before-ds");
+            waitAndCheckServerConsistency(uploadFolder, examination.getId(), true);
+            downloadAndCompareDatasetsZip(examination.getId(), uploadFolder, "testImportFromPACS");
+        } finally {
+            pacs.stop();
+        }
+    }
+    
     /**
      * Polls the server until the local DICOM files match their remote,
      * persisted counterparts for the given examination, or a timeout is
@@ -299,6 +577,27 @@ public class ImportTests extends AbstractTest {
         }
         Assertions.fail("DICOM instances were not consistent with the server within timeout for examination "
                 + examinationId + (lastError != null ? ": " + lastError.getMessage() : ""));
+    }
+
+    private ImportJobStatus waitForServerImportJobStatus(String tempDirId, String label) throws Exception {
+        long deadline = System.currentTimeMillis() + CONSISTENCY_CHECK_TIMEOUT_MILLIS;
+        while (System.currentTimeMillis() < deadline) {
+            ImportJobStatus status = userClient.getImportJobStatus(tempDirId);
+            if (status != null) {
+                if (status.getState() == ImportJobStatus.State.FINISHED) {
+                    logger.info("Server reported FINISHED for tempDirId {}.", tempDirId);
+                    ImportJobBase importJob = status.getImportJob();
+                    String importJobJson = Util.objectWriter.writeValueAsString(importJob);
+                    dumpImportJobJson(importJobJson, tempDirId, label);
+                    return status;
+                } else if (status.getState() == ImportJobStatus.State.ERROR) {
+                    Assertions.fail("Import failed on server for tempDirId " + tempDirId + ": " + status.getMessage());
+                }
+            }
+            Thread.sleep(CONSISTENCY_CHECK_POLL_INTERVAL_MILLIS);
+        }
+        Assertions.fail("Import did not reach FINISHED on server within timeout for tempDirId " + tempDirId);
+        return null;
     }
 
     private Examination createExaminationFromDicomStudy(Study study,
@@ -372,31 +671,34 @@ public class ImportTests extends AbstractTest {
         return subjectREST;
     }
 
-    private void startImportJobFromShanoirUploader(ImportJob importJob, File uploadFolder) throws Exception {
-        File[] dicomFiles = uploadFolder.listFiles(
-                (dir, name) -> name.endsWith(DcmRcvManager.DICOM_FILE_SUFFIX));
+    private void startImportJobFromShanoirUploader(ImportJobBase importJob, File uploadFolder, String label)
+            throws Exception {
+        Collection<File> dicomFiles = Util.listFiles(
+                uploadFolder,
+                (dir, name) -> name.endsWith(DcmRcvManager.DICOM_FILE_SUFFIX),
+                true
+        );
         Assertions.assertNotNull(dicomFiles);
-        Assertions.assertTrue(dicomFiles.length > 0, "No anonymized DICOM files found in upload folder.");
-
+        Assertions.assertTrue(dicomFiles.size() > 0, "No anonymized DICOM files found in upload folder.");
         String tempDirId = userClient.createTempDir();
         Assertions.assertNotNull(tempDirId);
         logger.info("Upload: tempDirId for import: " + tempDirId);
-
         int i = 0;
         for (File file : dicomFiles) {
             i++;
             userClient.uploadFile(tempDirId, file);
-            logger.debug("Uploaded file {}/{}: {}", i, dicomFiles.length, file.getName());
+            logger.debug("Uploaded file {}/{}: {}", i, dicomFiles.size(), file.getName());
         }
-        logger.info("Upload: " + dicomFiles.length + " uploaded files to tempDirId: " + tempDirId);
-
+        logger.info("Upload: " + dicomFiles.size() + " uploaded files to tempDirId: " + tempDirId);
         importJob.setWorkFolder(tempDirId);
+        logger.info("TempDirId: {}", importJob.getWorkFolder());
         String importJobJson = Util.objectWriter.writeValueAsString(importJob);
-        userClient.startImportJob(importJobJson);
+        dumpImportJobJson(importJobJson, tempDirId, label);
+        userClient.startImportJob(tempDirId, importJobJson);
     }
 
-    private void startImportJobFromZip(ImportJob importJob, org.shanoir.uploader.model.rest.Subject subjectREST,
-            Long examinationId, org.shanoir.uploader.model.rest.Study study)
+    private void startImportJobFromDicomZip(ImportJobBase importJob, org.shanoir.uploader.model.rest.Subject subjectREST,
+            Examination examination, org.shanoir.uploader.model.rest.Study study)
             throws JsonProcessingException, Exception {
         importJob.setStudyId(study.getId());
         importJob.setStudyName(study.getName());
@@ -404,14 +706,19 @@ public class ImportTests extends AbstractTest {
         importJob.setStudyCardId(studyCard.getId());
         importJob.setStudyCardName(studyCard.getName());
         importJob.setAcquisitionEquipmentId(studyCard.getAcquisitionEquipment().getId());
-        importJob.setExaminationId(examinationId);
+        importJob.setExaminationId(examination.getId());
+        importJob.setStudyInstanceUID(examination.getStudyInstanceUID());
         if (ShUpConfig.isModeSubjectNameManual()) {
             importJob.setAnonymisationProfileToUse("Profile Neurinfo");
         } else {
             importJob.setAnonymisationProfileToUse("Profile OFSEP");
         }
+        importJob.setPatient(null);
+        importJob.setStudy(null);
         String importJobJson = Util.objectWriter.writeValueAsString(importJob);
-        userClient.startImportJob(importJobJson);
+        dumpImportJobJson(importJobJson, importJob.getWorkFolder(), "testImportFromDicomZip");
+        userClient.startImportJob(importJob.getWorkFolder(), importJobJson);
+        waitForServerImportJobStatus(importJob.getWorkFolder(), "testImportFromDicomZip-before-ds");
     }
 
     /**
@@ -420,29 +727,34 @@ public class ImportTests extends AbstractTest {
      * are left {@code null} instead of being populated from a (non-existent)
      * study card.
      */
-    private void startImportJobFromZipNoStudyCard(ImportJob importJob,
+    private void startImportJobFromDicomZipNoStudyCard(ImportJobBase importJob,
             org.shanoir.uploader.model.rest.Subject subjectREST,
-            Long examinationId, org.shanoir.uploader.model.rest.Study study)
+            Examination examination, org.shanoir.uploader.model.rest.Study study, Long acquisitionEquipmentId)
             throws JsonProcessingException, Exception {
         importJob.setStudyId(study.getId());
         importJob.setStudyName(study.getName());
         importJob.setStudyCardId(null);
         importJob.setStudyCardName(null);
-        importJob.setAcquisitionEquipmentId(null);
-        importJob.setExaminationId(examinationId);
+        importJob.setAcquisitionEquipmentId(acquisitionEquipmentId);
+        importJob.setExaminationId(examination.getId());
+        importJob.setStudyInstanceUID(examination.getStudyInstanceUID());
         if (ShUpConfig.isModeSubjectNameManual()) {
             importJob.setAnonymisationProfileToUse("Profile Neurinfo");
         } else {
             importJob.setAnonymisationProfileToUse("Profile OFSEP");
         }
+        importJob.setPatient(null);
+        importJob.setStudy(null);
         String importJobJson = Util.objectWriter.writeValueAsString(importJob);
-        userClient.startImportJob(importJobJson);
+        dumpImportJobJson(importJobJson, importJob.getWorkFolder(), "testImportFromDicomZipNoStudyCard");
+        userClient.startImportJob(importJob.getWorkFolder(), importJobJson);
+        waitForServerImportJobStatus(importJob.getWorkFolder(), "testImportFromDicomZipNoStudyCard-before-ds");
     }
 
-    private org.shanoir.uploader.model.rest.Subject createSubject(ImportJob importJob,
+    private org.shanoir.uploader.model.rest.Subject createSubject(ImportJobBase importJob,
             org.shanoir.uploader.model.rest.Study study)
             throws UnsupportedEncodingException, NoSuchAlgorithmException, PseudonymusException, ParseException {
-        Patient patient = importJob.getPatients().get(0);
+        Patient patient = importJob.getPatient();
         final String randomPatientName = "Subject-" + UUID.randomUUID().toString();
         Subject subject = ImportUtils.createSubjectFromPatient(patient, pseudonymizer, identifierCalculator);
         org.shanoir.uploader.model.rest.Subject subjectREST = ImportUtils.manageSubject(
@@ -454,7 +766,7 @@ public class ImportTests extends AbstractTest {
         org.shanoir.ng.importer.model.Subject subjectForImportJob = new org.shanoir.ng.importer.model.Subject();
         subjectForImportJob.setId(subjectREST.getId());
         subjectForImportJob.setName(subjectREST.getName());
-        patient.setSubject(subjectForImportJob);
+        importJob.setSubject(subjectForImportJob);
         importJob.setSubjectName(subjectREST.getName());
         return subjectREST;
     }
@@ -465,10 +777,10 @@ public class ImportTests extends AbstractTest {
      * {@link org.shanoir.uploader.model.rest.AcquisitionEquipment}, matching
      * the "no study card" import path.
      */
-    private org.shanoir.uploader.model.rest.Subject createSubjectNoStudyCard(ImportJob importJob,
+    private org.shanoir.uploader.model.rest.Subject createSubjectNoStudyCard(ImportJobBase importJob,
             org.shanoir.uploader.model.rest.Study study)
             throws UnsupportedEncodingException, NoSuchAlgorithmException, PseudonymusException, ParseException {
-        Patient patient = importJob.getPatients().get(0);
+        Patient patient = importJob.getPatient();
         final String randomPatientName = "Subject-" + UUID.randomUUID().toString();
         Subject subject = ImportUtils.createSubjectFromPatient(patient, pseudonymizer, identifierCalculator);
         org.shanoir.uploader.model.rest.Subject subjectREST = ImportUtils.manageSubject(
@@ -479,33 +791,19 @@ public class ImportTests extends AbstractTest {
         org.shanoir.ng.importer.model.Subject subjectForImportJob = new org.shanoir.ng.importer.model.Subject();
         subjectForImportJob.setId(subjectREST.getId());
         subjectForImportJob.setName(subjectREST.getName());
-        patient.setSubject(subjectForImportJob);
+        importJob.setSubject(subjectForImportJob);
         importJob.setSubjectName(subjectREST.getName());
         return subjectREST;
     }
 
-    private void selectAllSeriesForImport(ImportJob importJob) {
-        List<Patient> patients = importJob.getPatients();
-        for (Patient patient : patients) {
-            List<org.shanoir.ng.importer.model.Study> studies = patient.getStudies();
-            for (org.shanoir.ng.importer.model.Study study : studies) {
-                List<Serie> series = study.getSeries();
-                for (Serie serie : series) {
-                    serie.setSelected(true);
-                }
-            }
+    private void selectAllSeriesForImport(ImportJobBase importJob) {
+        List<Serie> series = importJob.getSeries();
+        for (Serie serie : series) {
+            serie.setSelected(true);
         }
     }
 
-    private void selectAllSeriesForImport(Patient patient) {
-        for (org.shanoir.ng.importer.model.Study study : patient.getStudies()) {
-            for (Serie serie : study.getSeries()) {
-                serie.setSelected(true);
-            }
-        }
-    }
-
-    private ImportJob uploadDicomZip(final String fileName) {
+    private ImportJobBase uploadDicomZip(final String fileName) {
         try {
             URL resource = getClass().getClassLoader().getResource(fileName);
             if (resource != null) {
@@ -516,6 +814,138 @@ public class ImportTests extends AbstractTest {
             logger.error("Error while reading file: ", e);
         }
         return null;
+    }
+
+    private void dumpImportJobJson(String importJobJson, String workFolder, String label) {
+        try {
+            Files.createDirectories(IMPORT_JOB_DUMP_DIR.toPath());
+            String timestamp = LocalDateTime.now().format(IMPORT_JOB_DUMP_TIMESTAMP_FORMATTER);
+            String workFolderPart = (workFolder != null && !workFolder.isEmpty()) ? workFolder : "no-workfolder";
+            File dumpFile = new File(IMPORT_JOB_DUMP_DIR, timestamp + "_" + workFolderPart + "_" + label + ".json");
+            Files.writeString(dumpFile.toPath(), importJobJson, StandardCharsets.UTF_8);
+            logger.info("Dumped import-job to: {}", dumpFile.getAbsolutePath());
+        } catch (Exception e) {
+            // This is a debugging convenience only - never fail the test because of it.
+            logger.warn("Could not dump import-job for manual inspection: {}", e.getMessage());
+        }
+    }
+
+    /**
+     * Polls MS Datasets' new import-status endpoint until dataset creation
+     * for this examination is FINISHED (or fails/times out). This is
+     * necessary because dataset/acquisition creation happens asynchronously
+     * over RabbitMQ, and ExaminationApi (another microservice) has no
+     * visibility into whether that step has completed.
+     */
+    private void waitForDatasetImportFinished(Long examinationId, String label) throws Exception {
+        long deadline = System.currentTimeMillis() + DATASET_STATUS_TIMEOUT_MILLIS;
+        while (System.currentTimeMillis() < deadline) {
+            DatasetsImportStatus status = userClient.findImportStatusByExaminationId(examinationId);
+            if (status != null) {
+                if (status.getState() == DatasetsImportStatus.State.FINISHED) {
+                    logger.info("[{}] Dataset creation FINISHED for examination {}", label, examinationId);
+                    return;
+                } else if (status.getState() == DatasetsImportStatus.State.ERROR) {
+                    Assertions.fail("[" + label + "] Dataset creation failed for examination " + examinationId
+                            + ": " + status.getMessage());
+                }
+            }
+            Thread.sleep(DATASET_STATUS_POLL_INTERVAL_MILLIS);
+        }
+        Assertions.fail("[" + label + "] Dataset creation did not reach FINISHED within timeout for examination "
+                + examinationId);
+    }
+
+    /**
+     * Downloads the zip produced by POST /datasets/datasets/massiveDownload
+     * for all datasets of an examination, extracts it, and compares the
+     * DICOM files it contains (by SOPInstanceUID) against the local DICOM
+     * files used as the source of the import.
+     *
+     * @param examinationId   examination whose datasets should be checked
+     * @param localDicomFolder folder containing the original/local DICOM
+     *                         files used for this import (searched recursively)
+     * @param label           label used for logging / dumped artifact naming
+     */
+    private void downloadAndCompareDatasetsZip(Long examinationId, File localDicomFolder, String label) throws Exception {
+        waitForDatasetImportFinished(examinationId, label);
+
+        List<DatasetLight> datasets = userClient.findDatasetsByExaminationId(examinationId);
+        Assertions.assertNotNull(datasets, "[" + label + "] findDatasetsByExaminationId returned null.");
+        Assertions.assertFalse(datasets.isEmpty(),
+                "[" + label + "] No datasets found for examination " + examinationId + ".");
+        List<Long> datasetIds = datasets.stream().map(DatasetLight::getId).toList();
+
+        File downloadedZip = File.createTempFile("shanoir-massive-download-" + examinationId + "-", ".zip");
+        try (CloseableHttpResponse response = userClient.downloadDatasetsByIds(datasetIds, "dcm")) {
+            Assertions.assertNotNull(response, "[" + label + "] massiveDownload returned no response.");
+            HttpEntity entity = response.getEntity();
+            Assertions.assertNotNull(entity, "[" + label + "] massiveDownload returned no entity.");
+            try (var out = new java.io.FileOutputStream(downloadedZip)) {
+                entity.writeTo(out);
+            }
+        }
+        Assertions.assertTrue(downloadedZip.length() > 0,
+                "[" + label + "] Downloaded massiveDownload zip is empty.");
+
+        File extractDir = Files.createTempDirectory("shanoir-massive-download-extract-").toFile();
+        unzip(downloadedZip, extractDir);
+
+        Set<String> remoteSopInstanceUIDs = collectSopInstanceUIDs(extractDir);
+        Set<String> localSopInstanceUIDs = collectSopInstanceUIDs(localDicomFolder);
+
+        Assertions.assertFalse(remoteSopInstanceUIDs.isEmpty(),
+                "[" + label + "] No DICOM instances found in downloaded zip for examination " + examinationId + ".");
+        Assertions.assertFalse(localSopInstanceUIDs.isEmpty(),
+                "[" + label + "] No local DICOM instances found to compare against for examination " + examinationId + ".");
+
+        Assertions.assertEquals(localSopInstanceUIDs, remoteSopInstanceUIDs,
+                "[" + label + "] SOPInstanceUIDs of downloaded datasets (" + remoteSopInstanceUIDs.size()
+                        + ") do not match local DICOM files (" + localSopInstanceUIDs.size()
+                        + ") for examination " + examinationId + ".");
+
+        logger.info("[{}] massiveDownload check OK: {} DICOM instance(s) matched for examination {}.",
+                label, remoteSopInstanceUIDs.size(), examinationId);
+    }
+
+    private void unzip(File zipFile, File targetDir) throws IOException {
+        try (ZipInputStream zis = new ZipInputStream(new java.io.FileInputStream(zipFile))) {
+            ZipEntry entry;
+            while ((entry = zis.getNextEntry()) != null) {
+                File outFile = new File(targetDir, entry.getName());
+                if (entry.isDirectory()) {
+                    outFile.mkdirs();
+                    continue;
+                }
+                outFile.getParentFile().mkdirs();
+                try (var out = new java.io.FileOutputStream(outFile)) {
+                    zis.transferTo(out);
+                }
+            }
+        }
+    }
+
+    /**
+     * Recursively walks a folder, tries to read every regular file as DICOM,
+     * and collects the SOPInstanceUID of each one that parses successfully.
+     * Non-DICOM files (manifests, json reports, etc.) are silently skipped.
+     */
+    private Set<String> collectSopInstanceUIDs(File folder) throws IOException {
+        Set<String> uids = new HashSet<>();
+        try (var stream = Files.walk(folder.toPath())) {
+            for (java.nio.file.Path path : (Iterable<java.nio.file.Path>) stream.filter(Files::isRegularFile)::iterator) {
+                try (DicomInputStream dis = new DicomInputStream(path.toFile())) {
+                    Attributes attrs = dis.readDataset();
+                    String sopInstanceUID = attrs.getString(Tag.SOPInstanceUID);
+                    if (sopInstanceUID != null) {
+                        uids.add(sopInstanceUID);
+                    }
+                } catch (Exception notDicomOrUnreadable) {
+                    // expected for non-DICOM files in the zip/folder (manifest, json, etc.)
+                }
+            }
+        }
+        return uids;
     }
 
 }

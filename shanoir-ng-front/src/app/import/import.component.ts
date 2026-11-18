@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterOutlet } from '@angular/router';
 
@@ -26,6 +26,7 @@ export type ImportMode = 'DICOM' | 'PACS' | 'EEG' | 'BRUKER' | 'BIDS' | 'Process
     selector: 'imports',
     templateUrl: 'import.component.html',
     styleUrls: ['import.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [FormsModule, RouterOutlet]
 })
 export class ImportComponent {

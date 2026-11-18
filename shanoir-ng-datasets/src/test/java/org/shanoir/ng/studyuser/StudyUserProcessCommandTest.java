@@ -16,7 +16,6 @@ package org.shanoir.ng.studyuser;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
@@ -43,9 +42,6 @@ public class StudyUserProcessCommandTest {
 
     @MockBean
     private StudyUserRightsRepository studyUserRepository;
-
-    @MockBean
-    private StudyInstanceUIDAndSubjectNameHandler studyInstanceUIDHandler;
 
     @Test
     public void processCommandsTest() {

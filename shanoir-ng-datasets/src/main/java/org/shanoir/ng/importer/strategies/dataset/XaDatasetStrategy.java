@@ -31,6 +31,7 @@ import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.importer.strategies.datasetexpression.DatasetExpressionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class XaDatasetStrategy implements DatasetStrategy<XaDataset> {
@@ -68,6 +69,7 @@ public class XaDatasetStrategy implements DatasetStrategy<XaDataset> {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public XaDataset generateSingleDataset(Attributes attributes, Serie serie, Dataset dataset, int datasetIndex,
             Long subjectId) throws Exception {
         XaDataset xaDataset = new XaDataset();
@@ -111,11 +113,13 @@ public class XaDatasetStrategy implements DatasetStrategy<XaDataset> {
          *  The DatasetExpressionFactory will return the proper object according to the expression format type and add it to the current ctDataset
          *
          **/
-        for (ExpressionFormat expressionFormat : dataset.getExpressionFormats()) {
-            datasetExpressionContext.setDatasetExpressionStrategy(expressionFormat.getType());
-            DatasetExpression datasetExpression = datasetExpressionContext.generateDatasetExpression(serie, expressionFormat);
-            datasetExpression.setDataset(xaDataset);
-            xaDataset.getDatasetExpressions().add(datasetExpression);
+        if (dataset.getExpressionFormats() != null) {
+            for (ExpressionFormat expressionFormat : dataset.getExpressionFormats()) {
+                datasetExpressionContext.setDatasetExpressionStrategy(expressionFormat.getType());
+                DatasetExpression datasetExpression = datasetExpressionContext.generateDatasetExpression(serie, expressionFormat);
+                datasetExpression.setDataset(xaDataset);
+                xaDataset.getDatasetExpressions().add(datasetExpression);
+            }
         }
 
         DatasetMetadata originalDM = xaDataset.getOriginMetadata();

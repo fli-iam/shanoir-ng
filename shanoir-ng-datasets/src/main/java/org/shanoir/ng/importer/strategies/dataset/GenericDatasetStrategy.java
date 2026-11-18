@@ -30,6 +30,7 @@ import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.importer.strategies.datasetexpression.DatasetExpressionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class GenericDatasetStrategy implements DatasetStrategy<GenericDataset> {
@@ -66,6 +67,7 @@ public class GenericDatasetStrategy implements DatasetStrategy<GenericDataset> {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public GenericDataset generateSingleDataset(Attributes attributes, Serie serie, Dataset dataset,
             int datasetIndex, Long subjectId) throws Exception {
         GenericDataset genericDataset = new GenericDataset();
@@ -110,11 +112,13 @@ public class GenericDatasetStrategy implements DatasetStrategy<GenericDataset> {
          *  The DatasetExpressionFactory will return the proper object according to the expression format type and add it to the current ctDataset
          *
          **/
-        for (ExpressionFormat expressionFormat : dataset.getExpressionFormats()) {
-            datasetExpressionContext.setDatasetExpressionStrategy(expressionFormat.getType());
-            DatasetExpression datasetExpression = datasetExpressionContext.generateDatasetExpression(serie, expressionFormat);
-            datasetExpression.setDataset(genericDataset);
-            genericDataset.getDatasetExpressions().add(datasetExpression);
+        if (dataset.getExpressionFormats() != null) {
+            for (ExpressionFormat expressionFormat : dataset.getExpressionFormats()) {
+                datasetExpressionContext.setDatasetExpressionStrategy(expressionFormat.getType());
+                DatasetExpression datasetExpression = datasetExpressionContext.generateDatasetExpression(serie, expressionFormat);
+                datasetExpression.setDataset(genericDataset);
+                genericDataset.getDatasetExpressions().add(datasetExpression);
+            }
         }
 
         DatasetMetadata originalDM = genericDataset.getOriginMetadata();

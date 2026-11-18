@@ -76,6 +76,7 @@ import { ReferencesListComponent } from './preclinical/reference/list/reference-
 import { SubjectTherapyComponent } from './preclinical/therapies/subjectTherapy/edit/subject-therapy.component';
 import { TherapyFormComponent } from './preclinical/therapies/therapy/edit/therapy-form.component';
 import { TherapiesListComponent } from './preclinical/therapies/therapy/list/therapy-list.component';
+import { SendEmailComponent } from './users/mass-email/send-email.component';
 import { AuthAdminGuard } from './shared/roles/auth-admin-guard';
 import { AuthAdminOrExpertGuard } from './shared/roles/auth-admin-or-expert-guard';
 import { CanImportFromPACSGuard } from './shared/roles/auth-can-import-from-PACS-guard';
@@ -249,6 +250,10 @@ const routes: Routes = [
         path: 'download-statistics',
         component: DownloadStatisticsComponent
     },{
+        path: 'send-email',
+        component: SendEmailComponent,
+        canActivate: [AuthAdminGuard]
+    },{
         path: 'study',
         redirectTo: 'study/list',
     },
@@ -290,7 +295,6 @@ const routes: Routes = [
         path: 'subject/edit/:id',
         component: SubjectComponent,
         data: { mode: 'edit' },
-        canActivate: [AuthAdminOrExpertGuard],
     },
     {
         path: 'subject/create',
@@ -630,7 +634,6 @@ const routes: Routes = [
 		path: 'dataset-acquisition/edit/:id',
 		component: DatasetAcquisitionComponent,
 		data: { mode: 'edit' },
-		canActivate: [AuthAdminOrExpertGuard],
 	},
 	{
 		path: 'dataset-acquisition/create',

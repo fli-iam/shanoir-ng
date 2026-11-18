@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, ChangeDetectionStrategy } from '@angular/core';
 
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 
@@ -21,6 +21,7 @@ import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
     selector: 'help-message',
     templateUrl: 'help-message.component.html',
     styleUrls: ['help-message.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: []
 })
 export class HelpMessageComponent implements OnInit {

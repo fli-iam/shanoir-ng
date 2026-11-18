@@ -91,6 +91,7 @@ public class SolrJWrapperImpl implements SolrJWrapper {
     private static final String PROCESSED_FACET = "processed";
     private static final String IMPORT_DATE_FACET = "importDate";
     private static final String USERNAME_IMPORT_FACET = "username";
+    private static final String QUALITY_TAG_FACET = "qualityTag";
     private static final String UNKNOWN = "<none>";
 
     private static final String[] DOCUMENT_FACET_LIST = {
@@ -119,7 +120,8 @@ public class SolrJWrapperImpl implements SolrJWrapper {
             TAGS_FACET,
             PROCESSED_FACET,
             IMPORT_DATE_FACET,
-            USERNAME_IMPORT_FACET
+            USERNAME_IMPORT_FACET,
+            QUALITY_TAG_FACET
     };
 
     private static final String[] TEXTUAL_FACET_LIST = {
@@ -134,7 +136,8 @@ public class SolrJWrapperImpl implements SolrJWrapper {
             CENTER_NAME_FACET,
             TAGS_FACET,
             PROCESSED_FACET,
-            DATA_REUSE_AGREEMENT_FACET
+            DATA_REUSE_AGREEMENT_FACET,
+            QUALITY_TAG_FACET
     };
 
     @Autowired
@@ -142,27 +145,22 @@ public class SolrJWrapperImpl implements SolrJWrapper {
 
     public void addToIndex(final ShanoirSolrDocument document) throws SolrServerException, IOException {
         solrClient.addBean(document);
-        solrClient.commit();
     }
 
     public void addAllToIndex(final List<ShanoirSolrDocument> documents) throws SolrServerException, IOException {
         solrClient.addBeans(documents);
-        solrClient.commit();
     }
 
     public void deleteFromIndex(Long datasetId) throws SolrServerException, IOException {
         solrClient.deleteById(Long.toString(datasetId));
-        solrClient.commit();
     }
 
     public void deleteFromIndex(List<Long> datasetIds) throws SolrServerException, IOException {
-        solrClient.deleteById(datasetIds.stream().map(String::valueOf).collect(Collectors.toList()), 0);
-        solrClient.commit();
+        solrClient.deleteById(datasetIds.stream().map(String::valueOf).collect(Collectors.toList()));
     }
 
     public void deleteAll() throws SolrServerException, IOException {
         solrClient.deleteByQuery("*:*");
-        solrClient.commit();
     }
 
     public SolrResultPage<ShanoirSolrDocument> findByFacetCriteriaForAdmin(ShanoirSolrQuery facet, Pageable pageable) throws RestServiceException {
@@ -224,6 +222,10 @@ public class SolrJWrapperImpl implements SolrJWrapper {
 
     public Page<ShanoirSolrDocument> findByStudyIdInAndDatasetIdIn(Map<Long, List<String>> studiesCenter, Collection<Long> datasetIds,
             Pageable pageable) throws RestServiceException {
+        // An empty study filter would produce an empty fq, which Solr ignores: return nothing instead
+        if (studiesCenter == null || studiesCenter.isEmpty()) {
+            return new SolrResultPage<>(new ArrayList<>());
+        }
         final SolrQuery query = new SolrQuery();
         filterByDatasetIds(datasetIds, query);
         addFilterQueryForCenterStudy(query, studiesCenter);
@@ -506,6 +508,7 @@ public class SolrJWrapperImpl implements SolrJWrapper {
         addFilterQuery(query, DATASET_NATURE_FACET, shanoirQuery.getDatasetNature());
         addFilterQuery(query, CENTER_NAME_FACET, shanoirQuery.getCenterName());
         addFilterQuery(query, TAGS_FACET, shanoirQuery.getTags());
+        addFilterQuery(query, QUALITY_TAG_FACET, shanoirQuery.getQualityTag());
         addFilterQueryFromBoolean(query, PROCESSED_FACET, shanoirQuery.getProcessed());
         addFilterQueryFromBoolean(query, DATA_REUSE_AGREEMENT_FACET, shanoirQuery.getDataReuseAgreement());
         addFilterQueryFromRange(query, SLICE_THICKNESS_FACET, shanoirQuery.getSliceThickness());
@@ -561,6 +564,7 @@ public class SolrJWrapperImpl implements SolrJWrapper {
             solrDoc.setDataReuseAgreement((Boolean) document.getFirstValue("dataReuseAgreement"));
             solrDoc.setImportDate((Date) document.getFirstValue("importDate"));
             solrDoc.setUsername((String) document.getFirstValue("username"));
+            solrDoc.setQualityTag((String) document.getFirstValue("qualityTag"));
             solrDocuments.add(solrDoc);
         }
         SolrResultPage<ShanoirSolrDocument> page = new SolrResultPage<>(solrDocuments, pageable, documents.getNumFound(), null);

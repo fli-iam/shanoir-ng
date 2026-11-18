@@ -1,0 +1,12 @@
+{
+    "reflection": [
+        {
+            "type": "java.lang.Long",
+            "fields": [
+                {
+                    "name": "serialVersionUID"
+                }
+            ]
+        }
+    ]
+}

@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, Output, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { FormGroup, FormsModule } from '@angular/forms';
 
 import { Mode } from '../../shared/components/entity/entity.component.abstract';
@@ -29,6 +29,7 @@ import { StudyCardConditionComponent } from './condition/condition.component';
     selector: 'quality-card-rule',
     templateUrl: 'quality-card-rule.component.html',
     styleUrls: ['study-card-rule.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [StudyCardConditionComponent, ToggleSwitchComponent, FormsModule, SelectBoxComponent]
 })
 export class QualityCardRuleComponent implements OnChanges {
@@ -48,7 +49,7 @@ export class QualityCardRuleComponent implements OnChanges {
             new Option('WARNING', 'Warning', undefined, 'chocolate', 'fa-solid fa-triangle-exclamation'), 
             new Option('ERROR', 'Error', undefined, 'red', 'fa-solid fa-times-circle')];
     conditionFieldOptions: Option<string>[];
-    @Input() addSubForm: (subForm: FormGroup) => FormGroup;
+    @Input() addSubForm: (subForm: FormGroup, previousForm?: FormGroup) => FormGroup;
 
     constructor(public elementRef: ElementRef) { }
 
@@ -69,7 +70,7 @@ export class QualityCardRuleComponent implements OnChanges {
     }
 
     addNewCondition() {
-        const cond = new StudyCardCondition('ExamDICOMConditionOnDatasets');
+        const cond = new StudyCardCondition('AcqDICOMConditionOnDatasets');
         cond.values = [null];
         this.rule.conditions.push(cond);
         this.userChange.emit(this.rule);

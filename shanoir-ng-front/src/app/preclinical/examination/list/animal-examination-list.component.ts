@@ -11,9 +11,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import {Component, ViewChild} from '@angular/core'
+import {Component, ViewChild, ChangeDetectionStrategy} from '@angular/core'
 
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
 
 import { Examination } from '../../../examinations/shared/examination.model';
 import { ExaminationAnestheticService } from '../../anesthetics/examination_anesthetic/shared/examinationAnesthetic.service';
@@ -30,6 +30,7 @@ import { StudyUserRight } from '../../../studies/shared/study-user-right.enum';
 @Component({
     selector: 'animal-examination-list',
     templateUrl: 'animal-examination-list.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [TableComponent]
 })
 export class AnimalExaminationListComponent extends EntityListComponent<Examination>{

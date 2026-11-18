@@ -22,6 +22,7 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
 import org.shanoir.ng.processing.model.DatasetProcessing;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.springframework.http.ResponseEntity;
@@ -114,7 +115,7 @@ public interface DatasetProcessingApi {
             @ApiResponse(responseCode = "500", description = "unexpected error")})
     @GetMapping(value = "/{datasetProcessingId}/inputDatasets/", produces = {"application/json"})
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    ResponseEntity<List<DatasetDTO>> getInputDatasets(@Parameter(description = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId);
+    ResponseEntity<List<DatasetDTO>> getInputDatasets(@Parameter(description = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId) throws EntityNotFoundException;
 
     @Operation(summary = "", description = "Returns the output datasets of a processing")
     @ApiResponses(value = {
@@ -125,7 +126,7 @@ public interface DatasetProcessingApi {
             @ApiResponse(responseCode = "500", description = "unexpected error")})
     @GetMapping(value = "/{datasetProcessingId}/outputDatasets/", produces = {"application/json"})
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    ResponseEntity<List<DatasetDTO>> getOutputDatasets(@Parameter(description = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId);
+    ResponseEntity<List<DatasetDTO>> getOutputDatasets(@Parameter(description = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId) throws EntityNotFoundException;
 
     @Operation(summary = "", description = "Saves a new dataset processing")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "created dataset processing"),
@@ -137,7 +138,7 @@ public interface DatasetProcessingApi {
             "application/json"})
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER') and !@datasetSecurityService.isDraftStudy(#datasetProcessing.getStudyId())")
     ResponseEntity<DatasetProcessingDTO> saveNewDatasetProcessing(@Parameter(description = "dataset processing to create", required = true) @Valid @RequestBody DatasetProcessing datasetProcessing,
-                                                                  BindingResult result) throws RestServiceException;
+                                                                  BindingResult result) throws RestServiceException, EntityNotFoundException;
 
     @Operation(summary = "", description = "Updates a dataset processing")
     @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "dataset processing updated"),
@@ -151,7 +152,7 @@ public interface DatasetProcessingApi {
     ResponseEntity<Void> updateDatasetProcessing(
             @Parameter(description = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId,
             @Parameter(description = "dataset processing to update", required = true) @Valid @RequestBody DatasetProcessing datasetProcessing, BindingResult result)
-            throws RestServiceException;
+            throws RestServiceException, EntityNotFoundException;
 
     @Operation(summary = "massiveDownloadByProcessingIds", description = "If exists, returns a zip file of the inputs/outputs per processing corresponding to the given processing IDs.  Datas are in the http response body, it must be written in a zip file. Datas are sorted with folders according to their respective examination and processing.")
     @ApiResponses(value = {

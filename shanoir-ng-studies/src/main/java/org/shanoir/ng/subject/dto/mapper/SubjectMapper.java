@@ -25,7 +25,6 @@ import org.mapstruct.Named;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.shanoir.ng.subject.dto.SubjectDTO;
 import org.shanoir.ng.subject.model.Subject;
-import org.shanoir.ng.subjectstudy.dto.mapper.SubjectStudyMapper;
 import org.springframework.data.domain.Page;
 
 /**
@@ -34,7 +33,7 @@ import org.springframework.data.domain.Page;
  * @author msimon
  *
  */
-@Mapper(componentModel = "spring", uses = { SubjectStudyMapper.class })
+@Mapper(componentModel = "spring")
 @DecoratedWith(SubjectDecorator.class)
 public interface SubjectMapper {
 

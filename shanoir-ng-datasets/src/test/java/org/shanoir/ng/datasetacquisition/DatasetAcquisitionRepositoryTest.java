@@ -15,12 +15,14 @@
 package org.shanoir.ng.datasetacquisition;
 
 import org.junit.jupiter.api.Test;
+import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
 import org.shanoir.ng.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -52,6 +54,12 @@ public class DatasetAcquisitionRepositoryTest {
 
     @Autowired
     private DatasetAcquisitionRepository repository;
+
+    @Autowired
+    private DatasetRepository datasetRepository;
+
+    @Autowired
+    private TestEntityManager entityManager;
 
     @Test
     public void findAllTest() throws Exception {
@@ -90,5 +98,23 @@ public class DatasetAcquisitionRepositoryTest {
         assertEquals("Pet", list.get(1).getType());
         assertEquals("Ct", list.get(2).getType());
 
+    }
+
+    @Test
+    public void findEmptyTest() throws Exception {
+        // every acquisition of the test data holds a dataset
+        assertThat(repository.findEmpty()).isEmpty();
+
+        // the acquisition n° 3 belongs to the examination n° 3, of the study n° 3
+        datasetRepository.deleteById(3L);
+        entityManager.flush();
+        entityManager.clear();
+
+        List<DatasetAcquisition> emptyDb = repository.findEmpty();
+        assertThat(emptyDb.size()).isEqualTo(1);
+        assertEquals(Long.valueOf(3L), emptyDb.get(0).getId());
+
+        assertThat(repository.findEmptyByStudyId(3L).size()).isEqualTo(1);
+        assertThat(repository.findEmptyByStudyId(1L)).isEmpty();
     }
 }

@@ -52,7 +52,8 @@ public class DatasetAcquisitionRule extends StudyCardRule<DatasetAcquisition> {
             } else if (condition instanceof AcqMetadataCondOnAcq) {
                 fulfilled &= ((AcqMetadataCondOnAcq) condition).fulfilled(acquisition);
             } else if (condition instanceof AcqMetadataCondOnDatasets) {
-                fulfilled &= ((AcqMetadataCondOnDatasets) condition).fulfilled(acquisition.getDatasets());
+                // report is set to null here because study cards are not used to generate reports
+                fulfilled &= ((AcqMetadataCondOnDatasets) condition).fulfilled(acquisition.getDatasets(), null);
             } else {
                 throw new IllegalStateException("There might be an unimplemented condition type here. Condition class : " + condition.getClass());
             }

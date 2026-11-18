@@ -46,4 +46,12 @@ public enum QualityTag {
         throw new IllegalArgumentException("No matching calibration dataset type for id " + id);
     }
 
+    /**
+     * @param other the tag currently applied, may be null (no tag applied yet).
+     * @return true if this tag is worse (ERROR > WARNING > VALID) than other, or other is null.
+     */
+    public boolean isMoreSevereThan(QualityTag other) {
+        return other == null || this.id > other.id;
+    }
+
 }

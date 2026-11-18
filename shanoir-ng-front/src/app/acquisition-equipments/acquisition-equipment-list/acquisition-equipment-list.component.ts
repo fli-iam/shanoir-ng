@@ -12,9 +12,9 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ViewChild, ViewContainerRef } from '@angular/core';
+import { Component, ViewChild, ViewContainerRef, ChangeDetectionStrategy } from '@angular/core';
 
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
 
 import { Step } from '../../breadcrumbs/breadcrumbs.service';
 import { BrowserPaginEntityListComponent } from '../../shared/components/entity/entity-list.browser.component.abstract';
@@ -27,6 +27,7 @@ import { AcquisitionEquipmentService } from '../shared/acquisition-equipment.ser
 @Component({
     selector: 'acquisition-equipment-list',
     templateUrl: 'acquisition-equipment-list.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [TableComponent]
 })
 

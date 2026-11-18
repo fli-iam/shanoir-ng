@@ -46,12 +46,12 @@ public class ExecutionTemplateApiController implements ExecutionTemplateApi {
     private ExecutionTemplateService service;
 
     public ResponseEntity<List<ExecutionTemplateDTO>> getExecutionTemplatesByStudyId(@Parameter(description = "The study Id", required = true) @PathVariable("studyId") Long studyId) {
-        List<ExecutionTemplate> executions = repository.findByStudyId(studyId);
-        return new ResponseEntity<>(mapper.executionTemplatesToDTOs(executions), HttpStatus.OK);
+        List<ExecutionTemplate> executions = repository.findByStudyIdWithStudy(studyId);
+        return new ResponseEntity<>(mapper.executionTemplateListToDTOListWithStudy(executions), HttpStatus.OK);
     }
 
     public ResponseEntity<ExecutionTemplateDTO> saveNewExecutionTemplate(@Parameter(description = "The execution template to create", required = true) @RequestBody ExecutionTemplateDTO executionTemplateDTO) {
-        return new ResponseEntity<>(mapper.executionTemplateToDTO(repository.save(mapper.executionTemplateDTOToEntity(executionTemplateDTO))), HttpStatus.OK);
+        return new ResponseEntity<>(mapper.executionTemplateToDTOWithIdRelations(repository.save(mapper.executionTemplateDTOToEntity(executionTemplateDTO))), HttpStatus.OK);
     }
 
     public ResponseEntity<Void> deleteExecutionTemplate(@Parameter(description = "The execution template Id", required = true) @PathVariable("executionTemplateId") Long executionTemplateId) {
@@ -60,11 +60,10 @@ public class ExecutionTemplateApiController implements ExecutionTemplateApi {
     }
 
     public ResponseEntity<ExecutionTemplateDTO> getExecutionTemplateById(@Parameter(description = "The execution template Id", required = true) @PathVariable("executionTemplateId") Long executionTemplateId) {
-        return new ResponseEntity<>(mapper.executionTemplateToDTO(repository.findById(executionTemplateId).orElse(null)), HttpStatus.OK);
+        return new ResponseEntity<>(mapper.executionTemplateToDTOWithIdRelations(repository.findById(executionTemplateId).orElse(null)), HttpStatus.OK);
     }
 
-    public ResponseEntity<ExecutionTemplateDTO> updateExecutionTemplate(@Parameter(description = "The execution template updated", required = true) ExecutionTemplateDTO executionTemplateDTO,
-                                                                        @Parameter(description = "The execution template Id", required = true) @PathVariable("parameterId") Long parameterId) {
-        return new ResponseEntity<>(mapper.executionTemplateToDTO(repository.save(service.update(mapper.executionTemplateDTOToEntity(executionTemplateDTO)))), HttpStatus.OK);
+    public ResponseEntity<ExecutionTemplateDTO> updateExecutionTemplate(@Parameter(description = "The execution template updated", required = true) ExecutionTemplateDTO executionTemplateDTO) {
+        return new ResponseEntity<>(mapper.executionTemplateToDTOWithIdRelations(repository.save(service.update(mapper.executionTemplateDTOToEntity(executionTemplateDTO)))), HttpStatus.OK);
     }
 }

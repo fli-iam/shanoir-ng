@@ -16,7 +16,9 @@ package org.shanoir.ng.dicom;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
 import java.util.HashSet;
 import java.util.Set;
@@ -27,12 +29,10 @@ import org.dcm4che3.data.Tag;
 import org.dcm4che3.io.DicomInputStream;
 import org.shanoir.ng.anonymization.uid.generation.UIDGeneration;
 import org.shanoir.ng.download.AcquisitionAttributes;
-import org.shanoir.ng.download.ExaminationAttributes;
 import org.shanoir.ng.importer.dto.Dataset;
 import org.shanoir.ng.importer.dto.DatasetFile;
 import org.shanoir.ng.importer.dto.ExpressionFormat;
 import org.shanoir.ng.importer.dto.Serie;
-import org.shanoir.ng.importer.dto.Study;
 import org.shanoir.ng.shared.dateTime.DateTimeUtils;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.slf4j.Logger;
@@ -42,7 +42,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 @Service
-public class DicomProcessing {
+public final class DicomProcessing {
 
     private static final Logger LOG = LoggerFactory.getLogger(DicomProcessing.class);
 
@@ -50,6 +50,8 @@ public class DicomProcessing {
 
     @Autowired
     private static WADOURLHandler wadoURLHandler;
+
+    private DicomProcessing() { }
 
     public static int countUniqueInstances(Serie serie, Boolean isEnhancedMR) throws IOException {
         Set<String> instanceUIDs = new HashSet<>();
@@ -68,7 +70,17 @@ public class DicomProcessing {
     public static LocalDateTime parseAcquisitionStartTime(String acqDate, String acqTime) {
         if (acqDate != null && acqTime != null) {
             try {
-                return LocalDateTime.of(DateTimeUtils.pacsStringToLocalDate(acqDate), DateTimeUtils.stringToLocalTime(acqTime));
+                /**
+                 * Both helpers return null for an empty value: a DICOM date/time tag can be
+                 * present but empty (type 2). Check before LocalDateTime.of, that throws a
+                 * NullPointerException on a null argument and would fail the entire import.
+                 */
+                LocalDate localDate = DateTimeUtils.pacsStringToLocalDate(acqDate);
+                LocalTime localTime = DateTimeUtils.stringToLocalTime(acqTime);
+                if (localDate == null || localTime == null) {
+                    return null;
+                }
+                return LocalDateTime.of(localDate, localTime);
             } catch (DateTimeParseException e) {
                 LOG.warn("could not parse the acquisition date : " + acqDate + " and time : " + acqTime);
                 return null;
@@ -76,6 +88,32 @@ public class DicomProcessing {
         } else {
             return null;
         }
+    }
+
+    /**
+     * Parse acquisition start time for RT IODs (RTSTRUCT, RTDOSE, RTPLAN). Those often
+     * lack AcquisitionDate/AcquisitionTime; fall back to the closest equivalent timestamps.
+     *
+     * @param attributes DICOM attributes of the serie
+     * @param modality   serie modality (RTSTRUCT, RTDOSE or RTPLAN)
+     * @return the acquisition start time, or null if none could be determined
+     */
+    public static LocalDateTime parseRtAcquisitionStartTime(Attributes attributes, String modality) {
+        LocalDateTime acquisitionStartTime = parseAcquisitionStartTime(
+                attributes.getString(Tag.AcquisitionDate), attributes.getString(Tag.AcquisitionTime));
+        if (acquisitionStartTime == null && "RTSTRUCT".equals(modality)) {
+            acquisitionStartTime = parseAcquisitionStartTime(
+                    attributes.getString(Tag.StructureSetDate), attributes.getString(Tag.StructureSetTime));
+        }
+        if (acquisitionStartTime == null) {
+            acquisitionStartTime = parseAcquisitionStartTime(
+                    attributes.getString(Tag.ContentDate), attributes.getString(Tag.ContentTime));
+        }
+        if (acquisitionStartTime == null) {
+            acquisitionStartTime = parseAcquisitionStartTime(
+                    attributes.getString(Tag.SeriesDate), attributes.getString(Tag.SeriesTime));
+        }
+        return acquisitionStartTime;
     }
 
     public static Attributes getDicomObjectAttributes(DatasetFile image, Boolean isEnhancedMR) throws IOException {
@@ -91,26 +129,6 @@ public class DicomProcessing {
             }
             return datasetAttributes;
         }
-    }
-
-    public ExaminationAttributes<String> getDicomExaminationAttributes(Study study, Boolean isEnhanced) throws ShanoirException {
-        ExaminationAttributes<String> attributes = new ExaminationAttributes<>(wadoURLHandler);
-        if (study != null) {
-            for (Serie serie : study.getSeries()) {
-                attributes.addAcquisitionAttributes(serie.getSeriesInstanceUID(), getDicomAcquisitionAttributes(serie));
-            }
-        }
-        return attributes;
-    }
-
-    public static ExaminationAttributes<String> getDicomExaminationAttributes(Study study) throws ShanoirException {
-        ExaminationAttributes<String> attributes = new ExaminationAttributes<>(wadoURLHandler);
-        if (study != null) {
-            for (Serie serie : study.getSeries()) {
-                attributes.addAcquisitionAttributes(serie.getSeriesInstanceUID(), getDicomAcquisitionAttributes(serie));
-            }
-        }
-        return attributes;
     }
 
     public static AcquisitionAttributes<String> getDicomAcquisitionAttributes(Serie serie) throws ShanoirException {
@@ -129,7 +147,7 @@ public class DicomProcessing {
                 try {
                     attributes.addDatasetAttributes(dataset.getFirstImageSOPInstanceUID(), getDicomObjectAttributes(serie.getFirstDatasetFileForCurrentSerie(), serie.getIsEnhanced()));
                 } catch (IOException e) {
-                    throw new ShanoirException("Could not read dicom metadata from file for serie " + serie.getSopClassUID(), e);
+                    throw new ShanoirException("Could not read dicom metadata from file for serie " + serie.getSeriesInstanceUID(), e);
                 }
             }
         }

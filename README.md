@@ -86,7 +86,7 @@ Then the shanoir-downloader project can be simply managed as a normal git repo (
     
     
 * Add this line to C:\Windows\System32\drivers\etc\hosts :
-    127.0.0.1 shanoir-ng-nginx viewer
+    127.0.0.1 shanoir-ng-nginx viewer videpe
     
 * Fork GitHub project
 * Clone
@@ -117,7 +117,7 @@ Keycloak : https://shanoir-ng-nginx/auth/admin/master/console/#/realms/shanoir-n
 * Make sur docker has enough memory to run Shanoir (6Gb should be enough)
 * If you are on your **developer/local machine**:
     * Configure your local **/etc/hosts** (for windows, C:/Windows/System32/drivers/etc/hosts) and add:
-	* 127.0.0.1       shanoir-ng-nginx
+	* 127.0.0.1       shanoir-ng-nginx viewer videpe
     * For windows 7, increase your RAM and set the port redirection (8080 and 443) for the virtual box.
 * If you are on a **dedicated server** (e.g. shanoir-ng.irisa.fr):
     * By default Shanoir-NG is installed with the host shanoir-ng-nginx and the scheme http (dev setup)
@@ -173,7 +173,7 @@ Before deploying, some configuration is required:
 * add the following line in your **/etc/hosts** (so that
   https://shanoir-ng-nginx/ is reachable from your web browser):
   ```
-  127.0.0.1  shanoir-ng-nginx viewer
+  127.0.0.1  shanoir-ng-nginx viewer videpe
   ```
 * if docker is not running natively and thus you are using docker-machine
   (windows/macos users), you will need to tune the virtualbox machine:
@@ -251,7 +251,9 @@ Name                  | Value             | Description                         
 `SHANOIR_KEYCLOAK_ADAPTER_MODE` | `check-sso\|login-required` | authentication mode of the javascript adapter. `check-sso` (default) is fast but relies on a hidden iframe and tends to break when Keycloak is served from a different hostname; `login-required` redirects and is slower but reliable. |
 `SHANOIR_KEYCLOAK_API` | `limited\|full`   | which parts of the Keycloak API nginx exposes under `/auth/`. `limited` (default) exposes only what ordinary users of the `shanoir-ng` realm need; `full` also exposes the master realm and the admin console. |
 `SHANOIR_VIEWER_OHIF_URL_SCHEME`  | `http\|https`      | https (over TLS), http (plain text, NOT RECOMMENDED)                                                                                                                                |
-`SHANOIR_VIEWER_OHIF_URL_HOST`    | *hostname*         | hostname where the OHFI-Viewer is reachable                                                                                                                                         |
+`SHANOIR_VIEWER_VIDEPE_URL_SCHEME`| `http\|https`      | https (over TLS), http (plain text, NOT RECOMMENDED)                                                                                                                                |
+`SHANOIR_VIEWER_OHIF_URL_HOST`    | *hostname*         | hostname where the OHIF viewer is reachable                                                                                                                                         |
+`SHANOIR_VIEWER_VIDEPE_URL_HOST`  | *hostname*         | hostname where the VIDEPE viewer is reachable                                                                                                                                       |
 
 **Notes**
 * You must ensure that the hostname `SHANOIR_URL_HOST` can be resolved from the
@@ -260,13 +262,19 @@ Name                  | Value             | Description                         
   * in development this is achieved by:
     * adding the following line to your **/etc/hosts**
       ```
-      127.0.0.1  shanoir-ng-nginx viewer
+      127.0.0.1  shanoir-ng-nginx viewer videpe
       ```
     * ensuring that the nginx container name is equals to the value of
       `SHANOIR_URL_HOST` (in the default setup, they both use:
       `shanoir-ng-nginx`)
   * in production, you should have a the relevant A/AAAA configured in your DNS
     zone
+* The OHIF and VIDEPE viewers are each served by nginx on their own hostname
+  (`SHANOIR_VIEWER_OHIF_URL_HOST` and `SHANOIR_VIEWER_VIDEPE_URL_HOST`, `ohif`
+  and `videpe` in the default setup). Both must be resolvable from the users'
+  browsers (in development, through the **/etc/hosts** line above; in
+  production, through DNS) and covered by the TLS certificate. VIDEPE is opened
+  at `SHANOIR_VIEWER_VIDEPE_URL_SCHEME://SHANOIR_VIEWER_VIDEPE_URL_HOST/videpe/`.
 * Keycloak is addressed through two separate variables because browsers and
   containers do not reach it the same way:
   * `SHANOIR_KEYCLOAK_URL` is the **public** URL. It is handed to the browser

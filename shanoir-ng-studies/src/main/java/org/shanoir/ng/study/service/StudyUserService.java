@@ -19,6 +19,7 @@ import java.util.Map;
 
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
+import org.shanoir.ng.study.dto.IdDate;
 import org.shanoir.ng.study.model.StudyUser;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -70,5 +71,8 @@ public interface StudyUserService {
      * @throws AmqpRejectAndDontRequeueException
      */
     void deleteUser(String eventAsString) throws AmqpRejectAndDontRequeueException;
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    List<IdDate> getUserExpirationDates();
 
 }

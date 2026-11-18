@@ -26,11 +26,13 @@ import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.quality.SubjectQualityTagDTO;
 import org.shanoir.ng.shared.repository.SubjectRepository;
+import org.shanoir.ng.tag.model.Tag;
 import org.shanoir.ng.utils.Utils;
 import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -116,6 +118,25 @@ public class SubjectService {
 
     public Subject save(Subject subject) {
         return subjectRepository.save(subject);
+    }
+
+    /**
+     * Deletes the subject and its tag links from the datasets database.
+     *
+     * @param subjectId the id of the subject to delete
+     */
+    @Transactional
+    public void delete(Long subjectId) {
+        Subject subject = subjectRepository.findById(subjectId).orElse(null);
+        if (subject == null) {
+            return;
+        }
+        for (Tag tag : subject.getTags()) {
+            tag.getSubjects().remove(subject);
+        }
+        subject.getTags().clear();
+        subjectRepository.save(subject);
+        subjectRepository.delete(subject);
     }
 
 }

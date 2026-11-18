@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
@@ -23,6 +23,7 @@ import { ImagedObjectCategory } from '../../subjects/shared/imaged-object-catego
 import { SimpleSubject, Subject } from '../../subjects/shared/subject.model';
 import { AbstractClinicalContextComponent } from '../clinical-context/clinical-context.abstract.component';
 import { EquipmentDicom, ImportJob, PatientDicom, SerieDicom, StudyDicom } from '../shared/dicom-data.model';
+import { resolveExaminationCommentFromDicom, resolveExaminationDateFromDicom } from '../shared/dicom-examination-metadata.util';
 import { TooltipComponent } from '../../shared/components/tooltip/tooltip.component';
 import { SelectBoxComponent } from '../../shared/select/select.component';
 
@@ -30,6 +31,7 @@ import { SelectBoxComponent } from '../../shared/select/select.component';
     selector: 'clinical-context',
     templateUrl: '../clinical-context/clinical-context.component.html',
     styleUrls: ['../clinical-context/clinical-context.component.css', '../shared/import.step.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [TooltipComponent, SelectBoxComponent, FormsModule]
 })
 export class BasicClinicalContextComponent extends AbstractClinicalContextComponent {
@@ -129,8 +131,10 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
         newExam.subject = new Subject();
         newExam.subject.id = this.subject.id;
         newExam.subject.name = this.subject.name;
-        newExam.examinationDate = this.getFirstSelectedSerie()?.seriesDate ? new Date(this.getFirstSelectedSerie()?.seriesDate) : null;
-        newExam.comment = this.getFirstSelectedStudy()?.studyDescription;
+        const study = this.getFirstSelectedStudy();
+        const serie = this.getFirstSelectedSerie();
+        newExam.examinationDate = resolveExaminationDateFromDicom(study, serie);
+        newExam.comment = resolveExaminationCommentFromDicom(study);
         newExam.weightUnitOfMeasure = UnitOfMeasure.KG;
         return newExam;
     }

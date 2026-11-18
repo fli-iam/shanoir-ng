@@ -17,13 +17,13 @@ package org.shanoir.ng.bids.service;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
-import org.joda.time.DurationFieldType;
-import org.joda.time.LocalDate;
-import org.joda.time.Years;
 import org.shanoir.ng.storage.StorageService;
 import org.shanoir.ng.study.dto.DatasetDescription;
 import org.shanoir.ng.study.model.Study;
@@ -34,15 +34,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 @Service
 public class BIDSServiceImpl implements BIDSService {
 
@@ -83,69 +78,51 @@ public class BIDSServiceImpl implements BIDSService {
 
     private static final String README_FILE = "README";
 
-    public ResponseEntity<ByteArrayResource> generateParticipantsTsv(final Long studyId) throws IOException {
-        List<Subject> subjs = getSubjectsForStudy(studyId);
-        StringBuilder data = participantsSerializer(subjs);
-
-        ByteArrayResource resource = new ByteArrayResource(data.toString().getBytes());
-
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename" + "participants.tsv")
-                .contentType(MediaType.MULTIPART_FORM_DATA)
-                .contentLength(data.length())
-                .body(resource);
-    }
-
-
     @Override
-    public String generateParticipantsTsvFile(Long studyId) throws IOException {
+    public String generateParticipantsTsvFile(Long studyId, Map<Long, LocalDate> firstExaminationDates) throws IOException {
         Study study = studyRepository.findById(studyId).orElse(null);
         File workFolder = getBidsFolderPath(studyId);
         File baseDir = createBaseBidsFolder(workFolder, study.getName());
         File csvFile = new File(baseDir.getAbsolutePath() + File.separator + "participants.tsv");
 
-        List<Subject> subjs = getSubjectsForStudy(studyId);
-
         if (csvFile.exists()) {
             // Recreate it everytime
             FileUtils.deleteQuietly(csvFile);
         }
-        StringBuilder buffer = participantsSerializer(subjs);
+        String participants = participantsTsv(studyId, firstExaminationDates);
 
         try {
-            Files.write(Paths.get(csvFile.getAbsolutePath()), buffer.toString().getBytes());
+            Files.write(Path.of(csvFile.getAbsolutePath()), participants.getBytes());
         } catch (IOException e) {
             LOG.error("Error while creating particpants.tsv file: {}", e);
         }
-        return buffer.toString();
+        return participants;
     }
 
-    public StringBuilder participantsSerializer(List<Subject> subjects) {
+    @Override
+    public String participantsTsv(Long studyId, Map<Long, LocalDate> firstExaminationDates) {
+        return participantsSerializer(subjectRepository.findByStudy_Id(studyId), firstExaminationDates).toString();
+    }
+
+    public StringBuilder participantsSerializer(List<Subject> subjects, Map<Long, LocalDate> firstExaminationDates) {
         StringBuilder buffer =  new StringBuilder();
-        // Headers
-        for (String columnHeader : CSV_PARTICIPANTS_HEADER) {
-            buffer.append(columnHeader).append(CSV_SEPARATOR);
-        }
-        buffer.append(CSV_SPLITTER);
+        // Headers. Columns are separated, not terminated, by tabs: a trailing tab would read as an empty column.
+        buffer.append(String.join(CSV_SEPARATOR, CSV_PARTICIPANTS_HEADER)).append(CSV_SPLITTER);
 
         for (Subject subject : subjects) {
-            String subjectAge = ageCalculation(subject);
+            String subjectAge = ageCalculation(subject.getBirthDate(),
+                    firstExaminationDates == null ? null : firstExaminationDates.get(subject.getId()));
             String subjectSex = subject.getSex() != null ? subject.getSex().name() : "O";
             // Write in the file the values
-            buffer.append(StorageService.SUBJECT).append(subject.getId()).append(CSV_SEPARATOR)
-                    .append(subject.getId()).append(CSV_SEPARATOR)
-                    .append(subjectAge).append(CSV_SEPARATOR)
-                    .append(subjectSex).append(CSV_SEPARATOR)
+            buffer.append(String.join(CSV_SEPARATOR,
+                    StorageService.SUBJECT + subject.getId(),
+                    String.valueOf(subject.getId()),
+                    subjectAge,
+                    subjectSex))
                     .append(CSV_SPLITTER);
         }
 
         return buffer;
-    }
-
-    private List<Subject> getSubjectsForStudy(final Long studyId) throws JsonParseException, JsonMappingException, IOException {
-        // Get the list of subjects
-        List<Subject> subjects = subjectRepository.findByStudy_Id(studyId);
-        return subjects;
     }
 
     public File getBidsFolderPath(final Long studyId) {
@@ -161,21 +138,21 @@ public class BIDSServiceImpl implements BIDSService {
         try {
             objectMapper.writeValue(new File(workFolder.getAbsolutePath() + File.separator + DATASET_DESCRIPTION_FILE), datasetDescription);
             objectMapper.writeValue(new File(workFolder.getAbsolutePath() + File.separator + README_FILE), studyName);
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             LOG.error(e.getMessage());
         }
         return workFolder;
     }
 
-    private String ageCalculation(Subject subject) {
-        java.time.LocalDate bd = subject.getBirthDate();
-        if (bd == null) {
+    /**
+     * Age in years at the first examination: unlike an age computed today, it describes the data and does not
+     * change over time. n/a without birth date or examination date, or when the examination is before the birth.
+     */
+    private String ageCalculation(LocalDate birthDate, LocalDate firstExaminationDate) {
+        if (birthDate == null || firstExaminationDate == null || firstExaminationDate.isBefore(birthDate)) {
             return "n/a";
         }
-        LocalDate birthDate = new LocalDate(bd.getYear(), bd.getMonthValue(), bd.getDayOfMonth());
-        LocalDate now = new LocalDate();
-        Years age = Years.yearsBetween(birthDate, now);
-        return String.valueOf(age.get(DurationFieldType.years()));
+        return String.valueOf(Period.between(birthDate, firstExaminationDate).getYears());
     }
 
 }

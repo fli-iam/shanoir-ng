@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { ImportJob } from '../../../import/shared/dicom-data.model';
@@ -29,6 +29,7 @@ type Status = 'none' | 'uploading' | 'uploaded' | 'error';
     selector: 'bruker-upload',
     templateUrl: 'bruker-upload.component.html',
     styleUrls: ['bruker-upload.component.css', '../../..//import/shared/import.step.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [UploaderComponent, CheckboxComponent]
 })
 export class BrukerUploadComponent {

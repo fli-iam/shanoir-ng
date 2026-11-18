@@ -124,10 +124,15 @@ public class FileUtil {
     //     }
     // }
 
-    public static void cleanTempFolders(File workFolder, String studyInstanceUID) {
+    public static void cleanTempFolders(File workFolder, String studyInstanceUID) throws IOException {
         File tempStudyInstanceUIDFolder = new File(workFolder, studyInstanceUID);
         if (tempStudyInstanceUIDFolder.exists()) {
-            tempStudyInstanceUIDFolder.delete();
+            // Delete every existing file(s) of folder before deleting it.
+            try (Stream<Path> walk = Files.walk(tempStudyInstanceUIDFolder.toPath())) {
+                walk.sorted(Comparator.reverseOrder())
+                    .map(Path::toFile)
+                    .forEach(File::delete);
+            }
             LOG.info("Temp folder of last download found and cleaned: " + tempStudyInstanceUIDFolder.getAbsolutePath());
         }
     }

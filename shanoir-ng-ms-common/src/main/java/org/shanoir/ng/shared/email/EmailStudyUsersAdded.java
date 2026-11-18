@@ -16,8 +16,14 @@ package org.shanoir.ng.shared.email;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class EmailStudyUsersAdded extends EmailBase {
 
+    public EmailStudyUsersAdded() {
+    }
+
+    @JsonProperty
     private List<Long> studyUsers;
 
     public List<Long> getStudyUsers() {

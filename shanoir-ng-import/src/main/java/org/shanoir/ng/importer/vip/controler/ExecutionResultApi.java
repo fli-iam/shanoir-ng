@@ -18,11 +18,10 @@ import org.shanoir.ng.importer.vip.model.Path;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -38,7 +37,7 @@ public interface ExecutionResultApi {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "the deletion is successful and finished."),
             @ApiResponse(responseCode = "500", description = "A functional or internal error occured processing the request") })
-    @RequestMapping(value = "/**", produces = { "application/json" }, method = RequestMethod.DELETE)
+    @DeleteMapping(value = "/**", produces = { "application/json" })
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER'))")
     ResponseEntity<Void> deletePath();
 
@@ -49,9 +48,9 @@ public interface ExecutionResultApi {
             + "If the parent directory of the file/directory to create does not exist, an error must be returned.")
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "The upload is successful and finished."),
             @ApiResponse(responseCode = "500", description = "A functional or internal error occured processing the request") })
-    @RequestMapping(value = "/**", produces = { "application/json" }, consumes = { "application/carmin+json",
-            "application/octet-stream" }, method = RequestMethod.PUT)
+    @PutMapping(value = "/**", produces = { "application/json" }, consumes = { "application/carmin+json",
+            "application/octet-stream" })
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER'))")
-    ResponseEntity<Path> uploadPath(@Valid @RequestBody String body) throws RestServiceException, JsonProcessingException;
+    ResponseEntity<Path> uploadPath(@Valid @RequestBody String body) throws RestServiceException;
 
 }

@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
 
-import org.apache.http.client.ClientProtocolException;
+import org.apache.hc.client5.http.ClientProtocolException;
 import org.junit.jupiter.api.Test;
 import org.shanoir.ng.preclinical.extra_data.bloodgas_data.BloodGasData;
 import org.shanoir.ng.preclinical.extra_data.examination_extra_data.ExaminationExtraData;
@@ -26,9 +26,10 @@ import org.shanoir.ng.preclinical.extra_data.physiological_data.PhysiologicalDat
 import org.shanoir.ng.utils.ExtraDataModelUtil;
 import org.shanoir.ng.utils.KeycloakControllerTestIT;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.resttestclient.TestRestTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -44,6 +45,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("dev")
+@AutoConfigureTestRestTemplate
 public class ExtraDataApiControllerTestIT extends KeycloakControllerTestIT {
 
     private static final String REQUEST_PATH_EXAMINATION = "/examination";

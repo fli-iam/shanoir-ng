@@ -22,6 +22,8 @@ import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.KeycloakUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -35,55 +37,101 @@ import java.util.List;
 @Service
 public class DatasetAsyncServiceImpl implements DatasetAsyncService {
 
+    private static final Logger LOG = LoggerFactory.getLogger(DatasetAsyncServiceImpl.class);
+
     @Autowired
     private DICOMWebService dicomWebService;
 
     @Autowired
     private ShanoirEventService eventService;
 
-    public void deleteDatasetFilesFromDiskAndPacs(List<DatasetFile> datasetFiles, boolean isDicom, Long datasetId) throws ShanoirException {
-        deleteDatasetFilesFromDiskAndPacsAsync(datasetFiles, isDicom, datasetId);
+    public void deleteDatasetFilesFromDiskAndPacs(List<DatasetFile> datasetFiles, boolean isDicom, Long datasetId, ShanoirEvent parentEvent) throws ShanoirException {
+        deleteDatasetFilesFromDiskAndPacsAsync(datasetFiles, isDicom, datasetId, parentEvent);
     }
 
+    /**
+     * @param parentEvent the event of the parent deletion (acquisition, examination, subject...)
+     *                    that drives this one and already reports its own progress. It is given
+     *                    only when this deletion is cascaded: no dataset deletion event is then
+     *                    published, to avoid flooding the jobs with one event per deleted dataset.
+     *                    A dataset deleted on its own gets no parent event, and reports itself.
+     */
     @Override
     @Async
-    public void deleteDatasetFilesFromDiskAndPacsAsync(List<DatasetFile> datasetFiles, boolean isDicom, Long datasetId) throws ShanoirException {
+    public void deleteDatasetFilesFromDiskAndPacsAsync(List<DatasetFile> datasetFiles, boolean isDicom, Long datasetId, ShanoirEvent parentEvent) throws ShanoirException {
 
         ShanoirEvent event = null;
-        event = new ShanoirEvent(
-                ShanoirEventType.DELETE_DATASET_EVENT,
-                String.valueOf(datasetId),
-                KeycloakUtil.getTokenUserId(),
-                "Delete dataset with id :" + datasetId,
-                ShanoirEvent.IN_PROGRESS,
-                0f,
-                null);
+        if (parentEvent == null) {
+            event = new ShanoirEvent(
+                    ShanoirEventType.DELETE_DATASET_EVENT,
+                    String.valueOf(datasetId),
+                    KeycloakUtil.getTokenUserId(),
+                    "Delete dataset with id :" + datasetId,
+                    ShanoirEvent.IN_PROGRESS,
+                    0f,
+                    null);
 
-        eventService.publishEvent(event);
-
-        for (DatasetFile file : datasetFiles) {
-            // DICOM
-            if (isDicom && file.isPacs()) {
-                dicomWebService.rejectDatasetFromPacs(file.getPath());
-                float progress = event.getProgress();
-                progress += 1f / datasetFiles.size();
-                event.setProgress(progress);
-                eventService.publishEvent(event);
-                // NIfTI
-            } else if (!file.isPacs()) {
-                try {
-                    URL url = new URL(file.getPath().replaceAll("%20", " "));
-                    File srcFile = new File(UriUtils.decode(url.getPath(), "UTF-8"));
-                    FileUtils.deleteQuietly(srcFile);
-                } catch (MalformedURLException e) {
-                    throw new ShanoirException("Error while deleting dataset file.", e);
-                }
-            }
+            eventService.publishEvent(event);
         }
 
-        event.setMessage("Dataset " + datasetId + " deleted.");
-        event.setProgress(1f);
-        event.setStatus(ShanoirEvent.SUCCESS);
-        eventService.publishEvent(event);
+        try {
+            for (DatasetFile file : datasetFiles) {
+                // DICOM
+                if (isDicom && file.isPacs()) {
+                    dicomWebService.rejectDatasetFromPacs(file.getPath());
+                    if (event != null) {
+                        float progress = event.getProgress();
+                        progress += 1f / datasetFiles.size();
+                        event.setProgress(progress);
+                        eventService.publishEvent(event);
+                    }
+                    // NIfTI
+                } else if (!file.isPacs()) {
+                    try {
+                        URL url = new URL(file.getPath().replaceAll("%20", " "));
+                        File srcFile = new File(UriUtils.decode(url.getPath(), "UTF-8"));
+                        FileUtils.deleteQuietly(srcFile);
+                    } catch (MalformedURLException e) {
+                        throw new ShanoirException("Error while deleting dataset file.", e);
+                    }
+                }
+            }
+        } catch (ShanoirException | RuntimeException e) {
+            reportDeletionError(event, parentEvent, datasetId, e);
+            throw e;
+        }
+
+        if (event != null) {
+            event.setMessage("Dataset " + datasetId + " deleted.");
+            event.setProgress(1f);
+            event.setStatus(ShanoirEvent.SUCCESS);
+            eventService.publishEvent(event);
+        }
+    }
+
+    /**
+     * Reports a deletion failure. A direct deletion fails its own event, that would otherwise stay
+     * in progress forever, while a cascaded one, that publishes nothing as long as all goes well,
+     * gets a one-off error event: failures are rare enough not to flood the jobs, and silent ones
+     * would leave the parent deletion looking complete. The parent event is not failed itself, as
+     * it goes on reporting the rest of the cascade, but it tells which study the failure belongs to.
+     */
+    private void reportDeletionError(ShanoirEvent event, ShanoirEvent parentEvent, Long datasetId, Exception e) {
+        LOG.error("Error while deleting the files of dataset {} from disk and pacs.", datasetId, e);
+
+        ShanoirEvent errorEvent = event;
+        if (errorEvent == null) {
+            errorEvent = new ShanoirEvent(
+                    ShanoirEventType.DELETE_DATASET_EVENT,
+                    String.valueOf(datasetId),
+                    KeycloakUtil.getTokenUserId(),
+                    null,
+                    ShanoirEvent.ERROR,
+                    0f,
+                    parentEvent != null ? parentEvent.getStudyId() : null);
+        }
+        errorEvent.setMessage("Dataset " + datasetId + " could not be deleted : " + e.getMessage());
+        errorEvent.setStatus(ShanoirEvent.ERROR);
+        eventService.publishEvent(errorEvent);
     }
 }

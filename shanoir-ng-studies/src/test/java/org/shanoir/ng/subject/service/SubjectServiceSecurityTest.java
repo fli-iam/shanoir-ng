@@ -33,14 +33,14 @@ import org.shanoir.ng.study.repository.StudyRepository;
 import org.shanoir.ng.study.repository.StudyUserRepository;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.repository.SubjectRepository;
-import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 /**
  * User security service test.
@@ -63,14 +63,17 @@ public class SubjectServiceSecurityTest {
     @Autowired
     private SubjectService service;
 
-    @MockBean
+    @MockitoBean
     private SubjectRepository repository;
 
-    @MockBean
+    @MockitoBean
     private StudyRepository studyRepository;
 
-    @MockBean
+    @MockitoBean
     private StudyUserRepository studyUserRepository;
+
+    @MockitoBean
+    private ConnectionFactory connectionFactory;
 
     @BeforeEach
     public void setup() {
@@ -113,6 +116,18 @@ public class SubjectServiceSecurityTest {
     public void testEditAsUser() throws ShanoirException {
         assertAccessDenied(service::update, mockExisting);
         assertAccessDenied(service::deleteById, ENTITY_ID);
+
+        // importers may update the subject
+        Subject subjectMockImport = buildSubjectMock(ENTITY_ID);
+        addStudyToMock(subjectMockImport, 1L, StudyUserRight.CAN_IMPORT);
+        given(repository.findById(ENTITY_ID)).willReturn(Optional.of(subjectMockImport));
+        assertAccessAuthorized(service::update, subjectMockImport);
+
+        // study administrators without the expert role may not
+        Subject subjectMockAdmin = buildSubjectMock(ENTITY_ID);
+        addStudyToMock(subjectMockAdmin, 1L, StudyUserRight.CAN_ADMINISTRATE);
+        given(repository.findById(ENTITY_ID)).willReturn(Optional.of(subjectMockAdmin));
+        assertAccessDenied(service::update, subjectMockAdmin);
     }
 
     @Test
@@ -138,6 +153,11 @@ public class SubjectServiceSecurityTest {
         given(studyUserRepository.findByStudy_Id(1L)).willReturn(studiesMock.get(0).getStudyUserList());
         given(repository.findById(ENTITY_ID)).willReturn(Optional.of(subjectMock1));
         assertAccessAuthorized(service::update, subjectMock1);
+
+        Subject subjectMockAdmin = buildSubjectMock(ENTITY_ID);
+        addStudyToMock(subjectMockAdmin, 1L, StudyUserRight.CAN_ADMINISTRATE);
+        given(repository.findById(ENTITY_ID)).willReturn(Optional.of(subjectMockAdmin));
+        assertAccessAuthorized(service::update, subjectMockAdmin);
 
         Subject subjectMock2 = buildSubjectMock(ENTITY_ID);
         addStudyToMock(subjectMock2, 1L, StudyUserRight.CAN_SEE_ALL);
@@ -171,7 +191,6 @@ public class SubjectServiceSecurityTest {
         Subject subjectMockNoRights = buildSubjectMock(1L);
         given(repository.findByStudyIdAndName(1L, name)).willReturn(subjectMockNoRights);
         given(repository.findById(1L)).willReturn(Optional.of(subjectMockNoRights));
-        given(repository.findSubjectWithSubjectStudyById(1L)).willReturn(subjectMockNoRights);
         given(repository.findSubjectFromCenterCode("centerCode%")).willReturn(subjectMockNoRights);
         assertAccessDenied(service::findById, 1L);
         assertAccessDenied(service::findSubjectFromCenterCode, "centerCode");
@@ -180,7 +199,6 @@ public class SubjectServiceSecurityTest {
         addStudyToMock(subjectMockWrongRights, 100L, StudyUserRight.CAN_ADMINISTRATE, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT);
         given(repository.findByStudyIdAndName(1L, name)).willReturn(subjectMockWrongRights);
         given(repository.findById(1L)).willReturn(Optional.of(subjectMockWrongRights));
-        given(repository.findSubjectWithSubjectStudyById(1L)).willReturn(subjectMockWrongRights);
         given(repository.findSubjectFromCenterCode("centerCode%")).willReturn(subjectMockWrongRights);
         assertAccessDenied(service::findById, 1L);
         assertAccessDenied(service::findSubjectFromCenterCode, "centerCode");
@@ -189,7 +207,6 @@ public class SubjectServiceSecurityTest {
         addStudyToMock(subjectMockRightRights, 100L, StudyUserRight.CAN_SEE_ALL);
         given(repository.findByStudyIdAndName(1L, name)).willReturn(subjectMockRightRights);
         given(repository.findById(1L)).willReturn(Optional.of(subjectMockRightRights));
-        given(repository.findSubjectWithSubjectStudyById(1L)).willReturn(subjectMockRightRights);
         given(repository.findSubjectFromCenterCode("centerCode%")).willReturn(subjectMockRightRights);
         given(studyRepository.findById(100L)).willReturn(Optional.of(subjectMockRightRights.getStudy()));
         assertAccessAuthorized(service::findById, 1L);
@@ -267,19 +284,6 @@ public class SubjectServiceSecurityTest {
     private void addStudyToMock(Subject mock, Long id, StudyUserRight... rights) {
         Study study = buildStudyMock(id, rights);
         mock.setStudy(study);
-
-        SubjectStudy subjectStudy = new SubjectStudy();
-        subjectStudy.setSubject(mock);
-        subjectStudy.setStudy(study);
-
-        if (study.getSubjectStudyList() == null) {
-            study.setSubjectStudyList(new ArrayList<SubjectStudy>());
-        }
-        if (mock.getSubjectStudyList() == null) {
-            mock.setSubjectStudyList(new ArrayList<SubjectStudy>());
-        }
-        study.getSubjectStudyList().add(subjectStudy);
-        mock.getSubjectStudyList().add(subjectStudy);
     }
 
 }

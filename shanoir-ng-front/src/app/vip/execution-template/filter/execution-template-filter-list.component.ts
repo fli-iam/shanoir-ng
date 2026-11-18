@@ -11,11 +11,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, Input, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import { ColumnDefinition } from 'src/app/shared/components/table/column.definition.type';
+import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
+import { ColumnDefinition } from '@app/shared/components/table/column.definition.type';
 
 import { TableComponent } from "../../../shared/components/table/table.component";
 import { BrowserPaginEntityListComponent } from "../../../shared/components/entity/entity-list.browser.component.abstract";
@@ -26,6 +26,7 @@ import { ExecutionTemplateFilterService } from "./execution-template-filter.serv
 @Component({
     selector: 'execution-template-filter-list',
     templateUrl: './execution-template-filter-list.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
         ReactiveFormsModule,
         TableComponent

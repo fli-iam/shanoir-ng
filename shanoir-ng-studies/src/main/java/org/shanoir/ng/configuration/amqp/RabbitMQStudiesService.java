@@ -14,24 +14,29 @@
 
 package org.shanoir.ng.configuration.amqp;
 
+import java.io.IOException;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
+import tools.jackson.databind.json.JsonMapper;
 import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
 import org.shanoir.ng.acquisitionequipment.service.AcquisitionEquipmentService;
+import org.shanoir.ng.bids.service.BIDSService;
 import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.center.service.CenterService;
-import org.shanoir.ng.bids.service.BIDSService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.dicom.EquipmentDicom;
 import org.shanoir.ng.shared.dicom.InstitutionDicom;
+import org.shanoir.ng.shared.dto.ParticipantsTsvRequestDTO;
+import org.shanoir.ng.shared.dto.StudyExaminationsDTO;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
+import org.shanoir.ng.shared.event.UserAccessData;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.message.CreateCenterForStudyMessage;
@@ -56,16 +61,12 @@ import org.springframework.amqp.rabbit.annotation.QueueBinding;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import java.io.IOException;
-
-import org.shanoir.ng.shared.dto.StudyExaminationsDTO;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 @Service
 public class RabbitMQStudiesService {
@@ -75,6 +76,9 @@ public class RabbitMQStudiesService {
     private static final String RABBIT_MQ_ERROR = "Something went wrong deserializing the object.";
 
     private static final String DELIMITER = ":";
+
+    @Value("${shanoir.userDefaultExpirationDays:183}")
+    private int userDefaultExpirationDays;
 
     @Autowired
     private StudyRepository studyRepo;
@@ -131,7 +135,7 @@ public class RabbitMQStudiesService {
             Long examinationId = Long.valueOf(event.getObjectId());
             Long studyId = event.getStudyId();
             String message = event.getMessage();
-            Pattern pat = Pattern.compile("centerId:(\\d+);subjectId:(\\d+)");
+            Pattern pat = Pattern.compile(".*?centerId:(\\d+);subjectId:(\\d+)");
             Matcher mat = pat.matcher(message);
 
             Long centerId = null;
@@ -143,9 +147,7 @@ public class RabbitMQStudiesService {
                 LOG.error("Something wrong happend while updating study examination list.");
                 throw new ShanoirException("Could not read subject ID and center ID from event message");
             }
-
             this.studyService.addExaminationToStudy(examinationId, studyId, centerId, subjectId);
-
         } catch (Exception e) {
             LOG.error("Could not index examination on given study ", e);
             throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event." + e.getMessage());
@@ -193,7 +195,7 @@ public class RabbitMQStudiesService {
     public void deleteExaminationStudy(final String eventStr) {
         SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
         try {
-            ObjectMapper objectMapper = new ObjectMapper();
+            ObjectMapper objectMapper = new JsonMapper();
             ShanoirEvent event =  objectMapper.readValue(eventStr, ShanoirEvent.class);
             Long examinationId = Long.valueOf(event.getObjectId());
             Long studyId = Long.valueOf(event.getStudyId());
@@ -208,7 +210,7 @@ public class RabbitMQStudiesService {
     @Transactional
     public String getStudyName(final long studyId) {
         SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
-        Study study = this.studyRepo.findById(studyId).get();
+        Study study = this.studyRepo.findById(studyId).orElse(null);
         if (study != null) {
             return study.getName();
         }
@@ -219,8 +221,8 @@ public class RabbitMQStudiesService {
     @Transactional
     public String getStudyAnonymisationProfile(final long studyId) {
         SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
-        Study study = this.studyRepo.findById(studyId).get();
-        if (study != null) {
+        Study study = this.studyRepo.findById(studyId).orElse(null);
+        if (study != null && study.getProfile() != null) {
             return study.getProfile().getProfileName();
         }
         return null;
@@ -236,27 +238,38 @@ public class RabbitMQStudiesService {
         SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
         try {
             ShanoirEvent event =  mapper.readValue(studyStr, ShanoirEvent.class);
+            UserAccessData userAccessData = event.getMessage() != null ? mapper.readValue(event.getMessage(), UserAccessData.class) : null;
             Long userId = event.getUserId();
             Long studyId = Long.valueOf(event.getObjectId());
             // Get the study
             Study studyToUpdate = studyRepo.findById(studyId).orElseThrow();
-
             for (StudyUser su : studyToUpdate.getStudyUserList()) {
-                if (su.getUserId().equals(userId)) {
-                    // user already exists on study
-                    return true;
+                if (su.getUserId().equals(userId)) { // user already exists on study
+                    // check if it's an extension request
+                    if (userAccessData != null && event.getEventType().equals(ShanoirEventType.USER_EXTEND_TO_STUDY_EVENT)
+                            && userAccessData.getExpirationDate().isAfter(su.getExpirationDate())) {
+                        // If it's an extension request, just update the expiration date
+                        su.setExpirationDate(userAccessData.getExpirationDate());
+                        su.setReceivedExpirationNotification(false);
+                        studyService.updateStudyUserToStudy(su, studyToUpdate);
+                        eventService.publishEvent(event);
+                    }
+                    return true; // end of the method, user already exists on study
                 }
             }
-
-            // Create a new StudyUser
+            // Else create a new StudyUser
             StudyUser subscription = new StudyUser();
             subscription.setStudy(studyToUpdate);
             subscription.setUserId(userId);
             subscription.setReceiveNewImportReport(false);
             subscription.setReceiveStudyUserReport(false);
             subscription.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_DOWNLOAD));
-            subscription.setUserName(event.getMessage());
-
+            if (userAccessData != null) {
+                subscription.setUserName(userAccessData.getUserName());
+                subscription.setExpirationDate(userAccessData.getExpirationDate() != null
+                        ? userAccessData.getExpirationDate()
+                        : LocalDate.now().plusDays(userDefaultExpirationDays));
+            }
             if (studyToUpdate.getDataUserAgreementPaths() != null && !studyToUpdate.getDataUserAgreementPaths().isEmpty()) {
                 subscription.setConfirmed(false);
                 dataUserAgreementService.createDataUserAgreementForUserInStudy(studyToUpdate, subscription.getUserId());
@@ -267,8 +280,7 @@ public class RabbitMQStudiesService {
             eventService.publishEvent(event);
             return true;
         } catch (Exception e) {
-            LOG.error("Could not directly subscribe a user to the study: ", e);
-            return false;
+            throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the study subscription.", e);
         }
     }
 
@@ -344,7 +356,7 @@ public class RabbitMQStudiesService {
                 LOG.error("Error while creating a new equipment.");
                 return null;
             }
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             LOG.error("Error while creating a new equipment: ", e);
             throw new AmqpRejectAndDontRequeueException(e);
         }
@@ -362,10 +374,11 @@ public class RabbitMQStudiesService {
 
     @RabbitListener(queues = RabbitMQConfiguration.STUDY_PARTICIPANTS_TSV, containerFactory = "singleConsumerFactory")
     @RabbitHandler
-    public String studyParticipantsTsv(Long studyId) {
+    public String studyParticipantsTsv(String requestStr) {
         try {
             SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
-            return this.getStudyParticipantsTsv(studyId);
+            ParticipantsTsvRequestDTO request = mapper.readValue(requestStr, ParticipantsTsvRequestDTO.class);
+            return this.getStudyParticipantsTsv(request);
         } catch (Exception e) {
             LOG.error("Error while creating participants.tsv: ", e);
             throw new AmqpRejectAndDontRequeueException(e);
@@ -373,9 +386,9 @@ public class RabbitMQStudiesService {
     }
 
     @Transactional
-    private String getStudyParticipantsTsv(Long studyId) {
+    private String getStudyParticipantsTsv(ParticipantsTsvRequestDTO request) {
         try {
-            return this.bidsService.generateParticipantsTsvFile(studyId);
+            return this.bidsService.generateParticipantsTsvFile(request.getStudyId(), request.getFirstExaminationDates());
         } catch (IOException e) {
             LOG.error("Error while creating participants.tsv: ", e);
         }

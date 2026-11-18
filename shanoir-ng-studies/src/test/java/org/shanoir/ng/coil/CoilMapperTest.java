@@ -22,10 +22,12 @@ import org.junit.jupiter.api.Test;
 import org.shanoir.ng.coil.dto.CoilDTO;
 import org.shanoir.ng.coil.dto.mapper.CoilMapper;
 import org.shanoir.ng.coil.model.Coil;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 /**
  * Coil mapper test.
@@ -43,6 +45,9 @@ public class CoilMapperTest {
 
     @Autowired
     private CoilMapper coilMapper;
+
+    @MockitoBean
+    private ConnectionFactory connectionFactory;
 
     @Test
     public void coilsToCoilDTOsTest() {

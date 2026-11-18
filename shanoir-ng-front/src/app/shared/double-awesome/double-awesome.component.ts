@@ -12,11 +12,12 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
     selector: 'double-awesome',
     templateUrl: './double-awesome.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['./double-awesome.component.css']
 })
 export class DoubleAwesomeComponent {

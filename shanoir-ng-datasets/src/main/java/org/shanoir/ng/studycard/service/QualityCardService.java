@@ -14,14 +14,63 @@
 
 package org.shanoir.ng.studycard.service;
 
+import java.util.List;
+
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
+import org.shanoir.ng.shared.exception.PacsException;
+import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.model.QualityCard;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.BindingResult;
 
-public interface QualityCardService extends CardService<QualityCard> {
+public interface QualityCardService {
 
-    @Override
-    @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnQualityCard(#id, 'CAN_ADMINISTRATE'))")
-    void deleteById(Long id) throws EntityNotFoundException, MicroServiceCommunicationException;
+    /**
+     * Validate a quality card
+     *
+     * @param qualityCard
+     * @param result
+     * @throws RestServiceException
+     */
+    void validate(QualityCard qualityCard, BindingResult result) throws RestServiceException;
+
+    /**
+     * Update an existing quality card
+     *
+     * @param qualityCard
+     */
+    void update(QualityCard qualityCard) throws EntityNotFoundException;
+
+    /**
+     * Nulls out the ids of the quality card's rules and their nested conditions, so that saving it
+     * (creation, or duplication of an existing quality card) inserts fresh rows instead of failing on
+     * stale/foreign ids carried over from the client payload.
+     *
+     * @param qualityCard
+     */
+    void resetIdsForFreshInsert(QualityCard qualityCard);
+
+    /**
+     * Quality cards for quality control: apply on entire study.
+     *
+     * @param qualityCard
+     * @param updateTags for testing or for real apply
+     */
+    QualityCardResult applyQualityCardOnStudy(QualityCard qualityCard, boolean updateTags) throws PacsException;
+
+    /**
+     * Quality cards for quality control: apply on a sample of the study's examinations only
+     * (used by the "test on sample" option for studies with too many examinations to test in full).
+     *
+     * @param qualityCard
+     * @param updateTags for testing or for real apply
+     * @param from index of the first examination to process, or null to process all
+     * @param to index of the last examination to process, or null to process all
+     */
+    QualityCardResult applyQualityCardOnStudy(QualityCard qualityCard, boolean updateTags, Integer from, Integer to) throws PacsException;
+
+    QualityCardResult checkQuality(DatasetAcquisition datasetAcquisition, AcquisitionAttributes<?> acquisitionAttributes, List<QualityCard> qualityCards) throws ShanoirException;
 }

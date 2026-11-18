@@ -38,9 +38,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 </span>
                 <span class="input-box">
                     <i class="fa-solid fa-palette"></i>
-                    <input type="color" [(ngModel)]="selectedColor" (ngModelChange)="onColorChange()" />
+                    <input type="color" [(ngModel)]="selectedColor" [ngModelOptions]="{ standalone: true }" (ngModelChange)="onColorChange()" />
                 </span>
-                <input #input type="text" [(ngModel)]="text" (keyup.enter)="addTag()" placeholder="enter tag label..." />
+                <input #input type="text" [(ngModel)]="text" [ngModelOptions]="{ standalone: true }" (keyup.enter)="addTag()" placeholder="enter tag label..." />
                 <span (click)="addTag()" class="save" [class.disabled]="text == null || selectedColor == null">
                     <i class="fas fa-save"></i>
                 </span>

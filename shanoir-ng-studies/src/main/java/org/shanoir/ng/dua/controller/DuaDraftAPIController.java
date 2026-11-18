@@ -36,9 +36,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 import io.swagger.v3.oas.annotations.Parameter;
 
@@ -77,7 +76,7 @@ public class DuaDraftAPIController implements DuaDraftAPI {
             return new ResponseEntity<>(created.getId(), HttpStatus.OK);
         } catch (EntityFoundException ex) {
             return new ResponseEntity<>("This id is already taken", HttpStatus.INTERNAL_SERVER_ERROR);
-        } catch (JsonProcessingException ex) {
+        } catch (JacksonException ex) {
             return new ResponseEntity<>("The mail could not be sent, json serializing error", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -112,7 +111,7 @@ public class DuaDraftAPIController implements DuaDraftAPI {
         }
     }
 
-    private void sendDuaDraftCreationMail(DuaDraft duaEntity, String email) throws JsonProcessingException {
+    private void sendDuaDraftCreationMail(DuaDraft duaEntity, String email) {
         DuaDraftWrapper data = new DuaDraftWrapper();
         String link = frontServerUrl + DUA_VIEW_URL + duaEntity.getId();
         data.setDuaLink(link);

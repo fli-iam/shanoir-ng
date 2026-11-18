@@ -1,0 +1,52 @@
+# Shanoir NG - Import, manage and share neuroimaging data
+# Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+# Contact us on https://project.inria.fr/shanoir/
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+
+#
+# Overlay for docker-compose-dev.yml: run users, studies and import as native images.
+#
+# The services keep the SAME NAMES as in docker-compose-dev.yml (users, studies,
+# import), so that container names, DNS aliases (nginx, other microservices),
+# published ports, volumes and depends_on are all inherited and nothing can
+# conflict. The overlay only swaps the image and the entrypoint.
+#
+# Usage (done by bootstrap.sh --native):
+#   docker compose -f docker-compose-dev.yml -f docker-compose-dev-native.yml up -d
+#
+# Requires Docker Compose >= 2.24 (for "!reset").
+#
+services:
+  users:
+    image: "shanoir-ng-users-native:latest"
+    pull_policy: never          # image is built locally by bootstrap.sh
+    build: !reset null          # never rebuild/overwrite it with the JVM image
+    entrypoint: ["/workspace/org.shanoir.ng.ShanoirUsersApplication",
+                 "-Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts",
+                 "-Djavax.net.ssl.trustStorePassword=changeit",
+                 "-Djavax.net.ssl.trustStoreType=JKS"]
+    environment:
+      - SPRING_AMQP_DESERIALIZATION_TRUST_ALL=true
+  studies:
+    image: "shanoir-ng-studies-native:latest"
+    pull_policy: never
+    build: !reset null
+    entrypoint: ["/workspace/org.shanoir.ng.ShanoirStudiesApplication",
+                 "-Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts",
+                 "-Djavax.net.ssl.trustStorePassword=changeit",
+                 "-Djavax.net.ssl.trustStoreType=JKS"]
+  import:
+    image: "shanoir-ng-import-native:latest"
+    pull_policy: never
+    build: !reset null
+    entrypoint: ["/workspace/org.shanoir.ng.ShanoirImportApplication",
+                 "-Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts",
+                 "-Djavax.net.ssl.trustStorePassword=changeit",
+                 "-Djavax.net.ssl.trustStoreType=JKS"]

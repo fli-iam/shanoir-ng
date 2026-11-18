@@ -30,9 +30,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <span>
                     <select-box
                         [(ngModel)]="studycard"
+                        [ngModelOptions]="{ standalone: true }"
                         [options]="studycardOptions"
                         (userChange)="updateStudyCard()"
-                        [viewRoute]="'/study-card/details/' + studycard?.id"
+                        [viewRoute]="'/study-card/details/' + $safeNavigationMigration(studycard?.id)"
                         [viewDisabled]="!studycard"
                         [readOnly]="!studyCards"></select-box>
                 </span>
@@ -45,7 +46,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <li>
                 <span class="label">Show incompatible studycards :</span>
                 <span>
-                    <input type="checkbox" [(ngModel)]="showIncompatibles" (change)="updateShowIncompatible()" />
+                    <input type="checkbox" [(ngModel)]="showIncompatibles" [ngModelOptions]="{ standalone: true }" (change)="updateShowIncompatible()" />
                 </span>
             </li>
         }

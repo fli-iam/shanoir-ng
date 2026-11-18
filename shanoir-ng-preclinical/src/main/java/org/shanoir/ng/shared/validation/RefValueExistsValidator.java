@@ -70,7 +70,7 @@ public class RefValueExistsValidator<T extends AbstractEntityInterface> {
                             Optional<Reference> foundValue = service.findByTypeAndValue(field.getName(),
                                     value.getValue());
                             // If found entities and it is not the same current entity
-                            if (!foundValue.isPresent()) {
+                            if (foundValue.isEmpty()) {
                                 List<FieldError> errors = new ArrayList<>();
                                 errors.add(new FieldError("invalid value",
                                         "The given value do not exists for this field", value.getValue()));

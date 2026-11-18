@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 
 import { TableComponent } from '../../shared/components/table/table.component';
 import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
@@ -24,21 +24,30 @@ import { DatasetModalityType } from '../../enum/dataset-modality-type.enum';
 import { EntityListComponent } from '../../shared/components/entity/entity-list.component.abstract';
 import { Pageable, Page } from '../../shared/components/table/pageable.model';
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
+import { StudyService } from '../../studies/shared/study.service';
+import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 
 @Component({
     selector: 'dataset-acquisition-list',
     templateUrl: 'dataset-acquisition-list.component.html',
     styleUrls: ['dataset-acquisition-list.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [TableComponent]
 })
 export class DatasetAcquisitionListComponent extends EntityListComponent<DatasetAcquisition> {
 
     @ViewChild('table', { static: false }) table: TableComponent;
 
+    private studiesICanAdmin: number[];
+    private studiesICanImport: number[];
+
     constructor(
-        private datasetAcquisitionService: DatasetAcquisitionService) {
+        private datasetAcquisitionService: DatasetAcquisitionService,
+        private studyService: StudyService) {
 
             super('dataset-acquisition');
+            this.studyService.findStudyIdsIcanAdmin().then(ids => this.studiesICanAdmin = ids);
+            this.studyService.getStudiesByRight(StudyUserRight.CAN_IMPORT).then(ids => this.studiesICanImport = ids);
         }
 
     getService(): EntityService<DatasetAcquisition> {
@@ -49,9 +58,22 @@ export class DatasetAcquisitionListComponent extends EntityListComponent<Dataset
         return {
             new: false,
             view: true,
-            edit: this.keycloakService.isUserAdmin(),
-            delete: this.keycloakService.isUserAdmin()
+            edit: true,
+            delete: this.keycloakService.isUserAdminOrExpert()
         };
+    }
+
+    // importers can edit the extra-data files of the acquisition, study administrators its fields
+    canEdit(dsAcq: DatasetAcquisition): boolean {
+        return this.canDelete(dsAcq) || !!this.studiesICanImport?.includes(dsAcq.examination?.study?.id);
+    }
+
+    canDelete(dsAcq: DatasetAcquisition): boolean {
+        return this.keycloakService.isUserAdmin() || (
+            dsAcq.examination?.study
+            && this.studiesICanAdmin
+            && this.studiesICanAdmin.includes(dsAcq.examination.study.id)
+        );
     }
 
     getPage(pageable: Pageable): Promise<Page<DatasetAcquisition>> {

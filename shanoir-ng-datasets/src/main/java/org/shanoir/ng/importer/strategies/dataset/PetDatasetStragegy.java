@@ -29,6 +29,7 @@ import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.importer.strategies.datasetexpression.DatasetExpressionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author yyao
@@ -66,6 +67,7 @@ public class PetDatasetStragegy implements DatasetStrategy<PetDataset> {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public PetDataset generateSingleDataset(Attributes attributes, Serie serie, Dataset dataset, int datasetIndex,
             Long subjectId) throws Exception {
         PetDataset petDataset = new PetDataset();
@@ -110,11 +112,13 @@ public class PetDatasetStragegy implements DatasetStrategy<PetDataset> {
          *  The DatasetExpressionFactory will return the proper object according to the expression format type and add it to the current petDataset
          *
          **/
-        for (ExpressionFormat expressionFormat : dataset.getExpressionFormats()) {
-            datasetExpressionContext.setDatasetExpressionStrategy(expressionFormat.getType());
-            DatasetExpression datasetExpression = datasetExpressionContext.generateDatasetExpression(serie, expressionFormat);
-            datasetExpression.setDataset(petDataset);
-            petDataset.getDatasetExpressions().add(datasetExpression);
+        if (dataset.getExpressionFormats() != null) {
+            for (ExpressionFormat expressionFormat : dataset.getExpressionFormats()) {
+                datasetExpressionContext.setDatasetExpressionStrategy(expressionFormat.getType());
+                DatasetExpression datasetExpression = datasetExpressionContext.generateDatasetExpression(serie, expressionFormat);
+                datasetExpression.setDataset(petDataset);
+                petDataset.getDatasetExpressions().add(datasetExpression);
+            }
         }
 
         DatasetMetadata originalDM = petDataset.getOriginMetadata();

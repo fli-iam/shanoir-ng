@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, HostListener } from '@angular/core';
+import { Component, HostListener, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
@@ -28,6 +28,7 @@ import { LocalDateFormatPipe } from '../../shared/localLanguage/localDateFormat.
     selector: 'select-series',
     templateUrl: 'select-series.component.html',
     styleUrls: ['select-series.component.css', '../shared/import.step.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [TreeNodeComponent, FormsModule, PapayaComponent, LocalDateFormatPipe]
 })
 export class SelectSeriesComponent {

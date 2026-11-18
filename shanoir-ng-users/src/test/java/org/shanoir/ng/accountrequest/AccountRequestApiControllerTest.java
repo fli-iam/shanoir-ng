@@ -21,35 +21,53 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.shanoir.ng.ShanoirUsersManagement;
+import org.shanoir.ng.accessrequest.controller.AccessRequestService;
 import org.shanoir.ng.accountrequest.controller.AccountRequestApiController;
 import org.shanoir.ng.accountrequest.model.AccountRequestInfo;
+import org.shanoir.ng.email.EmailService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
+import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.SecurityException;
-import org.shanoir.ng.shared.jackson.JacksonUtils;
+import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.user.repository.UserRepository;
 import org.shanoir.ng.user.security.UserFieldEditionSecurityManager;
 import org.shanoir.ng.user.service.UserService;
 import org.shanoir.ng.user.service.UserUniqueConstraintManager;
 import org.shanoir.ng.utils.ModelsUtil;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.security.oauth2.server.resource.autoconfigure.servlet.OAuth2ResourceServerAutoConfiguration;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.aot.DisabledInAotMode;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import tools.jackson.databind.json.JsonMapper;
+
 /**
- * Unit tests for user controller.
+ * Unit tests for AccountRequestApiController.
  *
  * @author msimon
  *
  */
-@WebMvcTest(controllers = AccountRequestApiController.class)
-@ActiveProfiles("test")
+@WebMvcTest(
+        controllers = AccountRequestApiController.class,
+        excludeAutoConfiguration = {
+            OAuth2ResourceServerAutoConfiguration.class
+        }
+)
 @AutoConfigureMockMvc(addFilters = false)
+@ActiveProfiles("test")
+@TestPropertySource(properties = { "service-account.user.blacklist-mail=gmail.com, yahoo.com" })
+@DisabledInAotMode
 public class AccountRequestApiControllerTest {
 
     private static final String REQUEST_PATH = "/accountrequest";
@@ -57,16 +75,40 @@ public class AccountRequestApiControllerTest {
     @Autowired
     private MockMvc mvc;
 
-    @MockBean
-    private UserService userServiceMock;
+    @Autowired
+    private JsonMapper mapper;
 
-    @MockBean
-    private UserRepository userRepositoryMock;
+    @MockitoBean
+    private UserService userService;
 
-    @MockBean
+    @MockitoBean
+    private ShanoirUsersManagement shanoirUsersManagement;
+
+    @MockitoBean
+    private JavaMailSender mailSender;
+
+    @MockitoBean
+    private RabbitTemplate rabbitTemplate;
+
+    @MockitoBean
+    private ShanoirEventService shanoirEventService;
+
+    @MockitoBean
+    private EmailService emailService;
+
+    @MockitoBean
+    private AccessRequestService accessRequestService;
+
+    @MockitoBean
+    private StudyUserRightsRepository studyUserRightsRepository;
+
+    @MockitoBean
+    private UserRepository userRepository;
+
+    @MockitoBean
     private UserFieldEditionSecurityManager fieldEditionSecurityManager;
 
-    @MockBean
+    @MockitoBean
     private UserUniqueConstraintManager uniqueConstraintManager;
 
     @BeforeAll
@@ -92,10 +134,10 @@ public class AccountRequestApiControllerTest {
         info.setStudyId(1L);
         user.setAccountRequestInfo(info);
 
-        given(userServiceMock.createAccountRequest(Mockito.mock(User.class))).willReturn(new User());
+        given(userService.createAccountRequest(Mockito.mock(User.class))).willReturn(new User());
 
         mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(user)))
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(user)))
                 .andExpect(status().isNoContent());
     }
 
@@ -112,12 +154,72 @@ public class AccountRequestApiControllerTest {
         info.setStudyId(1L);
         user.setAccountRequestInfo(info);
 
-        given(userServiceMock.createAccountRequest(Mockito.any(User.class))).willReturn(user);
+        given(userService.createAccountRequest(Mockito.any(User.class))).willReturn(user);
 
         mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(user)))
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(user)))
                 .andExpect(status().isNoContent());
 
+    }
+
+    @Test
+    public void saveNewAccountRequestBlacklistedMailTest() throws Exception {
+        final User user = createAccountRequestUser("test@gmail.com");
+
+        mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(user)))
+                .andExpect(status().isUnprocessableContent());
+
+        Mockito.verify(userService, Mockito.never()).createAccountRequest(Mockito.any(User.class));
+    }
+
+    @Test
+    public void saveNewAccountRequestBlacklistedMailUpperCaseTest() throws Exception {
+        final User user = createAccountRequestUser("Test@GMail.COM");
+
+        mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(user)))
+                .andExpect(status().isUnprocessableContent());
+
+        Mockito.verify(userService, Mockito.never()).createAccountRequest(Mockito.any(User.class));
+    }
+
+    @Test
+    public void saveNewAccountRequestBlacklistedMailTrimmedConfigTest() throws Exception {
+        // " yahoo.com" in the property, the leading space must be ignored
+        final User user = createAccountRequestUser("test@yahoo.com");
+
+        mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(user)))
+                .andExpect(status().isUnprocessableContent());
+
+        Mockito.verify(userService, Mockito.never()).createAccountRequest(Mockito.any(User.class));
+    }
+
+    @Test
+    public void saveNewAccountRequestMailEndingLikeBlacklistedTest() throws Exception {
+        final User user = createAccountRequestUser("test@notgmail.com");
+
+        given(userService.createAccountRequest(Mockito.any(User.class))).willReturn(user);
+
+        mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(user)))
+                .andExpect(status().isNoContent());
+
+        Mockito.verify(userService).createAccountRequest(Mockito.any(User.class));
+    }
+
+    private User createAccountRequestUser(final String email) {
+        final User user = ModelsUtil.createUser(null);
+        user.setEmail(email);
+        user.setUsername("test");
+        final AccountRequestInfo info = new AccountRequestInfo();
+        info.setContact("contact");
+        info.setFunction("function");
+        info.setInstitution("institution");
+        info.setStudyId(1L);
+        user.setAccountRequestInfo(info);
+        return user;
     }
 
 }

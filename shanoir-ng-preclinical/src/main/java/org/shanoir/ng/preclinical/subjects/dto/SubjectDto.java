@@ -24,9 +24,9 @@ import org.shanoir.ng.shared.subjectstudy.SubjectType;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
+import tools.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.annotation.JsonSerialize;
+import tools.jackson.databind.ext.javatime.deser.LocalDateDeserializer;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SubjectDto {
@@ -50,9 +50,6 @@ public class SubjectDto {
 
     @JsonProperty("imagedObjectCategory")
     private ImagedObjectCategory imagedObjectCategory;
-
-    @JsonProperty("subjectStudyList")
-    private List<SubjectStudyDto> subjectStudyList;
 
     @JsonProperty("preclinical")
     private boolean preclinical;
@@ -115,14 +112,6 @@ public class SubjectDto {
      */
     public void setImagedObjectCategory(ImagedObjectCategory imagedObjectCategory) {
         this.imagedObjectCategory = imagedObjectCategory;
-    }
-
-    public List<SubjectStudyDto> getSubjectStudyList() {
-        return subjectStudyList;
-    }
-
-    public void setSubjectStudyList(List<SubjectStudyDto> subjectStudyList) {
-        this.subjectStudyList = subjectStudyList;
     }
 
     public boolean isPreclinical() {

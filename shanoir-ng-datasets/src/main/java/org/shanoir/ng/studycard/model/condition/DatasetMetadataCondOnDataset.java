@@ -56,14 +56,9 @@ public class DatasetMetadataCondOnDataset extends StudyCardMetadataCondition<Dat
         } catch (CheckedIllegalClassException e) {
             valueFromDb = null;
         }
-        if (valueFromDb != null) {
-            // get all possible values, that can fulfill the condition
-            for (String value : this.getValues()) {
-                if (textualCompare(this.getOperation(), valueFromDb, value)) {
-                    LOG.info("condition fulfilled: ds.name = " + valueFromDb + ", value=" + value);
-                    return true;
-                }
-            }
+        if (valueFromDb != null && textualCompare(this.getOperation(), valueFromDb)) {
+            LOG.info("condition fulfilled: ds.name = " + valueFromDb);
+            return true;
         }
         return false;
     }

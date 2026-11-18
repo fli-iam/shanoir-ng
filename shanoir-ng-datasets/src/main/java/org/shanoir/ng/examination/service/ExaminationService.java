@@ -29,6 +29,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -52,6 +53,16 @@ public interface ExaminationService {
     @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_ADMINISTRATE'))")
     void deleteExaminationAsync(Long examinationId, Long studyId, ShanoirEvent event);
 
+      /*
+     * Delete an empty examination without checking rights,
+     * used during quality control to delete any empty examination created during import.
+     *
+     * @param id examination id.
+     * @throws EntityNotFoundException
+     */
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    void deleteEmptyExamination(Long id) throws EntityNotFoundException;
+
     /**
      * Get all examinations for a specific user to support DICOMweb.
      *
@@ -60,6 +71,15 @@ public interface ExaminationService {
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterExaminationList(returnObject, 'CAN_SEE_ALL')")
     List<Examination> findAll();
+
+    /**
+     * Get all examinations for a specific user to support DICOMweb.
+     *
+     * @return
+     */
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterExaminationList(returnObject, 'CAN_SEE_ALL')")
+    List<Examination> findAllWithAcqAndDatasets();
 
     /**
      * Get a paginated list of examinations reachable by connected user.
@@ -141,6 +161,18 @@ public interface ExaminationService {
     Examination save(Examination examination) throws EntityNotFoundException;
 
     /**
+     * Save an examination and store its extra data files in a single transaction:
+     * the examination is committed only if all the files have been successfully stored.
+     *
+     * @param examination  examination to create.
+     * @param files the extra data files to store, can be empty.
+     * @return created examination.
+     * @throws StorageException if a file could not be stored (examination not created).
+     */
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudyCenter(#examination.getCenterId(), #examination.getStudyId(), 'CAN_IMPORT'))")
+    Examination saveWithExtraData(Examination examination, List<MultipartFile> files) throws EntityNotFoundException, StorageException;
+
+    /**
      * Update an examination.
      *
      * @param examination  examination to update.
@@ -148,8 +180,22 @@ public interface ExaminationService {
      * @throws EntityNotFoundException
      * @throws ShanoirException
      */
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examination.getId(), 'CAN_IMPORT'))")
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and (@datasetSecurityService.hasRightOnExamination(#examination.getId(), 'CAN_IMPORT') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnExamination(#examination.getId(), 'CAN_ADMINISTRATE'))))")
     Examination update(Examination examination) throws EntityNotFoundException, ShanoirException, StorageException;
+
+    /**
+     * Update an examination and store its new extra data files in a single transaction:
+     * the examination is updated only if all the files have been successfully stored.
+     * The files are stored first, as the update deletes the files removed from the list.
+     *
+     * @param examination  examination to update.
+     * @param files the new extra data files to store, can be empty.
+     * @return updated examination.
+     * @throws ShanoirException if a file already exists (422) or the update is refused.
+     * @throws StorageException if a file could not be stored (examination not updated).
+     */
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and (@datasetSecurityService.hasRightOnExamination(#examination.getId(), 'CAN_IMPORT') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnExamination(#examination.getId(), 'CAN_ADMINISTRATE'))))")
+    Examination updateWithExtraData(Examination examination, List<MultipartFile> files) throws ShanoirException, StorageException;
 
     Long getExtraDataSizeByStudyId(Long studyId) throws StorageException;
 
@@ -175,4 +221,20 @@ public interface ExaminationService {
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_IMPORT'))")
     void syncStudyInstanceUIDFromPacs(Long examinationId) throws EntityNotFoundException, ShanoirException;
 
+    /**
+     * This method generates during the examination creation a DICOM
+     * StudyInstanceUID, that will be used for all DICOM files of this
+     * examination (== DICOM study).
+     *
+     * @param examination
+     */
+    void generateStudyInstanceUID(Examination examination);
+
+    /**
+     * Validate a dataset
+     *
+     * @param result
+     * @throws RestServiceException
+     */
+    void validate(BindingResult result) throws RestServiceException;
 }

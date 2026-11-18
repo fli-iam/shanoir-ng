@@ -16,8 +16,8 @@ import { HttpClient, HttpEvent, HttpEventType, HttpParams, HttpProgressEvent, Ht
 import { Injectable } from '@angular/core';
 import { firstValueFrom, last, map, mergeMap, Observable, shareReplay } from 'rxjs';
 
-import { TaskState, TaskStatus } from 'src/app/async-tasks/task.model';
-import { browserDownloadFileFromResponse } from 'src/app/utils/app.utils';
+import { TaskState, TaskStatus } from '@app/async-tasks/task.model';
+import { browserDownloadFileFromResponse } from '@app/utils/app.utils';
 
 declare let JSZip: any;
 

@@ -23,7 +23,8 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.temporal.ChronoField;
 import java.util.Date;
 
 /**
@@ -47,17 +48,36 @@ public final class DateTimeUtils {
         else return Date.from(localDate.atStartOfDay().atZone(ZoneId.of("UTC")).toInstant());
     }
 
+    /**
+     * The DICOM VR TM is HH[MM[SS[.FFFFFF]]], where the fractional part holds one
+     * to six digits, so HH, HHMM, HHMMSS and HHMMSS.F to HHMMSS.FFFFFF are all
+     * legal. Values are also padded with a trailing space to an even length.
+     *
+     * Only HHMMSS and HHMMSS.FFFFFF used to be accepted, so a legal value such as
+     * 120000.00 raised a DateTimeParseException. The components that are not
+     * present default to 0.
+     */
+    private static final DateTimeFormatter DICOM_TIME_FORMATTER = new DateTimeFormatterBuilder()
+            .appendValue(ChronoField.HOUR_OF_DAY, 2)
+            .optionalStart()
+            .appendValue(ChronoField.MINUTE_OF_HOUR, 2)
+            .optionalStart()
+            .appendValue(ChronoField.SECOND_OF_MINUTE, 2)
+            .optionalStart()
+            .appendFraction(ChronoField.NANO_OF_SECOND, 1, 6, true)
+            .optionalEnd()
+            .optionalEnd()
+            .optionalEnd()
+            .parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0)
+            .parseDefaulting(ChronoField.SECOND_OF_MINUTE, 0)
+            .parseDefaulting(ChronoField.NANO_OF_SECOND, 0)
+            .toFormatter();
+
     public static LocalTime stringToLocalTime(String time) {
-        if (time == null || time.isEmpty()) return null;
-
-        DateTimeFormatter fullFormatter = DateTimeFormatter.ofPattern("HHmmss.SSSSSS");
-        DateTimeFormatter shortFormatter = DateTimeFormatter.ofPattern("HHmmss");
-
-        try {
-            return LocalTime.parse(time, fullFormatter);
-        } catch (DateTimeParseException e) {
-            return LocalTime.parse(time, shortFormatter);
-        }
+        if (time == null) return null;
+        String trimmedTime = time.trim();
+        if (trimmedTime.isEmpty()) return null;
+        return LocalTime.parse(trimmedTime, DICOM_TIME_FORMATTER);
     }
 
     public static LocalDateTime dateToLocalDateTime(Date date) {

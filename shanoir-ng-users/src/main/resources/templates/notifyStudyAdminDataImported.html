@@ -27,6 +27,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <li th:each="serie : ${series}"><a th:href="${serie.url}" th:text="${serie.name}"></a></li>
     </ul>
     </p>
+    <p th:if="${quality_cards != null and !#lists.isEmpty(quality_cards)}">
+    Quality Card(s) applied: <span th:text="${#strings.listJoin(quality_cards, ', ')}"></span>.
+    </p>
     <p> Please feel free to check data consistency. </p>
     <p>Regards,<br/>
     Shanoir administrator</p>

@@ -12,25 +12,48 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, ChangeDetectionStrategy } from '@angular/core';
 
-import { Pipeline } from 'src/app/vip/models/pipeline';
-import { ImagesUrlUtil } from 'src/app/shared/utils/images-url.util';
+import { Pipeline } from '@app/vip/models/pipeline';
+import { PipelineGroup, PipelineVersion } from '@app/vip/models/pipeline-group';
+import { ImagesUrlUtil } from '@app/shared/utils/images-url.util';
 
 
 @Component({
     selector: 'app-pipeline',
     templateUrl: './pipeline.component.html',
     styleUrls: ['./pipeline.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: []
 })
 export class PipelineComponent implements OnInit {
 
-  @Input() pipeline: Pipeline;
+  @Input() group: PipelineGroup;
+  /** Identifier of the pipeline currently selected in the whole list, may belong to another tile. */
+  @Input() selectedIdentifier: string;
+  @Output() pipelineSelected: EventEmitter<Pipeline> = new EventEmitter<Pipeline>();
+
+  /** The version the picker is on, latest by default. */
+  pickedVersion: PipelineVersion;
   readonly ImagesUrlUtil = ImagesUrlUtil;
 
   ngOnInit(): void {
-      return;
+      this.pickedVersion = this.group?.versions[0];
+  }
+
+  get selected(): boolean {
+      return !!this.pickedVersion && this.pickedVersion.pipeline.identifier === this.selectedIdentifier;
+  }
+
+  select(): void {
+      if (this.pickedVersion) {
+          this.pipelineSelected.emit(this.pickedVersion.pipeline);
+      }
+  }
+
+  pickVersion(label: string): void {
+      this.pickedVersion = this.group.versions.find(version => version.label === label) ?? this.pickedVersion;
+      this.select();
   }
 
 }

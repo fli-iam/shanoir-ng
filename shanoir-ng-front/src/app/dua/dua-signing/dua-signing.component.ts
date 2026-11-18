@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 
@@ -27,6 +27,7 @@ import { CheckboxComponent } from '../../shared/checkbox/checkbox.component';
     selector: 'dua-signing',
     templateUrl: 'dua-signing.component.html',
     styleUrls: ['dua-signing.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [CheckboxComponent, FormsModule]
 })
 

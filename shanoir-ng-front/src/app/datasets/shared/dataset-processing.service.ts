@@ -37,11 +37,6 @@ export class DatasetProcessingService extends EntityService<DatasetProcessing> {
         datasetProcessingDTOService.setDatasetProcessingService(this);
     }
 
-	findAllByStudyIdAndSubjectId(studyId: number, subjectId: number): Promise<DatasetProcessing[]> {
-		return firstValueFrom(this.http.get<DatasetProcessingInDTO[]>(this.API_URL + '/study/' + studyId + '/subject/' + subjectId))
-            .then(dtos => this.mapEntityList(dtos));
-	}
-
     findByInputDatasetId(datasetId: number): Promise<DatasetProcessing[]> {
         return firstValueFrom(this.http.get<DatasetProcessingInDTO[]>(this.API_URL + '/inputDataset/' + datasetId))
             .then(dtos => this.mapEntityList(dtos));
@@ -83,15 +78,26 @@ export class DatasetProcessingService extends EntityService<DatasetProcessing> {
         return JSON.stringify(dto, this.customReplacer);
     }
 
+    /**
+     * The first input dataset of the given processing, or of the first of its children that holds
+     * one : an execution monitoring carries no input itself, they belong to the processings it ran.
+     */
     async getFirstRealInput(proc: DatasetProcessing): Promise<Dataset> {
-        if (proc?.inputDatasets?.length) {
+        if (!proc) {
+            return null;
+        }
+        if (proc.inputDatasets?.length) {
             return this.datasetService.get(proc.inputDatasets[0].id);
         }
 
         const children = await this.findByMonitoringId(proc.id);
-        if (children?.length) {
-            return null;
+        for (const child of children || []) {
+            // the monitoring endpoint nulls the relations, the child is fetched to get its inputs
+            const input: Dataset = await this.getFirstRealInput(await this.get(child.id));
+            if (input) {
+                return input;
+            }
         }
-        return this.getFirstRealInput(children[0]);
+        return null;
     }
 }

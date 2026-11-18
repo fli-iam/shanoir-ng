@@ -32,8 +32,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.zip.GZIPOutputStream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.io.FilenameUtils;
 import org.shanoir.ng.dataset.dto.InputDTO;
@@ -42,6 +40,7 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.datasetfile.DatasetFile;
+import org.shanoir.ng.download.ArchiveWriter;
 import org.shanoir.ng.download.DatasetDownloadError;
 import org.shanoir.ng.storage.StorageService;
 import org.slf4j.Logger;
@@ -52,8 +51,6 @@ import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriUtils;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.mail.MessagingException;
@@ -186,7 +183,7 @@ public final class DatasetFileUtils {
      * @throws MessagingException
      */
     public static List<String> copyFilesForDownload(StorageService storageService, final List<URL> urls,
-            final ZipOutputStream zipOutputStream, Dataset dataset, String subjectName, boolean keepName,
+            final ArchiveWriter archive, Dataset dataset, String subjectName, boolean keepName,
             String datasetFilePath, Map<String, List<String>> datasetDownloadNameListPerPath)
             throws Exception {
 
@@ -226,42 +223,31 @@ public final class DatasetFileUtils {
             boolean compress = decodedPath.endsWith(".nii");
             String zipFileName = compress ? fileName + ".gz" : fileName;
 
-            ZipEntry zipEntry = new ZipEntry(zipFileName);
-            zipEntry.setTime(System.currentTimeMillis());
-
             if (compress) {
                 Path tempGz = Files.createTempFile("nii-gz-", ".gz");
                 try {
                     try (InputStream resourceStream = resource.getInputStream()) {
                         compressGzipStream(resourceStream, tempGz);
                     }
-                    zipEntry.setSize(Files.size(tempGz));
-                    zipOutputStream.putNextEntry(zipEntry);
                     try (InputStream gzStream = Files.newInputStream(tempGz)) {
-                        StreamUtils.copy(gzStream, zipOutputStream);
+                        archive.addEntry(zipFileName, gzStream, Files.size(tempGz));
                     }
                 } finally {
                     Files.deleteIfExists(tempGz);
                 }
             } else {
-                long contentLength = resource.contentLength();
-                if (contentLength >= 0) {
-                    zipEntry.setSize(contentLength);
-                }
-                zipOutputStream.putNextEntry(zipEntry);
                 try (InputStream resourceStream = resource.getInputStream()) {
-                    StreamUtils.copy(resourceStream, zipOutputStream);
+                    archive.addEntry(zipFileName, resourceStream, resource.contentLength());
                 }
             }
 
-            zipOutputStream.closeEntry();
             filesInZip.add(zipFileName);
             index++;
         }
         return filesInZip;
     }
 
-    public static void writeManifestForExport(final ZipOutputStream zipOutputStream,
+    public static void writeManifestForExport(final ArchiveWriter archive,
             Map<Long, List<String>> filesByAcquisitionId) throws IOException {
         InputDTO input = new InputDTO();
         for (Map.Entry<Long, List<String>> entry : filesByAcquisitionId.entrySet()) {
@@ -273,14 +259,7 @@ public final class DatasetFileUtils {
             input.getSeries().add(serie);
         }
 
-        JsonFactory jsonFactory = new JsonFactory();
-        jsonFactory.configure(JsonGenerator.Feature.AUTO_CLOSE_TARGET, false);
-
-        ZipEntry zipEntry = new ZipEntry(INPUT);
-        zipEntry.setTime(System.currentTimeMillis());
-        zipOutputStream.putNextEntry(zipEntry);
-        new ObjectMapper(jsonFactory).writeValue(zipOutputStream, input);
-        zipOutputStream.closeEntry();
+        archive.addEntry(INPUT, new ObjectMapper().writeValueAsBytes(input));
     }
 
     public static String getFileName(boolean keepName, String srcFileName, String subjectName, Dataset dataset,

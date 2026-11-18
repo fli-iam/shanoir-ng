@@ -88,7 +88,7 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
     @Lazy
     private ExecutionMonitoringServiceImpl emProxyService;
 
-    public ExecutionMonitoring createExecutionMonitoring(ExecutionCandidateDTO sample) throws RestServiceException {
+    public ExecutionMonitoring createExecutionMonitoring(ExecutionCandidateDTO sample) throws RestServiceException, EntityNotFoundException {
         ExecutionMonitoring executionMonitoring = new ExecutionMonitoring();
 
         executionMonitoring.setName(sample.getPipelineIdentifier().replaceAll("[/.]", "_") + "_" + LocalDateTime.now().format(readableFormatter));
@@ -125,6 +125,14 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
 
 
     public void startMonitoringJob(ExecutionMonitoring createdMonitoring, ShanoirEvent event, Integer jobsNumber) {
+        Long userId = KeycloakUtil.getTokenUserId();
+
+        // Publish here, not in the monitoring loop: queued behind others, the job would show up late.
+        if (Objects.isNull(event) || !Objects.equals(event.getStatus(), ShanoirEvent.IN_PROGRESS)) {
+            event = initShanoirEvent(createdMonitoring, event, getExecLabel(createdMonitoring), jobsNumber, userId);
+            LOG.info("Monitoring of execution id: " + createdMonitoring.getId() + ", identifier: " + createdMonitoring.getPipelineIdentifier() + ", name: " + createdMonitoring.getName() + " started");
+        }
+
         Map<String, Object> monitoringMap = new HashMap<>();
         monitoringMap.put("monitoring", createdMonitoring);
         monitoringMap.put("event", event);
@@ -154,13 +162,6 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
                 Integer attempt = (Integer) emMap.get("attempt");
                 Integer jobsNumber = (Integer) emMap.get("jobsNumber");
                 String execLabel = getExecLabel(monitoring);
-
-
-                if (Objects.isNull(event) || !Objects.equals(event.getStatus(), ShanoirEvent.IN_PROGRESS)) {
-                    event = initShanoirEvent(monitoring, event, execLabel, jobsNumber);
-                    emMap.put("event", event);
-                    LOG.info("Monitoring of execution id: " + monitoring.getId() + ", identifier: " + monitoring.getPipelineIdentifier() + ", name: " + monitoring.getName() + " started");
-                }
 
                 try {
                     VipExecutionDTO dto = executionService.getExecutionAsServiceAccount(attempt, monitoring.getIdentifier()).block();
@@ -194,7 +195,6 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
                     if (!Objects.equals(dto.getStatus(), ExecutionStatus.RUNNING)) {
                         monitoringQueue.remove(emMap);
                     }
-                    Thread.sleep(10000);
                 } catch (Exception e) {
                     // Unwrap ReactiveException thrown from async method
                     Throwable ex = Exceptions.unwrap(e);
@@ -205,6 +205,7 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
                     monitoringQueue.remove(emMap);
                 }
             }
+            // Paces the whole cycle, so polling stays at sleepTime whatever the number of monitored executions.
             while (System.currentTimeMillis() - startTime < sleepTime) {
                 try {
                     Thread.sleep(1000);
@@ -244,14 +245,14 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
     /**
      * Create or update Shanoir event relative to an execution monitoring
      */
-    private ShanoirEvent initShanoirEvent(ExecutionMonitoring processing, ShanoirEvent event, String execLabel, Integer jobsNumber) {
+    private ShanoirEvent initShanoirEvent(ExecutionMonitoring processing, ShanoirEvent event, String execLabel, Integer jobsNumber, Long userId) {
         String startMsg = execLabel + " : " + ExecutionStatus.RUNNING.getRestLabel() + " (0/" + jobsNumber + " jobs done)";
 
         if (event == null) {
             event = new ShanoirEvent(
                     ShanoirEventType.EXECUTION_MONITORING_EVENT,
                     processing.getId().toString(),
-                    KeycloakUtil.getTokenUserId(),
+                    userId,
                     startMsg,
                     ShanoirEvent.IN_PROGRESS,
                     DEFAULT_PROGRESS);

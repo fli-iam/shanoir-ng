@@ -33,4 +33,5 @@ public interface ExaminationRepositoryCustom {
 
     List<Examination> findAllByStudyCenterOrStudyIdIn(Iterable<Pair<Long, Long>> studyCenterIds, Iterable<Long> studyIds);
 
+    List<Examination> findAllWithAcqAndDatasetsByStudyCenterOrStudyIdIn(Iterable<Pair<Long, Long>> studyCenterIds, Iterable<Long> studyIds);
 }

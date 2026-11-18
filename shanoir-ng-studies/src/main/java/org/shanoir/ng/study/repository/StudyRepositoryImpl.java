@@ -14,18 +14,21 @@
 
 package org.shanoir.ng.study.repository;
 
+import java.sql.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.shanoir.ng.study.dto.StudyStatisticsDTO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.ParameterMode;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.StoredProcedureQuery;
-import org.springframework.stereotype.Component;
-import org.shanoir.ng.study.dto.StudyStatisticsDTO;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.sql.Date;
 
 @Component
 public class StudyRepositoryImpl implements StudyRepositoryCustom {
@@ -56,30 +59,51 @@ public class StudyRepositoryImpl implements StudyRepositoryCustom {
         List<StudyStatisticsDTO> studyStatisticsList = new ArrayList<>();
 
         for (Object[] row : results) {
-
-            StudyStatisticsDTO dto = new StudyStatisticsDTO();
-
-            dto.setStudyId((Long) row[0]);
-            dto.setCenterId((Long) row[1]);
-            dto.setCenterName((String) row[2]);
-            dto.setCenterPrefix((String) row[3]);
-            dto.setSubjectId((Long) row[4]);
-            dto.setCommonName((String) row[5]);
-            dto.setExaminationId((Long) row[6]);
-            dto.setExaminationComment((String) row[7]);
-            dto.setExaminationDate((Date) row[8]);
-            dto.setDatasetAcquisitionId((Long) row[9]);
-            dto.setImportDate((Date) row[10]);
-            dto.setDatasetId((Long) row[11]);
-            dto.setDatasetName((String) row[12]);
-            dto.setModality((String) row[13]);
-            dto.setQuality((String) row[14]);
-
-            studyStatisticsList.add(dto);
-
+            studyStatisticsList.add(toStudyStatisticsDTO(row));
         }
 
         return studyStatisticsList;
+    }
+
+    /**
+     * Maps one row of the getStudyStatistics procedure.
+     */
+    static StudyStatisticsDTO toStudyStatisticsDTO(Object[] row) {
+        StudyStatisticsDTO dto = new StudyStatisticsDTO();
+        dto.setStudyId(toLong(row[0]));
+        dto.setCenterId(toLong(row[1]));
+        dto.setCenterName((String) row[2]);
+        dto.setCenterPrefix((String) row[3]);
+        dto.setSubjectId(toLong(row[4]));
+        dto.setCommonName((String) row[5]);
+        dto.setExaminationId(toLong(row[6]));
+        dto.setExaminationComment((String) row[7]);
+        dto.setExaminationDate(toSqlDate(row[8]));
+        dto.setDatasetAcquisitionId(toLong(row[9]));
+        dto.setImportDate(toSqlDate(row[10]));
+        dto.setDatasetId(toLong(row[11]));
+        dto.setDatasetName((String) row[12]);
+        dto.setModality((String) row[13]);
+        dto.setQuality((String) row[14]);
+        return dto;
+    }
+
+    private static Long toLong(Object value) {
+        return value != null ? ((Number) value).longValue() : null;
+    }
+
+    //Conversion needed since Hibernate 7, dates of native queries are now java.time types
+    private static Date toSqlDate(Object value) {
+        if (value == null) {
+            return null;
+        } else if (value instanceof LocalDate localDate) {
+            return Date.valueOf(localDate);
+        } else if (value instanceof LocalDateTime localDateTime) {
+            return Date.valueOf(localDateTime.toLocalDate());
+        } else if (value instanceof java.util.Date date) {
+            return new Date(date.getTime());
+        }
+        throw new IllegalArgumentException("Unexpected date type: " + value.getClass());
     }
 
 }

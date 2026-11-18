@@ -16,7 +16,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     @for (condition of rule.conditions; track condition; let i = $index) {
         <div class="condition">
             <condition
-                ruleScope="Examination"
+                ruleScope="DatasetAcquisition"
                 [(condition)]="rule.conditions[i]"
                 [mode]="mode"
                 [fieldOptions]="conditionFieldOptions"
@@ -40,7 +40,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <div>
             <span class="and-or">
                 And
-                <toggle-switch [(ngModel)]="rule.orConditions"></toggle-switch>
+                <toggle-switch [(ngModel)]="rule.orConditions" [ngModelOptions]="{ standalone: true }"></toggle-switch>
                 Or
             </span>
             <span class="add" (click)="addNewCondition()">
@@ -73,6 +73,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             [class.error]="showErrors && !rule.tag"
             [readOnly]="mode == 'view'"
             [(ngModel)]="rule.tag"
+            [ngModelOptions]="{ standalone: true }"
             [options]="tagOptions"
             (userChange)="userChange.emit(rule)"
             [clear]="false"

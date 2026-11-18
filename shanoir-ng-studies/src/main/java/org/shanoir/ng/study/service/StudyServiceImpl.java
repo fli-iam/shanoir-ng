@@ -15,6 +15,7 @@
 package org.shanoir.ng.study.service;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -37,9 +38,7 @@ import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.dto.StudyExaminationsDTO.StudyExaminationDTO;
 import org.shanoir.ng.shared.email.EmailStudy;
 import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
-import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
-import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.ShanoirException;
@@ -66,9 +65,6 @@ import org.shanoir.ng.studyexamination.StudyExaminationRepository;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.shanoir.ng.subject.service.SubjectService;
-import org.shanoir.ng.subjectstudy.model.SubjectStudy;
-import org.shanoir.ng.subjectstudy.model.SubjectStudyTag;
-import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
 import org.shanoir.ng.tag.model.StudyTag;
 import org.shanoir.ng.tag.model.Tag;
 import org.shanoir.ng.tag.repository.TagRepository;
@@ -81,13 +77,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 import jakarta.transaction.Transactional;
 
@@ -102,6 +98,9 @@ import jakarta.transaction.Transactional;
 public class StudyServiceImpl implements StudyService {
 
     private static final Logger LOG = LoggerFactory.getLogger(StudyServiceImpl.class);
+
+    @Value("${shanoir.userDefaultExpirationDays:183}")
+    private int userDefaultExpirationDays;
 
     @Autowired
     private StudyUserRepository studyUserRepository;
@@ -135,9 +134,6 @@ public class StudyServiceImpl implements StudyService {
 
     @Autowired
     private SubjectService subjectService;
-
-    @Autowired
-    private SubjectStudyRepository subjectStudyRepository;
 
     @Autowired
     private StudyExaminationRepository studyExaminationRepository;
@@ -187,12 +183,6 @@ public class StudyServiceImpl implements StudyService {
             }
         }
 
-        if (study.getSubjectStudyList() != null) {
-            for (SubjectStudy subjectStudy : study.getSubjectStudyList()) {
-                subjectStudy.setStudy(study);
-            }
-        }
-
         if (study.getTags() != null) {
             for (final Tag tag : study.getTags()) {
                 tag.setStudy(study);
@@ -206,6 +196,9 @@ public class StudyServiceImpl implements StudyService {
 
         if (study.getStudyUserList() != null) {
             for (final StudyUser studyUser : study.getStudyUserList()) {
+                if (studyUser.getStudyUserRights() == null || !studyUser.getStudyUserRights().contains(StudyUserRight.CAN_ADMINISTRATE)) {
+                    studyUser.setExpirationDate(LocalDate.now().plusDays(userDefaultExpirationDays));
+                }
                 // if dua file exists, set StudyUser to confirmed false
                 if (study.getDataUserAgreementPaths() != null && !study.getDataUserAgreementPaths().isEmpty()) {
                     studyUser.setConfirmed(false);
@@ -217,41 +210,12 @@ public class StudyServiceImpl implements StudyService {
                 // he doesn't have to sign it)
                 if (KeycloakUtil.getTokenUserId().equals(studyUser.getUserId())) {
                     studyUser.setConfirmed(true);
+                    studyUser.setExpirationDate(null);
                 }
             }
         }
 
-        List<SubjectStudy> subjectStudyListSave = null;
-        if (study.getSubjectStudyList() != null) {
-            subjectStudyListSave = new ArrayList<SubjectStudy>(study.getSubjectStudyList());
-        }
-        Map<Long, List<SubjectStudyTag>> subjectStudyTagSave = new HashMap<>();
-        study.setSubjectStudyList(null);
         Study studyDb = studyRepository.save(study);
-
-        if (subjectStudyListSave != null && !subjectStudyListSave.isEmpty()) {
-            updateTags(subjectStudyListSave, studyDb.getTags());
-            studyDb.setSubjectStudyList(new ArrayList<>());
-            for (SubjectStudy subjectStudy : subjectStudyListSave) {
-                SubjectStudy newSubjectStudy = new SubjectStudy();
-                newSubjectStudy.setPhysicallyInvolved(subjectStudy.isPhysicallyInvolved());
-                newSubjectStudy.setSubject(subjectStudy.getSubject());
-                newSubjectStudy.setSubjectStudyIdentifier(subjectStudy.getSubjectStudyIdentifier());
-                newSubjectStudy.setSubjectType(subjectStudy.getSubjectType());
-                newSubjectStudy.setStudy(studyDb);
-                subjectStudyTagSave.put(subjectStudy.getSubject().getId(), subjectStudy.getSubjectStudyTags());
-                studyDb.getSubjectStudyList().add(newSubjectStudy);
-            }
-            studyDb = studyRepository.save(studyDb);
-
-            for (SubjectStudy subjectStudy : studyDb.getSubjectStudyList()) {
-                subjectStudy.setSubjectStudyTags(subjectStudyTagSave.get(subjectStudy.getSubject().getId()));
-                for (SubjectStudyTag ssTag : subjectStudy.getSubjectStudyTags()) {
-                    ssTag.setSubjectStudy(subjectStudy);
-                }
-            }
-            studyDb = studyRepository.save(studyDb);
-        }
 
         updateStudyName(studyMapper.studyToStudyDTODetailed(studyDb));
 
@@ -338,6 +302,10 @@ public class StudyServiceImpl implements StudyService {
         studyDb.setVisibleByDefault(study.isVisibleByDefault());
         studyDb.setStudyCardPolicy(study.getStudyCardPolicy());
         studyDb.setWithExamination(study.isWithExamination());
+        // Exposing a study to Neurobagel publishes its metadata outside the institution: admins only
+        if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+            studyDb.setNeurobagelExport(study.isNeurobagelExport());
+        }
 
         if (study.getExtraDetails() != null) {
             StudyExtraDetails incoming = study.getExtraDetails();
@@ -384,41 +352,6 @@ public class StudyServiceImpl implements StudyService {
             }
         }
 
-        List<Subject> toBeDeleted = new ArrayList<Subject>();
-
-        if (study.getSubjectStudyList() != null) {
-            // Find all ids from new study
-            Set<Long> updatedIds = new HashSet<>();
-            for (SubjectStudy entity : study.getSubjectStudyList()) {
-                updatedIds.add(entity.getId());
-            }
-
-            // Find deleted subject study so we can eventualy delete subjects
-            List<Subject> removed = new ArrayList<Subject>();
-
-            for (SubjectStudy subjectStudyDb : studyDb.getSubjectStudyList()) {
-                if (!updatedIds.contains(subjectStudyDb.getId())) {
-                    Subject sub = subjectStudyDb.getSubject();
-                    removed.add(sub);
-
-                    eventService.publishEvent(
-                            new ShanoirEvent(
-                                    ShanoirEventType.REMOVE_SUBJECT_FROM_STUDY_EVENT,
-                                    sub.getId().toString(),
-                                    KeycloakUtil.getTokenUserId(),
-                                    "Subject " + sub.getName() + " (id: " + sub.getId() + ") removed from study "
-                                            + study.getName() + " (id: " + study.getId() + ")",
-                                    ShanoirEvent.SUCCESS,
-                                    study.getId()));
-                }
-            }
-            for (Subject subject : removed) {
-                if (this.subjectStudyRepository.countBySubject(subject) == 1L) {
-                    toBeDeleted.add(subject);
-                }
-            }
-        }
-
         // Update subjects
         if (study.getSubjects() != null) {
             Study oldStudy = studyRepository.findById(study.getId())
@@ -428,11 +361,8 @@ public class StudyServiceImpl implements StudyService {
             for (Subject s : oldStudy.getSubjects()) {
                 oldSubjectsMap.put(s.getId(), s);
             }
-
             for (Subject newSubject : study.getSubjects()) {
                 Subject oldSubject = oldSubjectsMap.get(newSubject.getId());
-
-                // Call update if necessary (only a few fields can be changed)
                 if (oldSubject != null && hasSubjectChanged(oldSubject, newSubject)) {
                     newSubject.setStudy(study);
                     subjectService.update(newSubject);
@@ -515,39 +445,6 @@ public class StudyServiceImpl implements StudyService {
                 || !Objects.equals(oldSub.getStudyIdentifier(), newSub.getStudyIdentifier());
     }
 
-    /**
-     * For each subject study tag of study, set the fresh tag id by looking into
-     * studyDb tags,
-     * then update db subject study tags lists with the given study
-     *
-     * @param subjectStudyList
-     * @param dbStudyTags
-     * @return updated study
-     */
-    private void updateTags(List<SubjectStudy> subjectStudyList, List<Tag> dbStudyTags) {
-        if (subjectStudyList == null || dbStudyTags == null) {
-            return;
-        }
-        for (SubjectStudy subjectStudy : subjectStudyList) {
-            if (subjectStudy.getTags() == null) {
-                continue;
-            }
-            for (Tag tag : subjectStudy.getTags()) {
-                if (tag.getId() == null) {
-                    Tag dbTag = dbStudyTags.stream().filter(
-                            upTag -> upTag.getColor().equals(tag.getColor())
-                                    && upTag.getName().equals(tag.getName()))
-                            .findFirst().orElse(null);
-                    if (dbTag == null) {
-                        throw new IllegalStateException(
-                                "Cannot link a new tag to a subject-study, this tag does not exist in the study");
-                    }
-                    tag.setId(dbTag.getId());
-                }
-            }
-        }
-    }
-
     private List<Long> getTagsToDelete(Study study, Study studyDb) {
         List<Long> tagsToDelete = new ArrayList<>();
         if (studyDb.getTags() != null && study.getTags() != null) {
@@ -624,7 +521,7 @@ public class StudyServiceImpl implements StudyService {
      * @param studies
      */
     private void setNumberOfSubjectsAndExaminations(List<Study> studies) {
-        List<Object[]> subjectsCount = subjectStudyRepository.countByStudyIdGroupBy();
+        List<Object[]> subjectsCount = subjectRepository.countByStudyIdGroupBy();
         HashMap<Long, Long> studyIdSubjectsCountMap = new HashMap<>();
         for (Object[] row : subjectsCount) {
             Long studyId = (Long) row[0];
@@ -684,6 +581,12 @@ public class StudyServiceImpl implements StudyService {
                 && !CollectionUtils.isEmpty(study.getDataUserAgreementPaths())
                 && !study.getDataUserAgreementPaths().get(0).equals(studyDb.getDataUserAgreementPaths().get(0));
 
+        // The study has a single DUA file: archive it once, not once per study user
+        // (the signatures of the study users are handled per user below)
+        if (updateDua || deleteDua) {
+            this.archiveDuaFile(studyDb);
+        }
+
         Map<Long, StudyUser> replacing = new HashMap<>();
         for (StudyUser su : study.getStudyUserList()) {
             if (su.getId() == null) {
@@ -705,11 +608,8 @@ public class StudyServiceImpl implements StudyService {
                         duaSigning.setTimestampOfAccepted(new Date());
                         dataUserAgreementService.update(duaSigning);
                     }
-                    this.archiveDuaFile(studyDb);
                 } else if (deleteDua) {
                     // existing DUA removed from study
-                    this.archiveDuaFile(studyDb);
-
                     su.setConfirmed(true);
                     // without DUA all StudyUser are confirmed, set back to true, if false before
                     dataUserAgreementService.deleteIncompleteDataUserAgreementForUserInStudy(studyDb, su.getUserId());
@@ -732,6 +632,14 @@ public class StudyServiceImpl implements StudyService {
             existingSu.setStudyUserRights(replacingSu.getStudyUserRights());
             existingSu.setConfirmed(replacingSu.isConfirmed());
             existingSu.setCenters(replacingSu.getCenters());
+            if (replacingSu.getStudyUserRights() != null && replacingSu.getStudyUserRights().contains(StudyUserRight.CAN_ADMINISTRATE)) {
+                // No expiration for admin users
+                existingSu.setExpirationDate(null);
+            } else if (replacingSu.getExpirationDate() == null) {
+                existingSu.setExpirationDate(LocalDate.now().plusDays(userDefaultExpirationDays));
+            } else {
+                existingSu.setExpirationDate(replacingSu.getExpirationDate());
+            }
             toBeUpdated.add(existingSu);
         }
 
@@ -740,6 +648,11 @@ public class StudyServiceImpl implements StudyService {
         if (!toBeCreated.isEmpty()) {
             for (StudyUser su : toBeCreated) {
                 su.setStudy(studyDb);
+                if (su.getStudyUserRights() != null && su.getStudyUserRights().contains(StudyUserRight.CAN_ADMINISTRATE)) {
+                    su.setExpirationDate(null);
+                } else if (su.getExpirationDate() == null) {
+                    su.setExpirationDate(LocalDate.now().plusDays(userDefaultExpirationDays));
+                }
             }
             // save them first to get their id
             for (StudyUser su : studyUserRepository.saveAll(toBeCreated)) {
@@ -793,6 +706,11 @@ public class StudyServiceImpl implements StudyService {
             return;
         }
         String originalFilename = study.getDataUserAgreementPaths().get(0);
+        if (!storageService.existsStudyData(study.getId(), originalFilename)) {
+            // e.g. already archived by a previous failed update: do not block the study update
+            LOG.warn("DUA file {} of study {} not found, nothing to archive.", originalFilename, study.getId());
+            return;
+        }
         String archiveFilename = "archive_"
                 + new SimpleDateFormat("yyyyMMddHHmm").format(new Date())
                 + "_" + originalFilename;
@@ -814,14 +732,14 @@ public class StudyServiceImpl implements StudyService {
             emailStudyUserAdded.setRecipients(recipients);
             final Long userId = KeycloakUtil.getTokenUserId();
             emailStudyUserAdded.setUserId(userId);
-            emailStudyUserAdded.setStudyId(study.getId().toString());
+            emailStudyUserAdded.setStudyId(study.getId());
             emailStudyUserAdded.setStudyName(study.getName());
             List<Long> studyUserIds = created.stream().map(StudyUser::getUserId).collect(Collectors.toList());
             emailStudyUserAdded.setStudyUsers(studyUserIds);
             try {
                 rabbitTemplate.convertAndSend(RabbitMQConfiguration.STUDY_USER_MAIL_QUEUE,
                         objectMapper.writeValueAsString(emailStudyUserAdded));
-            } catch (AmqpException | JsonProcessingException e) {
+            } catch (AmqpException | JacksonException e) {
                 LOG.error("Could not send email for study user report. ", e);
             }
         }
@@ -844,7 +762,7 @@ public class StudyServiceImpl implements StudyService {
     private void sendMembersApprovalEmailReport(Study study) {
         EmailStudy email = new EmailStudy();
         email.setUserId(KeycloakUtil.getTokenUserId());
-        email.setStudyId(study.getId().toString());
+        email.setStudyId(study.getId());
         email.setStudyName(study.getName());
         List<Long> studyUserIds = study.getStudyUserList().stream().map(StudyUser::getUserId).collect(Collectors.toList());
         email.setStudyUsers(studyUserIds);
@@ -859,7 +777,7 @@ public class StudyServiceImpl implements StudyService {
     private EmailStudy buildAdminEmailReport(Study study) {
         EmailStudy email = new EmailStudy();
         email.setUserId(KeycloakUtil.getTokenUserId());
-        email.setStudyId(study.getId().toString());
+        email.setStudyId(study.getId());
         email.setStudyName(study.getName());
 
         email.setDescription(study.getDescription());
@@ -913,6 +831,19 @@ public class StudyServiceImpl implements StudyService {
     }
 
     @Override
+    public void updateStudyUserToStudy(StudyUser studyUser, Study study) {
+        studyUserRepository.save(studyUser);
+        // Send updates via RabbitMQ
+        try {
+            List<StudyUserCommand> commands = new ArrayList<>();
+            commands.add(new StudyUserCommand(CommandType.UPDATE, studyUser));
+            studyUserCom.broadcast(commands);
+        } catch (MicroServiceCommunicationException e) {
+            LOG.error("Could not transmit study-user update info through RabbitMQ", e);
+        }
+    }
+
+    @Override
     public void removeUserFromStudy(Long studyId, Long userId) {
         StudyUser studyUser = studyUserRepository.findByUserIdAndStudy_Id(userId, studyId);
         Study study = studyRepository.findById(studyId).orElse(null);
@@ -931,7 +862,7 @@ public class StudyServiceImpl implements StudyService {
         try {
             return (String) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_UPDATE_QUEUE,
                     objectMapper.writeValueAsString(study));
-        } catch (AmqpException | JsonProcessingException e) {
+        } catch (AmqpException | JacksonException e) {
             throw new MicroServiceCommunicationException(
                     "Error while communicating with datasets MS to update study name.", e);
         }
@@ -995,6 +926,14 @@ public class StudyServiceImpl implements StudyService {
     }
 
     @Override
+    public List<Study> findExpiredStudies() {
+        Long userId = KeycloakUtil.getTokenUserId();
+        List<Study> studies = this.studyRepository.findDistinctByStudyUserListUserIdAndStudyUserListExpirationDateBefore(userId, LocalDate.now());
+        setNumberOfSubjectsAndExaminations(studies);
+        return studies;
+    }
+
+    @Override
     public List<Study> findDraftStudies() {
         return this.studyRepository.findByIsDraftTrue();
     }
@@ -1010,7 +949,7 @@ public class StudyServiceImpl implements StudyService {
             } else {
                 dto = new StudyStorageVolumeDTO();
             }
-        } catch (AmqpException | JsonProcessingException e) {
+        } catch (AmqpException | JacksonException e) {
             LOG.error("Error while fetching study [{}] datasets volume storage details.", studyId, e);
             return null;
         }
@@ -1034,7 +973,7 @@ public class StudyServiceImpl implements StudyService {
             } else {
                 return new HashMap<>();
             }
-        } catch (AmqpException | JsonProcessingException e) {
+        } catch (AmqpException | JacksonException e) {
             LOG.error("Error while fetching studies [{}] datasets volume storage details.", studyIds, e);
             return null;
         }

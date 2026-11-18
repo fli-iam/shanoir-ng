@@ -17,7 +17,10 @@ package org.shanoir.ng.subject.model;
 import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 
+
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
+import java.io.Serial;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
@@ -30,6 +33,7 @@ public class UserPersonalCommentSubject extends HalEntity {
     /**
      * UID
      */
+    @Serial
     private static final long serialVersionUID = 153755891423362269L;
 
     /** The subject. */

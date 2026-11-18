@@ -1,0 +1,616 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+package org.shanoir.ng.shared.configuration;
+
+import java.util.List;
+
+import org.springframework.amqp.AmqpRejectAndDontRequeueException;
+import org.springframework.amqp.core.FanoutExchange;
+import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.TopicExchange;
+import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.support.converter.ContentTypeDelegatingMessageConverter;
+import org.springframework.amqp.support.converter.JacksonJsonMessageConverter;
+import org.springframework.amqp.support.converter.MessageConversionException;
+import org.springframework.amqp.support.converter.MessageConverter;
+import org.springframework.amqp.support.converter.SimpleMessageConverter;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.amqp.autoconfigure.RabbitListenerRetrySettingsCustomizer;
+import org.springframework.boot.amqp.autoconfigure.RabbitTemplateConfigurer;
+import org.springframework.boot.amqp.autoconfigure.SimpleRabbitListenerContainerFactoryConfigurer;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+/**
+ * Centralized configuration for RabbitMQ.
+ * Declares:
+ * - all queues
+ * - all exchanges
+ * @author JComeD
+ *
+ */
+@Configuration
+public class RabbitMQConfiguration {
+
+    @Autowired
+    private ConnectionFactory connectionFactory;
+
+    @Bean
+    public MessageConverter rabbitMessageConverter() {
+        ContentTypeDelegatingMessageConverter converter =
+                new ContentTypeDelegatingMessageConverter(
+                        new JacksonJsonMessageConverter());
+        converter.addDelegate(
+                "text/plain",
+                new SimpleMessageConverter());
+        converter.addDelegate(
+                "application/json",
+                new JacksonJsonMessageConverter());
+        converter.addDelegate(
+                "text/x-json",
+                new JacksonJsonMessageConverter());
+        return converter;
+    }
+
+    @Bean(name = "multipleConsumersFactory")
+    public SimpleRabbitListenerContainerFactory multipleConsumersFactory(
+            ObjectProvider<SimpleRabbitListenerContainerFactoryConfigurer> configurer) {
+        SimpleRabbitListenerContainerFactory factory = createListenerContainerFactory(configurer);
+        factory.setMaxConcurrentConsumers(100);
+        factory.setConcurrentConsumers(10);
+        factory.setStartConsumerMinInterval(100L);
+        factory.setConsecutiveActiveTrigger(1);
+        factory.setAutoStartup(true);
+        factory.setPrefetchCount(1);
+        return factory;
+    }
+
+    @Bean(name = "singleConsumerFactory")
+    public SimpleRabbitListenerContainerFactory singleConsumerFactory(
+            ObjectProvider<SimpleRabbitListenerContainerFactoryConfigurer> configurer) {
+        SimpleRabbitListenerContainerFactory factory = createListenerContainerFactory(configurer);
+        factory.setConcurrentConsumers(1);
+        return factory;
+    }
+
+    /**
+     * Configured through Spring Boot's SimpleRabbitListenerContainerFactoryConfigurer, so that the
+     * spring.rabbitmq.listener.simple.* properties (e.g. retry) are applied, as for Boot's default factory.
+     * A rejected message is never requeued: it would otherwise be redelivered endlessly.
+     * The configurer is absent when RabbitMQ auto-configuration is not loaded (tests).
+     */
+    private SimpleRabbitListenerContainerFactory createListenerContainerFactory(
+            ObjectProvider<SimpleRabbitListenerContainerFactoryConfigurer> configurer) {
+        SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
+        configurer.ifAvailable(c -> c.configure(factory, connectionFactory));
+        // keep the consumer threads used so far, even when spring.threads.virtual.enabled is set
+        factory.setTaskExecutor(null);
+        factory.setConnectionFactory(connectionFactory);
+        factory.setMessageConverter(rabbitMessageConverter());
+        factory.setDefaultRequeueRejected(false);
+        return factory;
+    }
+
+    /**
+     * Listener retry (spring.rabbitmq.listener.simple.retry.*) does not retry exceptions that will
+     * fail again on every attempt: the message is rejected at once. Causes are also checked, as the
+     * listener exception arrives wrapped by the container.
+     */
+    @Bean
+    public RabbitListenerRetrySettingsCustomizer listenerRetrySettingsCustomizer() {
+        return settings -> settings.setExceptionExcludes(
+                List.of(AmqpRejectAndDontRequeueException.class, MessageConversionException.class));
+    }
+
+    /**
+     * Configured through Spring Boot's RabbitTemplateConfigurer, so that the
+     * spring.rabbitmq.template.* properties (e.g. reply-timeout) are applied:
+     * declaring this bean disables Boot's auto-configured RabbitTemplate.
+     * The configurer is absent when RabbitMQ auto-configuration is not loaded (tests).
+     */
+    @Bean
+    public RabbitTemplate rabbitTemplate(ObjectProvider<RabbitTemplateConfigurer> configurer) {
+        RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
+        configurer.ifAvailable(c -> c.configure(rabbitTemplate, connectionFactory));
+        rabbitTemplate.setMessageConverter(rabbitMessageConverter());
+        return rabbitTemplate;
+    }
+
+    ////////////////// QUEUES //////////////////
+
+    /** Queue to create get equipment ID from code. */
+    public static final String ACQUISITION_EQUIPMENT_CODE_QUEUE = "acquisition-equipment-code-queue";
+
+    public static final String ACQUISITION_EQUIPMENT_CREATE_QUEUE = "acquisition-equipment-create-queue";
+
+    /** Queue to retrieve the center ID from an acquisition equipment ID. */
+    public static final String ACQUISITION_EQUIPMENT_UPDATE_QUEUE = "acquisition-equipment-update-queue";
+
+    /** Queue to make anima to nifti conversion. */
+    public static final String ANIMA_CONVERSION_QUEUE = "anima-conversion-queue";
+
+    /** Queue to make bruker to dicom conversion. */
+    public static final String BRUKER_CONVERSION_QUEUE = "bruker-conversion-queue";
+
+    /** Center created => notify MS Datasets to change database. */
+    public static final String CENTER_CREATE_QUEUE = "center-create-queue";
+
+    /** Center deleted => notify MS Datasets to change database. */
+    public static final String CENTER_DELETE_QUEUE = "center-delete-queue";
+
+    /** Center name updated => notify MS Datasets to change database. */
+    public static final String CENTER_UPDATE_QUEUE = "center-update-queue";
+
+    /** Copy datasets from one study to another. */
+    public static final String COPY_DATASETS_TO_STUDY_QUEUE = "copy-datasets-to-study-queue";
+
+    /** Delete animal subject => Delete associated subject. */
+    public static final String DELETE_ANIMAL_SUBJECT_QUEUE = "delete-animal-subject-queue";
+
+    /** Copy animal subject given the subject exists. */
+    public static final String COPY_ANIMAL_SUBJECT_QUEUE = "copy-animal-subject-queue";
+
+    /** Study deleted => Delete associated datasets. */
+    public static final String DELETE_STUDY_QUEUE = "delete-study-queue";
+
+    /** Delete subject => Delete associated examination / datasets. */
+    public static final String DELETE_SUBJECT_QUEUE = "delete-subject-queue";
+
+    /** Delete user queue. */
+    public static final String DELETE_USER_QUEUE = "delete-user-queue";
+
+    /** Queue to send dua draft by mail */
+    public static final String DUA_DRAFT_MAIL_QUEUE = "dua-draft-mail-queue";
+
+    /** Queue to get an equipment id from a code. */
+    public static final String EQUIPMENT_FROM_CODE_QUEUE = "equipment-from-code-queue";
+
+    /** Monitor execution of long tasks. */
+    public static final String EXECUTION_MONITORING_TASK = "execution-monitoring-task";
+
+    /** Queue to create exam for import bids. */
+    public static final String EXAMINATION_CREATION_QUEUE = "examination-creation-queue";
+
+    /** Queue to create examination extra data from import */
+    public static final String EXAMINATION_EXTRA_DATA_QUEUE = "examination-extra-data-queue";
+
+    /** Queue used to get information for study_examination relationship.*/
+    public static final String EXAMINATION_STUDY_QUEUE = "examination-study-queue";
+
+    /** Queue used to get information for multiple study_examination relationships.*/
+    public static final String EXAMINATION_STUDIES_QUEUE = "examination-studies-queue";
+
+    /** Queue used to get information for study_examination deletion relationship.*/
+    public static final String EXAMINATION_STUDY_DELETE_QUEUE = "examination-study-delete-queue";
+
+    /** Queue to create all bids dataset acquisitions */
+    public static final String IMPORTER_BIDS_DATASET_QUEUE = "importer-bids-dataset-queue";
+
+    /** Queue used to import datasets IMPORT => DATASET. */
+    public static final String IMPORTER_QUEUE_DATASET = "importer-queue-dataset";
+
+    /** Send a mail from dataset microservice to ms users for import dataset failure*/
+    public static final String IMPORT_DATASET_FAILED_MAIL_QUEUE = "import-dataset-failed-mail-queue";
+
+    /** Send a mail from dataset microservice to ms users */
+    public static final String IMPORT_DATASET_MAIL_QUEUE = "import-dataset-mail-queue";
+
+    /** Send a mail from dataset microservice to ms users when extra data files are added */
+    public static final String EXTRA_DATA_MAIL_QUEUE = "extra-data-mail-queue";
+
+    /** Send a mail from dataset microservice to ms users when datasets are copied into a study */
+    public static final String DATASETS_COPIED_MAIL_QUEUE = "datasets-copied-mail-queue";
+
+    /** Queue used to import eeg data */
+    public static final String IMPORT_EEG_QUEUE = "import-eeg-queue";
+
+    /** Queue to get the study card from a equipment code. */
+    public static final String IMPORT_STUDY_CARD_QUEUE = "import-study-card-queue";
+
+    /** Queue to re-convert using a different nifti converter */
+    public static final String NIFTI_CONVERSION_QUEUE = "nifti-conversion-queue";
+
+    /** Queue to consume BIDS related events */
+    public static final String RELOAD_BIDS = "reload-bids-queue";
+
+    /** Queue for all shanoir events. */
+    public static final String SHANOIR_EVENTS_QUEUE = "shanoir-events-queue";
+
+    public static final String STUDY_ADMINS_QUEUE = "study-admin-queue";
+
+    /** Queue used to get anonymisation profile of a study. */
+    public static final String STUDY_ANONYMISATION_PROFILE_QUEUE = "study-anonymisation-profile-queue";
+
+    /** Calculate storage volume for datasets linked to a study. */
+    public static final String STUDY_DATASETS_DETAILED_STORAGE_VOLUME = "study-datasets-detailed-storage-volume";
+
+    /** Calculate total storage volume for datasets linked to a study. */
+    public static final String STUDY_DATASETS_TOTAL_STORAGE_VOLUME = "study-datasets-total-storage-volume";
+
+    /** Queue used to get the list of studies I can Admin. */
+    public static final String STUDY_I_CAN_ADMIN_QUEUE = "study-i-can-admin";
+
+    /** Queue used to get the name of a study from ID */
+    public static final String STUDY_NAME_QUEUE = "study-name-queue";
+
+    /** Study name updated => notify dataset MS to change database. */
+    public static final String STUDY_UPDATE_QUEUE = "study-update-queue";
+
+    /** Study name updated => notify dataset MS to change database. */
+    public static final String STUDY_DRAFT_STATE_QUEUE = "study-draft-state-queue";
+
+    /** Queue to create a study_user when subscribing to a study */
+    public static final String STUDY_SUBSCRIPTION_QUEUE = "study-subscription-queue";
+
+    /** Create tags on subject-study via quality control using study cards: ms datasets -> ms studies */
+    public static final String STUDIES_SUBJECT_STUDY_STUDY_CARD_TAG = "studies-subject-study-study-card-tag";
+
+    /** participants.tsv of a study, from a ParticipantsTsvRequestDTO: ms datasets -> ms studies */
+    public static final String STUDY_PARTICIPANTS_TSV = "study-participants-tsv";
+
+    /**
+     * First examination date of each subject of a study, as a ParticipantsTsvRequestDTO: ms studies -> ms datasets.
+     * Used for the subject ages of participants.tsv files built by ms studies.
+     */
+    public static final String STUDY_FIRST_EXAMINATION_DATES = "study-first-examination-dates";
+
+    /**
+     * Neurobagel export: ms datasets writes the imaging table of a study into the shared bids-data volume
+     * and replies with the file name: ms studies -> ms datasets. The table can be several MB, so it does not
+     * travel through RabbitMQ.
+     */
+    public static final String NEUROBAGEL_IMAGING_TSV = "neurobagel-imaging-tsv";
+
+    /** Send a mail from studies microservice to ms users */
+    public static final String STUDY_USER_MAIL_QUEUE = "study-user-mail-queue";
+
+    /** Send a mail from studies microservice when a study is created */
+    public static final String DRAFT_STUDY_MAIL_QUEUE = "draft-study-mail-queue";
+
+    /** Send a mail from studies microservice when a study is created */
+    public static final String APPROVE_STUDY_MAIL_QUEUE = "approve-study-mail-queue";
+
+    /** Update / create a study user to dataset MS. */
+    public static final String STUDY_USER_QUEUE_DATASET = "study-user-queue-dataset";
+
+    /** Update / create a study user to import MS. */
+    public static final String STUDY_USER_QUEUE_IMPORT = "study-user-queue-import";
+
+    /** Update / create a study user to users MS. */
+    public static final String STUDY_USER_QUEUE_USERS = "study-user-queue-users";
+
+    public static final String SUBJECT_BATCH_UPDATE_QUEUE = "subject_batch_update_queue";
+
+    /** Subject name updated => notify dataset MS to change database. */
+    public static final String SUBJECT_UPDATE_QUEUE = "subject-update-queue";
+
+    public static final String SUBJECTS_QUEUE_WITH_DATASETS = "subjects-queue-with-datasets";
+
+    public static final String SUBJECTS_QUEUE_WITHOUT_DATASETS = "subjects-queue-without-datasets";
+
+    /** Preclinical subject creation => Check if a subject with this name already exists **/
+    public static final String SUBJECTS_NAME_QUEUE = "subjects-name-queue";
+
+    /** Subject deletion => Check if some data of the subject was copied into another study **/
+    public static final String SUBJECT_HAS_COPIED_DATA_QUEUE = "subject-has-copied-data-queue";
+
+    ////////////////// EXCHANGES //////////////////
+
+    /** Exchange used to publish / treat all sort of shanoir events. */
+    public static final String EVENTS_EXCHANGE = "events-exchange";
+
+    /** Exchange to notify when a user / study is updated / deleted. */
+    public static final String STUDY_USER_EXCHANGE = "study-user-exchange";
+
+    ////////////////// BEANS //////////////////
+
+    @Bean
+    public static Queue acquisitionEquipmentCodeQueue() {
+        return new Queue(ACQUISITION_EQUIPMENT_CODE_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue acquisitionEquipmentCreateQueue() {
+        return new Queue(ACQUISITION_EQUIPMENT_CREATE_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue acquisitionEquipmentUpdateQueue() {
+        return new Queue(ACQUISITION_EQUIPMENT_UPDATE_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue animaConversionQueue() {
+        return new Queue(ANIMA_CONVERSION_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue brukerConversionQueue() {
+        return new Queue(BRUKER_CONVERSION_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue centerCreateQueue() {
+        return new Queue(CENTER_CREATE_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue centerDeleteQueue() {
+        return new Queue(CENTER_DELETE_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue centerUpdateQueue() {
+        return new Queue(CENTER_UPDATE_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue copyDatasetToStudyQueue() {
+        return new Queue(COPY_DATASETS_TO_STUDY_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue deleteAnimalSubjectQueue() {
+        return new Queue(DELETE_ANIMAL_SUBJECT_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue copyAnimalSubjectQueue() {
+        return new Queue(COPY_ANIMAL_SUBJECT_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue deleteSubjectQueue() {
+        return new Queue(DELETE_SUBJECT_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue deleteStudyQueue() {
+        return new Queue(DELETE_STUDY_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue deleteUserQueue() {
+        return new Queue(DELETE_USER_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue duaDraftMailQueue() {
+        return new Queue(DUA_DRAFT_MAIL_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue equipmentFromCodeQueue() {
+        return new Queue(EQUIPMENT_FROM_CODE_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue executionMonitoringEventQueue() {
+        return new Queue(EXECUTION_MONITORING_TASK, true);
+    }
+
+    @Bean
+    public static Queue examinationCreationQueue() {
+        return new Queue(EXAMINATION_CREATION_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue examinationExtraDataQueue() {
+        return new Queue(EXAMINATION_EXTRA_DATA_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue examinationStudyQueue() {
+        return new Queue(EXAMINATION_STUDY_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue examinationStudyDeleteQueue() {
+        return new Queue(EXAMINATION_STUDY_DELETE_QUEUE, true);
+    }
+
+    @Bean
+    public FanoutExchange fanout() {
+        return new FanoutExchange(STUDY_USER_EXCHANGE, true, false);
+    }
+
+    @Bean
+    public static Queue getShanoirEventsQueue() {
+        return new Queue(SHANOIR_EVENTS_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue importBidsDatasetQueue() {
+        return new Queue(IMPORTER_BIDS_DATASET_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue importDatasetFailedMailQueue() {
+        return new Queue(IMPORT_DATASET_FAILED_MAIL_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue importDatasetMailQueue() {
+        return new Queue(IMPORT_DATASET_MAIL_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue extraDataMailQueue() {
+        return new Queue(EXTRA_DATA_MAIL_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue datasetsCopiedMailQueue() {
+        return new Queue(DATASETS_COPIED_MAIL_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue importEEGQueue() {
+        return new Queue(IMPORT_EEG_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue importerQueue() {
+        return new Queue(IMPORTER_QUEUE_DATASET, true);
+    }
+
+    @Bean
+    public static Queue importStudyCardQueue() {
+        return new Queue(IMPORT_STUDY_CARD_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue niftiConversionQueue() {
+        return new Queue(NIFTI_CONVERSION_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue reloadBidsQueue() {
+        return new Queue(RELOAD_BIDS, true);
+    }
+
+    @Bean
+    public static Queue studiesSubjectStudyStudyCardTagQueue() {
+        return new Queue(STUDIES_SUBJECT_STUDY_STUDY_CARD_TAG, true);
+    }
+
+    @Bean
+    public static Queue studyAdminQueue() {
+        return new Queue(STUDY_ADMINS_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue studyAnonymisationProfileQueue() {
+        return new Queue(STUDY_ANONYMISATION_PROFILE_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue studyDatasetsDetailedStorageVolumeQueue() {
+        return new Queue(STUDY_DATASETS_DETAILED_STORAGE_VOLUME, true);
+    }
+
+    @Bean
+    public static Queue studyDatasetsTotalStorageVolumeQueue() {
+        return new Queue(STUDY_DATASETS_TOTAL_STORAGE_VOLUME, true);
+    }
+
+    @Bean
+    public static Queue studyICanAdminQueue() {
+        return new Queue(STUDY_I_CAN_ADMIN_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue studyNameQueue() {
+        return new Queue(STUDY_NAME_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue studyNameUpdateQueue() {
+        return new Queue(STUDY_UPDATE_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue studyDraftStateQueue() {
+        return new Queue(STUDY_DRAFT_STATE_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue studySubscriptionQueue() {
+        return new Queue(STUDY_SUBSCRIPTION_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue studyUserDatasetQueue() {
+        return new Queue(STUDY_USER_QUEUE_DATASET, true);
+    }
+
+    @Bean
+    public static Queue studyUserMailQueue() {
+        return new Queue(STUDY_USER_MAIL_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue studyCreatedMailQueue() {
+        return new Queue(DRAFT_STUDY_MAIL_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue studyDraftStateMailQueue() {
+        return new Queue(APPROVE_STUDY_MAIL_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue studyParticipantsTsvQueue() {
+        return new Queue(STUDY_PARTICIPANTS_TSV, true);
+    }
+
+    @Bean
+    public static Queue studyFirstExaminationDatesQueue() {
+        return new Queue(STUDY_FIRST_EXAMINATION_DATES, true);
+    }
+
+    @Bean
+    public static Queue neurobagelImagingTsvQueue() {
+        return new Queue(NEUROBAGEL_IMAGING_TSV, true);
+    }
+
+    @Bean
+    public static Queue studyUserQueueImport() {
+        return new Queue(STUDY_USER_QUEUE_IMPORT, true);
+    }
+
+    @Bean
+    public static Queue studyUserQueueUsers() {
+        return new Queue(STUDY_USER_QUEUE_USERS, true);
+    }
+
+    @Bean
+    public Queue subjectBatchUpdateQueue() {
+        return new Queue(SUBJECT_BATCH_UPDATE_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue subjectUpdateQueue() {
+        return new Queue(SUBJECT_UPDATE_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue subjectsNameQueue() {
+        return new Queue(SUBJECTS_NAME_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue subjectHasCopiedDataQueue() {
+        return new Queue(SUBJECT_HAS_COPIED_DATA_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue subjectsQueue() {
+        return new Queue(SUBJECTS_QUEUE_WITH_DATASETS, true);
+    }
+
+    @Bean
+    public static Queue subjectsWithoutDatasetsQueue() {
+        return new Queue(SUBJECTS_QUEUE_WITHOUT_DATASETS, true);
+    }
+
+    @Bean
+    public TopicExchange topicExchange() {
+        return new TopicExchange(EVENTS_EXCHANGE);
+    }
+
+}

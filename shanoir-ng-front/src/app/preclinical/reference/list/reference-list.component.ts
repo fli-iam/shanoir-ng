@@ -12,9 +12,9 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import {Component,ViewChild} from '@angular/core';
+import {Component, ViewChild, ChangeDetectionStrategy} from '@angular/core';
 
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
 
 import { Reference } from '../shared/reference.model';
 import { ReferenceService } from '../shared/reference.service';
@@ -26,6 +26,7 @@ import { BrowserPaginEntityListComponent } from '../../../shared/components/enti
     selector: 'reference-list',
     templateUrl: 'reference-list.component.html',
     styleUrls: ['reference-list.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [TableComponent]
 })
     

@@ -1,0 +1,56 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
+<div [formGroup]="form">
+    @if (memberCount > 0) {
+        <ol>
+            <li>
+                <label>Recipients</label>
+                <span class="right-col">{{ memberCount }} member{{ memberCount > 1 ? 's' : '' }} of {{ study.name }}</span>
+            </li>
+            <li class="info">
+                <i class="fas fa-circle-info"></i>
+                Each member gets an individual email that already opens with <b>Dear [first name] [last name],</b>
+                and is signed with your name as administrator of {{ study.name }}. Write only the body of the message,
+                no greeting and no signature. The name of this Shanoir instance and the name of the study are added
+                at the beginning of the subject.
+            </li>
+            <li>
+                <label>Subject</label>
+                <span class="right-col">
+                    <input type="text" id="subject" formControlName="subject" maxlength="255" />
+                    @if (hasError('subject', ['required'])) {
+                        <label animate.enter="slide-down-error" animate.leave="slide-up-error" class="form-validation-alert">Subject is required!</label>
+                    }
+                    @if (hasError('subject', ['maxlength'])) {
+                        <label animate.enter="slide-down-error" animate.leave="slide-up-error" class="form-validation-alert">Length must not exceed 255!</label>
+                    }
+                </span>
+            </li>
+            <li>
+                <label>Message</label>
+                <span class="right-col">
+                    <textarea id="content" formControlName="content" rows="12" style="width: 600px;"></textarea>
+                    @if (hasError('content', ['required'])) {
+                        <label animate.enter="slide-down-error" animate.leave="slide-up-error" class="form-validation-alert">Message is required!</label>
+                    }
+                </span>
+                <tool-tip>The message is sent as plain text: line breaks are kept, formatting tags are not interpreted.</tool-tip>
+            </li>
+        </ol>
+        <button class="next" [disabled]="!form.valid || sending" (click)="send()">Send email</button>
+    } @else {
+        <p>This study has no members to email.</p>
+    }
+</div>

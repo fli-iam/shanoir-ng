@@ -23,8 +23,8 @@ import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.mockito.Mockito;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.ReferenceModelUtil;
@@ -44,13 +44,13 @@ public class ReferenceServiceTest {
     private static final Long REFERENCE_ID = 1L;
     private static final String UPDATED_REFERENCE_VALUE = "monkey";
 
-    @Mock
+    @MockitoBean
     private RefsRepository refsRepository;
 
-    @Mock
+    @MockitoBean
     private RabbitTemplate rabbitTemplate;
 
-    @InjectMocks
+    @Autowired
     private RefsServiceImpl referenceService;
 
     @BeforeEach

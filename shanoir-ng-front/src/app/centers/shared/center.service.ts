@@ -43,7 +43,9 @@ export class CenterService extends EntityService<Center> {
     }
 
     getCentersByStudyId(studyId: number): Promise<Center[]> {
-        return firstValueFrom(this.http.get<Center[]>(AppUtils.BACKEND_API_CENTER_STUDY_URL + "/" + studyId));
+        // 204 (no accessible center) comes back as null
+        return firstValueFrom(this.http.get<Center[]>(AppUtils.BACKEND_API_CENTER_STUDY_URL + "/" + studyId))
+            .then(centers => centers ?? []);
     }
 
     protected mapEntity = (dto: CenterDTO, result?: Center): Promise<Center> => {

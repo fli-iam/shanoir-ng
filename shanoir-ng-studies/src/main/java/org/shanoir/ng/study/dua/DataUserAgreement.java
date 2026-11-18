@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.study.dua;
 
+import java.io.Serial;
 import java.util.Date;
 
 import org.hibernate.annotations.CreationTimestamp;
@@ -35,6 +36,7 @@ import jakarta.validation.constraints.NotNull;
 @GenericGenerator(name = "IdOrGenerate", strategy = "org.shanoir.ng.shared.model.UseIdOrGenerate")
 public class DataUserAgreement extends AbstractEntity {
 
+    @Serial
     private static final long serialVersionUID = 6095755233940273029L;
 
     @ManyToOne

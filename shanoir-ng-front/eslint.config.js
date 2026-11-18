@@ -17,17 +17,17 @@ const eslint = require('@eslint/js');
 const tseslint = require('typescript-eslint');
 const angular = require('angular-eslint');
 const unusedImports = require('eslint-plugin-unused-imports');
-const importPlugin = require('eslint-plugin-import');
+const importPlugin = require('eslint-plugin-import-x');
 
 module.exports = tseslint.config(
     {
         files: ['**/*.ts'],
         plugins: {
             'unused-imports': unusedImports,
-            import: importPlugin,
+            'import-x': importPlugin,
         },
         settings: {
-            'import/resolver': {
+            'import-x/resolver': {
                 typescript: {
                     project: './tsconfig.json',
                 },
@@ -40,22 +40,10 @@ module.exports = tseslint.config(
         },
         rules: {
             '@typescript-eslint/no-deprecated': 'error',
-            '@angular-eslint/directive-selector': [
-                'error',
-                {
-                    type: 'attribute',
-                    //prefix: "app",
-                    style: 'camelCase',
-                },
-            ],
-            '@angular-eslint/component-selector': [
-                'error',
-                {
-                    type: 'element',
-                    //prefix: "app",
-                    style: 'kebab-case',
-                },
-            ],
+            // has to be turned off if we don't use prefixes for selectors, which we don't
+            '@angular-eslint/directive-selector': 'off',
+            // This should be addressed in the future, but it's a lot of work!
+            '@angular-eslint/prefer-on-push-component-change-detection': 'off',
 
             // TypeScript ESLint rules - turn off common errors
             '@typescript-eslint/no-explicit-any': 'off', //
@@ -69,9 +57,9 @@ module.exports = tseslint.config(
             'unused-imports/no-unused-imports': 'error',
 
             // Import plugin
-            'import/no-unresolved': 'error',
-            'import/no-duplicates': 'error',
-            'import/order': [
+            'import-x/no-unresolved': 'error',
+            'import-x/no-duplicates': 'error',
+            'import-x/order': [
                 'error',
                 {
                     groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
@@ -100,7 +88,7 @@ module.exports = tseslint.config(
         // Fix false positives in this file for dev env
         files: ['src/app/shared/side-menu/side-menu.component.ts'],
         rules: {
-            'import/no-unresolved': 'off',
+            'import-x/no-unresolved': 'off',
         },
     },
 );

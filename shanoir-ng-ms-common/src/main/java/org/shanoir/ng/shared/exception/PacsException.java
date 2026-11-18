@@ -15,7 +15,7 @@
 package org.shanoir.ng.shared.exception;
 
 /**
- * SecurityException exception.
+ * PacsException exception.
  *
  * @author jlouis
  *
@@ -28,7 +28,7 @@ public class PacsException extends ShanoirException {
         super(message);
     }
 
-    public PacsException(String message, Exception cause) {
+    public PacsException(String message, Throwable cause) {
         super(message, cause);
     }
 

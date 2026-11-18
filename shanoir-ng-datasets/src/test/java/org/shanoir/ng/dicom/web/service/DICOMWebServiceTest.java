@@ -16,9 +16,11 @@ package org.shanoir.ng.dicom.web.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
@@ -28,6 +30,7 @@ import java.io.IOException;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.io.entity.ByteArrayEntity;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
@@ -38,8 +41,10 @@ import org.dcm4che3.io.DicomOutputStream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -48,6 +53,15 @@ import org.springframework.test.util.ReflectionTestUtils;
 class DICOMWebServiceTest {
 
     private static final String SERVER_URL = "http://pacs/dicomweb/studies";
+
+    /** a compressed frame, as the PACS answers it for a JPEG-LS serie */
+    private static final String JLS_CONTENT_TYPE = "multipart/related;type=\"image/jls\";transfer-syntax="
+            + UID.JPEGLSLossless;
+
+    /** the Accept header OHIF sends: any transfer syntax its decoders can read */
+    private static final String VIEWER_ACCEPT = "multipart/related;type=\"application/octet-stream\";transfer-syntax=*";
+
+    private static final byte[] PIXEL_DATA = new byte[] {1, 2, 3, 4};
 
     private DICOMWebService dicomWebService;
 
@@ -92,9 +106,94 @@ class DICOMWebServiceTest {
         }
     }
 
+    @Test
+    void findInstanceForwardsPacsErrorStatusInsteadOfAnEmptyOk() throws Exception {
+        CloseableHttpResponse httpResponse = mock(CloseableHttpResponse.class);
+        when(httpResponse.getCode()).thenReturn(HttpStatus.NOT_FOUND.value());
+        when(httpResponse.getEntity()).thenReturn(new ByteArrayEntity(new byte[0], null));
+        when(httpClient.execute(any(HttpGet.class))).thenReturn(httpResponse);
+
+        // OHIF and ShanoirUploader read the answer as a DICOM instance: an error
+        // of the PACS must not reach them disguised as a 200 with a broken body
+        ResponseEntity<?> response = dicomWebService.findInstance("1.2.3", "4.5.6", "7.8.9", null);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertNull(response.getBody());
+    }
+
+    @Test
+    void findFrameForwardsPacsContentTypeToTheViewer() throws Exception {
+        mockPacsFrameResponse(HttpStatus.OK.value(), PIXEL_DATA, ContentType.parse(JLS_CONTENT_TYPE));
+
+        ResponseEntity<?> response = dicomWebService.findFrameOfStudyOfSerieOfInstance("1.2.3", "4.5.6", "7.8.9",
+                "1", null);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        // the viewer selects its decoder from the transfer syntax of this header
+        String contentType = response.getHeaders().getFirst(HttpHeaders.CONTENT_TYPE);
+        assertNotNull(contentType);
+        assertTrue(contentType.contains("multipart/related"), contentType);
+        assertTrue(contentType.contains("transfer-syntax=" + UID.JPEGLSLossless), contentType);
+        assertEquals(PIXEL_DATA.length, response.getHeaders().getContentLength());
+    }
+
+    @Test
+    void findFrameForwardsPacsErrorStatusInsteadOfAnEmptyOk() throws Exception {
+        mockPacsFrameResponse(HttpStatus.NOT_FOUND.value(), new byte[0], null);
+
+        ResponseEntity<?> response = dicomWebService.findFrameOfStudyOfSerieOfInstance("1.2.3", "4.5.6", "7.8.9",
+                "1", null);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertNull(response.getBody());
+    }
+
+    @Test
+    void findFrameForwardsPartialContentOfThePacs() throws Exception {
+        mockPacsFrameResponse(HttpStatus.PARTIAL_CONTENT.value(), PIXEL_DATA, ContentType.parse(JLS_CONTENT_TYPE));
+
+        ResponseEntity<?> response = dicomWebService.findFrameOfStudyOfSerieOfInstance("1.2.3", "4.5.6", "7.8.9",
+                "1", null);
+
+        assertEquals(HttpStatus.PARTIAL_CONTENT, response.getStatusCode());
+        assertNotNull(response.getBody());
+    }
+
+    @Test
+    void findFrameSendsAcceptHeaderOfTheViewerToThePacs() throws Exception {
+        mockPacsFrameResponse(HttpStatus.OK.value(), PIXEL_DATA, ContentType.parse(JLS_CONTENT_TYPE));
+
+        dicomWebService.findFrameOfStudyOfSerieOfInstance("1.2.3", "4.5.6", "7.8.9", "1", VIEWER_ACCEPT);
+
+        assertEquals(VIEWER_ACCEPT, executedRequest().getFirstHeader(HttpHeaders.ACCEPT).getValue());
+    }
+
+    @Test
+    void findFrameWithoutAcceptLeavesTheTransferSyntaxChoiceToThePacs() throws Exception {
+        mockPacsFrameResponse(HttpStatus.OK.value(), PIXEL_DATA, ContentType.parse(JLS_CONTENT_TYPE));
+
+        dicomWebService.findFrameOfStudyOfSerieOfInstance("1.2.3", "4.5.6", "7.8.9", "1", null);
+
+        assertNull(executedRequest().getFirstHeader(HttpHeaders.ACCEPT));
+    }
+
+    private HttpGet executedRequest() throws Exception {
+        ArgumentCaptor<HttpGet> httpGetCaptor = ArgumentCaptor.forClass(HttpGet.class);
+        verify(httpClient).execute(httpGetCaptor.capture());
+        return httpGetCaptor.getValue();
+    }
+
+    private void mockPacsFrameResponse(int code, byte[] body, ContentType contentType) throws Exception {
+        CloseableHttpResponse httpResponse = mock(CloseableHttpResponse.class);
+        when(httpResponse.getCode()).thenReturn(code);
+        when(httpResponse.getEntity()).thenReturn(new ByteArrayEntity(body, contentType));
+        when(httpClient.execute(any(HttpGet.class))).thenReturn(httpResponse);
+    }
+
     private void mockPacsInstanceResponse(byte[] dicomBytes) throws Exception {
         CloseableHttpResponse httpResponse = mock(CloseableHttpResponse.class);
         ByteArrayEntity entity = new ByteArrayEntity(dicomBytes, null);
+        when(httpResponse.getCode()).thenReturn(HttpStatus.OK.value());
         when(httpResponse.getEntity()).thenReturn(entity);
         when(httpClient.execute(any(HttpGet.class))).thenReturn(httpResponse);
     }

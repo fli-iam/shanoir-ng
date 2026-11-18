@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.shared.hateoas;
 
+import java.io.Serial;
 import java.util.HashMap;
 
 /**
@@ -24,6 +25,7 @@ import java.util.HashMap;
  */
 public class Links extends HashMap<String, Link> {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     public static final String REL_SELF = "self";

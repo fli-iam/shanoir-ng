@@ -12,9 +12,9 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import {Component, Input, ViewChild} from '@angular/core'
+import {Component, Input, ViewChild, ChangeDetectionStrategy} from '@angular/core'
 
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
 
 import { ContrastAgent } from '../shared/contrastAgent.model';
 import { ContrastAgentService } from '../shared/contrastAgent.service';
@@ -29,6 +29,7 @@ import { BrowserPaginEntityListComponent } from '../../../shared/components/enti
     selector: 'contrast-agent-list',
     templateUrl: 'contrastAgent-list.component.html',
     styleUrls: ['contrastAgent-list.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [TableComponent]
 })
 export class ContrastAgentsListComponent extends BrowserPaginEntityListComponent<ContrastAgent>{

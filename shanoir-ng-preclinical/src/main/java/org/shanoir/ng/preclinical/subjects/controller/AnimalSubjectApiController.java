@@ -45,9 +45,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-
+import tools.jackson.core.JacksonException;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 
@@ -112,7 +110,7 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
         Long id;
         try {
             id = subjectService.createSubject(dto);
-        } catch (JsonProcessingException | ShanoirException ex) {
+        } catch (JacksonException | ShanoirException ex) {
             String msg = "Failed to create subject. Animal subject can't be created.";
             LOG.error(msg, ex);
             throw new RestServiceException(

@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.subject.model;
 
+import java.io.Serial;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -27,22 +28,17 @@ import org.shanoir.ng.shared.hateoas.Links;
 import org.shanoir.ng.shared.quality.QualityTag;
 import org.shanoir.ng.shared.subjectstudy.SubjectType;
 import org.shanoir.ng.study.model.Study;
-import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.shanoir.ng.tag.model.Tag;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.ColumnResult;
 import jakarta.persistence.ConstructorResult;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
@@ -54,16 +50,21 @@ import jakarta.persistence.PostLoad;
 import jakarta.persistence.SqlResultSetMapping;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
+import tools.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.annotation.JsonSerialize;
+import tools.jackson.databind.ext.javatime.deser.LocalDateDeserializer;
+import tools.jackson.databind.ext.javatime.ser.LocalDateSerializer;
 
 @Entity
 @Table(indexes = @Index(name = "subject_name_study_id_idx", columnList = "name, study_id", unique = true))
 @JsonPropertyOrder({ "_links", "id", "name", "identifier", "sex", "birthDate", "imagedObjectCategory",
-    "preclinical", "pseudonymusHashValues", "subjectStudyList", "languageHemisphericDominance", "manualHemisphericDominance",
+    "preclinical", "pseudonymusHashValues", "languageHemisphericDominance", "manualHemisphericDominance",
     "userPersonalCommentList" })
 @SqlResultSetMapping(name = "subjectNameResult", classes = { @ConstructorResult(targetClass = IdName.class, columns = {
         @ColumnResult(name = "id", type = Long.class), @ColumnResult(name = "name") }) })
 public class Subject extends HalEntity {
 
+    @Serial
     private static final long serialVersionUID = 6844259659282875507L;
 
     @JsonSerialize(using = LocalDateSerializer.class)
@@ -81,10 +82,6 @@ public class Subject extends HalEntity {
     @NotNull
     private Study study;
 
-    /** Relations beetween the subjects and the studies. */
-    @OneToMany(mappedBy = "subject", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<SubjectStudy> subjectStudyList;
-
     private String identifier;
 
     @OneToOne(cascade = CascadeType.ALL)
@@ -99,6 +96,7 @@ public class Subject extends HalEntity {
     /** Flag to set the subject as pre-clinical subject */
     @Column(nullable = false)
     @ColumnDefault("false")
+    @NotNull
     private boolean preclinical;
 
     /**
@@ -127,6 +125,7 @@ public class Subject extends HalEntity {
 
     private Integer qualityTag;
 
+    @JsonCreator
     public Subject() { }
 
     public Subject(Subject other, Study study) {
@@ -171,14 +170,6 @@ public class Subject extends HalEntity {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public List<SubjectStudy> getSubjectStudyList() {
-        return subjectStudyList;
-    }
-
-    public void setSubjectStudyList(List<SubjectStudy> subjectStudyList) {
-        this.subjectStudyList = subjectStudyList;
     }
 
     public String getIdentifier() {

@@ -54,11 +54,13 @@ public interface SubjectApi {
             @ApiResponse(responseCode = "204", description = "no subject found"),
             @ApiResponse(responseCode = "401", description = "unauthorized"),
             @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "422", description = "subject data copied into another study"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
     @DeleteMapping(value = "/{subjectId}", produces = { "application/json" })
-    @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @studySecurityService.hasRightOnSubjectForEveryStudy(#subjectId, 'CAN_ADMINISTRATE'))")
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @studySecurityService.hasRightOnSubject(#subjectId, 'CAN_ADMINISTRATE'))")
     ResponseEntity<Void> deleteSubject(
-            @Parameter(description = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId);
+            @Parameter(description = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId)
+            throws RestServiceException;
 
     @Operation(summary = "", description = "Returns all the subjects")
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found subjects"),
@@ -128,7 +130,7 @@ public interface SubjectApi {
             @ApiResponse(responseCode = "500", description = "unexpected error") })
     @PostMapping(value = "", produces = { "application/json" }, consumes = {
             "application/json" })
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnTrustedSubjectForOneStudy(#subject, 'CAN_IMPORT'))")
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnTrustedSubject(#subject, 'CAN_IMPORT'))")
     ResponseEntity<SubjectDTO> saveNewSubject(
             @Parameter(description = "subject to create", required = true) @RequestBody Subject subject,
             @Parameter(description = "request param centerId as flag for auto-increment common name", required = false) @RequestParam(required = false) Long centerId,
@@ -143,7 +145,7 @@ public interface SubjectApi {
             @ApiResponse(responseCode = "500", description = "unexpected error") })
     @PutMapping(value = "/{subjectId}", produces = { "application/json" }, consumes = {
             "application/json" })
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnSubjectForOneStudy(#subjectId, 'CAN_IMPORT'))")
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and (@studySecurityService.hasRightOnSubject(#subjectId, 'CAN_IMPORT') or (hasRole('EXPERT') and @studySecurityService.hasRightOnSubject(#subjectId, 'CAN_ADMINISTRATE'))))")
     ResponseEntity<Void> updateSubject(
             @Parameter(description = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
             @Parameter(description = "subject to update", required = true) @RequestBody Subject subject,
@@ -162,6 +164,8 @@ public interface SubjectApi {
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
             @Parameter(description = "preclinical", required = false) @RequestParam(value = "preclinical", required = false) String preclinical);
 
+    // Attention: this method is used by ShanoirUploader!!!
+    // Legacy method: used by old versions, to remove later.
     @Operation(summary = "", description = "If exists, returns the subject corresponding to the given identifier")
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found subject"),
             @ApiResponse(responseCode = "204", description = "no subject found"),
@@ -171,8 +175,22 @@ public interface SubjectApi {
     @GetMapping(value = "/findByIdentifier/{subjectIdentifier}", produces = {"application/json" })
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     @PostAuthorize("hasRole('ADMIN') or returnObject.getBody() == null or @studySecurityService.hasRightOnSubject(returnObject.getBody(), 'CAN_SEE_ALL')")
-    // PostAuthorize removed here: only a subject can be returned from studies with correct rights
     ResponseEntity<SubjectDTO> findSubjectByIdentifier(
+            @Parameter(description = "identifier of the subject", required = true) @PathVariable("subjectIdentifier") String subjectIdentifier);
+
+    // Attention: this method is used by ShanoirUploader!!!
+    // New method: used by all upcoming versions, please keep.
+    @Operation(summary = "", description = "If exists, returns the subject corresponding to the given study id and identifier")
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found subject"),
+            @ApiResponse(responseCode = "204", description = "no subject found"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @GetMapping(value = "/findByStudyIdAndIdentifier/{studyId}/{subjectIdentifier}", produces = {"application/json" })
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    @PostAuthorize("hasRole('ADMIN') or returnObject.getBody() == null or @studySecurityService.hasRightOnSubject(returnObject.getBody(), 'CAN_SEE_ALL')")
+    ResponseEntity<SubjectDTO> findSubjectByStudyIdAndIdentifier(
+            @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
             @Parameter(description = "identifier of the subject", required = true) @PathVariable("subjectIdentifier") String subjectIdentifier);
 
     @Operation(summary = "", description = "If exists, returns the subject corresponding to the given name in the given study")

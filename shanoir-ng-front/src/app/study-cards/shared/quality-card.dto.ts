@@ -13,8 +13,8 @@
  */
 import { Injectable } from '@angular/core';
 
-import { CoilService } from 'src/app/coils/shared/coil.service';
-import { Coil } from 'src/app/coils/shared/coil.model';
+import { CoilService } from '@app/coils/shared/coil.service';
+import { Coil } from '@app/coils/shared/coil.model';
 
 import { Study } from '../../studies/shared/study.model';
 import { StudyService } from '../../studies/shared/study.service';

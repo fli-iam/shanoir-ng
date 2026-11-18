@@ -45,7 +45,6 @@ import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.TimeZone;
-import java.util.Vector;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -56,11 +55,11 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.core5.http.HttpResponse;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShanoirUploader;
 import org.shanoir.uploader.dicom.anonymize.Pseudonymizer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -263,34 +262,34 @@ public final class Util {
     }
 
     /**
-     * This method copies the content of the dicom.server.properties in the .jar
-     * file to the same file in the user.home.
+     * Encrypts the given password property with AES-256-GCM and stores the
+     * properties file in the shanoirUploaderFolder.
      *
-     * @param propertiesFile
-     * @throws IOException
-     * @throws FileNotFoundException
+     * If the password is empty it is stored as empty string. If encryption fails,
+     * nothing is written, so an existing file is never overwritten with an empty password.
+     *
+     * @param shanoirUploaderFolder
+     * @param propertyObject
+     * @param propertyFile
+     * @param passwordPropertyName
      */
     public static void encryptPasswordAndCopyPropertiesFile(File shanoirUploaderFolder, Properties propertyObject,
             String propertyFile, final String passwordPropertyName) {
-        if (propertyObject.getProperty(passwordPropertyName) != null
-                && !propertyObject.getProperty(passwordPropertyName).equals("")) {
-            propertyObject.setProperty(passwordPropertyName,
-                    ShUpConfig.encryption.cryptEncryptedString(propertyObject.getProperty(passwordPropertyName)));
+        final String clearPassword = propertyObject.getProperty(passwordPropertyName);
+        if (clearPassword != null && !clearPassword.isEmpty()) {
+            final String encryptedPassword = ShUpConfig.encryption.cryptEncryptedString(clearPassword);
+            if (encryptedPassword.isEmpty()) {
+                LOG.error("Password property '" + passwordPropertyName
+                        + "' could not be encrypted, properties file '" + propertyFile + "' was not written.");
+                return;
+            }
+            propertyObject.setProperty(passwordPropertyName, encryptedPassword);
         } else {
             propertyObject.setProperty(passwordPropertyName, "");
         }
-        final File propertiesFile = new File(shanoirUploaderFolder + File.separator + propertyFile);
-        OutputStream out;
-        try {
-            out = new FileOutputStream(propertiesFile);
-            try {
-                propertyObject.store(out, "Configuration");
-            } catch (IOException e) {
-                LOG.error(e.getMessage(), e);
-            }
-            out.close();
-        } catch (FileNotFoundException e) {
-            LOG.error(e.getMessage(), e);
+        final File propertiesFile = new File(shanoirUploaderFolder, propertyFile);
+        try (OutputStream out = new FileOutputStream(propertiesFile)) {
+            propertyObject.store(out, "Configuration");
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
         }
@@ -437,14 +436,14 @@ public final class Util {
                                                            // in jar
             Set<String> result = new HashSet<String>(); // avoid duplicates in
                                                         // case it is a
-                                                        // subdirectory
+                                                        // sub-directory
             while (entries.hasMoreElements()) {
                 String name = entries.nextElement().getName();
                 if (name.startsWith(path)) { // filter according to the path
                     String entry = name.substring(path.length());
                     int checkSubdir = entry.indexOf("/");
                     if (checkSubdir >= 0) {
-                        // if it is a subdirectory, we just return the directory
+                        // if it is a sub-directory, we just return the directory
                         // name
                         entry = entry.substring(0, checkSubdir);
                     }
@@ -575,29 +574,25 @@ public final class Util {
      * @return a collection of files
      */
     public static Collection<File> listFiles(final File directory, final FilenameFilter filter, final boolean recurse) {
-        // List of files / directories
-        Vector<File> files = new Vector<File>();
+        List<File> files = new ArrayList<>();
+        collectFiles(directory, filter, recurse, files);
+        return files;
+    }
 
-        // Get files / directories in the directory
+    private static void collectFiles(final File directory, final FilenameFilter filter,
+                                      final boolean recurse, final List<File> result) {
         File[] entries = directory.listFiles();
-
-        // Go over entries
+        if (entries == null) {
+            return; // not a directory, or couldn't be read
+        }
         for (File entry : entries) {
-            // If there is no filter or the filter accepts the
-            // file / directory, add it to the list
             if (filter == null || filter.accept(directory, entry.getName())) {
-                files.add(entry);
+                result.add(entry);
             }
-
-            // If the file is a directory and the recurse flag
-            // is set, recurse into the directory
             if (recurse && entry.isDirectory()) {
-                files.addAll(listFiles(entry, filter, recurse));
+                collectFiles(entry, filter, recurse, result);
             }
         }
-
-        // Return collection of files
-        return files;
     }
 
     /**

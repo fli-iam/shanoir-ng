@@ -19,7 +19,6 @@ import org.shanoir.ng.vip.executionMonitoring.repository.ExecutionMonitoringRepo
 import org.shanoir.ng.vip.executionMonitoring.service.ExecutionMonitoringService;
 import org.shanoir.ng.vip.executionMonitoring.dto.ExecutionMonitoringDTO;
 import org.shanoir.ng.vip.executionMonitoring.dto.mapper.ExecutionMonitoringMapper;
-import org.shanoir.ng.shared.exception.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -46,7 +45,7 @@ public class ExecutionMonitoringApiController implements ExecutionMonitoringApi 
 
     public ResponseEntity<ExecutionMonitoringDTO> findExecutionMonitoringById(Long executionMonitoringId) {
         final Optional<ExecutionMonitoring> monitoring = executionMonitoringRepository.findById(executionMonitoringId);
-        return monitoring.map(executionMonitoring -> new ResponseEntity<>(mapper.executionMonitoringToExecutionMonitoringDTO(executionMonitoring), HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+        return monitoring.map(executionMonitoring -> new ResponseEntity<>(mapper.executionMonitoringToExecutionMonitoringDTOWithNullRelations(executionMonitoring), HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
     public ResponseEntity<List<ExecutionMonitoringDTO>> getAllExecutionMonitoring() {
@@ -55,6 +54,6 @@ public class ExecutionMonitoringApiController implements ExecutionMonitoringApi 
         if (monitorings.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
-        return new ResponseEntity<>(mapper.executionMonitoringsToExecutionMonitoringDTOs(monitorings), HttpStatus.OK);
+        return new ResponseEntity<>(mapper.executionMonitoringsToExecutionMonitoringDTOListWithNullRelations(monitorings), HttpStatus.OK);
     }
 }

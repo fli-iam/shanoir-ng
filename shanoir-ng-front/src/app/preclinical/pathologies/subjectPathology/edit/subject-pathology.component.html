@@ -84,7 +84,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <span class="right-col">
                                 @switch (mode) {
                                     @case ('view') {
-                                        {{ subjectPathology?.startDate | date: 'shortDate' }}
+                                        {{ $safeNavigationMigration(subjectPathology?.startDate) | date: 'shortDate' }}
                                     }
                                     @default {
                                         <datepicker formControlName="startDate"></datepicker>
@@ -102,7 +102,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <span class="right-col">
                                 @switch (mode) {
                                     @case ('view') {
-                                        {{ subjectPathology?.endDate | date: 'shortDate' }}
+                                        {{ $safeNavigationMigration(subjectPathology?.endDate) | date: 'shortDate' }}
                                     }
                                     @default {
                                         <datepicker formControlName="endDate"></datepicker>

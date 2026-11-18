@@ -26,11 +26,6 @@ import org.shanoir.ng.shared.dicom.EquipmentDicom;
 import org.shanoir.ng.shared.dicom.InstitutionDicom;
 import org.shanoir.uploader.dicom.DicomTreeNode;
 
-import jakarta.xml.bind.annotation.XmlElement;
-import jakarta.xml.bind.annotation.XmlElementWrapper;
-import jakarta.xml.bind.annotation.XmlTransient;
-import jakarta.xml.bind.annotation.XmlType;
-
 /**
  * SerieTreeNode, wraps a Serie in model of ms-import, but implements the interface for the JTree,
  * that is required to show the JTree in the GUI of ShUp. The setters and getters are used, when
@@ -47,7 +42,6 @@ import jakarta.xml.bind.annotation.XmlType;
  * @author mkain
  *
  */
-@XmlType(propOrder = {"id", "modality", "protocol", "description", "seriesDate", "seriesNumber", "imagesCount", "selected", "fileNames"})
 public class SerieTreeNode implements DicomTreeNode {
 
     private StudyTreeNode parent;
@@ -56,7 +50,6 @@ public class SerieTreeNode implements DicomTreeNode {
 
     private List<String> fileNames;
 
-    // constructor for JAXB
     public SerieTreeNode() {
         this.serie = new Serie();
     }
@@ -83,7 +76,6 @@ public class SerieTreeNode implements DicomTreeNode {
         return this.serie;
     }
 
-    @XmlElement
     public String getId() {
         return this.serie.getSeriesInstanceUID();
     }
@@ -92,7 +84,6 @@ public class SerieTreeNode implements DicomTreeNode {
         this.serie.setSeriesInstanceUID(seriesInstanceUID);
     }
 
-    @XmlElement
     public String getModality() {
         return this.serie.getModality();
     }
@@ -101,7 +92,6 @@ public class SerieTreeNode implements DicomTreeNode {
         this.serie.setModality(modality);
     }
 
-    @XmlElement
     public String getProtocol() {
         return this.serie.getProtocolName();
     }
@@ -110,7 +100,6 @@ public class SerieTreeNode implements DicomTreeNode {
         this.serie.setProtocolName(protocolName);
     }
 
-    @XmlElement
     public String getDescription() {
         return this.serie.getSeriesDescription();
     }
@@ -119,7 +108,6 @@ public class SerieTreeNode implements DicomTreeNode {
         this.serie.setSeriesDescription(seriesDescription);
     }
 
-    @XmlElement
     public String getSeriesDate() {
         if (this.serie.getSeriesDate() != null) {
             return this.serie.getSeriesDate().toString();
@@ -127,7 +115,6 @@ public class SerieTreeNode implements DicomTreeNode {
         return "";
     }
 
-    @XmlElement
     public String getSeriesNumber() {
         return this.serie.getSeriesNumber();
     }
@@ -136,7 +123,6 @@ public class SerieTreeNode implements DicomTreeNode {
         this.serie.setSeriesNumber(seriesNumber);
     }
 
-    @XmlElement
     public String getImagesCount() {
         if (this.serie.getImagesNumber() != null) {
             return this.serie.getImagesNumber().toString();
@@ -166,7 +152,6 @@ public class SerieTreeNode implements DicomTreeNode {
         return null;
     }
 
-    @XmlTransient
     public String getDisplayString() {
         StringBuilder result = new StringBuilder();
 
@@ -224,12 +209,10 @@ public class SerieTreeNode implements DicomTreeNode {
      *
      * @return the type
      */
-    @XmlTransient
     public String getType() {
         return "Serie";
     }
 
-    @XmlTransient
     public boolean isMultiFrame() {
         return this.serie.getIsMultiFrame();
     }
@@ -310,8 +293,6 @@ public class SerieTreeNode implements DicomTreeNode {
         return this.parent;
     }
 
-    @XmlElementWrapper(name = "fileNames")
-    @XmlElement(name = "fileName")
     public List<String> getFileNames() {
         return fileNames;
     }

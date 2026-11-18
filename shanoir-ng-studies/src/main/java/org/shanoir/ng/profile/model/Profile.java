@@ -19,7 +19,10 @@ import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.validation.Unique;
 
+
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
+import java.io.Serial;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -38,6 +41,7 @@ public class Profile extends HalEntity {
     /**
      * UID
      */
+    @Serial
     private static final long serialVersionUID = 8829401300909105525L;
 
     @Column(unique = true)

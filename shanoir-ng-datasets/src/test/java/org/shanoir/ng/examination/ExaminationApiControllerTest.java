@@ -17,16 +17,19 @@ package org.shanoir.ng.examination;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.lang.reflect.Method;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,23 +37,19 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-import org.shanoir.ng.bids.service.BIDSService;
 import org.shanoir.ng.examination.controler.ExaminationApiController;
 import org.shanoir.ng.examination.dto.mapper.ExaminationMapper;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;
-import org.shanoir.ng.importer.service.DicomImporterService;
-import org.shanoir.ng.importer.service.DicomSEGAndSRImporterService;
+import org.shanoir.ng.importer.service.ImporterMailService;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.paging.PageImpl;
-import org.shanoir.ng.shared.repository.CenterRepository;
-import org.shanoir.ng.shared.repository.StudyRepository;
-import org.shanoir.ng.shared.repository.SubjectRepository;
+import org.shanoir.ng.storage.StorageException;
 import org.shanoir.ng.storage.StorageService;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
@@ -66,6 +65,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
@@ -74,6 +74,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -98,12 +99,6 @@ public class ExaminationApiControllerTest {
 
     private String tempFolderPath;
 
-    @MockBean
-    private DicomSEGAndSRImporterService dicomSEGAndSRImporterService;
-
-    @MockBean
-    private DicomImporterService dicomImporterService;
-
     @BeforeEach
     public void beforeClass() {
         tempFolderPath = tempFolder.getAbsolutePath() + "/tmp/";
@@ -111,7 +106,6 @@ public class ExaminationApiControllerTest {
     }
 
     private static final String REQUEST_PATH = "/examinations";
-    private static final String REQUEST_PATH_COUNT = REQUEST_PATH + "/count";
     private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
 
     @Autowired
@@ -124,31 +118,19 @@ public class ExaminationApiControllerTest {
     private ExaminationService examinationServiceMock;
 
     @MockBean
-    private SubjectRepository subjectRepository;
-
-    @MockBean
-    private CenterRepository centerRepository;
-
-    @MockBean
-    private Pageable pageable;
-
-    @MockBean
-    private BIDSService bidsService;
-
-    @MockBean
     private ShanoirEventService eventService;
 
     @MockBean
-    private StudyRepository studyRepository;
+    private StorageService storageService;
+
+    @MockBean
+    private ExaminationRepository examinationRepository;
 
     @MockBean
     private RabbitTemplate rabbitTemplate;
 
     @MockBean
-    private ExaminationRepository examRepo;
-
-    @MockBean
-    private StorageService storageService;
+    private ImporterMailService importerMailService;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -213,7 +195,7 @@ public class ExaminationApiControllerTest {
     @Test
     @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
     public void findExaminationByIdTest() throws Exception {
-        given(examinationServiceMock.findById(1L)).willReturn(new Examination());
+        given(examinationRepository.findByIdWithAllRelations(1L)).willReturn(Optional.of(new Examination()));
 
         mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
@@ -237,9 +219,9 @@ public class ExaminationApiControllerTest {
         exam.setStudy(new Study());
         exam.getStudy().setId(3L);
         exam.setSubject(new Subject(1L, "1"));
-        given(examinationMapperMock.examinationDTOToExamination(Mockito.any())).willReturn(exam);
+        given(examinationMapperMock.examinationDTOToExaminationIdRelations(Mockito.any())).willReturn(exam);
         given(examinationServiceMock.findById(1L)).willReturn(exam);
-        given(examinationServiceMock.save(Mockito.any())).willReturn(exam);
+        given(examinationServiceMock.saveWithExtraData(Mockito.any(), Mockito.anyList())).willReturn(exam);
 
         mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(ModelsUtil.createExamination())))
@@ -263,31 +245,48 @@ public class ExaminationApiControllerTest {
     @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
     public void updateExaminationTest() throws Exception {
         given(examinationServiceMock.findById(1L)).willReturn(ModelsUtil.createExamination(1L));
-        mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(ModelsUtil.createExamination(1L))))
+        mvc.perform(MockMvcRequestBuilders.multipart(HttpMethod.PUT, REQUEST_PATH_WITH_ID)
+                .file(new MockMultipartFile("examination", "", MediaType.APPLICATION_JSON_VALUE, objectMapper.writeValueAsBytes(ModelsUtil.createExamination(1L)))))
                 .andExpect(status().isNoContent());
+        // without files: plain update, nothing to store
+        Mockito.verify(examinationServiceMock).updateWithExtraData(Mockito.any(), Mockito.eq(List.of()));
     }
 
     @Test
     @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
-    public void testAddExtraData() throws IOException {
-        // GIVEN a file to add to an examination
-        File importZip = tempFolder.createTempFile("test-import-extra-data", ".zip");
+    public void updateExaminationWithFilesStorageFailureTest() throws Exception {
+        given(examinationServiceMock.updateWithExtraData(Mockito.any(), Mockito.anyList())).willThrow(new StorageException("storage down", null));
+        mvc.perform(MockMvcRequestBuilders.multipart(HttpMethod.PUT, REQUEST_PATH_WITH_ID)
+                .file(new MockMultipartFile("examination", "", MediaType.APPLICATION_JSON_VALUE, objectMapper.writeValueAsBytes(ModelsUtil.createExamination(1L))))
+                .file(new MockMultipartFile("files", "a.txt", MediaType.TEXT_PLAIN_VALUE, "a".getBytes())))
+                .andExpect(status().isInternalServerError());
+        // examination not updated => no event, no mail
+        Mockito.verifyNoInteractions(eventService, importerMailService);
+    }
 
-        try {
-            importZip.createNewFile();
-            MockMultipartFile file = new MockMultipartFile("file", "test-import-extra-data.txt", MediaType.MULTIPART_FORM_DATA_VALUE, new FileInputStream(importZip.getAbsolutePath()));
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void saveNewExaminationWithFilesTest() throws Exception {
+        Examination exam = new Examination();
+        exam.setId(123L);
+        exam.setStudy(new Study());
+        exam.getStudy().setId(3L);
+        exam.setSubject(new Subject(1L, "1"));
+        given(examinationMapperMock.examinationDTOToExaminationIdRelations(Mockito.any())).willReturn(exam);
+        given(examinationServiceMock.saveWithExtraData(Mockito.any(), Mockito.anyList())).willReturn(exam);
 
-            // WHEN The file is added to the examination
-            mvc.perform(MockMvcRequestBuilders.multipart(REQUEST_PATH + "/extra-data-upload/1").file(file))
-                    .andExpect(status().isUnprocessableEntity());
+        // the same URL as the JSON creation, as multipart with files
+        mvc.perform(MockMvcRequestBuilders.multipart(REQUEST_PATH)
+                .file(new MockMultipartFile("examination", "", MediaType.APPLICATION_JSON_VALUE, objectMapper.writeValueAsBytes(ModelsUtil.createExamination())))
+                .file(new MockMultipartFile("files", "a.txt", MediaType.TEXT_PLAIN_VALUE, "a".getBytes()))
+                .file(new MockMultipartFile("files", "b.txt", MediaType.TEXT_PLAIN_VALUE, "b".getBytes())))
+                .andExpect(status().isOk());
 
-            Mockito.verify(examinationServiceMock).addExtraData(Mockito.any(Long.class), Mockito.any(MultipartFile.class));
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail();
-        }
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<List<MultipartFile>> filesCaptor = ArgumentCaptor.forClass(List.class);
+        Mockito.verify(examinationServiceMock).saveWithExtraData(Mockito.eq(exam), filesCaptor.capture());
+        assertEquals(List.of("a.txt", "b.txt"), filesCaptor.getValue().stream().map(MultipartFile::getOriginalFilename).toList());
+        Mockito.verify(importerMailService).sendExtraDataEmail(exam, null, List.of("a.txt", "b.txt"), 12L);
     }
 
     @Test
@@ -330,6 +329,23 @@ public class ExaminationApiControllerTest {
             LOG.error(e.getMessage(), e);
             fail();
         }
+    }
+
+    /**
+     * Guards against a regression where findExaminationsBySubjectId() throws
+     * "failed to lazily initialize a collection of role:
+     * org.shanoir.ng.examination.model.Examination.copies: could not initialize
+     * proxy - no Session" once OSIV is disabled.
+     */
+    @Test
+    void findExaminationsBySubjectIdMustBeTransactional() throws NoSuchMethodException {
+        Method method = ExaminationApiController.class.getDeclaredMethod("findExaminationsBySubjectId", Long.class);
+        Transactional transactional = method.getAnnotation(Transactional.class);
+
+        assertNotNull(transactional,
+                "findExaminationsBySubjectId maps the lazy 'copies' collection and must stay "
+                        + "transactional through the mapping, not just the repository fetch");
+        assertTrue(transactional.readOnly(), "findExaminationsBySubjectId only reads data");
     }
 
 }

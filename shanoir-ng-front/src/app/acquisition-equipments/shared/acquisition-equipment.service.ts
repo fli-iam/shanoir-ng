@@ -15,7 +15,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 
-import { Center } from 'src/app/centers/shared/center.model';
+import { Center } from '@app/centers/shared/center.model';
 
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import * as AppUtils from '../../utils/app.utils';
@@ -84,7 +84,7 @@ export class AcquisitionEquipmentService extends EntityService<AcquisitionEquipm
             );
         }).catch(error => {
             if (error instanceof HttpErrorResponse && error.status === 404) {
-                console.log("catch 404 error: no equipments found for this serial number");
+                this.consoleService.log('error', 'No equipments found for this serial number');
                 return false; // No equipments found, so no duplicates
             }
             // Handle other errors

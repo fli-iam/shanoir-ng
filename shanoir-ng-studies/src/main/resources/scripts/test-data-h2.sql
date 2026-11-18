@@ -13,11 +13,11 @@
 -- Populates database for test
 
 INSERT INTO study
-	(id,  name, start_date, end_date, clinical, with_examination, visible_by_default, downloadable_by_default, study_status, study_type, challenge, is_draft)
+	(id,  name, start_date, end_date, clinical, with_examination, visible_by_default, downloadable_by_default, study_status, study_type, challenge, is_draft, neurobagel_export)
 VALUES
-	(1,'shanoirStudy1', NOW(), parsedatetime('2017/12/31', 'yyyy/MM/dd'), 1, 0, 0, 0, 1, 1, 0, 0),
-	(2,'shanoirStudy2', NOW(), parsedatetime('2017/12/31', 'yyyy/MM/dd'), 0, 0, 0, 0, 1, 1, 0, 0),
-	(3,'shanoirStudy3', NOW(), parsedatetime('2017/12/31', 'yyyy/MM/dd'), 1, 0, 0, 0, 1, 1, 0, 0);
+	(1,'shanoirStudy1', NOW(), parsedatetime('2017/12/31', 'yyyy/MM/dd'), 1, 0, 0, 0, 1, 1, 0, 0, 0),
+	(2,'shanoirStudy2', NOW(), parsedatetime('2017/12/31', 'yyyy/MM/dd'), 0, 0, 0, 0, 1, 1, 0, 0, 0),
+	(3,'shanoirStudy3', NOW(), parsedatetime('2017/12/31', 'yyyy/MM/dd'), 1, 0, 0, 0, 1, 1, 0, 0, 0);
 
 INSERT INTO study_extra_details
 	(id, expected_nb_of_subjects, average_examination_size, estimated_total_volume, expected_nb_of_centers, inclusion_rate, inclusion_rate_unit, sponsor, principal_investigator, scientific_advisor, study_id)
@@ -27,12 +27,12 @@ VALUES
     (3, 400, 5, 2000, 1, 5, 2, 'INRIA', 'INRIA', 'INRIA', 3);
 
 INSERT INTO study_user
-	(id, receive_study_user_report, receive_new_import_report, confirmed, study_id, user_id, user_name)
+	(id, receive_study_user_report, receive_new_import_report, confirmed, study_id, user_id, user_name, expiration_date, received_expiration_notification)
 VALUES
-	(1, 0, 1, 1, 1, 1, 'admin'),
-	(2, 0, 1, 1, 3, 1, 'admin'),
-	(3, 0, 0, 1, 1, 2, 'jlouis'),
-	(4, 0, 1, 1, 2, 1, 'admin');
+	(1, 0, 1, 1, 1, 1, 'admin', null, 0),
+	(2, 0, 1, 1, 3, 1, 'admin', null, 0),
+	(3, 0, 0, 1, 1, 2, 'jlouis', null, 0),
+	(4, 0, 1, 1, 2, 1, 'admin', null, 0);
 
 INSERT INTO study_user_study_user_rights
 	(study_user_id, study_user_rights)
@@ -88,9 +88,3 @@ VALUES
 	(3,'0010001', 'sub3', parsedatetime('2001/02/01', 'yyyy/MM/dd'), 2, 0),
 	(4,'0010002', 'sub4', parsedatetime('2001/02/01', 'yyyy/MM/dd'), 2, 0);
 
-INSERT INTO subject_study
-	(id, physically_involved, study_id, subject_id, subject_study_identifier, subject_type)
-VALUES
-	(1, 0, 1, 1, 'Subject 1 for study 1', 1),
-	(2, 0, 1, 2, 'Subject 2 for study 1', 2),
-	(3, 0, 2, 1, 'Subject 1 for study 2', 2);

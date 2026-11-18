@@ -48,8 +48,6 @@ public class StudyDraftTest extends AbstractTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(StudyDraftTest.class);
 
-    private static final String IN_PROGRESS = "IN_PROGRESS";
-
     /**
      * The study created in step 1 and shared across all steps via a static field
      * so that ordered test methods can hand state to each other without a full
@@ -81,7 +79,7 @@ public class StudyDraftTest extends AbstractTest {
     @Order(1)
     void expertCreatesStudyDraft() {
         LOG.info("Step 1 - Expert creates a study expected in DRAFT state.");
-        Study study = buildMinimalStudy();
+        Study study = buildMinimalStudy("Study-Draft-");
         createdStudy = expertClient.createStudy(study);
         Assertions.assertNotNull(createdStudy,
                 "Study creation by expert must not return null.");

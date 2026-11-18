@@ -32,7 +32,7 @@ import org.dcm4che3.io.DicomInputStream;
 import org.shanoir.ng.importer.dicom.DicomDirGeneratorService;
 import org.shanoir.ng.importer.dicom.DicomDirToModelService;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
-import org.shanoir.ng.importer.model.ImportJob;
+import org.shanoir.ng.importer.model.ImportJobBase;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
@@ -72,12 +72,10 @@ public class DicomPushServiceJob {
 
     private final File workFolder = ShUpOnloadConfig.getWorkFolder();
 
-
     public void setDownloadOrCopyActionListener(MainWindow mainWindow) {
         this.dOCAL = mainWindow.dOCAL;
         this.dicomFileAnalyzer = mainWindow.dicomFileAnalyzer;
     }
-
 
     @Scheduled(fixedRate = JOB_RATE)
     public void execute() {
@@ -220,6 +218,7 @@ public class DicomPushServiceJob {
         }
         return true;
     }
+
     /**
      * Prepare the import job for the DICOM push identified complete examination
      * @param patient
@@ -228,7 +227,7 @@ public class DicomPushServiceJob {
      * @param folder
      */
     private void prepareImportJob(Patient patient, Study study, List<Serie> completeSeries) throws IOException {
-        ImportJob importJob = ImportUtils.createNewImportJob(patient, study);
+        ImportJobBase importJob = ImportUtils.createNewImportJob(patient, study);
         try {
             importJob.setSubject(ImportUtils.createSubjectFromPatient(patient, dOCAL.pseudonymizer, dOCAL.identifierCalculator));
         } catch (PseudonymusException e) {
@@ -253,7 +252,7 @@ public class DicomPushServiceJob {
         FileUtil.deleteFolderDownloadFromDicomServer(workFolder, study.getStudyInstanceUID(), completeSeries);
 
         // We set the selected series after the copy of the DICOM files to have the instances set to each serie
-        importJob.setSelectedSeries(completeSeries);
+        importJob.setSeries(completeSeries);
 
         importJob.setTimestamp(System.currentTimeMillis());
         importJob.setUploadState(UploadState.READY);

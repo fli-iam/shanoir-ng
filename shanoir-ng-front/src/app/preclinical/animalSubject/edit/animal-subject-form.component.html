@@ -314,7 +314,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         }
                                     }
                                     @default {
-                                        <tag-list [availableTags]="animalSubject.subject.study?.tags" formControlName="tags"></tag-list>
+                                        <tag-list [availableTags]="$safeNavigationMigration(animalSubject.subject.study?.tags)" formControlName="tags"></tag-list>
                                     }
                                 }
                             </span>

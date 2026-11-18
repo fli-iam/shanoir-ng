@@ -25,6 +25,7 @@ import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.storage.StorageException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PostAuthorize;
@@ -63,15 +64,25 @@ public interface DatasetAcquisitionService {
     @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetAcquisitionList(returnObject, 'CAN_SEE_ALL')")
     List<DatasetAcquisition> findByDatasetId(Long[] datasetIds);
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetAcquisitionList(returnObject, 'CAN_SEE_ALL')")
-    List<DatasetAcquisition> findByExamination(Long examinationId);
-
-    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and  @datasetSecurityService.hasRightOnExamination(#entity.examination.id, 'CAN_ADMINISTRATE')")
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and (@datasetSecurityService.hasRightOnDatasetAcquisition(#entity.id, 'CAN_IMPORT') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnDatasetAcquisition(#entity.id, 'CAN_ADMINISTRATE'))))")
     DatasetAcquisition update(DatasetAcquisition entity) throws EntityNotFoundException;
 
+    /**
+     * Update a dataset acquisition with new extra data files.
+     * The files are stored first: the acquisition is updated only if all of them are stored,
+     * otherwise the files stored by this call are removed and nothing is updated.
+     *
+     * @param entity the acquisition to update.
+     * @param files the new extra data files, can be empty.
+     * @return the updated acquisition.
+     * @throws ShanoirException if a file already exists (422) or the acquisition is not found.
+     * @throws StorageException if a file could not be stored.
+     */
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and (@datasetSecurityService.hasRightOnDatasetAcquisition(#entity.id, 'CAN_IMPORT') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnDatasetAcquisition(#entity.id, 'CAN_ADMINISTRATE'))))")
+    DatasetAcquisition update(DatasetAcquisition entity, List<MultipartFile> files) throws ShanoirException, StorageException;
+
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and  @datasetSecurityService.filterDatasetAcquisitionList(#entities, 'CAN_ADMINISTRATE')")
-    Iterable<DatasetAcquisition> update(List<DatasetAcquisition> entities);
+    Iterable<DatasetAcquisition> update(List<DatasetAcquisition> entities) throws EntityNotFoundException;
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and  @datasetSecurityService.hasRightOnDatasetAcquisition(#id, 'CAN_ADMINISTRATE')")
     void deleteById(Long id, ShanoirEvent event) throws EntityNotFoundException, ShanoirException, SolrServerException, IOException, RestServiceException;
@@ -81,10 +92,49 @@ public interface DatasetAcquisitionService {
 
     void deleteByIdCascade(Long id, ShanoirEvent event) throws EntityNotFoundException, ShanoirException, SolrServerException, IOException, RestServiceException;
 
+    /**
+     * Tells whether an acquisition holds no dataset anymore and may be removed automatically.
+     * An acquisition is only removable when it carries no data of its own: no extra-data file
+     * uploaded on the acquisition itself, and no copy pointing to it as its source.
+     *
+     * @param id the acquisition id
+     * @return true when the acquisition is empty and may be removed
+     */
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @datasetSecurityService.hasRightOnDatasetAcquisition(#id, 'CAN_ADMINISTRATE')")
+    boolean isEmptyAndRemovable(Long id) throws EntityNotFoundException;
+
+    /**
+     * Deletes an acquisition that does not hold any dataset anymore.
+     *
+     * @param id the acquisition id
+     */
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @datasetSecurityService.hasRightOnDatasetAcquisition(#id, 'CAN_ADMINISTRATE')")
+    void deleteEmptyAcquisition(Long id) throws EntityNotFoundException, RestServiceException;
+
+    /**
+     * Finds the acquisitions that would not hold any dataset anymore once the given datasets are
+     * deleted, and that may then be removed automatically. Acquisitions holding extra data or
+     * copied to another study are left out: they are meant to survive the deletion.
+     *
+     * @param datasetIds the datasets about to be deleted
+     * @return the acquisitions that the deletion would leave empty and removable
+     */
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
+    @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetAcquisitionList(returnObject, 'CAN_ADMINISTRATE')")
+    List<DatasetAcquisition> findAcquisitionsLeftEmptyBy(List<Long> datasetIds);
+
+    /**
+     * Finds the acquisitions that hold no dataset at all and that may be removed. Meant for the
+     * clean up of the acquisitions emptied before their removal was proposed on deletion.
+     *
+     * @param studyId the study to look into, or null to look into all of them
+     * @return the empty and removable acquisitions
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    List<DatasetAcquisition> findEmptyAcquisitions(Long studyId);
+
     boolean existsByStudyCardId(Long studyCardId);
 
     Collection<DatasetAcquisition> createAll(Collection<DatasetAcquisition> acquisitions);
-
-    String addExtraData(Long acquisitionId, MultipartFile file);
 
 }

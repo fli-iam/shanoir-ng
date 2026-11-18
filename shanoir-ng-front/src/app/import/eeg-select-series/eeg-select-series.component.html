@@ -39,6 +39,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <node
                     [label]="dataset.name"
                     [(ngModel)]="dataset.selected"
+                    [ngModelOptions]="{ standalone: true }"
                     awesome="fa fa-bolt"
                     (labelClick)="showDatasetDetail(dataset)"
                     [class.selected]="datasetDetail == dataset"

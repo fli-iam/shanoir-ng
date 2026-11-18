@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, EventEmitter, HostBinding, Injector, OnDestroy, Output } from '@angular/core';
+import { Component, EventEmitter, HostBinding, Injector, OnDestroy, Output, ChangeDetectionStrategy } from '@angular/core';
 import { Subscription } from 'rxjs';
 
 import { ConsoleService, Message } from './console.service';
@@ -22,6 +22,7 @@ import { ConsoleService, Message } from './console.service';
     selector: 'shanoir-console',
     templateUrl: './console.component.html',
     styleUrls: ['./console.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: []
 })
 export class ConsoleComponent implements OnDestroy {

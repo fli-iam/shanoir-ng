@@ -1,0 +1,243 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
+package org.shanoir.ng.neurobagel.service;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+
+import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.shanoir.ng.bids.service.BIDSService;
+import org.shanoir.ng.neurobagel.dto.NeurobagelDatasetDescriptionDTO;
+import org.shanoir.ng.neurobagel.dto.NeurobagelStudyDTO;
+import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.study.model.Study;
+import org.shanoir.ng.study.repository.StudyRepository;
+import org.shanoir.ng.tag.model.StudyTag;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.test.util.ReflectionTestUtils;
+
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
+
+@ExtendWith(MockitoExtension.class)
+class NeurobagelServiceTest {
+
+    @Mock
+    private StudyRepository studyRepository;
+
+    @Mock
+    private RabbitTemplate rabbitTemplate;
+
+    @Mock
+    private BIDSService bidsService;
+
+    /** Real mapper: the replies of ms datasets must parse. */
+    @Spy
+    private ObjectMapper objectMapper = JsonMapper.builder().build();
+
+    @TempDir
+    private File bidsDataDir;
+
+    @InjectMocks
+    private NeurobagelService service;
+
+    @Test
+    void findExportedStudiesReturnsIdsAndNames() {
+        given(studyRepository.findByNeurobagelExportTrueAndIsDraftFalseOrderByIdAsc())
+                .willReturn(List.of(study(1L, "first"), study(4L, "second")));
+
+        List<NeurobagelStudyDTO> studies = service.findExportedStudies();
+
+        assertEquals(List.of(1L, 4L), studies.stream().map(NeurobagelStudyDTO::getId).toList());
+        assertEquals(List.of("first", "second"), studies.stream().map(NeurobagelStudyDTO::getName).toList());
+    }
+
+    @Test
+    void exportedStudyIsFound() {
+        given(studyRepository.existsByIdAndNeurobagelExportTrueAndIsDraftFalse(1L)).willReturn(true);
+        given(studyRepository.findById(1L)).willReturn(Optional.of(study(1L, "first")));
+
+        Optional<NeurobagelStudyDTO> study = service.findExportedStudy(1L);
+
+        assertTrue(study.isPresent());
+        assertEquals("first", study.get().getName());
+    }
+
+    @Test
+    void notExportedStudyIsNotFoundAndNotLoaded() {
+        given(studyRepository.existsByIdAndNeurobagelExportTrueAndIsDraftFalse(2L)).willReturn(false);
+
+        assertFalse(service.findExportedStudy(2L).isPresent());
+        verify(studyRepository, never()).findById(anyLong());
+    }
+
+    @Test
+    void nullStudyIdIsNotExported() {
+        assertFalse(service.isExported(null));
+    }
+
+    @Test
+    void participantsOfAnExportedStudyAreBuiltLocally() {
+        given(studyRepository.existsByIdAndNeurobagelExportTrueAndIsDraftFalse(1L)).willReturn(true);
+        given(bidsService.participantsTsv(1L, Map.of())).willReturn("participant_id\nsub-1\n");
+
+        assertEquals(Optional.of("participant_id\nsub-1\n"), service.findParticipantsTsv(1L));
+    }
+
+    @Test
+    void participantsAgesUseTheFirstExaminationDatesFromDatasets() {
+        given(studyRepository.existsByIdAndNeurobagelExportTrueAndIsDraftFalse(1L)).willReturn(true);
+        given(rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_FIRST_EXAMINATION_DATES, "1"))
+                .willReturn("{\"studyId\": 1, \"firstExaminationDates\": {\"10\": \"2020-01-31\"}}");
+        given(bidsService.participantsTsv(1L, Map.of(10L, LocalDate.of(2020, 1, 31)))).willReturn("participants");
+
+        assertEquals(Optional.of("participants"), service.findParticipantsTsv(1L));
+    }
+
+    @Test
+    void unreadableDatesFromDatasetsLeaveTheAgesUnknown() {
+        given(studyRepository.existsByIdAndNeurobagelExportTrueAndIsDraftFalse(1L)).willReturn(true);
+        given(rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_FIRST_EXAMINATION_DATES, "1"))
+                .willReturn("not json");
+        given(bidsService.participantsTsv(1L, Map.of())).willReturn("participants with n/a ages");
+
+        assertEquals(Optional.of("participants with n/a ages"), service.findParticipantsTsv(1L));
+    }
+
+    @Test
+    void participantsOfAStudyNotExportedAreNeverBuilt() {
+        given(studyRepository.existsByIdAndNeurobagelExportTrueAndIsDraftFalse(2L)).willReturn(false);
+
+        assertFalse(service.findParticipantsTsv(2L).isPresent());
+        verify(bidsService, never()).participantsTsv(anyLong(), any());
+    }
+
+    @Test
+    void participantsDictionaryAnnotatesTheParticipantsColumns() throws Exception {
+        JsonNode dictionary = new ObjectMapper().readTree(service.getParticipantsDictionary());
+
+        assertEquals(List.of("participant_id", "subject_identifier", "subject_age", "subject_sex"),
+                List.copyOf(dictionary.propertyNames()));
+        assertEquals("nb:ParticipantID", dictionary.at("/participant_id/Annotations/IsAbout/TermURL").asString());
+        assertEquals("nb:Age", dictionary.at("/subject_age/Annotations/IsAbout/TermURL").asString());
+        assertEquals("nb:Sex", dictionary.at("/subject_sex/Annotations/IsAbout/TermURL").asString());
+        assertEquals(List.of("M", "F", "O"), List.copyOf(dictionary.at("/subject_sex/Annotations/Levels").propertyNames()));
+    }
+
+
+    @Test
+    void datasetDescriptionOfAnExportedStudy() {
+        ReflectionTestUtils.setField(service, "frontServerAddress", "https://shanoir.example.org/shanoir-ng");
+        Study study = study(1L, "My study");
+        study.setStudyTags(List.of(studyTag("mri"), studyTag("adhd")));
+        given(studyRepository.existsByIdAndNeurobagelExportTrueAndIsDraftFalse(1L)).willReturn(true);
+        given(studyRepository.findStudyWithStudyTagsById(1L)).willReturn(study);
+
+        NeurobagelDatasetDescriptionDTO description = service.findDatasetDescription(1L).orElseThrow();
+
+        assertEquals("My study", description.getName());
+        assertEquals(List.of("adhd", "mri"), description.getKeywords());
+        assertEquals(List.of("https://shanoir.example.org/shanoir-ng/study/details/1"), description.getReferencesAndLinks());
+        assertEquals("restricted", description.getAccessType());
+        assertEquals("https://shanoir.example.org/shanoir-ng/access-request/study/1", description.getAccessLink());
+        assertTrue(description.getAccessInstructions().contains(description.getAccessLink()));
+    }
+
+    @Test
+    void datasetDescriptionOfAStudyNotExportedIsNotBuilt() {
+        given(studyRepository.existsByIdAndNeurobagelExportTrueAndIsDraftFalse(2L)).willReturn(false);
+
+        assertFalse(service.findDatasetDescription(2L).isPresent());
+        verify(studyRepository, never()).findStudyWithStudyTagsById(anyLong());
+    }
+
+    private static StudyTag studyTag(String name) {
+        StudyTag tag = new StudyTag();
+        tag.setName(name);
+        return tag;
+    }
+
+    private static final String IMAGING_FILE = "study-1-imaging-3f2a1c9e-8b7d-4e6f-a1b2-c3d4e5f6a7b8.tsv";
+
+    @Test
+    void imagingTableOfAStudyNotExportedIsNeverRequested() {
+        given(studyRepository.existsByIdAndNeurobagelExportTrueAndIsDraftFalse(2L)).willReturn(false);
+
+        assertFalse(service.findImagingTsv(2L).isPresent());
+        verify(rabbitTemplate, never()).convertSendAndReceive(anyString(), any(Object.class));
+    }
+
+    @Test
+    void imagingTableWrittenByDatasetsIsReadThenDeleted() throws Exception {
+        ReflectionTestUtils.setField(service, "bidsDataDir", bidsDataDir.getAbsolutePath());
+        Path file = bidsDataDir.toPath().resolve("neurobagel").resolve(IMAGING_FILE);
+        Files.createDirectories(file.getParent());
+        Files.writeString(file, "sub\tses\tsuffix\tpath\n", StandardCharsets.UTF_8);
+        given(studyRepository.existsByIdAndNeurobagelExportTrueAndIsDraftFalse(1L)).willReturn(true);
+        given(rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.NEUROBAGEL_IMAGING_TSV, "1")).willReturn(IMAGING_FILE);
+
+        assertEquals(Optional.of("sub\tses\tsuffix\tpath\n"), service.findImagingTsv(1L));
+        assertFalse(Files.exists(file));
+    }
+
+    @Test
+    void unexpectedFileNameFromDatasetsIsNeverRead() {
+        ReflectionTestUtils.setField(service, "bidsDataDir", bidsDataDir.getAbsolutePath());
+        given(studyRepository.existsByIdAndNeurobagelExportTrueAndIsDraftFalse(1L)).willReturn(true);
+        given(rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.NEUROBAGEL_IMAGING_TSV, "1"))
+                .willReturn("../../etc/passwd");
+
+        assertFalse(service.findImagingTsv(1L).isPresent());
+    }
+
+    @Test
+    void noAnswerFromDatasetsMeansNoImagingTable() {
+        given(studyRepository.existsByIdAndNeurobagelExportTrueAndIsDraftFalse(1L)).willReturn(true);
+        given(rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.NEUROBAGEL_IMAGING_TSV, "1")).willReturn(null);
+
+        assertFalse(service.findImagingTsv(1L).isPresent());
+    }
+
+    private static Study study(Long id, String name) {
+        Study study = new Study();
+        study.setId(id);
+        study.setName(name);
+        return study;
+    }
+
+}

@@ -13,7 +13,7 @@
  */
 import { Injectable, ComponentRef } from '@angular/core';
 
-import { ServiceLocator } from 'src/app/utils/locator.service';
+import { ServiceLocator } from '@app/utils/locator.service';
 
 import { ConfirmDialogComponent } from './confirm-dialog.component';
 
@@ -52,6 +52,15 @@ export class ConfirmDialogService {
         const ref: ComponentRef<ConfirmDialogComponent> = ServiceLocator.createComponent(ConfirmDialogComponent);
         const dialog: ConfirmDialogComponent = ref.instance;
         return dialog.openError(title, message, link).then(answer => {
+            ref.destroy();
+            return answer;
+        });
+    }
+
+    public extendDate(title: string, message?: string, button?: string, date?: Date): Promise<{response: boolean, date: Date}> {
+        const ref: ComponentRef<ConfirmDialogComponent> = ServiceLocator.createComponent(ConfirmDialogComponent);
+        const dialog: ConfirmDialogComponent = ref.instance;
+        return dialog.openExtendDate(title, message, button, date).then(answer => {
             ref.destroy();
             return answer;
         });

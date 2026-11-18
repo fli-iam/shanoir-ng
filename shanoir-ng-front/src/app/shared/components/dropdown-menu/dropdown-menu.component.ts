@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ContentChildren, ElementRef, forwardRef, HostBinding, Input, Output, QueryList, ViewChild, EventEmitter, OnChanges, SimpleChanges, OnDestroy, AfterViewInit } from '@angular/core';
+import { Component, ContentChildren, ElementRef, forwardRef, HostBinding, Input, Output, QueryList, ViewChild, EventEmitter, OnChanges, SimpleChanges, OnDestroy, AfterViewInit, ChangeDetectionStrategy } from '@angular/core';
 import { Subscription } from 'rxjs';
 
 import { GlobalService } from '../../services/global.service';
@@ -25,6 +25,7 @@ import { MenuItemComponent } from './menu-item/menu-item.component';
     selector: 'dropdown-menu',
     templateUrl: 'dropdown-menu.component.html',
     styleUrls: ['dropdown-menu.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: []
 })
 export class DropdownMenuComponent implements OnChanges, OnDestroy, AfterViewInit {

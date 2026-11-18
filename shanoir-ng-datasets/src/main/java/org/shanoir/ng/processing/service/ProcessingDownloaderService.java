@@ -41,6 +41,22 @@ public interface ProcessingDownloaderService {
     void massiveDownload(List<DatasetProcessing> processingList, boolean resultOnly, String format, HttpServletResponse response, boolean withManifest, Long converterId) throws RestServiceException;
 
     /**
+     * Download outputs (+ inputs if needed) of the processings of the given ids. The processings are
+     * loaded by the service itself, so that they stay attached to the session for the whole download :
+     * the dataset expressions and files are lazily walked through while zipping.
+     *
+     * @param processingIds ids of the processings that have to be downloaded
+     * @param resultOnly boolean describing if inputs must be downloaded too
+     * @param format a potential format required, in that case a conversion has to be dine
+     * @param response the HTTP in which create the download zip stream
+     * @param withManifest a boolean describing if a summary of the files is required
+     * @param converterId if format is ".nii", describes the converter to use
+     *
+     * @throws RestServiceException
+     */
+    void massiveDownloadByProcessingIds(List<Long> processingIds, boolean resultOnly, String format, HttpServletResponse response, boolean withManifest, Long converterId) throws RestServiceException;
+
+    /**
      * Download processing data according to a json parameter file
      *
      * @param jsonRequest the json parameter file

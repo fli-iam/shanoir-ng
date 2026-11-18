@@ -22,9 +22,9 @@ import javax.swing.SwingWorker;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
-import org.shanoir.ng.exchange.imports.subject.IdentifierCalculator;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.model.ImportJob;
+import org.shanoir.ng.importer.model.ImportJobBase;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.PatientVerification;
 import org.shanoir.ng.importer.model.Serie;
@@ -33,6 +33,7 @@ import org.shanoir.ng.importer.model.Subject;
 import org.shanoir.ng.importer.model.UploadState;
 import org.shanoir.ng.shared.dateTime.DateTimeUtils;
 import org.shanoir.ng.shared.dicom.EquipmentDicom;
+import org.shanoir.ng.utils.IdentifierCalculator;
 import org.shanoir.ng.utils.Utils;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.dicom.IDicomServerClient;
@@ -204,7 +205,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
         // DownloadOrCopyRunnable sets patient and study to NULL: reduce size of import-job.json
         LocalDate studyDate = importJob.getStudy().getStudyDate();
         String studyDescription = importJob.getStudy().getStudyDescription();
-        HashMap<String, ImportJob> downloadImportJobs = new HashMap<String, ImportJob>();
+        HashMap<String, ImportJobBase> downloadImportJobs = new HashMap<String, ImportJobBase>();
         downloadImportJobs.put(importJob.getStudy().getStudyInstanceUID(), importJob);
         Runnable downloadOrCopyRunnable = new DownloadOrCopyRunnable(true, true, importFromTableWindow.frame, importFromTableWindow.downloadProgressBar,  dicomServerClient, dicomFileAnalyzer,  null, downloadImportJobs);
         Thread downloadThread = new Thread(downloadOrCopyRunnable);
@@ -325,7 +326,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
         // Profile OFSEP: in Excel table: SHANOIR_SUBJECT_NAME column is ignored
         } else {
             try {
-                subjectREST = shanoirUploaderServiceClientNG.findSubjectBySubjectIdentifier(subject.getIdentifier());
+                subjectREST = shanoirUploaderServiceClientNG.findSubjectByStudyIdAndSubjectIdentifier(studyREST.getId(), subject.getIdentifier());
                 // If the name does not match, change the subjectStudyIdentifier for this study
                 if (subjectREST != null && !subjectREST.getName().equals(importJob.getSubjectName())) {
                     subjectStudyIdentifier = importJob.getSubjectName();
@@ -399,12 +400,10 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
         }
 
         logger.info("Prepare import job in thread: pseudonymize DICOM files, write import-job.json");
-        importJob.setDicomQuery(null); // clean up, as not necessary anymore
-        importJob.setPatientVerification(null); // avoid sending patient info to server
-        ImportUtils.prepareImportJob(importJob, subjectREST.getName(), subjectREST.getId(),
+        ImportUtils.prepareImportJob(importJob, subjectREST,
             examination.getId(), examination.getStudyInstanceUID(), studyREST, studyCard, equipment);
         File importJobFile = new File(importJob.getWorkFolder() + File.separator + ShUpConfig.IMPORT_JOB_JSON);
-        Runnable importRunnable = new ImportFinishRunnable(importJobFile.getParentFile(), importJob, subjectREST.getName());
+        Runnable importRunnable = new ImportFinishRunnable(importJobFile.getParentFile(), importJob);
         Thread importThread = new Thread(importRunnable);
         importThread.start();
         while (importThread.isAlive()) {
@@ -414,7 +413,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
         return true;
     }
 
-    private EquipmentDicom getAndCheckEquipmentDicom(ImportJob importJob) {
+    private EquipmentDicom getAndCheckEquipmentDicom(ImportJobBase importJob) {
         EquipmentDicom equipmentDicom = importJob.getFirstSerieWithInstitutionAndEquipment().getEquipment();
         String manufacturerName = equipmentDicom.getManufacturer();
         String manufacturerModelName = equipmentDicom.getManufacturerModelName();

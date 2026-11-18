@@ -31,6 +31,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             class="label"
                             [class.icon]="selectedOption?.awesome"
                             [ngModel]="inputText"
+                            [ngModelOptions]="{ standalone: true }"
                             (ngModelChange)="onTypeText($event)"
                             [placeholder]="placeholder ? placeholder : 'Select an option...'"
                             (click)="isOpen() ? close() : open()"

@@ -28,19 +28,17 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.util.UriUtils;
+import tools.jackson.core.json.JsonFactory;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.StreamReadConstraints;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.json.JsonMapper;
+import tools.jackson.core.StreamReadConstraints;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.servlet.http.HttpServletRequest;
@@ -62,7 +60,6 @@ public class ExecutionResultApiController implements ExecutionResultApi {
 
     private final HttpServletRequest httpServletRequest;
 
-    @Autowired
     ExecutionResultApiController(HttpServletRequest httpServletRequest) {
         this.httpServletRequest = httpServletRequest;
 
@@ -74,7 +71,7 @@ public class ExecutionResultApiController implements ExecutionResultApi {
     @Override
     public ResponseEntity<Path> uploadPath(
             @Parameter(name = "") @Valid @RequestBody String body)
-            throws RestServiceException, JsonProcessingException {
+            throws RestServiceException {
 
         LOG.info("Starting VIP output download.");
 

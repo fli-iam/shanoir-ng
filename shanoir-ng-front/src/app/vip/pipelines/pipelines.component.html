@@ -31,8 +31,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <div class="row">
             <div class="pipeline-list">
                 <div class="pipelines">
-                    @for (pipeline of pipelines; track pipelines) {
-                        <app-pipeline [pipeline]="pipeline" (click)="selectPipeline(pipeline)"></app-pipeline>
+                    @for (group of pipelineGroups; track group.name) {
+                        <app-pipeline
+                                [group]="group"
+                                [selectedIdentifier]="selectedIdentifier"
+                                (pipelineSelected)="selectPipeline($event)"></app-pipeline>
                     }
                 </div>
             </div>
@@ -43,7 +46,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <h3>Pipeline description</h3>
                     <hr />
                     <h3>Name :</h3>
-                    <p>{{ selectedPipeline.name }}</p>
+                    <p>{{ selectedPipeline.name }} {{ selectedPipeline.version }}</p>
                     <h3>Description :</h3>
                     <p>{{ selectedPipeline.description }}</p>
                     <hr />

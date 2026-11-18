@@ -34,7 +34,6 @@ import org.mockito.Mockito;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEventService;
-import org.shanoir.ng.shared.jackson.JacksonUtils;
 import org.shanoir.ng.storage.StorageService;
 import org.shanoir.ng.study.controler.StudyApiController;
 import org.shanoir.ng.study.dto.StudyDTO;
@@ -53,18 +52,20 @@ import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Unit tests for study controller.
@@ -72,7 +73,10 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
  * @author msimon
  *
  */
-@WebMvcTest(controllers = StudyApiController.class)
+@WebMvcTest(controllers = StudyApiController.class,
+        excludeAutoConfiguration = {
+                org.springframework.boot.security.oauth2.server.resource.autoconfigure.OAuth2ResourceServerAutoConfiguration.class
+        })
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
 public class StudyApiControllerTest {
@@ -80,45 +84,50 @@ public class StudyApiControllerTest {
     private static final Logger LOG = LoggerFactory.getLogger(StudyApiControllerTest.class);
 
     private static final String REQUEST_PATH = "/studies";
+
     private static final String REQUEST_PATH_FOR_NAMES = REQUEST_PATH + "/names";
+
     private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
+
     private static final String REQUEST_PATH_FOR_MEMBERS = REQUEST_PATH_WITH_ID + "/members";
-    private static final String REQUEST_PATH_FOR_MEMBER_WITH_ID = REQUEST_PATH_FOR_MEMBERS + "/1";
 
     @Autowired
     private MockMvc mvc;
 
-    @MockBean
+    @Autowired
+    private JsonMapper mapper;
+
+    @MockitoBean
     private StudyMapper studyMapperMock;
 
-    @MockBean
+    @MockitoBean
     private StudyTagMapper studyTagMapperMock;
 
-    @MockBean
+    @MockitoBean
     private StudyService studyServiceMock;
 
-    @MockBean
+    @MockitoBean
     private StudyUserService studyUserServiceMock;
 
-    @MockBean
+    @MockitoBean
     private DataUserAgreementService dataUserAgreementServiceMock;
 
-    @MockBean
+    @MockitoBean
     private StudyFieldEditionSecurityManager fieldEditionSecurityManager;
 
-    @MockBean
+    @MockitoBean
     private StudyUniqueConstraintManager uniqueConstraintManager;
 
-    @MockBean(name = "studySecurityService")
+    @MockitoBean(name = "studySecurityService")
     private StudySecurityService studySecurityService;
 
-    @MockBean
+    @MockitoBean
     private ShanoirEventService eventService;
 
-    @MockBean
+    @MockitoBean
     private RelatedDatasetService relatedDatasetService;
 
-    @MockBean
+    @MockitoBean
     private StorageService storageService;
 
     @TempDir
@@ -155,7 +164,7 @@ public class StudyApiControllerTest {
     // @Test
     public void addMember() throws Exception {
         mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_FOR_MEMBERS).accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(ModelsUtil.createStudyUser())))
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(ModelsUtil.createStudyUser())))
                 .andExpect(status().isNoContent());
     }
 

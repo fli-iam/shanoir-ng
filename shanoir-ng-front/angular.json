@@ -11,7 +11,7 @@
             "prefix": "app",
             "architect": {
                 "build": {
-                    "builder": "@angular-devkit/build-angular:application",
+                    "builder": "@angular/build:application",
                     "options": {
                         "outputPath": {
                             "base": "dist",
@@ -59,12 +59,13 @@
                                     "maximumError": "10kb"
                                 }
                             ]
-                        }
+                        },
+                        "development": {}
                     },
                     "defaultConfiguration": ""
                 },
                 "serve": {
-                    "builder": "@angular-devkit/build-angular:dev-server",
+                    "builder": "@angular/build:dev-server",
                     "options": {
                         "buildTarget": "shanoir-ng-front:build",
                         "host": "0.0.0.0",
@@ -74,8 +75,6 @@
                         "liveReload": true,
                         "watch": true,
                         "ssl": false,
-                        "publicHost": "http://shanoir-ng-nginx",
-                        "disableHostCheck": true,
                         "verbose": true
                     },
                     "configurations": {
@@ -85,33 +84,16 @@
                     }
                 },
                 "extract-i18n": {
-                    "builder": "@angular-devkit/build-angular:extract-i18n",
+                    "builder": "@angular/build:extract-i18n",
                     "options": {
                         "buildTarget": "shanoir-ng-front:build"
                     }
                 },
                 "test": {
-                    "builder": "@angular-devkit/build-angular:karma",
+                    "builder": "@angular/build:unit-test",
                     "options": {
-                        "main": "src/test.ts",
-                        "polyfills": "src/polyfills.ts",
-                        "tsConfig": "tsconfig.spec.json",
-                        "karmaConfig": "karma.conf.js",
-                        "assets": ["src/assets"],
-                        "styles": ["src/styles.css"],
-                        "scripts": []
-                    }
-                },
-                "e2e": {
-                    "builder": "@angular-devkit/build-angular:protractor",
-                    "options": {
-                        "protractorConfig": "e2e/protractor.conf.js",
-                        "devServerTarget": "shanoir-ng-front:serve"
-                    },
-                    "configurations": {
-                        "production": {
-                            "devServerTarget": "shanoir-ng-front:serve:production"
-                        }
+                        "runner": "karma",
+                        "tsConfig": "tsconfig.spec.json"
                     }
                 },
                 "lint": {

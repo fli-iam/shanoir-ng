@@ -12,11 +12,11 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
 
 import { Reference }   from '../shared/reference.model';
 import { ReferenceService } from '../shared/reference.service';
@@ -27,6 +27,7 @@ import { FormFooterComponent } from '../../../shared/components/form-footer/form
     selector: 'reference-form',
     templateUrl: 'reference-form.component.html',
     styleUrls: ['reference-form.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [FormsModule, ReactiveFormsModule, FormFooterComponent]
 })
 export class ReferenceFormComponent extends EntityComponent<Reference>{

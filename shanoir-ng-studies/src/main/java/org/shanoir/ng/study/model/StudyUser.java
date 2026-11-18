@@ -14,6 +14,8 @@
 
 package org.shanoir.ng.study.model;
 
+import java.io.Serial;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -43,6 +45,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "study_user", uniqueConstraints = { @UniqueConstraint(columnNames = { "study_id", "userId" }, name = "study_user_idx") })
@@ -52,12 +55,14 @@ public class StudyUser extends AbstractEntity implements StudyUserInterface {
     /**
      * UID
      */
+    @Serial
     private static final long serialVersionUID = 5813071870148636187L;
 
     /** Inform an user about changes on study_user: creation */
     private boolean receiveStudyUserReport;
 
     /** Advice the user when new import done in the study. */
+    @NotNull
     private boolean receiveNewImportReport;
 
     /**
@@ -66,7 +71,13 @@ public class StudyUser extends AbstractEntity implements StudyUserInterface {
      * not confirmed as long, as the user has not validated the DUA.
      * The default is true, in case no DUA is existing.
      */
+    @NotNull
     private boolean confirmed = true;
+
+    private LocalDate expirationDate;
+
+    @NotNull
+    private boolean receivedExpirationNotification = false;
 
     /** Study id. */
     @ManyToOne
@@ -131,6 +142,18 @@ public class StudyUser extends AbstractEntity implements StudyUserInterface {
 
     public void setConfirmed(boolean confirmed) {
         this.confirmed = confirmed;
+    }
+
+    public boolean canAccessStudy() {
+        return isConfirmed() && (getExpirationDate() == null || getExpirationDate().isAfter(LocalDate.now()));
+    }
+
+    public LocalDate getExpirationDate() {
+        return expirationDate;
+    }
+
+    public void setExpirationDate(LocalDate expirationDate) {
+        this.expirationDate = expirationDate;
     }
 
     /**
@@ -230,4 +253,11 @@ public class StudyUser extends AbstractEntity implements StudyUserInterface {
         }
     }
 
+    public boolean isReceivedExpirationNotification() {
+        return receivedExpirationNotification;
+    }
+
+    public void setReceivedExpirationNotification(boolean receivedExpirationNotification) {
+        this.receivedExpirationNotification = receivedExpirationNotification;
+    }
 }

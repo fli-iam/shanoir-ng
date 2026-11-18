@@ -59,8 +59,10 @@ import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.eeg.model.Channel;
 import org.shanoir.ng.eeg.model.Event;
 import org.shanoir.ng.examination.model.Examination;
+import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.shared.dto.ParticipantsTsvRequestDTO;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
@@ -80,8 +82,10 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.UriUtils;
 
 import com.fasterxml.jackson.core.JsonParseException;
@@ -127,10 +131,14 @@ public class BIDSServiceImpl implements BIDSService {
     private String bidsStorageDir;
 
     @Autowired
+    @Lazy
     private ExaminationService examService;
 
     @Autowired
     private StudyRepository studyRepo;
+
+    @Autowired
+    private ExaminationRepository examinationRepository;
 
     @Autowired
     private SubjectRepository subjectRepository;
@@ -157,10 +165,17 @@ public class BIDSServiceImpl implements BIDSService {
 
     private DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
+    /**
+     * Deletes the BIDS folder of a study (not the study itself), to be regenerated on next access.
+     * The study is not loaded from database: this message is sent for each examination deleted,
+     * including when the whole study is deleted (RabbitMQDatasetsService.deleteStudy), so the
+     * study row may already be gone when it is received. Its BIDS folder must be deleted anyway.
+     *
+     * @param studyId the study id, as a string
+     */
     @RabbitListener(queues = RabbitMQConfiguration.RELOAD_BIDS)
     public void deleteBidsForStudy(String studyId) {
-        Study studyDeleted = studyRepo.findById(Long.valueOf(studyId)).orElse(null);
-        this.deleteBidsFolder(studyDeleted.getId());
+        this.deleteBidsFolder(Long.valueOf(studyId));
     }
 
     @Override
@@ -218,7 +233,8 @@ public class BIDSServiceImpl implements BIDSService {
                 // Create participants.tsv
                 event.setMessage("Getting participants.tsv for study " + studyName);
                 eventService.publishEvent(event);
-                rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_PARTICIPANTS_TSV, objectMapper.writeValueAsString(studyId));
+                rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_PARTICIPANTS_TSV, objectMapper.writeValueAsString(
+                        new ParticipantsTsvRequestDTO(studyId, examinationRepository.findFirstExaminationDatesByStudyId(studyId))));
 
                 int index = 1;
                 for (Subject subject : subjects) {
@@ -267,11 +283,11 @@ public class BIDSServiceImpl implements BIDSService {
      * @param subject the subject we want to export as BIDS
      * @param studyName the study name
      * @param workDir Subject BIDS directory where we are working. Will be created if null.
-     * @param index subject index
      * @return data from the subject formatted as BIDS in a .zip file.
      * @throws IOException
      */
-    private void exportAsBids(final Subject subject, final String studyName, Long studyId, final File workDir) throws IOException {
+    @Transactional(readOnly = true)
+    protected void exportAsBids(final Subject subject, final String studyName, Long studyId, final File workDir) throws IOException {
         File subjectFolder = createSubjectFolder(subject.getId(), workDir);
 
         // Get subject examinations and filter on the one with adapted study only

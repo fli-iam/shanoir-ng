@@ -16,26 +16,26 @@ import { Injectable } from "@angular/core";
 import { ActivatedRoute, ActivationStart, Router } from '@angular/router';
 import { Subject as RxjsSubject } from 'rxjs';
 
-import { AcquisitionEquipment } from 'src/app/acquisition-equipments/shared/acquisition-equipment.model';
-import { AcquisitionEquipmentService } from 'src/app/acquisition-equipments/shared/acquisition-equipment.service';
-import { Center } from 'src/app/centers/shared/center.model';
-import { Coil } from "src/app/coils/shared/coil.model";
-import { CoilService } from "src/app/coils/shared/coil.service";
-import { DatasetAcquisition } from 'src/app/dataset-acquisitions/shared/dataset-acquisition.model';
-import { DatasetAcquisitionService } from 'src/app/dataset-acquisitions/shared/dataset-acquisition.service';
-import { DatasetProcessing } from 'src/app/datasets/shared/dataset-processing.model';
-import { DatasetProcessingService } from 'src/app/datasets/shared/dataset-processing.service';
-import { Dataset } from 'src/app/datasets/shared/dataset.model';
-import { DatasetService } from 'src/app/datasets/shared/dataset.service';
-import { Examination } from 'src/app/examinations/shared/examination.model';
-import { ExaminationService } from 'src/app/examinations/shared/examination.service';
-import { Entity } from "src/app/shared/components/entity/entity.abstract";
-import { KeycloakService } from "src/app/shared/keycloak/keycloak.service";
-import { QualityCard } from 'src/app/study-cards/shared/quality-card.model';
-import { StudyCard } from 'src/app/study-cards/shared/study-card.model';
-import { Subject } from "src/app/subjects/shared/subject.model";
-import { User } from 'src/app/users/shared/user.model';
-import { AnimalSubject } from "src/app/preclinical/animalSubject/shared/animalSubject.model";
+import { AcquisitionEquipment } from '@app/acquisition-equipments/shared/acquisition-equipment.model';
+import { AcquisitionEquipmentService } from '@app/acquisition-equipments/shared/acquisition-equipment.service';
+import { Center } from '@app/centers/shared/center.model';
+import { Coil } from "@app/coils/shared/coil.model";
+import { CoilService } from "@app/coils/shared/coil.service";
+import { DatasetAcquisition } from '@app/dataset-acquisitions/shared/dataset-acquisition.model';
+import { DatasetAcquisitionService } from '@app/dataset-acquisitions/shared/dataset-acquisition.service';
+import { DatasetProcessing } from '@app/datasets/shared/dataset-processing.model';
+import { DatasetProcessingService } from '@app/datasets/shared/dataset-processing.service';
+import { Dataset } from '@app/datasets/shared/dataset.model';
+import { DatasetService } from '@app/datasets/shared/dataset.service';
+import { Examination } from '@app/examinations/shared/examination.model';
+import { ExaminationService } from '@app/examinations/shared/examination.service';
+import { Entity } from "@app/shared/components/entity/entity.abstract";
+import { KeycloakService } from "@app/shared/keycloak/keycloak.service";
+import { QualityCard } from '@app/study-cards/shared/quality-card.model';
+import { StudyCard } from '@app/study-cards/shared/study-card.model';
+import { Subject } from "@app/subjects/shared/subject.model";
+import { User } from '@app/users/shared/user.model';
+import { AnimalSubject } from "@app/preclinical/animalSubject/shared/animalSubject.model";
 
 import { AcquisitionEquipmentNode, CenterNode, CentersNode, ClinicalSubjectNode, CoilNode, DatasetAcquisitionNode, DatasetNode, ExaminationNode, MemberNode, MembersNode, MetadataNode, AnimalSubjectNode, ProcessingNode, QualityCardNode, RightNode, ShanoirNode, StudyCardNode, StudyNode, SubjectNode, SubjectsNode, UNLOADED } from '../../tree/tree.model';
 import { SuperPromise } from '../../utils/super-promise';
@@ -89,12 +89,26 @@ export class TreeService {
         localStorage.setItem('treeOpened', this._treeOpened ? 'true' : 'false');
     }
 
-    get canAdminStudy(): boolean {
-        return this.studyRights.includes(StudyUserRight.CAN_ADMINISTRATE);
+    get canDeleteInStudy(): boolean {
+        return this.hasDeleteRight(this.studyRights);
+    }
+
+    // as in the backend, deleting study data needs the expert role along with CAN_ADMINISTRATE
+    hasDeleteRight(rights: StudyUserRight[]): boolean {
+        return this.keycloakService.isUserAdmin()
+            || (this.keycloakService.isUserExpert() && !!rights?.includes(StudyUserRight.CAN_ADMINISTRATE));
     }
 
     get canDownloadStudy(): boolean {
         return this.studyRights.includes(StudyUserRight.CAN_DOWNLOAD);
+    }
+
+    get canExecuteInStudy(): boolean {
+        return !!this.studyRights?.includes(StudyUserRight.CAN_EXECUTE);
+    }
+
+    get canImportInStudy(): boolean {
+        return !!this.studyRights?.includes(StudyUserRight.CAN_IMPORT);
     }
 
     get treeAvailable(): boolean {
@@ -245,6 +259,14 @@ export class TreeService {
                     this.treeAvailable = !!this.selectedNode;
                     return node;
                 }
+                // the selection found no node : the previous one has to be dropped, as it would
+                // otherwise stay armed for removeCurrentNode() and be removed in its place
+                this.selectedNode = null;
+            }).catch(error => {
+                // idem, a selection that could not be resolved leaves no node behind
+                this.selectedNode = null;
+                console.error('Could not select the tree node', error);
+                return null;
             });
 
         }
@@ -271,9 +293,6 @@ export class TreeService {
         } else if (selection?.type == 'acquisition') {
             node = this.selectAcquisition(selection.entity as DatasetAcquisition);
         } else if (selection?.type == 'processing') {
-            if ((selection.entity as DatasetProcessing).parentId == null) {
-                return Promise.resolve(null);
-            }
             node = this.selectProcessing(selection.entity as DatasetProcessing);
         } else if (selection?.type == 'examination') {
             node = this.selectExamination(selection.entity as Examination);
@@ -300,6 +319,9 @@ export class TreeService {
         return this.studyNodeOpenPromise.then(() => {
             return this.studyNode.subjectsNode.open().then(() => {
                 return this.findDatasetChainFromBottomDataset(dataset).then(ret => {
+                    if (!ret) {
+                        return null;
+                    }
                     if (this.studyNode.subjectsNode.subjects != UNLOADED) {
                         const subjectNode: SubjectNode = this.studyNode.subjectsNode.subjects?.find(sn => {
                             return sn.id == ret.subjectId;
@@ -377,7 +399,10 @@ export class TreeService {
             datasetPromise = Promise.resolve(dataset);
         }
         return datasetPromise.then(ds => {
-            if (ds?.hasProcessing) {
+            if (!ds) {
+                return Promise.resolve(null);
+            }
+            if (ds.hasProcessing) {
                 return this.findDatasetChain({id: ds.datasetProcessing.inputDatasets[0].id, outProcessing: {id: ds.datasetProcessing.id, outDataset: {id: ds.id}}})
             } else {
                 return Promise.resolve({id: ds?.id,
@@ -414,13 +439,13 @@ export class TreeService {
 
         return processingPromise.then(async proc => {
             const firstRealInput = await this.datasetProcessingService.getFirstRealInput(proc);
+            if (!firstRealInput) {
+                // a processing is shown under its input dataset : without one, it has no node
+                return null;
+            }
             return this.selectDataset(firstRealInput).then(parentDsNode => {
                 return parentDsNode?.open().then(() => {
                     if (parentDsNode.processings != UNLOADED) {
-                        if (proc.parentId === null) {
-                            return parentDsNode.processings?.filter(pnode => pnode.id > proc.id)
-                                .sort((a, b) => a.id - b.id)[0];
-                        }
                         return parentDsNode.processings?.find(pnode => pnode.id == proc.id);
                     }
                 });
@@ -631,14 +656,14 @@ export class TreeService {
                 return AnimalSubjectNode.fromSubject(
                     subject,
                     studyNode,
-                    this.canAdminStudy,
+                    this.canDeleteInStudy,
                     this.canDownloadStudy
                 );
             } else {
                 return ClinicalSubjectNode.fromSubject(
                     subject,
                     studyNode,
-                    this.canAdminStudy,
+                    this.canDeleteInStudy,
                     this.canDownloadStudy
                 );
             }

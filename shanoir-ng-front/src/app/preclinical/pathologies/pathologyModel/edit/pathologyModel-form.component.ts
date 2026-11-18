@@ -12,13 +12,13 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { Validators, UntypedFormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
-import { TaskState } from 'src/app/async-tasks/task.model';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import { StudyRightsService } from 'src/app/studies/shared/study-rights.service';
+import { TaskState } from '@app/async-tasks/task.model';
+import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
+import { StudyRightsService } from '@app/studies/shared/study-rights.service';
 
 import { PathologyModel }    from '../shared/pathologyModel.model';
 import { PathologyModelService } from '../shared/pathologyModel.service';
@@ -33,6 +33,7 @@ import { SelectBoxComponent } from '../../../../shared/select/select.component';
 @Component({
     selector: 'pathologyModel-form',
     templateUrl: 'pathologyModel-form.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, SelectBoxComponent]
 })
 export class PathologyModelFormComponent extends EntityComponent<PathologyModel>{

@@ -17,6 +17,7 @@ package org.shanoir.ng.key.model;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 public class KeyValue {
@@ -25,6 +26,7 @@ public class KeyValue {
     @Column(name = "kv_key")
     private String key;
 
+    @NotNull
     private String value;
 
     public String getKey() {

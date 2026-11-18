@@ -23,7 +23,7 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.shared.core.model.IdList;
 import org.shanoir.ng.shared.exception.PacsException;
 import org.shanoir.ng.shared.exception.RestServiceException;
-import org.shanoir.ng.studycard.dto.DicomTag;
+import org.shanoir.ng.studycard.model.DicomTag;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.model.StudyCardApply;
 import org.springframework.http.ResponseEntity;
@@ -73,7 +73,7 @@ public interface StudyCardApi {
             @ApiResponse(responseCode = "500", description = "unexpected error") })
     @RequestMapping(value = "/byStudy/{studyId}", produces = { "application/json" }, method = RequestMethod.GET)
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterCardList(returnObject.getBody(), 'CAN_SEE_ALL')")
+    @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterStudyCardList(returnObject.getBody(), 'CAN_SEE_ALL')")
     ResponseEntity<List<StudyCard>> findStudyCardByStudyId(
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId);
 
@@ -85,7 +85,7 @@ public interface StudyCardApi {
             @ApiResponse(responseCode = "500", description = "unexpected error") })
     @RequestMapping(value = "/byAcqEq/{acqEqId}", produces = { "application/json" }, method = RequestMethod.GET)
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterCardList(returnObject.getBody(), 'CAN_SEE_ALL')")
+    @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterStudyCardList(returnObject.getBody(), 'CAN_SEE_ALL')")
     ResponseEntity<List<StudyCard>> findStudyCardByAcqEqId(
             @Parameter(description = "id of the acquisition equipment", required = true) @PathVariable("acqEqId") Long acqEqId);
 
@@ -97,7 +97,7 @@ public interface StudyCardApi {
             @ApiResponse(responseCode = "500", description = "unexpected error") })
     @RequestMapping(value = "", produces = { "application/json" }, method = RequestMethod.GET)
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterCardList(returnObject.getBody(), 'CAN_SEE_ALL')")
+    @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterStudyCardList(returnObject.getBody(), 'CAN_SEE_ALL')")
     ResponseEntity<List<StudyCard>> findStudyCards();
 
     @Operation(summary = "", description = "Saves a new study card")
@@ -123,7 +123,7 @@ public interface StudyCardApi {
     @RequestMapping(value = "/search", produces = { "application/json" }, consumes = {
             "application/json" }, method = RequestMethod.POST)
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    @PostAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.filterCardList(returnObject.getBody(), 'CAN_SEE_ALL') )")
+    @PostAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.filterStudyCardList(returnObject.getBody(), 'CAN_SEE_ALL') )")
     ResponseEntity<List<StudyCard>> searchStudyCards(
             @Parameter(description = "study ids", required = true) @RequestBody IdList studyIds);
 
