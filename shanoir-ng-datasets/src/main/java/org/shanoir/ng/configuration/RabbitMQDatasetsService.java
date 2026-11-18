@@ -35,6 +35,7 @@ import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;
+import org.shanoir.ng.importer.service.ImporterMailService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.dataset.RelatedDataset;
@@ -119,6 +120,9 @@ public class RabbitMQDatasetsService {
 
     @Autowired
     private SolrService solrService;
+
+    @Autowired
+    private ImporterMailService importerMailService;
 
     @Autowired
     @Lazy
@@ -343,6 +347,21 @@ public class RabbitMQDatasetsService {
             LOG.error("Could not read value transmit as Subject class through RabbitMQ", e);
             throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR);
         }
+    }
+
+    /**
+     * Receives a subject id and says if some of its examinations were copied into another study.
+     * Called synchronously by the studies microservice before deleting a subject: such a subject
+     * cannot be deleted, as the deletion of its copied examinations would be refused.
+     *
+     * @param subjectId the subject id
+     * @return true if at least one examination of the subject has been copied
+     */
+    @RabbitListener(queues = RabbitMQConfiguration.SUBJECT_HAS_COPIED_DATA_QUEUE, containerFactory = "multipleConsumersFactory")
+    @RabbitHandler
+    @Transactional
+    public boolean subjectHasCopiedData(Long subjectId) {
+        return examinationRepository.existsCopyOfSubjectExaminations(subjectId);
     }
 
     /**
@@ -631,8 +650,10 @@ public class RabbitMQDatasetsService {
             event.setProgress(1.0f);
             event.setReport(buildReport(datasetParentIds, countProcessed, countAlreadyExist, countCopy, countSuccess, errors));
             eventService.publishEvent(event);
-            if (!newDatasets.isEmpty())
+            if (!newDatasets.isEmpty()) {
                 solrService.indexDatasets(newDatasets);
+                sendDatasetsCopiedEmail(studyId, newDatasets.size(), propagatedExams, userId);
+            }
 
         } catch (Exception e) {
             if (event != null) {
@@ -644,6 +665,20 @@ public class RabbitMQDatasetsService {
             }
             LOG.error("Something went wrong during the copy. {}", e.getMessage());
             throw new AmqpRejectAndDontRequeueException(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Notify the members of the target study, a failure must never fail the copy.
+     */
+    private void sendDatasetsCopiedEmail(Long studyId, int copiedDatasetCount, StudyExaminationsDTO propagatedExams, Long userId) {
+        try {
+            List<Long> examinationIds = propagatedExams.getExaminations().stream()
+                    .map(StudyExaminationsDTO.StudyExaminationDTO::getExaminationId)
+                    .toList();
+            importerMailService.sendDatasetsCopiedEmail(studyId, copiedDatasetCount, examinationIds, userId);
+        } catch (Exception e) {
+            LOG.error("[CopyDatasets] Could not send the datasets copied email for study {}", studyId, e);
         }
     }
 

@@ -33,6 +33,7 @@ import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.email.DuaDraftWrapper;
 import org.shanoir.ng.shared.email.EmailDatasetImportFailed;
+import org.shanoir.ng.shared.email.EmailDatasetsCopied;
 import org.shanoir.ng.shared.email.EmailDatasetsImported;
 import org.shanoir.ng.shared.email.EmailExtraDataAdded;
 import org.shanoir.ng.shared.email.EmailStudy;
@@ -111,6 +112,12 @@ public class EmailServiceImpl implements EmailService {
     private static final String ACQUISITION = "acquisition";
 
     private static final String FILE_NAMES = "fileNames";
+
+    private static final String DATASET_COUNT = "datasetCount";
+
+    private static final String EXAMINATIONS = "examinations";
+
+    private static final String MORE_EXAMINATIONS = "moreExaminations";
 
     private static final String MOTIVATION = "motivation";
 
@@ -644,6 +651,51 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
+    public void notifyStudyMembersDatasetsCopied(EmailDatasetsCopied generatedMail) {
+        // Find user that copied the datasets
+        User u = userRepository.findById(generatedMail.getUserId()).orElse(null);
+        String username = u != null ? u.getUsername() : "unknown";
+
+        // Get the list of recipients
+        List<User> recipients = (List<User>) this.userRepository.findAllById(generatedMail.getRecipients());
+
+        List<EmailEntityLink> examinationLinks = new ArrayList<>();
+        if (generatedMail.getExaminations() != null) {
+            for (Entry<Long, String> examination : generatedMail.getExaminations().entrySet()) {
+                EmailEntityLink emailLink = new EmailEntityLink();
+                emailLink.setName(examination.getValue());
+                emailLink.setUrl(shanoirServerAddress + "examination/details/" + examination.getKey());
+                examinationLinks.add(emailLink);
+            }
+        }
+        int moreExaminations = Math.max(0, generatedMail.getTotalExaminations() - examinationLinks.size());
+
+        for (User recipient : recipients) {
+            MimeMessagePreparator messagePreparator = mimeMessage -> {
+                final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+                this.setFromAdministrator(messageHelper);
+                messageHelper.setTo(recipient.getEmail());
+                messageHelper.setSubject(subject("New datasets copied to " + generatedMail.getStudyName()));
+                final Map<String, Object> variables = new HashMap<>();
+                variables.put(LASTNAME, recipient.getLastName());
+                variables.put(FIRSTNAME, recipient.getFirstName());
+                variables.put(USERNAME, username);
+                variables.put(STUDY_NAME, generatedMail.getStudyName());
+                variables.put(STUDY_ADDRESS, shanoirServerAddress + "study/details/" + generatedMail.getStudyId());
+                variables.put(DATASET_COUNT, generatedMail.getCopiedDatasetCount());
+                variables.put(EXAMINATIONS, examinationLinks);
+                variables.put(MORE_EXAMINATIONS, moreExaminations);
+                variables.put(SERVER_ADDRESS, shanoirServerAddress);
+                final String content = build("notifyStudyMembersDatasetsCopied", variables);
+                messageHelper.setText(content, true);
+            };
+            // Send the message
+            LOG.info("Sending datasets copied mail to {} for study {}", recipient.getUsername(), generatedMail.getStudyId());
+            mailSender.send(messagePreparator);
+        }
+    }
+
+    @Override
     public void notifyStudyMembersExtraDataAdded(EmailExtraDataAdded generatedMail) {
         // Find user that added the files
         User u = userRepository.findById(generatedMail.getUserId()).orElse(null);
@@ -874,7 +926,7 @@ public class EmailServiceImpl implements EmailService {
 
     /**
      * Notify a user its study request was refused
-     * @param accessRequest the access request
+     * @param refusedRequest the refused access request
      */
     public void notifyUserRefusedFromStudy(AccessRequest refusedRequest) {
         User user = refusedRequest.getUser();

@@ -178,6 +178,7 @@ services:
       - VIP_SERVICE_EMAIL
       - SHANOIR_SMTP_HOST
       - SHANOIR_SMTP_PORT
+      - SHANOIR_MAIL_SUPPLIER_BLACK_LIST
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - "certificate-share-data:/etc/ssl/certs/java:ro"
@@ -310,6 +311,7 @@ services:
       - SHANOIR_CONTINUANCE_HOUR
       - SHANOIR_SHUTDOWN_HOUR
       - SHANOIR_PACS_CONCURRENT_DOWNLOADS
+      - SHANOIR_MAIL_COPIED_EXAMINATIONS_MAX
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - certificate-share-data:/etc/ssl/certs/java:ro
@@ -513,6 +515,7 @@ services:
       - VIP_URL_HOST
       - SHANOIR_DPO_EMAIL
       - SHANOIR_CONTACT_EMAIL
+      - SHANOIR_MAIL_SUPPLIER_BLACK_LIST
     volumes:
       - "logs:/var/log/nginx"
       - certificate-share-data:/opt/ssl:ro
