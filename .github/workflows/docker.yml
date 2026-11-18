@@ -175,13 +175,7 @@ jobs:
                 },
                 } for image in images }}))
 
-      # process-aot evaluates spring.sql.init.mode at build time (default profile:
-      # never). Without always here, published images skip classpath data.sql on
-      # SHANOIR_MIGRATION=init even when the entrypoint sets mode=always at runtime.
-      # bootstrap.sh already exports SPRING_SQL_INIT_MODE for local builds (3d3bd990c).
       - name: Maven build
-        env:
-          SPRING_SQL_INIT_MODE: always
         run: mvn -f ./shanoir-ng-parent/pom.xml install -DskipTests
 
       - name: Build docker images
