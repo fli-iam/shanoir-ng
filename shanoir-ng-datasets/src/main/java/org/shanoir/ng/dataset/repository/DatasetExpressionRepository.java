@@ -14,8 +14,16 @@
 
 package org.shanoir.ng.dataset.repository;
 
+import java.util.List;
+
 import org.shanoir.ng.dataset.model.DatasetExpression;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
 public interface DatasetExpressionRepository  extends CrudRepository<DatasetExpression, Long> {
+
+    @Query("SELECT DISTINCT de FROM DatasetExpression de "
+            + "LEFT JOIN FETCH de.datasetFiles "
+            + "WHERE de.id IN :ids")
+    List<DatasetExpression> findByIdsWithDatasetFiles(List<Long> ids);
 }
