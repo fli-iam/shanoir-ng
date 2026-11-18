@@ -185,6 +185,7 @@ export class DicomUploadComponent implements OnDestroy {
     }
 
     onSelectStudy() {
+        if (!this.study) return;
         this.useStudyCard = this.study.studyCardPolicy == "MANDATORY" ? true : false;
         if (this.useStudyCard) {
             this.studyCardService.getAllForStudy(this.study.id).then(studycards => {
