@@ -16,7 +16,7 @@ services:
   #
   keycloak-database:
     container_name: "${SHANOIR_PREFIX}keycloak-database"
-image: "ghcr.io/fli-iam/shanoir-ng/keycloak-database:${SHANOIR_IMAGE_TAG:-NG_v2.14.0}"
+    image: "ghcr.io/fli-iam/shanoir-ng/keycloak-database:${SHANOIR_IMAGE_TAG:-NG_v2.14.0}"
     environment:
       - MARIADB_DATABASE=keycloak
       - MARIADB_ROOT_PASSWORD=password
@@ -60,7 +60,7 @@ image: "ghcr.io/fli-iam/shanoir-ng/keycloak-database:${SHANOIR_IMAGE_TAG:-NG_v2.
       - SHANOIR_SMTP_STARTTLS_ENABLE
       - SHANOIR_SMTP_STARTTLS_REQUIRED
       - SHANOIR_SMTP_FROM
-image: "ghcr.io/fli-iam/shanoir-ng/keycloak:${SHANOIR_IMAGE_TAG:-NG_v2.14.0}"
+    image: "ghcr.io/fli-iam/shanoir-ng/keycloak:${SHANOIR_IMAGE_TAG:-NG_v2.14.0}"
     volumes:
       - "keycloak-logs:/opt/keycloak/data/log"
     networks:
@@ -106,7 +106,7 @@ image: "ghcr.io/fli-iam/shanoir-ng/keycloak:${SHANOIR_IMAGE_TAG:-NG_v2.14.0}"
   #
   database:
     container_name: "${SHANOIR_PREFIX}database"
-image: "ghcr.io/fli-iam/shanoir-ng/database:${SHANOIR_IMAGE_TAG:-NG_v2.14.0}"
+    image: "ghcr.io/fli-iam/shanoir-ng/database:${SHANOIR_IMAGE_TAG:-NG_v2.14.0}"
     command: --max_allowed_packet 20000000
     environment:
       - MARIADB_ROOT_PASSWORD=password
@@ -133,7 +133,7 @@ image: "ghcr.io/fli-iam/shanoir-ng/database:${SHANOIR_IMAGE_TAG:-NG_v2.14.0}"
   #
   database-migrations:
     container_name: "${SHANOIR_PREFIX}database-migrations"
-image: "ghcr.io/fli-iam/shanoir-ng/database-migrations:${SHANOIR_IMAGE_TAG:-NG_v2.14.0}"
+    image: "ghcr.io/fli-iam/shanoir-ng/database-migrations:${SHANOIR_IMAGE_TAG:-NG_v2.14.0}"
     environment:
       - SHANOIR_MIGRATION
     networks:
@@ -147,7 +147,7 @@ image: "ghcr.io/fli-iam/shanoir-ng/database-migrations:${SHANOIR_IMAGE_TAG:-NG_v
   #
   users:
     container_name: "${SHANOIR_PREFIX}users"
-image: "ghcr.io/fli-iam/shanoir-ng/users:${SHANOIR_IMAGE_TAG:-NG_v2.14.0}"
+    image: "ghcr.io/fli-iam/shanoir-ng/users:${SHANOIR_IMAGE_TAG:-NG_v2.14.0}"
     environment:
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
@@ -189,7 +189,7 @@ image: "ghcr.io/fli-iam/shanoir-ng/users:${SHANOIR_IMAGE_TAG:-NG_v2.14.0}"
   #
   studies:
     container_name: "${SHANOIR_PREFIX}studies"
-image: "ghcr.io/fli-iam/shanoir-ng/studies:${SHANOIR_IMAGE_TAG:-NG_v2.14.0}"
+    image: "ghcr.io/fli-iam/shanoir-ng/studies:${SHANOIR_IMAGE_TAG:-NG_v2.14.0}"
     environment:
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
@@ -230,7 +230,7 @@ image: "ghcr.io/fli-iam/shanoir-ng/studies:${SHANOIR_IMAGE_TAG:-NG_v2.14.0}"
   #
   import:
     container_name: "${SHANOIR_PREFIX}import"
-image: "ghcr.io/fli-iam/shanoir-ng/import:${SHANOIR_IMAGE_TAG:-NG_v2.14.0}"
+    image: "ghcr.io/fli-iam/shanoir-ng/import:${SHANOIR_IMAGE_TAG:-NG_v2.14.0}"
     environment:
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
@@ -267,7 +267,7 @@ image: "ghcr.io/fli-iam/shanoir-ng/import:${SHANOIR_IMAGE_TAG:-NG_v2.14.0}"
   #
   datasets:
     container_name: "${SHANOIR_PREFIX}datasets"
-image: "ghcr.io/fli-iam/shanoir-ng/datasets:${SHANOIR_IMAGE_TAG:-NG_v2.14.0}"
+    image: "ghcr.io/fli-iam/shanoir-ng/datasets:${SHANOIR_IMAGE_TAG:-NG_v2.14.0}"
     environment:
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
@@ -321,7 +321,7 @@ image: "ghcr.io/fli-iam/shanoir-ng/datasets:${SHANOIR_IMAGE_TAG:-NG_v2.14.0}"
   #
   preclinical:
     container_name: "${SHANOIR_PREFIX}preclinical"
-image: "ghcr.io/fli-iam/shanoir-ng/preclinical:${SHANOIR_IMAGE_TAG:-NG_v2.14.0}"
+    image: "ghcr.io/fli-iam/shanoir-ng/preclinical:${SHANOIR_IMAGE_TAG:-NG_v2.14.0}"
     environment:
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
@@ -362,7 +362,7 @@ image: "ghcr.io/fli-iam/shanoir-ng/preclinical:${SHANOIR_IMAGE_TAG:-NG_v2.14.0}"
   #
   nifti-conversion:
     container_name: "${SHANOIR_PREFIX}nifti-conversion"
-image: "ghcr.io/fli-iam/shanoir-ng/nifti-conversion:${SHANOIR_IMAGE_TAG:-NG_v2.14.0}"
+    image: "ghcr.io/fli-iam/shanoir-ng/nifti-conversion:${SHANOIR_IMAGE_TAG:-NG_v2.14.0}"
     environment:
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
@@ -386,7 +386,7 @@ image: "ghcr.io/fli-iam/shanoir-ng/nifti-conversion:${SHANOIR_IMAGE_TAG:-NG_v2.1
   #
   solr:
     container_name: "${SHANOIR_PREFIX}solr"
-image: "ghcr.io/fli-iam/shanoir-ng/solr:${SHANOIR_IMAGE_TAG:-NG_v2.14.0}"
+    image: "ghcr.io/fli-iam/shanoir-ng/solr:${SHANOIR_IMAGE_TAG:-NG_v2.14.0}"
     environment:
       - SOLR_LOG_LEVEL=SEVERE
     volumes:
@@ -462,7 +462,7 @@ image: "ghcr.io/fli-iam/shanoir-ng/solr:${SHANOIR_IMAGE_TAG:-NG_v2.14.0}"
   #
   nginx:
     container_name: shanoir-ng-nginx
-image: "ghcr.io/fli-iam/shanoir-ng/nginx:${SHANOIR_IMAGE_TAG:-NG_v2.14.0}"
+    image: "ghcr.io/fli-iam/shanoir-ng/nginx:${SHANOIR_IMAGE_TAG:-NG_v2.14.0}"
     environment:
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
@@ -504,7 +504,7 @@ image: "ghcr.io/fli-iam/shanoir-ng/nginx:${SHANOIR_IMAGE_TAG:-NG_v2.14.0}"
 
   bids-validator:
     container_name: "${SHANOIR_PREFIX}bids-validator"
-image: "ghcr.io/fli-iam/shanoir-ng/bids-validator:${SHANOIR_IMAGE_TAG:-NG_v2.14.0}"
+    image: "ghcr.io/fli-iam/shanoir-ng/bids-validator:${SHANOIR_IMAGE_TAG:-NG_v2.14.0}"
     environment:
       - AMQP_URL=amqp://guest:guest@rabbitmq:5672/
       - IN_QUEUE=bids.validate
