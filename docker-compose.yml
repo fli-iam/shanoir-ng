@@ -21,7 +21,7 @@ services:
       - MARIADB_DATABASE=keycloak
       - "MARIADB_ROOT_PASSWORD=${SHANOIR_KEYCLOAK_DB_ROOT_PASSWORD:?is not set, see .env.example}"
       # user of Keycloak, with rights on the keycloak schema only
-      - MARIADB_USER=keycloak
+      - "MARIADB_USER=${SHANOIR_KEYCLOAK_DB_USER:?is not set, see .env.example}"
       - "MARIADB_PASSWORD=${SHANOIR_KEYCLOAK_DB_PASSWORD:?is not set, see .env.example}"
       - MARIADB_AUTO_UPGRADE=1
     ulimits:
@@ -42,6 +42,7 @@ services:
     container_name: "${SHANOIR_PREFIX}keycloak"
     #command: ["start-dev"]   # default is "start" to run in production mode
     environment:
+      - "DB_USER=${SHANOIR_KEYCLOAK_DB_USER:?is not set, see .env.example}"
       - "DB_PASSWORD=${SHANOIR_KEYCLOAK_DB_PASSWORD:?is not set, see .env.example}"
       - SHANOIR_NOTIFICATION_EMAIL
       - SHANOIR_NOTIFICATION_NAME
@@ -120,12 +121,18 @@ services:
     environment:
       - "MARIADB_ROOT_PASSWORD=${SHANOIR_DB_ROOT_PASSWORD:?is not set, see .env.example}"
       - MARIADB_AUTO_UPGRADE=1
-      # passwords of the microservices' users, only read when the volume is initialised
+      # accounts of the microservices, only read when the volume is initialised
+      - "SHANOIR_STUDIES_DB_USER=${SHANOIR_STUDIES_DB_USER:?is not set, see .env.example}"
       - "SHANOIR_STUDIES_DB_PASSWORD=${SHANOIR_STUDIES_DB_PASSWORD:?is not set, see .env.example}"
+      - "SHANOIR_USERS_DB_USER=${SHANOIR_USERS_DB_USER:?is not set, see .env.example}"
       - "SHANOIR_USERS_DB_PASSWORD=${SHANOIR_USERS_DB_PASSWORD:?is not set, see .env.example}"
+      - "SHANOIR_IMPORT_DB_USER=${SHANOIR_IMPORT_DB_USER:?is not set, see .env.example}"
       - "SHANOIR_IMPORT_DB_PASSWORD=${SHANOIR_IMPORT_DB_PASSWORD:?is not set, see .env.example}"
+      - "SHANOIR_DATASETS_DB_USER=${SHANOIR_DATASETS_DB_USER:?is not set, see .env.example}"
       - "SHANOIR_DATASETS_DB_PASSWORD=${SHANOIR_DATASETS_DB_PASSWORD:?is not set, see .env.example}"
+      - "SHANOIR_PRECLINICAL_DB_USER=${SHANOIR_PRECLINICAL_DB_USER:?is not set, see .env.example}"
       - "SHANOIR_PRECLINICAL_DB_PASSWORD=${SHANOIR_PRECLINICAL_DB_PASSWORD:?is not set, see .env.example}"
+      - "SHANOIR_MIGRATIONS_DB_USER=${SHANOIR_MIGRATIONS_DB_USER:?is not set, see .env.example}"
       - "SHANOIR_MIGRATIONS_DB_PASSWORD=${SHANOIR_MIGRATIONS_DB_PASSWORD:?is not set, see .env.example}"
     ulimits:
       nofile:
@@ -150,6 +157,7 @@ services:
     container_name: "${SHANOIR_PREFIX}database-migrations"
     image: "ghcr.io/fli-iam/shanoir-ng/database-migrations:NG_v2.14.0"
     environment:
+      - "SHANOIR_MIGRATIONS_DB_USER=${SHANOIR_MIGRATIONS_DB_USER:?is not set, see .env.example}"
       - "SHANOIR_MIGRATIONS_DB_PASSWORD=${SHANOIR_MIGRATIONS_DB_PASSWORD:?is not set, see .env.example}"
       - SHANOIR_MIGRATION
     networks:
@@ -167,6 +175,7 @@ services:
     environment:
       - "SPRING_RABBITMQ_USERNAME=${SHANOIR_RABBITMQ_USER:?is not set, see .env.example}"
       - "SPRING_RABBITMQ_PASSWORD=${SHANOIR_RABBITMQ_PASSWORD:?is not set, see .env.example}"
+      - "SPRING_DATASOURCE_USERNAME=${SHANOIR_USERS_DB_USER:?is not set, see .env.example}"
       - "SPRING_DATASOURCE_PASSWORD=${SHANOIR_USERS_DB_PASSWORD:?is not set, see .env.example}"
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
@@ -212,6 +221,7 @@ services:
     environment:
       - "SPRING_RABBITMQ_USERNAME=${SHANOIR_RABBITMQ_USER:?is not set, see .env.example}"
       - "SPRING_RABBITMQ_PASSWORD=${SHANOIR_RABBITMQ_PASSWORD:?is not set, see .env.example}"
+      - "SPRING_DATASOURCE_USERNAME=${SHANOIR_STUDIES_DB_USER:?is not set, see .env.example}"
       - "SPRING_DATASOURCE_PASSWORD=${SHANOIR_STUDIES_DB_PASSWORD:?is not set, see .env.example}"
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
@@ -256,6 +266,7 @@ services:
     environment:
       - "SPRING_RABBITMQ_USERNAME=${SHANOIR_RABBITMQ_USER:?is not set, see .env.example}"
       - "SPRING_RABBITMQ_PASSWORD=${SHANOIR_RABBITMQ_PASSWORD:?is not set, see .env.example}"
+      - "SPRING_DATASOURCE_USERNAME=${SHANOIR_IMPORT_DB_USER:?is not set, see .env.example}"
       - "SPRING_DATASOURCE_PASSWORD=${SHANOIR_IMPORT_DB_PASSWORD:?is not set, see .env.example}"
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
@@ -296,6 +307,7 @@ services:
     environment:
       - "SPRING_RABBITMQ_USERNAME=${SHANOIR_RABBITMQ_USER:?is not set, see .env.example}"
       - "SPRING_RABBITMQ_PASSWORD=${SHANOIR_RABBITMQ_PASSWORD:?is not set, see .env.example}"
+      - "SPRING_DATASOURCE_USERNAME=${SHANOIR_DATASETS_DB_USER:?is not set, see .env.example}"
       - "SPRING_DATASOURCE_PASSWORD=${SHANOIR_DATASETS_DB_PASSWORD:?is not set, see .env.example}"
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
@@ -353,6 +365,7 @@ services:
     environment:
       - "SPRING_RABBITMQ_USERNAME=${SHANOIR_RABBITMQ_USER:?is not set, see .env.example}"
       - "SPRING_RABBITMQ_PASSWORD=${SHANOIR_RABBITMQ_PASSWORD:?is not set, see .env.example}"
+      - "SPRING_DATASOURCE_USERNAME=${SHANOIR_PRECLINICAL_DB_USER:?is not set, see .env.example}"
       - "SPRING_DATASOURCE_PASSWORD=${SHANOIR_PRECLINICAL_DB_PASSWORD:?is not set, see .env.example}"
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
