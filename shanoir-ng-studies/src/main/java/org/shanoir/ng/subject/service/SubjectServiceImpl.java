@@ -42,6 +42,7 @@ import org.shanoir.ng.subject.dto.SubjectBatchDTO;
 import org.shanoir.ng.subject.dto.SubjectDTO;
 import org.shanoir.ng.subject.dto.mapper.SubjectMapper;
 import org.shanoir.ng.subject.model.Subject;
+import org.shanoir.ng.subject.repository.LegacySubjectStudyRepository;
 import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.shanoir.ng.tag.model.Tag;
 import org.shanoir.ng.tag.repository.TagRepository;
@@ -99,6 +100,9 @@ public class SubjectServiceImpl implements SubjectService {
     private StudyExaminationRepository studyExaminationRepository;
 
     @Autowired
+    private LegacySubjectStudyRepository legacySubjectStudyRepository;
+
+    @Autowired
     private ShanoirEventService eventService;
 
     private static final Logger LOG = LoggerFactory.getLogger(SubjectServiceImpl.class);
@@ -122,6 +126,7 @@ public class SubjectServiceImpl implements SubjectService {
 
         // Delete all associated study_examination
         studyExaminationRepository.deleteBySubjectId(id);
+        legacySubjectStudyRepository.deleteLegacyEnrollmentLinks(id);
         subject.getTags().clear();
         subjectRepository.deleteById(id);
         if (subject.isPreclinical())

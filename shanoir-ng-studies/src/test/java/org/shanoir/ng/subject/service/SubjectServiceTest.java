@@ -41,6 +41,7 @@ import org.shanoir.ng.subject.model.PseudonymusHashValues;
 import org.shanoir.ng.subject.model.Sex;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.model.UserPersonalCommentSubject;
+import org.shanoir.ng.subject.repository.LegacySubjectStudyRepository;
 import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
@@ -77,6 +78,9 @@ public class SubjectServiceTest {
     @MockitoBean
     private RabbitTemplate rabbitTemplate;
 
+    @MockitoBean
+    private LegacySubjectStudyRepository legacySubjectStudyRepository;
+
     @Autowired
     private SubjectServiceImpl subjectService;
 
@@ -100,6 +104,7 @@ public class SubjectServiceTest {
     public void deleteByIdTest() throws ShanoirException {
         given(rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECT_HAS_COPIED_DATA_QUEUE, TEMP_ID)).willReturn(false);
         subjectService.deleteById(TEMP_ID);
+        Mockito.verify(legacySubjectStudyRepository, Mockito.times(1)).deleteLegacyEnrollmentLinks(TEMP_ID);
         Mockito.verify(subjectRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
     }
 
