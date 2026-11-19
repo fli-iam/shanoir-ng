@@ -109,18 +109,14 @@ export class HomeComponent {
     }
 
     private fetchChallengeStudies(): Promise<void> {
-        return this.studyService.getStudiesLight().then(studies => {
-            this.challengeStudies = [];
-            if (studies) {
-                this.allStudies = studies;
-                this.studies = studies.slice(0, 8);
-                for (const study of studies) {
-                    if (study.challenge) {
-                        this.challengeStudies.push(study);
-                    }
-                }
-            }
+        const studiesPromise: Promise<void> = this.studyService.getStudiesLight({ withCounts: true }).then(studies => {
+            this.allStudies = studies;
+            this.studies = studies.slice(0, 8);
         });
+        const challengesPromise: Promise<void> = this.studyService.getStudiesLight({ withProtocols: true, onlyChallenge: true }).then(studies => {
+            this.challengeStudies = studies;
+        });
+        return Promise.all([studiesPromise, challengesPromise]).then(() => {});
     }
 
     private computeExpiringStudies() {

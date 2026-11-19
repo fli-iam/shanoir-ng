@@ -68,11 +68,13 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
             .then(this.mapEntity);
     }
 
-    getStudiesLight(): Promise<StudyLight[]> {
-        return firstValueFrom(this.http.get<StudyLight[]>(AppUtils.BACKEND_API_STUDY_STUDIES_LIGHT_URL))
-            .then((typeResult: StudyLight[]) => {
-                return typeResult;
-            });
+    getStudiesLight(options: { withCounts?: boolean, withProtocols?: boolean, onlyChallenge?: boolean } = {}): Promise<StudyLight[]> {
+        const params: HttpParams = new HttpParams()
+            .set('withCounts', !!options.withCounts)
+            .set('withProtocols', !!options.withProtocols)
+            .set('onlyChallenge', !!options.onlyChallenge);
+        return firstValueFrom(this.http.get<StudyLight[]>(AppUtils.BACKEND_API_STUDY_STUDIES_LIGHT_URL, { params }))
+            .then(studies => studies ?? []);
     }
 
     findStudiesByUserId(): Promise<Study[]> {

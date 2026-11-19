@@ -170,8 +170,9 @@ public class StudyApiController implements StudyApi {
         return new ResponseEntity<>(studyMapper.studiesToStudyDTOs(studies), HttpStatus.OK);
     }
 
-    public ResponseEntity<List<StudyLightDTO>> findStudiesLight() {
-        List<Study> studies = studyService.findAll();
+    @Override
+    public ResponseEntity<List<StudyLightDTO>> findStudiesLight(boolean withCounts, boolean withProtocols, boolean onlyChallenge) {
+        List<Study> studies = studyService.findLightStudies(withCounts, withProtocols, onlyChallenge);
         if (studies.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
@@ -179,7 +180,7 @@ public class StudyApiController implements StudyApi {
     }
 
     @Override
-    public ResponseEntity<List<IdName>> findStudiesNames() throws RestServiceException {
+    public ResponseEntity<List<IdName>> findStudiesNames() {
         List<IdName> studiesDTO = studyService.findAllNames();
         if (studiesDTO.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -189,7 +190,7 @@ public class StudyApiController implements StudyApi {
 
     @Override
     @Transactional
-    public ResponseEntity<List<IdNameCenterStudyDTO>> findStudiesNamesAndCenters() throws RestServiceException {
+    public ResponseEntity<List<IdNameCenterStudyDTO>> findStudiesNamesAndCenters() {
         List<IdNameCenterStudyDTO> studiesDTO = new ArrayList<>();
         final List<Study> studies = studyService.findAll();
         if (studies.isEmpty()) {

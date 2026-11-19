@@ -56,8 +56,8 @@ public interface StudyRepository extends JpaRepository<Study, Long>, StudyReposi
     //@EntityGraph(attributePaths = { "profile", "tags" })
     List<Study> findAll();
 
-    @Query("SELECT new org.shanoir.ng.shared.core.model.IdName(s.id, s.name) FROM Study s")
-    List<IdName> findAllIdAndName();
+    @Query("SELECT new org.shanoir.ng.shared.core.model.IdName(s.id, s.name) FROM Study s WHERE :challenge IS NOT TRUE OR s.challenge IS TRUE")
+    List<IdName> findAllIdAndName(Boolean challenge);
 
     @Query("""
         SELECT DISTINCT s
@@ -82,11 +82,13 @@ public interface StudyRepository extends JpaRepository<Study, Long>, StudyReposi
         WHERE su.userId = :userId
         AND :studyUserRightId IN elements(su.studyUserRights)
         AND su.confirmed = :confirmed
+        AND (:challenge IS NOT TRUE OR s.challenge IS TRUE)
         ORDER BY s.name ASC""")
     List<IdName> findIdAndNameByUserAndRight(
-            @Param("userId") Long userId,
-            @Param("studyUserRightId") Integer studyUserRightId,
-            @Param("confirmed") boolean confirmed
+            Long userId,
+            Integer studyUserRightId,
+            boolean confirmed,
+            Boolean challenge
     );
 
     List<Study> findByChallengeTrue();
@@ -105,11 +107,11 @@ public interface StudyRepository extends JpaRepository<Study, Long>, StudyReposi
     @Query("SELECT s FROM Study s WHERE s.id = :studyId")
     Study findStudyWithStudyTagsById(@Param("studyId") Long studyId);
 
-    @Query("SELECT s.protocolFilePaths FROM Study s WHERE s.id = :studyId")
-    List<String> findProtocolFilePathsByStudyId(Long studyId);
+    @Query("SELECT s.id, p FROM Study s JOIN s.protocolFilePaths p WHERE s.id IN :studyIds")
+    List<Object[]> findProtocolFilePathsByStudyIds(@Param("studyIds") List<Long> studyIds);
 
-    @Query("SELECT s.dataUserAgreementPaths FROM Study s WHERE s.id = :studyId")
-    List<String> findDataUserAgreementPathsByStudyId(Long studyId);
+    @Query("SELECT s.id, p FROM Study s JOIN s.dataUserAgreementPaths p WHERE s.id IN :studyIds")
+    List<Object[]> findDataUserAgreementPathsByStudyIds(@Param("studyIds") List<Long> studyIds);
 
     @Query("SELECT su.study.id FROM StudyUser su WHERE su.userId = :userId AND :right MEMBER OF su.studyUserRights")
     List<Long> findByUserIdAndStudyUserRight(Long userId, Integer right);

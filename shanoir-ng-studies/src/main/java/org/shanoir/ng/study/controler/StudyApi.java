@@ -101,7 +101,11 @@ public interface StudyApi {
             @ApiResponse(responseCode = "500", description = "unexpected error") })
     @GetMapping(value = "/light", produces = { "application/json" })
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    ResponseEntity<List<StudyLightDTO>> findStudiesLight();
+    ResponseEntity<List<StudyLightDTO>> findStudiesLight(
+            @Parameter(description = "with exam and subject counts") @RequestParam(name = "withCounts", defaultValue = "false") boolean withCounts,
+            @Parameter(description = "with protocols path") @RequestParam(name = "withProtocols", defaultValue = "false") boolean withProtocols,
+            @Parameter(description = "only challenge studies") @RequestParam(name = "onlyChallenge", defaultValue = "false") boolean onlyChallenge
+    );
 
     @Operation(summary = "", description = "If exists, returns the studies that are publicly available")
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found studies"),
@@ -132,7 +136,7 @@ public interface StudyApi {
             @ApiResponse(responseCode = "500", description = "unexpected error") })
     @GetMapping(value = "/names", produces = { "application/json" })
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    ResponseEntity<List<IdName>> findStudiesNames() throws RestServiceException;
+    ResponseEntity<List<IdName>> findStudiesNames();
 
     @Operation(summary = "", description = "Returns id, name and centers for all the studies")
     @ApiResponses(value = {
@@ -143,7 +147,7 @@ public interface StudyApi {
             @ApiResponse(responseCode = "500", description = "unexpected error") })
     @GetMapping(value = "/namesAndCenters", produces = { "application/json" })
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    ResponseEntity<List<IdNameCenterStudyDTO>> findStudiesNamesAndCenters() throws RestServiceException;
+    ResponseEntity<List<IdNameCenterStudyDTO>> findStudiesNamesAndCenters();
 
     @Operation(summary = "", description = "If exists, returns the study corresponding to the given id")
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found study"),

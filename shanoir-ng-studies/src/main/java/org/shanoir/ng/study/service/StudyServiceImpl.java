@@ -493,21 +493,38 @@ public class StudyServiceImpl implements StudyService {
                             KeycloakUtil.getTokenUserId(), StudyUserRight.CAN_SEE_ALL.getId(), true);
         }
         setNumberOfSubjectsAndExaminations(studies);
-        setFilePaths(studies);
+        setProtocolsFilePaths(studies);
+        setDataUserAgreementPaths(studies);
         // Utils.copyList is used to prevent a bug with @PostFilter
         return Utils.copyList(studies);
     }
 
-    @Override
     public List<IdName> findAllNames() {
-        List<IdName> studies;
+        return findAllNames(false);
+    }
+
+    public List<IdName> findAllNames(Boolean onlyChallenge) {
+        List<IdName> studyIds;
         if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
-            studies = studyRepository.findAllIdAndName();
+            studyIds = studyRepository.findAllIdAndName(onlyChallenge);
         } else {
-            studies = studyRepository
-                    .findIdAndNameByUserAndRight(
-                            KeycloakUtil.getTokenUserId(), StudyUserRight.CAN_SEE_ALL.getId(), true);
+            studyIds = studyRepository.findIdAndNameByUserAndRight(KeycloakUtil.getTokenUserId(), StudyUserRight.CAN_SEE_ALL.getId(), true, onlyChallenge);
         }
+        return studyIds;
+    }
+
+    public List<Study> findLightStudies(Boolean withCount, Boolean withProtocols, Boolean onlyChallenge) {
+        List<IdName> studyIds = findAllNames(onlyChallenge);
+
+        List<Study> studies = studyIdsToStudyList(studyIds);
+
+        if (withCount) {
+            setNumberOfSubjectsAndExaminations(studies);
+        }
+        if (withProtocols) {
+            setProtocolsFilePaths(studies);
+        }
+
         // Utils.copyList is used to prevent a bug with @PostFilter
         return Utils.copyList(studies);
     }
@@ -551,11 +568,26 @@ public class StudyServiceImpl implements StudyService {
         });
     }
 
-    private void setFilePaths(List<Study> studies) {
-        studies.stream().forEach(s -> {
-            s.setProtocolFilePaths(studyRepository.findProtocolFilePathsByStudyId(s.getId()));
-            s.setDataUserAgreementPaths(studyRepository.findDataUserAgreementPathsByStudyId(s.getId()));
+    private void setProtocolsFilePaths(List<Study> studies) {
+        Map<Long, List<String>> protocols = groupPathsByStudyId(studyRepository.findProtocolFilePathsByStudyIds(studies.stream().map(Study::getId).collect(Collectors.toList())));
+        studies.forEach(s -> {
+            s.setProtocolFilePaths(protocols.getOrDefault(s.getId(), new ArrayList<>()));
         });
+    }
+
+    private void setDataUserAgreementPaths(List<Study> studies) {
+        Map<Long, List<String>> protocols = groupPathsByStudyId(studyRepository.findDataUserAgreementPathsByStudyIds(studies.stream().map(Study::getId).collect(Collectors.toList())));
+        studies.forEach(s -> {
+            s.setDataUserAgreementPaths(protocols.getOrDefault(s.getId(), new ArrayList<>()));
+        });
+    }
+
+    private Map<Long, List<String>> groupPathsByStudyId(List<Object[]> rows) {
+        Map<Long, List<String>> result = new HashMap<>();
+        for (Object[] row : rows) {
+            result.computeIfAbsent((Long) row[0], k -> new ArrayList<>()).add((String) row[1]);
+        }
+        return result;
     }
 
     @Transactional
@@ -1032,4 +1064,12 @@ public class StudyServiceImpl implements StudyService {
         return studyRepository.findByUserIdAndStudyUserRight(KeycloakUtil.getTokenUserId(), right.getId());
     }
 
+    private List<Study> studyIdsToStudyList(List<IdName> studyIds) {
+        return studyIds.stream().map(id -> {
+            Study s = new Study();
+            s.setId(id.getId());
+            s.setName(id.getName());
+            return s;
+        }).toList();
+    }
 }
