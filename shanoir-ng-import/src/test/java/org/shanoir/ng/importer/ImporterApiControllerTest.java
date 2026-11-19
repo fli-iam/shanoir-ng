@@ -14,10 +14,13 @@
 
 package org.shanoir.ng.importer;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.io.File;
@@ -32,6 +35,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.io.FileUtils;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -42,12 +46,14 @@ import org.shanoir.ng.importer.dicom.query.QueryPACSService;
 import org.shanoir.ng.importer.model.EegDataset;
 import org.shanoir.ng.importer.model.EegImportJob;
 import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.controller.GlobalExceptionHandler;
 import org.shanoir.ng.utils.ImportUtils;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
@@ -71,6 +77,7 @@ import tools.jackson.databind.json.JsonMapper;
         excludeAutoConfiguration = {
                 org.springframework.boot.security.oauth2.server.resource.autoconfigure.servlet.OAuth2ResourceServerAutoConfiguration.class
         })
+@Import(GlobalExceptionHandler.class)
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
 public class ImporterApiControllerTest {
@@ -80,6 +87,9 @@ public class ImporterApiControllerTest {
     private static final String GET_DICOM = "/importer/get_dicom/";
 
     private static final String UPLOAD_DICOM = "/importer/upload_dicom/";
+
+    private static final String UPLOAD_MULTIPLE_DICOM =
+            "/importer/upload_multiple_dicom/study/1/studyName/test/studyCard/0/center/1/equipment/1/";
 
     private static Path importDirectory;
 
@@ -121,6 +131,14 @@ public class ImporterApiControllerTest {
 
     @Autowired
     private JsonMapper mapper;
+
+    @BeforeEach
+    void cleanUserImportDir() throws IOException {
+        File userImportDir = importDirectory.resolve("3").toFile();
+        if (userImportDir.exists()) {
+            FileUtils.deleteDirectory(userImportDir);
+        }
+    }
 
     public MockMultipartFile createFile(boolean withParticipants, boolean studyDescription,
             boolean sourceData, boolean importJson) throws IOException {
@@ -207,9 +225,19 @@ public class ImporterApiControllerTest {
     @Test
     @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
     public void testUploadDicomZipFileDeletesUnzippedWorkDirOnFailure() throws Exception {
+        doAnswer(invocation -> {
+            File dicomDir = invocation.getArgument(0);
+            if (!dicomDir.exists()) {
+                dicomDir.getParentFile().mkdirs();
+                dicomDir.createNewFile();
+            }
+            return null;
+        }).when(dicomDirGeneratorService).generateDicomDirFromDirectory(any(File.class), any(File.class));
+        when(dicomDirToModel.readDicomDirToPatients(any(File.class))).thenReturn(Collections.emptyList());
+
         Path zipFile = Files.createTempFile("dicom-upload", ".zip");
         try (ZipOutputStream zipout = new ZipOutputStream(Files.newOutputStream(zipFile))) {
-            zipout.putNextEntry(new ZipEntry("instance.dcm"));
+            zipout.putNextEntry(new ZipEntry("README.txt"));
             zipout.write("not-a-dicom".getBytes(StandardCharsets.UTF_8));
             zipout.closeEntry();
         }
@@ -217,15 +245,108 @@ public class ImporterApiControllerTest {
                 Files.readAllBytes(zipFile));
         Files.deleteIfExists(zipFile);
 
-        mvc.perform(multipart(UPLOAD_DICOM).file(upload)).andExpect(status().isUnprocessableEntity());
+        mvc.perform(multipart(UPLOAD_DICOM).file(upload))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.message").value(
+                        "No DICOM patient found in the ZIP; the archive must contain at least one valid DICOM instance."));
 
         File userImportDir = importDirectory.resolve("3").toFile();
         if (userImportDir.exists()) {
             File[] leftovers = userImportDir.listFiles();
-            assertTrue(leftovers == null || leftovers.length == 0,
-                    "Unzipped import job folder should be removed after upload failure");
-        } else {
-            assertFalse(userImportDir.exists());
+            if (leftovers != null) {
+                for (File leftover : leftovers) {
+                    if (leftover.isFile()) {
+                        assertTrue(false, "Unexpected file left after upload failure: " + leftover.getName());
+                    }
+                    if (leftover.isDirectory()) {
+                        String[] nested = leftover.list();
+                        assertTrue(nested == null || nested.length == 0,
+                                "Unzipped import job folder should be removed after upload failure");
+                    }
+                }
+            }
         }
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    public void testUploadDicomZipFileRejectsZipWithNoDicomPatient() throws Exception {
+        doAnswer(invocation -> {
+            File dicomDir = invocation.getArgument(0);
+            if (!dicomDir.exists()) {
+                dicomDir.getParentFile().mkdirs();
+                dicomDir.createNewFile();
+            }
+            return null;
+        }).when(dicomDirGeneratorService).generateDicomDirFromDirectory(any(File.class), any(File.class));
+        when(dicomDirToModel.readDicomDirToPatients(any(File.class))).thenReturn(Collections.emptyList());
+
+        Path zipFile = Files.createTempFile("no-dicom-patient", ".zip");
+        try (ZipOutputStream zipout = new ZipOutputStream(Files.newOutputStream(zipFile))) {
+            zipout.putNextEntry(new ZipEntry("README.txt"));
+            zipout.write("not dicom".getBytes(StandardCharsets.UTF_8));
+            zipout.closeEntry();
+        }
+        MockMultipartFile upload = new MockMultipartFile("file", "dicom.zip", "application/zip",
+                Files.readAllBytes(zipFile));
+        Files.deleteIfExists(zipFile);
+
+        mvc.perform(multipart(UPLOAD_DICOM).file(upload))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.message").value(
+                        "No DICOM patient found in the ZIP; the archive must contain at least one valid DICOM instance."));
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    public void testUploadMultipleDicomRejectsExamFolderWithNoDicomPatient() throws Exception {
+        doAnswer(invocation -> {
+            File dicomDir = invocation.getArgument(0);
+            if (!dicomDir.exists()) {
+                dicomDir.getParentFile().mkdirs();
+                dicomDir.createNewFile();
+            }
+            return null;
+        }).when(dicomDirGeneratorService).generateDicomDirFromDirectory(any(File.class), any(File.class));
+        when(dicomDirToModel.readDicomDirToPatients(any(File.class))).thenReturn(Collections.emptyList());
+
+        Path staging = Files.createTempDirectory("multi-no-dicom-src");
+        Files.createDirectories(staging.resolve("sub-test").resolve("ses-01"));
+        Files.writeString(staging.resolve("sub-test").resolve("ses-01").resolve("README.txt"), "not dicom");
+        File multiZip = Files.createTempFile("multi-no-dicom", ".zip").toFile();
+        try (FileOutputStream outStream = new FileOutputStream(multiZip);
+                ZipOutputStream zipout = new ZipOutputStream(outStream)) {
+            ImportUtils.zipFile(staging.toFile(), staging.getFileName().toString(), zipout, true);
+        }
+        MockMultipartFile upload = new MockMultipartFile("file", "multi.zip", "application/zip",
+                Files.readAllBytes(multiZip.toPath()));
+        FileUtils.deleteQuietly(multiZip);
+        FileUtils.deleteQuietly(staging.toFile());
+
+        mvc.perform(multipart(UPLOAD_MULTIPLE_DICOM).file(upload))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.message").value(
+                        "No DICOM patient found in the ZIP; the archive must contain at least one valid DICOM instance."));
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    public void testUploadMultipleDicomRejectsEmptySubjectFolder() throws Exception {
+        Path staging = Files.createTempDirectory("multi-empty-subject-src");
+        Files.createDirectories(staging.resolve("sub-test"));
+        File multiZip = Files.createTempFile("multi-empty-subject", ".zip").toFile();
+        try (FileOutputStream outStream = new FileOutputStream(multiZip);
+                ZipOutputStream zipout = new ZipOutputStream(outStream)) {
+            ImportUtils.zipFile(staging.toFile(), staging.getFileName().toString(), zipout, true);
+        }
+        MockMultipartFile upload = new MockMultipartFile("file", "multi.zip", "application/zip",
+                Files.readAllBytes(multiZip.toPath()));
+        FileUtils.deleteQuietly(multiZip);
+        FileUtils.deleteQuietly(staging.toFile());
+
+        mvc.perform(multipart(UPLOAD_MULTIPLE_DICOM).file(upload))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.message")
+                        .value("The subject folder must contain at least one examination sub-folder."));
     }
 }
