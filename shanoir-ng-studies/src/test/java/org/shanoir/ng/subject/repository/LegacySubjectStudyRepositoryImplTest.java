@@ -31,7 +31,7 @@ class LegacySubjectStudyRepositoryImplTest {
     void skipsWhenSubjectStudyTableAbsent() {
         when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class))).thenReturn(0);
         repository.deleteLegacyEnrollmentLinks(42L);
-        verify(jdbcTemplate, never()).update(anyString(), any());
+        verify(jdbcTemplate, never()).update(anyString(), any(Object.class));
     }
 
     @Test
