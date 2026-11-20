@@ -14,25 +14,26 @@
 
 package org.shanoir.ng.studycard;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
-import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.studycard.model.StudyCard;
-import org.shanoir.ng.studycard.repository.StudyCardRepository;
-import org.shanoir.ng.studycard.service.StudyCardServiceImpl;
-import org.shanoir.ng.utils.ModelsUtil;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import static org.mockito.BDDMockito.given;
 
 import java.util.Arrays;
 import java.util.Optional;
 
-import static org.mockito.BDDMockito.given;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.study.rights.ampq.RabbitMqStudyUserService;
+import org.shanoir.ng.studycard.model.StudyCard;
+import org.shanoir.ng.studycard.repository.StudyCardRepository;
+import org.shanoir.ng.studycard.service.StudyCardServiceImpl;
+import org.shanoir.ng.utils.ModelsUtil;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 /**
  * Study card service test.
@@ -47,13 +48,19 @@ public class StudyCardServiceTest {
     private static final Long TEMPLATE_ID = 1L;
     private static final String UPDATED_STUDYCARD_DATA = "StudyCard1";
 
-    @Mock
+    @MockitoBean
     private StudyCardRepository studyCardRepository;
 
     @MockitoBean
     private StudyInstanceUIDAndSubjectNameHandler studyInstanceUIDHandler;
 
-    @InjectMocks
+    @MockitoBean
+    private ConnectionFactory connectionFactory;
+
+    @MockitoBean
+    private RabbitMqStudyUserService rabbitMqStudyUserService;
+
+    @Autowired
     private StudyCardServiceImpl studyCardService;
 
     @BeforeEach
