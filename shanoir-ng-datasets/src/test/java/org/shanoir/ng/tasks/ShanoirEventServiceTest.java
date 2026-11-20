@@ -46,7 +46,7 @@ public class ShanoirEventServiceTest {
     @Autowired
     private ShanoirEventService service;
 
-    @Autowired
+    @MockitoBean
     private RabbitTemplate rabbitTemplate;
 
     @MockitoBean
