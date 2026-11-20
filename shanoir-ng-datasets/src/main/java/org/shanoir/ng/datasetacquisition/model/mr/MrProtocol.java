@@ -207,7 +207,6 @@ public class MrProtocol extends AbstractEntity {
     private MrProtocolSCMetadata updatedMetadata;
 
     public MrProtocol() {
-
     }
 
     @JsonCreator(mode = JsonCreator.Mode.DISABLED)
