@@ -21,7 +21,7 @@ import tools.jackson.core.JsonGenerator;
 import tools.jackson.databind.SerializationContext;
 import tools.jackson.databind.ser.std.StdSerializer;
 
-@JacksonComponent
+@JacksonComponent(type = SolrResultPage.class)
 public class SolrPageSerializer extends StdSerializer<SolrResultPage> {
 
     public SolrPageSerializer() {

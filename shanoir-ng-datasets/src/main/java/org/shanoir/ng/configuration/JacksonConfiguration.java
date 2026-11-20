@@ -15,6 +15,7 @@
 package org.shanoir.ng.configuration;
 
 import org.shanoir.ng.shared.paging.PageSerializer;
+import org.shanoir.ng.solr.model.SolrPageSerializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -32,6 +33,7 @@ public class JacksonConfiguration {
     public JsonMapper jsonMapper() {
         SimpleModule pageModule = new SimpleModule();
         pageModule.addSerializer(new PageSerializer());
+        pageModule.addSerializer(new SolrPageSerializer());
         var builder = JsonMapper.builder();
         builder.changeDefaultPropertyInclusion(include -> include.withValueInclusion(JsonInclude.Include.NON_NULL))
                 .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
