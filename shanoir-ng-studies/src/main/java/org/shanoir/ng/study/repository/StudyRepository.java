@@ -18,6 +18,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import jakarta.transaction.Transactional;
+import org.hibernate.Hibernate;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.study.model.Study;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -53,23 +55,24 @@ public interface StudyRepository extends JpaRepository<Study, Long>, StudyReposi
 
     List<Study> findByIsDraftTrue();
 
-    //@EntityGraph(attributePaths = { "profile", "tags" })
     List<Study> findAll();
+
+    @Query(value = "SELECT id from study", nativeQuery = true)
+    List<Long> findAllIds();
 
     @Query("SELECT new org.shanoir.ng.shared.core.model.IdName(s.id, s.name) FROM Study s WHERE :challenge IS NOT TRUE OR s.challenge IS TRUE")
     List<IdName> findAllIdAndName(Boolean challenge);
 
     @Query("""
-        SELECT DISTINCT s
+        SELECT DISTINCT s.id
         FROM Study s
-        LEFT JOIN FETCH s.studyUserList
         WHERE EXISTS (
             SELECT su FROM StudyUser su
             WHERE su.study = s
             AND su.userId = :userId AND :studyUserRightId IN elements(su.studyUserRights)
             AND su.confirmed = :confirmed)
         ORDER BY s.name ASC""")
-    List<Study> findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(
+    List<Long> findIdsByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(
             @Param("userId") Long userId,
             @Param("studyUserRightId") Integer studyUserRightId,
             @Param("confirmed") boolean confirmed
@@ -121,4 +124,13 @@ public interface StudyRepository extends JpaRepository<Study, Long>, StudyReposi
 
     @Query("SELECT s.isDraft FROM Study s WHERE s.id = :studyId")
     Optional<Boolean> findIsDraftById(@Param("studyId") Long id);
+
+    @Transactional
+    default List<Study> findAllIdAndNameAndCenterListFromIds(List<Long> ids, Boolean withCenterList) {
+        List<Study> studies = findAllById(ids);
+        if (withCenterList) {
+            studies.forEach(s -> Hibernate.initialize(s.getStudyCenterList()));
+        }
+        return studies;
+    }
 }

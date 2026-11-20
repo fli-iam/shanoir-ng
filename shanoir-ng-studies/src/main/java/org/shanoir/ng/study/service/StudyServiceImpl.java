@@ -481,20 +481,20 @@ public class StudyServiceImpl implements StudyService {
         return studyTagsToDelete;
     }
 
-    @Override
     @Transactional
-    public List<Study> findAll() {
+    public List<Study> findAll(Boolean withCenterList, Boolean withCounts) {
         List<Study> studies;
         if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
-            studies = studyRepository.findAll();
+            studies = studyRepository.findAllIdAndNameAndCenterListFromIds(studyRepository.findAllIds(), withCenterList);
         } else {
-            studies = studyRepository
-                    .findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(
-                            KeycloakUtil.getTokenUserId(), StudyUserRight.CAN_SEE_ALL.getId(), true);
+            studies = studyRepository.findAllIdAndNameAndCenterListFromIds(
+                    studyRepository.findIdsByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(
+                            KeycloakUtil.getTokenUserId(), StudyUserRight.CAN_SEE_ALL.getId(), true), withCenterList);
         }
-        setNumberOfSubjectsAndExaminations(studies);
-        setProtocolsFilePaths(studies);
-        setDataUserAgreementPaths(studies);
+
+        if (withCounts) {
+            setNumberOfSubjectsAndExaminations(studies);
+        }
         // Utils.copyList is used to prevent a bug with @PostFilter
         return Utils.copyList(studies);
     }

@@ -121,7 +121,6 @@ public class StudyApiController implements StudyApi {
         this.request = request;
     }
 
-    @Override
     @Transactional
     public ResponseEntity<Void> deleteStudy(@PathVariable("studyId") Long studyId) {
         try {
@@ -150,18 +149,14 @@ public class StudyApiController implements StudyApi {
         }
     }
 
-    @Override
-    @Transactional
-    public ResponseEntity<List<StudyDTO>> findStudies() {
-        List<Study> studies = studyService.findAll();
+    public ResponseEntity<List<StudyDTO>> findStudies(Boolean withCenterList, Boolean withCounts) {
+        List<Study> studies = studyService.findAll(withCenterList, withCounts);
         if (studies.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity<>(studyMapper.studiesToStudyDTOs(studies), HttpStatus.OK);
     }
 
-    @Override
-    @Transactional
     public ResponseEntity<List<StudyDTO>> findDraftStudies() {
         List<Study> studies = studyService.findDraftStudies();
         if (studies.isEmpty()) {
@@ -170,8 +165,7 @@ public class StudyApiController implements StudyApi {
         return new ResponseEntity<>(studyMapper.studiesToStudyDTOs(studies), HttpStatus.OK);
     }
 
-    @Override
-    public ResponseEntity<List<StudyLightDTO>> findStudiesLight(boolean withCounts, boolean withProtocols, boolean onlyChallenge) {
+    public ResponseEntity<List<StudyLightDTO>> findStudiesLight(Boolean withCounts, Boolean withProtocols, Boolean onlyChallenge) {
         List<Study> studies = studyService.findLightStudies(withCounts, withProtocols, onlyChallenge);
         if (studies.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -179,7 +173,6 @@ public class StudyApiController implements StudyApi {
         return new ResponseEntity<>(studyMapper.studiesToStudyLightDTOs(studies), HttpStatus.OK);
     }
 
-    @Override
     public ResponseEntity<List<IdName>> findStudiesNames() {
         List<IdName> studiesDTO = studyService.findAllNames();
         if (studiesDTO.isEmpty()) {
@@ -192,7 +185,7 @@ public class StudyApiController implements StudyApi {
     @Transactional
     public ResponseEntity<List<IdNameCenterStudyDTO>> findStudiesNamesAndCenters() {
         List<IdNameCenterStudyDTO> studiesDTO = new ArrayList<>();
-        final List<Study> studies = studyService.findAll();
+        final List<Study> studies = studyService.findAll(false, false);
         if (studies.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
@@ -706,7 +699,7 @@ public class StudyApiController implements StudyApi {
 
     @Override
     public ResponseEntity<List<FileEntryDTO>> getAllFiles() throws StorageException {
-        List<Study> studies = studyService.findAll();
+        List<Study> studies = studyService.findAll(false, false);
         List<FileEntryDTO> entries = new ArrayList<>();
         for (Study study : studies) {
             Long studyId = study.getId();
