@@ -116,7 +116,7 @@ export class HomeComponent {
         const challengesPromise: Promise<void> = this.studyService.getStudiesLight({ withProtocols: true, onlyChallenge: true }).then(studies => {
             this.challengeStudies = studies;
         });
-        return Promise.all([studiesPromise, challengesPromise]).then(() => {});
+        return Promise.all([studiesPromise, challengesPromise]).then();
     }
 
     private computeExpiringStudies() {
