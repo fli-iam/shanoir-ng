@@ -70,7 +70,14 @@ public interface StudyService {
      */
     @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EXPERT')")
     @PostFilter("@studySecurityService.hasRightOnTrustedStudy(filterObject, 'CAN_SEE_ALL')")
-    List<Study> findAll();
+    List<Study> findAll(Boolean withCenterList, Boolean withCounts);
+
+    /**
+     * Rights are filtered directly in the queries (CAN_SEE_ALL for non admin users),
+     * so no @PostFilter is needed here.
+     */
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EXPERT')")
+    List<Study> findLightStudies(Boolean withCount, Boolean withProtocols, Boolean onlyChallenge);
 
     @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EXPERT')")
     @PostFilter("@studySecurityService.filterStudyIdNameDTOsHasRight(filterObject, 'CAN_SEE_ALL')")

@@ -95,7 +95,7 @@ public class StudyApiSecurityTest {
     @WithAnonymousUser
     public void testAsAnonymous() throws ShanoirException, RestServiceException {
         assertAccessDenied(api::deleteStudy, ENTITY_ID);
-        assertAccessDenied(api::findStudies);
+        assertAccessDenied(() -> api.findStudies(false, false));
         assertAccessDenied(api::findStudiesNames);
         assertAccessDenied(api::findStudyById, ENTITY_ID, false);
         assertAccessDenied(api::saveNewStudy, mockNew, mockBindingResult);
@@ -142,7 +142,7 @@ public class StudyApiSecurityTest {
     @WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_ADMIN" })
     public void testAsAdmin() throws ShanoirException, RestServiceException {
         assertAccessAuthorized(api::deleteStudy, ENTITY_ID);
-        assertAccessAuthorized(api::findStudies);
+        assertAccessAuthorized(() -> api.findStudies(false, false));
         assertAccessAuthorized(api::findStudiesNames);
         given(repository.findById(ENTITY_ID)).willReturn(Optional.of(buildStudyMock(ENTITY_ID)));
         assertAccessAuthorized(api::findStudyById, ENTITY_ID, false);
@@ -153,13 +153,13 @@ public class StudyApiSecurityTest {
     private void testRead() throws ShanoirException, RestServiceException {
         // No rights
         Study studyMockNoRights = buildStudyMock(1L);
-        given(repository.findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(LOGGED_USER_ID, null, true)).willReturn(Arrays.asList(studyMockNoRights));
+        given(repository.findIdsByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(LOGGED_USER_ID, null, true)).willReturn(Arrays.asList(1L));
         given(repository.findAll()).willReturn(Arrays.asList(studyMockNoRights));
-        given(repository.findAllIdAndName()).willReturn(Arrays.asList(new IdName(studyMockNoRights.getId(), studyMockNoRights.getName())));
+        given(repository.findAllIdAndName(false)).willReturn(Arrays.asList(new IdName(studyMockNoRights.getId(), studyMockNoRights.getName())));
         given(repository.findById(1L)).willReturn(Optional.of(studyMockNoRights));
         given(studyUserRepository.findByStudy_Id(1L)).willReturn(studyMockNoRights.getStudyUserList());
-        assertAccessAuthorized(api::findStudies);
-        assertEquals(null, api.findStudies().getBody());
+        assertAccessAuthorized(() -> api.findStudies(false, false));
+        assertEquals(null, api.findStudies(false, false).getBody());
         assertAccessAuthorized(api::findStudiesNames);
         assertEquals(null, api.findStudiesNames().getBody());
         assertAccessDenied(api::findStudyById, 1L, false);
@@ -167,12 +167,13 @@ public class StudyApiSecurityTest {
         // Wrong Rights
         Study studyMockWrongRights = buildStudyMock(2L, StudyUserRight.CAN_ADMINISTRATE, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT);
         given(repository.findAll()).willReturn(Arrays.asList(studyMockWrongRights));
-        given(repository.findAllIdAndName()).willReturn(Arrays.asList(new IdName(studyMockWrongRights.getId(), studyMockWrongRights.getName())));
-        given(repository.findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId(), true)).willReturn(Arrays.asList(studyMockWrongRights));
+        given(repository.findAllIdAndName(false)).willReturn(Arrays.asList(new IdName(studyMockWrongRights.getId(), studyMockWrongRights.getName())));
+        given(repository.findIdsByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId(), true)).willReturn(Arrays.asList(2L));
+        given(repository.findAllIdAndNameAndCenterListFromIds(Arrays.asList(2L), false)).willReturn(Arrays.asList(studyMockWrongRights));
         given(repository.findById(2L)).willReturn(Optional.of(studyMockNoRights));
         given(studyUserRepository.findByStudy_Id(2L)).willReturn(studyMockWrongRights.getStudyUserList());
-        assertAccessAuthorized(api::findStudies);
-        assertEquals(null, api.findStudies().getBody());
+        assertAccessAuthorized(() -> api.findStudies(false, false));
+        assertEquals(null, api.findStudies(false, false).getBody());
         assertAccessAuthorized(api::findStudiesNames);
         assertEquals(null, api.findStudiesNames().getBody());
         assertAccessDenied(api::findStudyById, 2L, false);
@@ -180,19 +181,20 @@ public class StudyApiSecurityTest {
         // Right rights
         Study studyMockRightRights = buildStudyMock(3L, StudyUserRight.CAN_SEE_ALL);
         given(repository.findAll()).willReturn(Arrays.asList(studyMockRightRights, studyMockWrongRights, studyMockNoRights));
-        given(repository.findAllIdAndName()).willReturn(Arrays.asList(
+        given(repository.findAllIdAndName(false)).willReturn(Arrays.asList(
                 new IdName(studyMockRightRights.getId(), studyMockRightRights.getName()),
                 new IdName(studyMockWrongRights.getId(), studyMockWrongRights.getName()),
                 new IdName(studyMockNoRights.getId(), studyMockNoRights.getName())));
-        given(repository.findIdAndNameByUserAndRight(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId(), true)).willReturn(Arrays.asList(
+        given(repository.findIdAndNameByUserAndRight(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId(), true, false)).willReturn(Arrays.asList(
                 new IdName(studyMockRightRights.getId(), studyMockRightRights.getName())));
         given(repository.findAllById(Arrays.asList(3L))).willReturn(Arrays.asList(studyMockRightRights));
-        given(repository.findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId(), true)).willReturn(Arrays.asList(studyMockRightRights, studyMockWrongRights, studyMockNoRights));
+        given(repository.findIdsByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId(), true)).willReturn(Arrays.asList(3L, 2L, 1L));
+        given(repository.findAllIdAndNameAndCenterListFromIds(Arrays.asList(3L, 2L, 1L), false)).willReturn(Arrays.asList(studyMockRightRights, studyMockWrongRights, studyMockNoRights));
         given(repository.findById(3L)).willReturn(Optional.of(studyMockRightRights));
         given(studyUserRepository.findByStudy_Id(3L)).willReturn(studyMockRightRights.getStudyUserList());
-        assertAccessAuthorized(api::findStudies);
-        assertNotNull(api.findStudies().getBody());
-        assertEquals(1, api.findStudies().getBody().size());
+        assertAccessAuthorized(() -> api.findStudies(false, false));
+        assertNotNull(api.findStudies(false, false).getBody());
+        assertEquals(1, api.findStudies(false, false).getBody().size());
         assertAccessAuthorized(api::findStudiesNames);
         assertNotNull(api.findStudiesNames().getBody());
         assertEquals(1, api.findStudiesNames().getBody().size());

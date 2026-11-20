@@ -18,6 +18,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import jakarta.transaction.Transactional;
+import org.hibernate.Hibernate;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.study.model.Study;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -53,23 +55,24 @@ public interface StudyRepository extends JpaRepository<Study, Long>, StudyReposi
 
     List<Study> findByIsDraftTrue();
 
-    //@EntityGraph(attributePaths = { "profile", "tags" })
     List<Study> findAll();
 
-    @Query("SELECT new org.shanoir.ng.shared.core.model.IdName(s.id, s.name) FROM Study s")
-    List<IdName> findAllIdAndName();
+    @Query(value = "SELECT id from study", nativeQuery = true)
+    List<Long> findAllIds();
+
+    @Query("SELECT new org.shanoir.ng.shared.core.model.IdName(s.id, s.name) FROM Study s WHERE :challenge IS NOT TRUE OR s.challenge IS TRUE")
+    List<IdName> findAllIdAndName(Boolean challenge);
 
     @Query("""
-        SELECT DISTINCT s
+        SELECT DISTINCT s.id
         FROM Study s
-        LEFT JOIN FETCH s.studyUserList
         WHERE EXISTS (
             SELECT su FROM StudyUser su
             WHERE su.study = s
             AND su.userId = :userId AND :studyUserRightId IN elements(su.studyUserRights)
             AND su.confirmed = :confirmed)
         ORDER BY s.name ASC""")
-    List<Study> findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(
+    List<Long> findIdsByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(
             @Param("userId") Long userId,
             @Param("studyUserRightId") Integer studyUserRightId,
             @Param("confirmed") boolean confirmed
@@ -82,11 +85,13 @@ public interface StudyRepository extends JpaRepository<Study, Long>, StudyReposi
         WHERE su.userId = :userId
         AND :studyUserRightId IN elements(su.studyUserRights)
         AND su.confirmed = :confirmed
+        AND (:challenge IS NOT TRUE OR s.challenge IS TRUE)
         ORDER BY s.name ASC""")
     List<IdName> findIdAndNameByUserAndRight(
-            @Param("userId") Long userId,
-            @Param("studyUserRightId") Integer studyUserRightId,
-            @Param("confirmed") boolean confirmed
+            Long userId,
+            Integer studyUserRightId,
+            boolean confirmed,
+            Boolean challenge
     );
 
     List<Study> findByChallengeTrue();
@@ -105,11 +110,11 @@ public interface StudyRepository extends JpaRepository<Study, Long>, StudyReposi
     @Query("SELECT s FROM Study s WHERE s.id = :studyId")
     Study findStudyWithStudyTagsById(@Param("studyId") Long studyId);
 
-    @Query("SELECT s.protocolFilePaths FROM Study s WHERE s.id = :studyId")
-    List<String> findProtocolFilePathsByStudyId(Long studyId);
+    @Query("SELECT s.id, p FROM Study s JOIN s.protocolFilePaths p WHERE s.id IN :studyIds")
+    List<Object[]> findProtocolFilePathsByStudyIds(@Param("studyIds") List<Long> studyIds);
 
-    @Query("SELECT s.dataUserAgreementPaths FROM Study s WHERE s.id = :studyId")
-    List<String> findDataUserAgreementPathsByStudyId(Long studyId);
+    @Query("SELECT s.id, p FROM Study s JOIN s.dataUserAgreementPaths p WHERE s.id IN :studyIds")
+    List<Object[]> findDataUserAgreementPathsByStudyIds(@Param("studyIds") List<Long> studyIds);
 
     @Query("SELECT su.study.id FROM StudyUser su WHERE su.userId = :userId AND :right MEMBER OF su.studyUserRights")
     List<Long> findByUserIdAndStudyUserRight(Long userId, Integer right);
@@ -119,4 +124,13 @@ public interface StudyRepository extends JpaRepository<Study, Long>, StudyReposi
 
     @Query("SELECT s.isDraft FROM Study s WHERE s.id = :studyId")
     Optional<Boolean> findIsDraftById(@Param("studyId") Long id);
+
+    @Transactional
+    default List<Study> findAllIdAndNameAndCenterListFromIds(List<Long> ids, Boolean withCenterList) {
+        List<Study> studies = findAllById(ids);
+        if (withCenterList) {
+            studies.forEach(s -> Hibernate.initialize(s.getStudyCenterList()));
+        }
+        return studies;
+    }
 }

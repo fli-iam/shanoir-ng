@@ -86,7 +86,7 @@ public class StudyServiceSecurityTest {
     @WithAnonymousUser
     public void testAsAnonymous() throws ShanoirException {
         assertAccessDenied(service::findById, ENTITY_ID);
-        assertAccessDenied(service::findAll);
+        assertAccessDenied(() -> service.findAll(false, false));
         assertAccessDenied(service::create, mockNew);
         assertAccessDenied(service::update, mockExisting);
         assertAccessDenied(service::deleteById, ENTITY_ID);
@@ -117,19 +117,20 @@ public class StudyServiceSecurityTest {
     @Test
     @WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_USER" })
     public void testFindAllAsUserThatCanSee() throws ShanoirException {
-        assertAccessAuthorized(service::findAll);
+        assertAccessAuthorized(() -> service.findAll(false, false));
 
-        given(repository.findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId(), true)).willReturn(Arrays.asList(new Study[]
+        given(repository.findIdsByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId(), true)).willReturn(Arrays.asList(1L, 2L));
+        given(repository.findAllIdAndNameAndCenterListFromIds(Arrays.asList(1L, 2L), false)).willReturn(Arrays.asList(new Study[]
                 {buildStudyMock(1L, StudyUserRight.CAN_SEE_ALL), buildStudyMock(2L, StudyUserRight.CAN_SEE_ALL)}));
         given(studyUserRepository.findByStudy_Id(1L)).willReturn(buildStudyMock(1L, StudyUserRight.CAN_SEE_ALL).getStudyUserList());
         given(studyUserRepository.findByStudy_Id(2L)).willReturn(buildStudyMock(2L, StudyUserRight.CAN_SEE_ALL).getStudyUserList());
-        assertEquals(2, service.findAll().size());
+        assertEquals(2, service.findAll(false, false).size());
 
-        given(repository.findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId(), true)).willReturn(Arrays.asList(new Study[]
+        given(repository.findAllIdAndNameAndCenterListFromIds(Arrays.asList(1L, 2L), false)).willReturn(Arrays.asList(new Study[]
                 {buildStudyMock(1L, StudyUserRight.CAN_SEE_ALL), buildStudyMock(2L, StudyUserRight.CAN_DOWNLOAD)}));
         given(studyUserRepository.findByStudy_Id(1L)).willReturn(buildStudyMock(1L, StudyUserRight.CAN_SEE_ALL).getStudyUserList());
         given(studyUserRepository.findByStudy_Id(2L)).willReturn(buildStudyMock(2L, StudyUserRight.CAN_DOWNLOAD).getStudyUserList());
-        assertEquals(1, service.findAll().size());
+        assertEquals(1, service.findAll(false, false).size());
     }
 
     @Test
@@ -137,7 +138,7 @@ public class StudyServiceSecurityTest {
     public void testAsExpert() throws ShanoirException {
         given(repository.findById(ENTITY_ID)).willReturn(Optional.of(buildStudyMock(ENTITY_ID, StudyUserRight.CAN_ADMINISTRATE)));
         assertAccessAuthorized(service::findById, ENTITY_ID);
-        assertAccessAuthorized(service::findAll);
+        assertAccessAuthorized(() -> service.findAll(false, false));
         assertAccessAuthorized(service::create, mockNew);
         assertAccessAuthorized(service::create, mockExisting);
 
@@ -169,7 +170,7 @@ public class StudyServiceSecurityTest {
     public void testAsAdmin() throws ShanoirException {
         given(repository.findById(ENTITY_ID)).willReturn(Optional.of(buildStudyMock(ENTITY_ID)));
         assertAccessAuthorized(service::findById, ENTITY_ID);
-        assertAccessAuthorized(service::findAll);
+        assertAccessAuthorized(() -> service.findAll(false, false));
         assertAccessAuthorized(service::create, mockNew);
         assertAccessAuthorized(service::create, mockExisting);
         assertAccessAuthorized(service::update, mockExisting);
@@ -179,12 +180,12 @@ public class StudyServiceSecurityTest {
     @Test
     @WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_ADMIN" })
     public void findAllTestAdmin() {
-        given(repository.findAll()).willReturn(Arrays.asList(ModelsUtil.createStudy()));
-        List<Study> all = service.findAll();
-        List<Study> repoAll = repository.findAll();
+        Study study = ModelsUtil.createStudy();
+        given(repository.findAllIds()).willReturn(Arrays.asList(study.getId()));
+        given(repository.findAllIdAndNameAndCenterListFromIds(Arrays.asList(study.getId()), false)).willReturn(Arrays.asList(study));
+        List<Study> all = service.findAll(false, false);
         Assertions.assertNotNull(all);
-        Assertions.assertEquals(repoAll.size(), all.size());
-        Assertions.assertTrue(all.size() > 0);
+        Assertions.assertEquals(1, all.size());
         Assertions.assertNotNull(all.get(0).getStudyCenterList());
     }
 
@@ -195,15 +196,13 @@ public class StudyServiceSecurityTest {
         StudyUser studyUser = new StudyUser();
         studyUser.setStudy(studyMock); studyUser.setUserId(LOGGED_USER_ID); studyUser.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_SEE_ALL));
         studyMock.setStudyUserList(Arrays.asList(studyUser));
-        given(repository.findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId(), true))
-                .willReturn(Arrays.asList(studyMock));
+        given(repository.findIdsByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId(), true))
+                .willReturn(Arrays.asList(studyMock.getId()));
+        given(repository.findAllIdAndNameAndCenterListFromIds(Arrays.asList(studyMock.getId()), false)).willReturn(Arrays.asList(studyMock));
         given(studyUserRepository.findByStudy_Id(studyMock.getId())).willReturn(Arrays.asList(studyUser));
-        List<Study> repoAll = repository.findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId(), true);
-        List<Study> all = service.findAll();
+        List<Study> all = service.findAll(false, false);
         Assertions.assertNotNull(all);
-        Assertions.assertEquals(repoAll.size(), all.size());
-        Assertions.assertTrue(repoAll.size() > 0);
-        Assertions.assertTrue(all.size() > 0);
+        Assertions.assertEquals(1, all.size());
         Assertions.assertNotNull(all.get(0).getStudyCenterList());
     }
 

@@ -81,7 +81,10 @@ public interface StudyApi {
             @ApiResponse(responseCode = "500", description = "unexpected error") })
     @GetMapping(value = "", produces = { "application/json" })
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    ResponseEntity<List<StudyDTO>> findStudies();
+    ResponseEntity<List<StudyDTO>> findStudies(
+            @Parameter(description = "with list of centers related to that study") @RequestParam(name = "withCenterList", defaultValue = "false") Boolean withCenterList,
+            @Parameter(description = "with exam and subject counts") @RequestParam(name = "withCounts", defaultValue = "false") Boolean withCounts
+    );
 
     @Operation(summary = "", description = "If exists, returns the draft studies that the user is allowed to see")
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found approved studies"),
@@ -101,7 +104,11 @@ public interface StudyApi {
             @ApiResponse(responseCode = "500", description = "unexpected error") })
     @GetMapping(value = "/light", produces = { "application/json" })
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    ResponseEntity<List<StudyLightDTO>> findStudiesLight();
+    ResponseEntity<List<StudyLightDTO>> findStudiesLight(
+            @Parameter(description = "with exam and subject counts") @RequestParam(name = "withCounts", defaultValue = "false") Boolean withCounts,
+            @Parameter(description = "with protocols path") @RequestParam(name = "withProtocols", defaultValue = "false") Boolean withProtocols,
+            @Parameter(description = "only challenge studies") @RequestParam(name = "onlyChallenge", defaultValue = "false") Boolean onlyChallenge
+    );
 
     @Operation(summary = "", description = "If exists, returns the studies that are publicly available")
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found studies"),
@@ -132,7 +139,7 @@ public interface StudyApi {
             @ApiResponse(responseCode = "500", description = "unexpected error") })
     @GetMapping(value = "/names", produces = { "application/json" })
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    ResponseEntity<List<IdName>> findStudiesNames() throws RestServiceException;
+    ResponseEntity<List<IdName>> findStudiesNames();
 
     @Operation(summary = "", description = "Returns id, name and centers for all the studies")
     @ApiResponses(value = {
@@ -143,7 +150,7 @@ public interface StudyApi {
             @ApiResponse(responseCode = "500", description = "unexpected error") })
     @GetMapping(value = "/namesAndCenters", produces = { "application/json" })
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    ResponseEntity<List<IdNameCenterStudyDTO>> findStudiesNamesAndCenters() throws RestServiceException;
+    ResponseEntity<List<IdNameCenterStudyDTO>> findStudiesNamesAndCenters();
 
     @Operation(summary = "", description = "If exists, returns the study corresponding to the given id")
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found study"),

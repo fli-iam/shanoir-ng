@@ -22,8 +22,6 @@ import { Mode } from '../../../shared/components/entity/entity.component.abstrac
 import { DatepickerComponent } from '../../../shared/date-picker/date-picker.component';
 import { LocalDateFormatPipe } from '../../../shared/localLanguage/localDateFormat.pipe';
 import { Option } from '../../../shared/select/select.component';
-import { Study } from '../../../studies/shared/study.model';
-import { StudyService } from '../../../studies/shared/study.service';
 import { Subject } from '../../../subjects/shared/subject.model';
 import { SubjectService } from '../../../subjects/shared/subject.service';
 import { DatasetType } from '../../shared/dataset-type.model';
@@ -42,7 +40,6 @@ export class CommonDatasetComponent implements OnChanges {
     @Input() parentFormGroup: UntypedFormGroup;
     @Input() hasAdministrateRight: boolean = false;
     subjects: Subject[] = [];
-    studies: Study[] = [];
 
     exploredEntityOptions: Option<ExploredEntity>[];
     datasetTypes: Option<DatasetType>[];
@@ -52,7 +49,6 @@ export class CommonDatasetComponent implements OnChanges {
     ProcessedDatasetType = ProcessedDatasetType;
 
     constructor(
-            private studyService: StudyService,
             private subjectService: SubjectService,
             private formBuilder: UntypedFormBuilder) {
 
@@ -74,21 +70,16 @@ export class CommonDatasetComponent implements OnChanges {
         if (changes['mode']) {
             if (this.mode != 'view')  {
                 this.fetchAllSubjects();
-                this.fetchAllStudies();
                 if (this.dataset && this.dataset.creationDate) {
                     this.dataset.creationDate = new Date(this.dataset.creationDate);
                 }
             } else if (this.dataset) {
                 this.fetchOneSubject();
-                this.fetchOneStudy();
             }
         }
         if (changes['dataset'] && this.mode == 'view') {
             if (changes['dataset'].firstChange || changes['dataset'].previousValue.subjectId != changes['dataset'].currentValue.subjectId) {
                 this.fetchOneSubject();
-            }
-            if (changes['dataset'].firstChange || changes['dataset'].previousValue.studyId != changes['dataset'].currentValue.studyId) {
-                this.fetchOneStudy();
             }
         }
     }
@@ -110,19 +101,9 @@ export class CommonDatasetComponent implements OnChanges {
         this.subjects = this.dataset.subject ? [this.dataset.subject] : [];
     }
 
-    private fetchOneStudy() {
-        this.studies = this.dataset.study ? [this.dataset.study] : [];
-    }
-
     private fetchAllSubjects() {
         this.subjectService.getAll().then(subjects => {
             this.subjects = subjects;
-        });
-    }
-
-    private fetchAllStudies() {
-        this.studyService.getAll().then(studies => {
-            this.studies = studies;
         });
     }
 }

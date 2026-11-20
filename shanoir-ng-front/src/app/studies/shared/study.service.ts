@@ -68,11 +68,21 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
             .then(this.mapEntity);
     }
 
-    getStudiesLight(): Promise<StudyLight[]> {
-        return firstValueFrom(this.http.get<StudyLight[]>(AppUtils.BACKEND_API_STUDY_STUDIES_LIGHT_URL))
-            .then((typeResult: StudyLight[]) => {
-                return typeResult;
-            });
+    getStudiesLight(options: { withCounts?: boolean, withProtocols?: boolean, onlyChallenge?: boolean } = {}): Promise<StudyLight[]> {
+        const params: HttpParams = new HttpParams()
+            .set('withCounts', !!options.withCounts)
+            .set('withProtocols', !!options.withProtocols)
+            .set('onlyChallenge', !!options.onlyChallenge);
+        return firstValueFrom(this.http.get<StudyLight[]>(AppUtils.BACKEND_API_STUDY_STUDIES_LIGHT_URL, { params }))
+            .then(studies => studies ?? []);
+    }
+
+    getAll(options: { withCenterList?: boolean, withCounts?: boolean } = {}): Promise<Study[]> {
+        const params: HttpParams = new HttpParams()
+            .set('withCenterList', !!options.withCenterList)
+            .set('withCounts', !!options.withCounts);
+        return firstValueFrom(this.http.get<any[]>(this.API_URL, { params }))
+            .then(this.mapEntityList);
     }
 
     findStudiesByUserId(): Promise<Study[]> {
@@ -156,11 +166,11 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
             .then(this.mapSubjectList);
     }
 
-    findStudiesICanImport(): Promise<Study[]> {
+    findStudiesICanImport(options: { withCenterList?: boolean } = {}): Promise<Study[]> {
         if (this.keycloakService.isUserAdmin()) {
-            return this.getAll();
+            return this.getAll(options);
         } else {
-            return this.getAll().then(studies => {
+            return this.getAll(options).then(studies => {
                 const myId: number = KeycloakService.auth.userId;
                 return studies?.filter(study => {
                     return study.studyUserList.filter(su => su.userId == myId && su.studyUserRights.includes(StudyUserRight.CAN_IMPORT)).length > 0;
