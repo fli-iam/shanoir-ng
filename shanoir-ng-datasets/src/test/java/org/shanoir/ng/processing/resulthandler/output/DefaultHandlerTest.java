@@ -16,10 +16,12 @@ package org.shanoir.ng.processing.resulthandler.output;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.shanoir.ng.examination.service.ExaminationService;
+import org.shanoir.ng.study.rights.ampq.RabbitMqStudyUserService;
 import org.shanoir.ng.vip.executionMonitoring.model.ExecutionMonitoring;
 import org.shanoir.ng.vip.output.handler.DefaultHandler;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -28,11 +30,17 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 @ActiveProfiles("test")
 public class DefaultHandlerTest {
 
-    @InjectMocks
+    @Autowired
     private DefaultHandler outputProcessing;
 
     @MockitoBean
     private ExaminationService examinationService; //Needed for spring management, even if not used. Do not remove
+
+    @MockitoBean
+    private ConnectionFactory connectionFactory;
+
+    @MockitoBean
+    private RabbitMqStudyUserService rabbitMqStudyUserService;
 
     @Test
     public void canProcessTest() {

@@ -41,7 +41,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -181,7 +180,7 @@ public interface DatasetApi {
         @ApiResponse(responseCode = "401", description = "unauthorized"),
         @ApiResponse(responseCode = "403", description = "forbidden"),
         @ApiResponse(responseCode = "500", description = "unexpected error")})
-    @RequestMapping(value = "/study/{studyId}", produces = {"application/json"}, method = RequestMethod.GET)
+    @GetMapping(value = "/study/{studyId}", produces = {"application/json"})
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#studyId, 'CAN_SEE_ALL'))")
     ResponseEntity<List<DatasetLight>> findDatasetByStudyId(
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId);
@@ -193,7 +192,7 @@ public interface DatasetApi {
         @ApiResponse(responseCode = "401", description = "unauthorized"),
         @ApiResponse(responseCode = "403", description = "forbidden"),
         @ApiResponse(responseCode = "500", description = "unexpected error")})
-    @RequestMapping(value = "/study/nb-datasets/{studyId}", produces = {"application/json"}, method = RequestMethod.GET)
+    @GetMapping(value = "/study/nb-datasets/{studyId}", produces = {"application/json"})
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#studyId, 'CAN_SEE_ALL'))")
     ResponseEntity<Integer> findNbDatasetByStudyId(
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId);
@@ -205,7 +204,7 @@ public interface DatasetApi {
         @ApiResponse(responseCode = "401", description = "unauthorized"),
         @ApiResponse(responseCode = "403", description = "forbidden"),
         @ApiResponse(responseCode = "500", description = "unexpected error")})
-    @RequestMapping(value = "find/subject/{subjectId}", produces = {"application/json"}, method = RequestMethod.GET)
+    @GetMapping(value = "find/subject/{subjectId}", produces = {"application/json"})
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnSubjectId(#subjectId, 'CAN_SEE_ALL'))")
     @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetDTOList(returnObject.getBody(), 'CAN_SEE_ALL')")
     ResponseEntity<List<DatasetDTO>> findDatasetsBySubjectId(
@@ -246,10 +245,9 @@ public interface DatasetApi {
         @ApiResponse(responseCode = "403", description = "forbidden"),
         @ApiResponse(responseCode = "422", description = "bad parameters"),
         @ApiResponse(responseCode = "500", description = "unexpected error")})
-    @RequestMapping(value = "/processedDataset",
+    @PostMapping(value = "/processedDataset",
             produces = {"application/json"},
-            consumes = {"application/json"},
-            method = RequestMethod.POST)
+            consumes = {"application/json"})
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#importJob.getStudyId(), 'CAN_IMPORT'))")
     ResponseEntity<Void> createProcessedDataset(@Parameter(description = "co to create", required = true) @Valid @RequestBody ProcessedDatasetImportJob importJob) throws RestServiceException, IOException, Exception;
 
@@ -366,10 +364,9 @@ public interface DatasetApi {
         @ApiResponse(responseCode = "403", description = "forbidden"),
         @ApiResponse(responseCode = "422", description = "bad parameters"),
         @ApiResponse(responseCode = "500", description = "unexpected error")})
-    @RequestMapping(value = "/getDownloadData",
+    @PostMapping(value = "/getDownloadData",
             produces = {"application/json"},
-            consumes = {"application/json"},
-            method = RequestMethod.POST)
+            consumes = {"application/json"})
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     ResponseEntity<List<DatasetDownloadData>> getDownloadData(@Parameter(description = "Input arguments", required = true) @Valid @RequestBody DatasetDownloadDataInput input);
 

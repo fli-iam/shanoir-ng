@@ -14,6 +14,9 @@
 
 package org.shanoir.ng.dataset.modality;
 
+import java.io.Serial;
+
+
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetType;
 
@@ -31,6 +34,7 @@ public class MegDataset extends Dataset {
     /**
      * UID
      */
+    @Serial
     private static final long serialVersionUID = 8986396467410158683L;
 
     public MegDataset() { }

@@ -38,6 +38,8 @@ import org.dcm4che3.data.Sequence;
 import org.dcm4che3.data.Tag;
 import org.dcm4che3.data.UID;
 import org.dcm4che3.io.DicomOutputStream;
+import tools.jackson.core.JacksonException;
+
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
@@ -94,8 +96,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 import jakarta.annotation.PostConstruct;
 
@@ -503,15 +504,15 @@ public class DicomImporterService {
      * @param institution
      * @param studyId
      * @return
-     * @throws JsonProcessingException
+     * @throws JacksonException
      * @throws AmqpException
      * @throws RestServiceException
      */
-    private Long manageCenter(InstitutionDicom institution, Long studyId) throws JsonProcessingException, AmqpException, RestServiceException {
+    private Long manageCenter(InstitutionDicom institution, Long studyId) throws AmqpException, RestServiceException {
         Center center = null;
         Optional<StudyCenter> studyCenterOpt = null;
         Optional<Center> centerOpt = centerRepository.findFirstByNameContainingOrderByIdAsc(institution.getInstitutionName());
-        if (!centerOpt.isEmpty()) {
+        if (centerOpt.isPresent()) {
             center = centerOpt.get();
             studyCenterOpt = studyCenterRepository.findByStudy_IdAndCenter_Id(studyId, center.getId());
         }
@@ -632,7 +633,7 @@ public class DicomImporterService {
     }
 
     private Long manageSubject(Attributes attributes, Study study)
-            throws JsonProcessingException, RestServiceException {
+            throws RestServiceException {
         String subjectName = attributes.getString(Tag.PatientName);
         Subject subject = subjectService.findByNameAndStudyId(subjectName, study.getId());
         if (subject == null) {

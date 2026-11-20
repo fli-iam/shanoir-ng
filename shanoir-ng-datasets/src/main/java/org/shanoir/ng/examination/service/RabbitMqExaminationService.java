@@ -29,7 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Service for rabbit MQ communications concerning Examination.
@@ -59,7 +59,7 @@ public class RabbitMqExaminationService {
             Subject subj = exam.getSubject();
             subj.setStudy(exam.getStudy());
             Optional<Subject> dbSubject = subjectRepository.findById(subj.getId());
-            if (!dbSubject.isPresent()) {
+            if (dbSubject.isEmpty()) {
                 subjectRepository.save(subj);
             }
             exam = examRepo.save(exam);

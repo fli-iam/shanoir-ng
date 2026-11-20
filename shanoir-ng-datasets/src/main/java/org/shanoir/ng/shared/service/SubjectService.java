@@ -34,8 +34,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
+
+import tools.jackson.core.JacksonException;
 
 /**
  * Subject service implementation.
@@ -107,7 +108,7 @@ public class SubjectService {
     private void send(Object obj, String queue) throws MicroServiceCommunicationException {
         try {
             rabbitTemplate.convertAndSend(queue, objectMapper.writeValueAsString(obj));
-        } catch (AmqpException | JsonProcessingException e) {
+        } catch (AmqpException | JacksonException e) {
             throw new MicroServiceCommunicationException("Error while communicating with MS Studies to send study card tags.", e);
         }
     }

@@ -17,7 +17,11 @@ package org.shanoir.ng.score;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import jakarta.persistence.*;
+
+
 import org.shanoir.ng.examination.model.VariableAssessment;
+
+import java.io.Serial;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
 
@@ -35,6 +39,7 @@ public class Score extends HalEntity {
     /**
      * UID
      */
+    @Serial
     private static final long serialVersionUID = 5995692961509079060L;
 
     @ManyToOne(fetch = FetchType.EAGER)

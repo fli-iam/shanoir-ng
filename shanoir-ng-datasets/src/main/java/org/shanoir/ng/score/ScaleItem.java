@@ -24,6 +24,7 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.shanoir.ng.examination.model.CodedVariable;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 
+import java.io.Serial;
 import java.sql.Types;
 
 /**
@@ -37,6 +38,7 @@ import java.sql.Types;
 public class ScaleItem extends AbstractEntity {
 
     /** The Constant serialVersionUID. */
+    @Serial
     private static final long serialVersionUID = 5995587676825866034L;
 
     /** The codedVariable. */

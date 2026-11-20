@@ -56,8 +56,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import jakarta.annotation.PostConstruct;
 
@@ -489,7 +490,7 @@ public class DICOMWebService {
     private DICOMWebSTOWRSResult parseJsonResponse(String responseBody) {
         DICOMWebSTOWRSResult result = new DICOMWebSTOWRSResult();
         try {
-            ObjectMapper mapper = new ObjectMapper();
+            ObjectMapper mapper = new JsonMapper();
             JsonNode root = mapper.readTree(responseBody);
             // Parse Referenced SOP Sequence (00081199) - successful instances
             JsonNode referencedSopSeq = findDicomAttribute(root, "00081199");
@@ -551,12 +552,12 @@ public class DICOMWebService {
             // Referenced SOP Instance UID (00081155)
             JsonNode sopInstanceUID = item.get("00081155");
             if (sopInstanceUID != null && sopInstanceUID.has("Value")) {
-                instResult.setSopInstanceUID(sopInstanceUID.get("Value").get(0).asText());
+                instResult.setSopInstanceUID(sopInstanceUID.get("Value").get(0).asString());
             }
             // Referenced SOP Class UID (00081150)
             JsonNode sopClassUID = item.get("00081150");
             if (sopClassUID != null && sopClassUID.has("Value")) {
-                instResult.setSopClassUID(sopClassUID.get("Value").get(0).asText());
+                instResult.setSopClassUID(sopClassUID.get("Value").get(0).asString());
             }
             // Failure Reason (00081197)
             JsonNode failureReason = item.get("00081197");

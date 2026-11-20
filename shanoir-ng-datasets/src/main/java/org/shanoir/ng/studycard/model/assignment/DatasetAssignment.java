@@ -15,7 +15,7 @@
 package org.shanoir.ng.studycard.model.assignment;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.annotation.JsonDeserialize;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import org.shanoir.ng.dataset.model.Dataset;

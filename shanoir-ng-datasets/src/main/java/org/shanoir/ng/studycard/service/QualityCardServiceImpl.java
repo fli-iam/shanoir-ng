@@ -455,12 +455,12 @@ public class QualityCardServiceImpl implements QualityCardService {
         for (CardCondition condition : rule.getConditions()) {
             StringBuffer msg = new StringBuffer();
             boolean fulfilled = true;
-            if (condition instanceof AcqDICOMConditionOnDatasets) {
-                fulfilled = ((AcqDICOMConditionOnDatasets) condition).fulfilled(dicomAttributes, msg);
-            } else if (condition instanceof AcqMetadataCondOnAcq) {
-                fulfilled = ((AcqMetadataCondOnAcq) condition).fulfilled(da, msg);
-            } else if (condition instanceof AcqMetadataCondOnDatasets) {
-                fulfilled = ((AcqMetadataCondOnDatasets) condition).fulfilled(da.getDatasets(), msg);
+            if (condition instanceof AcqDICOMConditionOnDatasets datasets1) {
+                fulfilled = datasets1.fulfilled(dicomAttributes, msg);
+            } else if (condition instanceof AcqMetadataCondOnAcq acq) {
+                fulfilled = acq.fulfilled(da, msg);
+            } else if (condition instanceof AcqMetadataCondOnDatasets datasets) {
+                fulfilled = datasets.fulfilled(da.getDatasets(), msg);
             } else {
                 throw new IllegalStateException("There might be an unimplemented condition type here. Condition class : " + condition.getClass());
             }

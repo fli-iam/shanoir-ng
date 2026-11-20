@@ -33,6 +33,7 @@ public enum ExecutionStatus {
 
     private String restLabel;
 
+    @JsonCreator
     ExecutionStatus(String restLabel) {
         this.restLabel = restLabel;
     }

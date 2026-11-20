@@ -22,6 +22,7 @@ import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionForRightsProjecti
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.NativeQuery;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -50,8 +51,8 @@ public interface DatasetAcquisitionRepository extends PagingAndSortingRepository
 
     DatasetAcquisition findBySourceIdAndExaminationStudy_Id(Long sourceId, Long studyId);
 
-    @Query(value = "SELECT id FROM dataset_acquisition acq "
-            + "WHERE acq.examination_id = ?1", nativeQuery = true)
+    @NativeQuery("SELECT id FROM dataset_acquisition acq "
+            + "WHERE acq.examination_id = ?1")
     List<Long> findIdsByExaminationId(Long examinationId);
 
     @Query("""
@@ -94,9 +95,9 @@ public interface DatasetAcquisitionRepository extends PagingAndSortingRepository
      */
     List<DatasetAcquisition> findByIdGreaterThan(Long idThreshold);
 
-    @Query(value = "SELECT id FROM dataset_acquisition acq "
+    @NativeQuery("SELECT id FROM dataset_acquisition acq "
             + "WHERE acq.examination_id = ?1 "
-            + "AND acq.id IN (?2)", nativeQuery = true)
+            + "AND acq.id IN (?2)")
     List<Long> findIdsFromIdsListWithExamId(Long examId, List<Long> acqIdList);
 
     @Query("SELECT da FROM DatasetAcquisition da "

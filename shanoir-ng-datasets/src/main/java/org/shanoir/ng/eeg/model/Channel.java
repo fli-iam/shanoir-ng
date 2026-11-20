@@ -20,7 +20,11 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+
+
 import org.shanoir.ng.dataset.modality.EegDataset;
+
+import java.io.Serial;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 
 /**
@@ -63,6 +67,7 @@ public class Channel extends HalEntity {
     }
 
     /** Serial Version ID. */
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /** Name of the channel. */

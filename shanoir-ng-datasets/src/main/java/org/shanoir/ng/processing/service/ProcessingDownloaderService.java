@@ -16,7 +16,7 @@ package org.shanoir.ng.processing.service;
 
 import java.util.List;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.shanoir.ng.examination.model.Examination;

@@ -14,6 +14,10 @@
 
 package org.shanoir.ng.datasetacquisition;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.shanoir.ng.datasetacquisition.dto.ExaminationDatasetAcquisitionDTO;
@@ -22,15 +26,13 @@ import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.model.Study;
+import org.shanoir.ng.study.rights.ampq.RabbitMqStudyUserService;
 import org.shanoir.ng.utils.ModelsUtil;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.ActiveProfiles;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 /**
  * Dataset acquisition mapper test.
@@ -39,13 +41,19 @@ import java.util.List;
  *
  */
 
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@SpringBootTest
 @ActiveProfiles("test")
 public class DatasetAcquisitionMapperTest {
 
     private static final Long DATASET_ACQUISITION_ID = 1L;
     private static final String DATASET_ACQUISITION_WIHTOUT_DATASET_NAME = "id=1 (Mr)";
     private static final String DATASET_ACQUISITION_WIHT_DATASET_NAME = ModelsUtil.DATASET_NAME + " (Mr)";
+
+    @MockitoBean
+    private ConnectionFactory connectionFactory;
+
+    @MockitoBean
+    private RabbitMqStudyUserService rabbitMqStudyUserService;
 
     @Autowired
     private ExaminationDatasetAcquisitionMapper datasetAcquisitionMapper;

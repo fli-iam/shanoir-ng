@@ -47,7 +47,8 @@ import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @ExtendWith(MockitoExtension.class)
 public class ImporterMailServiceTest {
@@ -69,7 +70,7 @@ public class ImporterMailServiceTest {
     private ExaminationRepository examinationRepository;
 
     @Spy
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private ObjectMapper objectMapper = new JsonMapper();
 
     @InjectMocks
     private ImporterMailService importerMailService;

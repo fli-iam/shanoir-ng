@@ -16,13 +16,18 @@ package org.shanoir.ng.datasetacquisition.model.bids;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import jakarta.persistence.Entity;
+
+
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+
+import java.io.Serial;
 
 @Entity
 @JsonTypeName("BIDS")
 public class BidsDatasetAcquisition extends DatasetAcquisition {
 
     public static final String DATASET_ACQUISITION_TYPE = "BIDS";
+    @Serial
     private static final long serialVersionUID = -4654922391836952469L;
 
     public BidsDatasetAcquisition() {

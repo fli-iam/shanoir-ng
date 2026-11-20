@@ -39,8 +39,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-
 import jakarta.transaction.Transactional;
 
 
@@ -69,7 +67,7 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
 
     @Override
     @Transactional
-    public DatasetCopyService.DatasetCopyResult moveDataset(Long dsId, Long studyId, Map<Long, IdName> subjectMap, Map<Long, Examination> examMap, Map<Long, DatasetAcquisition> acqMap, Long userId) throws DatasetCopyService.NotFoundSubjectIdException, DatasetCopyService.NotFoundDatasetIdException, JsonProcessingException {
+    public DatasetCopyService.DatasetCopyResult moveDataset(Long dsId, Long studyId, Map<Long, IdName> subjectMap, Map<Long, Examination> examMap, Map<Long, DatasetAcquisition> acqMap, Long userId) throws DatasetCopyService.NotFoundSubjectIdException, DatasetCopyService.NotFoundDatasetIdException {
         DatasetCopyService.DatasetCopyResult result = new DatasetCopyService.DatasetCopyResult();
         try {
             Dataset ds = datasetRepository.findById(dsId).orElseThrow(() -> new DatasetCopyService.NotFoundDatasetIdException(dsId));

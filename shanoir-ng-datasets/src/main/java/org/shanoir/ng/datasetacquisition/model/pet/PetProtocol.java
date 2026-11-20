@@ -14,6 +14,9 @@
 
 package org.shanoir.ng.datasetacquisition.model.pet;
 
+import java.io.Serial;
+
+
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -35,6 +38,7 @@ public class PetProtocol extends AbstractEntity {
     /**
      * UID
      */
+    @Serial
     private static final long serialVersionUID = -9089131328921308436L;
 
     /** (0054, 1101) Attenuation Correction Method */

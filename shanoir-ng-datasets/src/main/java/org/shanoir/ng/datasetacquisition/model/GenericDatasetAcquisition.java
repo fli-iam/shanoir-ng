@@ -14,6 +14,8 @@
 
 package org.shanoir.ng.datasetacquisition.model;
 
+import java.io.Serial;
+
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import jakarta.persistence.Entity;
 
@@ -25,6 +27,7 @@ public class GenericDatasetAcquisition extends DatasetAcquisition {
     /**
      * Serial version UUID
      */
+    @Serial
     private static final long serialVersionUID = -8826440216825057112L;
 
     public GenericDatasetAcquisition() {

@@ -21,9 +21,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.shanoir.ng.shared.exception.SecurityException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 
 /**
  * @author Alae Es-saki
@@ -37,9 +37,8 @@ public interface PipelineApi {
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "500", description = "unexpected error"),
             @ApiResponse(responseCode = "503", description = "error from VIP API")})
-    @RequestMapping(value = "",
-            produces = { "application/json", "application/octet-stream" },
-            method = RequestMethod.GET)
+    @GetMapping(value = "",
+            produces = { "application/json", "application/octet-stream" })
     ResponseEntity<String> getPipelineAll() throws SecurityException;
 
     @Operation(summary = "Get the description of pipeline [name] in the version [version]", description = "Returns the VIp description of the pipeline [name] in the version [version].", tags = { })
@@ -48,9 +47,8 @@ public interface PipelineApi {
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "500", description = "unexpected error"),
             @ApiResponse(responseCode = "503", description = "error from VIP API")})
-    @RequestMapping(value = "/{identifier}/{version}",
-            produces = { "application/json", "application/octet-stream" },
-            method = RequestMethod.GET)
+    @GetMapping(value = "/{identifier}/{version}",
+            produces = { "application/json", "application/octet-stream" })
     ResponseEntity<String> getPipeline(@Parameter(description = "The pipeline identifier", required = true) @PathVariable("identifier") String identifier, @Parameter(description = "The pipeline version", required = true) @PathVariable("version") String version) throws SecurityException;
 
 

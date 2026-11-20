@@ -14,6 +14,8 @@
 
 package org.shanoir.ng.examination.model;
 
+import java.io.Serial;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.Table;
@@ -28,6 +30,7 @@ import jakarta.persistence.Table;
 public class NumericalVariable extends InstrumentVariable {
 
     /** The Constant serialVersionUID. */
+    @Serial
     private static final long serialVersionUID = -4974109889862891260L;
 
     /** Maximum score value of this variable. */

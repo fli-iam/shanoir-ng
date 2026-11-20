@@ -14,6 +14,9 @@
 
 package org.shanoir.ng.datasetacquisition.model.ct;
 
+import java.io.Serial;
+
+
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -34,6 +37,7 @@ public class CtProtocol extends AbstractEntity {
     /**
      * UID
      */
+    @Serial
     private static final long serialVersionUID = 5062475142212117502L;
 
     @JsonIgnore
