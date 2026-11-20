@@ -44,6 +44,7 @@ import org.shanoir.ng.studycard.service.StudyCardService;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.security.oauth2.server.resource.autoconfigure.servlet.OAuth2ResourceServerAutoConfiguration;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
@@ -62,7 +63,9 @@ import com.google.gson.GsonBuilder;
  *
  */
 
-@WebMvcTest(controllers = {StudyCardApiController.class, UniqueConstraintManager.class})
+@WebMvcTest(controllers = {StudyCardApiController.class, UniqueConstraintManager.class},
+        excludeAutoConfiguration = {OAuth2ResourceServerAutoConfiguration.class
+        })
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
 public class StudyCardApiControllerTest {
@@ -80,7 +83,6 @@ public class StudyCardApiControllerTest {
 
     @MockitoBean
     private StudyCardRepository repositoryMock;
-
 
     @MockitoBean
     private DicomSEGAndSRImporterService dicomSEGAndSRImporterService;
