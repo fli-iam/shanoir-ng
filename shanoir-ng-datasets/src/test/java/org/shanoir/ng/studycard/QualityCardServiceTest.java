@@ -14,14 +14,20 @@
 
 package org.shanoir.ng.studycard;
 
+import static org.mockito.BDDMockito.given;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.dcm4che3.data.VR;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.GenericDatasetAcquisition;
@@ -37,6 +43,7 @@ import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.quality.QualityTag;
 import org.shanoir.ng.shared.repository.StudyRepository;
+import org.shanoir.ng.study.rights.ampq.RabbitMqStudyUserService;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.model.Operation;
 import org.shanoir.ng.studycard.model.QualityCard;
@@ -46,19 +53,13 @@ import org.shanoir.ng.studycard.model.rule.QualityCardRule;
 import org.shanoir.ng.studycard.repository.QualityCardRepository;
 import org.shanoir.ng.studycard.service.QualityCardServiceImpl;
 import org.shanoir.ng.utils.SecurityContextUtil;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-
-import static org.mockito.BDDMockito.given;
 
 /**
  * Quality card service test.
@@ -72,28 +73,34 @@ public class QualityCardServiceTest {
     private static final String QUALITY_CARD_NAME = "QualityCard1";
     private static final String UPDATED_QUALITY_CARD_NAME = "QualityCard1Updated";
 
-    @Mock
+    @MockitoBean
     private QualityCardRepository qualityCardRepository;
 
-    @Mock
+    @MockitoBean
     private StudyRepository studyRepository;
 
-    @Mock
+    @MockitoBean
     private ExaminationRepository examinationRepository;
 
-    @Mock
+    @MockitoBean
     private WADODownloaderService downloader;
 
-    @Mock
+    @MockitoBean
     private ShanoirEventService eventService;
 
-    @Mock
+    @MockitoBean
     private DatasetAcquisitionService datasetAcquisitionService;
 
     @MockitoBean
     private StudyInstanceUIDAndSubjectNameHandler studyInstanceUIDHandler;
 
-    @InjectMocks
+    @MockitoBean
+    private ConnectionFactory connectionFactory;
+
+    @MockitoBean
+    private RabbitMqStudyUserService rabbitMqStudyUserService;
+
+    @Autowired
     private QualityCardServiceImpl qualityCardService;
 
     @BeforeEach
