@@ -14,6 +14,17 @@
 
 package org.shanoir.ng.importer.strategies.protocol;
 
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.dcm4che3.data.UID;
@@ -21,21 +32,18 @@ import org.dcm4che3.io.DicomInputStream;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.shanoir.ng.datasetacquisition.model.mr.MrProtocol;
 import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
 import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.importer.dto.Serie;
+import org.shanoir.ng.study.rights.ampq.RabbitMqStudyUserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.util.*;
 
 /**
  * Tests the implementation of MrProtocolStrategy.
@@ -50,11 +58,17 @@ public class MrProtocolStrategyTest {
     /** Logger. */
     private static final Logger LOG = LoggerFactory.getLogger(MrProtocolStrategy.class);
 
-    @InjectMocks
+    @Autowired
     private MrProtocolStrategy mrProtocolStrategy;
 
     @MockitoBean
     private StudyInstanceUIDAndSubjectNameHandler studyInstanceUIDHandler;
+
+    @MockitoBean
+    private ConnectionFactory connectionFactory;
+
+    @MockitoBean
+    private RabbitMqStudyUserService rabbitMqStudyUserService;
 
     @BeforeEach
     public void setup() {
