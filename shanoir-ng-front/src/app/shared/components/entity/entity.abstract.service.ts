@@ -90,6 +90,9 @@ export abstract class EntityService<T extends Entity> implements OnDestroy {
                         let warn = 'The ' + name + (entity['name'] ? ' ' + entity['name'] : '') + ' with id ' + entity.id + ' is linked to other entities, it was not deleted.';
                         if((reason.error && reason.error.code == 422)
                             || reason.status == 422){
+                            if (reason.error?.message) {
+                                warn = warn + ' ' + reason.error.message;
+                            }
                             this.consoleService.log('warn', warn);
                             return false;
                         }

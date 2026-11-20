@@ -32,6 +32,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.hibernate.Hibernate;
 import org.shanoir.ng.anonymization.uid.generation.UIDGeneration;
+import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
@@ -121,6 +122,10 @@ public class ExaminationServiceImpl implements ExaminationService {
     @Autowired
     @Lazy
     private ExaminationService examinationService;
+
+    @Autowired
+    @Lazy
+    private DatasetSecurityService datasetSecurityService;
 
     @Transactional
     public void deleteById(final Long id, ShanoirEvent event) throws ShanoirException, SolrServerException, IOException, RestServiceException {
@@ -314,6 +319,11 @@ public class ExaminationServiceImpl implements ExaminationService {
     @Transactional(rollbackFor = { ShanoirException.class, StorageException.class })
     public Examination updateWithExtraData(final Examination examination, final List<MultipartFile> files) throws ShanoirException, StorageException {
         Long examinationId = examination.getId();
+        // Only importers may add extra-data files: refuse before storing anything, the files would be orphaned
+        if (!files.isEmpty() && !KeycloakUtil.isAdmin()
+                && !datasetSecurityService.hasRightOnExamination(examinationId, "CAN_IMPORT")) {
+            throw new AccessDeniedException("Adding extra data files requires the import right on the study.");
+        }
         // A new file must not overwrite an existing one: it would be lost when cleaning up on failure
         for (MultipartFile file : files) {
             if (storageService.existsExtraData(examinationId, file.getOriginalFilename())) {
@@ -350,6 +360,19 @@ public class ExaminationServiceImpl implements ExaminationService {
         final Examination examinationDb = examinationRepository.findById(examination.getId()).orElse(null);
         if (examinationDb == null) {
             throw new EntityNotFoundException(Examination.class, examination.getId());
+        }
+        // The examination fields are edited by importers and by study administrators with the expert role,
+        // the extra-data files by importers only: whatever the user is not allowed to change is dropped, not refused.
+        boolean canImport = datasetSecurityService.hasRightOnExamination(examination.getId(), "CAN_IMPORT");
+        if (!canImport) {
+            examination.setExtraDataFilePathList(examinationDb.getExtraDataFilePathList());
+        }
+        boolean canEditFields = KeycloakUtil.isAdmin() || canImport || (KeycloakUtil.getTokenRoles().contains("ROLE_EXPERT")
+                && datasetSecurityService.hasRightOnExamination(examination.getId(), "CAN_ADMINISTRATE"));
+        if (!canEditFields) {
+            updateExtraDataFilePathList(examinationDb, examination);
+            examinationRepository.save(examinationDb);
+            return examinationDb;
         }
         if (!KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN") && !examinationDb.getCenterId().equals(examination.getCenterId())) {
             throw new AccessDeniedException("Cannot update the center of the examination, please ask an administrator.");
@@ -447,14 +470,7 @@ public class ExaminationServiceImpl implements ExaminationService {
      * @throws StorageException
      */
     private Examination updateExaminationValues(final Examination examinationDb, final Examination examination) throws StorageException {
-        // Update extra data paths => delete files not present anymore
-        if (examinationDb.getExtraDataFilePathList() != null) {
-            for (String filePath : examinationDb.getExtraDataFilePathList()) {
-                if (!examination.getExtraDataFilePathList().contains(filePath)) {
-                    storageService.deleteExtraData(examination.getId(), filePath);
-                }
-            }
-        }
+        updateExtraDataFilePathList(examinationDb, examination);
         // If we updated the subject, we need to update datasets and processed datasets too
         if (!examination.getSubject().getId().equals(examinationDb.getSubject().getId())) {
             examinationDb.setSubject(examination.getSubject());
@@ -479,10 +495,27 @@ public class ExaminationServiceImpl implements ExaminationService {
         examinationDb.setDataReuseAgreement(examination.getDataReuseAgreement());
         examinationDb.setSubjectWeight(examination.getSubjectWeight());
         examinationDb.setWeightUnitOfMeasure(examination.getWeightUnitOfMeasure());
+        examinationDb.setInstrumentBasedAssessmentList(examination.getInstrumentBasedAssessmentList());
+        return examinationDb;
+    }
+
+    /**
+     * Update the extra-data paths of the examination: delete the files not present anymore.
+     *
+     * @param examinationDb examination found in database.
+     * @param examination examination with the new extra-data paths.
+     * @throws StorageException
+     */
+    private void updateExtraDataFilePathList(final Examination examinationDb, final Examination examination) throws StorageException {
+        if (examinationDb.getExtraDataFilePathList() != null) {
+            for (String filePath : examinationDb.getExtraDataFilePathList()) {
+                if (!examination.getExtraDataFilePathList().contains(filePath)) {
+                    storageService.deleteExtraData(examination.getId(), filePath);
+                }
+            }
+        }
         examinationDb.setExtraDataFilePathList(examination.getExtraDataFilePathList() != null
                 ? examination.getExtraDataFilePathList().stream().distinct().collect(Collectors.toList())
                 : null);
-        examinationDb.setInstrumentBasedAssessmentList(examination.getInstrumentBasedAssessmentList());
-        return examinationDb;
     }
 }

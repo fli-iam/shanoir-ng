@@ -187,7 +187,7 @@ public interface DatasetAcquisitionApi {
         @ApiResponse(responseCode = "500", description = "unexpected error, datasetAcquisition not updated")})
     @RequestMapping(value = "/datasetacquisition/{datasetAcquisitionId}", produces = {"application/json"}, consumes = {
         "multipart/form-data"}, method = RequestMethod.PUT)
-    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and #datasetAcquisitionId == #datasetAcquisition.getId() and @datasetSecurityService.hasRightOnExamination(#datasetAcquisition.examination.id, 'CAN_ADMINISTRATE')")
+    @PreAuthorize("#datasetAcquisitionId == #datasetAcquisition.getId() and (hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and (@datasetSecurityService.hasRightOnDatasetAcquisition(#datasetAcquisitionId, 'CAN_IMPORT') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnDatasetAcquisition(#datasetAcquisitionId, 'CAN_ADMINISTRATE')))))")
     ResponseEntity<Void> updateDatasetAcquisition(
             @Parameter(description = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId,
             @Parameter(description = "datasetAcquisition to update", required = true) @Valid @RequestPart("datasetAcquisition") DatasetAcquisitionDTO datasetAcquisition, BindingResult result,
