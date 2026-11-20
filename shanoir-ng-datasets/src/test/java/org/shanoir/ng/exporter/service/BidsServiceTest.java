@@ -59,7 +59,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Test class for BIDS service class.
@@ -90,7 +90,7 @@ public class BidsServiceTest {
     private BIDSServiceImpl service = new BIDSServiceImpl();
 
     @MockitoBean
-    private ObjectMapper objectMapper;
+    private JsonMapper mapper;
 
     @MockitoBean
     private RabbitTemplate rabbitTemplate;
