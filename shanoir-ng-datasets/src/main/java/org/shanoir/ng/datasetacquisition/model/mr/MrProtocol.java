@@ -22,6 +22,7 @@ import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.model.DiffusionGradient;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.CascadeType;
@@ -209,6 +210,7 @@ public class MrProtocol extends AbstractEntity {
 
     }
 
+    @JsonCreator(mode = JsonCreator.Mode.DISABLED)
     public MrProtocol(MrProtocol mrPro, MrDataset mrDs) {
         this.acquisitionDuration = mrPro.getAcquisitionDuration();
         this.acquisitionResolutionX = mrPro.getAcquisitionResolutionX();

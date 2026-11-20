@@ -46,6 +46,7 @@ import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.tag.model.StudyTag;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -221,6 +222,7 @@ public abstract class Dataset extends AbstractEntity {
     public Dataset() {
     }
 
+    @JsonCreator(mode = JsonCreator.Mode.DISABLED)
     public Dataset(Dataset d) {
         this.creationDate = d.getCreationDate();
         this.userId = d.getUserId();

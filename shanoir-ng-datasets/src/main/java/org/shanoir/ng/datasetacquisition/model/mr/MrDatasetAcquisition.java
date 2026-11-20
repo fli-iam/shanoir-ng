@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.datasetacquisition.model.mr;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -49,6 +50,7 @@ public class MrDatasetAcquisition extends DatasetAcquisition {
     public MrDatasetAcquisition() {
     }
 
+    @JsonCreator(mode = JsonCreator.Mode.DISABLED)
     public MrDatasetAcquisition(DatasetAcquisition acq, MrDataset mrDs) {
         super(acq);
         this.mrProtocol = new MrProtocol(((MrDatasetAcquisition) acq).getMrProtocol(), mrDs);
