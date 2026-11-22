@@ -395,10 +395,7 @@ public class DicomImporterService {
                 }
             }
             Set<EchoTime> echoTimes = DatasetSeparationHelper.echoTimesForDatasetSeparation(acquisition, dataset);
-            int acquisitionNumber = 0;
-            if (acquisition.getAcquisitionNumber() != null) {
-                acquisitionNumber = acquisition.getAcquisitionNumber().intValue();
-            }
+            int acquisitionNumber = DatasetSeparationHelper.acquisitionNumberForDatasetSeparation(acquisition);
             existingSeparator = new SerieToDatasetsSeparator(
                     acquisitionNumber,
                     echoTimes,
@@ -418,7 +415,7 @@ public class DicomImporterService {
     private SerieToDatasetsSeparator createSeriesToDatasetsSeparator(Attributes attributes,
             DatasetAcquisition acquisition) {
         // Acquisition number
-        final int acquisitionNumber = attributes.getInt(Tag.AcquisitionNumber, 0);
+        final int acquisitionNumber = DatasetSeparationHelper.acquisitionNumberForDatasetSeparation(acquisition, attributes);
         // Echo times
         Set<EchoTime> echoTimes = DatasetSeparationHelper.echoTimesForDatasetSeparation(acquisition, attributes);
         // Image orientation patient
