@@ -17,6 +17,7 @@ package org.shanoir.ng.study.dto.mapper;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hibernate.Hibernate;
 import org.shanoir.ng.study.dto.IdNameCenterStudyDTO;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.dto.StudyLightDTO;
@@ -101,8 +102,10 @@ public abstract class StudyDecorator implements StudyMapper {
      */
     private StudyDTO convertStudyToStudyDTO(final Study study, final boolean withData) {
         final StudyDTO studyDTO = studyMapperDelegate.studyToStudyDTO(study);
-        studyDTO.setStudyCenterList(
-                studyCenterMapper.studyCenterListToStudyCenterDTOList(study.getStudyCenterList()));
+        if (Hibernate.isInitialized(study.getStudyCenterList())) {
+            studyDTO.setStudyCenterList(
+                    studyCenterMapper.studyCenterListToStudyCenterDTOList(study.getStudyCenterList()));
+        }
         if (withData) {
             if (study.getTags() != null) {
                 studyDTO.setTags(tagMapper.tagListToTagDTOList(study.getTags()));
