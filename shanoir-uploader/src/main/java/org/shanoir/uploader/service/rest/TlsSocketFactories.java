@@ -16,7 +16,7 @@ package org.shanoir.uploader.service.rest;
 
 import javax.net.ssl.SSLContext;
 
-import org.apache.hc.client5.http.ssl.DefaultHostnameVerifier;
+import org.apache.hc.client5.http.ssl.HttpsSupport;
 import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
 import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactoryBuilder;
 import org.apache.hc.core5.http.ssl.TLS;
@@ -26,8 +26,9 @@ import org.apache.hc.core5.http.ssl.TLS;
  *
  * The server certificate chain is validated against the given SSLContext
  * (by default the JVM truststore), and the host name of the URL is checked
- * against the certificate (subject alternative names) with the standard
- * {@link DefaultHostnameVerifier} of HttpClient.
+ * against the certificate (subject alternative names) with the default
+ * host name verifier of HttpClient ({@link HttpsSupport#getDefaultHostnameVerifier()}),
+ * which also rejects wildcards on public suffixes (e.g. *.co.uk).
  */
 public final class TlsSocketFactories {
 
@@ -41,7 +42,7 @@ public final class TlsSocketFactories {
      */
     public static SSLConnectionSocketFactory withHostnameVerification(final SSLContext sslContext, final TLS... tlsVersions) {
         final SSLConnectionSocketFactoryBuilder builder = SSLConnectionSocketFactoryBuilder.create()
-                .setHostnameVerifier(new DefaultHostnameVerifier());
+                .setHostnameVerifier(HttpsSupport.getDefaultHostnameVerifier());
         if (sslContext != null) {
             builder.setSslContext(sslContext);
         }
