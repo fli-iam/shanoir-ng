@@ -515,15 +515,6 @@
   "webAuthnPolicyPasswordlessAcceptableAaguids": [],
   "webAuthnPolicyPasswordlessExtraOrigins": [],
   "users": [
-    {
-      "id": "86dc3205-a43b-4873-bd3c-56d5da8da70e",
-      "username": "service-account-neurobagel-export",
-      "enabled": true,
-      "serviceAccountClientId": "neurobagel-export",
-      "realmRoles": [
-        "ROLE_NEUROBAGEL"
-      ]
-    }
   ],
   "scopeMappings": [
     {
@@ -1041,6 +1032,17 @@
       },
       "fullScopeAllowed": true,
       "nodeReRegistrationTimeout": -1,
+      "protocolMappers": [
+        {
+          "name": "ROLE_NEUROBAGEL",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-hardcoded-role-mapper",
+          "consentRequired": false,
+          "config": {
+            "role": "ROLE_NEUROBAGEL"
+          }
+        }
+      ],
       "defaultClientScopes": [
         "roles",
         "basic"

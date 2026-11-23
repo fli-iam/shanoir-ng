@@ -74,11 +74,6 @@ public class ImportDialogOpener {
     public void openImportDialog(ImportJobBase importJob, File importFolder) {
         try {
             Date studyDate = ShUpConfig.FORMATTER.parse(Util.convertLocalDateToString(importJob.getStudy().getStudyDate()));
-            Subject subject = null;
-            // Profile OFSEP: search with identifier
-            if (ShUpConfig.isModeSubjectNameAutoIncrement()) {
-                subject = getSubject(importJob);
-            } // else Profile Neurinfo: no search with identifier, user selects existing subject
             List<AcquisitionEquipment> acquisitionEquipments = shanoirUploaderServiceClient.findAcquisitionEquipments();
             LOG.info("findAcquisitionEquipments: " + acquisitionEquipments.size() + " equipments found.");
             List<Study> studiesWithStudyCards = getStudiesWithStudyCards(importJob, acquisitionEquipments);
@@ -93,13 +88,12 @@ public class ImportDialogOpener {
             } else {
                 LOG.warn("None of the selected series contains both institution and equipment information.");
             }
-            ImportStudyAndStudyCardCBItemListener importStudyAndStudyCardCBIL = new ImportStudyAndStudyCardCBItemListener(this.mainWindow, institutionDicom, equipmentDicom, subject, studyDate, importStudyCardFilterDocumentListener, shanoirUploaderServiceClient);
-            ImportFinishActionListener importFinishAL = new ImportFinishActionListener(this.mainWindow, importFolder, subject);
+            ImportStudyAndStudyCardCBItemListener importStudyAndStudyCardCBIL = new ImportStudyAndStudyCardCBItemListener(this.mainWindow, institutionDicom, equipmentDicom, importJob.getSubject().getIdentifier(), studyDate, importStudyCardFilterDocumentListener, shanoirUploaderServiceClient);
+            ImportFinishActionListener importFinishAL = new ImportFinishActionListener(this.mainWindow, importFolder);
             importDialog = new ImportDialog(this.mainWindow,
                     ShUpConfig.resourceBundle.getString("shanoir.uploader.preImportDialog.title"), true, resourceBundle,
                     importStudyAndStudyCardCBIL, importFinishAL, importStudyCardFilterDocumentListener);
             // Update import dialog with items from server
-            updateImportDialogForSubject(subject); // this has to be done after init of the dialog
             updateImportDialogForNewExamFields(studyDate, importJob.getStudy().getStudyDescription(), importJob.getExaminationDataReuseAgreement());
             updateImportDialogForStudyAndStudyCard(studiesWithStudyCards);
             importDialog.mrExaminationExamExecutiveLabel.setVisible(false);
@@ -255,80 +249,6 @@ public class ImportDialogOpener {
             }
         }
         importDialog.studyCB.setValueSet(false);
-    }
-
-    private Subject getSubject(final ImportJobBase importJob) throws Exception {
-        String identifier = importJob.getSubject().getIdentifier();
-        if (identifier != null) {
-            return shanoirUploaderServiceClient
-                .findSubjectBySubjectIdentifier(identifier);
-        }
-        return null;
-    }
-
-    private void updateImportDialogForSubject(Subject subject) {
-        /**
-         * Insert subject specific items into combo boxes from model classes.
-         * Should be there nevertheless if subject exists or not.
-         */
-        // Insert ImageObjectCategory objects
-        for (int i = 0; i < ImagedObjectCategory.values().length; i++) {
-            importDialog.subjectImageObjectCategoryCB.addItem(ImagedObjectCategory.values()[i]);
-        }
-        // Insert String here, as the model does not contain "", the unknown, not selected hemdom
-        importDialog.subjectLanguageHemisphericDominanceCB.addItem("");
-        importDialog.subjectLanguageHemisphericDominanceCB.addItem(HemisphericDominance.Left.getName());
-        importDialog.subjectLanguageHemisphericDominanceCB.addItem(HemisphericDominance.Right.getName());
-        importDialog.subjectManualHemisphericDominanceCB.addItem("");
-        importDialog.subjectManualHemisphericDominanceCB.addItem(HemisphericDominance.Left.getName());
-        importDialog.subjectManualHemisphericDominanceCB.addItem(HemisphericDominance.Right.getName());
-        for (int i = 0; i < SubjectType.values().length; i++) {
-            importDialog.subjectTypeCB.addItem(SubjectType.values()[i]);
-        }
-        // Existing subject found with identifier: only profile OFSEP, not Neurinfo
-        if (subject != null) {
-            importDialog.subjectTextField.setText(subject.getName());
-            importDialog.subjectTextField.setBackground(Color.LIGHT_GRAY);
-            importDialog.subjectTextField.setEnabled(false);
-            importDialog.subjectTextField.setEditable(false);
-            importDialog.subjectTextField.setValueSet(true);
-            importDialog.existingSubjectsCB.setVisible(false);
-            importDialog.existingSubjectsCB.setBackground(Color.LIGHT_GRAY);
-            importDialog.existingSubjectsCB.setEnabled(false);
-            importDialog.existingSubjectsCB.setEditable(false);
-            ImportStudyAndStudyCardCBItemListener.updateImportDialogForExistingSubject(subject, importDialog);
-        // No existing subject found with identifier:
-        } else {
-            // Profile Neurinfo: enable manual edition
-            if (ShUpConfig.isModeSubjectNameManual()) {
-                importDialog.subjectTextField.setText("");
-                importDialog.subjectTextField.setBackground(Color.WHITE);
-                importDialog.subjectTextField.setEnabled(true);
-                importDialog.subjectTextField.setEditable(true);
-                importDialog.existingSubjectsCB.setEditable(true);
-            // Profile OFSEP: display, that subject will be created automatically
-            } else if (ShUpConfig.isModeSubjectNameAutoIncrement()) {
-                importDialog.subjectTextField
-                        .setText(resourceBundle.getString("shanoir.uploader.import.subject.autofill"));
-                importDialog.subjectTextField.setBackground(Color.LIGHT_GRAY);
-                importDialog.subjectTextField.setEnabled(false);
-                importDialog.subjectTextField.setEditable(false);
-                importDialog.existingSubjectsCB.setVisible(false);
-                importDialog.existingSubjectsCB.setBackground(Color.LIGHT_GRAY);
-                importDialog.existingSubjectsCB.setEnabled(false);
-                importDialog.existingSubjectsCB.setEditable(false);
-            }
-            importDialog.subjectTextField.setValueSet(false);
-            importDialog.subjectImageObjectCategoryCB.setEnabled(true);
-            importDialog.subjectImageObjectCategoryCB.setSelectedItem(ImagedObjectCategory.LIVING_HUMAN_BEING);
-            importDialog.subjectLanguageHemisphericDominanceCB.setEnabled(true);
-            importDialog.subjectLanguageHemisphericDominanceCB.setSelectedItem("");
-            importDialog.subjectManualHemisphericDominanceCB.setEnabled(true);
-            importDialog.subjectManualHemisphericDominanceCB.setSelectedItem("");
-            importDialog.subjectPersonalCommentTextArea.setText("");
-            importDialog.subjectPersonalCommentTextArea.setBackground(Color.WHITE);
-            importDialog.subjectPersonalCommentTextArea.setEditable(true);
-        }
     }
 
     private void updateImportDialogForNewExamFields(Date studyDate, String studyDescription, Boolean examinationDataReuseAgreement)

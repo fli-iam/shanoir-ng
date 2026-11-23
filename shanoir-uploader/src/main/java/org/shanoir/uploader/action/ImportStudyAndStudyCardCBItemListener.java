@@ -23,6 +23,7 @@ import java.time.ZoneId;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 import org.shanoir.ng.shared.dicom.EquipmentDicom;
@@ -33,7 +34,9 @@ import org.shanoir.uploader.gui.MainWindow;
 import org.shanoir.uploader.gui.customcomponent.JComboBoxMandatory;
 import org.shanoir.uploader.model.rest.AcquisitionEquipment;
 import org.shanoir.uploader.model.rest.Examination;
+import org.shanoir.uploader.model.rest.HemisphericDominance;
 import org.shanoir.uploader.model.rest.IdName;
+import org.shanoir.uploader.model.rest.ImagedObjectCategory;
 import org.shanoir.uploader.model.rest.Study;
 import org.shanoir.uploader.model.rest.StudyCard;
 import org.shanoir.uploader.model.rest.Subject;
@@ -52,7 +55,7 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 
     private EquipmentDicom equipmentDicom;
 
-    private Subject subject;
+    private String subjectIdentifier;
 
     private List<Examination> examinationsOfSubject;
 
@@ -62,17 +65,18 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 
     private ShanoirUploaderServiceClient serviceClient;
 
-    public ImportStudyAndStudyCardCBItemListener(MainWindow mainWindow, InstitutionDicom institutionDicom, EquipmentDicom equipmentDicom, Subject subject, Date studyDate, ImportStudyCardFilterDocumentListener importStudyCardDocumentListener, ShanoirUploaderServiceClient serviceClient) {
+    public ImportStudyAndStudyCardCBItemListener(MainWindow mainWindow, InstitutionDicom institutionDicom, EquipmentDicom equipmentDicom, String subjectIdentifier, Date studyDate, ImportStudyCardFilterDocumentListener importStudyCardDocumentListener, ShanoirUploaderServiceClient serviceClient) {
         this.mainWindow = mainWindow;
         this.institutionDicom = institutionDicom;
         this.equipmentDicom = equipmentDicom;
-        this.subject = subject;
+        this.subjectIdentifier = subjectIdentifier;
         this.studyDate = studyDate;
         this.importStudyCardDocumentListener = importStudyCardDocumentListener;
         this.serviceClient = serviceClient;
     }
 
     public void itemStateChanged(ItemEvent e) {
+        Subject subject = null;
         int state = e.getStateChange();
         if (state == ItemEvent.SELECTED) {
             if (e.getSource().equals(mainWindow.importDialog.studyCB)) {
@@ -86,13 +90,17 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
                     mainWindow.importDialog.mrExaminationCenterCB.addItem(centerIdName);
                     showOrHideStudyCardComponents(false);
                 }
-                // Profile Neurinfo
-                if (ShUpConfig.isModeSubjectNameManual()) {
+                // Profile OFSEP: search in study with subject identifier
+                if (ShUpConfig.isModeSubjectNameAutoIncrement()) {
+                    subject = getSubject(study.getId(), subjectIdentifier);
+                    mainWindow.importDialog.existingSubjectsCB.removeAllItems();
+                    mainWindow.importDialog.existingSubjectsCB.addItem(subject);
+                // Profile Neurinfo: user has free selection of subject
+                } else if (ShUpConfig.isModeSubjectNameManual()) {
                     updateExistingSubjects(study);
-                    this.subject = (Subject) mainWindow.importDialog.existingSubjectsCB.getSelectedItem();
-                    // for OFSEP this is done in ImportDialogOpener as subject found before, if
-                    updateImportDialogForExistingSubject(this.subject, mainWindow.importDialog);
+                    subject = (Subject) mainWindow.importDialog.existingSubjectsCB.getSelectedItem();
                 }
+                updateImportDialogForSubject(subject, mainWindow.importDialog, mainWindow.resourceBundle);
                 examinationsOfSubject = updateExaminations(subject);
                 filterExistingExamsForSelectedStudy(study);
             }
@@ -112,12 +120,23 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
             // the selection of an existing subject defines the list of existing exams
             if (e.getSource().equals(mainWindow.importDialog.existingSubjectsCB)) {
                 Study study = (Study) mainWindow.importDialog.studyCB.getSelectedItem();
-                this.subject = (Subject) mainWindow.importDialog.existingSubjectsCB.getSelectedItem();
-                updateImportDialogForExistingSubject(this.subject, mainWindow.importDialog);
+                subject = (Subject) mainWindow.importDialog.existingSubjectsCB.getSelectedItem();
+                updateImportDialogForSubject(subject, mainWindow.importDialog, mainWindow.resourceBundle);
                 examinationsOfSubject = updateExaminations(subject);
                 filterExistingExamsForSelectedStudy(study);
             }
         } // ignore otherwise
+    }
+
+    private Subject getSubject(final Long studyId, final String subjectIdentifier) {
+        if (studyId != null && subjectIdentifier != null) {
+            try {
+                return serviceClient.findSubjectByStudyIdAndSubjectIdentifier(studyId, subjectIdentifier);
+            } catch (Exception e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
+        return null;
     }
 
     private void showOrHideStudyCardComponents(boolean show) {
@@ -167,55 +186,136 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
         }
     }
 
-    public static void updateImportDialogForExistingSubject(Subject subject, ImportDialog importDialog) {
-        if (subject != null) {
-            importDialog.subjectImageObjectCategoryCB.setEnabled(false);
-            if (subject.getImagedObjectCategory() != null) {
-                importDialog.subjectImageObjectCategoryCB.setSelectedItem(subject.getImagedObjectCategory());
-            }
-            importDialog.subjectLanguageHemisphericDominanceCB.setEnabled(false);
-            if (subject.getLanguageHemisphericDominance() != null) {
-                importDialog.subjectLanguageHemisphericDominanceCB.setSelectedItem(subject.getLanguageHemisphericDominance().getName());
+    public static void updateImportDialogForSubject(Subject subject, ImportDialog importDialog, ResourceBundle resourceBundle) {
+        // Profile OFSEP: create new or use existing, but no modification
+        if (ShUpConfig.isModeSubjectNameAutoIncrement()) {
+            // Subject found in study via identifier: fix it
+            if (subject != null) {
+                importDialog.subjectTextField.setText("");
+                importDialog.existingSubjectsCB.setEnabled(true);
+                importDialog.existingSubjectsCB.setEditable(false);
+                importDialog.existingSubjectsCB.setVisible(true);
+                importDialog.existingSubjectsCB.setBackground(Color.WHITE);
             } else {
-                importDialog.subjectLanguageHemisphericDominanceCB.setSelectedItem("");
+                importDialog.subjectTextField
+                        .setText(resourceBundle.getString("shanoir.uploader.import.subject.autofill"));
+                importDialog.existingSubjectsCB.setEnabled(false);
+                importDialog.existingSubjectsCB.setEditable(false);
+                importDialog.existingSubjectsCB.setVisible(false);
+                importDialog.existingSubjectsCB.setBackground(Color.LIGHT_GRAY);
             }
-            importDialog.subjectManualHemisphericDominanceCB.setEnabled(false);
-            if (subject.getManualHemisphericDominance() != null) {
-                importDialog.subjectManualHemisphericDominanceCB.setSelectedItem(subject.getManualHemisphericDominance().getName());
-            } else {
-                importDialog.subjectManualHemisphericDominanceCB.setSelectedItem("");
+            importDialog.subjectTextField.setBackground(Color.LIGHT_GRAY);
+            importDialog.subjectTextField.setEnabled(false);
+            importDialog.subjectTextField.setEditable(false);
+            importDialog.subjectTextField.setValueSet(true);
+        // Profile Neurinfo: enable manual edition
+        } else if (ShUpConfig.isModeSubjectNameManual()) {
+            importDialog.subjectTextField.setEnabled(true);
+            importDialog.subjectTextField.setEditable(true);
+            importDialog.subjectTextField.setBackground(Color.WHITE);
+            if (subject != null) {
+                importDialog.existingSubjectsCB.setEnabled(true);
+                importDialog.existingSubjectsCB.setEditable(true);
+                importDialog.existingSubjectsCB.setVisible(true);
+                importDialog.existingSubjectsCB.setBackground(Color.WHITE);
             }
-            // not used anymore on server: remove later
-            importDialog.subjectPersonalCommentTextArea.setBackground(Color.LIGHT_GRAY);
-            importDialog.subjectPersonalCommentTextArea.setEditable(false);
-            importDialog.subjectStudyIdentifierTF.setText(subject.getStudyIdentifier());
-            importDialog.subjectStudyIdentifierTF.setBackground(Color.LIGHT_GRAY);
-            importDialog.subjectStudyIdentifierTF.setEnabled(false);
-            importDialog.subjectStudyIdentifierTF.setEditable(false);
-            importDialog.subjectIsPhysicallyInvolvedCB.setSelected(subject.isPhysicallyInvolved());
-            importDialog.subjectIsPhysicallyInvolvedCB.setEnabled(false);
-            importDialog.subjectTypeCB.setSelectedItem(subject.getSubjectType());
-            importDialog.subjectTypeCB.setEnabled(false);
-        } else {
-            // subject is new, enable editing and display defaults
-            if (ShUpConfig.isModeSubjectStudyIdentifier()) {
-                importDialog.subjectStudyIdentifierTF.setEnabled(true);
-                importDialog.subjectStudyIdentifierTF.setEditable(true);
-                importDialog.subjectStudyIdentifierTF.setBackground(Color.WHITE);
-            }
-            importDialog.subjectStudyIdentifierTF.setText("");
-            importDialog.subjectIsPhysicallyInvolvedCB.setEnabled(true);
-            importDialog.subjectIsPhysicallyInvolvedCB.setSelected(true);
-            importDialog.subjectTypeCB.setEnabled(true);
-            importDialog.subjectTypeCB.setSelectedItem(SubjectType.values()[1]);
         }
+        if (subject != null) {
+            fixSubjectValuesInDialog(subject, importDialog);
+        } else {
+            clearSubjectValuesInDialog(importDialog);
+        }
+    }
+
+    private static void clearSubjectValuesInDialog(ImportDialog importDialog) {
+        /**
+         * Insert subject specific items into combo boxes from model classes.
+         * Should be there nevertheless if subject exists or not.
+         */
+        // Insert ImageObjectCategory objects
+        importDialog.subjectImageObjectCategoryCB.setEnabled(true);
+        importDialog.subjectImageObjectCategoryCB.setBackground(Color.WHITE);
+        importDialog.subjectImageObjectCategoryCB.removeAllItems();
+        for (int i = 0; i < ImagedObjectCategory.values().length; i++) {
+            importDialog.subjectImageObjectCategoryCB.addItem(ImagedObjectCategory.values()[i]);
+        }
+        importDialog.subjectImageObjectCategoryCB.setSelectedItem(ImagedObjectCategory.values()[1]);
+        // Insert String here, as the model does not contain "", the unknown, not selected hemdom
+        importDialog.subjectLanguageHemisphericDominanceCB.setEnabled(true);
+        importDialog.subjectLanguageHemisphericDominanceCB.setBackground(Color.WHITE);
+        importDialog.subjectLanguageHemisphericDominanceCB.removeAllItems();
+        importDialog.subjectLanguageHemisphericDominanceCB.addItem("");
+        importDialog.subjectLanguageHemisphericDominanceCB.addItem(HemisphericDominance.Left.getName());
+        importDialog.subjectLanguageHemisphericDominanceCB.addItem(HemisphericDominance.Right.getName());
+        importDialog.subjectManualHemisphericDominanceCB.setEnabled(true);
+        importDialog.subjectManualHemisphericDominanceCB.setBackground(Color.WHITE);
+        importDialog.subjectManualHemisphericDominanceCB.removeAllItems();
+        importDialog.subjectManualHemisphericDominanceCB.addItem("");
+        importDialog.subjectManualHemisphericDominanceCB.addItem(HemisphericDominance.Left.getName());
+        importDialog.subjectManualHemisphericDominanceCB.addItem(HemisphericDominance.Right.getName());
+        importDialog.subjectIsPhysicallyInvolvedCB.setEnabled(true);
+        importDialog.subjectIsPhysicallyInvolvedCB.setBackground(Color.WHITE);
+        importDialog.subjectIsPhysicallyInvolvedCB.setSelected(true);
+        importDialog.subjectTypeCB.setEnabled(true);
+        importDialog.subjectTypeCB.setBackground(Color.WHITE);
+        importDialog.subjectTypeCB.removeAllItems();
+        for (int i = 0; i < SubjectType.values().length; i++) {
+            importDialog.subjectTypeCB.addItem(SubjectType.values()[i]);
+        }
+        importDialog.subjectTypeCB.setSelectedItem(SubjectType.values()[1]);
+        // not used anymore on server: remove later
+        importDialog.subjectPersonalCommentTextArea.setEnabled(false);
+        importDialog.subjectPersonalCommentTextArea.setEditable(false);
+        importDialog.subjectPersonalCommentTextArea.setBackground(Color.LIGHT_GRAY);
+        importDialog.subjectStudyIdentifierTF.setEnabled(false);
+        importDialog.subjectStudyIdentifierTF.setEditable(false);
+        importDialog.subjectStudyIdentifierTF.setBackground(Color.LIGHT_GRAY);
+        importDialog.subjectStudyIdentifierTF.setText("");
+    }
+
+    private static void fixSubjectValuesInDialog(Subject subject, ImportDialog importDialog) {
+        importDialog.subjectImageObjectCategoryCB.setEnabled(false);
+        importDialog.subjectImageObjectCategoryCB.setBackground(Color.LIGHT_GRAY);
+        if (subject.getImagedObjectCategory() != null) {
+            importDialog.subjectImageObjectCategoryCB.setSelectedItem(subject.getImagedObjectCategory());
+        }
+        importDialog.subjectLanguageHemisphericDominanceCB.setEnabled(false);
+        importDialog.subjectLanguageHemisphericDominanceCB.setBackground(Color.LIGHT_GRAY);
+        if (subject.getLanguageHemisphericDominance() != null) {
+            importDialog.subjectLanguageHemisphericDominanceCB.setSelectedItem(subject.getLanguageHemisphericDominance().getName());
+        } else {
+            importDialog.subjectLanguageHemisphericDominanceCB.setSelectedItem("");
+        }
+        importDialog.subjectManualHemisphericDominanceCB.setEnabled(false);
+        importDialog.subjectManualHemisphericDominanceCB.setBackground(Color.LIGHT_GRAY);
+        if (subject.getManualHemisphericDominance() != null) {
+            importDialog.subjectManualHemisphericDominanceCB.setSelectedItem(subject.getManualHemisphericDominance().getName());
+        } else {
+            importDialog.subjectManualHemisphericDominanceCB.setSelectedItem("");
+        }
+        importDialog.subjectIsPhysicallyInvolvedCB.setEnabled(false);
+        importDialog.subjectIsPhysicallyInvolvedCB.setBackground(Color.LIGHT_GRAY);
+        importDialog.subjectIsPhysicallyInvolvedCB.setSelected(subject.isPhysicallyInvolved());
+        importDialog.subjectTypeCB.setEnabled(false);
+        importDialog.subjectTypeCB.setBackground(Color.LIGHT_GRAY);
+        importDialog.subjectTypeCB.setSelectedItem(subject.getSubjectType());
+        // not used anymore on server: remove later
+        importDialog.subjectPersonalCommentTextArea.setEnabled(false);
+        importDialog.subjectPersonalCommentTextArea.setEditable(false);
+        importDialog.subjectPersonalCommentTextArea.setBackground(Color.LIGHT_GRAY);
+        importDialog.subjectStudyIdentifierTF.setEnabled(false);
+        importDialog.subjectStudyIdentifierTF.setEditable(false);
+        importDialog.subjectStudyIdentifierTF.setBackground(Color.LIGHT_GRAY);
+        importDialog.subjectStudyIdentifierTF.setText(subject.getStudyIdentifier());
     }
 
     private void updateExistingSubjects(Study study) {
         try {
+            mainWindow.importDialog.existingSubjectsCB.setEnabled(false);
             mainWindow.importDialog.existingSubjectsCB.removeAllItems();
             List<Subject> subjects = serviceClient.findSubjectsByStudy(study.getId());
-            if (subjects != null) {
+            if (subjects != null && !subjects.isEmpty()) {
+                mainWindow.importDialog.existingSubjectsCB.setEnabled(true);
                 for (Subject subject : subjects) {
                     mainWindow.importDialog.existingSubjectsCB.addItem(subject);
                 }

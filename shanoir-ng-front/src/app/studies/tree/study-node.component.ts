@@ -90,8 +90,8 @@ export class StudyNodeComponent extends TreeNodeAbstractComponent<StudyNode> imp
         });
     }
 
-    get canAdmin(): boolean {
-        return this.rights.includes(StudyUserRight.CAN_ADMINISTRATE);
+    get canDeleteCards(): boolean {
+        return this.treeService.hasDeleteRight(this.rights);
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -148,7 +148,7 @@ export class StudyNodeComponent extends TreeNodeAbstractComponent<StudyNode> imp
             this.studyCardsLoading = true;
             this.studyCardService.getAllForStudy(this.node.id).then(studyCards => {
                 if (studyCards) {
-                    this.node.studyCardsNode.cards = studyCards.map(studyCard => new StudyCardNode(this.node, studyCard.id, studyCard.name, this.canAdmin));
+                    this.node.studyCardsNode.cards = studyCards.map(studyCard => new StudyCardNode(this.node, studyCard.id, studyCard.name, this.canDeleteCards));
                 } else this.node.studyCardsNode.cards = [];
                 this.studyCardsLoading = false;
                 this.node.studyCardsNode.open();
@@ -161,7 +161,7 @@ export class StudyNodeComponent extends TreeNodeAbstractComponent<StudyNode> imp
             this.qualityCardsLoading = true;
             this.qualityCardService.getAllForStudy(this.node.id).then(qualityCards => {
                 if (qualityCards) {
-                    this.node.qualityCardsNode.cards = qualityCards.map(studyCard => new QualityCardNode(this.node, studyCard.id, studyCard.name, this.canAdmin));
+                    this.node.qualityCardsNode.cards = qualityCards.map(studyCard => new QualityCardNode(this.node, studyCard.id, studyCard.name, this.canDeleteCards));
                 } else this.node.qualityCardsNode.cards = [];
                 this.qualityCardsLoading = false;
                 this.node.qualityCardsNode.open();

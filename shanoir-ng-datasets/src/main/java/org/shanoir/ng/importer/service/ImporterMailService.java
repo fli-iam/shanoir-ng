@@ -18,15 +18,21 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.examination.model.Examination;
+import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.shared.model.Study;
+import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.email.EmailBase;
 import org.shanoir.ng.shared.email.EmailDatasetImportFailed;
+import org.shanoir.ng.shared.email.EmailDatasetsCopied;
 import org.shanoir.ng.shared.email.EmailDatasetsImported;
 import org.shanoir.ng.shared.email.EmailExtraDataAdded;
 import org.shanoir.ng.study.rights.StudyUser;
@@ -36,6 +42,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -47,6 +54,10 @@ public class ImporterMailService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ImporterMailService.class);
 
+    /** Maximum number of examinations listed in the datasets copied email. */
+    @Value("${mail.datasets-copied.max-examinations:50}")
+    private int maxCopiedExaminationsInMail;
+
     @Autowired
     private StudyUserRightsRepository studyUserRightRepo;
 
@@ -55,6 +66,12 @@ public class ImporterMailService {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private StudyRepository studyRepository;
+
+    @Autowired
+    private ExaminationRepository examinationRepository;
 
     /**
      * Sends the import email through rabbitMQ to user MS
@@ -127,6 +144,50 @@ public class ImporterMailService {
         generatedMail.setUserId(userId);
 
         sendMail(examination.getStudyId(), generatedMail, RabbitMQConfiguration.EXTRA_DATA_MAIL_QUEUE);
+    }
+
+    /**
+     * Sends the datasets copied email through rabbitMQ to user MS
+     * @param studyId the study the datasets were copied into
+     * @param copiedDatasetCount the number of datasets successfully copied
+     * @param examinationIds the examinations created in the study by the copy
+     * @param userId the user who copied the datasets
+     */
+    public void sendDatasetsCopiedEmail(Long studyId, int copiedDatasetCount, List<Long> examinationIds, Long userId) {
+        if (copiedDatasetCount <= 0) {
+            return;
+        }
+        List<Long> distinctExamIds = examinationIds == null ? List.of()
+                : examinationIds.stream().filter(Objects::nonNull).distinct().toList();
+        List<Long> listedExamIds = distinctExamIds.stream().limit(Math.max(0, maxCopiedExaminationsInMail)).toList();
+
+        // Keep the copy order, the repository does not guarantee it
+        Map<Long, Examination> examsById = new LinkedHashMap<>();
+        for (Examination exam : examinationRepository.findAllById(listedExamIds)) {
+            examsById.put(exam.getId(), exam);
+        }
+        LinkedHashMap<Long, String> examinations = new LinkedHashMap<>();
+        for (Long examId : listedExamIds) {
+            Examination exam = examsById.get(examId);
+            if (exam != null) {
+                examinations.put(examId, examinationLabel(exam));
+            }
+        }
+
+        EmailDatasetsCopied generatedMail = new EmailDatasetsCopied();
+        generatedMail.setStudyId(studyId);
+        generatedMail.setStudyName(studyRepository.findById(studyId).map(Study::getName).orElse(null));
+        generatedMail.setCopiedDatasetCount(copiedDatasetCount);
+        generatedMail.setExaminations(examinations);
+        generatedMail.setTotalExaminations(distinctExamIds.size());
+        generatedMail.setUserId(userId);
+
+        sendMail(studyId, generatedMail, RabbitMQConfiguration.DATASETS_COPIED_MAIL_QUEUE);
+    }
+
+    private String examinationLabel(Examination exam) {
+        String subjectName = exam.getSubject() != null ? exam.getSubject().getName() : "Examination " + exam.getId();
+        return exam.getExaminationDate() != null ? subjectName + " - " + exam.getExaminationDate() : subjectName;
     }
 
     /**
