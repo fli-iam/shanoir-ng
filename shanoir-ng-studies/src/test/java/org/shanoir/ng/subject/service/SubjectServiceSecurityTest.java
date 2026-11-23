@@ -116,6 +116,18 @@ public class SubjectServiceSecurityTest {
     public void testEditAsUser() throws ShanoirException {
         assertAccessDenied(service::update, mockExisting);
         assertAccessDenied(service::deleteById, ENTITY_ID);
+
+        // importers may update the subject
+        Subject subjectMockImport = buildSubjectMock(ENTITY_ID);
+        addStudyToMock(subjectMockImport, 1L, StudyUserRight.CAN_IMPORT);
+        given(repository.findById(ENTITY_ID)).willReturn(Optional.of(subjectMockImport));
+        assertAccessAuthorized(service::update, subjectMockImport);
+
+        // study administrators without the expert role may not
+        Subject subjectMockAdmin = buildSubjectMock(ENTITY_ID);
+        addStudyToMock(subjectMockAdmin, 1L, StudyUserRight.CAN_ADMINISTRATE);
+        given(repository.findById(ENTITY_ID)).willReturn(Optional.of(subjectMockAdmin));
+        assertAccessDenied(service::update, subjectMockAdmin);
     }
 
     @Test
@@ -141,6 +153,11 @@ public class SubjectServiceSecurityTest {
         given(studyUserRepository.findByStudy_Id(1L)).willReturn(studiesMock.get(0).getStudyUserList());
         given(repository.findById(ENTITY_ID)).willReturn(Optional.of(subjectMock1));
         assertAccessAuthorized(service::update, subjectMock1);
+
+        Subject subjectMockAdmin = buildSubjectMock(ENTITY_ID);
+        addStudyToMock(subjectMockAdmin, 1L, StudyUserRight.CAN_ADMINISTRATE);
+        given(repository.findById(ENTITY_ID)).willReturn(Optional.of(subjectMockAdmin));
+        assertAccessAuthorized(service::update, subjectMockAdmin);
 
         Subject subjectMock2 = buildSubjectMock(ENTITY_ID);
         addStudyToMock(subjectMock2, 1L, StudyUserRight.CAN_SEE_ALL);

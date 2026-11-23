@@ -104,10 +104,9 @@ public class MassEmailApiControllerTest {
     @Test
     @WithMockUser(authorities = { "ROLE_ADMIN" })
     public void countRecipientsBadGroupTest() throws Exception {
-        // the platform-wide GlobalExceptionHandler maps type mismatches to 500
         mvc.perform(MockMvcRequestBuilders.get(COUNT_PATH).param("group", "NOT_A_GROUP")
                 .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isInternalServerError());
+                .andExpect(status().isBadRequest());
     }
 
     @Test

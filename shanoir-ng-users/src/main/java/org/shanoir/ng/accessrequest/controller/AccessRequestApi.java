@@ -139,7 +139,7 @@ public interface AccessRequestApi {
             @ApiResponse(responseCode = "500", description = "unexpected error") })
     @GetMapping(value = "/{accessRequestId}", produces = { "application/json" }, consumes = {
             "application/json" })
-    @PreAuthorize("hasRole('ADMIN') or (@userSecurityService.hasRightOnAccessRequest(#accessRequestId, 'CAN_ADMINISTRATE'))")
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @userSecurityService.hasRightOnAccessRequest(#accessRequestId, 'CAN_ADMINISTRATE'))")
     ResponseEntity<AccessRequest> getById(@Parameter(name = "id of the access request to resolve", required = true) @PathVariable("accessRequestId") Long accessRequestId) throws RestServiceException;
 
     @Operation(summary = "", description = "Invite an user to a study")

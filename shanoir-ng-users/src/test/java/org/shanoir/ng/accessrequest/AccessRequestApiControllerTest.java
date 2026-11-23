@@ -176,6 +176,22 @@ public class AccessRequestApiControllerTest {
 
     @Test
     @WithMockKeycloakUser(id = 1)
+    public void findAllByAdminIdAsSimpleUserTest() throws Exception {
+        // A simple user never sees access requests, even with CAN_ADMINISTRATE on a study
+        Mockito.when(rabbitTemplate.
+                convertSendAndReceive(RabbitMQConfiguration.STUDY_I_CAN_ADMIN_QUEUE, 1L))
+                .thenReturn(Collections.singletonList(1L));
+        Mockito.when(this.accessRequestService.findByStudyIdAndStatus(Mockito.any(List.class), Mockito.anyInt()))
+                .thenReturn(new ArrayList<>(List.of(createAccessRequest())));
+
+        mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/byAdmin").accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNoContent());
+        Mockito.verifyNoInteractions(rabbitTemplate);
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 1, roles = { "EXPERT" })
     public void findAllByAdminIdTest() throws Exception {
         // I get data, but only the one in demand
         Mockito.when(rabbitTemplate.
