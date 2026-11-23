@@ -28,7 +28,9 @@ import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -36,6 +38,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.shanoir.ng.bids.service.BIDSService;
 import org.shanoir.ng.neurobagel.dto.NeurobagelDatasetDescriptionDTO;
@@ -49,6 +52,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @ExtendWith(MockitoExtension.class)
 class NeurobagelServiceTest {
@@ -61,6 +65,10 @@ class NeurobagelServiceTest {
 
     @Mock
     private BIDSService bidsService;
+
+    /** Real mapper: the replies of ms datasets must parse. */
+    @Spy
+    private ObjectMapper objectMapper = JsonMapper.builder().build();
 
     @TempDir
     private File bidsDataDir;
@@ -106,9 +114,29 @@ class NeurobagelServiceTest {
     @Test
     void participantsOfAnExportedStudyAreBuiltLocally() {
         given(studyRepository.existsByIdAndNeurobagelExportTrueAndIsDraftFalse(1L)).willReturn(true);
-        given(bidsService.participantsTsv(1L)).willReturn("participant_id\nsub-1\n");
+        given(bidsService.participantsTsv(1L, Map.of())).willReturn("participant_id\nsub-1\n");
 
         assertEquals(Optional.of("participant_id\nsub-1\n"), service.findParticipantsTsv(1L));
+    }
+
+    @Test
+    void participantsAgesUseTheFirstExaminationDatesFromDatasets() {
+        given(studyRepository.existsByIdAndNeurobagelExportTrueAndIsDraftFalse(1L)).willReturn(true);
+        given(rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_FIRST_EXAMINATION_DATES, "1"))
+                .willReturn("{\"studyId\": 1, \"firstExaminationDates\": {\"10\": \"2020-01-31\"}}");
+        given(bidsService.participantsTsv(1L, Map.of(10L, LocalDate.of(2020, 1, 31)))).willReturn("participants");
+
+        assertEquals(Optional.of("participants"), service.findParticipantsTsv(1L));
+    }
+
+    @Test
+    void unreadableDatesFromDatasetsLeaveTheAgesUnknown() {
+        given(studyRepository.existsByIdAndNeurobagelExportTrueAndIsDraftFalse(1L)).willReturn(true);
+        given(rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_FIRST_EXAMINATION_DATES, "1"))
+                .willReturn("not json");
+        given(bidsService.participantsTsv(1L, Map.of())).willReturn("participants with n/a ages");
+
+        assertEquals(Optional.of("participants with n/a ages"), service.findParticipantsTsv(1L));
     }
 
     @Test
@@ -116,7 +144,7 @@ class NeurobagelServiceTest {
         given(studyRepository.existsByIdAndNeurobagelExportTrueAndIsDraftFalse(2L)).willReturn(false);
 
         assertFalse(service.findParticipantsTsv(2L).isPresent());
-        verify(bidsService, never()).participantsTsv(anyLong());
+        verify(bidsService, never()).participantsTsv(anyLong(), any());
     }
 
     @Test

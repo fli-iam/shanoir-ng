@@ -105,10 +105,16 @@ public class SubjectServiceImpl implements SubjectService {
 
     @Override
     @Transactional
-    public void deleteById(final Long id) throws EntityNotFoundException {
+    public void deleteById(final Long id) throws ShanoirException {
         Optional<Subject> subjectOpt = subjectRepository.findById(id);
         if (subjectOpt.isEmpty()) {
             throw new EntityNotFoundException(Subject.class, id);
+        }
+        // The datasets ms refuses to delete copied examinations: check it before deleting
+        // the subject here, otherwise its copied data would be left without subject.
+        if (hasCopiedData(id)) {
+            throw new ShanoirException("This subject has data that was copied into another study."
+                    + " Delete the copies first.", HttpStatus.UNPROCESSABLE_ENTITY.value());
         }
 
         Subject subject = subjectOpt.get();
@@ -447,6 +453,25 @@ public class SubjectServiceImpl implements SubjectService {
      * @param eventType the type of event
      * @return the published event
      */
+    /**
+     * Ask the datasets ms if some examinations of this subject were copied into another study.
+     * When the datasets ms does not answer, the deletion is refused rather than risking orphan data.
+     */
+    private boolean hasCopiedData(Long subjectId) throws ShanoirException {
+        Object reply;
+        try {
+            reply = rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECT_HAS_COPIED_DATA_QUEUE, subjectId);
+        } catch (AmqpException e) {
+            LOG.error("Could not check whether subject {} has copied data", subjectId, e);
+            reply = null;
+        }
+        if (reply == null) {
+            throw new ShanoirException("Could not check whether this subject has copied data, it was not deleted.",
+                    HttpStatus.SERVICE_UNAVAILABLE.value());
+        }
+        return Boolean.TRUE.equals(reply);
+    }
+
     private ShanoirEvent publishSubjectEvent(Subject subject, String eventType) {
         Study study = subject.getStudy();
         String eventMsg;

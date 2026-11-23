@@ -74,6 +74,7 @@ export const BACKEND_API_STUDY_EXPIRED_STUDIES_DATA_URL: string = BACKEND_API_ST
 export const BACKEND_API_STUDY_PUBLIC_STUDIES_CONNECTED_URL: string = BACKEND_API_STUDY_PUBLIC_STUDIES_URL + '/connected';
 export const BACKEND_API_STUDY_COPY_DATASETS: string = BACKEND_API_STUDY_URL + '/copyDatasets';
 export const BACKEND_API_STUDY_FILES: string = BACKEND_API_STUDY_URL + '/files';
+export const BACKEND_API_STUDY_STATISTICS_URL: string = BACKEND_API_STUDY_URL + '/statistics';
 
 
 // Profile API
@@ -167,6 +168,9 @@ export const BACKEND_API_VIP_EXEC_MONITORING_URL: string = BACKEND_API_DATASET_M
 
 // Custom sentence to introduce the Shanoir instance on welcome page
 export const FRONTEND_WELCOME_INTRODUCTION: string = "This is an instance of the Shanoir database.";
+
+// Mail supplier blacklist conf
+export const SHANOIR_MAIL_SUPPLIER_BLACK_LIST: string = environment.shanoirMailSupplierBlacklist;
 
 export function hasUniqueError(error: any, fieldName: string): boolean {
     let hasUniqueError = false;

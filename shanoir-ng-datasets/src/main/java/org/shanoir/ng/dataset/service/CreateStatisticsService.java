@@ -30,6 +30,7 @@ import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import org.hibernate.procedure.ProcedureCall;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -79,7 +80,8 @@ public class CreateStatisticsService {
         String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
         File userDir = DatasetFileUtils.getUserImportDir(tmpDir);
         File zipFile = recreateFile(userDir + File.separator + TSV_FILE_PREFIX + "_" + event.getId() + ZIP);
-        int startRow = 0;
+        long lastDatasetId = 0;
+        int fetchedRows = 0;
         int blocSize = 50000;
 
         event.setMessage("Querying size...");
@@ -103,7 +105,7 @@ public class CreateStatisticsService {
                 try (BufferedWriter writer = new BufferedWriter(outputStreamWriter)) {
 
                     while (true) {
-                        event.setMessage("Querying results: " + (startRow + blocSize) + "/" + procedureSize);
+                        event.setMessage("Querying results: " + Math.min((fetchedRows + blocSize), procedureSize) + "/" + procedureSize);
                         eventService.publishEvent(event);
                         //"getStatistics" is the name of the MySQL procedure
                         StoredProcedureQuery query = entityManager.createStoredProcedureQuery("getStatistics");
@@ -113,7 +115,7 @@ public class CreateStatisticsService {
                         query.registerStoredProcedureParameter(2, String.class, ParameterMode.IN);
                         query.registerStoredProcedureParameter(3, String.class, ParameterMode.IN);
                         query.registerStoredProcedureParameter(4, String.class, ParameterMode.IN);
-                        query.registerStoredProcedureParameter(5, Integer.class, ParameterMode.IN);
+                        query.registerStoredProcedureParameter(5, Long.class, ParameterMode.IN);
                         query.registerStoredProcedureParameter(6, Integer.class, ParameterMode.IN);
 
                         //Pass the parameter values
@@ -121,12 +123,15 @@ public class CreateStatisticsService {
                         query.setParameter(2, studyNameOutRegExp);
                         query.setParameter(3, subjectNameInRegExp);
                         query.setParameter(4, subjectNameOutRegExp);
-                        query.setParameter(5, startRow);
+                        query.setParameter(5, lastDatasetId);
                         query.setParameter(6, blocSize);
 
-                        //Execute query
-                        @SuppressWarnings("unchecked")
                         List<Object[]> results = query.getResultList();
+
+                        // Release the statement now: otherwise Hibernate keeps it, with the result set
+                        // buffered by the driver, until the end of the transaction
+                        // It would lead to a JavaHeapSpace
+                        query.unwrap(ProcedureCall.class).close();
 
                         if (results.isEmpty()) {
                             break;
@@ -138,14 +143,19 @@ public class CreateStatisticsService {
                             writer.write('\n');
                         }
 
+                        // The header row is only returned by the first call (lastDatasetId = 0)
+                        int dataRows = lastDatasetId == 0 ? results.size() - 1 : results.size();
+                        fetchedRows += dataRows;
+
                         progress += (1f + blocSize) / procedureSize;
-                        event.setProgress(progress);
+                        event.setProgress(Math.min(progress, 1L));
                         eventService.publishEvent(event);
 
-                        startRow += blocSize;
-                        if (startRow > procedureSize) {
+                        if (dataRows < blocSize) {
                             break;
                         }
+                        // Column 17 is sequence_id (dataset.id), used as the keyset for the next page
+                        lastDatasetId = Long.parseLong(Objects.toString(results.get(results.size() - 1)[17]));
                     }
 
                     writer.flush();

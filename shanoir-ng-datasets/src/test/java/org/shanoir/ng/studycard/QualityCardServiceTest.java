@@ -14,6 +14,9 @@
 
 package org.shanoir.ng.studycard;
 
+import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.Tag;
+import org.dcm4che3.data.VR;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,7 +37,11 @@ import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.quality.QualityTag;
 import org.shanoir.ng.shared.repository.StudyRepository;
+import org.shanoir.ng.studycard.dto.QualityCardResult;
+import org.shanoir.ng.studycard.model.Operation;
 import org.shanoir.ng.studycard.model.QualityCard;
+import org.shanoir.ng.studycard.model.condition.AcqMetadataCondOnAcq;
+import org.shanoir.ng.studycard.model.field.DatasetAcquisitionMetadataField;
 import org.shanoir.ng.studycard.model.rule.QualityCardRule;
 import org.shanoir.ng.studycard.repository.QualityCardRepository;
 import org.shanoir.ng.studycard.service.QualityCardServiceImpl;
@@ -156,6 +163,35 @@ public class QualityCardServiceTest {
         qualityCardService.applyQualityCardOnStudy(qualityCard, false);
 
         Assertions.assertEquals(QualityTag.ERROR, acquisition.getQualityTag());
+    }
+
+    /**
+     * ShanoirUploader checks each serie at import: when no rule applies, no tag must be set and
+     * the result must be empty, so that no report is shown and the serie is imported untagged.
+     */
+    @Test
+    public void checkQualityWithoutApplicableRuleSetsNoTagTest() throws Exception {
+        final DatasetAcquisition acquisition = createAcquisition();
+        final QualityCard qualityCard = createQualityCard();
+        final AcqMetadataCondOnAcq condition = new AcqMetadataCondOnAcq();
+        condition.setShanoirField(DatasetAcquisitionMetadataField.PROTOCOL_NAME);
+        condition.setOperation(Operation.EQUALS);
+        condition.setValues(List.of("T1"));
+        final QualityCardRule rule = createRuleWithoutCondition(QualityTag.ERROR);
+        rule.setConditions(new ArrayList<>(List.of(condition)));
+        qualityCard.setRules(List.of(rule));
+        final Attributes attributes = new Attributes();
+        attributes.setString(Tag.SeriesDescription, VR.LO, "T2");
+        final AcquisitionAttributes<String> dicomAttributes = new AcquisitionAttributes<>();
+        dicomAttributes.addDatasetAttributes("1", attributes);
+
+        QualityCardResult result = qualityCardService.checkQuality(acquisition, dicomAttributes, List.of(qualityCard));
+
+        Assertions.assertNull(acquisition.getQualityTag());
+        Assertions.assertTrue(result.getUpdatedDatasetAcquisitions().isEmpty());
+        Assertions.assertFalse(result.hasError());
+        Assertions.assertFalse(result.hasWarning());
+        Assertions.assertFalse(result.hasFailedValid());
     }
 
     /**

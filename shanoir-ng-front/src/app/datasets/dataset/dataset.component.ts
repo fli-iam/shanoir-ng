@@ -182,11 +182,11 @@ export class DatasetComponent extends EntityComponent<Dataset> {
     }
 
     public async hasEditRight(): Promise<boolean> {
-        return this.keycloakService.isUserAdmin() || this.hasAdministrateRight;
+        return this.keycloakService.isUserAdmin() || (this.keycloakService.isUserExpert() && this.hasAdministrateRight);
     }
 
     public async hasDeleteRight(): Promise<boolean> {
-        return this.keycloakService.isUserAdmin() || this.hasAdministrateRight;
+        return this.keycloakService.isUserAdmin() || (this.keycloakService.isUserExpert() && this.hasAdministrateRight);
     }
 
     downloadMetadata() {

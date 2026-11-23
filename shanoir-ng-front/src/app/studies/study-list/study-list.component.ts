@@ -281,7 +281,8 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> i
     }
 
     canEdit(study: Study): boolean {
-        return this.keycloakService.isUserAdmin() || this.studyIdsForCurrentUser.includes(study.id);
+        return this.keycloakService.isUserAdmin()
+            || (this.keycloakService.isUserExpert() && this.studyIdsForCurrentUser.includes(study.id));
     }
 
     private fetchStudyUsers(study: any): Promise<StudyUser[]> {

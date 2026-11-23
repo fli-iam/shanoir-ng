@@ -121,7 +121,7 @@ public class ShanoirUploaderServiceClient {
 
     private static final String SERVICE_SUBJECTS = "service.subjects.find";
 
-    private static final String SERVICE_SUBJECTS_FIND_BY_IDENTIFIER = "service.subjects.find.by.identifier";
+    private static final String SERVICE_SUBJECTS_FIND_BY_STUDY_ID_AND_IDENTIFIER = "service.subjects.find.by.study.id.and.identifier";
 
     private static final String SERVICE_SUBJECTS_FIND_BY_NAME_AND_STUDY = "service.subjects.find.by.identifier";
 
@@ -213,7 +213,7 @@ public class ShanoirUploaderServiceClient {
 
     private String serviceURLKeysFindValue;
 
-    private String serviceURLSubjectsFindByIdentifier;
+    private String serviceURLSubjectsFindByStudyIdAndIdentifier;
 
     private String serviceURLSubjectsFindBySubjectNameAndStudy;
 
@@ -308,8 +308,8 @@ public class ShanoirUploaderServiceClient {
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_MANUFACTURER_MODELS);
         this.serviceURLManufacturers = this.serverURL
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_MANUFACTURERS);
-        this.serviceURLSubjectsFindByIdentifier = this.serverURL
-                + ShUpConfig.endpointProperties.getProperty(SERVICE_SUBJECTS_FIND_BY_IDENTIFIER);
+        this.serviceURLSubjectsFindByStudyIdAndIdentifier = this.serverURL
+                + ShUpConfig.endpointProperties.getProperty(SERVICE_SUBJECTS_FIND_BY_STUDY_ID_AND_IDENTIFIER);
         this.serviceURLSubjectsFindBySubjectNameAndStudy = this.serverURL
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_SUBJECTS_FIND_BY_NAME_AND_STUDY);
         this.serviceURLDatasets = this.serverURL + ShUpConfig.endpointProperties.getProperty(SERVICE_DATASETS);
@@ -653,13 +653,13 @@ public class ShanoirUploaderServiceClient {
         return null;
     }
 
-    public Subject findSubjectBySubjectIdentifier(String subjectIdentifier) throws Exception {
+    public Subject findSubjectByStudyIdAndSubjectIdentifier(Long studyId, String subjectIdentifier) throws Exception {
         long startTime = System.currentTimeMillis();
         try (CloseableHttpResponse response = httpService
-                .get(this.serviceURLSubjectsFindByIdentifier + URLEncoder.encode(subjectIdentifier, "UTF-8"))) {
+                .get(this.serviceURLSubjectsFindByStudyIdAndIdentifier + studyId + "/" + URLEncoder.encode(subjectIdentifier, "UTF-8"))) {
             long stopTime = System.currentTimeMillis();
             long elapsedTime = stopTime - startTime;
-            LOG.info("findSubjectBySubjectIdentifier: " + elapsedTime + "ms");
+            LOG.info("findSubjectByStudyIdAndSubjectIdentifier: " + elapsedTime + "ms");
             int code = response.getCode();
             if (code == HttpStatus.SC_OK) {
                 Subject subject = Util.getMappedObject(response, Subject.class);
@@ -667,9 +667,9 @@ public class ShanoirUploaderServiceClient {
             } else if (code == HttpStatus.SC_NO_CONTENT) {
                 return null; // no content, not found is fine as well
             } else {
-                LOG.warn("Could not find subject with identifier (status code: " + code + ", message: "
+                LOG.warn("Could not find subject with study id and identifier (status code: " + code + ", message: "
                         + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
-                throw new Exception(code + " Error with subjectBySubjectIdentifier search");
+                throw new Exception(code + " Error with findSubjectByStudyIdAndSubjectIdentifier search");
             }
         }
     }

@@ -14,7 +14,10 @@
 
 package org.shanoir.ng.examination.repository;
 
+import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.hibernate.Hibernate;
@@ -95,6 +98,26 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
     @Query("select e.id from Examination e where e.study.id = :studyId")
     List<Long> findIdsByStudyId(Long studyId);
 
+    @Query("SELECT e.subject.id, MIN(e.examinationDate) FROM Examination e "
+            + "WHERE e.study.id = :studyId AND e.subject IS NOT NULL AND e.examinationDate IS NOT NULL "
+            + "GROUP BY e.subject.id")
+    List<Object[]> findFirstExaminationDateRowsByStudyId(@Param("studyId") Long studyId);
+
+    /**
+     * Date of the first examination of each subject of a study, by subject id.
+     * Subjects without any dated examination in the study are left out.
+     *
+     * @param studyId
+     * @return the first examination dates, by subject id.
+     */
+    default Map<Long, LocalDate> findFirstExaminationDatesByStudyId(Long studyId) {
+        Map<Long, LocalDate> dates = new HashMap<>();
+        for (Object[] row : findFirstExaminationDateRowsByStudyId(studyId)) {
+            dates.put((Long) row[0], (LocalDate) row[1]);
+        }
+        return dates;
+    }
+
     /**
      * Get all examinations, clinical or preclinical.
      *
@@ -139,6 +162,17 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
      * @return
      */
     Examination findBySourceIdAndStudy_Id(Long sourceId, Long studyId);
+
+    /**
+     * Say if an examination of this subject has been copied to another subject (i.e. into another study).
+     * Copying a dataset always copies its examination, so this covers acquisitions and datasets too.
+     *
+     * @param subjectId the subject id
+     * @return true if at least one copy exists
+     */
+    @Query("SELECT COUNT(e) > 0 FROM Examination e WHERE e.source.subject.id = :subjectId"
+            + " AND (e.subject IS NULL OR e.subject.id <> :subjectId)")
+    boolean existsCopyOfSubjectExaminations(@Param("subjectId") Long subjectId);
 
     Page<Examination> findPageByComment(String comment, Pageable pageable);
 

@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.shanoir.ng.anonymization.uid.generation.UIDGeneration;
@@ -112,6 +113,9 @@ public class ImporterApiController implements ImporterApi {
     private static final String WRONG_CONTENT_FILE_UPLOAD = "Wrong content type of file upload, .zip required.";
 
     private static final String ERROR_WHILE_SAVING_UPLOADED_FILE = "Error while saving uploaded file.";
+
+    private static final String NO_DICOM_PATIENT_IN_ZIP = "No DICOM patient found in the ZIP; "
+            + "the archive must contain at least one valid DICOM instance.";
 
     private static final String NO_FILE_UPLOADED = "No file uploaded.";
 
@@ -198,6 +202,10 @@ public class ImporterApiController implements ImporterApi {
              * complete with meta-data from files.
              */
             List<Patient> patients = preparePatientsForImportJob(importJobDir);
+            if (patients == null || patients.isEmpty()) {
+                throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                        NO_DICOM_PATIENT_IN_ZIP, null));
+            }
             if (patients.size() > 1) {
                 throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
                 "ZIP with multiple DICOM patients not supported.", null));
@@ -235,6 +243,14 @@ public class ImporterApiController implements ImporterApi {
             imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(importJob, importJobDir.getAbsolutePath(), false, null, false);
 
             return new ResponseEntity<>(importJob, HttpStatus.OK);
+        } catch (RestServiceException e) {
+            if (tempFile != null) {
+                FileUtils.deleteQuietly(tempFile);
+            }
+            if (importJobDir != null) {
+                FileUtils.deleteQuietly(importJobDir);
+            }
+            throw e;
         } catch (Exception e) {
             if (tempFile != null) {
                 FileUtils.deleteQuietly(tempFile);
@@ -821,6 +837,10 @@ public class ImporterApiController implements ImporterApi {
             }
             File subjectFolder = subjectFolders[0];
             File[] examinationsFolders = subjectFolder.listFiles();
+            if (examinationsFolders == null || examinationsFolders.length == 0) {
+                throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                        "The subject folder must contain at least one examination sub-folder.", null));
+            }
 
             String subjectName = subjectFolder.getName();
             Subject subject = null;
@@ -891,7 +911,11 @@ public class ImporterApiController implements ImporterApi {
                     job.setStudyCardId(studyCardId);
 
                 // STEP 4.2 Create examination
-                ExaminationDTO examination = ImportUtils.createExam(studyId, centerId, subject.getId(), examFolder.getName(),
+                String examinationComment = job.getStudy().getStudyDescription();
+                if (StringUtils.isBlank(examinationComment)) {
+                    examinationComment = examFolder.getName();
+                }
+                ExaminationDTO examination = ImportUtils.createExam(studyId, centerId, subject.getId(), examinationComment,
                         job.getStudy().getStudyDate(), subject.getName());
                 String studyInstanceUID = UID_GENERATOR.getNewUID();
                 examination.setStudyInstanceUID(studyInstanceUID);

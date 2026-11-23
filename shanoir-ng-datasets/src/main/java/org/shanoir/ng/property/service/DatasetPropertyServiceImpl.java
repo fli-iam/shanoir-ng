@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.property.service;
 
+import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.property.model.DatasetProperty;
 import org.shanoir.ng.property.repository.DatasetPropertyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,10 +27,11 @@ public class DatasetPropertyServiceImpl implements DatasetPropertyService {
 
     @Autowired
     private DatasetPropertyRepository repository;
+
     @Override
-    public List<DatasetProperty> createAll(List<DatasetProperty> properties) {
+    public void replaceAllExisting(List<DatasetProperty> properties, Dataset ds) {
+        repository.deleteByDatasetId(ds.getId());
         repository.saveAll(properties);
-        return properties;
     }
 
     @Override
