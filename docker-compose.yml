@@ -82,12 +82,16 @@ services:
   rabbitmq:
     container_name: "${SHANOIR_PREFIX}rabbitmq"
     image: rabbitmq:3.10.7
+    # fixed node name (rabbit@rabbitmq): RabbitMQ keeps its data in mnesia/rabbit@<hostname>,
+    # so with the default hostname (the container id) every new container started empty
+    hostname: rabbitmq
     environment:
-      # created at the first start, instead of the default guest/guest
+      # created when the volume is initialised, instead of the default guest/guest
       - "RABBITMQ_DEFAULT_USER=${SHANOIR_RABBITMQ_USER:?is not set, see .env.example}"
       - "RABBITMQ_DEFAULT_PASS=${SHANOIR_RABBITMQ_PASSWORD:?is not set, see .env.example}"
     volumes:
-      - "rabbitmq-data:/var/lib/rabbitmq/mnesia/rabbitmq"
+      # the whole data directory (accounts, queues, persistent messages, erlang cookie)
+      - "rabbitmq-data:/var/lib/rabbitmq"
     ports:
      - "5672:5672"
      - "15672:15672"
