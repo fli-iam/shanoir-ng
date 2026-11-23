@@ -53,7 +53,7 @@ public interface DatasetAcquisitionRepository extends PagingAndSortingRepository
 
     @NativeQuery("SELECT id FROM dataset_acquisition acq "
             + "WHERE acq.examination_id = ?1")
-    List<Long> findIdsByExaminationId(Long examinationId);
+    List<Long> findIdsByExaminationId(@Param("examinationId") Long examinationId);
 
     @Query("""
         SELECT DISTINCT
@@ -78,7 +78,7 @@ public interface DatasetAcquisitionRepository extends PagingAndSortingRepository
     @Query("SELECT da FROM DatasetAcquisition da "
             + "LEFT JOIN FETCH da.datasets "
             + "WHERE da.id = :id")
-    Optional<DatasetAcquisition> findByIdWithDatasets(Long id);
+    Optional<DatasetAcquisition> findByIdWithDatasets(@Param("id") Long id);
 
     @Query("SELECT da FROM DatasetAcquisition da WHERE da.datasets IS EMPTY")
     List<DatasetAcquisition> findEmpty();
@@ -98,18 +98,18 @@ public interface DatasetAcquisitionRepository extends PagingAndSortingRepository
     @NativeQuery("SELECT id FROM dataset_acquisition acq "
             + "WHERE acq.examination_id = ?1 "
             + "AND acq.id IN (?2)")
-    List<Long> findIdsFromIdsListWithExamId(Long examId, List<Long> acqIdList);
+    List<Long> findIdsFromIdsListWithExamId(@Param("examId") Long examId, @Param("acqIdList") List<Long> acqIdList);
 
     @Query("SELECT da FROM DatasetAcquisition da "
             + "LEFT JOIN FETCH da.datasets "
             + "WHERE da.examination.id = :examinationId "
             + "ORDER BY COALESCE(da.sortingIndex, 0)")
-    List<DatasetAcquisition> findByExaminationIdWithDatasets(Long examinationId);
+    List<DatasetAcquisition> findByExaminationIdWithDatasets(@Param("examinationId") Long examinationId);
 
     @Query("SELECT da FROM DatasetAcquisition da "
             + "LEFT JOIN FETCH da.datasets "
             + "WHERE da.id IN :ids")
-    List<DatasetAcquisition> findByIdsWithDatasets(List<Long> ids);
+    List<DatasetAcquisition> findByIdsWithDatasets(@Param("ids") List<Long> ids);
 
     @Transactional(readOnly = true)
     default List<DatasetAcquisition> findByIdsWithDatasetsAndCopies(List<Long> ids) {
@@ -152,4 +152,5 @@ public interface DatasetAcquisitionRepository extends PagingAndSortingRepository
         );
         return acquisitions;
     }
+
 }
