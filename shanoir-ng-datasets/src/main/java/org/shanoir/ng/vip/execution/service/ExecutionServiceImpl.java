@@ -88,9 +88,6 @@ public class ExecutionServiceImpl implements ExecutionService {
     private KeycloakServiceAccountUtils keycloakServiceAccountUtils;
 
     @Autowired
-    private ExecutionTrackingServiceImpl executionTrackingService;
-
-    @Autowired
     private DatasetProcessingRepository datasetProcessingRepository;
 
     @Autowired
