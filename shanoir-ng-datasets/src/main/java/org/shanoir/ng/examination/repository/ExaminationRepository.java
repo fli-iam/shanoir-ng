@@ -133,8 +133,7 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
      */
     @Query("SELECT e FROM Examination e "
             + "LEFT JOIN FETCH e.datasetAcquisitions da "
-            + "LEFT JOIN FETCH da.datasets "
-            + "WHERE e.id = :id ")
+            + "LEFT JOIN FETCH da.datasets")
     List<Examination> findAllWithAcqAndDatasets();
 
     /**
