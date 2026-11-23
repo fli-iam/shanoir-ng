@@ -114,6 +114,9 @@ public class ImporterApiController implements ImporterApi {
 
     private static final String ERROR_WHILE_SAVING_UPLOADED_FILE = "Error while saving uploaded file.";
 
+    private static final String NO_DICOM_PATIENT_IN_ZIP = "No DICOM patient found in the ZIP; "
+            + "the archive must contain at least one valid DICOM instance.";
+
     private static final String NO_FILE_UPLOADED = "No file uploaded.";
 
     private static final String DICOMDIR = "DICOMDIR";
@@ -199,6 +202,10 @@ public class ImporterApiController implements ImporterApi {
              * complete with meta-data from files.
              */
             List<Patient> patients = preparePatientsForImportJob(importJobDir);
+            if (patients == null || patients.isEmpty()) {
+                throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                        NO_DICOM_PATIENT_IN_ZIP, null));
+            }
             if (patients.size() > 1) {
                 throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
                 "ZIP with multiple DICOM patients not supported.", null));
@@ -236,6 +243,14 @@ public class ImporterApiController implements ImporterApi {
             imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(importJob, importJobDir.getAbsolutePath(), false, null, false);
 
             return new ResponseEntity<>(importJob, HttpStatus.OK);
+        } catch (RestServiceException e) {
+            if (tempFile != null) {
+                FileUtils.deleteQuietly(tempFile);
+            }
+            if (importJobDir != null) {
+                FileUtils.deleteQuietly(importJobDir);
+            }
+            throw e;
         } catch (Exception e) {
             if (tempFile != null) {
                 FileUtils.deleteQuietly(tempFile);
@@ -822,6 +837,10 @@ public class ImporterApiController implements ImporterApi {
             }
             File subjectFolder = subjectFolders[0];
             File[] examinationsFolders = subjectFolder.listFiles();
+            if (examinationsFolders == null || examinationsFolders.length == 0) {
+                throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                        "The subject folder must contain at least one examination sub-folder.", null));
+            }
 
             String subjectName = subjectFolder.getName();
             Subject subject = null;
