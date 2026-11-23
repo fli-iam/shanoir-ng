@@ -9,4 +9,91 @@ updates:
     labels:
       - "dependencies"
       - "automerge"
----
+
+  # GitHub Actions used by the workflows
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+    labels:
+      - "dependencies"
+
+  # Maven: the microservices, the modules they share and ShanoirUploader.
+  # Minor and patch updates only, in one pull request per week. Major versions
+  # (Spring Boot, Jackson, ...) are migrations planned and done by hand, module
+  # by module, so they are not proposed.
+  - package-ecosystem: "maven"
+    directories:
+      - "/shanoir-ng-anonymization"
+      - "/shanoir-ng-datasets"
+      - "/shanoir-ng-import"
+      - "/shanoir-ng-keycloak-auth"
+      - "/shanoir-ng-ms-common"
+      - "/shanoir-ng-ms-common-jackson3"
+      - "/shanoir-ng-nifti-conversion"
+      - "/shanoir-ng-parent"
+      - "/shanoir-ng-preclinical"
+      - "/shanoir-ng-storage"
+      - "/shanoir-ng-storage-jackson3"
+      - "/shanoir-ng-studies"
+      - "/shanoir-ng-study-rights"
+      - "/shanoir-ng-study-rights-jackson3"
+      - "/shanoir-ng-users"
+      - "/shanoir-uploader"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    groups:
+      maven-minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - "version-update:semver-major"
+    labels:
+      - "dependencies"
+
+  # npm: the Angular front. Same rules as Maven (Angular majors are planned migrations).
+  - package-ecosystem: "npm"
+    directory: "/shanoir-ng-front"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    groups:
+      npm-minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - "version-update:semver-major"
+    labels:
+      - "dependencies"
+
+  # Docker: the base images of the Dockerfiles, once a month. A floating tag such
+  # as mariadb:11.4 can get a pull request for a newer series; close it if the
+  # series is not wanted, or add an ignore rule for it.
+  - package-ecosystem: "docker"
+    directories:
+      - "/docker-compose"
+      - "/shanoir-ng-nginx"
+    schedule:
+      interval: "monthly"
+    groups:
+      docker-minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - "version-update:semver-major"
+    labels:
+      - "dependencies"
