@@ -11,17 +11,21 @@
 # along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 #!/bin/sh
-# script that helps with local dev/deploy tasks
-# The configuration and the secrets come from .env (see .env.example)
+# Deploys (or upgrades) shanoir with docker-compose.yml: pulls the released images
+# <SHANOIR_REGISTRY>/<service>:<SHANOIR_IMAGE_TAG> and (re)starts the containers.
+# The configuration and the secrets come from .env (see .env.example).
+# Run it after 'git pull', so that docker-compose.yml and the images are from the
+# same release. For a development deployment (images built from the sources), use
+# bootstrap.sh instead.
 
-./check-env.sh || exit 1
+set -e
 
-cd ./shanoir-ng-parent
+cd "$(dirname "$0")"
 
-mvn clean install -DskipTests
+./check-env.sh
 
-cd ..
-
-docker compose build
+# without this, 'up' keeps the images already on this machine: SHANOIR_IMAGE_TAG=latest
+# would never upgrade
+docker compose pull
 
 docker compose up -d
