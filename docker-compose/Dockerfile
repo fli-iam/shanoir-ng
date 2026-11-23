@@ -399,7 +399,17 @@ CMD ["mariadb"]
 
 ################ database-migrations #######################################
 
-FROM mariadb:11.4 AS database-migrations
+# Only a client of the 'database' service: it needs the mariadb client tools, not a server.
+# (Not based on the mariadb image: its 'VOLUME /var/lib/mysql' gave every migrations
+# container a new, useless anonymous volume.)
+FROM debian:bookworm-slim AS database-migrations
+
+RUN apt-get update -qq \
+    && apt-get install -qqy --no-install-recommends mariadb-client \
+    && rm -rf /var/lib/apt/lists/*
+
+# same locale as before (mariadb image): the migrations are applied in 'sort' order
+ENV LANG=C.UTF-8
 
 COPY --link --chmod=0755 database-migrations/shanoir-entrypoint.sh /
 COPY --link database-migrations/db-changes /opt/db-changes

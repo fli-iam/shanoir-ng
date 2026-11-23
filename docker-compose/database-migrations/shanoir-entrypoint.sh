@@ -16,19 +16,21 @@
 #              migrations in the DB_CHANGES_DIR and exit
 #              (to be used for setting up a new shanoir instance)
 #
-#   auto    -> run the mariadbd as pid 1, then initialise or apply migrations in a
-#              background process. The mariadb daemon is killed in case of
-#              migration failure (fail-fast)
+#   auto    -> 'init' if the migrations table does not exist yet, else 'manual',
+#              then exit (fails if a migration fails)
 #
-#   manual  -> apply the migrations manually and exit
+#   manual  -> apply the migrations that are not applied yet and exit
 #              (to be used when migrating to a newer shanoir version)
 #
-#   never   -> do not apply anything, just run the mariadbd server
+#   never   -> do not apply anything and exit
 #              (to be used for normal operation)
 #
-#   dev     -> do not apply anything, just run the mariadbd server
+#   dev     -> only create the procedures and exit
 #              (to be used in development mode: migrations are applied directly
 #              by the microservices with spring.jpa.hibernate.ddl-auto=update)
+#
+# The container only runs the mariadb client tools against the 'database' service
+# (MARIADB_HOST, default 'database'): it has no server and stores nothing.
 
 DB_CHANGES_DIR="/opt/db-changes"
 DB_INIT_PROCEDURES_DIR="/opt/db-init-procedures"
