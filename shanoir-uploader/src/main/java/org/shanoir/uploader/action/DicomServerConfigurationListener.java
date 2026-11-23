@@ -229,7 +229,7 @@ public class DicomServerConfigurationListener implements ActionListener {
             tempProp.load(propsFile);
             propsFile.close();
         } catch (IOException ioe) {
-            ioe.printStackTrace();
+            LOG.error("Could not load the properties file {}", fileName, ioe);
             System.exit(0);
         }
         return tempProp;

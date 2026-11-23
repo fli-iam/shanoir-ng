@@ -108,7 +108,7 @@ public class CurrentNominativeDataController {
                     try {
                         processWorkFolder(workFolderFilePath);
                     } catch (IOException e1) {
-                        e1.printStackTrace();
+                        LOG.error("Could not process the work folder {}", workFolderFilePath, e1);
                     }
                 }
             }
