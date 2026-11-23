@@ -52,7 +52,7 @@ public interface DatasetAcquisitionRepository extends PagingAndSortingRepository
     DatasetAcquisition findBySourceIdAndExaminationStudy_Id(Long sourceId, Long studyId);
 
     @NativeQuery("SELECT id FROM dataset_acquisition acq "
-            + "WHERE acq.examination_id = ?1")
+            + "WHERE acq.examination_id = :examinationId")
     List<Long> findIdsByExaminationId(@Param("examinationId") Long examinationId);
 
     @Query("""
@@ -96,8 +96,8 @@ public interface DatasetAcquisitionRepository extends PagingAndSortingRepository
     List<DatasetAcquisition> findByIdGreaterThan(Long idThreshold);
 
     @NativeQuery("SELECT id FROM dataset_acquisition acq "
-            + "WHERE acq.examination_id = ?1 "
-            + "AND acq.id IN (?2)")
+            + "WHERE acq.examination_id = :examId "
+            + "AND acq.id IN (:acqIdList)")
     List<Long> findIdsFromIdsListWithExamId(@Param("examId") Long examId, @Param("acqIdList") List<Long> acqIdList);
 
     @Query("SELECT da FROM DatasetAcquisition da "
