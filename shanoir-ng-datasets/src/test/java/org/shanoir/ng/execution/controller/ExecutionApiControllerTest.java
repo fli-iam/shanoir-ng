@@ -38,7 +38,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
@@ -90,7 +89,6 @@ public class ExecutionApiControllerTest {
 
     @Test
     public void testCreateExecutionAsUnauthenticated() throws Exception {
-        SecurityContextHolder.clearContext();
         ExecutionCandidateDTO candidate = createExecutionCandidateDTO();
         assertException(api::createExecution, List.of(candidate), AuthenticationCredentialsNotFoundException.class);
     }
