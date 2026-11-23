@@ -21,15 +21,21 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <button class="dl-button" type="button" (click)="treeService.scrollToSelected()" title="scroll to selected">
         <i class="fa-solid fa-arrows-to-circle"></i>
     </button>
-    <button class="dl-button" type="button" (click)="downloadSelected()" [disabled]="selectionEmpty" title="download selection">
-        <i class="fas fa-download"></i>
-    </button>
-    <button class="copy-button" type="button" (click)="copySelected()" [disabled]="selectionEmpty" title="copy selection">
-        <i class="fas fa-copy"></i>
-    </button>
-    <button class="dl-button" type="button" (click)="goToProcessing()" [disabled]="selectionEmpty" title="process selection">
-        <i class="fas fa-rocket"></i>
-    </button>
+    @if (treeService.canDownloadStudy) {
+        <button class="dl-button" type="button" (click)="downloadSelected()" [disabled]="selectionEmpty" title="download selection">
+            <i class="fas fa-download"></i>
+        </button>
+    }
+    @if (treeService.canImportInStudy) {
+        <button class="copy-button" type="button" (click)="copySelected()" [disabled]="selectionEmpty" title="copy selection">
+            <i class="fas fa-copy"></i>
+        </button>
+    }
+    @if (treeService.canExecuteInStudy) {
+        <button class="dl-button" type="button" (click)="goToProcessing()" [disabled]="selectionEmpty" title="process selection">
+            <i class="fas fa-rocket"></i>
+        </button>
+    }
     @if (treeService.canDownloadStudy) {
         <button
             class="dl-button"

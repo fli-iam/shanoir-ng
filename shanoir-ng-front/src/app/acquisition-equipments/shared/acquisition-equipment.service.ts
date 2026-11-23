@@ -84,7 +84,7 @@ export class AcquisitionEquipmentService extends EntityService<AcquisitionEquipm
             );
         }).catch(error => {
             if (error instanceof HttpErrorResponse && error.status === 404) {
-                console.log("catch 404 error: no equipments found for this serial number");
+                this.consoleService.log('error', 'No equipments found for this serial number');
                 return false; // No equipments found, so no duplicates
             }
             // Handle other errors

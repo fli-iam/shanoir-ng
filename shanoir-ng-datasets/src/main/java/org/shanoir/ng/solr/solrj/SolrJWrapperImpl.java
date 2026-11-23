@@ -145,27 +145,22 @@ public class SolrJWrapperImpl implements SolrJWrapper {
 
     public void addToIndex(final ShanoirSolrDocument document) throws SolrServerException, IOException {
         solrClient.addBean(document);
-        solrClient.commit();
     }
 
     public void addAllToIndex(final List<ShanoirSolrDocument> documents) throws SolrServerException, IOException {
         solrClient.addBeans(documents);
-        solrClient.commit();
     }
 
     public void deleteFromIndex(Long datasetId) throws SolrServerException, IOException {
         solrClient.deleteById(Long.toString(datasetId));
-        solrClient.commit();
     }
 
     public void deleteFromIndex(List<Long> datasetIds) throws SolrServerException, IOException {
-        solrClient.deleteById(datasetIds.stream().map(String::valueOf).collect(Collectors.toList()), 0);
-        solrClient.commit();
+        solrClient.deleteById(datasetIds.stream().map(String::valueOf).collect(Collectors.toList()));
     }
 
     public void deleteAll() throws SolrServerException, IOException {
         solrClient.deleteByQuery("*:*");
-        solrClient.commit();
     }
 
     public SolrResultPage<ShanoirSolrDocument> findByFacetCriteriaForAdmin(ShanoirSolrQuery facet, Pageable pageable) throws RestServiceException {
@@ -227,6 +222,10 @@ public class SolrJWrapperImpl implements SolrJWrapper {
 
     public Page<ShanoirSolrDocument> findByStudyIdInAndDatasetIdIn(Map<Long, List<String>> studiesCenter, Collection<Long> datasetIds,
             Pageable pageable) throws RestServiceException {
+        // An empty study filter would produce an empty fq, which Solr ignores: return nothing instead
+        if (studiesCenter == null || studiesCenter.isEmpty()) {
+            return new SolrResultPage<>(new ArrayList<>());
+        }
         final SolrQuery query = new SolrQuery();
         filterByDatasetIds(datasetIds, query);
         addFilterQueryForCenterStudy(query, studiesCenter);

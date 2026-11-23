@@ -56,6 +56,7 @@ import org.shanoir.ng.utils.DatasetFileUtils;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -194,17 +195,14 @@ public class DatasetDownloaderServiceImpl {
                         converterId,
                         datasetDownloadNameListPerPath
                 );
-                if (abortOnAnyError && downloadResults.containsKey(dataset.getId())) {
-                    throw new DownloadAbortedException("Dataset [" + dataset.getId() + "] could not be fully downloaded: "
-                            + downloadResults.get(dataset.getId()).getMessages());
-                }
             }
 
             // Write manifest if any files exist
             if (!filesByAcquisitionId.isEmpty())
                 DatasetFileUtils.writeManifestForExport(archiveWriter, filesByAcquisitionId);
 
-            // Write download errors into a JSON file in the archive
+            // Write download errors into a JSON file in the archive:
+            // a dataset not fully found on the PACS does not abort the download, the rest is still sent
             if (!downloadResults.isEmpty()) {
                 archiveWriter.addEntry(JSON_RESULT_FILENAME, objectMapper.writeValueAsBytes(downloadResults));
             }
@@ -366,10 +364,15 @@ public class DatasetDownloaderServiceImpl {
             try {
                 Long converterToUse = (converterId != null) ? converterId : DEFAULT_NIFTI_CONVERTER_ID;
                 tempDir = convertToNifti(dataset, pathURLs, converterToUse, downloadResult, subjectName);
-                DatasetFileUtils.copyFilesForDownload(storageService, pathURLs, archive, dataset, subjectName, true, datasetFilePath, datasetDownloadNameListPerPath);
+                // Conversion failure is already recorded in downloadResult: nothing to copy, go on with the next dataset
+                if (!pathURLs.isEmpty()) {
+                    DatasetFileUtils.copyFilesForDownload(storageService, pathURLs, archive, dataset, subjectName, true, datasetFilePath, datasetDownloadNameListPerPath);
+                }
             } finally {
-                LOG.info("Deleting temporary conversion folder [{}]", tempDir.getAbsolutePath());
-                FileUtils.deleteQuietly(tempDir);
+                if (tempDir != null) {
+                    LOG.info("Deleting temporary conversion folder [{}]", tempDir.getAbsolutePath());
+                    FileUtils.deleteQuietly(tempDir);
+                }
             }
         } else { // Download the other types
             DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, format, downloadResult);
@@ -394,19 +397,29 @@ public class DatasetDownloaderServiceImpl {
         downloader.downloadDicomFilesForURLs(dicomUrls, sourceFolder, subjectName, dataset, downloadResult);
 
         // 3. Convert via RabbitMQ
-        boolean result = Boolean.TRUE.equals(rabbitTemplate.convertSendAndReceive(
-                RabbitMQConfiguration.NIFTI_CONVERSION_QUEUE,
-                converterId + ";" + sourceFolder.getAbsolutePath()
-        ));
+        boolean result;
+        try {
+            result = Boolean.TRUE.equals(rabbitTemplate.convertSendAndReceive(
+                    RabbitMQConfiguration.NIFTI_CONVERSION_QUEUE,
+                    converterId + ";" + sourceFolder.getAbsolutePath()
+            ));
+        } catch (AmqpException e) {
+            LOG.error("Nifti conversion request failed for dataset [{}]", dataset.getId(), e);
+            result = false;
+        }
 
-        if (!result)
+        if (!result) {
             downloadResult.update("Conversion to NIfTI failed.", DatasetDownloadError.ERROR);
+            return sourceFolder;
+        }
 
         // 4. Collect converted files
         File resultFolder = new File(sourceFolder, "result");
         File[] files = resultFolder.listFiles();
-        if (files == null || files.length == 0)
+        if (files == null || files.length == 0) {
             downloadResult.update("No NIfTI files found after conversion.", DatasetDownloadError.ERROR);
+            return sourceFolder;
+        }
 
         for (File file : files)
             if (!file.isDirectory())

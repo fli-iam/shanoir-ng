@@ -41,6 +41,7 @@ import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.user.service.UserService;
 import org.shanoir.ng.utils.KeycloakUtil;
+import org.shanoir.ng.utils.KeycloakUtil.UserRole;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -160,8 +161,14 @@ public class AccessRequestApiController implements AccessRequestApi {
 
     @Override
     public ResponseEntity<List<AccessRequest>> findAllByAdminId() throws RestServiceException {
-        // Get all studies I administrate
+        // Only admins and experts can manage access requests: simple users never see them,
+        // even if they hold CAN_ADMINISTRATE on a study.
+        UserRole role = KeycloakUtil.getUserRole();
+        if (role != UserRole.ADMIN && role != UserRole.EXPERT) {
+            return new ResponseEntity<List<AccessRequest>>(HttpStatus.NO_CONTENT);
+        }
 
+        // Get all studies I administrate
         List<Long> studiesId;
         if (KeycloakUtil.isAdmin()) {
             studiesId = Utils.toList(this.studyUserRightsRepository.findAll())

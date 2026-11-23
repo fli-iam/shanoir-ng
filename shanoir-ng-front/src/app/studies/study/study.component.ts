@@ -16,15 +16,15 @@ import { ChangeDetectionStrategy, Component, ElementRef, ViewChild } from '@angu
 import { UntypedFormGroup, ValidationErrors, Validators, FormsModule, ReactiveFormsModule, AbstractControl, ValidatorFn } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 
-import { TaskState } from '@app/async-tasks/task.model';
-import { DUAAssistantComponent } from '@app/dua/dua-assistant.component';
-import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
-import { MassDownloadService } from '@app/shared/mass-download/mass-download.service';
-import { Tag } from '@app/tags/tag.model';
-import { AccessRequest } from '@app/users/access-request/access-request.model';
-import { AccessRequestService } from '@app/users/access-request/access-request.service';
-import { ExecutionTemplateListComponent } from "@app/vip/execution-template/execution-template-list.component";
-
+import { TaskState } from '../../async-tasks/task.model';
+import { DUAAssistantComponent } from '../../dua/dua-assistant.component';
+import { EntityService } from '../../shared/components/entity/entity.abstract.service';
+import { MassDownloadService } from '../../shared/mass-download/mass-download.service';
+import { Tag } from '../../tags/tag.model';
+import { AccessRequest } from '../../users/access-request/access-request.model';
+import { AccessRequestService } from '../../users/access-request/access-request.service';
+import { ExecutionTemplateListComponent } from "../../vip/execution-template/execution-template-list.component";
+import { StudyStatisticsComponent } from "../../study-statistics/study-statistics.component";
 import { Center } from '../../centers/shared/center.model';
 import { CenterService } from '../../centers/shared/center.service';
 import { DatasetExpressionFormat } from "../../enum/dataset-expression-format.enum";
@@ -75,7 +75,7 @@ import { CopyFromCsvComponent } from "./copy-csv.component";
     styleUrls: ['study.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
     imports: [NgClass, FormsModule, ReactiveFormsModule, FormFooterComponent, RouterLink, DatepickerComponent, SelectBoxComponent, CheckboxComponent, TooltipComponent, LoadingBarComponent, TagCreatorComponent, TableComponent, StudyUserListComponent, QualityControlComponent,
-        BidsTreeComponent, StudyHistoryComponent, KeyValuePipe, LocalDateFormatPipe, DaysLeftPipe, SizePipe, CopyFromCsvComponent, ExecutionTemplateListComponent, StudyEmailMembersComponent]
+        BidsTreeComponent, StudyHistoryComponent, KeyValuePipe, LocalDateFormatPipe, DaysLeftPipe, SizePipe, CopyFromCsvComponent, ExecutionTemplateListComponent, StudyEmailMembersComponent, StudyStatisticsComponent]
 })
 
 export class StudyComponent extends EntityComponent<Study> {
@@ -415,15 +415,12 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     public async hasEditRight(): Promise<boolean> {
-        return this.hasStudyAdminRight();
+        if (this.keycloakService.isUserAdmin()) return true;
+        return this.keycloakService.isUserExpert() && this.hasStudyAdminRight();
     }
 
     public async hasDeleteRight(): Promise<boolean> {
-        if (this.keycloakService.isUserAdmin()) return true;
-        if (!this.study.studyUserList) return false;
-        const studyUser: StudyUser = this.study.studyUserList.filter(su => su.userId == KeycloakService.auth.userId)[0];
-        if (!studyUser) return false;
-        return studyUser.studyUserRights && studyUser.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE);
+        return this.hasEditRight();
     }
 
     private newStudy(): Study {

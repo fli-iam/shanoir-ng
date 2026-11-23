@@ -60,7 +60,6 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
-import org.springframework.web.util.DisconnectedClientHelper;
 
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.resources.ConnectionProvider;
@@ -224,10 +223,11 @@ public class WADODownloaderService {
                     // Client gone: stop here, closing the stream cancels the pending PACS requests
                     throw new DownloadAbortedException("Could not flush dataset [" + dataset.getId() + "] to the client", e);
                 } catch (ZipPacsFileException e) {
-                    if (DisconnectedClientHelper.isClientDisconnectedException(e)) {
-                        throw new DownloadAbortedException("Client disconnected while downloading dataset [" + dataset.getId() + "]", e);
+                    if (e.getCause() instanceof WebClientResponseException.NotFound) {
+                        LOG.warn("File [{}] of dataset [{}] not found on PACS", response.url(), dataset.getId());
+                    } else {
+                        LOG.error("Could not download dataset [{}] as dicom", dataset.getId(), e);
                     }
-                    LOG.error("Could not download dataset [{}] as dicom", dataset.getId(), e);
                     downloadResult.update("Could not download dataset [" + dataset.getId() + "] as dicom : " + e.getMessage(), DatasetDownloadError.PARTIAL_FAILURE);
                 }
                 waitStart = System.nanoTime();
@@ -271,7 +271,7 @@ public class WADODownloaderService {
         try {
             extractDICOMArchiveFromMHTMLFile(response.body(), name, archive, response.url().contains(WADO_REQUEST_TYPE_WADO_RS), subjectName);
             return name + DCM;
-        } catch (IOException | MessagingException | ZipPacsFileException e) {
+        } catch (IOException | MessagingException e) {
             LOG.error("Error in writing file [{}] from pacs to zip", name, e);
             throw new ZipException("Error in writing file to zip");
         }

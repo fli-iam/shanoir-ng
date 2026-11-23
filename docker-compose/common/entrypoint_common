@@ -107,6 +107,7 @@ require()
             VIP_CLIENT_SECRET)      ;;
             VIP_MAX_DOWNLOAD)       ;;
             NEUROBAGEL_CLIENT_SECRET) match "$name" '^[A-Za-z0-9]+$' ;;
+            VIP_COMPRESSION_LEVEL)       ;;
             SHANOIR_SHUTDOWN_HOUR)      ;;
             SHANOIR_CONTINUANCE_HOUR)      ;;
             DEV_USERS_DEFAULT_PASSWORD)      ;;
@@ -130,6 +131,7 @@ require()
             SHANOIR_PRECLINICAL_DB_NAME) match "$name" '^([a-z0-9._-]+)$' ;;
             SHANOIR_MIGRATIONS_DB_NAME)  match "$name" '^([a-z0-9._-]+)$' ;;
 
+            SHANOIR_MAIL_SUPPLIER_BLACK_LIST)  match "$name" '^([A-Za-z0-9.,-]+)$' ;;
             *)
                 error "unknown var: $name"
                 ;;
