@@ -1,4 +1,4 @@
-#!/bin/sh
+﻿#!/bin/sh
 # Shanoir NG - Import, manage and share neuroimaging data
 # Copyright (C) 2009-2019 Inria - https://www.inria.fr/
 # Contact us on https://project.inria.fr/shanoir/
@@ -73,7 +73,7 @@ NATIVE_SERVICES="users studies import"
 # Always the plain JVM config (build + one-shot init)
 dc_jvm()
 {
-	docker compose -f "$BASE_COMPOSE" "$@"
+	docker compose "$@"
 }
 
 # Free disk space (only with --prune). Safe: dangling images, build cache and
@@ -107,6 +107,28 @@ free_buildpack_cache()
 	for v in `docker volume ls -q --filter name=pack-cache-` ; do
 		docker volume rm "$v" >/dev/null 2>&1 || true
 	done
+}
+
+
+# MariaDB's first-boot entrypoint can answer on localhost while it is still
+# cycling through its init server (temporary instance -> shutdown -> real
+# server). Wait until the DB accepts connections from a peer on the compose
+# network before starting Keycloak, which exits on the first JDBC failure.
+wait_db_network_ready()
+{
+	local db_host="$1"
+	local via_container="${2:-database}"
+	local i=0
+	while [ $i -lt 120 ]; do
+		if docker compose exec -T "$via_container" mariadb-admin ping \
+			-h "$db_host" -u root -ppassword >/dev/null 2>&1; then
+			echo "${db_host} accepts connections from ${via_container}"
+			return 0
+		fi
+		i=$((i + 1))
+		sleep 2
+	done
+	die "timeout waiting for ${db_host} from ${via_container}"
 }
 
 wait_tcp_ready()
@@ -172,12 +194,18 @@ fi
 # From here on, a plain 'docker compose ...' uses the right set of files:
 # JVM only, or JVM + native overlay (same service names, so ports, volumes,
 # depends_on and nginx upstreams are unchanged).
-if [ -n "$native" ] ; then
-	COMPOSE_FILE="$BASE_COMPOSE:$NATIVE_COMPOSE"
-else
-	COMPOSE_FILE="$BASE_COMPOSE"
+# Honour a caller-supplied COMPOSE_FILE (CI overlays). When pulling release
+# images (--no-build), use docker-compose.yml rather than docker-compose-dev.yml.
+if [ -z "${COMPOSE_FILE:-}" ] ; then
+	if [ -n "$native" ] ; then
+		COMPOSE_FILE="$BASE_COMPOSE:$NATIVE_COMPOSE"
+	elif [ -n "$build" ] ; then
+		COMPOSE_FILE="$BASE_COMPOSE"
+	else
+		COMPOSE_FILE=docker-compose.yml
+	fi
+	export COMPOSE_FILE
 fi
-export COMPOSE_FILE
 
 # Optional services (nifti-conversion, bids-validator, preclinical, solr,
 # ldap, dcm4chee-database, dcm4chee-arc) belong to the compose profile 'full'.
@@ -268,6 +296,7 @@ if [ -n "$deploy" ] ; then
 		step "init: keycloak-database"
 		docker compose up -d keycloak-database
 		wait_tcp_ready keycloak-database 3306
+		wait_db_network_ready keycloak-database database
 
 		step "init: keycloak"
 		docker compose run --rm -e SHANOIR_MIGRATION=init keycloak
