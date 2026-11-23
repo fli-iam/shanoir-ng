@@ -24,6 +24,7 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.NativeQuery;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -41,7 +42,7 @@ public interface DatasetProcessingRepository extends CrudRepository<DatasetProce
      */
     @Query("SELECT processing FROM DatasetProcessing processing "
             + "WHERE processing.id IN :ids ")
-    List<DatasetProcessing> findByIds(List<Long> ids);
+    List<DatasetProcessing> findByIds(@Param("ids") List<Long> ids);
 
     /**
      * Find dataset processings by monitoring id.
@@ -51,7 +52,7 @@ public interface DatasetProcessingRepository extends CrudRepository<DatasetProce
      */
     @Query("SELECT processing FROM DatasetProcessing processing "
             + "WHERE processing.parent.id = :id ")
-    List<DatasetProcessing> findByMonitoringId(Long id);
+    List<DatasetProcessing> findByMonitoringId(@Param("id") Long id);
 
     /**
      * Find all processings that are linked to given dataset through INPUT_OF_DATASET_PROCESSING table
@@ -100,7 +101,7 @@ public interface DatasetProcessingRepository extends CrudRepository<DatasetProce
             + "FROM processing_inputs pi "
             + "    INNER JOIN execution_monitoring monitoring ON monitoring.id = pi.monitoring_id) "
             + "SELECT id FROM ranked WHERE rn = 1 ORDER BY id")
-    List<Long> findIdsByCommentAndDatasetProcessingTypeWithStatusFinished(String comment, int type);
+    List<Long> findIdsByCommentAndDatasetProcessingTypeWithStatusFinished(@Param("comment") String comment, @Param("type") int type);
 
     /**
      * Find all processings that are linked to given monitoring through parent_id column
@@ -110,7 +111,7 @@ public interface DatasetProcessingRepository extends CrudRepository<DatasetProce
      */
     @NativeQuery("SELECT DISTINCT processing.id FROM dataset_processing as processing "
             + "WHERE processing.parent_id = :monitoringId")
-    List<Long> findAllIdsByMonitoringId(Long monitoringId);
+    List<Long> findAllIdsByMonitoringId(@Param("monitoringId") Long monitoringId);
 
     List<DatasetProcessing> findAllByParentId(Long id);
 
@@ -125,34 +126,34 @@ public interface DatasetProcessingRepository extends CrudRepository<DatasetProce
             + "INNER JOIN dataset as dataset ON dataset.id=input.dataset_id "
             + "INNER JOIN dataset_acquisition as acquisition ON acquisition.id=dataset.dataset_acquisition_id "
             + "WHERE acquisition.examination_id IN (:examinationIds)")
-    List<Long> findAllIdsByExaminationIds(List<Long> examinationIds);
+    List<Long> findAllIdsByExaminationIds(@Param("examinationIds") List<Long> examinationIds);
 
     @Query("SELECT processing FROM DatasetProcessing processing "
             + "LEFT JOIN FETCH processing.inputDatasets "
             + "LEFT JOIN FETCH processing.parent "
             + "WHERE processing.id = :id")
-    Optional<DatasetProcessing> findByIdWithParentAndInputs(Long id);
+    Optional<DatasetProcessing> findByIdWithParentAndInputs(@Param("id") Long id);
 
     @Query("SELECT processing FROM DatasetProcessing processing "
             + "LEFT JOIN FETCH processing.inputDatasets "
             + "WHERE processing.id = :id")
-    Optional<DatasetProcessing> findByIdWithInputs(Long id);
+    Optional<DatasetProcessing> findByIdWithInputs(@Param("id") Long id);
 
     @Query("SELECT processing FROM DatasetProcessing processing "
             + "LEFT JOIN FETCH processing.outputDatasets "
             + "WHERE processing.id = :id")
-    Optional<DatasetProcessing> findByIdWithOutputs(Long id);
+    Optional<DatasetProcessing> findByIdWithOutputs(@Param("id") Long id);
 
     @Query("SELECT processing FROM DatasetProcessing processing "
             + "LEFT JOIN FETCH processing.outputDatasets "
             + "LEFT JOIN FETCH processing.inputDatasets "
             + "WHERE processing.id = :id")
-    Optional<DatasetProcessing> findByIdWithInputsAndOutputs(Long id);
+    Optional<DatasetProcessing> findByIdWithInputsAndOutputs(@Param("id") Long id);
 
     @Query("SELECT DISTINCT processing FROM DatasetProcessing processing "
             + "LEFT JOIN FETCH processing.inputDatasets "
             + "WHERE processing.id IN :ids")
-    List<DatasetProcessing> findByIdsWithInputs(List<Long> ids);
+    List<DatasetProcessing> findByIdsWithInputs(@Param("ids") List<Long> ids);
 
     /**
      * inputDatasets and outputDatasets are both bags, so Hibernate refuses to fetch them both
@@ -190,7 +191,7 @@ public interface DatasetProcessingRepository extends CrudRepository<DatasetProce
     @Query("SELECT DISTINCT p FROM DatasetProcessing p "
             + "JOIN FETCH p.inputDatasets "
             + "WHERE EXISTS (SELECT i FROM p.inputDatasets i WHERE i.id = :inputId)")
-    List<DatasetProcessing> findByInputIdWithInputs(Long inputId);
+    List<DatasetProcessing> findByInputIdWithInputs(@Param("inputId") Long inputId);
 
     /**
      * Find all identifying fields for a given processing id
@@ -202,7 +203,7 @@ public interface DatasetProcessingRepository extends CrudRepository<DatasetProce
             + "INNER JOIN dataset_processing as parent on parent.id = processing.parent_id "
             + "INNER JOIN execution_monitoring as monitoring on monitoring.id = parent.id "
             + "WHERE processing.id = :processingId")
-    IdentificationData findIdentificationDataFromProcessingId(Long processingId);
+    IdentificationData findIdentificationDataFromProcessingId(@Param("processingId") Long processingId);
 
     interface IdentificationData {
         Long getMonitoringIndex();
@@ -225,5 +226,6 @@ public interface DatasetProcessingRepository extends CrudRepository<DatasetProce
     @Query(value = "SELECT distinct dp.comment FROM DatasetProcessing AS dp "
             + "JOIN ProcessingResource AS pr ON pr.processing = dp "
             + "WHERE pr.resourceId = :resourceId")
-    String findTypeByResourceId(String resourceId);
+    String findTypeByResourceId(@Param("resourceId") String resourceId);
+
 }
