@@ -62,12 +62,12 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
     @NativeQuery("SELECT ds.id FROM dataset ds "
             + "INNER JOIN dataset_acquisition acq ON ds.dataset_acquisition_id = acq.id "
             + "INNER JOIN examination ex ON acq.examination_id = ex.id "
-            + "WHERE ex.study_id = ?1")
-    List<Long> findIdsByStudyId(Long studyId);
+            + "WHERE ex.study_id = :studyId")
+    List<Long> findIdsByStudyId(@Param("studyId") Long studyId);
 
     @NativeQuery("SELECT ds.id FROM dataset ds "
-            + "WHERE ds.subject_id IN (?1)")
-    List<Long> findIdsBySubjectIdIn(List<Long> subjectIds);
+            + "WHERE ds.subject_id IN (:subjectIds)")
+    List<Long> findIdsBySubjectIdIn(@Param("subjectIds") List<Long> subjectIds);
 
     List<Dataset> findByDatasetAcquisitionId(Long acquisitionId);
 
@@ -214,20 +214,20 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
 
     @NativeQuery("SELECT ds.id FROM dataset ds "
             + "JOIN dataset_metadata AS meta ON ds.updated_metadata_id = meta.id "
-            + "WHERE ds.dataset_acquisition_id IN (?1) "
-            + "AND (?2 = '' OR meta.name LIKE ?2)")
-    List<Long> findFilteredIdsByDatasetAcquisitionIdIn(List<Long> acquisitionIds, String filter);
+            + "WHERE ds.dataset_acquisition_id IN (:acquisitionIds) "
+            + "AND (:filter = '' OR meta.name LIKE :filter)")
+    List<Long> findFilteredIdsByDatasetAcquisitionIdIn(@Param("acquisitionIds") List<Long> acquisitionIds, @Param("filter") String filter);
 
     @NativeQuery("SELECT ds.id FROM dataset ds "
             + "JOIN dataset_metadata AS meta ON ds.updated_metadata_id = meta.id "
-            + "WHERE ds.dataset_acquisition_id = ?1 "
-            + "AND (?2 = '' OR meta.name LIKE ?2)")
-    List<Long> findFilteredIdsByDatasetAcquisitionId(Long acquisitionId, String filter);
+            + "WHERE ds.dataset_acquisition_id = :acquisitionId "
+            + "AND (:filter = '' OR meta.name LIKE :filter)")
+    List<Long> findFilteredIdsByDatasetAcquisitionId(@Param("acquisitionId") Long acquisitionId, @Param("filter") String filter);
 
     @NativeQuery("SELECT dataset.id FROM dataset "
             + "JOIN dataset_acquisition acq ON acq.id = dataset.dataset_acquisition_id "
-            + "WHERE acq.examination_id = ?1")
-    List<Long> findIdsByExaminationId(Long examinationId);
+            + "WHERE acq.examination_id = :examinationId")
+    List<Long> findIdsByExaminationId(@Param("examinationId") Long examinationId);
 
     @Query("SELECT DISTINCT de.dataset.id FROM DatasetExpression de WHERE de.dataset.id IN :ids")
     Set<Long> findDatasetIdsHavingExpressions(@Param("ids") List<Long> ids);
@@ -270,7 +270,7 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
     @Query("SELECT dataset FROM Dataset dataset "
             + "LEFT JOIN FETCH dataset.tags "
             + "WHERE dataset.subjectId = :subjectId")
-    Dataset findByIdWithTags(@Param("subjectId") Long id);
+    Dataset findByIdWithTags(@Param("subjectId") Long subjectId);
 
     boolean existsBySourceId(Long sourceId);
 
