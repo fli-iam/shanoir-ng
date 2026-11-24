@@ -438,7 +438,8 @@ server directly:
 
 1. go to Keycloak admin interface: https://shanoir-ng-nginx/auth/admin/
 2. sign in with the credentials configured in
-   `SHANOIR_KEYCLOAK_USER`/`SHANOIR_KEYCLOAK_PASSWORD' (default is `admin`/`&a1A&a1A`)
+   `SHANOIR_KEYCLOAK_USER`/`SHANOIR_KEYCLOAK_PASSWORD` in `.env` (no default
+   password: it is required, see `.env.example`)
 3. go to the **shanoir-ng** realm
 4. create/edit the new user and grant the relevant role (eg. `ROLE_ADMIN`). By
    default, new user accounts are created in Keycloak by the users' microservice
