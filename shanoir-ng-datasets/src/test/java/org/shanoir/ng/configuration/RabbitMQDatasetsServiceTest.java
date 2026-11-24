@@ -63,7 +63,9 @@ import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.Subject;
+import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.repository.StudyRepository;
+import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.shared.service.SubjectService;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.studycard.repository.QualityCardRepository;
@@ -97,6 +99,9 @@ class RabbitMQDatasetsServiceTest {
 
     @Mock
     private StudyRepository studyRepository;
+
+    @Mock
+    private SubjectRepository subjectRepository;
 
     @Mock
     private BIDSService bidsService;
@@ -150,6 +155,36 @@ class RabbitMQDatasetsServiceTest {
 
         assertTrue(rabbitMQDatasetsService.subjectHasCopiedData(10L));
         assertFalse(rabbitMQDatasetsService.subjectHasCopiedData(11L));
+    }
+
+    @Test
+    void findExaminationStudyIdAnswersTheStudyOfTheExamination() {
+        when(examinationRepository.findStudyIdById(EXAM_ID)).thenReturn(Optional.of(STUDY_ID));
+
+        assertEquals(STUDY_ID, rabbitMQDatasetsService.findExaminationStudyId(EXAM_ID));
+    }
+
+    @Test
+    void findExaminationStudyIdAnswersUnknownForAMissingExamination() {
+        when(examinationRepository.findStudyIdById(EXAM_ID)).thenReturn(Optional.empty());
+
+        assertEquals(RabbitMQConfiguration.UNKNOWN_STUDY_ID, rabbitMQDatasetsService.findExaminationStudyId(EXAM_ID));
+        assertEquals(RabbitMQConfiguration.UNKNOWN_STUDY_ID, rabbitMQDatasetsService.findExaminationStudyId(null));
+    }
+
+    @Test
+    void findSubjectStudyIdAnswersTheStudyOfTheSubject() {
+        when(subjectRepository.findStudyIdById(SUBJECT_ID)).thenReturn(Optional.of(STUDY_ID));
+
+        assertEquals(STUDY_ID, rabbitMQDatasetsService.findSubjectStudyId(SUBJECT_ID));
+    }
+
+    @Test
+    void findSubjectStudyIdAnswersUnknownForAMissingSubject() {
+        when(subjectRepository.findStudyIdById(SUBJECT_ID)).thenReturn(Optional.empty());
+
+        assertEquals(RabbitMQConfiguration.UNKNOWN_STUDY_ID, rabbitMQDatasetsService.findSubjectStudyId(SUBJECT_ID));
+        assertEquals(RabbitMQConfiguration.UNKNOWN_STUDY_ID, rabbitMQDatasetsService.findSubjectStudyId(null));
     }
 
     @Test

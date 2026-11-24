@@ -367,6 +367,42 @@ public class RabbitMQDatasetsService {
     }
 
     /**
+     * Receives an examination id and answers the id of its study, so that another microservice
+     * (preclinical) can check the study rights of the user on data attached to this examination.
+     *
+     * @param examinationId the examination id
+     * @return the study id, or RabbitMQConfiguration.UNKNOWN_STUDY_ID if the examination does not exist:
+     *         never null, as no answer would be sent back and the caller would wait until its timeout
+     */
+    @RabbitListener(queues = RabbitMQConfiguration.EXAMINATION_STUDY_ID_QUEUE, containerFactory = "multipleConsumersFactory")
+    @RabbitHandler
+    @Transactional(readOnly = true)
+    public Long findExaminationStudyId(Long examinationId) {
+        if (examinationId == null) {
+            return RabbitMQConfiguration.UNKNOWN_STUDY_ID;
+        }
+        return examinationRepository.findStudyIdById(examinationId).orElse(RabbitMQConfiguration.UNKNOWN_STUDY_ID);
+    }
+
+    /**
+     * Receives a subject id and answers the id of its study, so that another microservice
+     * (preclinical) can check the study rights of the user on data attached to this subject.
+     *
+     * @param subjectId the subject id
+     * @return the study id, or RabbitMQConfiguration.UNKNOWN_STUDY_ID if the subject does not exist or has no study:
+     *         never null, as no answer would be sent back and the caller would wait until its timeout
+     */
+    @RabbitListener(queues = RabbitMQConfiguration.SUBJECT_STUDY_ID_QUEUE, containerFactory = "multipleConsumersFactory")
+    @RabbitHandler
+    @Transactional(readOnly = true)
+    public Long findSubjectStudyId(Long subjectId) {
+        if (subjectId == null) {
+            return RabbitMQConfiguration.UNKNOWN_STUDY_ID;
+        }
+        return subjectRepository.findStudyIdById(subjectId).orElse(RabbitMQConfiguration.UNKNOWN_STUDY_ID);
+    }
+
+    /**
      * Receives the deletion event of a subject and deletes its data, completing the task
      * carried by the event: its progress follows the examinations, and the errors met are
      * gathered in its report.

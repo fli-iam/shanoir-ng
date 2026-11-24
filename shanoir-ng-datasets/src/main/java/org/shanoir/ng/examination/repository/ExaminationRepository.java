@@ -98,6 +98,15 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
     @Query("select e.id from Examination e where e.study.id = :studyId")
     List<Long> findIdsByStudyId(@Param("studyId") Long studyId);
 
+    /**
+     * Id of the study of an examination, without loading the examination.
+     *
+     * @param examinationId the examination id
+     * @return the study id, empty if the examination does not exist
+     */
+    @Query("select e.study.id from Examination e where e.id = :examinationId")
+    Optional<Long> findStudyIdById(@Param("examinationId") Long examinationId);
+
     @Query("SELECT e.subject.id, MIN(e.examinationDate) FROM Examination e "
             + "WHERE e.study.id = :studyId AND e.subject IS NOT NULL AND e.examinationDate IS NOT NULL "
             + "GROUP BY e.subject.id")

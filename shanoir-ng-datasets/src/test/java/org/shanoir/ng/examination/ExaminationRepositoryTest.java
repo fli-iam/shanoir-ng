@@ -124,6 +124,18 @@ public class ExaminationRepositoryTest {
     }
 
     @Test
+    public void findStudyIdByIdAnswersTheStudyOfTheExamination() throws Exception {
+        // examination 3 is in study 3, while its subject is in study 1
+        assertThat(repository.findStudyIdById(3L)).contains(3L);
+        assertThat(repository.findStudyIdById(EXAMINATION_TEST_1_ID)).contains(STUDY_TEST_1_ID);
+    }
+
+    @Test
+    public void findStudyIdByIdIsEmptyForAMissingExamination() throws Exception {
+        assertThat(repository.findStudyIdById(999L)).isEmpty();
+    }
+
+    @Test
     public void findOneTest() throws Exception {
         Examination examinationDb = repository.findById(EXAMINATION_TEST_1_ID).orElse(null);
         assertThat(examinationDb.getNote()).isEqualTo(EXAMINATION_TEST_1_NOTE);
