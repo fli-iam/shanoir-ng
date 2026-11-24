@@ -25,6 +25,7 @@ import java.util.Map;
 
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.dto.FileEntryDTO;
+import org.shanoir.ng.shared.error.FieldError;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -35,6 +36,7 @@ import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.shared.files.SafeFileNames;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.storage.StorageException;
 import org.shanoir.ng.storage.StorageService;
@@ -412,10 +414,11 @@ public class StudyApiController implements StudyApi {
     public ResponseEntity<Void> uploadProtocolFile(
             @PathVariable("studyId") Long studyId,
             @Valid @RequestBody MultipartFile file) throws RestServiceException {
+        String fileName = uploadedFileName(file);
         try {
             storageService.storeStudyData(
                     studyId,
-                    file.getOriginalFilename(),
+                    fileName,
                     file.getInputStream(),
                     file.getContentType(),
                     file.getSize());
@@ -428,11 +431,65 @@ public class StudyApiController implements StudyApi {
 
     private void validate(Study study, BindingResult result) throws RestServiceException {
         final FieldErrorMap errors = new FieldErrorMap().add(fieldEditionSecurityManager.validate(study))
-                .add(new FieldErrorMap(result)).add(uniqueConstraintManager.validate(study));
+                .add(new FieldErrorMap(result)).add(uniqueConstraintManager.validate(study))
+                .add(validateFileNames("protocolFilePaths", study.getProtocolFilePaths()))
+                .add(validateFileNames("dataUserAgreementPaths", study.getDataUserAgreementPaths()));
         if (!errors.isEmpty()) {
             ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments",
                     new ErrorDetails(errors));
             throw new RestServiceException(error);
+        }
+    }
+
+    /**
+     * The protocol files and the DUA of a study are stored and downloaded with the names of these lists,
+     * sent by the client: they must be plain file names, without any folder.
+     */
+    private static FieldErrorMap validateFileNames(String field, List<String> fileNames) {
+        FieldErrorMap errors = new FieldErrorMap();
+        if (fileNames != null) {
+            List<FieldError> invalidNames = new ArrayList<>();
+            for (String fileName : fileNames) {
+                if (!isFileName(fileName)) {
+                    invalidNames.add(new FieldError("invalid", "Invalid file name", fileName));
+                }
+            }
+            if (!invalidNames.isEmpty()) {
+                errors.put(field, invalidNames);
+            }
+        }
+        return errors;
+    }
+
+    private static boolean isFileName(String fileName) {
+        try {
+            return SafeFileNames.fileName(fileName).equals(fileName);
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+    }
+
+    /**
+     * @return the name an uploaded file is stored with: only the last part of the name sent by the client
+     * @throws RestServiceException (422) if there is no usable name
+     */
+    private static String uploadedFileName(MultipartFile file) throws RestServiceException {
+        try {
+            return SafeFileNames.fileName(file.getOriginalFilename());
+        } catch (IllegalArgumentException e) {
+            throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                    "Invalid file name: " + file.getOriginalFilename()));
+        }
+    }
+
+    /**
+     * A name the storage refuses (a folder in the name...) can't be a stored file.
+     */
+    private boolean existsStudyData(Long studyId, String fileName) {
+        try {
+            return storageService.existsStudyData(studyId, fileName);
+        } catch (StorageException e) {
+            return false;
         }
     }
 
@@ -485,8 +542,9 @@ public class StudyApiController implements StudyApi {
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
             @Parameter(description = "dua to upload", required = true) @Valid @RequestBody MultipartFile file)
             throws RestServiceException {
+        String fileName = uploadedFileName(file);
         try {
-            if (!file.getOriginalFilename().endsWith(PDF_EXTENSION) || file.getSize() > 50000000) {
+            if (!fileName.endsWith(PDF_EXTENSION) || file.getSize() > 50000000) {
                 LOG.error("Could not upload the file: {}", file.getOriginalFilename());
                 // Clean up: delete from study in case upload not allowed
                 Study study = studyService.findById(studyId);
@@ -498,7 +556,7 @@ public class StudyApiController implements StudyApi {
             }
             storageService.storeStudyData(
                     studyId,
-                    file.getOriginalFilename(),
+                    fileName,
                     file.getInputStream(),
                     file.getContentType(),
                     file.getSize());
@@ -712,13 +770,13 @@ public class StudyApiController implements StudyApi {
             String directory = storageService.getDirectoryStudyData(studyId);
             if (study.getProtocolFilePaths() != null) {
                 for (String path : study.getProtocolFilePaths()) {
-                    boolean exists = storageService.existsStudyData(studyId, path);
+                    boolean exists = existsStudyData(studyId, path);
                     entries.add(new FileEntryDTO(studyId, directory + path, "PROTOCOL", exists));
                 }
             }
             if (study.getDataUserAgreementPaths() != null) {
                 for (String path : study.getDataUserAgreementPaths()) {
-                    boolean exists = storageService.existsStudyData(studyId, path);
+                    boolean exists = existsStudyData(studyId, path);
                     entries.add(new FileEntryDTO(studyId, directory + path, "DUA", exists));
                 }
             }

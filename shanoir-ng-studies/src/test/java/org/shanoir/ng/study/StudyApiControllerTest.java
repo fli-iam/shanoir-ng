@@ -18,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.io.File;
@@ -26,6 +27,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Arrays;
 
+import java.util.List;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,6 +36,8 @@ import org.mockito.Mockito;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.security.ControllerSecurityService;
+import org.shanoir.ng.storage.StorageException;
 import org.shanoir.ng.storage.StorageService;
 import org.shanoir.ng.study.controler.StudyApiController;
 import org.shanoir.ng.study.dto.StudyDTO;
@@ -130,6 +134,9 @@ public class StudyApiControllerTest {
     @MockitoBean
     private StorageService storageService;
 
+    @MockitoBean(name = "controllerSecurityService")
+    private ControllerSecurityService controllerSecurityService;
+
     @TempDir
     private static File tempFolder;
 
@@ -159,6 +166,7 @@ public class StudyApiControllerTest {
         given(fieldEditionSecurityManager.validate(Mockito.any(Study.class))).willReturn(new FieldErrorMap());
         given(uniqueConstraintManager.validate(Mockito.any(Study.class))).willReturn(new FieldErrorMap());
         given(studySecurityService.hasRightOnStudy(Mockito.anyLong(), Mockito.anyString())).willReturn(true);
+        given(controllerSecurityService.idMatches(Mockito.anyLong(), Mockito.any())).willReturn(true);
     }
 
     // @Test
@@ -225,6 +233,78 @@ public class StudyApiControllerTest {
             LOG.error(e.getMessage(), e);
             fail();
         }
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void updateStudyRefusesAProtocolFileNameWithAFolder() throws Exception {
+        Study study = new Study();
+        study.setId(1L);
+        study.setName("study");
+        study.setProtocolFilePaths(List.of("protocol.pdf", "../study-2/protocol.pdf"));
+        mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(study)))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.details.fieldErrors.protocolFilePaths[0].givenValue").value("../study-2/protocol.pdf"));
+        Mockito.verify(studyServiceMock, Mockito.never()).update(Mockito.any(Study.class));
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void createStudyRefusesADuaNameWithAFolder() throws Exception {
+        Study study = new Study();
+        study.setName("study");
+        study.setDataUserAgreementPaths(List.of("../../dua.pdf"));
+        mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(study)))
+                .andExpect(status().isUnprocessableEntity());
+        Mockito.verify(studyServiceMock, Mockito.never()).create(Mockito.any(Study.class));
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void uploadProtocolFileStoresTheFileWithItsNameOnly() throws Exception {
+        MockMultipartFile file = new MockMultipartFile("file", "../../protocol.pdf", MediaType.APPLICATION_PDF_VALUE, new byte[] {1});
+        mvc.perform(MockMvcRequestBuilders.multipart(REQUEST_PATH + "/protocol-file-upload/1").file(file))
+                .andExpect(status().isOk());
+        Mockito.verify(storageService).storeStudyData(Mockito.eq(1L), Mockito.eq("protocol.pdf"), Mockito.any(),
+                Mockito.eq(MediaType.APPLICATION_PDF_VALUE), Mockito.eq(1L));
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void uploadProtocolFileRefusesAFileWithoutName() throws Exception {
+        MockMultipartFile file = new MockMultipartFile("file", "..", MediaType.APPLICATION_PDF_VALUE, new byte[] {1});
+        mvc.perform(MockMvcRequestBuilders.multipart(REQUEST_PATH + "/protocol-file-upload/1").file(file))
+                .andExpect(status().isUnprocessableEntity());
+        Mockito.verifyNoInteractions(storageService);
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void uploadDataUseAgreementStoresTheFileWithItsNameOnly() throws Exception {
+        MockMultipartFile file = new MockMultipartFile("file", "C:\\Users\\me\\dua.pdf", MediaType.APPLICATION_PDF_VALUE, new byte[] {1});
+        mvc.perform(MockMvcRequestBuilders.multipart(REQUEST_PATH + "/dua-upload/1").file(file))
+                .andExpect(status().isOk());
+        Mockito.verify(storageService).storeStudyData(Mockito.eq(1L), Mockito.eq("dua.pdf"), Mockito.any(),
+                Mockito.eq(MediaType.APPLICATION_PDF_VALUE), Mockito.eq(1L));
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void getAllFilesShowsANameRefusedByTheStorageAsMissing() throws Exception {
+        Study study = new Study();
+        study.setId(1L);
+        study.setProtocolFilePaths(List.of("protocol.pdf", "old/protocol.pdf"));
+        given(studyServiceMock.findAll()).willReturn(List.of(study));
+        given(storageService.getDirectoryStudyData(1L)).willReturn("/studies/study-1/");
+        given(storageService.existsStudyData(1L, "protocol.pdf")).willReturn(true);
+        given(storageService.existsStudyData(1L, "old/protocol.pdf")).willThrow(new StorageException("Invalid file name", null));
+        mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/files"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].exists").value(true))
+                .andExpect(jsonPath("$[1].fileName").value("/studies/study-1/old/protocol.pdf"))
+                .andExpect(jsonPath("$[1].exists").value(false));
     }
 
 }
