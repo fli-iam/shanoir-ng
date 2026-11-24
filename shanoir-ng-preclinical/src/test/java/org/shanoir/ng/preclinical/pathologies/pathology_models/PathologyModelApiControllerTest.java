@@ -28,6 +28,7 @@ import org.mockito.Mockito;
 import org.shanoir.ng.ShanoirPreclinicalApplication;
 import org.shanoir.ng.preclinical.pathologies.Pathology;
 import org.shanoir.ng.preclinical.pathologies.PathologyService;
+import org.shanoir.ng.preclinical.pathologies.subject_pathologies.SubjectPathologyService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.ShanoirException;
@@ -93,6 +94,9 @@ public class PathologyModelApiControllerTest {
 
     @TempDir
     private File tempFolder;
+
+    @MockitoBean
+    private SubjectPathologyService subjectPathologyServiceMock;
 
     @BeforeEach
     public void setup() throws ShanoirException {

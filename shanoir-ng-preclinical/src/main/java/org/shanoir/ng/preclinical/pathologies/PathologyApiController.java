@@ -16,6 +16,8 @@ package org.shanoir.ng.preclinical.pathologies;
 
 import java.util.List;
 
+import org.shanoir.ng.preclinical.pathologies.pathology_models.PathologyModelService;
+import org.shanoir.ng.preclinical.pathologies.subject_pathologies.SubjectPathologyService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
@@ -24,6 +26,7 @@ import org.shanoir.ng.shared.exception.ShanoirException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -48,6 +51,12 @@ public class PathologyApiController implements PathologyApi {
 
     @Autowired
     private PathologyEditableByManager editableOnlyValidator;
+
+    @Autowired
+    private PathologyModelService pathologyModelService;
+
+    @Autowired
+    private SubjectPathologyService subjectPathologyService;
 
     @Override
     public ResponseEntity<Pathology> createPathology(
@@ -81,13 +90,21 @@ public class PathologyApiController implements PathologyApi {
     @Override
     public ResponseEntity<Void> deletePathology(
             @Parameter(name = "Pathology id to delete", required = true) @PathVariable("id") Long id) {
-        if (pathologiesService.findById(id) == null) {
+        Pathology pathology = pathologiesService.findById(id);
+        if (pathology == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        // still given to subjects, of any study, or still used by a model: refused without telling which ones
+        if (!subjectPathologyService.findAllByPathology(pathology).isEmpty()
+                || !pathologyModelService.findByPathology(pathology).isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
         try {
             pathologiesService.deleteById(id);
         } catch (ShanoirException e) {
             return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
+        } catch (DataIntegrityViolationException e) {
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
         return new ResponseEntity<>(HttpStatus.OK);
     }

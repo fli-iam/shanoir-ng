@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 
 import org.shanoir.ng.preclinical.pathologies.Pathology;
 import org.shanoir.ng.preclinical.pathologies.PathologyService;
+import org.shanoir.ng.preclinical.pathologies.subject_pathologies.SubjectPathologyService;
 import org.shanoir.ng.shared.dto.FileEntryDTO;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEvent;
@@ -37,6 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -75,6 +77,9 @@ public class PathologyModelApiController implements PathologyModelApi {
     @Autowired
     private StorageService storageService;
 
+    @Autowired
+    private SubjectPathologyService subjectPathologyService;
+
     @Override
     public ResponseEntity<PathologyModel> createPathologyModel(
             @Parameter(name = "pathology model to create", required = true) @RequestBody PathologyModel model,
@@ -112,17 +117,24 @@ public class PathologyModelApiController implements PathologyModelApi {
         if (toDelete == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        try {
-            storageService.deletePathologyModelData(toDelete.getId(), toDelete.getFilename());
-        } catch (StorageException e) {
-            LOG.error("There was an error trying to delete files from " + toDelete.getFilepath()
-                    + toDelete.getFilename() + " " + e.getMessage(), e);
+        // still given to subjects, of any study: refused without telling which ones
+        if (!subjectPathologyService.findAllByPathologyModel(toDelete).isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
+        // the model is deleted before its files, so that a refused deletion does not lose them
         try {
             modelsService.deleteById(id);
             eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_PATHOLOGY_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
         } catch (ShanoirException e) {
             return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
+        } catch (DataIntegrityViolationException e) {
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
+        try {
+            storageService.deletePathologyModelData(toDelete.getId(), toDelete.getFilename());
+        } catch (StorageException e) {
+            LOG.error("There was an error trying to delete files from " + toDelete.getFilepath()
+                    + toDelete.getFilename() + " " + e.getMessage(), e);
         }
         return new ResponseEntity<>(HttpStatus.OK);
     }
