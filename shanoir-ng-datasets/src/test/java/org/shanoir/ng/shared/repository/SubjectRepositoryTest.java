@@ -16,10 +16,12 @@ package org.shanoir.ng.shared.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.test.context.ActiveProfiles;
 
 /**
@@ -41,6 +43,15 @@ public class SubjectRepositoryTest {
     @Test
     public void findStudyIdByIdIsEmptyForAMissingSubject() throws Exception {
         assertThat(repository.findStudyIdById(999L)).isEmpty();
+    }
+
+    @Test
+    public void findStudyIdsByIdsLeavesOutTheMissingSubjects() throws Exception {
+        assertThat(repository.findStudyIdsByIds(List.of(1L, 3L, 999L)))
+                .containsOnlyKeys(1L, 3L)
+                .containsEntry(1L, 1L)
+                .containsEntry(3L, 1L);
+        assertThat(repository.findStudyIdsByIds(List.of())).isEmpty();
     }
 
 }

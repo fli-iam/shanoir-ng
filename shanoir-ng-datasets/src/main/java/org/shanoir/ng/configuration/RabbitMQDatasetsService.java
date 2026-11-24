@@ -85,6 +85,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.DatabindException;
 import tools.jackson.databind.ObjectMapper;
 
@@ -388,7 +389,7 @@ public class RabbitMQDatasetsService {
         try {
             Optional<ExaminationStudyCenterDTO> studyCenter = examinationRepository.findStudyCenterById(examinationId);
             return studyCenter.isPresent() ? objectMapper.writeValueAsString(studyCenter.get()) : "";
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             LOG.error("Cannot write the study and center of examination {}", examinationId, e);
             return "";
         }
@@ -410,6 +411,27 @@ public class RabbitMQDatasetsService {
             return RabbitMQConfiguration.UNKNOWN_STUDY_ID;
         }
         return subjectRepository.findStudyIdById(subjectId).orElse(RabbitMQConfiguration.UNKNOWN_STUDY_ID);
+    }
+
+    /**
+     * Receives subject ids and answers the id of the study of each one, so that another microservice
+     * (preclinical) can filter a list of subjects by the study rights of the user, in one call.
+     *
+     * @param subjectIdsJson the subject ids, as a json array
+     * @return the study id by subject id, as a json object, the unknown subjects being left out; "{}" if the ids
+     *         cannot be read: never null, as no answer would be sent back and the caller would wait until its timeout
+     */
+    @RabbitListener(queues = RabbitMQConfiguration.SUBJECTS_STUDY_IDS_QUEUE, containerFactory = "multipleConsumersFactory")
+    @RabbitHandler
+    @Transactional(readOnly = true)
+    public String findSubjectsStudyIds(String subjectIdsJson) {
+        try {
+            List<Long> subjectIds = objectMapper.readValue(subjectIdsJson, new TypeReference<List<Long>>() { });
+            return objectMapper.writeValueAsString(subjectRepository.findStudyIdsByIds(subjectIds));
+        } catch (Exception e) {
+            LOG.error("Cannot find the studies of subjects {}", subjectIdsJson, e);
+            return "{}";
+        }
     }
 
     /**

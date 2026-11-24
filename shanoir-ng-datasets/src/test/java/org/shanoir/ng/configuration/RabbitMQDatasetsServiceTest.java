@@ -45,7 +45,6 @@ import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-import tools.jackson.core.JacksonException;
 
 import org.shanoir.ng.bids.service.BIDSService;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
@@ -74,6 +73,8 @@ import org.shanoir.ng.studycard.repository.StudyCardRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 
 /**
@@ -180,6 +181,25 @@ class RabbitMQDatasetsServiceTest {
         when(subjectRepository.findStudyIdById(SUBJECT_ID)).thenReturn(Optional.of(STUDY_ID));
 
         assertEquals(STUDY_ID, rabbitMQDatasetsService.findSubjectStudyId(SUBJECT_ID));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void findSubjectsStudyIdsAnswersTheStudyOfEachKnownSubject() throws Exception {
+        when(objectMapper.readValue(eq("[10,11]"), any(TypeReference.class))).thenReturn(List.of(10L, 11L));
+        when(subjectRepository.findStudyIdsByIds(List.of(10L, 11L))).thenReturn(Map.of(10L, STUDY_ID));
+        when(objectMapper.writeValueAsString(Map.of(10L, STUDY_ID))).thenReturn("{\"10\":99}");
+
+        assertEquals("{\"10\":99}", rabbitMQDatasetsService.findSubjectsStudyIds("[10,11]"));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void findSubjectsStudyIdsAnswersAnEmptyObjectForUnreadableIds() throws Exception {
+        when(objectMapper.readValue(eq("not json"), any(TypeReference.class)))
+                .thenThrow(new JacksonException("not json") { });
+
+        assertEquals("{}", rabbitMQDatasetsService.findSubjectsStudyIds("not json"));
     }
 
     @Test
