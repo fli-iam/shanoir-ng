@@ -14,7 +14,9 @@
 
 package org.shanoir.ng.preclinical.pathologies.subject_pathologies;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.shanoir.ng.preclinical.pathologies.Pathology;
 import org.shanoir.ng.preclinical.pathologies.PathologyService;
@@ -27,6 +29,7 @@ import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.shared.security.PreclinicalSecurityService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,6 +60,9 @@ public class SubjectPathologyApiController implements SubjectPathologyApi {
 
     @Autowired
     private SubjectPathologyEditableByManager editableOnlyValidator;
+
+    @Autowired
+    private PreclinicalSecurityService securityService;
 
     @Override
     public ResponseEntity<SubjectPathology> addSubjectPathology(
@@ -113,7 +119,7 @@ public class SubjectPathologyApiController implements SubjectPathologyApi {
             throw new RestServiceException(
                     new ErrorModel(HttpStatus.NOT_FOUND.value(), "Subject not found", new ErrorDetails()));
         } else {
-            if (pathosService.findById(pid) == null) {
+            if (!belongsToSubject(pathosService.findById(pid), id)) {
                 return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
             }
             try {
@@ -154,7 +160,7 @@ public class SubjectPathologyApiController implements SubjectPathologyApi {
                     new ErrorModel(HttpStatus.NOT_FOUND.value(), "Subject not found", new ErrorDetails()));
         } else {
             final SubjectPathology pathos = pathosService.findById(pid);
-            if (pathos == null) {
+            if (!belongsToSubject(pathos, id)) {
                 return new ResponseEntity<SubjectPathology>(HttpStatus.NOT_FOUND);
             }
             return new ResponseEntity<SubjectPathology>(pathos, HttpStatus.OK);
@@ -182,7 +188,7 @@ public class SubjectPathologyApiController implements SubjectPathologyApi {
         if (pathology == null) {
             return new ResponseEntity<List<SubjectPathology>>(HttpStatus.NOT_FOUND);
         } else {
-            final List<SubjectPathology> pathos = pathosService.findAllByPathology(pathology);
+            final List<SubjectPathology> pathos = keepVisibleSubjects(pathosService.findAllByPathology(pathology));
             if (pathos.isEmpty()) {
                 return new ResponseEntity<List<SubjectPathology>>(HttpStatus.NO_CONTENT);
             }
@@ -194,7 +200,7 @@ public class SubjectPathologyApiController implements SubjectPathologyApi {
     public ResponseEntity<List<SubjectPathology>> getSubjectPathologiesByPathologyModel(
             @Parameter(name = "pathology model id", required = true) @PathVariable("pathoModelId") Long pathoModelId) {
         PathologyModel patMod = pathosModelService.findById(pathoModelId);
-        List<SubjectPathology> subPathology = pathosService.findByPathologyModel(patMod);
+        List<SubjectPathology> subPathology = keepVisibleSubjects(pathosService.findByPathologyModel(patMod));
         if (subPathology == null || subPathology.isEmpty()) {
             return new ResponseEntity<List<SubjectPathology>>(HttpStatus.NO_CONTENT);
         } else {
@@ -213,6 +219,8 @@ public class SubjectPathologyApiController implements SubjectPathologyApi {
         if (animalSubject == null) {
             throw new RestServiceException(
                     new ErrorModel(HttpStatus.NOT_FOUND.value(), "animalSubject not found", new ErrorDetails()));
+        } else if (!belongsToSubject(pathosService.findById(pid), id)) {
+            return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
         } else {
             pathos.setId(pid);
 
@@ -234,6 +242,34 @@ public class SubjectPathologyApiController implements SubjectPathologyApi {
             }
             return new ResponseEntity<Void>(HttpStatus.OK);
         }
+    }
+
+    /**
+     * Keeps the entries of the subjects of the studies the user can see (all of them for an admin):
+     * the lists across all the subjects must not show the data of the other studies.
+     */
+    private List<SubjectPathology> keepVisibleSubjects(List<SubjectPathology> entries) {
+        if (entries == null || entries.isEmpty()) {
+            return entries;
+        }
+        List<Long> subjectIds = entries.stream()
+                .filter(pathos -> pathos.getAnimalSubject() != null)
+                .map(pathos -> pathos.getAnimalSubject().getId())
+                .distinct()
+                .toList();
+        Set<Long> visibleSubjectIds = new HashSet<>(securityService.filterSubjectIdsHasRight(subjectIds, "CAN_SEE_ALL"));
+        return entries.stream()
+                .filter(pathos -> pathos.getAnimalSubject() != null && visibleSubjectIds.contains(pathos.getAnimalSubject().getId()))
+                .toList();
+    }
+
+    /**
+     * The rights are checked on the subject of the path: the subject pathology must belong to it,
+     * otherwise any subject pathology could be read or changed through a subject of the user.
+     */
+    private static boolean belongsToSubject(SubjectPathology pathos, Long subjectId) {
+        return pathos != null && pathos.getAnimalSubject() != null
+                && subjectId != null && subjectId.equals(pathos.getAnimalSubject().getId());
     }
 
     private FieldErrorMap getUpdateRightsErrors(final SubjectPathology pathos) {

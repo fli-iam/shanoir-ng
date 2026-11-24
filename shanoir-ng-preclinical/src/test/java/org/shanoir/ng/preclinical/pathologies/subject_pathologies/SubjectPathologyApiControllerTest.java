@@ -33,6 +33,7 @@ import org.shanoir.ng.preclinical.subjects.model.AnimalSubject;
 import org.shanoir.ng.preclinical.subjects.service.AnimalSubjectService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.shared.security.PreclinicalSecurityService;
 import org.shanoir.ng.utils.PathologyModelUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -96,6 +97,9 @@ public class SubjectPathologyApiControllerTest {
     private SubjectPathologyEditableByManager editableOnlyValidator;
 
 
+    @MockitoBean
+    private PreclinicalSecurityService securityServiceMock;
+
     @BeforeEach
     public void setup() throws ShanoirException {
         gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
@@ -107,9 +111,17 @@ public class SubjectPathologyApiControllerTest {
         given(refsServiceMock.findById(1L)).willReturn(new Reference());
         given(subPathosServiceMock.findByAnimalSubject(new AnimalSubject()))
                 .willReturn(Arrays.asList(new SubjectPathology()));
+        // subject pathology 1 belongs to subject 1, the subject of the request paths
+        AnimalSubject animalSubject = new AnimalSubject();
+        animalSubject.setId(1L);
+        SubjectPathology subjectPathology = new SubjectPathology();
+        subjectPathology.setAnimalSubject(animalSubject);
+        given(subPathosServiceMock.findById(1L)).willReturn(subjectPathology);
         given(subPathosServiceMock.findAllByPathology(new Pathology()))
-                .willReturn(Arrays.asList(new SubjectPathology()));
-        given(subPathosServiceMock.findById(1L)).willReturn(new SubjectPathology());
+                .willReturn(Arrays.asList(subjectPathology));
+        // the rights are checked in SubjectPathologyAndTherapyApiSecurityTest
+        given(securityServiceMock.filterSubjectIdsHasRight(Mockito.anyList(), Mockito.anyString()))
+                .willAnswer(invocation -> invocation.getArgument(0));
         given(subPathosServiceMock.save(Mockito.mock(SubjectPathology.class))).willReturn(new SubjectPathology());
 
 

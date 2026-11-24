@@ -30,6 +30,7 @@ import org.shanoir.ng.preclinical.therapies.Therapy;
 import org.shanoir.ng.preclinical.therapies.TherapyService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.shared.security.PreclinicalSecurityService;
 import org.shanoir.ng.utils.TherapyModelUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -89,6 +90,9 @@ public class SubjectTherapyApiControllerTest {
     private SubjectTherapyEditableByManager editableOnlyValidator;
 
 
+    @MockitoBean
+    private PreclinicalSecurityService securityServiceMock;
+
     @BeforeEach
     public void setup() throws ShanoirException {
         gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
@@ -97,8 +101,16 @@ public class SubjectTherapyApiControllerTest {
         given(subTherapiesServiceMock.findAll()).willReturn(Arrays.asList(new SubjectTherapy()));
         given(subjectsServiceMock.getById(1L)).willReturn(new AnimalSubject());
         given(therapiesServiceMock.findById(1L)).willReturn(new Therapy());
-        given(subTherapiesServiceMock.findById(1L)).willReturn(new SubjectTherapy());
-        given(subTherapiesServiceMock.findAllByTherapy(new Therapy())).willReturn(Arrays.asList(new SubjectTherapy()));
+        // subject therapy 1 belongs to subject 1, the subject of the request paths
+        AnimalSubject animalSubject = new AnimalSubject();
+        animalSubject.setId(1L);
+        SubjectTherapy subjectTherapy = new SubjectTherapy();
+        subjectTherapy.setAnimalSubject(animalSubject);
+        given(subTherapiesServiceMock.findById(1L)).willReturn(subjectTherapy);
+        // the rights are checked in SubjectPathologyAndTherapyApiSecurityTest
+        given(securityServiceMock.filterSubjectIdsHasRight(Mockito.anyList(), Mockito.anyString()))
+                .willAnswer(invocation -> invocation.getArgument(0));
+        given(subTherapiesServiceMock.findAllByTherapy(new Therapy())).willReturn(Arrays.asList(subjectTherapy));
         given(subTherapiesServiceMock.findAllByAnimalSubject(new AnimalSubject()))
                 .willReturn(Arrays.asList(new SubjectTherapy()));
         given(subTherapiesServiceMock.save(Mockito.mock(SubjectTherapy.class))).willReturn(new SubjectTherapy());

@@ -14,7 +14,9 @@
 
 package org.shanoir.ng.preclinical.therapies.subject_therapies;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.shanoir.ng.preclinical.subjects.model.AnimalSubject;
 import org.shanoir.ng.preclinical.subjects.service.AnimalSubjectService;
@@ -25,6 +27,7 @@ import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.shared.security.PreclinicalSecurityService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,6 +59,9 @@ public class SubjectTherapyApiController implements SubjectTherapyApi {
     private SubjectTherapyUniqueValidator uniqueValidator;
     @Autowired
     private SubjectTherapyEditableByManager editableOnlyValidator;
+
+    @Autowired
+    private PreclinicalSecurityService securityService;
 
     @Override
     public ResponseEntity<SubjectTherapy> addSubjectTherapy(
@@ -113,7 +119,7 @@ public class SubjectTherapyApiController implements SubjectTherapyApi {
                     new ErrorModel(HttpStatus.NOT_FOUND.value(), ANIMAL_SUBJECT_NOT_FOUND, new ErrorDetails()));
         } else {
             SubjectTherapy toDelete = subtherapiesService.findById(tid);
-            if (toDelete == null) {
+            if (!belongsToSubject(toDelete, id)) {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
             try {
@@ -155,7 +161,7 @@ public class SubjectTherapyApiController implements SubjectTherapyApi {
                     new ErrorModel(HttpStatus.NOT_FOUND.value(), ANIMAL_SUBJECT_NOT_FOUND, new ErrorDetails()));
         } else {
             final SubjectTherapy subtherapy = subtherapiesService.findById(tid);
-            if (subtherapy == null) {
+            if (!belongsToSubject(subtherapy, id)) {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
             return new ResponseEntity<>(subtherapy, HttpStatus.OK);
@@ -183,7 +189,7 @@ public class SubjectTherapyApiController implements SubjectTherapyApi {
         if (therapy == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } else {
-            final List<SubjectTherapy> subtherapies = subtherapiesService.findAllByTherapy(therapy);
+            final List<SubjectTherapy> subtherapies = keepVisibleSubjects(subtherapiesService.findAllByTherapy(therapy));
             if (subtherapies.isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
@@ -198,6 +204,9 @@ public class SubjectTherapyApiController implements SubjectTherapyApi {
             @Parameter(name = "Subject therapy object that needs to be updated", required = true) @RequestBody SubjectTherapy subtherapy,
             final BindingResult result) throws RestServiceException {
 
+        if (!belongsToSubject(subtherapiesService.findById(tid), id)) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
         subtherapy.setId(tid);
         final FieldErrorMap accessErrors = this.getUpdateRightsErrors(subtherapy);
         final FieldErrorMap hibernateErrors = new FieldErrorMap(result);
@@ -217,6 +226,34 @@ public class SubjectTherapyApiController implements SubjectTherapyApi {
                     new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, null));
         }
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    /**
+     * Keeps the entries of the subjects of the studies the user can see (all of them for an admin):
+     * the lists across all the subjects must not show the data of the other studies.
+     */
+    private List<SubjectTherapy> keepVisibleSubjects(List<SubjectTherapy> entries) {
+        if (entries == null || entries.isEmpty()) {
+            return entries;
+        }
+        List<Long> subjectIds = entries.stream()
+                .filter(subtherapy -> subtherapy.getAnimalSubject() != null)
+                .map(subtherapy -> subtherapy.getAnimalSubject().getId())
+                .distinct()
+                .toList();
+        Set<Long> visibleSubjectIds = new HashSet<>(securityService.filterSubjectIdsHasRight(subjectIds, "CAN_SEE_ALL"));
+        return entries.stream()
+                .filter(subtherapy -> subtherapy.getAnimalSubject() != null && visibleSubjectIds.contains(subtherapy.getAnimalSubject().getId()))
+                .toList();
+    }
+
+    /**
+     * The rights are checked on the subject of the path: the subject therapy must belong to it,
+     * otherwise any subject therapy could be read or changed through a subject of the user.
+     */
+    private static boolean belongsToSubject(SubjectTherapy subtherapy, Long subjectId) {
+        return subtherapy != null && subtherapy.getAnimalSubject() != null
+                && subjectId != null && subjectId.equals(subtherapy.getAnimalSubject().getId());
     }
 
     private FieldErrorMap getUpdateRightsErrors(final SubjectTherapy subtherapy) {

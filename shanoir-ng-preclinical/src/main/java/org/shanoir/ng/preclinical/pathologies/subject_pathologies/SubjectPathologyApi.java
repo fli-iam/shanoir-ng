@@ -18,6 +18,7 @@ import java.util.List;
 
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -43,6 +44,9 @@ public interface SubjectPathologyApi {
             @ApiResponse(responseCode = "500", description = "Unexpected Error") })
     @PostMapping(value = "/subject/{id}/pathology", produces = { "application/json" }, consumes = {
             "application/json" })
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') "
+            + "and (@preclinicalSecurityService.hasRightOnSubject(#id, 'CAN_IMPORT') "
+            + "or (hasRole('EXPERT') and @preclinicalSecurityService.hasRightOnSubject(#id, 'CAN_ADMINISTRATE'))))")
     ResponseEntity<SubjectPathology> addSubjectPathology(
             @Parameter(name = "subject id", required = true) @PathVariable("id") Long id,
             @Parameter(name = "pathology to add to subject", required = true) @RequestBody SubjectPathology pathos,
@@ -54,6 +58,9 @@ public interface SubjectPathologyApi {
             @ApiResponse(responseCode = "500", description = "Unexpected Error") })
     @DeleteMapping(value = "/subject/{id}/pathology/{pid}", produces = {
             "application/json" })
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') "
+            + "and (@preclinicalSecurityService.hasRightOnSubject(#id, 'CAN_IMPORT') "
+            + "or (hasRole('EXPERT') and @preclinicalSecurityService.hasRightOnSubject(#id, 'CAN_ADMINISTRATE'))))")
     ResponseEntity<Void> deleteSubjectPathology(
             @Parameter(name = "animal subject id", required = true) @PathVariable("id") Long id,
             @Parameter(name = "pathology id", required = true) @PathVariable("pid") Long pid)
@@ -65,6 +72,9 @@ public interface SubjectPathologyApi {
             @ApiResponse(responseCode = "500", description = "Unexpected Error") })
     @DeleteMapping(value = "/subject/{id}/pathology/all", produces = {
             "application/json" })
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') "
+            + "and (@preclinicalSecurityService.hasRightOnSubject(#id, 'CAN_IMPORT') "
+            + "or (hasRole('EXPERT') and @preclinicalSecurityService.hasRightOnSubject(#id, 'CAN_ADMINISTRATE'))))")
     ResponseEntity<Void> deleteSubjectPathologies(
             @Parameter(name = "animal subject id", required = true) @PathVariable("id") Long id)
             throws RestServiceException;
@@ -76,6 +86,8 @@ public interface SubjectPathologyApi {
             @ApiResponse(responseCode = "500", description = "Unexpected error") })
     @GetMapping(value = "/subject/{id}/pathology/{pid}", produces = {
             "application/json" })
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') "
+            + "and @preclinicalSecurityService.hasRightOnSubject(#id, 'CAN_SEE_ALL'))")
     ResponseEntity<SubjectPathology> getSubjectPathologyById(
             @Parameter(name = "subject id", required = true) @PathVariable("id") Long id,
             @Parameter(name = "Subject pathology id", required = true) @PathVariable("pid") Long pid)
@@ -87,6 +99,8 @@ public interface SubjectPathologyApi {
             @ApiResponse(responseCode = "500", description = "Unexpected error") })
     @GetMapping(value = "/subject/{id}/pathology/all", produces = {
             "application/json" })
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') "
+            + "and @preclinicalSecurityService.hasRightOnSubject(#id, 'CAN_SEE_ALL'))")
     ResponseEntity<List<SubjectPathology>> getSubjectPathologies(
             @Parameter(name = "subject id", required = true) @PathVariable("id") Long id) throws RestServiceException;
 
@@ -96,6 +110,8 @@ public interface SubjectPathologyApi {
             @ApiResponse(responseCode = "500", description = "Unexpected error") })
     @GetMapping(value = "/subject/all/pathology/{pid}", produces = {
             "application/json" })
+    // used before deleting a catalogue entry: filtered to the subjects of the studies the user can see
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
     ResponseEntity<List<SubjectPathology>> getSubjectPathologiesByPathology(
             @Parameter(name = "pathology id", required = true) @PathVariable("pid") Long pid)
             throws RestServiceException;
@@ -106,6 +122,8 @@ public interface SubjectPathologyApi {
             @ApiResponse(responseCode = "500", description = "Unexpected error") })
     @GetMapping(value = "/subject/all/pathology/model/{pathoModelId}/", produces = {
             "application/json" })
+    // used before deleting a catalogue entry: filtered to the subjects of the studies the user can see
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
     public ResponseEntity<List<SubjectPathology>> getSubjectPathologiesByPathologyModel(
             @Parameter(name = "pathology model id", required = true) @PathVariable("pathoModelId") Long pathoModelId);
 
@@ -116,6 +134,9 @@ public interface SubjectPathologyApi {
             @ApiResponse(responseCode = "500", description = "Unexpected Error") })
     @PutMapping(value = "/subject/{id}/pathology/{pid}", produces = { "application/json" }, consumes = {
             "application/json" })
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') "
+            + "and (@preclinicalSecurityService.hasRightOnSubject(#id, 'CAN_IMPORT') "
+            + "or (hasRole('EXPERT') and @preclinicalSecurityService.hasRightOnSubject(#id, 'CAN_ADMINISTRATE'))))")
     ResponseEntity<Void> updateSubjectPathology(
             @Parameter(name = "ID of subject", required = true) @PathVariable("id") Long id,
             @Parameter(name = "ID of subject pathology that needs to be updated", required = true) @PathVariable("pid") Long pid,
