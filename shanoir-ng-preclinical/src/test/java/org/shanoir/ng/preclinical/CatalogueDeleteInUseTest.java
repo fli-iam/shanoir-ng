@@ -37,6 +37,11 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.shanoir.ng.preclinical.anesthetics.anesthetic.Anesthetic;
+import org.shanoir.ng.preclinical.anesthetics.anesthetic.AnestheticApiController;
+import org.shanoir.ng.preclinical.anesthetics.anesthetic.AnestheticService;
+import org.shanoir.ng.preclinical.anesthetics.examination_anesthetics.ExaminationAnesthetic;
+import org.shanoir.ng.preclinical.anesthetics.examination_anesthetics.ExaminationAnestheticService;
 import org.shanoir.ng.preclinical.pathologies.Pathology;
 import org.shanoir.ng.preclinical.pathologies.PathologyApiController;
 import org.shanoir.ng.preclinical.pathologies.PathologyService;
@@ -57,8 +62,9 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 
 /**
- * A therapy, a pathology or a pathology model still used by subjects, of any study, cannot be deleted:
- * the deletion is refused (409) without telling which subjects use it, as the user may not see their studies.
+ * An anesthetic still given in examinations, or a therapy, a pathology or a pathology model still used by subjects,
+ * of any study, cannot be deleted: the deletion is refused (409) without telling where it is used, as the user
+ * may not see those studies.
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -87,6 +93,15 @@ class CatalogueDeleteInUseTest {
     @Mock
     private ShanoirEventService eventService;
 
+    @Mock
+    private AnestheticService anestheticService;
+
+    @Mock
+    private ExaminationAnestheticService examAnestheticService;
+
+    @InjectMocks
+    private AnestheticApiController anesthetics;
+
     @InjectMocks
     private TherapyApiController therapies;
 
@@ -97,6 +112,8 @@ class CatalogueDeleteInUseTest {
     private PathologyModelApiController models;
 
     private MockedStatic<KeycloakUtil> keycloakUtil;
+
+    private final Anesthetic anesthetic = new Anesthetic();
 
     private final Therapy therapy = new Therapy();
 
@@ -109,6 +126,8 @@ class CatalogueDeleteInUseTest {
         keycloakUtil = Mockito.mockStatic(KeycloakUtil.class);
         keycloakUtil.when(KeycloakUtil::getTokenUserId).thenReturn(2L);
         model.setId(ID);
+        when(anestheticService.findById(ID)).thenReturn(anesthetic);
+        when(examAnestheticService.findByAnesthetic(anesthetic)).thenReturn(List.of());
         when(therapyService.findById(ID)).thenReturn(therapy);
         when(pathologyService.findById(ID)).thenReturn(pathology);
         when(pathologyModelService.findById(ID)).thenReturn(model);
@@ -121,6 +140,27 @@ class CatalogueDeleteInUseTest {
     @AfterEach
     void closeUserMock() {
         keycloakUtil.close();
+    }
+
+    @Test
+    void anestheticGivenInExaminationsIsNotDeleted() throws Exception {
+        when(examAnestheticService.findByAnesthetic(anesthetic)).thenReturn(List.of(new ExaminationAnesthetic()));
+
+        assertEquals(HttpStatus.CONFLICT, anesthetics.deleteAnesthetic(ID).getStatusCode());
+        verify(anestheticService, never()).deleteById(anyLong());
+    }
+
+    @Test
+    void unusedAnestheticIsDeleted() throws Exception {
+        assertEquals(HttpStatus.OK, anesthetics.deleteAnesthetic(ID).getStatusCode());
+        verify(anestheticService).deleteById(ID);
+    }
+
+    @Test
+    void anestheticDeletionRefusedByTheDatabaseIsAConflict() throws Exception {
+        doThrow(new DataIntegrityViolationException("fk")).when(anestheticService).deleteById(ID);
+
+        assertEquals(HttpStatus.CONFLICT, anesthetics.deleteAnesthetic(ID).getStatusCode());
     }
 
     @Test
