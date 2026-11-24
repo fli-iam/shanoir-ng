@@ -14,6 +14,11 @@
 
 package org.shanoir.ng.shared.security;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.dto.ExaminationStudyCenterDTO;
 import org.shanoir.ng.study.rights.StudyRightsService;
@@ -26,6 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 
 /**
@@ -93,6 +99,47 @@ public class PreclinicalSecurityService {
     }
 
     /**
+     * Check that the connected user has the given right on the given study,
+     * for the creations, the new entity not being known by ms datasets yet.
+     *
+     * @param studyId the study id
+     * @param rightStr the right, e.g. CAN_IMPORT
+     * @return true if the user is an admin or has the right, false otherwise (and for a null study)
+     */
+    public boolean hasRightOnStudy(Long studyId, String rightStr) {
+        if (KeycloakUtil.isAdmin()) {
+            return true;
+        }
+        if (studyId == null) {
+            return false;
+        }
+        return studyRightsService.hasRightOnStudy(studyId, rightStr);
+    }
+
+    /**
+     * Keeps the subjects of a list on whose study the connected user has the given right,
+     * asking ms datasets the studies of all the subjects at once.
+     *
+     * @param subjectIds the subject ids
+     * @param rightStr the right, e.g. CAN_SEE_ALL
+     * @return all the subject ids for an admin, otherwise the ones the user has the right on, in the same order
+     *         (none if ms datasets did not answer)
+     */
+    public List<Long> filterSubjectIdsHasRight(List<Long> subjectIds, String rightStr) {
+        if (subjectIds == null || subjectIds.isEmpty() || KeycloakUtil.isAdmin()) {
+            return subjectIds;
+        }
+        Map<Long, Long> studyIds = findSubjectsStudyIds(subjectIds);
+        if (studyIds.isEmpty()) {
+            return List.of();
+        }
+        Set<Long> allowedStudyIds = studyRightsService.hasRightOnStudies(new HashSet<>(studyIds.values()), rightStr);
+        return subjectIds.stream()
+                .filter(subjectId -> studyIds.containsKey(subjectId) && allowedStudyIds.contains(studyIds.get(subjectId)))
+                .toList();
+    }
+
+    /**
      * Check that the connected user has the given right on at least one study,
      * for the actions that are not attached to a study yet (e.g. a Bruker upload before its import).
      *
@@ -127,6 +174,27 @@ public class PreclinicalSecurityService {
         } catch (AmqpException | JacksonException e) {
             LOG.error("Cannot get the study of examination {} from ms datasets: access refused", examinationId, e);
             return null;
+        }
+    }
+
+    /**
+     * Asks ms datasets the studies of several subjects at once.
+     *
+     * @param subjectIds the subject ids
+     * @return the study id by subject id, without the unknown subjects; empty if ms datasets did not answer
+     */
+    private Map<Long, Long> findSubjectsStudyIds(List<Long> subjectIds) {
+        try {
+            Object reply = rabbitTemplate.convertSendAndReceive(
+                    RabbitMQConfiguration.SUBJECTS_STUDY_IDS_QUEUE, objectMapper.writeValueAsString(subjectIds));
+            if (!(reply instanceof String json) || json.isEmpty()) {
+                LOG.warn("No studies found by ms datasets for subjects {}: access refused", subjectIds);
+                return Map.of();
+            }
+            return objectMapper.readValue(json, new TypeReference<Map<Long, Long>>() { });
+        } catch (AmqpException | JacksonException e) {
+            LOG.error("Cannot get the studies of subjects {} from ms datasets: access refused", subjectIds, e);
+            return Map.of();
         }
     }
 

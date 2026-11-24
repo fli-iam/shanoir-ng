@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.shared.security;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -23,6 +24,9 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.util.List;
+import java.util.Set;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -187,6 +191,54 @@ class PreclinicalSecurityServiceTest {
         when(rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECT_STUDY_ID_QUEUE, SUBJECT_ID))
                 .thenThrow(new AmqpTimeoutException("timeout"));
         assertFalse(service.hasRightOnSubject(SUBJECT_ID, "CAN_SEE_ALL"));
+    }
+
+    @Test
+    void studyRightIsCheckedOnTheLocalStudyMembers() {
+        when(studyRightsService.hasRightOnStudy(STUDY_ID, "CAN_IMPORT")).thenReturn(true);
+        when(studyRightsService.hasRightOnStudy(STUDY_ID, "CAN_ADMINISTRATE")).thenReturn(false);
+
+        assertTrue(service.hasRightOnStudy(STUDY_ID, "CAN_IMPORT"));
+        assertFalse(service.hasRightOnStudy(STUDY_ID, "CAN_ADMINISTRATE"));
+        assertFalse(service.hasRightOnStudy(null, "CAN_IMPORT"));
+        verify(rabbitTemplate, never()).convertSendAndReceive(anyString(), any(Object.class));
+    }
+
+    @Test
+    void adminHasTheRightOnAnyStudyAndSeesAllTheSubjects() {
+        keycloakUtil.when(KeycloakUtil::isAdmin).thenReturn(true);
+
+        assertTrue(service.hasRightOnStudy(null, "CAN_IMPORT"));
+        assertEquals(List.of(1L, 2L), service.filterSubjectIdsHasRight(List.of(1L, 2L), "CAN_SEE_ALL"));
+        verify(rabbitTemplate, never()).convertSendAndReceive(anyString(), any(Object.class));
+    }
+
+    @Test
+    void subjectListIsFilteredInOneCallByTheRightOnTheirStudies() {
+        // subjects 1 and 3 in study 56, subject 2 in study 57, subject 4 unknown
+        when(rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECTS_STUDY_IDS_QUEUE, "[1,2,3,4]"))
+                .thenReturn("{\"1\":56,\"2\":57,\"3\":56}");
+        when(studyRightsService.hasRightOnStudies(Set.of(56L, 57L), "CAN_SEE_ALL")).thenReturn(Set.of(56L));
+
+        assertEquals(List.of(1L, 3L), service.filterSubjectIdsHasRight(List.of(1L, 2L, 3L, 4L), "CAN_SEE_ALL"));
+    }
+
+    @Test
+    void subjectListIsEmptyWhenDatasetsDoesNotAnswer() {
+        when(rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECTS_STUDY_IDS_QUEUE, "[1,2]"))
+                .thenReturn(null);
+        assertEquals(List.of(), service.filterSubjectIdsHasRight(List.of(1L, 2L), "CAN_SEE_ALL"));
+
+        when(rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECTS_STUDY_IDS_QUEUE, "[1,2]"))
+                .thenThrow(new AmqpTimeoutException("timeout"));
+        assertEquals(List.of(), service.filterSubjectIdsHasRight(List.of(1L, 2L), "CAN_SEE_ALL"));
+        verify(studyRightsService, never()).hasRightOnStudies(any(), anyString());
+    }
+
+    @Test
+    void emptySubjectListIsReturnedWithoutAskingDatasets() {
+        assertEquals(List.of(), service.filterSubjectIdsHasRight(List.of(), "CAN_SEE_ALL"));
+        verify(rabbitTemplate, never()).convertSendAndReceive(anyString(), any(Object.class));
     }
 
     @Test
