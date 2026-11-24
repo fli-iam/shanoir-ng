@@ -58,9 +58,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 /**
  * Rights on the extra data of the examinations, which are part of the examination:
- * view with CAN_SEE_ALL, download the file with CAN_DOWNLOAD, change with the examination edit right
- * (CAN_IMPORT, or expert role and CAN_ADMINISTRATE), on the study of the examination and on its center
- * when the user is restricted to some centers. The upload and the download only know the extra data:
+ * view with CAN_SEE_ALL, download the file with CAN_DOWNLOAD, change with CAN_IMPORT only (the "Extra data"
+ * row of the roles and rights specification, for the experts too), on the study of the examination and on its
+ * center when the user is restricted to some centers. The upload and the download only know the extra data:
  * the rights are checked on its examination.
  *
  * The study rights are really checked (PreclinicalSecurityService, StudyRightsService): only the study members,
@@ -182,7 +182,16 @@ public class ExtraDataApiSecurityTest {
     @Test
     @WithMockKeycloakUser(id = USER_ID, authorities = { "ROLE_EXPERT" })
     public void testAsExpertWithAdministrate() throws ShanoirException {
+        // unlike the other examination data, CAN_ADMINISTRATE is not enough for the extra data
         givenRights(STUDY_ID, StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_ADMINISTRATE);
+        checkReads(EXAMINATION_ID, ENTRY_ID, true);
+        checkWrites(EXAMINATION_ID, ENTRY_ID, false);
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = USER_ID, authorities = { "ROLE_EXPERT" })
+    public void testAsExpertWithImport() throws ShanoirException {
+        givenRights(STUDY_ID, StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_IMPORT);
         checkReads(EXAMINATION_ID, ENTRY_ID, true);
         checkWrites(EXAMINATION_ID, ENTRY_ID, true);
         checkWrites(OTHER_EXAMINATION_ID, OTHER_ENTRY_ID, false);
