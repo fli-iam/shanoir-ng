@@ -14,6 +14,8 @@
 
 package org.shanoir.ng.importer;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
@@ -28,6 +30,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
@@ -349,4 +352,69 @@ public class ImporterApiControllerTest {
                 .andExpect(jsonPath("$.message")
                         .value("The subject folder must contain at least one examination sub-folder."));
     }
+
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    public void testUploadFileStoresTheFileWithItsNameOnly() throws Exception {
+        Path tempDir = Files.createDirectories(importDirectory.resolve("3").resolve("456"));
+        MockMultipartFile file = new MockMultipartFile("file", "../../evil.dcm", "application/octet-stream", new byte[] {1});
+
+        mvc.perform(multipart("/importer/456").file(file))
+                .andExpect(status().isOk());
+
+        assertTrue(Files.exists(tempDir.resolve("evil.dcm")));
+        assertFalse(Files.exists(importDirectory.resolve("3").resolve("evil.dcm")));
+        assertFalse(Files.exists(importDirectory.resolve("evil.dcm")));
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    public void testUploadFileRefusesAFileWithoutName() throws Exception {
+        Path tempDir = Files.createDirectories(importDirectory.resolve("3").resolve("456"));
+        MockMultipartFile file = new MockMultipartFile("file", "..", "application/octet-stream", new byte[] {1});
+
+        mvc.perform(multipart("/importer/456").file(file))
+                .andExpect(status().isUnprocessableEntity());
+
+        assertEquals(0, tempDir.toFile().list().length);
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    public void testUploadFileRefusesATempDirOutsideOfTheUserFolder() throws Exception {
+        // ".." (URL encoded to reach the method) is the import folder of all the users
+        Files.createDirectories(importDirectory.resolve("3"));
+        MockMultipartFile file = new MockMultipartFile("file", "1.dcm", "application/octet-stream", new byte[] {1});
+
+        mvc.perform(multipart(URI.create("/importer/%2E%2E")).file(file))
+                .andExpect(status().isUnprocessableEntity());
+
+        assertFalse(Files.exists(importDirectory.resolve("1.dcm")));
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    public void testUploadProcessedDatasetStoresTheFileWithItsNameOnly() throws Exception {
+        MockMultipartFile image = new MockMultipartFile("image", "../../../brain.nii", "application/octet-stream", new byte[] {1});
+
+        String path = mvc.perform(multipart("/importer/upload_processed_dataset/").file(image))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        Path stored = Path.of(path).normalize();
+        assertEquals("brain.nii", stored.getFileName().toString());
+        assertTrue(stored.startsWith(importDirectory.resolve("3")), stored + " is outside of the import folder of the user");
+        assertTrue(Files.exists(stored));
+        assertFalse(Files.exists(importDirectory.getParent().resolve("brain.nii")));
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    public void testUploadProcessedDatasetRefusesAFileWithoutName() throws Exception {
+        MockMultipartFile image = new MockMultipartFile("image", "folder/", "application/octet-stream", new byte[] {1});
+
+        mvc.perform(multipart("/importer/upload_processed_dataset/").file(image))
+                .andExpect(status().isUnprocessableEntity());
+    }
+
 }

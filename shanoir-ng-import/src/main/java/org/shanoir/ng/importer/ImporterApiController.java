@@ -66,6 +66,7 @@ import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.exception.ShanoirImportException;
+import org.shanoir.ng.shared.files.SafeFileNames;
 import org.shanoir.ng.utils.ImportUtils;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
@@ -515,8 +516,9 @@ public class ImporterApiController implements ImporterApi {
             @Parameter(name = "header detail", required = false) @RequestPart(value = "header", required = false) MultipartFile headerFile)
                     throws RestServiceException {
 
-        String imageFileName = imageFile == null ? "" : imageFile.getOriginalFilename();
-        String headerFileName = headerFile == null ? "" : headerFile.getOriginalFilename();
+        // only the names of the files, without the folders some clients send
+        String imageFileName = imageFile == null ? "" : uploadedFileName(imageFile);
+        String headerFileName = headerFile == null ? "" : uploadedFileName(headerFile);
         Boolean isNifti = imageFileName.endsWith(".nii") || imageFileName.endsWith(".nii.gz");
         Boolean isAnalyze = imageFileName.endsWith(".img") && headerFileName.endsWith(".hdr");
 
@@ -750,14 +752,40 @@ public class ImporterApiController implements ImporterApi {
         return new ResponseEntity<String>(tempDirForImport.getName(), HttpStatus.OK);
     }
 
+    /**
+     * @return the name an uploaded file is stored with: only the last part of the name sent by the client
+     * @throws RestServiceException (422) if there is no usable name
+     */
+    private static String uploadedFileName(MultipartFile file) throws RestServiceException {
+        try {
+            return SafeFileNames.fileName(file.getOriginalFilename());
+        } catch (IllegalArgumentException e) {
+            throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                    "Invalid file name: " + file.getOriginalFilename(), null));
+        }
+    }
+
+    private static boolean isFileName(String name) {
+        try {
+            return SafeFileNames.fileName(name).equals(name);
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+    }
+
     @Override
     public ResponseEntity<Void> uploadFile(@PathVariable("tempDirId") String tempDirId,
                                            @RequestParam("file") MultipartFile file) throws RestServiceException, IOException {
         final File userImportDir = ImportUtils.getUserImportDir(importDir);
+        // the temp dir must be one of the folders of the user (created by createTempDir), not a path
+        if (!isFileName(tempDirId)) {
+            throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                    "Upload file called with an invalid tempDirId.", null));
+        }
         final File importJobDir = new File(userImportDir, tempDirId);
         // only continue in case of existing temp dir id
         if (importJobDir.exists()) {
-            File fileToWrite = new File(importJobDir, file.getOriginalFilename());
+            File fileToWrite = new File(importJobDir, uploadedFileName(file));
             if (fileToWrite.exists()) {
                 throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
                         "Duplicate file name in tempDir, could not create file as file exists already.", null));
