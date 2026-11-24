@@ -357,4 +357,49 @@ public class DatasetAcquisitionApiControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isEmpty());
     }
+
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void testUpdateRefusesAnExtraDataNameWithAFolder() throws Exception {
+        // GIVEN an extra data list with a name leading to another folder
+        String acquisition = "{\"id\":1,\"extraDataFilePathList\":[\"a.pdf\",\"../../acquisition-2/b.pdf\"]}";
+
+        // WHEN it is sent
+        mvc.perform(MockMvcRequestBuilders.multipart(HttpMethod.PUT, REQUEST_PATH + "/1")
+                .file(new MockMultipartFile("datasetAcquisition", "", MediaType.APPLICATION_JSON_VALUE, acquisition.getBytes())))
+                .andExpect(status().isUnprocessableEntity());
+
+        // THEN nothing is updated
+        Mockito.verify(datasetAcquisitionService, Mockito.never()).update(Mockito.any(), Mockito.anyList());
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void testUpdateRefusesAnUploadedFileWithoutName() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.multipart(HttpMethod.PUT, REQUEST_PATH + "/1")
+                .file(new MockMultipartFile("datasetAcquisition", "", MediaType.APPLICATION_JSON_VALUE, "{\"id\":1}".getBytes()))
+                .file(new MockMultipartFile("files", "folder/", MediaType.TEXT_PLAIN_VALUE, "a".getBytes())))
+                .andExpect(status().isUnprocessableEntity());
+        Mockito.verify(datasetAcquisitionService, Mockito.never()).update(Mockito.any(), Mockito.anyList());
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void testUpdateMailsTheNamesTheFilesAreStoredWith() throws Exception {
+        Examination exam = new Examination();
+        exam.setId(3L);
+        GenericDatasetAcquisition acquisition = new GenericDatasetAcquisition();
+        acquisition.setId(1L);
+        acquisition.setExamination(exam);
+        given(dsAcqMapper.acquisitionDTOToAcquisitionIdRelations(Mockito.any())).willReturn(acquisition);
+        given(datasetAcquisitionService.update(Mockito.eq(acquisition), Mockito.anyList())).willReturn(acquisition);
+
+        mvc.perform(MockMvcRequestBuilders.multipart(HttpMethod.PUT, REQUEST_PATH + "/1")
+                .file(new MockMultipartFile("datasetAcquisition", "", MediaType.APPLICATION_JSON_VALUE, "{\"id\":1}".getBytes()))
+                .file(new MockMultipartFile("files", "../../a.txt", MediaType.TEXT_PLAIN_VALUE, "a".getBytes())))
+                .andExpect(status().isNoContent());
+
+        Mockito.verify(importerMailService).sendExtraDataEmail(exam, 1L, List.of("a.txt"), 12L);
+    }
+
 }

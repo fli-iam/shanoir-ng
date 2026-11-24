@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.io.File;
@@ -350,6 +351,67 @@ public class ExaminationApiControllerTest {
                 "findExaminationsBySubjectId maps the lazy 'copies' collection and must stay "
                         + "transactional through the mapping, not just the repository fetch");
         assertTrue(transactional.readOnly(), "findExaminationsBySubjectId only reads data");
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void saveNewExaminationRefusesAnExtraDataNameWithAFolder() throws Exception {
+        Examination examination = ModelsUtil.createExamination();
+        examination.setExtraDataFilePathList(List.of("../../secret.txt"));
+        mvc.perform(MockMvcRequestBuilders.multipart(REQUEST_PATH)
+                .file(new MockMultipartFile("examination", "", MediaType.APPLICATION_JSON_VALUE, objectMapper.writeValueAsBytes(examination))))
+                .andExpect(status().isUnprocessableEntity());
+        Mockito.verify(examinationServiceMock, Mockito.never()).saveWithExtraData(Mockito.any(), Mockito.anyList());
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void updateExaminationRefusesAnExtraDataNameWithAFolder() throws Exception {
+        Examination examination = ModelsUtil.createExamination(1L);
+        examination.setExtraDataFilePathList(List.of("a.txt", "../examination-2/b.txt"));
+        mvc.perform(MockMvcRequestBuilders.multipart(HttpMethod.PUT, REQUEST_PATH_WITH_ID)
+                .file(new MockMultipartFile("examination", "", MediaType.APPLICATION_JSON_VALUE, objectMapper.writeValueAsBytes(examination))))
+                .andExpect(status().isUnprocessableEntity());
+        Mockito.verify(examinationServiceMock, Mockito.never()).updateWithExtraData(Mockito.any(), Mockito.anyList());
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void updateExaminationRefusesAnUploadedFileWithoutName() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.multipart(HttpMethod.PUT, REQUEST_PATH_WITH_ID)
+                .file(new MockMultipartFile("examination", "", MediaType.APPLICATION_JSON_VALUE, objectMapper.writeValueAsBytes(ModelsUtil.createExamination(1L))))
+                .file(new MockMultipartFile("files", "../..", MediaType.TEXT_PLAIN_VALUE, "a".getBytes())))
+                .andExpect(status().isUnprocessableEntity());
+        Mockito.verify(examinationServiceMock, Mockito.never()).updateWithExtraData(Mockito.any(), Mockito.anyList());
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void updateExaminationMailsTheNamesTheFilesAreStoredWith() throws Exception {
+        Examination examination = ModelsUtil.createExamination(1L);
+        examination.setExtraDataFilePathList(List.of("a.txt"));
+        given(examinationServiceMock.updateWithExtraData(Mockito.any(), Mockito.anyList())).willReturn(examination);
+        mvc.perform(MockMvcRequestBuilders.multipart(HttpMethod.PUT, REQUEST_PATH_WITH_ID)
+                .file(new MockMultipartFile("examination", "", MediaType.APPLICATION_JSON_VALUE, objectMapper.writeValueAsBytes(examination)))
+                .file(new MockMultipartFile("files", "C:\\Users\\me\\a.txt", MediaType.TEXT_PLAIN_VALUE, "a".getBytes())))
+                .andExpect(status().isNoContent());
+        Mockito.verify(importerMailService).sendExtraDataEmail(examination, null, List.of("a.txt"), 12L);
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void getAllFilesShowsANameRefusedByTheStorageAsMissing() throws Exception {
+        Examination examination = ModelsUtil.createExamination(1L);
+        examination.setExtraDataFilePathList(List.of("a.txt", "old/name.txt"));
+        given(examinationServiceMock.findAll()).willReturn(List.of(examination));
+        given(storageService.getDirectoryExtraData(1L)).willReturn("/datasets/examination-1/");
+        given(storageService.existsExtraData(1L, "a.txt")).willReturn(true);
+        given(storageService.existsExtraData(1L, "old/name.txt")).willThrow(new StorageException("Invalid file name", null));
+        mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/files"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].exists").value(true))
+                .andExpect(jsonPath("$[1].fileName").value("/datasets/examination-1/old/name.txt"))
+                .andExpect(jsonPath("$[1].exists").value(false));
     }
 
 }

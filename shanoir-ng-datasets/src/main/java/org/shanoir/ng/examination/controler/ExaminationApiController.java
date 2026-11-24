@@ -36,6 +36,7 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.storage.StorageException;
 import org.shanoir.ng.storage.StorageService;
+import org.shanoir.ng.utils.ExtraDataFileNames;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -187,6 +188,7 @@ public class ExaminationApiController implements ExaminationApi {
             @Parameter(description = "extra data files to store") @RequestPart(value = "files", required = false) final List<MultipartFile> files) throws RestServiceException, StorageException {
         List<MultipartFile> filesToStore = files != null ? files : List.of();
         examinationService.validate(result);
+        ExtraDataFileNames.check(examinationDTO.getExtraDataFilePathList(), filesToStore);
         Examination examination = examinationMapper.examinationDTOToExaminationIdRelations(examinationDTO);
         examinationService.generateStudyInstanceUID(examination);
         try {
@@ -194,7 +196,7 @@ public class ExaminationApiController implements ExaminationApi {
             LOG.info("New examination created with {} extra data file(s): {}", filesToStore.size(), createdExamination);
             // NB: Message as centerId / subjectId is important in RabbitMQStudiesService
             eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EXAMINATION_EVENT, createdExamination.getId().toString(), KeycloakUtil.getTokenUserId(), "centerId:" + createdExamination.getCenterId() + ";subjectId:" + (createdExamination.getSubject() != null ? createdExamination.getSubject().getId() : null), ShanoirEvent.SUCCESS, createdExamination.getStudyId()));
-            importerMailService.sendExtraDataEmail(createdExamination, null, filesToStore.stream().map(MultipartFile::getOriginalFilename).toList(), KeycloakUtil.getTokenUserId());
+            importerMailService.sendExtraDataEmail(createdExamination, null, ExtraDataFileNames.of(filesToStore), KeycloakUtil.getTokenUserId());
             ExaminationDTO createdExaminationDTO = examinationMapper.examinationToExaminationDTOWithCopiesAndSourceAndStudyId(createdExamination);
             return new ResponseEntity<>(createdExaminationDTO, HttpStatus.OK);
         } catch (EntityNotFoundException e) {
@@ -215,12 +217,13 @@ public class ExaminationApiController implements ExaminationApi {
             @Parameter(description = "new extra data files to store") @RequestPart(value = "files", required = false) final List<MultipartFile> files) throws RestServiceException, StorageException {
         examinationService.validate(result);
         List<MultipartFile> filesToStore = files != null ? files : List.of();
+        ExtraDataFileNames.check(examination.getExtraDataFilePathList(), filesToStore);
         try {
             Examination updatedExamination = examinationService.updateWithExtraData(examinationMapper.examinationDTOToExaminationIdRelations(examination), filesToStore);
             LOG.info("Examination {} updated with {} new extra data file(s)", examinationId, filesToStore.size());
             eventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_EXAMINATION_EVENT, examination.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, examination.getStudyId()));
             rabbitTemplate.convertAndSend(RabbitMQConfiguration.RELOAD_BIDS, objectMapper.writeValueAsString(examination.getStudyId()));
-            importerMailService.sendExtraDataEmail(updatedExamination, null, filesToStore.stream().map(MultipartFile::getOriginalFilename).toList(), KeycloakUtil.getTokenUserId());
+            importerMailService.sendExtraDataEmail(updatedExamination, null, ExtraDataFileNames.of(filesToStore), KeycloakUtil.getTokenUserId());
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (JacksonException | EntityNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -291,7 +294,13 @@ public class ExaminationApiController implements ExaminationApi {
             String directory = storageService.getDirectoryExtraData(examinationId);
             if (examination.getExtraDataFilePathList() != null) {
                 for (String path : examination.getExtraDataFilePathList()) {
-                    boolean exists = storageService.existsExtraData(examinationId, path);
+                    boolean exists;
+                    try {
+                        exists = storageService.existsExtraData(examinationId, path);
+                    } catch (StorageException e) {
+                        // a name the storage refuses (folder in the name...) can't be a stored file
+                        exists = false;
+                    }
                     entries.add(new FileEntryDTO(examination.getStudyId(), directory + path, "EXTRA-DATA", exists));
                 }
             }

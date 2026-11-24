@@ -408,4 +408,24 @@ class DatasetAcquisitionServiceImplTest {
             verify(repository, never()).save(any(DatasetAcquisition.class));
         }
     }
+
+    @Test
+    void updateWithFilesStoresTheFilesWithTheirNameOnly() throws Exception {
+        prepareUpdate(true, false);
+        when(storageService.storeAcquisitionExtraData(Mockito.eq(ACQ_ID), anyString(), any(), any(), anyLong()))
+                .thenReturn("file:///datasets/acquisition/b.pdf");
+        MockMultipartFile file = new MockMultipartFile("files", "..\\..\\b.pdf", "application/pdf", new byte[] {1});
+
+        try (MockedStatic<KeycloakUtil> keycloakUtil = Mockito.mockStatic(KeycloakUtil.class)) {
+            keycloakUtil.when(KeycloakUtil::getTokenUserId).thenReturn(1L);
+            keycloakUtil.when(KeycloakUtil::getTokenRoles).thenReturn(Set.of("ROLE_USER"));
+
+            service.update(acquisitionToUpdate(new ArrayList<>(List.of("a.pdf", "b.pdf"))), List.of(file));
+
+            verify(storageService).existsAcquisitionExtraData(ACQ_ID, "b.pdf");
+            verify(storageService).storeAcquisitionExtraData(Mockito.eq(ACQ_ID), Mockito.eq("b.pdf"), any(),
+                    Mockito.eq("application/pdf"), Mockito.eq(1L));
+        }
+    }
+
 }

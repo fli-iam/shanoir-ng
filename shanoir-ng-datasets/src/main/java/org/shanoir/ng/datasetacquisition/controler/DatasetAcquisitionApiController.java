@@ -48,6 +48,7 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.storage.StorageException;
 import org.shanoir.ng.storage.StorageService;
+import org.shanoir.ng.utils.ExtraDataFileNames;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
@@ -347,11 +348,12 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 
         validate(result);
         List<MultipartFile> filesToStore = files != null ? files : List.of();
+        ExtraDataFileNames.check(datasetAcquisition.getExtraDataFilePathList(), filesToStore);
         try {
             DatasetAcquisition acquisition = datasetAcquisitionService.update(dsAcqMapper.acquisitionDTOToAcquisitionIdRelations(datasetAcquisition), filesToStore);
             if (acquisition.getExamination() != null) {
                 importerMailService.sendExtraDataEmail(acquisition.getExamination(), datasetAcquisitionId,
-                        filesToStore.stream().map(MultipartFile::getOriginalFilename).toList(), KeycloakUtil.getTokenUserId());
+                        ExtraDataFileNames.of(filesToStore), KeycloakUtil.getTokenUserId());
             }
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (EntityNotFoundException e) {
