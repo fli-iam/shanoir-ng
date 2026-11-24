@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.shanoir.ng.bids.service.BIDSService;
@@ -39,6 +40,7 @@ import org.shanoir.ng.importer.service.ImporterMailService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.dataset.RelatedDataset;
+import org.shanoir.ng.shared.dto.ExaminationStudyCenterDTO;
 import org.shanoir.ng.shared.dto.ParticipantsTsvRequestDTO;
 import org.shanoir.ng.shared.dto.StudyExaminationsDTO;
 import org.shanoir.ng.shared.event.ShanoirEvent;
@@ -367,21 +369,29 @@ public class RabbitMQDatasetsService {
     }
 
     /**
-     * Receives an examination id and answers the id of its study, so that another microservice
-     * (preclinical) can check the study rights of the user on data attached to this examination.
+     * Receives an examination id and answers its study and center, so that another microservice
+     * (preclinical) can check the study rights of the user, restricted to some centers or not,
+     * on data attached to this examination.
      *
      * @param examinationId the examination id
-     * @return the study id, or RabbitMQConfiguration.UNKNOWN_STUDY_ID if the examination does not exist:
-     *         never null, as no answer would be sent back and the caller would wait until its timeout
+     * @return the study and center as an ExaminationStudyCenterDTO json string, or an empty string if the
+     *         examination does not exist: never null, as no answer would be sent back and the caller would
+     *         wait until its timeout
      */
-    @RabbitListener(queues = RabbitMQConfiguration.EXAMINATION_STUDY_ID_QUEUE, containerFactory = "multipleConsumersFactory")
+    @RabbitListener(queues = RabbitMQConfiguration.EXAMINATION_STUDY_CENTER_QUEUE, containerFactory = "multipleConsumersFactory")
     @RabbitHandler
     @Transactional(readOnly = true)
-    public Long findExaminationStudyId(Long examinationId) {
+    public String findExaminationStudyCenter(Long examinationId) {
         if (examinationId == null) {
-            return RabbitMQConfiguration.UNKNOWN_STUDY_ID;
+            return "";
         }
-        return examinationRepository.findStudyIdById(examinationId).orElse(RabbitMQConfiguration.UNKNOWN_STUDY_ID);
+        try {
+            Optional<ExaminationStudyCenterDTO> studyCenter = examinationRepository.findStudyCenterById(examinationId);
+            return studyCenter.isPresent() ? objectMapper.writeValueAsString(studyCenter.get()) : "";
+        } catch (JsonProcessingException e) {
+            LOG.error("Cannot write the study and center of examination {}", examinationId, e);
+            return "";
+        }
     }
 
     /**

@@ -17,6 +17,7 @@ package org.shanoir.ng.examination;
 import org.junit.jupiter.api.Test;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
+import org.shanoir.ng.shared.dto.ExaminationStudyCenterDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
@@ -124,15 +125,20 @@ public class ExaminationRepositoryTest {
     }
 
     @Test
-    public void findStudyIdByIdAnswersTheStudyOfTheExamination() throws Exception {
-        // examination 3 is in study 3, while its subject is in study 1
-        assertThat(repository.findStudyIdById(3L)).contains(3L);
-        assertThat(repository.findStudyIdById(EXAMINATION_TEST_1_ID)).contains(STUDY_TEST_1_ID);
+    public void findStudyCenterByIdAnswersTheStudyAndCenterOfTheExamination() throws Exception {
+        // examination 3 is in study 3 and center 1, while its subject is in study 1
+        ExaminationStudyCenterDTO studyCenter = repository.findStudyCenterById(3L).orElseThrow();
+        assertThat(studyCenter.getStudyId()).isEqualTo(3L);
+        assertThat(studyCenter.getCenterId()).isEqualTo(1L);
+        // examination 2 is in study 1 and center 2
+        studyCenter = repository.findStudyCenterById(2L).orElseThrow();
+        assertThat(studyCenter.getStudyId()).isEqualTo(STUDY_TEST_1_ID);
+        assertThat(studyCenter.getCenterId()).isEqualTo(2L);
     }
 
     @Test
-    public void findStudyIdByIdIsEmptyForAMissingExamination() throws Exception {
-        assertThat(repository.findStudyIdById(999L)).isEmpty();
+    public void findStudyCenterByIdIsEmptyForAMissingExamination() throws Exception {
+        assertThat(repository.findStudyCenterById(999L)).isEmpty();
     }
 
     @Test

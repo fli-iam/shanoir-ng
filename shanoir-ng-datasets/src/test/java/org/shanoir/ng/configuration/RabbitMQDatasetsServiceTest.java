@@ -55,6 +55,7 @@ import org.shanoir.ng.dataset.service.DatasetCopyService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;
+import org.shanoir.ng.shared.dto.ExaminationStudyCenterDTO;
 import org.shanoir.ng.shared.dto.ParticipantsTsvRequestDTO;
 import org.shanoir.ng.importer.service.ImporterMailService;
 import org.shanoir.ng.shared.dataset.RelatedDataset;
@@ -158,18 +159,20 @@ class RabbitMQDatasetsServiceTest {
     }
 
     @Test
-    void findExaminationStudyIdAnswersTheStudyOfTheExamination() {
-        when(examinationRepository.findStudyIdById(EXAM_ID)).thenReturn(Optional.of(STUDY_ID));
+    void findExaminationStudyCenterAnswersTheStudyAndCenterOfTheExamination() throws Exception {
+        ExaminationStudyCenterDTO studyCenter = new ExaminationStudyCenterDTO(STUDY_ID, 5L);
+        when(examinationRepository.findStudyCenterById(EXAM_ID)).thenReturn(Optional.of(studyCenter));
+        when(objectMapper.writeValueAsString(studyCenter)).thenReturn("{\"studyId\":99,\"centerId\":5}");
 
-        assertEquals(STUDY_ID, rabbitMQDatasetsService.findExaminationStudyId(EXAM_ID));
+        assertEquals("{\"studyId\":99,\"centerId\":5}", rabbitMQDatasetsService.findExaminationStudyCenter(EXAM_ID));
     }
 
     @Test
-    void findExaminationStudyIdAnswersUnknownForAMissingExamination() {
-        when(examinationRepository.findStudyIdById(EXAM_ID)).thenReturn(Optional.empty());
+    void findExaminationStudyCenterAnswersEmptyForAMissingExamination() {
+        when(examinationRepository.findStudyCenterById(EXAM_ID)).thenReturn(Optional.empty());
 
-        assertEquals(RabbitMQConfiguration.UNKNOWN_STUDY_ID, rabbitMQDatasetsService.findExaminationStudyId(EXAM_ID));
-        assertEquals(RabbitMQConfiguration.UNKNOWN_STUDY_ID, rabbitMQDatasetsService.findExaminationStudyId(null));
+        assertEquals("", rabbitMQDatasetsService.findExaminationStudyCenter(EXAM_ID));
+        assertEquals("", rabbitMQDatasetsService.findExaminationStudyCenter(null));
     }
 
     @Test

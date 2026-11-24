@@ -23,6 +23,7 @@ import java.util.Optional;
 import org.hibernate.Hibernate;
 import org.shanoir.ng.examination.dto.ExaminationForRightsDTO;
 import org.shanoir.ng.examination.model.Examination;
+import org.shanoir.ng.shared.dto.ExaminationStudyCenterDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
@@ -99,13 +100,14 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
     List<Long> findIdsByStudyId(@Param("studyId") Long studyId);
 
     /**
-     * Id of the study of an examination, without loading the examination.
+     * Study and center of an examination, without loading the examination.
      *
      * @param examinationId the examination id
-     * @return the study id, empty if the examination does not exist
+     * @return the study and center ids, empty if the examination does not exist
      */
-    @Query("select e.study.id from Examination e where e.id = :examinationId")
-    Optional<Long> findStudyIdById(@Param("examinationId") Long examinationId);
+    @Query("select new org.shanoir.ng.shared.dto.ExaminationStudyCenterDTO(e.study.id, e.centerId) "
+            + "from Examination e where e.id = :examinationId")
+    Optional<ExaminationStudyCenterDTO> findStudyCenterById(@Param("examinationId") Long examinationId);
 
     @Query("SELECT e.subject.id, MIN(e.examinationDate) FROM Examination e "
             + "WHERE e.study.id = :studyId AND e.subject IS NOT NULL AND e.examinationDate IS NOT NULL "

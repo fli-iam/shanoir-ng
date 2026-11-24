@@ -311,13 +311,16 @@ public class RabbitMQConfiguration {
     /** Subject deletion => Check if some data of the subject was copied into another study **/
     public static final String SUBJECT_HAS_COPIED_DATA_QUEUE = "subject-has-copied-data-queue";
 
-    /** Examination id => id of its study, from datasets MS (to check the study rights in other MS). */
-    public static final String EXAMINATION_STUDY_ID_QUEUE = "examination-study-id-queue";
+    /**
+     * Examination id => its study and center, as an ExaminationStudyCenterDTO json string, from datasets MS
+     * (to check the study rights in other MS). Empty string for an unknown examination.
+     */
+    public static final String EXAMINATION_STUDY_CENTER_QUEUE = "examination-study-center-queue";
 
     /** Subject id => id of its study, from datasets MS (to check the study rights in other MS). */
     public static final String SUBJECT_STUDY_ID_QUEUE = "subject-study-id-queue";
 
-    /** Answer of the study id queues for an unknown examination or subject (a null answer is never sent back). */
+    /** Answer of the subject study id queue for an unknown subject (a null answer is never sent back). */
     public static final Long UNKNOWN_STUDY_ID = -1L;
 
     ////////////////// EXCHANGES //////////////////
@@ -616,8 +619,8 @@ public class RabbitMQConfiguration {
     }
 
     @Bean
-    public static Queue examinationStudyIdQueue() {
-        return new Queue(EXAMINATION_STUDY_ID_QUEUE, true);
+    public static Queue examinationStudyCenterQueue() {
+        return new Queue(EXAMINATION_STUDY_CENTER_QUEUE, true);
     }
 
     @Bean
