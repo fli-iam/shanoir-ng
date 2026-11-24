@@ -128,7 +128,10 @@ services:
     build:
       context: docker-compose
       target: database
-    command: --max_allowed_packet 20000000
+    # max_connections: the connection pools of the microservices add up to 150 (datasets 70,
+    # import 50, the others 10), so the default (151) leaves no room for an init run, the
+    # migrations or an admin session ('Too many connections')
+    command: --max_allowed_packet 20000000 --max_connections 300
     environment:
       - "MARIADB_ROOT_PASSWORD=${SHANOIR_DB_ROOT_PASSWORD:?is not set, see .env.example}"
       - MARIADB_AUTO_UPGRADE=1
