@@ -14,8 +14,14 @@
 
 package org.shanoir.ng.preclinical.pathologies.pathology_models;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.io.File;
@@ -39,6 +45,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -159,6 +167,25 @@ public class PathologyModelApiControllerTest {
         mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(gson.toJson(PathologyModelUtil.createPathologyModel()))).andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser
+    public void uploadSpecificationsKeepsOnlyTheFileNameTest() throws Exception {
+        // a name with folders would be stored outside of the folder of the pathology model
+        MockMultipartFile file = new MockMultipartFile("files", "..\\..\\evil.txt", "text/plain", "data".getBytes());
+        mvc.perform(MockMvcRequestBuilders.multipart(REQUEST_PATH_UPLOAD_SPECS).file(file))
+                .andExpect(status().isOk());
+        verify(storageService).storePathologyModelData(any(), eq("evil.txt"), any(), anyString(), anyLong());
+    }
+
+    @Test
+    @WithMockUser
+    public void uploadSpecificationsRefusesAFileNameWithoutNameTest() throws Exception {
+        MockMultipartFile file = new MockMultipartFile("files", "a/", "text/plain", "data".getBytes());
+        mvc.perform(MockMvcRequestBuilders.multipart(REQUEST_PATH_UPLOAD_SPECS).file(file))
+                .andExpect(status().isUnprocessableEntity());
+        verify(storageService, never()).storePathologyModelData(any(), any(), any(), any(), anyLong());
     }
 
 }

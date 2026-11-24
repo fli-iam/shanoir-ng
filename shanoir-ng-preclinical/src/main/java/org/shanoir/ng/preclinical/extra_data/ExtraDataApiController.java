@@ -31,6 +31,7 @@ import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.shared.files.SafeFileNames;
 import org.shanoir.ng.storage.StorageException;
 import org.shanoir.ng.storage.StorageService;
 import org.slf4j.Logger;
@@ -107,8 +108,9 @@ public class ExtraDataApiController implements ExtraDataApi {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
+        String fileName = safeFileName(uploadfiles[0]);
         try {
-            ExaminationExtraData uploadedData = saveUploadedFile(extradata, uploadfiles[0]);
+            ExaminationExtraData uploadedData = saveUploadedFile(extradata, uploadfiles[0], fileName);
             extraDataService.save(uploadedData);
             return new ResponseEntity<>(extradata, HttpStatus.OK);
         } catch (IOException e) {
@@ -378,20 +380,33 @@ public class ExtraDataApiController implements ExtraDataApi {
         return editableOnlyValidator.validate(extraData);
     }
 
-    private ExaminationExtraData saveUploadedFile(ExaminationExtraData examinationExtraData, MultipartFile file) throws IOException {
+    /**
+     * The name sent by the client is used to build the path of the stored file: it must not contain any folder.
+     */
+    private static String safeFileName(MultipartFile file) throws RestServiceException {
         try {
-            LOG.info("Saving file {} for examination: {}", file.getOriginalFilename(), examinationExtraData.getId());
+            return SafeFileNames.fileName(file.getOriginalFilename());
+        } catch (IllegalArgumentException e) {
+            throw new RestServiceException(
+                    new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Invalid file name", null));
+        }
+    }
+
+    private ExaminationExtraData saveUploadedFile(ExaminationExtraData examinationExtraData, MultipartFile file,
+            String fileName) throws IOException {
+        try {
+            LOG.info("Saving file {} for examination: {}", fileName, examinationExtraData.getId());
             String filePath = storageService.storePreclinicalExtraData(
                     examinationExtraData.getExaminationId(),
-                    file.getOriginalFilename(),
+                    fileName,
                     file.getInputStream(),
                     file.getContentType(),
                     file.getSize());
-            examinationExtraData.setFilename(file.getOriginalFilename());
+            examinationExtraData.setFilename(fileName);
             examinationExtraData.setFilepath(filePath);
         } catch (Exception e) {
             LOG.error("Error while uploading file {} for examination: {}. File not uploaded. {}",
-                    file.getOriginalFilename(), examinationExtraData.getId(), e);
+                    fileName, examinationExtraData.getId(), e);
             return null;
         }
         return examinationExtraData;

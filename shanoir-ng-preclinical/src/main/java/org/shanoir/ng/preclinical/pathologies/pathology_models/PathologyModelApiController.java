@@ -31,6 +31,7 @@ import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.shared.files.SafeFileNames;
 import org.shanoir.ng.storage.StorageException;
 import org.shanoir.ng.storage.StorageService;
 import org.shanoir.ng.utils.KeycloakUtil;
@@ -221,8 +222,9 @@ public class PathologyModelApiController implements PathologyModelApi {
         }
 
         PathologyModel model = modelsService.findById(id);
+        String fileName = safeFileName(uploadfiles[0]);
         try {
-            model = saveUploadedFile(model, uploadfiles[0]);
+            model = saveUploadedFile(model, uploadfiles[0], fileName);
             modelsService.save(model);
             return new ResponseEntity<>(model, HttpStatus.OK);
         } catch (IOException e) {
@@ -273,20 +275,32 @@ public class PathologyModelApiController implements PathologyModelApi {
         return uniqueValidator.validate(model);
     }
 
-    private PathologyModel saveUploadedFile(PathologyModel model, MultipartFile file) throws IOException {
+    /**
+     * The name sent by the client is used to build the path of the stored file: it must not contain any folder.
+     */
+    private static String safeFileName(MultipartFile file) throws RestServiceException {
         try {
-            LOG.info("Saving file {} for pathology model: {}", file.getOriginalFilename(), model.getId());
+            return SafeFileNames.fileName(file.getOriginalFilename());
+        } catch (IllegalArgumentException e) {
+            throw new RestServiceException(
+                    new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Invalid file name", null));
+        }
+    }
+
+    private PathologyModel saveUploadedFile(PathologyModel model, MultipartFile file, String fileName) throws IOException {
+        try {
+            LOG.info("Saving file {} for pathology model: {}", fileName, model.getId());
             String filePath = storageService.storePathologyModelData(
                     model.getId(),
-                    file.getOriginalFilename(),
+                    fileName,
                     file.getInputStream(),
                     file.getContentType(),
                     file.getSize());
-            model.setFilename(file.getOriginalFilename());
+            model.setFilename(fileName);
             model.setFilepath(filePath);
         } catch (Exception e) {
             LOG.error("Error while uploading file {} for pathology model: {}. File not uploaded. {}",
-                    file.getOriginalFilename(), model.getId(), e);
+                    fileName, model.getId(), e);
             return null;
         }
         return model;

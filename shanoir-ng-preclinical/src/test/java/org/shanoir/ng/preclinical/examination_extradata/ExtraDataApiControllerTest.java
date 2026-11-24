@@ -14,8 +14,14 @@
 
 package org.shanoir.ng.preclinical.examination_extradata;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.io.File;
@@ -204,6 +210,25 @@ public class ExtraDataApiControllerTest {
         mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_BLOODGAS_WITH_ID).accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(gson.toJson(ExtraDataModelUtil.createExaminationBloodGasData()))).andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser
+    public void uploadKeepsOnlyTheFileNameTest() throws Exception {
+        // a name with folders would be stored outside of the folder of the examination
+        MockMultipartFile file = new MockMultipartFile("files", "../../evil.txt", "text/plain", "data".getBytes());
+        mvc.perform(MockMvcRequestBuilders.multipart(REQUEST_PATH_UPLOAD).file(file))
+                .andExpect(status().isOk());
+        verify(storageService).storePreclinicalExtraData(eq(1L), eq("evil.txt"), any(), anyString(), anyLong());
+    }
+
+    @Test
+    @WithMockUser
+    public void uploadRefusesAFileNameWithoutNameTest() throws Exception {
+        MockMultipartFile file = new MockMultipartFile("files", "..", "text/plain", "data".getBytes());
+        mvc.perform(MockMvcRequestBuilders.multipart(REQUEST_PATH_UPLOAD).file(file))
+                .andExpect(status().isUnprocessableEntity());
+        verify(storageService, never()).storePreclinicalExtraData(any(), any(), any(), any(), anyLong());
     }
 
 }
