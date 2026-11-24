@@ -20,7 +20,10 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.SecureRandom;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
@@ -29,15 +32,18 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
+import org.apache.commons.io.FileUtils;
 import org.shanoir.ng.importer.dto.ExaminationDTO;
 import org.shanoir.ng.importer.model.Subject;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.files.SafeFileNames;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -143,37 +149,28 @@ public final class ImportUtils {
      * @throws IOException
      */
     public static void unzip(String zipFilePath, String destDirectory) throws IOException {
-        File destDir = new File(destDirectory);
-        if (!destDir.exists()) {
-            destDir.mkdir();
-        }
-
+        Path destDir = Paths.get(destDirectory).toAbsolutePath().normalize();
+        Files.createDirectories(destDir);
         try (ZipFile zipFile = new ZipFile(new File(zipFilePath))) {
             Enumeration<? extends ZipEntry> entries = zipFile.entries();
-
-
-            String directoryFile;
-            String name;
-
             while (entries.hasMoreElements()) {
                 ZipEntry entry = entries.nextElement();
-                // iterates over entries in the .zip file
-
-                name = entry.getName();
-                String filePath = destDirectory + File.separator + name;
-                if (!entry.isDirectory()) {
-                    // if the entry is a file, extracts it
-                    // create the dir if necessary, file entry can come before directory entry where
-                    // is file located
-                    directoryFile = getDirectoryPart(name);
-                    if (directoryFile != null) {
-                        createDirectory(destDir, directoryFile);
+                // the entry names come from the uploaded file: they must stay inside the destination folder ("zip slip")
+                Path path;
+                try {
+                    if (entry.isDirectory() && destDir.resolve(entry.getName()).normalize().equals(destDir)) {
+                        continue; // "./" entry: the destination folder itself
                     }
-                    extractFile(entry, zipFile, filePath);
+                    path = SafeFileNames.resolveInside(destDir, entry.getName());
+                } catch (IOException | InvalidPathException e) {
+                    throw new ZipException("Invalid zip entry, outside of the archive folder: " + entry.getName());
+                }
+                if (entry.isDirectory()) {
+                    Files.createDirectories(path);
                 } else {
-                    // if the entry is a directory, make the directory
-                    File dir = new File(filePath);
-                    dir.mkdir();
+                    // a file entry can come before the entry of its folder
+                    Files.createDirectories(path.getParent());
+                    extractFile(entry, zipFile, path.toString());
                 }
             }
         }
@@ -235,18 +232,6 @@ public final class ImportUtils {
         return userImportDir;
     }
 
-    private static void createDirectory(File outdir, String path) {
-        File d = new File(outdir, path);
-        if (!d.exists()) {
-            d.mkdirs();
-        }
-    }
-
-    private static String getDirectoryPart(String name) {
-        int s = name.lastIndexOf(File.separatorChar);
-        return s == -1 ? null : name.substring(0, s);
-    }
-
     /**
      * Extracts a zip entry (file entry)
      *
@@ -291,7 +276,16 @@ public final class ImportUtils {
             throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
                     "Error while unzipping file: folder already exists.", null));
         }
-        ImportUtils.unzip(tempFile.getAbsolutePath(), unzipFolderFile.getAbsolutePath());
+        try {
+            ImportUtils.unzip(tempFile.getAbsolutePath(), unzipFolderFile.getAbsolutePath());
+        } catch (ZipException e) {
+            // invalid archive, or an entry leading outside of its folder: nothing of it is kept
+            LOG.warn("Invalid zip file {}: {}", dicomZipFile.getOriginalFilename(), e.getMessage());
+            FileUtils.deleteQuietly(unzipFolderFile);
+            tempFile.delete();
+            throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                    "Invalid zip file: " + e.getMessage(), null));
+        }
         tempFile.delete();
         return unzipFolderFile;
     }
