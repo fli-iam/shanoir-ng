@@ -14,16 +14,14 @@
 
 package org.shanoir.ng.importer;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.net.URLConnection;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -123,12 +121,6 @@ public class ImporterApiController implements ImporterApi {
     private static final String DICOMDIR = "DICOMDIR";
 
     private static final String APPLICATION_ZIP = "application/zip";
-
-    /** The Constant KB. */
-    private static final int KB = 1024;
-
-    /** The Constant BUFFER_SIZE. */
-    private static final int BUFFER_SIZE = 10 * KB;
 
     private static final UIDGeneration UID_GENERATOR = new UIDGeneration();
 
@@ -815,26 +807,22 @@ public class ImporterApiController implements ImporterApi {
     public ResponseEntity<ByteArrayResource> getDicomImage(@Parameter(name = "path", required = true)  @RequestParam(value = "path", required = true) String path)
             throws RestServiceException, IOException {
         final File userImportDir = ImportUtils.getUserImportDir(importDir);
-        String pathInfo = userImportDir.getAbsolutePath() + File.separator + path;
-        URL url = new URL("file:///" + pathInfo);
-        final URLConnection uCon = url.openConnection();
-        final InputStream is = uCon.getInputStream();
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-        int nRead;
-        byte[] data = new byte[BUFFER_SIZE];
-        while ((nRead = is.read(data, 0, data.length)) != -1) {
-            buffer.write(data, 0, nRead);
+        // the path comes from the client: only the files of the import folder of the user can be read
+        Path dicomFile;
+        try {
+            dicomFile = SafeFileNames.resolveInside(userImportDir.toPath(), path);
+        } catch (IOException | InvalidPathException e) {
+            throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                    "Invalid path, outside of the import folder: " + path, null));
         }
-
-        buffer.flush();
-        byte[] byteArray = buffer.toByteArray();
-
-        ByteArrayResource resource = new ByteArrayResource(byteArray);
-
+        if (!Files.isRegularFile(dicomFile)) {
+            throw new RestServiceException(new ErrorModel(HttpStatus.NOT_FOUND.value(), "File not found: " + path, null));
+        }
+        byte[] byteArray = Files.readAllBytes(dicomFile);
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType("application/dicom"))
-                .contentLength(uCon.getContentLength())
-                .body(resource);
+                .contentLength(byteArray.length)
+                .body(new ByteArrayResource(byteArray));
     }
 
     public ResponseEntity<ImportJobBase> uploadMultipleDicom(@Parameter(name = "file detail") @RequestPart("file") MultipartFile dicomZipFile,

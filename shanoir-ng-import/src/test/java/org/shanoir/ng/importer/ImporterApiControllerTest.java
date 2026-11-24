@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.importer;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -40,6 +41,8 @@ import java.util.zip.ZipOutputStream;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.shanoir.ng.importer.dicom.DicomDirGeneratorService;
@@ -219,10 +222,10 @@ public class ImporterApiControllerTest {
     @Test
     @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
     public void testGetDicomImageNoPath() throws Exception {
-
+        // the import folder itself is not an image (it was sent as a listing of the folder)
         mvc.perform(MockMvcRequestBuilders.get(GET_DICOM)
                 .param("path", ""))
-                .andExpect(status().is(200));
+                .andExpect(status().isUnprocessableEntity());
     }
 
     @Test
@@ -415,6 +418,53 @@ public class ImporterApiControllerTest {
 
         mvc.perform(multipart("/importer/upload_processed_dataset/").file(image))
                 .andExpect(status().isUnprocessableEntity());
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    public void testGetDicomImageReadsAFileOfTheImportFolder() throws Exception {
+        Path image = Files.createDirectories(importDirectory.resolve("3").resolve("456").resolve("serie"))
+                .resolve("1.dcm");
+        Files.write(image, new byte[] {1, 2, 3});
+
+        byte[] content = mvc.perform(MockMvcRequestBuilders.get(GET_DICOM).param("path", "456/serie/1.dcm"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsByteArray();
+
+        assertArrayEquals(new byte[] {1, 2, 3}, content);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"../13/456/1.dcm", "456/../../13/456/1.dcm", "../../secret.txt"})
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    public void testGetDicomImageRefusesAFileOutsideOfTheImportFolder(String path) throws Exception {
+        // a file of another user, and a file outside of the import folders
+        Path otherUserImage = Files.createDirectories(importDirectory.resolve("13").resolve("456")).resolve("1.dcm");
+        Files.write(otherUserImage, new byte[] {1});
+        Files.createDirectories(importDirectory.resolve("3"));
+        Path secret = Files.write(importDirectory.getParent().resolve("secret.txt"), new byte[] {1});
+        try {
+            mvc.perform(MockMvcRequestBuilders.get(GET_DICOM).param("path", path))
+                    .andExpect(status().isUnprocessableEntity());
+        } finally {
+            Files.deleteIfExists(secret);
+        }
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    public void testGetDicomImageRefusesAnAbsolutePath() throws Exception {
+        Files.createDirectories(importDirectory.resolve("3"));
+        mvc.perform(MockMvcRequestBuilders.get(GET_DICOM).param("path", "/etc/hostname"))
+                .andExpect(status().isUnprocessableEntity());
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    public void testGetDicomImageAnswersNotFoundForAMissingFile() throws Exception {
+        Files.createDirectories(importDirectory.resolve("3"));
+        mvc.perform(MockMvcRequestBuilders.get(GET_DICOM).param("path", "456/missing.dcm"))
+                .andExpect(status().isNotFound());
     }
 
 }
