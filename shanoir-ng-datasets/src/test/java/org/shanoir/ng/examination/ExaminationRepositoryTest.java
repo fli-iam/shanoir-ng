@@ -142,6 +142,17 @@ public class ExaminationRepositoryTest {
     }
 
     @Test
+    public void findStudyCentersByIdsLeavesOutTheMissingExaminations() throws Exception {
+        Map<Long, ExaminationStudyCenterDTO> studyCenters = repository.findStudyCentersByIds(List.of(2L, 3L, 999L));
+        assertThat(studyCenters).containsOnlyKeys(2L, 3L);
+        assertThat(studyCenters.get(2L).getStudyId()).isEqualTo(STUDY_TEST_1_ID);
+        assertThat(studyCenters.get(2L).getCenterId()).isEqualTo(2L);
+        assertThat(studyCenters.get(3L).getStudyId()).isEqualTo(3L);
+        assertThat(studyCenters.get(3L).getCenterId()).isEqualTo(1L);
+        assertThat(repository.findStudyCentersByIds(List.of())).isEmpty();
+    }
+
+    @Test
     public void findOneTest() throws Exception {
         Examination examinationDb = repository.findById(EXAMINATION_TEST_1_ID).orElse(null);
         assertThat(examinationDb.getNote()).isEqualTo(EXAMINATION_TEST_1_NOTE);

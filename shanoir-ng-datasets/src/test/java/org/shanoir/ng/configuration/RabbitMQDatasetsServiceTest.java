@@ -177,6 +177,26 @@ class RabbitMQDatasetsServiceTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
+    void findExaminationsStudyCentersAnswersTheStudyAndCenterOfEachKnownExamination() throws Exception {
+        Map<Long, ExaminationStudyCenterDTO> studyCenters = Map.of(EXAM_ID, new ExaminationStudyCenterDTO(STUDY_ID, 5L));
+        when(objectMapper.readValue(eq("[1,2]"), any(TypeReference.class))).thenReturn(List.of(1L, 2L));
+        when(examinationRepository.findStudyCentersByIds(List.of(1L, 2L))).thenReturn(studyCenters);
+        when(objectMapper.writeValueAsString(studyCenters)).thenReturn("{\"1\":{\"studyId\":99,\"centerId\":5}}");
+
+        assertEquals("{\"1\":{\"studyId\":99,\"centerId\":5}}", rabbitMQDatasetsService.findExaminationsStudyCenters("[1,2]"));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void findExaminationsStudyCentersAnswersAnEmptyObjectForUnreadableIds() throws Exception {
+        when(objectMapper.readValue(eq("not json"), any(TypeReference.class)))
+                .thenThrow(new JacksonException("not json") { });
+
+        assertEquals("{}", rabbitMQDatasetsService.findExaminationsStudyCenters("not json"));
+    }
+
+    @Test
     void findSubjectStudyIdAnswersTheStudyOfTheSubject() {
         when(subjectRepository.findStudyIdById(SUBJECT_ID)).thenReturn(Optional.of(STUDY_ID));
 

@@ -414,6 +414,28 @@ public class RabbitMQDatasetsService {
     }
 
     /**
+     * Receives examination ids and answers the study and center of each one, so that another microservice
+     * (preclinical) can filter a list of examinations by the study rights of the user, in one call.
+     *
+     * @param examinationIdsJson the examination ids, as a json array
+     * @return the ExaminationStudyCenterDTO by examination id, as a json object, the unknown examinations being
+     *         left out; "{}" if the ids cannot be read: never null, as no answer would be sent back and the caller
+     *         would wait until its timeout
+     */
+    @RabbitListener(queues = RabbitMQConfiguration.EXAMINATIONS_STUDY_CENTERS_QUEUE, containerFactory = "multipleConsumersFactory")
+    @RabbitHandler
+    @Transactional(readOnly = true)
+    public String findExaminationsStudyCenters(String examinationIdsJson) {
+        try {
+            List<Long> examinationIds = objectMapper.readValue(examinationIdsJson, new TypeReference<List<Long>>() { });
+            return objectMapper.writeValueAsString(examinationRepository.findStudyCentersByIds(examinationIds));
+        } catch (Exception e) {
+            LOG.error("Cannot find the studies and centers of examinations {}", examinationIdsJson, e);
+            return "{}";
+        }
+    }
+
+    /**
      * Receives subject ids and answers the id of the study of each one, so that another microservice
      * (preclinical) can filter a list of subjects by the study rights of the user, in one call.
      *

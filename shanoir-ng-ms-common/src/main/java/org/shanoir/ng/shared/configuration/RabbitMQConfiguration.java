@@ -329,6 +329,13 @@ public class RabbitMQConfiguration {
      */
     public static final String EXAMINATION_STUDY_CENTER_QUEUE = "examination-study-center-queue";
 
+    /**
+     * Examination ids, as a json array => study and center of each examination, as a json object of
+     * ExaminationStudyCenterDTO by examination id, from datasets MS (to filter lists by study rights in other MS).
+     * Unknown examinations are left out.
+     */
+    public static final String EXAMINATIONS_STUDY_CENTERS_QUEUE = "examinations-study-centers-queue";
+
     /** Subject id => id of its study, from datasets MS (to check the study rights in other MS). */
     public static final String SUBJECT_STUDY_ID_QUEUE = "subject-study-id-queue";
 
@@ -634,6 +641,11 @@ public class RabbitMQConfiguration {
     @Bean
     public static Queue examinationStudyCenterQueue() {
         return new Queue(EXAMINATION_STUDY_CENTER_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue examinationsStudyCentersQueue() {
+        return new Queue(EXAMINATIONS_STUDY_CENTERS_QUEUE, true);
     }
 
     @Bean
