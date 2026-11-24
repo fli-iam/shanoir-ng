@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.shanoir.ng.preclinical.extra_data.examination_extra_data.ExaminationExtraDataRepository;
+import org.shanoir.ng.preclinical.extradata.examination.ExaminationExtraDataRepository;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.dto.ExaminationStudyCenterDTO;
 import org.shanoir.ng.study.rights.StudyRightsService;

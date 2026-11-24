@@ -1,0 +1,432 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
+package org.shanoir.ng.preclinical.extradata;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.shanoir.ng.preclinical.extradata.bloodgas.BloodGasData;
+import org.shanoir.ng.preclinical.extradata.bloodgas.BloogGasUniqueConstraintManager;
+import org.shanoir.ng.preclinical.extradata.examination.ExaminationExtraData;
+import org.shanoir.ng.preclinical.extradata.physiological.PhysioDataUniqueConstraintManager;
+import org.shanoir.ng.preclinical.extradata.physiological.PhysiologicalData;
+import org.shanoir.ng.shared.dto.FileEntryDTO;
+import org.shanoir.ng.shared.error.FieldErrorMap;
+import org.shanoir.ng.shared.exception.ErrorDetails;
+import org.shanoir.ng.shared.exception.ErrorModel;
+import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.shared.files.SafeFileNames;
+import org.shanoir.ng.storage.StorageException;
+import org.shanoir.ng.storage.StorageService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+
+import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+@Controller
+public class ExtraDataApiController implements ExtraDataApi {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ExtraDataApiController.class);
+
+    private static final String BAD_ARGUMENTS = "Bad arguments";
+
+    @Autowired
+    private ExtraDataService<ExaminationExtraData> extraDataService;
+
+    @Autowired
+    private ExtraDataService<PhysiologicalData> physioDataService;
+
+    @Autowired
+    private ExtraDataService<BloodGasData> bloodGasDataService;
+
+    private final HttpServletRequest request;
+
+    public ExtraDataApiController(final HttpServletRequest request) {
+        this.request = request;
+    }
+
+    @Autowired
+    private ExtraDataUniqueConstraintManager uniqueConstraintManager;
+
+    @Autowired
+    private PhysioDataUniqueConstraintManager physioConstraintManager;
+
+    @Autowired
+    private BloogGasUniqueConstraintManager bloodGasConstraintManager;
+
+    @Autowired
+    private ExtraDataEditableByManager editableOnlyValidator;
+
+    @Autowired
+    private StorageService storageService;
+
+    @Override
+    public ResponseEntity<ExaminationExtraData> uploadExtraData(
+            @Parameter(name = "extra data id", required = true) @PathVariable("id") Long id,
+            @RequestParam("files") MultipartFile[] uploadfiles) throws RestServiceException {
+
+        if (uploadfiles.length == 0) {
+            throw new RestServiceException(
+                    new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "No file uploaded", null));
+        }
+        if (id == null) {
+            throw new RestServiceException(
+                    new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad Arguments", null));
+        }
+
+        ExaminationExtraData extradata = extraDataService.findById(id);
+        if (extradata == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        String fileName = safeFileName(uploadfiles[0]);
+        try {
+            ExaminationExtraData uploadedData = saveUploadedFile(extradata, uploadfiles[0], fileName);
+            extraDataService.save(uploadedData);
+            return new ResponseEntity<>(extradata, HttpStatus.OK);
+        } catch (IOException e) {
+            throw new RestServiceException(e,
+                    new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while saving uploaded file", e));
+        } catch (ShanoirException e) {
+            throw new RestServiceException(e, new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                    "Error while saving updated extradata", e));
+        }
+    }
+
+    @Override
+    public ResponseEntity<ExaminationExtraData> createExtraData(
+            @Parameter(name = "examination id", required = true) @PathVariable("id") Long id,
+            @Parameter(name = "ExaminationExtraData to create", required = true) @RequestBody ExaminationExtraData extradata,
+            BindingResult result) throws RestServiceException {
+
+        // the rights were checked on the examination of the path, not on the one of the body
+        extradata.setExaminationId(id);
+        final FieldErrorMap accessErrors = this.getCreationRightsErrors(extradata);
+        final FieldErrorMap hibernateErrors = new FieldErrorMap(result);
+        final FieldErrorMap uniqueErrors = this.uniqueConstraintManager.validate(extradata);
+
+        final FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors, uniqueErrors);
+        if (!errors.isEmpty()) {
+            throw new RestServiceException(
+                    new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, new ErrorDetails(errors)));
+        }
+        // Guarantees it is a creation, not an update
+        extradata.setId(null);
+        extradata.setExtraDataType("Extra data");
+        try {
+            final ExaminationExtraData createdExtraData = extraDataService.save(extradata);
+            return new ResponseEntity<>(createdExtraData, HttpStatus.OK);
+        } catch (ShanoirException e) {
+            throw new RestServiceException(e,
+                    new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, null));
+        }
+
+    }
+
+    @Override
+    public ResponseEntity<PhysiologicalData> createPhysiologicalExtraData(
+            @Parameter(name = "examination id", required = true) @PathVariable("id") Long id,
+            @Parameter(name = "PhysiologicalData to create", required = true) @RequestBody PhysiologicalData extradata,
+            BindingResult result) throws RestServiceException {
+
+        // the rights were checked on the examination of the path, not on the one of the body
+        extradata.setExaminationId(id);
+        final FieldErrorMap accessErrors = this.getCreationRightsErrors(extradata);
+        final FieldErrorMap hibernateErrors = new FieldErrorMap(result);
+        final FieldErrorMap uniqueErrors = physioConstraintManager.validate(extradata);
+        /* Merge errors. */
+        final FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors, uniqueErrors);
+        if (!errors.isEmpty()) {
+            throw new RestServiceException(
+                    new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, new ErrorDetails(errors)));
+        }
+
+        // Guarantees it is a creation, not an update
+        extradata.setId(null);
+        extradata.setExtraDataType("Physiological data");
+
+        /* Save extradata in db. */
+        try {
+            final PhysiologicalData createdExtraData = physioDataService.save(extradata);
+            return new ResponseEntity<>(createdExtraData, HttpStatus.OK);
+        } catch (ShanoirException e) {
+            throw new RestServiceException(e,
+                    new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, null));
+        }
+    }
+
+    @Override
+    public ResponseEntity<BloodGasData> createBloodGasExtraData(
+            @Parameter(name = "examination id", required = true) @PathVariable("id") Long id,
+            @Parameter(name = "BloodGasData to create", required = true) @RequestBody BloodGasData extradata,
+            BindingResult result) throws RestServiceException {
+
+        // the rights were checked on the examination of the path, not on the one of the body
+        extradata.setExaminationId(id);
+        final FieldErrorMap accessErrors = this.getCreationRightsErrors(extradata);
+        final FieldErrorMap hibernateErrors = new FieldErrorMap(result);
+        final FieldErrorMap uniqueErrors = this.bloodGasConstraintManager.validate(extradata);
+        /* Merge errors. */
+        final FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors, uniqueErrors);
+        if (!errors.isEmpty()) {
+            throw new RestServiceException(
+                    new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, new ErrorDetails(errors)));
+        }
+        // Guarantees it is a creation, not an update
+        extradata.setId(null);
+        extradata.setExtraDataType("Blood gas data");
+        try {
+            final BloodGasData createdExtraData = bloodGasDataService.save(extradata);
+            return new ResponseEntity<>(createdExtraData, HttpStatus.OK);
+        } catch (ShanoirException e) {
+            throw new RestServiceException(e,
+                    new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, null));
+        }
+
+    }
+
+    @Override
+    public ResponseEntity<Void> deleteExtraData(
+            @Parameter(name = "examination id", required = true) @PathVariable("id") Long id,
+            @Parameter(name = "ExaminationExtraData id to delete", required = true) @PathVariable("eid") Long eid)
+            throws RestServiceException {
+        ExaminationExtraData toDelete = extraDataService.findById(eid);
+        if (!belongsToExamination(toDelete, id)) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        try {
+            storageService.deletePreclinicalExtraData(toDelete.getExaminationId(), toDelete.getFilename());
+        } catch (StorageException e) {
+            LOG.error("There was an error trying to delete files from " + toDelete.getFilepath()
+                    + toDelete.getFilename() + " " + e.getMessage(), e);
+        }
+        try {
+            extraDataService.deleteById(toDelete.getId());
+        } catch (ShanoirException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
+        } catch (Exception e) {
+            throw new RestServiceException(e, new ErrorModel(HttpStatus.NOT_FOUND.value(),
+                    "Error trying to delete file " + toDelete.getFilename(), null));
+        }
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<ExaminationExtraData> getExtraDataById(
+            @Parameter(name = "examination id", required = true) @PathVariable("id") Long id,
+            @Parameter(name = "ID of exam extra data that needs to be fetched", required = true) @PathVariable("eid") Long eid) {
+        final ExaminationExtraData extradata = extraDataService.findById(eid);
+        if (!belongsToExamination(extradata, id)) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(extradata, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<List<ExaminationExtraData>> getExaminationExtraData(
+            @Parameter(name = "ID of examination from which we get extradata", required = true) @PathVariable("id") Long id) {
+        final List<ExaminationExtraData> extradatas = extraDataService.findAllByExaminationId(id);
+        return new ResponseEntity<>(extradatas, HttpStatus.OK);
+    }
+
+    @Override
+    public void downloadExtraData(
+            @Parameter(name = "ID of exam extra data file to download", required = true) @PathVariable("id") Long id,
+            HttpServletResponse response)
+            throws RestServiceException, StorageException {
+        final ExaminationExtraData extraData = extraDataService.findById(id);
+        if (extraData != null) {
+            try {
+                String contentType = request.getServletContext().getMimeType(extraData.getFilename());
+                if (contentType == null) {
+                    contentType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
+                }
+                Resource resource = storageService.loadPreclinicalExtraData(extraData.getExaminationId(), extraData.getFilename());
+                if (!resource.exists()) {
+                    response.sendError(HttpStatus.NO_CONTENT.value());
+                    return;
+                }
+                try (InputStream is = resource.getInputStream()) {
+                    response.setHeader("Content-Disposition", "attachment;filename=\"" + extraData.getFilename() + "\"");
+                    response.setContentType(contentType);
+                    response.setContentLengthLong(resource.contentLength());
+                    org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
+                    response.flushBuffer();
+                }
+            } catch (IOException ioe) {
+                LOG.error("Error while getting file to download " + ioe.getMessage(), ioe);
+            }
+        }
+    }
+
+    @Override
+    public ResponseEntity<Void> updatePhysiologicalData(
+            @Parameter(name = "ID of examination that needs to be updated", required = true) @PathVariable("id") Long id,
+            @Parameter(name = "ID of physiologicalData that needs to be updated", required = true) @PathVariable("eid") Long eid,
+            @Parameter(name = "PhysiologicalData object that needs to be updated", required = true) @RequestBody PhysiologicalData physioData,
+            final BindingResult result) throws RestServiceException {
+        if (!belongsToExamination(physioDataService.findById(eid), id)) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        // IMPORTANT : avoid any confusion that could lead to security breach
+        physioData.setId(eid);
+        physioData.setExaminationId(id);
+
+        // A basic template can only update certain fields, check that
+        final FieldErrorMap accessErrors = this.getUpdateRightsErrors(physioData);
+        // Check hibernate validation
+        final FieldErrorMap hibernateErrors = new FieldErrorMap(result);
+        // Check unique constraint
+        final FieldErrorMap uniqueErrors = this.physioConstraintManager.validate(physioData);
+        /* Merge errors. */
+        final FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors, uniqueErrors);
+        if (!errors.isEmpty()) {
+            throw new RestServiceException(
+                    new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, new ErrorDetails(errors)));
+        }
+
+        /* Update template in db. */
+        try {
+            physioDataService.update(physioData);
+        } catch (ShanoirException e) {
+            LOG.error("Error while trying to update extradata " + id + " : ", e);
+            throw new RestServiceException(e,
+                    new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, null));
+        }
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<Void> updateBloodGasData(
+            @Parameter(name = "ID of examination that needs to be updated", required = true) @PathVariable("id") Long id,
+            @Parameter(name = "ID of bloodGasData that needs to be updated", required = true) @PathVariable("eid") Long eid,
+            @Parameter(name = "BloodGasData object that needs to be updated", required = true) @RequestBody BloodGasData bloodGasData,
+            final BindingResult result) throws RestServiceException {
+        if (!belongsToExamination(bloodGasDataService.findById(eid), id)) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        // IMPORTANT : avoid any confusion that could lead to security breach
+        bloodGasData.setId(eid);
+        bloodGasData.setExaminationId(id);
+
+        // A basic template can only update certain fields, check that
+        final FieldErrorMap accessErrors = this.getUpdateRightsErrors(bloodGasData);
+        // Check hibernate validation
+        final FieldErrorMap hibernateErrors = new FieldErrorMap(result);
+        // Check unique constrainte
+        final FieldErrorMap uniqueErrors = bloodGasConstraintManager.validate(bloodGasData);
+        /* Merge errors. */
+        final FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors, uniqueErrors);
+        if (!errors.isEmpty()) {
+            throw new RestServiceException(
+                    new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, new ErrorDetails(errors)));
+        }
+
+        /* Update template in db. */
+        try {
+            bloodGasDataService.update(bloodGasData);
+        } catch (ShanoirException e) {
+            LOG.error("Error while trying to update extradata " + id + " : ", e);
+            throw new RestServiceException(e,
+                    new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, null));
+        }
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    /**
+     * The rights are checked on the examination of the path: the extra data must belong to it,
+     * otherwise any extra data could be read or changed through an examination of the user.
+     */
+    private static boolean belongsToExamination(ExaminationExtraData extraData, Long examinationId) {
+        return extraData != null && examinationId != null && examinationId.equals(extraData.getExaminationId());
+    }
+
+    private FieldErrorMap getCreationRightsErrors(final ExaminationExtraData extradata) {
+        return editableOnlyValidator.validate(extradata);
+    }
+
+    private FieldErrorMap getUpdateRightsErrors(final ExaminationExtraData extraData) {
+        return editableOnlyValidator.validate(extraData);
+    }
+
+    /**
+     * The name sent by the client is used to build the path of the stored file: it must not contain any folder.
+     */
+    private static String safeFileName(MultipartFile file) throws RestServiceException {
+        try {
+            return SafeFileNames.fileName(file.getOriginalFilename());
+        } catch (IllegalArgumentException e) {
+            throw new RestServiceException(
+                    new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Invalid file name", null));
+        }
+    }
+
+    private ExaminationExtraData saveUploadedFile(ExaminationExtraData examinationExtraData, MultipartFile file,
+            String fileName) throws IOException {
+        try {
+            LOG.info("Saving file {} for examination: {}", fileName, examinationExtraData.getId());
+            String filePath = storageService.storePreclinicalExtraData(
+                    examinationExtraData.getExaminationId(),
+                    fileName,
+                    file.getInputStream(),
+                    file.getContentType(),
+                    file.getSize());
+            examinationExtraData.setFilename(fileName);
+            examinationExtraData.setFilepath(filePath);
+        } catch (Exception e) {
+            LOG.error("Error while uploading file {} for examination: {}. File not uploaded. {}",
+                    fileName, examinationExtraData.getId(), e);
+            return null;
+        }
+        return examinationExtraData;
+    }
+
+    @Override
+    public ResponseEntity<List<FileEntryDTO>> getAllFiles() throws StorageException {
+        List<ExaminationExtraData> allExtraData = extraDataService.findAll();
+        if (allExtraData == null || allExtraData.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.OK);
+        }
+        List<FileEntryDTO> fileEntries = allExtraData.stream()
+                .filter(extraData -> extraData.getFilepath() != null && extraData.getFilename() != null)
+                .map(extraData -> {
+                    boolean exists = Path.of(extraData.getFilepath()).toFile().exists();
+                    return new FileEntryDTO(extraData.getId(),
+                            extraData.getFilename(), extraData.getExtraDataType(), exists);
+                })
+                .collect(Collectors.toList());
+        return new ResponseEntity<>(fileEntries, HttpStatus.OK);
+    }
+
+}

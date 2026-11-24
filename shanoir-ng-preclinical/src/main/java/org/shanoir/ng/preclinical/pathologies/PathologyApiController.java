@@ -16,8 +16,8 @@ package org.shanoir.ng.preclinical.pathologies;
 
 import java.util.List;
 
-import org.shanoir.ng.preclinical.pathologies.pathology_models.PathologyModelService;
-import org.shanoir.ng.preclinical.pathologies.subject_pathologies.SubjectPathologyService;
+import org.shanoir.ng.preclinical.pathologies.models.PathologyModelService;
+import org.shanoir.ng.preclinical.pathologies.subject.SubjectPathologyService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;

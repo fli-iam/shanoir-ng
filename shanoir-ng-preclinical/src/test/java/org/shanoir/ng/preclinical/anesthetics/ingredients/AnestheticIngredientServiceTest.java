@@ -1,0 +1,139 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
+package org.shanoir.ng.preclinical.anesthetics.ingredients;
+
+import static org.mockito.BDDMockito.given;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.mockito.Mockito;
+import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.utils.AnestheticModelUtil;
+import org.shanoir.ng.utils.ReferenceModelUtil;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+
+/**
+ * Anesthetic ingredients service test.
+ *
+ * @author sloury
+ *
+ */
+@SpringBootTest
+@ActiveProfiles("test")
+public class AnestheticIngredientServiceTest {
+
+    private static final Long INGREDIENT_ID = 1L;
+    private static final Double UPDATED_INGREDIENT_CONCENTRATION = 2.0;
+
+
+    @MockitoBean
+    private AnestheticIngredientRepository ingredientsRepository;
+
+    @MockitoBean
+    private RabbitTemplate rabbitTemplate;
+
+    @Autowired
+    private AnestheticIngredientServiceImpl ingredientsService;
+
+
+
+    @BeforeEach
+    public void setup() {
+        given(ingredientsRepository.findAll()).willReturn(Arrays.asList(AnestheticModelUtil.createAnestheticIngredient()));
+        given(ingredientsRepository.findByAnesthetic(AnestheticModelUtil.createAnestheticGas())).willReturn(Arrays.asList(AnestheticModelUtil.createAnestheticIngredient()));
+        given(ingredientsRepository.findById(INGREDIENT_ID)).willReturn(Optional.of(AnestheticModelUtil.createAnestheticIngredient()));
+        given(ingredientsRepository.save(Mockito.any(AnestheticIngredient.class))).willReturn(AnestheticModelUtil.createAnestheticIngredient());
+    }
+
+    @Test
+    public void deleteByIdTest() throws ShanoirException {
+        ingredientsService.deleteById(INGREDIENT_ID);
+
+        Mockito.verify(ingredientsRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
+    }
+
+    @Test
+    public void findAllTest() {
+        final List<AnestheticIngredient> ingredients = ingredientsService.findAll();
+        Assertions.assertNotNull(ingredients);
+        Assertions.assertTrue(ingredients.size() == 1);
+
+        Mockito.verify(ingredientsRepository, Mockito.times(1)).findAll();
+    }
+
+    @Test
+    public void findByIdTest() {
+        final AnestheticIngredient ingredient = ingredientsService.findById(INGREDIENT_ID);
+        Assertions.assertNotNull(ingredient);
+        Assertions.assertTrue(ReferenceModelUtil.REFERENCE_INGREDIENT_ISOFLURANE_VALUE.equals(ingredient.getName().getValue()));
+
+        Mockito.verify(ingredientsRepository, Mockito.times(1)).findById(Mockito.anyLong());
+    }
+
+    @Test
+    public void findByAnestheticTest() {
+        final List<AnestheticIngredient> ingredients = ingredientsService.findByAnesthetic(AnestheticModelUtil.createAnestheticGas());
+        Assertions.assertNotNull(ingredients);
+        Assertions.assertTrue(ingredients.size() == 1);
+
+        Mockito.verify(ingredientsRepository, Mockito.times(1)).findByAnesthetic(AnestheticModelUtil.createAnestheticGas());
+    }
+
+
+
+    @Test
+    public void saveTest() throws ShanoirException {
+        ingredientsService.save(createAnestheticIngredient());
+
+        Mockito.verify(ingredientsRepository, Mockito.times(1)).save(Mockito.any(AnestheticIngredient.class));
+    }
+
+    @Test
+    public void updateTest() throws ShanoirException {
+        final AnestheticIngredient updatedIngredient = ingredientsService.update(createAnestheticIngredient());
+        Assertions.assertNotNull(updatedIngredient);
+        Assertions.assertTrue(UPDATED_INGREDIENT_CONCENTRATION.equals(updatedIngredient.getConcentration()));
+
+        Mockito.verify(ingredientsRepository, Mockito.times(1)).save(Mockito.any(AnestheticIngredient.class));
+    }
+
+/*
+    @Test
+    public void updateFromShanoirOldTest() throws ShanoirException {
+        pathologiesService.updateFromShanoirOld(createPathology());
+
+        Mockito.verify(pathologiesRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
+        Mockito.verify(pathologiesRepository, Mockito.times(1)).save(Mockito.any(Pathology.class));
+    }
+*/
+    private AnestheticIngredient createAnestheticIngredient() {
+        final AnestheticIngredient ingredient = new AnestheticIngredient();
+        ingredient.setId(INGREDIENT_ID);
+        ingredient.setName(ReferenceModelUtil.createReferenceAnestheticIngredientIsoflurane());
+        ingredient.setAnesthetic(AnestheticModelUtil.createAnestheticGas());
+        ingredient.setConcentration(UPDATED_INGREDIENT_CONCENTRATION);
+        return ingredient;
+    }
+
+}

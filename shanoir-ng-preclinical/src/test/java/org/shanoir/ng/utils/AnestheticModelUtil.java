@@ -16,7 +16,7 @@ package org.shanoir.ng.utils;
 
 import org.shanoir.ng.preclinical.anesthetics.anesthetic.Anesthetic;
 import org.shanoir.ng.preclinical.anesthetics.anesthetic.AnestheticType;
-import org.shanoir.ng.preclinical.anesthetics.examination_anesthetics.ExaminationAnesthetic;
+import org.shanoir.ng.preclinical.anesthetics.examinationanesthetics.ExaminationAnesthetic;
 import org.shanoir.ng.preclinical.anesthetics.ingredients.AnestheticIngredient;
 
 /**

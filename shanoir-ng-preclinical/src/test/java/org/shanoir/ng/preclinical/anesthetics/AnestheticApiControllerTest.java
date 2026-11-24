@@ -30,7 +30,7 @@ import org.shanoir.ng.preclinical.anesthetics.anesthetic.AnestheticEditableByMan
 import org.shanoir.ng.preclinical.anesthetics.anesthetic.AnestheticService;
 import org.shanoir.ng.preclinical.anesthetics.anesthetic.AnestheticType;
 import org.shanoir.ng.preclinical.anesthetics.anesthetic.AnestheticUniqueValidator;
-import org.shanoir.ng.preclinical.anesthetics.examination_anesthetics.ExaminationAnestheticService;
+import org.shanoir.ng.preclinical.anesthetics.examinationanesthetics.ExaminationAnestheticService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.ShanoirException;

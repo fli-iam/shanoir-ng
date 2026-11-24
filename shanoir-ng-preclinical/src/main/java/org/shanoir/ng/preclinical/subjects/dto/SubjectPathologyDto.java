@@ -16,7 +16,7 @@ package org.shanoir.ng.preclinical.subjects.dto;
 import java.util.Date;
 
 import org.shanoir.ng.preclinical.pathologies.Pathology;
-import org.shanoir.ng.preclinical.pathologies.pathology_models.PathologyModel;
+import org.shanoir.ng.preclinical.pathologies.models.PathologyModel;
 import org.shanoir.ng.preclinical.references.Reference;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 

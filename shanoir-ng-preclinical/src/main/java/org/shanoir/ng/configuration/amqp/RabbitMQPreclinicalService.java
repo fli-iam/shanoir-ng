@@ -16,10 +16,10 @@ package org.shanoir.ng.configuration.amqp;
 
 import java.util.Arrays;
 
-import org.shanoir.ng.preclinical.pathologies.subject_pathologies.SubjectPathologyService;
+import org.shanoir.ng.preclinical.pathologies.subject.SubjectPathologyService;
 import org.shanoir.ng.preclinical.subjects.model.AnimalSubject;
 import org.shanoir.ng.preclinical.subjects.service.AnimalSubjectService;
-import org.shanoir.ng.preclinical.therapies.subject_therapies.SubjectTherapyService;
+import org.shanoir.ng.preclinical.therapies.subject.SubjectTherapyService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.study.rights.ampq.StudyUserUpdateService;
 import org.shanoir.ng.study.rights.command.StudyUserCommand;

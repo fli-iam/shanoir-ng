@@ -16,7 +16,7 @@ package org.shanoir.ng.preclinical.anesthetics.anesthetic;
 
 import java.util.List;
 
-import org.shanoir.ng.preclinical.anesthetics.examination_anesthetics.ExaminationAnestheticService;
+import org.shanoir.ng.preclinical.anesthetics.examinationanesthetics.ExaminationAnestheticService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;

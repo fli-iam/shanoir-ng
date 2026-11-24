@@ -17,8 +17,8 @@ package org.shanoir.ng.utils;
 import java.util.ArrayList;
 
 import org.shanoir.ng.preclinical.pathologies.Pathology;
-import org.shanoir.ng.preclinical.pathologies.pathology_models.PathologyModel;
-import org.shanoir.ng.preclinical.pathologies.subject_pathologies.SubjectPathology;
+import org.shanoir.ng.preclinical.pathologies.models.PathologyModel;
+import org.shanoir.ng.preclinical.pathologies.subject.SubjectPathology;
 
 /**
  * Utility class for test. Generates pathology.
