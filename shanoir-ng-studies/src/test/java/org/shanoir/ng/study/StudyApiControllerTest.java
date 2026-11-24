@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.study;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.BDDMockito.given;
@@ -25,6 +26,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import java.util.List;
@@ -32,6 +34,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.error.FieldErrorMap;
@@ -305,6 +308,26 @@ public class StudyApiControllerTest {
                 .andExpect(jsonPath("$[0].exists").value(true))
                 .andExpect(jsonPath("$[1].fileName").value("/studies/study-1/old/protocol.pdf"))
                 .andExpect(jsonPath("$[1].exists").value(false));
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void uploadDataUseAgreementRefusedRemovesTheDuaFromTheStudy() throws Exception {
+        // the study was saved with the DUA before its upload, which is refused (not a PDF)
+        Study study = new Study();
+        study.setId(1L);
+        study.setDataUserAgreementPaths(new ArrayList<>(List.of("DUA-agreement.docx")));
+        given(studyServiceMock.findById(1L)).willReturn(study);
+        MockMultipartFile file = new MockMultipartFile("file", "DUA-agreement.docx", MediaType.APPLICATION_OCTET_STREAM_VALUE, new byte[] {1});
+
+        mvc.perform(MockMvcRequestBuilders.multipart(REQUEST_PATH + "/dua-upload/1").file(file))
+                .andExpect(status().isNotAcceptable());
+
+        ArgumentCaptor<Study> updated = ArgumentCaptor.forClass(Study.class);
+        Mockito.verify(studyServiceMock).update(updated.capture());
+        assertEquals(List.of(), updated.getValue().getDataUserAgreementPaths());
+        Mockito.verify(storageService, Mockito.never()).storeStudyData(Mockito.anyLong(), Mockito.anyString(), Mockito.any(),
+                Mockito.any(), Mockito.anyLong());
     }
 
 }

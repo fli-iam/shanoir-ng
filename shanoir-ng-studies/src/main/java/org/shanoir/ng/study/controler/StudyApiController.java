@@ -549,7 +549,8 @@ public class StudyApiController implements StudyApi {
                 // Clean up: delete from study in case upload not allowed
                 Study study = studyService.findById(studyId);
                 if (!CollectionUtils.isEmpty(study.getDataUserAgreementPaths())) {
-                    study.getDataUserAgreementPaths().remove(file.getName());
+                    // the name the client gave the DUA in the study (not the name of the form field)
+                    study.getDataUserAgreementPaths().remove(fileName);
                 }
                 studyService.update(study);
                 return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
