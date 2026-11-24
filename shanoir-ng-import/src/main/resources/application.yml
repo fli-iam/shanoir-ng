@@ -121,6 +121,9 @@ logging:
 shanoir:
   import:
     directory: /tmp
+    # Folder where ms-preclinical writes the DICOM zip files converted from Bruker uploads (shared /tmp volume):
+    # import_dicom only imports the zip files of this folder
+    bruker-convert-directory: /tmp/bruker/convert
     # Import from PACS configuration
     pacs:
       query:

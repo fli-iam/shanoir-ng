@@ -107,7 +107,8 @@ public class BrukerApiController implements BrukerApi {
                 LOG.info("START BRUKER 2 DICOM");
                 startBruker2Dicom(brukerDirFile);
                 LOG.info("ZIP DICOM FILES");
-                File destinationZip = File.createTempFile(destinationFilePath, "." + brukerDirString + ".converted.zip");
+                // in the conversion folder, the only folder ms-import accepts to import from (import_dicom)
+                File destinationZip = File.createTempFile(RESULT_FOLDER, "." + brukerDirString + ".converted.zip", brukerDirFile.toFile());
                 LOG.info("zip destinationFilePath = {}, destinationZip = {}, rootFolderToRemove = {}", destinationFilePath, destinationZip.getAbsolutePath(), RESULT_FOLDER);
                 zipFolder(destinationFilePath, destinationZip, RESULT_FOLDER);
                 return new ResponseEntity<>(destinationZip.getAbsolutePath(), HttpStatus.OK);

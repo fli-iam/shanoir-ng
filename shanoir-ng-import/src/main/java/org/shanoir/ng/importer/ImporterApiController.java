@@ -21,7 +21,9 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -123,6 +125,10 @@ public class ImporterApiController implements ImporterApi {
     private static final String APPLICATION_ZIP = "application/zip";
 
     private static final UIDGeneration UID_GENERATOR = new UIDGeneration();
+
+    /** The folder where ms preclinical writes the DICOM files converted from Bruker uploads (shared /tmp volume). */
+    @Value("${shanoir.import.bruker-convert-directory:/tmp/bruker/convert}")
+    private String brukerConvertDir;
 
     @Value("${shanoir.import.directory}")
     private String importDir;
@@ -378,7 +384,8 @@ public class ImporterApiController implements ImporterApi {
             throw new RestServiceException(
                     new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), NO_FILE_UPLOADED, null));
         }
-        File tempFile = new File(dicomZipFilename);
+        // the file is read then deleted: only the zip files converted from Bruker uploads are accepted
+        File tempFile = brukerConvertedZip(dicomZipFilename);
         MockMultipartFile multiPartFile;
         try {
             multiPartFile = new MockMultipartFile(tempFile.getName(), tempFile.getName(), APPLICATION_ZIP, new FileInputStream(tempFile.getAbsolutePath()));
@@ -742,6 +749,27 @@ public class ImporterApiController implements ImporterApi {
                     "Error while creating temp dir: random number generated twice?", null));
         }
         return new ResponseEntity<String>(tempDirForImport.getName(), HttpStatus.OK);
+    }
+
+    /**
+     * @param dicomZipFilename the path sent by the client
+     * @return the zip file converted from a Bruker upload, in the conversion folder of ms preclinical
+     * @throws RestServiceException (422) for any other path
+     */
+    private File brukerConvertedZip(String dicomZipFilename) throws RestServiceException {
+        try {
+            Path folder = Paths.get(brukerConvertDir).toAbsolutePath().normalize();
+            Path zip = Paths.get(dicomZipFilename.trim()).toAbsolutePath().normalize();
+            if (zip.startsWith(folder) && zip.getFileName().toString().endsWith(".zip")
+                    && Files.isRegularFile(zip, LinkOption.NOFOLLOW_LINKS)) {
+                return zip.toFile();
+            }
+        } catch (InvalidPathException e) {
+            // refused below
+        }
+        LOG.warn("Import of {} refused: not a Bruker conversion of {}", dicomZipFilename, brukerConvertDir);
+        throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                "Only the DICOM files converted from a Bruker upload can be imported.", null));
     }
 
     /**

@@ -17,6 +17,7 @@ package org.shanoir.ng.importer;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
@@ -62,6 +63,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -69,6 +71,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
 
 import tools.jackson.databind.json.JsonMapper;
 
@@ -103,6 +106,7 @@ public class ImporterApiControllerTest {
     static void configureImportDirectory(DynamicPropertyRegistry registry) throws IOException {
         importDirectory = Files.createTempDirectory("shanoir-import-upload-test");
         registry.add("shanoir.import.directory", () -> importDirectory.toString());
+        registry.add("shanoir.import.bruker-convert-directory", () -> importDirectory.resolve("bruker/convert").toString());
     }
 
     @Autowired
@@ -465,6 +469,63 @@ public class ImporterApiControllerTest {
         Files.createDirectories(importDirectory.resolve("3"));
         mvc.perform(MockMvcRequestBuilders.get(GET_DICOM).param("path", "456/missing.dcm"))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void testImportDicomZipFileHasTheGuardOfTheOtherImports() throws NoSuchMethodException {
+        PreAuthorize guard = ImporterApi.class.getMethod("importDicomZipFile", String.class).getAnnotation(PreAuthorize.class);
+        PreAuthorize uploadGuard = ImporterApi.class.getMethod("uploadDicomZipFile", MultipartFile.class).getAnnotation(PreAuthorize.class);
+        assertNotNull(guard);
+        assertEquals(uploadGuard.value(), guard.value());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"3/upload.zip", "bruker/convert/../../3/upload.zip", "bruker/convert/2dseq/0/notes.txt", "bruker/convert/2dseq/0"})
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    public void testImportDicomZipFileRefusesAnyFileButABrukerConversion(String path) throws Exception {
+        // an upload of a user, and a file and a folder of the conversion folder that are not zip files
+        Path upload = Files.write(Files.createDirectories(importDirectory.resolve("3")).resolve("upload.zip"), new byte[] {1});
+        Path conversion = Files.createDirectories(importDirectory.resolve("bruker/convert/2dseq/0"));
+        Path notes = Files.write(conversion.resolve("notes.txt"), new byte[] {1});
+
+        mvc.perform(MockMvcRequestBuilders.post("/importer/import_dicom/").contentType(MediaType.APPLICATION_JSON)
+                .content(importDirectory.resolve(path).toString()))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.message").value("Only the DICOM files converted from a Bruker upload can be imported."));
+
+        // nothing is deleted
+        assertTrue(Files.exists(upload));
+        assertTrue(Files.exists(notes));
+        assertTrue(Files.exists(conversion));
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    public void testImportDicomZipFileRefusesASystemFile() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.post("/importer/import_dicom/").contentType(MediaType.APPLICATION_JSON)
+                .content("/etc/hostname"))
+                .andExpect(status().isUnprocessableEntity());
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    public void testImportDicomZipFileImportsABrukerConversion() throws Exception {
+        when(dicomDirToModel.readDicomDirToPatients(any(File.class))).thenReturn(Collections.emptyList());
+        Path conversion = Files.createDirectories(importDirectory.resolve("bruker/convert/2dseq/0"));
+        Path zip = conversion.resolve("result123.0.converted.zip");
+        try (ZipOutputStream zipout = new ZipOutputStream(Files.newOutputStream(zip))) {
+            zipout.putNextEntry(new ZipEntry("DICOMDIR"));
+            zipout.write(new byte[] {1});
+            zipout.closeEntry();
+        }
+
+        // the zip goes through the DICOM upload (here without any DICOM patient), then is deleted
+        mvc.perform(MockMvcRequestBuilders.post("/importer/import_dicom/").contentType(MediaType.APPLICATION_JSON)
+                .content(zip.toString()))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.message").value(
+                        "No DICOM patient found in the ZIP; the archive must contain at least one valid DICOM instance."));
+        assertFalse(Files.exists(zip));
     }
 
 }

@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.preclinical.bruker;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -80,8 +81,12 @@ public class BrukerApiControllerTest {
         given(rabbitTemplate.convertSendAndReceive(Mockito.eq(RabbitMQConfiguration.BRUKER_CONVERSION_QUEUE), Mockito.anyString())).willReturn(true);
 
         MockMultipartFile firstFile = new MockMultipartFile("files", "2dseq", "text/plain", "some xml".getBytes());
-        mvc.perform(MockMvcRequestBuilders.multipart(REQUEST_PATH_UPLOAD_BRUKER).file(firstFile))
-                .andExpect(status().isOk());
+        String zip = mvc.perform(MockMvcRequestBuilders.multipart(REQUEST_PATH_UPLOAD_BRUKER).file(firstFile))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        // ms-import only imports the zip files of the Bruker conversion folder
+        assertTrue(zip.contains("/bruker/convert/2dseq/"), zip);
+        assertTrue(zip.endsWith(".converted.zip"), zip);
     }
 
     @Test
