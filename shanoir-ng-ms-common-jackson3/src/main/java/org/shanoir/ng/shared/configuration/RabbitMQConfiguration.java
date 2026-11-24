@@ -293,6 +293,9 @@ public class RabbitMQConfiguration {
     /** Update / create a study user to users MS. */
     public static final String STUDY_USER_QUEUE_USERS = "study-user-queue-users";
 
+    /** Update / create a study user to preclinical MS. */
+    public static final String STUDY_USER_QUEUE_PRECLINICAL = "study-user-queue-preclinical";
+
     public static final String SUBJECT_BATCH_UPDATE_QUEUE = "subject_batch_update_queue";
 
     /** Subject name updated => notify dataset MS to change database. */
@@ -576,6 +579,11 @@ public class RabbitMQConfiguration {
     @Bean
     public static Queue studyUserQueueUsers() {
         return new Queue(STUDY_USER_QUEUE_USERS, true);
+    }
+
+    @Bean
+    public static Queue studyUserQueuePreclinical() {
+        return new Queue(STUDY_USER_QUEUE_PRECLINICAL, true);
     }
 
     @Bean
