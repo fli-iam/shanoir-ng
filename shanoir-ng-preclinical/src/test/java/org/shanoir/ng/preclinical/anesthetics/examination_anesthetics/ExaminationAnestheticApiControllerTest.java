@@ -29,6 +29,7 @@ import org.shanoir.ng.preclinical.anesthetics.anesthetic.AnestheticService;
 import org.shanoir.ng.preclinical.references.RefsService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.shared.security.PreclinicalSecurityService;
 import org.shanoir.ng.utils.AnestheticModelUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -88,6 +89,9 @@ public class ExaminationAnestheticApiControllerTest {
     @MockitoBean
     private ExaminationAnestheticEditableByManager editableOnlyValidator;
 
+    @MockitoBean
+    private PreclinicalSecurityService securityServiceMock;
+
     @BeforeEach
     public void setup() throws ShanoirException {
         gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
@@ -96,11 +100,17 @@ public class ExaminationAnestheticApiControllerTest {
         given(anestheticsServiceMock.findById(1L)).willReturn(new Anesthetic());
         given(examAnestheticServiceMock.findAll()).willReturn(Arrays.asList(new ExaminationAnesthetic()));
         given(examAnestheticServiceMock.findByExaminationId(1L)).willReturn(Arrays.asList(new ExaminationAnesthetic()));
-        given(examAnestheticServiceMock.findById(1L)).willReturn(new ExaminationAnesthetic());
+        // examination anesthetic 1 belongs to examination 1, the examination of the request paths
+        ExaminationAnesthetic examAnesthetic = new ExaminationAnesthetic();
+        examAnesthetic.setExaminationId(1L);
+        given(examAnestheticServiceMock.findById(1L)).willReturn(examAnesthetic);
+        // the rights are checked in ExaminationAnestheticApiSecurityTest
+        given(securityServiceMock.filterExaminationIdsHasRight(Mockito.anyList(), Mockito.anyString()))
+                .willAnswer(invocation -> invocation.getArgument(0));
         given(examAnestheticServiceMock.save(Mockito.mock(ExaminationAnesthetic.class)))
                 .willReturn(new ExaminationAnesthetic());
         given(examAnestheticServiceMock.findByAnesthetic(new Anesthetic()))
-                .willReturn(Arrays.asList(new ExaminationAnesthetic()));
+                .willReturn(Arrays.asList(examAnesthetic));
         given(uniqueValidator.validate(Mockito.any(ExaminationAnesthetic.class))).willReturn(new FieldErrorMap());
         given(editableOnlyValidator.validate(Mockito.any(ExaminationAnesthetic.class))).willReturn(new FieldErrorMap());
     }

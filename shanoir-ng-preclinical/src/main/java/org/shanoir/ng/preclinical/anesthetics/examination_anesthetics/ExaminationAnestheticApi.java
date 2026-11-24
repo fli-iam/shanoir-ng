@@ -18,6 +18,7 @@ import java.util.List;
 
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,6 +41,9 @@ public interface ExaminationAnestheticApi {
             @ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
             @ApiResponse(responseCode = "409", description = "Already exists - conflict"),
             @ApiResponse(responseCode = "500", description = "Unexpected Error") })
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') "
+            + "and (@preclinicalSecurityService.hasRightOnExamination(#id, 'CAN_IMPORT') "
+            + "or (hasRole('EXPERT') and @preclinicalSecurityService.hasRightOnExamination(#id, 'CAN_ADMINISTRATE'))))")
     @PostMapping(value = "/examination/{id}/anesthetic", produces = { "application/json" }, consumes = {
             "application/json" })
     ResponseEntity<ExaminationAnesthetic> addExaminationAnesthetic(
@@ -51,6 +55,9 @@ public interface ExaminationAnestheticApi {
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Successful operation"),
             @ApiResponse(responseCode = "400", description = "Invalid examination anesthetic id"),
             @ApiResponse(responseCode = "500", description = "Unexpected Error") })
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') "
+            + "and (@preclinicalSecurityService.hasRightOnExamination(#id, 'CAN_IMPORT') "
+            + "or (hasRole('EXPERT') and @preclinicalSecurityService.hasRightOnExamination(#id, 'CAN_ADMINISTRATE'))))")
     @DeleteMapping(value = "/examination/{id}/anesthetic/{eaid}", produces = {
             "application/json" })
     ResponseEntity<Void> deleteExaminationAnesthetic(
@@ -63,6 +70,8 @@ public interface ExaminationAnestheticApi {
             @ApiResponse(responseCode = "200", description = "An examination anesthetic"),
             @ApiResponse(responseCode = "404", description = "Examination anesthetic not found"),
             @ApiResponse(responseCode = "500", description = "Unexpected error") })
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') "
+            + "and @preclinicalSecurityService.hasRightOnExamination(#id, 'CAN_SEE_ALL'))")
     @GetMapping(value = "/examination/{id}/anesthetic/{eaid}", produces = {
             "application/json" })
     ResponseEntity<ExaminationAnesthetic> getExaminationAnestheticById(
@@ -74,6 +83,8 @@ public interface ExaminationAnestheticApi {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "An array of examination anesthetics"),
             @ApiResponse(responseCode = "500", description = "Unexpected error") })
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') "
+            + "and @preclinicalSecurityService.hasRightOnExamination(#id, 'CAN_SEE_ALL'))")
     @GetMapping(value = "/examination/{id}/anesthetic/all", produces = {
             "application/json" })
     ResponseEntity<List<ExaminationAnesthetic>> getExaminationAnesthetics(
@@ -85,6 +96,9 @@ public interface ExaminationAnestheticApi {
             @ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
             @ApiResponse(responseCode = "404", description = "Examination anesthetic not found"),
             @ApiResponse(responseCode = "500", description = "Unexpected Error") })
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') "
+            + "and (@preclinicalSecurityService.hasRightOnExamination(#id, 'CAN_IMPORT') "
+            + "or (hasRole('EXPERT') and @preclinicalSecurityService.hasRightOnExamination(#id, 'CAN_ADMINISTRATE'))))")
     @PutMapping(value = "/examination/{id}/anesthetic/{eaid}", produces = { "application/json" }, consumes = {
             "application/json" })
     ResponseEntity<Void> updateExaminationAnesthetic(
@@ -97,6 +111,8 @@ public interface ExaminationAnestheticApi {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "An array of examination anesthetics"),
             @ApiResponse(responseCode = "500", description = "Unexpected error") })
+    // used before deleting an anesthetic: filtered to the examinations the user can see
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
     @GetMapping(value = "/examination/all/anesthetic/{id}", produces = {
             "application/json" })
     ResponseEntity<List<ExaminationAnesthetic>> getExaminationAnestheticsByAnesthetic(

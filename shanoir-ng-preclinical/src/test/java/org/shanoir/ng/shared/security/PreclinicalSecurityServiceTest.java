@@ -39,7 +39,10 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.rights.StudyRightsService;
+import org.shanoir.ng.study.rights.StudyUser;
+import org.shanoir.ng.study.rights.UserRights;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.springframework.amqp.AmqpTimeoutException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -238,6 +241,40 @@ class PreclinicalSecurityServiceTest {
     @Test
     void emptySubjectListIsReturnedWithoutAskingDatasets() {
         assertEquals(List.of(), service.filterSubjectIdsHasRight(List.of(), "CAN_SEE_ALL"));
+        verify(rabbitTemplate, never()).convertSendAndReceive(anyString(), any(Object.class));
+    }
+
+    @Test
+    void examinationListIsFilteredInOneCallByTheRightOnTheirStudiesAndCenters() {
+        // user restricted to center 78 of study 56, without rights on study 57
+        StudyUser studyUser = new StudyUser();
+        studyUser.setStudyId(STUDY_ID);
+        studyUser.setStudyUserRights(List.of(StudyUserRight.CAN_SEE_ALL));
+        studyUser.setCenterIds(List.of(CENTER_ID));
+        studyUser.setConfirmed(true);
+        when(studyRightsService.getUserRights()).thenReturn(new UserRights(List.of(studyUser)));
+        // examination 1 in study 56 center 78, 2 in study 56 center 79, 3 in study 57, 4 unknown
+        when(rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EXAMINATIONS_STUDY_CENTERS_QUEUE, "[1,2,3,4]"))
+                .thenReturn("{\"1\":" + STUDY_CENTER_JSON + ",\"2\":{\"studyId\":56,\"centerId\":79},"
+                        + "\"3\":{\"studyId\":57,\"centerId\":78}}");
+
+        assertEquals(List.of(1L), service.filterExaminationIdsHasRight(List.of(1L, 2L, 3L, 4L), "CAN_SEE_ALL"));
+    }
+
+    @Test
+    void examinationListIsEmptyWhenDatasetsDoesNotAnswer() {
+        when(rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EXAMINATIONS_STUDY_CENTERS_QUEUE, "[1,2]"))
+                .thenThrow(new AmqpTimeoutException("timeout"));
+
+        assertEquals(List.of(), service.filterExaminationIdsHasRight(List.of(1L, 2L), "CAN_SEE_ALL"));
+        verify(studyRightsService, never()).getUserRights();
+    }
+
+    @Test
+    void adminSeesAllTheExaminationsWithoutAskingDatasets() {
+        keycloakUtil.when(KeycloakUtil::isAdmin).thenReturn(true);
+
+        assertEquals(List.of(1L, 2L), service.filterExaminationIdsHasRight(List.of(1L, 2L), "CAN_SEE_ALL"));
         verify(rabbitTemplate, never()).convertSendAndReceive(anyString(), any(Object.class));
     }
 

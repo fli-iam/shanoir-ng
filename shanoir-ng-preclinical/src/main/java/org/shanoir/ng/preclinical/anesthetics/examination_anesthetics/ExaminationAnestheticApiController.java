@@ -14,7 +14,9 @@
 
 package org.shanoir.ng.preclinical.anesthetics.examination_anesthetics;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.shanoir.ng.preclinical.anesthetics.anesthetic.Anesthetic;
 import org.shanoir.ng.preclinical.anesthetics.anesthetic.AnestheticService;
@@ -23,6 +25,7 @@ import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.shared.security.PreclinicalSecurityService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +55,9 @@ public class ExaminationAnestheticApiController implements ExaminationAnesthetic
 
     @Autowired
     private ExaminationAnestheticEditableByManager editableOnlyValidator;
+
+    @Autowired
+    private PreclinicalSecurityService securityService;
 
 
     @Override
@@ -91,7 +97,7 @@ public class ExaminationAnestheticApiController implements ExaminationAnesthetic
             @Parameter(name = "Examination anesthetic id to delete", required = true) @PathVariable("eaid") Long eaid)
             throws RestServiceException {
 
-        if (examAnestheticsService.findById(eaid) == null) {
+        if (!belongsToExamination(examAnestheticsService.findById(eaid), id)) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         try {
@@ -109,7 +115,7 @@ public class ExaminationAnestheticApiController implements ExaminationAnesthetic
             @Parameter(name = "ID of examination id that needs to be fetched", required = true) @PathVariable("eaid") Long eaid)
             throws RestServiceException {
         final ExaminationAnesthetic examAnesthetic = examAnestheticsService.findById(eaid);
-        if (examAnesthetic == null) {
+        if (!belongsToExamination(examAnesthetic, id)) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(examAnesthetic, HttpStatus.OK);
@@ -130,7 +136,11 @@ public class ExaminationAnestheticApiController implements ExaminationAnesthetic
             @Parameter(name = "Examination anesthetic object that needs to be updated", required = true) @RequestBody ExaminationAnesthetic examAnesthetic,
             final BindingResult result) throws RestServiceException {
 
+        if (!belongsToExamination(examAnestheticsService.findById(eaid), id)) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
         examAnesthetic.setId(eaid);
+        examAnesthetic.setExaminationId(id);
         final FieldErrorMap accessErrors = this.getUpdateRightsErrors(examAnesthetic);
         final FieldErrorMap hibernateErrors = new FieldErrorMap(result);
         final FieldErrorMap uniqueErrors = this.getUniqueConstraintErrors(examAnesthetic);
@@ -159,12 +169,40 @@ public class ExaminationAnestheticApiController implements ExaminationAnesthetic
         if (anesthetic == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } else {
-            final List<ExaminationAnesthetic> subexaminations = examAnestheticsService.findByAnesthetic(anesthetic);
+            final List<ExaminationAnesthetic> subexaminations = keepVisibleExaminations(examAnestheticsService.findByAnesthetic(anesthetic));
             if (subexaminations.isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
             return new ResponseEntity<>(subexaminations, HttpStatus.OK);
         }
+    }
+
+    /**
+     * Keeps the anesthetics of the examinations the user can see (all of them for an admin):
+     * the list across all the examinations must not show the data of the other studies or centers.
+     */
+    private List<ExaminationAnesthetic> keepVisibleExaminations(List<ExaminationAnesthetic> entries) {
+        if (entries == null || entries.isEmpty()) {
+            return entries;
+        }
+        List<Long> examinationIds = entries.stream()
+                .map(ExaminationAnesthetic::getExaminationId)
+                .filter(examinationId -> examinationId != null)
+                .distinct()
+                .toList();
+        Set<Long> visibleExaminationIds = new HashSet<>(
+                securityService.filterExaminationIdsHasRight(examinationIds, "CAN_SEE_ALL"));
+        return entries.stream()
+                .filter(examAnesthetic -> visibleExaminationIds.contains(examAnesthetic.getExaminationId()))
+                .toList();
+    }
+
+    /**
+     * The rights are checked on the examination of the path: the examination anesthetic must belong to it,
+     * otherwise any examination anesthetic could be read or changed through an examination of the user.
+     */
+    private static boolean belongsToExamination(ExaminationAnesthetic examAnesthetic, Long examinationId) {
+        return examAnesthetic != null && examinationId != null && examinationId.equals(examAnesthetic.getExaminationId());
     }
 
     private FieldErrorMap getUpdateRightsErrors(final ExaminationAnesthetic examAnesthetic) {

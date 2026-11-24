@@ -22,6 +22,7 @@ import java.util.Set;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.dto.ExaminationStudyCenterDTO;
 import org.shanoir.ng.study.rights.StudyRightsService;
+import org.shanoir.ng.study.rights.UserRights;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -140,6 +141,34 @@ public class PreclinicalSecurityService {
     }
 
     /**
+     * Keeps the examinations of a list on whose study the connected user has the given right, and on whose
+     * center if the user is restricted to some centers of the study, asking ms datasets the studies and centers
+     * of all the examinations at once.
+     *
+     * @param examinationIds the examination ids
+     * @param rightStr the right, e.g. CAN_SEE_ALL
+     * @return all the examination ids for an admin, otherwise the ones the user has the right on, in the same order
+     *         (none if ms datasets did not answer)
+     */
+    public List<Long> filterExaminationIdsHasRight(List<Long> examinationIds, String rightStr) {
+        if (examinationIds == null || examinationIds.isEmpty() || KeycloakUtil.isAdmin()) {
+            return examinationIds;
+        }
+        Map<Long, ExaminationStudyCenterDTO> studyCenters = findExaminationsStudyCenters(examinationIds);
+        if (studyCenters.isEmpty()) {
+            return List.of();
+        }
+        UserRights userRights = studyRightsService.getUserRights();
+        return examinationIds.stream()
+                .filter(examinationId -> {
+                    ExaminationStudyCenterDTO studyCenter = studyCenters.get(examinationId);
+                    return studyCenter != null && studyCenter.getStudyId() != null
+                            && userRights.hasStudyCenterRights(studyCenter.getStudyId(), studyCenter.getCenterId(), rightStr);
+                })
+                .toList();
+    }
+
+    /**
      * Check that the connected user has the given right on at least one study,
      * for the actions that are not attached to a study yet (e.g. a Bruker upload before its import).
      *
@@ -174,6 +203,28 @@ public class PreclinicalSecurityService {
         } catch (AmqpException | JacksonException e) {
             LOG.error("Cannot get the study of examination {} from ms datasets: access refused", examinationId, e);
             return null;
+        }
+    }
+
+    /**
+     * Asks ms datasets the studies and centers of several examinations at once.
+     *
+     * @param examinationIds the examination ids
+     * @return the study and center by examination id, without the unknown examinations;
+     *         empty if ms datasets did not answer
+     */
+    private Map<Long, ExaminationStudyCenterDTO> findExaminationsStudyCenters(List<Long> examinationIds) {
+        try {
+            Object reply = rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EXAMINATIONS_STUDY_CENTERS_QUEUE,
+                    objectMapper.writeValueAsString(examinationIds));
+            if (!(reply instanceof String json) || json.isEmpty()) {
+                LOG.warn("No studies found by ms datasets for examinations {}: access refused", examinationIds);
+                return Map.of();
+            }
+            return objectMapper.readValue(json, new TypeReference<Map<Long, ExaminationStudyCenterDTO>>() { });
+        } catch (AmqpException | JacksonException e) {
+            LOG.error("Cannot get the studies of examinations {} from ms datasets: access refused", examinationIds, e);
+            return Map.of();
         }
     }
 
