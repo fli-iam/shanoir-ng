@@ -52,6 +52,9 @@ public interface ExtraDataApi {
             @ApiResponse(responseCode = "200", description = "success returns Extra data"),
             @ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
             @ApiResponse(responseCode = "500", description = "Unexpected Error") })
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') "
+            + "and (@preclinicalSecurityService.hasRightOnExtraData(#id, 'CAN_IMPORT') "
+            + "or (hasRole('EXPERT') and @preclinicalSecurityService.hasRightOnExtraData(#id, 'CAN_ADMINISTRATE'))))")
     @PostMapping(value = "/examination/extradata/upload/{id}", produces = { "application/json" }, consumes = {
             MediaType.MULTIPART_FORM_DATA_VALUE, "application/json" })
     ResponseEntity<ExaminationExtraData> uploadExtraData(
@@ -64,6 +67,9 @@ public interface ExtraDataApi {
             @ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
             @ApiResponse(responseCode = "409", description = "Already exists - conflict"),
             @ApiResponse(responseCode = "500", description = "Unexpected Error") })
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') "
+            + "and (@preclinicalSecurityService.hasRightOnExamination(#id, 'CAN_IMPORT') "
+            + "or (hasRole('EXPERT') and @preclinicalSecurityService.hasRightOnExamination(#id, 'CAN_ADMINISTRATE'))))")
     @PostMapping(value = "/examination/{id}/extradata", produces = { "application/json" }, consumes = {
             "application/json" })
     ResponseEntity<ExaminationExtraData> createExtraData(
@@ -77,6 +83,9 @@ public interface ExtraDataApi {
             @ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
             @ApiResponse(responseCode = "409", description = "Already exists - conflict"),
             @ApiResponse(responseCode = "500", description = "Unexpected Error") })
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') "
+            + "and (@preclinicalSecurityService.hasRightOnExamination(#id, 'CAN_IMPORT') "
+            + "or (hasRole('EXPERT') and @preclinicalSecurityService.hasRightOnExamination(#id, 'CAN_ADMINISTRATE'))))")
     @PostMapping(value = "/examination/{id}/physiologicaldata", produces = { "application/json" }, consumes = {
             "application/json" })
     ResponseEntity<PhysiologicalData> createPhysiologicalExtraData(
@@ -90,6 +99,9 @@ public interface ExtraDataApi {
             @ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
             @ApiResponse(responseCode = "409", description = "Already exists - conflict"),
             @ApiResponse(responseCode = "500", description = "Unexpected Error") })
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') "
+            + "and (@preclinicalSecurityService.hasRightOnExamination(#id, 'CAN_IMPORT') "
+            + "or (hasRole('EXPERT') and @preclinicalSecurityService.hasRightOnExamination(#id, 'CAN_ADMINISTRATE'))))")
     @PostMapping(value = "/examination/{id}/bloodgasdata", produces = { "application/json" }, consumes = {
             "application/json" })
     ResponseEntity<BloodGasData> createBloodGasExtraData(
@@ -101,6 +113,9 @@ public interface ExtraDataApi {
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Successful operation"),
             @ApiResponse(responseCode = "400", description = "Invalid Examination Extra Data id"),
             @ApiResponse(responseCode = "500", description = "Unexpected Error") })
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') "
+            + "and (@preclinicalSecurityService.hasRightOnExamination(#id, 'CAN_IMPORT') "
+            + "or (hasRole('EXPERT') and @preclinicalSecurityService.hasRightOnExamination(#id, 'CAN_ADMINISTRATE'))))")
     @DeleteMapping(value = "/examination/{id}/extradata/{eid}", produces = {
             "application/json" })
     ResponseEntity<Void> deleteExtraData(
@@ -113,6 +128,8 @@ public interface ExtraDataApi {
             @ApiResponse(responseCode = "200", description = "An examination extra data"),
             @ApiResponse(responseCode = "404", description = "Examination extra data not found"),
             @ApiResponse(responseCode = "500", description = "Unexpected error") })
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') "
+            + "and @preclinicalSecurityService.hasRightOnExamination(#id, 'CAN_SEE_ALL'))")
     @GetMapping(value = "/examination/{id}/extradata/{eid}", produces = {
             "application/json" })
     ResponseEntity<ExaminationExtraData> getExtraDataById(
@@ -123,6 +140,8 @@ public interface ExtraDataApi {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "An array of extra data elements"),
             @ApiResponse(responseCode = "500", description = "Unexpected error") })
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') "
+            + "and @preclinicalSecurityService.hasRightOnExamination(#id, 'CAN_SEE_ALL'))")
     @GetMapping(value = "/examination/{id}/extradata/all", produces = {
             "application/json" })
     ResponseEntity<List<ExaminationExtraData>> getExaminationExtraData(
@@ -133,6 +152,8 @@ public interface ExtraDataApi {
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Successful operation"),
             @ApiResponse(responseCode = "400", description = "Invalid Examination Extra Data  id"),
             @ApiResponse(responseCode = "500", description = "Unexpected Error") })
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') "
+            + "and @preclinicalSecurityService.hasRightOnExtraData(#id, 'CAN_DOWNLOAD'))")
     @GetMapping(value = "/examination/extradata/download/{id}")
     void downloadExtraData(
             @Parameter(name = "Examination extra data id to download", required = true) @PathVariable("id") Long id,
@@ -144,6 +165,9 @@ public interface ExtraDataApi {
             @ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
             @ApiResponse(responseCode = "404", description = "ExaminationExtraData not found"),
             @ApiResponse(responseCode = "500", description = "Unexpected Error") })
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') "
+            + "and (@preclinicalSecurityService.hasRightOnExamination(#id, 'CAN_IMPORT') "
+            + "or (hasRole('EXPERT') and @preclinicalSecurityService.hasRightOnExamination(#id, 'CAN_ADMINISTRATE'))))")
     @PutMapping(value = "/examination/{id}/physiologicaldata/{eid}", produces = { "application/json" }, consumes = {
             "application/json" })
     ResponseEntity<Void> updatePhysiologicalData(
@@ -157,6 +181,9 @@ public interface ExtraDataApi {
             @ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
             @ApiResponse(responseCode = "404", description = "BloodGasData not found"),
             @ApiResponse(responseCode = "500", description = "Unexpected Error") })
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') "
+            + "and (@preclinicalSecurityService.hasRightOnExamination(#id, 'CAN_IMPORT') "
+            + "or (hasRole('EXPERT') and @preclinicalSecurityService.hasRightOnExamination(#id, 'CAN_ADMINISTRATE'))))")
     @PutMapping(value = "/examination/{id}/bloodgasdata/{eid}", produces = { "application/json" }, consumes = {
             "application/json" })
     ResponseEntity<Void> updateBloodGasData(

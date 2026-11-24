@@ -103,6 +103,9 @@ public class ExtraDataApiController implements ExtraDataApi {
         }
 
         ExaminationExtraData extradata = extraDataService.findById(id);
+        if (extradata == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
 
         try {
             ExaminationExtraData uploadedData = saveUploadedFile(extradata, uploadfiles[0]);
@@ -123,6 +126,8 @@ public class ExtraDataApiController implements ExtraDataApi {
             @Parameter(name = "ExaminationExtraData to create", required = true) @RequestBody ExaminationExtraData extradata,
             BindingResult result) throws RestServiceException {
 
+        // the rights were checked on the examination of the path, not on the one of the body
+        extradata.setExaminationId(id);
         final FieldErrorMap accessErrors = this.getCreationRightsErrors(extradata);
         final FieldErrorMap hibernateErrors = new FieldErrorMap(result);
         final FieldErrorMap uniqueErrors = this.uniqueConstraintManager.validate(extradata);
@@ -151,6 +156,8 @@ public class ExtraDataApiController implements ExtraDataApi {
             @Parameter(name = "PhysiologicalData to create", required = true) @RequestBody PhysiologicalData extradata,
             BindingResult result) throws RestServiceException {
 
+        // the rights were checked on the examination of the path, not on the one of the body
+        extradata.setExaminationId(id);
         final FieldErrorMap accessErrors = this.getCreationRightsErrors(extradata);
         final FieldErrorMap hibernateErrors = new FieldErrorMap(result);
         final FieldErrorMap uniqueErrors = physioConstraintManager.validate(extradata);
@@ -181,6 +188,8 @@ public class ExtraDataApiController implements ExtraDataApi {
             @Parameter(name = "BloodGasData to create", required = true) @RequestBody BloodGasData extradata,
             BindingResult result) throws RestServiceException {
 
+        // the rights were checked on the examination of the path, not on the one of the body
+        extradata.setExaminationId(id);
         final FieldErrorMap accessErrors = this.getCreationRightsErrors(extradata);
         final FieldErrorMap hibernateErrors = new FieldErrorMap(result);
         final FieldErrorMap uniqueErrors = this.bloodGasConstraintManager.validate(extradata);
@@ -209,7 +218,7 @@ public class ExtraDataApiController implements ExtraDataApi {
             @Parameter(name = "ExaminationExtraData id to delete", required = true) @PathVariable("eid") Long eid)
             throws RestServiceException {
         ExaminationExtraData toDelete = extraDataService.findById(eid);
-        if (toDelete == null) {
+        if (!belongsToExamination(toDelete, id)) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         try {
@@ -234,7 +243,7 @@ public class ExtraDataApiController implements ExtraDataApi {
             @Parameter(name = "examination id", required = true) @PathVariable("id") Long id,
             @Parameter(name = "ID of exam extra data that needs to be fetched", required = true) @PathVariable("eid") Long eid) {
         final ExaminationExtraData extradata = extraDataService.findById(eid);
-        if (extradata == null) {
+        if (!belongsToExamination(extradata, id)) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(extradata, HttpStatus.OK);
@@ -283,8 +292,12 @@ public class ExtraDataApiController implements ExtraDataApi {
             @Parameter(name = "ID of physiologicalData that needs to be updated", required = true) @PathVariable("eid") Long eid,
             @Parameter(name = "PhysiologicalData object that needs to be updated", required = true) @RequestBody PhysiologicalData physioData,
             final BindingResult result) throws RestServiceException {
+        if (!belongsToExamination(physioDataService.findById(eid), id)) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
         // IMPORTANT : avoid any confusion that could lead to security breach
         physioData.setId(eid);
+        physioData.setExaminationId(id);
 
         // A basic template can only update certain fields, check that
         final FieldErrorMap accessErrors = this.getUpdateRightsErrors(physioData);
@@ -317,8 +330,12 @@ public class ExtraDataApiController implements ExtraDataApi {
             @Parameter(name = "ID of bloodGasData that needs to be updated", required = true) @PathVariable("eid") Long eid,
             @Parameter(name = "BloodGasData object that needs to be updated", required = true) @RequestBody BloodGasData bloodGasData,
             final BindingResult result) throws RestServiceException {
+        if (!belongsToExamination(bloodGasDataService.findById(eid), id)) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
         // IMPORTANT : avoid any confusion that could lead to security breach
         bloodGasData.setId(eid);
+        bloodGasData.setExaminationId(id);
 
         // A basic template can only update certain fields, check that
         final FieldErrorMap accessErrors = this.getUpdateRightsErrors(bloodGasData);
@@ -343,6 +360,14 @@ public class ExtraDataApiController implements ExtraDataApi {
         }
 
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    /**
+     * The rights are checked on the examination of the path: the extra data must belong to it,
+     * otherwise any extra data could be read or changed through an examination of the user.
+     */
+    private static boolean belongsToExamination(ExaminationExtraData extraData, Long examinationId) {
+        return extraData != null && examinationId != null && examinationId.equals(extraData.getExaminationId());
     }
 
     private FieldErrorMap getCreationRightsErrors(final ExaminationExtraData extradata) {

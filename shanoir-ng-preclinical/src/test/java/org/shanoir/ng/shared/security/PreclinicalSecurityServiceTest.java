@@ -26,6 +26,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.AfterEach;
@@ -38,6 +39,8 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.shanoir.ng.preclinical.extra_data.examination_extra_data.ExaminationExtraData;
+import org.shanoir.ng.preclinical.extra_data.examination_extra_data.ExaminationExtraDataRepository;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.rights.StudyRightsService;
@@ -64,6 +67,9 @@ class PreclinicalSecurityServiceTest {
 
     @Mock
     private StudyRightsService studyRightsService;
+
+    @Mock
+    private ExaminationExtraDataRepository extraDataRepository;
 
     @Spy
     private ObjectMapper objectMapper = JsonMapper.builder().build();
@@ -152,6 +158,28 @@ class PreclinicalSecurityServiceTest {
                 .thenReturn("not json");
 
         assertFalse(service.hasRightOnExamination(EXAMINATION_ID, "CAN_IMPORT"));
+    }
+
+    @Test
+    void extraDataRightIsTheRightOnItsExamination() {
+        ExaminationExtraData extraData = new ExaminationExtraData();
+        extraData.setExaminationId(EXAMINATION_ID);
+        when(extraDataRepository.findById(3L)).thenReturn(Optional.of(extraData));
+        when(rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EXAMINATION_STUDY_CENTER_QUEUE, EXAMINATION_ID))
+                .thenReturn(STUDY_CENTER_JSON);
+        when(studyRightsService.hasRightOnStudy(STUDY_ID, "CAN_DOWNLOAD")).thenReturn(true);
+        when(studyRightsService.hasRightOnCenter(STUDY_ID, CENTER_ID)).thenReturn(true);
+
+        assertTrue(service.hasRightOnExtraData(3L, "CAN_DOWNLOAD"));
+    }
+
+    @Test
+    void extraDataRightIsRefusedForAnUnknownExtraData() {
+        when(extraDataRepository.findById(3L)).thenReturn(Optional.empty());
+
+        assertFalse(service.hasRightOnExtraData(3L, "CAN_DOWNLOAD"));
+        assertFalse(service.hasRightOnExtraData(null, "CAN_DOWNLOAD"));
+        verify(rabbitTemplate, never()).convertSendAndReceive(anyString(), any(Object.class));
     }
 
     @Test

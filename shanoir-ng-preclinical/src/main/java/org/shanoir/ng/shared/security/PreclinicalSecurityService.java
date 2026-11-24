@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.shanoir.ng.preclinical.extra_data.examination_extra_data.ExaminationExtraDataRepository;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.dto.ExaminationStudyCenterDTO;
 import org.shanoir.ng.study.rights.StudyRightsService;
@@ -61,6 +62,9 @@ public class PreclinicalSecurityService {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private ExaminationExtraDataRepository extraDataRepository;
+
     /**
      * Check that the connected user has the given right on the study of the given examination,
      * and on its center if the user is restricted to some centers of the study.
@@ -79,6 +83,26 @@ public class PreclinicalSecurityService {
         }
         return studyRightsService.hasRightOnStudy(studyCenter.getStudyId(), rightStr)
                 && studyRightsService.hasRightOnCenter(studyCenter.getStudyId(), studyCenter.getCenterId());
+    }
+
+    /**
+     * Check that the connected user has the given right on the examination of the given extra data,
+     * for the endpoints that only know the extra data (file upload and download).
+     *
+     * @param extraDataId the extra data id (examination extra data, physiological or blood gas data)
+     * @param rightStr the right, e.g. CAN_DOWNLOAD
+     * @return true if the user is an admin or has the right, false otherwise (and for an unknown extra data)
+     */
+    public boolean hasRightOnExtraData(Long extraDataId, String rightStr) {
+        if (KeycloakUtil.isAdmin()) {
+            return true;
+        }
+        if (extraDataId == null) {
+            return false;
+        }
+        return extraDataRepository.findById(extraDataId)
+                .map(extraData -> hasRightOnExamination(extraData.getExaminationId(), rightStr))
+                .orElse(false);
     }
 
     /**

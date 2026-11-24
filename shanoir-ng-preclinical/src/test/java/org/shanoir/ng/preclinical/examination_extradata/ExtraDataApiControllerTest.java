@@ -130,8 +130,16 @@ public class ExtraDataApiControllerTest {
 
         gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 
+        // the extra data 1 belongs to examination 1, the examination of the request paths
         ExaminationExtraData extraData = new ExaminationExtraData();
         extraData.setId(1L);
+        extraData.setExaminationId(1L);
+        PhysiologicalData physioData = new PhysiologicalData();
+        physioData.setExaminationId(1L);
+        given(physioDataService.findById(1L)).willReturn(physioData);
+        BloodGasData bloodGasData = new BloodGasData();
+        bloodGasData.setExaminationId(1L);
+        given(bloodGasDataService.findById(1L)).willReturn(bloodGasData);
 
         doNothing().when(extraDataServiceMock).deleteById(1L);
         given(extraDataServiceMock.findAllByExaminationId(1L)).willReturn(Arrays.asList(extraData));

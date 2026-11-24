@@ -17,6 +17,7 @@ import java.util.List;
 
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,6 +33,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+/**
+ * The contrast agents are not used by the pages, and their protocols are not linked to a study:
+ * their rights cannot be checked on a study, so they are restricted to the admins.
+ */
 @Tag(name = "contrast_agent")
 @RequestMapping("/protocol/{pid}/contrastagent")
 public interface ContrastAgentApi {
@@ -42,6 +47,7 @@ public interface ContrastAgentApi {
         @ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
         @ApiResponse(responseCode = "409", description = "Already exists - conflict"),
         @ApiResponse(responseCode = "500", description = "Unexpected Error")})
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping(value = "",
             produces = {"application/json"},
             consumes = {"application/json"})
@@ -54,6 +60,7 @@ public interface ContrastAgentApi {
         @ApiResponse(responseCode = "200", description = "Successful operation"),
         @ApiResponse(responseCode = "400", description = "Invalid ContrastAgent id"),
         @ApiResponse(responseCode = "500", description = "Unexpected Error")})
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping(value = "/{cid}",
             produces = {"application/json"})
     ResponseEntity<Void> deleteContrastAgent(@Parameter(name = "protocol id", required = true) @PathVariable("pid") Long pid,
@@ -64,6 +71,7 @@ public interface ContrastAgentApi {
         @ApiResponse(responseCode = "200", description = "A Contrast Agent"),
         @ApiResponse(responseCode = "404", description = "Contrast Agent not found"),
         @ApiResponse(responseCode = "500", description = "Unexpected error")})
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping(value = "",
             produces = {"application/json"})
     ResponseEntity<ContrastAgent> getContrastAgentByProtocolId(@Parameter(name = "protocol id", required = true) @PathVariable("pid") Long pid);
@@ -73,6 +81,7 @@ public interface ContrastAgentApi {
         @ApiResponse(responseCode = "200", description = "A Contrast Agent"),
         @ApiResponse(responseCode = "404", description = "Contrast Agent not found"),
         @ApiResponse(responseCode = "500", description = "Unexpected error")})
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping(value = "/{cid}",
             produces = {"application/json"})
     ResponseEntity<ContrastAgent> getContrastAgentById(@Parameter(name = "protocol id", required = true) @PathVariable("pid") Long pid,
@@ -83,6 +92,7 @@ public interface ContrastAgentApi {
         @ApiResponse(responseCode = "200", description = "A Contrast Agent"),
         @ApiResponse(responseCode = "404", description = "Contrast Agent not found"),
         @ApiResponse(responseCode = "500", description = "Unexpected error")})
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping(value = "/name/{name}",
             produces = {"application/json"})
     ResponseEntity<ContrastAgent> getContrastAgentByName(@Parameter(name = "protocol id", required = true) @PathVariable("pid") Long pid,
@@ -92,6 +102,7 @@ public interface ContrastAgentApi {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "An array of contrast agents"),
         @ApiResponse(responseCode = "500", description = "Unexpected error")})
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping(value = "/all",
             produces = {"application/json"})
     ResponseEntity<List<ContrastAgent>> getContrastAgents(@Parameter(name = "protocol id", required = true) @PathVariable("pid") Long pid);
@@ -102,6 +113,7 @@ public interface ContrastAgentApi {
         @ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
         @ApiResponse(responseCode = "404", description = "Contrast Agent not found"),
         @ApiResponse(responseCode = "500", description = "Unexpected Error")})
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping(value = "/{cid}",
             produces = {"application/json"},
             consumes = {"application/json"})
