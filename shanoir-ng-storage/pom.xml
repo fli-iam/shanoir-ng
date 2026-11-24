@@ -43,6 +43,19 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <artifactId>spring-cloud-aws-starter-s3</artifactId>
             <version>3.4.0</version>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <version>3.4.0</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- the byte-buddy of Spring Boot 3.4.0 does not know the recent JDKs (Mockito), as in ms-datasets -->
+        <dependency>
+            <groupId>net.bytebuddy</groupId>
+            <artifactId>byte-buddy</artifactId>
+            <version>1.18.5</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>

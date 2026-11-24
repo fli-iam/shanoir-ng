@@ -55,8 +55,8 @@ public class FileSystemStorageService implements StorageService {
     public boolean existsStudyData(Long studyId, String fileName) throws StorageException {
         String directory = STUDY + studyId;
         try {
-            String decodedFileName = URLDecoder.decode(fileName, StandardCharsets.UTF_8);
-            Path filePath = Paths.get(baseDirStudies, directory, decodedFileName);
+            String decodedFileName = StorageNames.checkFileName(URLDecoder.decode(fileName, StandardCharsets.UTF_8));
+            Path filePath = StorageNames.pathInside(baseDirStudies, directory, decodedFileName);
             return Files.exists(filePath);
         } catch(InvalidPathException e) {
             return false;
@@ -67,8 +67,8 @@ public class FileSystemStorageService implements StorageService {
     public boolean existsExtraData(Long examinationId, String fileName) throws StorageException {
         String directory = EXAMINATION + examinationId;
         try {
-            String decodedFileName = URLDecoder.decode(fileName, StandardCharsets.UTF_8);
-            Path filePath = Paths.get(baseDirDatasets, directory, decodedFileName);
+            String decodedFileName = StorageNames.checkFileName(URLDecoder.decode(fileName, StandardCharsets.UTF_8));
+            Path filePath = StorageNames.pathInside(baseDirDatasets, directory, decodedFileName);
             return Files.exists(filePath);
         } catch (InvalidPathException e) {
             return false;
@@ -79,8 +79,8 @@ public class FileSystemStorageService implements StorageService {
     public boolean existsAcquisitionExtraData(Long acquisitionId, String fileName) throws StorageException {
         String directory = ACQUISITION + acquisitionId;
         try {
-            String decodedFileName = URLDecoder.decode(fileName, StandardCharsets.UTF_8);
-            Path filePath = Paths.get(baseDirDatasets, directory, decodedFileName);
+            String decodedFileName = StorageNames.checkFileName(URLDecoder.decode(fileName, StandardCharsets.UTF_8));
+            Path filePath = StorageNames.pathInside(baseDirDatasets, directory, decodedFileName);
             return Files.exists(filePath);
         } catch (InvalidPathException e) {
             return false;
@@ -208,9 +208,9 @@ public class FileSystemStorageService implements StorageService {
             InputStream inputStream, String contentType, long size)
             throws StorageException {
         try {
-            Path dirPath = Paths.get(baseDir, directory);
+            Path dirPath = StorageNames.pathInside(baseDir, directory);
             Files.createDirectories(dirPath);
-            Path filePath = dirPath.resolve(fileName);
+            Path filePath = dirPath.resolve(StorageNames.checkFileName(fileName));
             LOG.info("Storing file at: {}", filePath);
             Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
             return FILE + filePath.toString();
@@ -255,8 +255,8 @@ public class FileSystemStorageService implements StorageService {
     }
 
     private Resource load(String baseDir, String directory, String fileName) throws StorageException {
-        String decodedFileName = URLDecoder.decode(fileName, StandardCharsets.UTF_8);
-        Path filePath = Paths.get(baseDir, directory, decodedFileName);
+        String decodedFileName = StorageNames.checkFileName(URLDecoder.decode(fileName, StandardCharsets.UTF_8));
+        Path filePath = StorageNames.pathInside(baseDir, directory, decodedFileName);
         Resource resource = new FileSystemResource(filePath);
         if (!resource.exists()) {
             throw new StorageException("File not found: " + filePath, null);
@@ -265,7 +265,7 @@ public class FileSystemStorageService implements StorageService {
     }
 
     private Resource load(String baseDir, String path) throws StorageException {
-        Path filePath = Paths.get(baseDir, path);
+        Path filePath = StorageNames.pathInside(baseDir, path);
         Resource resource = new FileSystemResource(filePath);
         if (!resource.exists()) {
             throw new StorageException("File not found: " + filePath, null);
@@ -276,7 +276,7 @@ public class FileSystemStorageService implements StorageService {
     @Override
     public long getFileSizeExtraData(Long examinationId, String fileName) throws StorageException {
         try {
-            Path filePath = Paths.get(baseDirDatasets, EXAMINATION + examinationId, fileName);
+            Path filePath = StorageNames.pathInside(baseDirDatasets, EXAMINATION + examinationId, StorageNames.checkFileName(fileName));
             if (!Files.exists(filePath)) {
                 return 0L;
             }
@@ -289,7 +289,7 @@ public class FileSystemStorageService implements StorageService {
     @Override
     public long getFileSizeAcquisitionExtraData(Long acquisitionId, String fileName) throws StorageException {
         try {
-            Path filePath = Paths.get(baseDirDatasets, ACQUISITION + acquisitionId, fileName);
+            Path filePath = StorageNames.pathInside(baseDirDatasets, ACQUISITION + acquisitionId, StorageNames.checkFileName(fileName));
             if (!Files.exists(filePath)) {
                 return 0L;
             }
@@ -301,17 +301,17 @@ public class FileSystemStorageService implements StorageService {
 
     @Override
     public String getPublicLocationStudies(String directory, String fileName) throws StorageException {
-        return Paths.get(baseDirStudies, directory, fileName).toUri().toString();
+        return StorageNames.pathInside(baseDirStudies, directory, StorageNames.checkFileName(fileName)).toUri().toString();
     }
 
     @Override
     public String getPublicLocationDatasets(String directory, String fileName) throws StorageException {
-        return Paths.get(baseDirDatasets, directory, fileName).toUri().toString();
+        return StorageNames.pathInside(baseDirDatasets, directory, StorageNames.checkFileName(fileName)).toUri().toString();
     }
 
     @Override
     public String getPublicLocationPreclinical(String directory, String fileName) throws StorageException {
-        return Paths.get(baseDirPreclinical, directory, fileName).toUri().toString();
+        return StorageNames.pathInside(baseDirPreclinical, directory, StorageNames.checkFileName(fileName)).toUri().toString();
     }
 
     @Override
@@ -342,7 +342,7 @@ public class FileSystemStorageService implements StorageService {
 
     private void delete(String baseDir, String directory, String fileName) throws StorageException {
         try {
-            Files.deleteIfExists(Paths.get(baseDir, directory, fileName));
+            Files.deleteIfExists(StorageNames.pathInside(baseDir, directory, StorageNames.checkFileName(fileName)));
         } catch (IOException e) {
             throw new StorageException("Failed to delete file " + fileName, e);
         }
@@ -380,7 +380,7 @@ public class FileSystemStorageService implements StorageService {
     }
 
     private void deleteDirectory(String baseDir, String directory) throws StorageException {
-        Path dirPath = Paths.get(baseDir, directory);
+        Path dirPath = StorageNames.pathInside(baseDir, directory);
         if (!Files.exists(dirPath))
             return;
         try {
@@ -414,8 +414,8 @@ public class FileSystemStorageService implements StorageService {
     private void move(String baseDir, String directory, String sourceFileName, String targetFileName)
             throws StorageException {
         try {
-            Path source = Paths.get(baseDir, directory, sourceFileName);
-            Path target = Paths.get(baseDir, directory, targetFileName);
+            Path source = StorageNames.pathInside(baseDir, directory, StorageNames.checkFileName(sourceFileName));
+            Path target = StorageNames.pathInside(baseDir, directory, StorageNames.checkFileName(targetFileName));
             Files.move(source, target, StandardCopyOption.REPLACE_EXISTING);
             LOG.info("Moved file from {} to {}", source, target);
         } catch (IOException e) {
