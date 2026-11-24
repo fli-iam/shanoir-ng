@@ -50,6 +50,7 @@ public interface PathologyModelApi {
     @PostMapping(value = "/pathology/model",
             produces = {"application/json"},
             consumes = {"application/json"})
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
     ResponseEntity<PathologyModel> createPathologyModel(@Parameter(name = "pathology model to create", required = true) @RequestBody PathologyModel model,
             BindingResult result) throws RestServiceException;
 
@@ -60,6 +61,7 @@ public interface PathologyModelApi {
         @ApiResponse(responseCode = "500", description = "Unexpected Error")})
     @DeleteMapping(value = "/pathology/model/{id}",
             produces = {"application/json"})
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
     ResponseEntity<Void> deletePathologyModel(@Parameter(name = "pathology model id", required = true) @PathVariable("id") Long id);
 
     @Operation(summary = "Get Pathology model", description = "")
@@ -69,6 +71,7 @@ public interface PathologyModelApi {
         @ApiResponse(responseCode = "500", description = "Unexpected error")})
     @GetMapping(value = "/pathology/model/{id}",
             produces = {"application/json"})
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     ResponseEntity<PathologyModel> getPathologyModelById(@Parameter(name = "Pathology model id", required = true) @PathVariable("id") Long id);
 
     @Operation(summary = "List all pathologies models", description = "")
@@ -77,6 +80,7 @@ public interface PathologyModelApi {
         @ApiResponse(responseCode = "500", description = "Unexpected error")})
     @GetMapping(value = "/pathology/model",
             produces = {"application/json"})
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     ResponseEntity<List<PathologyModel>> getPathologyModels();
 
     @Operation(summary = "List all pathologies models for given pathology", description = "")
@@ -85,6 +89,7 @@ public interface PathologyModelApi {
         @ApiResponse(responseCode = "500", description = "Unexpected error")})
     @GetMapping(value = "/pathology/{id}/model/all",
             produces = {"application/json"})
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     ResponseEntity<List<PathologyModel>> getPathologyModelsByPathology(@Parameter(name = "ID of pathology", required = true) @PathVariable("id") Long id);
 
     @Operation(summary = "Update an existing pathology model", description = "")
@@ -96,6 +101,7 @@ public interface PathologyModelApi {
     @PutMapping(value = "/pathology/model/{id}",
             produces = {"application/json"},
             consumes = {"application/json"})
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
     ResponseEntity<Void> updatePathologyModel(@Parameter(name = "ID of pathology model that needs to be updated", required = true) @PathVariable("id") Long id,
             @Parameter(name = "Pathology model object that needs to be updated", required = true) @RequestBody PathologyModel model,
             final BindingResult result) throws RestServiceException;
@@ -108,6 +114,7 @@ public interface PathologyModelApi {
     @PostMapping(value = "/pathology/model/upload/specs/{id}",
             produces = {"application/json"},
             consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, "application/json"})
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
     ResponseEntity<PathologyModel> uploadModelSpecifications(@Parameter(name = "Pathology model id", required = true) @PathVariable("id") Long id,
             @RequestParam("files") MultipartFile[] uploadfiles) throws RestServiceException;
 
@@ -118,6 +125,7 @@ public interface PathologyModelApi {
         @ApiResponse(responseCode = "500", description = "Unexpected Error")})
     @GetMapping(value = "/pathology/model/download/specs/{id}",
             produces = {MediaType.APPLICATION_OCTET_STREAM_VALUE, "application/json"})
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     ResponseEntity<Resource> downloadModelSpecifications(@Parameter(name = "pathology model id", required = true) @PathVariable("id") Long id) throws RestServiceException;
 
     @Operation(summary = "", description = "Returns a JSON table of all files indexed by study ID")

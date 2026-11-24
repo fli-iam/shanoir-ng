@@ -17,6 +17,7 @@ import java.util.List;
 
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -45,6 +46,7 @@ public interface TherapyApi {
     @PostMapping(value = "",
             produces = {"application/json"},
             consumes = {"application/json"})
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
     ResponseEntity<Therapy> createTherapy(@Parameter(name = "therapy to create", required = true) @RequestBody Therapy therapy,
             BindingResult result) throws RestServiceException;
 
@@ -55,6 +57,7 @@ public interface TherapyApi {
         @ApiResponse(responseCode = "500", description = "Unexpected Error")})
     @DeleteMapping(value = "/{id}",
             produces = {"application/json"})
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
     ResponseEntity<Void> deleteTherapy(@Parameter(name = "therapy id", required = true) @PathVariable("id") Long id);
 
     @Operation(summary = "Get Therapy by id", description = "")
@@ -64,6 +67,7 @@ public interface TherapyApi {
         @ApiResponse(responseCode = "500", description = "Unexpected error")})
     @GetMapping(value = "/{id}",
             produces = {"application/json"})
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     ResponseEntity<Therapy> getTherapyById(@Parameter(name = "Therapy id", required = true) @PathVariable("id") Long id);
 
     @Operation(summary = "Get Therapy by type", description = "")
@@ -72,6 +76,7 @@ public interface TherapyApi {
         @ApiResponse(responseCode = "500", description = "Unexpected error")})
     @GetMapping(value = "/type/{type}",
             produces = {"application/json"})
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     ResponseEntity<List<Therapy>> getTherapyByType(@Parameter(name = "Therapy type", required = true) @PathVariable("type") String type) throws RestServiceException;
 
     @Operation(summary = "List all therapies", description = "")
@@ -80,6 +85,7 @@ public interface TherapyApi {
         @ApiResponse(responseCode = "500", description = "Unexpected error")})
     @GetMapping(value = "",
             produces = {"application/json"})
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     ResponseEntity<List<Therapy>> getTherapies();
 
     @Operation(summary = "Update an existing therapy", description = "")
@@ -91,6 +97,7 @@ public interface TherapyApi {
     @PutMapping(value = "/{id}",
             produces = {"application/json"},
             consumes = {"application/json"})
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
     ResponseEntity<Void> updateTherapy(@Parameter(name = "ID of therapy that needs to be updated", required = true) @PathVariable("id") Long id,
             @Parameter(name = "Therapy object that needs to be updated", required = true) @RequestBody Therapy therapy,
             final BindingResult result) throws RestServiceException;

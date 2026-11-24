@@ -17,6 +17,7 @@ import java.util.List;
 
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -46,6 +47,7 @@ public interface AnestheticIngredientApi {
     @PostMapping(value = "",
             produces = {"application/json"},
             consumes = {"application/json"})
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
     ResponseEntity<AnestheticIngredient> createAnestheticIngredient(@Parameter(name = "anesthetic id", required = true) @PathVariable("id") Long id,
             @Parameter(name = "anesthetic ingredient to create", required = true) @RequestBody AnestheticIngredient ingredient,
             BindingResult result) throws RestServiceException;
@@ -58,6 +60,7 @@ public interface AnestheticIngredientApi {
         @ApiResponse(responseCode = "500", description = "Unexpected Error")})
     @DeleteMapping(value = "/{aiid}",
             produces = {"application/json"})
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
     ResponseEntity<Void> deleteAnestheticIngredient(@Parameter(name = "anesthetic id", required = true) @PathVariable("id") Long id,
             @Parameter(name = "Anesthetic Ingredient id", required = true) @PathVariable("aiid") Long aiid);
 
@@ -68,6 +71,7 @@ public interface AnestheticIngredientApi {
         @ApiResponse(responseCode = "500", description = "Unexpected error")})
     @GetMapping(value = "/{aiid}",
             produces = {"application/json"})
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     ResponseEntity<AnestheticIngredient> getAnestheticIngredientById(@Parameter(name = "anesthetic id", required = true) @PathVariable("id") Long id,
             @Parameter(name = "Anesthetic Ingredient id", required = true) @PathVariable("id") Long aiid);
 
@@ -79,6 +83,7 @@ public interface AnestheticIngredientApi {
         @ApiResponse(responseCode = "500", description = "Unexpected error")})
     @GetMapping(value = "/all",
             produces = {"application/json"})
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     ResponseEntity<List<AnestheticIngredient>> getAnestheticIngredients(@Parameter(name = "anesthetic id", required = true) @PathVariable("id") Long id) throws RestServiceException;
 
     @Operation(summary = "Update an existing anesthetic ingredient", description = "")
@@ -90,6 +95,7 @@ public interface AnestheticIngredientApi {
     @PutMapping(value = "/{aiid}",
             produces = {"application/json"},
             consumes = {"application/json"})
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
     ResponseEntity<Void> updateAnestheticIngredient(@Parameter(name = "anesthetic id", required = true) @PathVariable("id") Long id,
             @Parameter(name = "ID of Anesthetic Ingredient that needs to be updated", required = true) @PathVariable("aiid") Long aiid,
             @Parameter(name = "Anesthetic Ingredient object that needs to be updated", required = true) @RequestBody AnestheticIngredient ingredient,
