@@ -375,11 +375,20 @@ Service             | Accounts                                              | Ri
    ```
    docker compose down
    ```
-2. update the configuration: `git pull`, then set the new passwords in `.env`
-   (`./check-env.sh` lists the missing variables). Keep the account names
-   (`SHANOIR_*_DB_USER`, `SHANOIR_PACS_DATABASE_USER`) of the existing install:
-   accounts cannot be renamed, and the script stops if an account does not
-   exist.
+2. update the configuration: first keep a copy of the current `.env`
+   (`cp .env .env.old`), then `git pull` and set the new passwords in `.env`
+   (`./check-env.sh` lists the missing variables). Keep from the existing
+   install:
+   * the account names (`SHANOIR_*_DB_USER`, `SHANOIR_PACS_DATABASE_USER`):
+     accounts cannot be renamed, and the script stops if an account does not
+     exist;
+   * `SHANOIR_KEYCLOAK_PASSWORD` and `VIP_CLIENT_SECRET`: Keycloak stores them
+     when its realm is created, the script does not change them (see the notes).
+
+   If the current root passwords are not the old defaults (e.g. a second
+   rotation), give them to the next step, from the copy of `.env` (see the
+   notes): the script cannot find them by itself, and without them it stops
+   on the first database.
 3. apply them
    ```
    ./rotate-passwords.sh
@@ -404,7 +413,16 @@ Service             | Accounts                                              | Ri
   ```
   The PACS database needs no old password, and the LDAP root password is
   changed through the LDAP config account.
-* The same procedure changes the passwords later, e.g. after a leak.
+* The same procedure changes the passwords later, e.g. after a leak. The
+  current passwords are then the ones of the previous `.env`: keep a copy of it
+  until the rotation is done, e.g.
+  ```
+  old() { grep "^$1=" .env.old | cut -d= -f2-; }
+  SHANOIR_OLD_DB_ROOT_PASSWORD="$(old SHANOIR_DB_ROOT_PASSWORD)"                    \
+  SHANOIR_OLD_KEYCLOAK_DB_ROOT_PASSWORD="$(old SHANOIR_KEYCLOAK_DB_ROOT_PASSWORD)"  \
+  SHANOIR_OLD_PACS_LDAP_CONFIG_PASSWORD="$(old SHANOIR_PACS_LDAP_CONFIG_PASSWORD)"  \
+  ./rotate-passwords.sh
+  ```
 * Not handled by the script:
   * RabbitMQ: on installs created before its volume was fixed, the account is
     created from `.env` at the next start. To change its password later, see
