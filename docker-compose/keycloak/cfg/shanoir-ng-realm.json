@@ -814,7 +814,8 @@
         "profile",
         "roles",
         "basic",
-        "email"
+        "email",
+        "shanoir-api"
       ],
       "optionalClientScopes": [
         "address",
@@ -895,7 +896,8 @@
         "profile",
         "roles",
         "basic",
-        "email"
+        "email",
+        "shanoir-api"
       ]
     },
     {
@@ -1045,7 +1047,8 @@
       ],
       "defaultClientScopes": [
         "roles",
-        "basic"
+        "basic",
+        "shanoir-api"
       ],
       "optionalClientScopes": []
     },
@@ -1313,7 +1316,8 @@
         "profile",
         "roles",
         "basic",
-        "email"
+        "email",
+        "shanoir-api"
       ],
       "optionalClientScopes": [
         "address",
@@ -1402,7 +1406,8 @@
         "profile",
         "roles",
         "basic",
-        "email"
+        "email",
+        "shanoir-api"
       ],
       "optionalClientScopes": [
         "address",
@@ -1491,7 +1496,8 @@
         "roles",
         "profile",
         "basic",
-        "email"
+        "email",
+        "shanoir-api"
       ],
       "optionalClientScopes": [
         "address",
@@ -1502,6 +1508,31 @@
     }
   ],
   "clientScopes": [
+    {
+      "id": "d31b5d47-a331-49c5-9ee4-38b047e04b6e",
+      "name": "shanoir-api",
+      "description": "Audience of the Shanoir APIs: the services refuse tokens without it",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "false",
+        "display.on.consent.screen": "false"
+      },
+      "protocolMappers": [
+        {
+          "id": "70c3ad86-e6da-4e17-9a0c-af7661836d9d",
+          "name": "shanoir-api audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.custom.audience": "shanoir-ng-api",
+            "id.token.claim": "false",
+            "access.token.claim": "true",
+            "introspection.token.claim": "true"
+          }
+        }
+      ]
+    },
     {
       "id": "2602d5ce-9031-400c-ba8e-beec1b09e79d",
       "name": "email",
