@@ -572,6 +572,11 @@ public class StudyApiController implements StudyApi {
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
             @Parameter(description = "file to download", required = true) @PathVariable("fileName") String fileName,
             HttpServletResponse response) throws Exception {
+        // only the DUA of the study: its other files need their own right (protocol files: CAN_DOWNLOAD)
+        if (!dataUserAgreementService.isDataUserAgreementOfStudy(studyId, fileName)) {
+            response.sendError(HttpStatus.NOT_FOUND.value());
+            return;
+        }
         Resource resource = storageService.loadStudyData(studyId, fileName);
         String contentType = MediaType.APPLICATION_PDF_VALUE;
         downloadFile(fileName, contentType, response, resource);

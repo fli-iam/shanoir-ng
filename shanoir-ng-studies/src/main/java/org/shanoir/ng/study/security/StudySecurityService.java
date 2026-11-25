@@ -332,6 +332,25 @@ public class StudySecurityService {
      * @param right
      * @return
      */
+    /**
+     * The DUA of a study can be read by its members, and by the users asked to accept it: they are not members
+     * until they accept it.
+     *
+     * @param studyId the study id
+     * @return true if the connected user is an admin, can see the study, or has a DUA of the study to accept
+     */
+    public boolean canDownloadDua(Long studyId) {
+        if (studyId == null) {
+            return false;
+        }
+        if (hasPrivilegeOnStudy(studyId, StudyUserRight.CAN_SEE_ALL)) {
+            return true;
+        }
+        Long userId = KeycloakUtil.getTokenUserId();
+        return userId != null
+                && dataUserAgreementRepository.findByUserIdAndStudy_IdAndTimestampOfAcceptedIsNull(userId, studyId) != null;
+    }
+
     private boolean hasPrivilegeOnStudy(Long studyId, StudyUserRight right) {
         return studyRepository.findById(studyId)
                 .map(study -> hasPrivilege(study, right))

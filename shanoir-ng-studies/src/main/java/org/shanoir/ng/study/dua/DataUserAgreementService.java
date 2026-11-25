@@ -23,6 +23,7 @@ import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.model.StudyUser;
+import org.shanoir.ng.study.repository.StudyRepository;
 import org.shanoir.ng.study.repository.StudyUserRepository;
 import org.shanoir.ng.study.rights.command.CommandType;
 import org.shanoir.ng.study.rights.command.StudyUserCommand;
@@ -52,6 +53,21 @@ public class DataUserAgreementService {
 
     @Autowired
     private StudyUserUpdateBroadcastService studyUserCom;
+
+    @Autowired
+    private StudyRepository studyRepository;
+
+    /**
+     * Read without the rights of the study: the users asked to accept its DUA are not members yet.
+     *
+     * @param studyId the study id
+     * @param fileName the file name
+     * @return true if the file is the DUA of the study
+     */
+    public boolean isDataUserAgreementOfStudy(Long studyId, String fileName) {
+        List<String> paths = studyRepository.findDataUserAgreementPathsByStudyId(studyId);
+        return paths != null && paths.contains(fileName);
+    }
 
     public List<DataUserAgreement> getDataUserAgreementsByUserId(Long userId) {
         return repository.findByUserIdAndTimestampOfAcceptedIsNull(userId);
