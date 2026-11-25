@@ -52,7 +52,7 @@ public class StowRSDicomTest extends AbstractTest {
     public void postDICOMMRToDicomWeb() throws Exception {
         Study study = createStudyAndCenterAndStudyCardAndAddMembers();
         try {
-            URL resource = getClass().getClassLoader().getResource("acr_phantom_t1/");
+            URL resource = getClass().getClassLoader().getResource("DICOM_MR/");
             if (resource != null) {
                 File sourceDir = new File(resource.toURI());
                 if (sourceDir.isDirectory()) {
@@ -70,6 +70,36 @@ public class StowRSDicomTest extends AbstractTest {
                         long stopTime = System.currentTimeMillis();
                         long elapsedTime = stopTime - startTime;
                         logger.info("postDICOMMRToDicomWeb: " + elapsedTime + "ms");
+                    }
+                }
+            }
+        } catch (URISyntaxException e) {
+            logger.error("Error while reading file", e);
+        }
+    }
+
+    @Test
+    public void postDICOMXAToDicomWeb() throws Exception {
+        Study study = createStudyAndCenterAndStudyCardAndAddMembers();
+        try {
+            URL resource = getClass().getClassLoader().getResource("DICOM_XA/");
+            if (resource != null) {
+                File sourceDir = new File(resource.toURI());
+                if (sourceDir.isDirectory()) {
+                    File tempDir = generateStowRSDicom(study.getId().toString(), sourceDir);
+                    if (tempDir != null) {
+                        logger.info("Starting postDICOMXAToDicomWeb");
+                        long startTime = System.currentTimeMillis();
+                        for (File f : tempDir.listFiles()) {
+                            try {
+                                userClient.postDicom(f);
+                            } catch (Exception e) {
+                                logger.error(e.getMessage());
+                            }
+                        }
+                        long stopTime = System.currentTimeMillis();
+                        long elapsedTime = stopTime - startTime;
+                        logger.info("postDICOMXAToDicomWeb: " + elapsedTime + "ms");
                     }
                 }
             }
