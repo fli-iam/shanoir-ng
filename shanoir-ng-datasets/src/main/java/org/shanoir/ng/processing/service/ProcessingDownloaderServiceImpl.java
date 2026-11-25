@@ -33,6 +33,7 @@ import org.apache.solr.common.util.Pair;
 import org.assertj.core.util.Lists;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
+import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.download.ArchiveWriter;
@@ -46,6 +47,7 @@ import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.utils.DatasetFileUtils;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,6 +69,9 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
 
     @Autowired
     private DatasetRepository datasetRepository;
+
+    @Autowired
+    private DatasetSecurityService datasetSecurityService;
 
     @PersistenceContext
     private EntityManager em;
@@ -120,6 +125,9 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
         for (JsonNode extraction : extractions) {
             extractedIds.addAll(getDatasetIdsFromJsonFilters(extraction));
         }
+        // the filters can match any dataset of the instance: only the ones the user can download are listed
+        extractedIds = datasetSecurityService.filterDatasetIds(
+                extractedIds.stream().distinct().collect(Collectors.toList()), StudyUserRight.CAN_DOWNLOAD.name());
 
         int count = 1;
         List<List<Long>> partitions = ListUtils.partition(extractedIds, 3000);
