@@ -100,6 +100,10 @@ public class UploadServiceJob {
             if (importJobFile.exists()) {
                 NominativeDataImportJobManager importJobManager = new NominativeDataImportJobManager(importJobFile);
                 final ImportJobBase importJob = importJobManager.readImportJob();
+                if (importJob == null) {
+                    LOG.error("Folder skipped, import-job.json could not be read: " + folder.getAbsolutePath());
+                    continue;
+                }
                 final org.shanoir.ng.importer.model.UploadState uploadState = importJob.getUploadState();
                 // Avoid reading all files (a lot) in case of finished upload
                 if (!uploadState.equals(org.shanoir.ng.importer.model.UploadState.FINISHED)) {
