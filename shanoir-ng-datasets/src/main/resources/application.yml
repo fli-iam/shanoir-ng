@@ -150,6 +150,12 @@ storage:
       bucket: ${S3_BUCKET_DATASETS:datasets}
       prefix: datasets/
 
+shanoir:
+  import:
+    # Folder where ms-preclinical converts the Bruker uploads (shared /tmp volume), same setting as ms-import:
+    # the Bruker archive stored at the end of an import must be in the folder of the user
+    bruker-convert-directory: /tmp/bruker/convert
+
 # logging configuration
 logging:
   pattern:
