@@ -93,6 +93,25 @@ class STOWRSMultipartRequestFilterTest {
     }
 
     @Test
+    void structureSetOfTheViewerGoesToTheSegAndSrImporter() throws Exception {
+        when(dicomSEGAndSRImporterService.needsSourceDataset(any(), eq(false))).thenReturn(true);
+        when(dicomSEGAndSRImporterService.importDicomSEGAndSR(any(), any(), eq("RTSTRUCT"), eq(false))).thenReturn(true);
+
+        send(instance("RTSTRUCT"), "");
+
+        verify(dicomSEGAndSRImporterService).importDicomSEGAndSR(any(), any(), eq("RTSTRUCT"), eq(false));
+        verify(dicomImporterService, never()).importDicom(any(), any());
+    }
+
+    @Test
+    void failedImportOfAStructureSetOfTheViewerFailsTheRequest() throws Exception {
+        when(dicomSEGAndSRImporterService.needsSourceDataset(any(), eq(false))).thenReturn(true);
+        when(dicomSEGAndSRImporterService.importDicomSEGAndSR(any(), any(), eq("RTSTRUCT"), eq(false))).thenReturn(false);
+
+        assertThrows(IOException.class, () -> send(instance("RTSTRUCT"), ""));
+    }
+
+    @Test
     void srWithoutSourceDatasetFollowsTheNormalPath() throws Exception {
         when(dicomSEGAndSRImporterService.needsSourceDataset(any(), eq(true))).thenReturn(false);
         when(dicomImporterService.importDicom(any(), any())).thenReturn(true);
