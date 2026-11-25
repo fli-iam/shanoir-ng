@@ -200,6 +200,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <goals>
                             <goal>process-aot</goal>
                         </goals>
+                        <!-- AOT freezes auto-configuration conditions at build time: SQL init
+                             must be enabled here or SHANOIR_MIGRATION=init cannot run the seed
+                             script. At runtime, spring.sql.init.mode=never still skips it. -->
+                        <configuration>
+                            <arguments>
+                                <argument>--spring.sql.init.mode=always</argument>
+                            </arguments>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
