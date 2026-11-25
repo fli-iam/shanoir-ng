@@ -87,7 +87,7 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> i
 
     getEntities(eager: boolean = false): Promise<Study[]> {
         const earlyResult: Promise<Study[]> = Promise.all([
-            this.studyService.getAll().then(studies => this.fetchStorageVolumesByChunk(studies)),
+            this.studyService.getAll({ withCounts: true }).then(studies => this.fetchStorageVolumesByChunk(studies)),
             this.studyService.getPublicStudiesData(),
             this.studyService.getExpiredStudiesData()
         ]).then(([studies, publicStudies, expiredStudies]) => {

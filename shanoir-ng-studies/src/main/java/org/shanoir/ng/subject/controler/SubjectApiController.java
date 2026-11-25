@@ -207,7 +207,7 @@ public class SubjectApiController implements SubjectApi {
     @Transactional
     public ResponseEntity<SubjectDTO> findSubjectByIdentifier(String subjectIdentifier) {
         // Get all allowed studies
-        List<Study> studies = studyService.findAll();
+        List<Study> studies = studyService.findAll(false, false);
         // As only studies are used to find a subject, in which the user has rights, no
         // need for further rights checks
         final Subject subject = subjectService.findByIdentifierInStudiesWithRights(subjectIdentifier, studies);
@@ -254,7 +254,7 @@ public class SubjectApiController implements SubjectApi {
 
     public ResponseEntity<Page<SubjectDTO>> findClinicalSubjectsPageByName(Pageable page, String name) {
         // Get all allowed studies
-        List<Study> studies = this.studyService.findAll();
+        List<Study> studies = this.studyService.findAll(false, false);
         Page<Subject> subjects = this.subjectService.getClinicalFilteredPageByStudies(page, name, studies);
         if (subjects.getContent().isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);

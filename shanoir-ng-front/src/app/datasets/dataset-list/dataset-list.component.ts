@@ -20,7 +20,6 @@ import { EntityListComponent } from '../../shared/components/entity/entity-list.
 import { Page, Pageable } from '../../shared/components/table/pageable.model';
 import { TableComponent } from '../../shared/components/table/table.component';
 import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
-import { Study } from '../../studies/shared/study.model';
 import { StudyService } from '../../studies/shared/study.service';
 import { Subject } from '../../subjects/shared/subject.model';
 import { SubjectService } from '../../subjects/shared/subject.service';
@@ -37,7 +36,6 @@ import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 
 export class DatasetListComponent extends EntityListComponent<Dataset>{
     private subjects: Subject[] = [];
-    private studies: Study[] = [];
     @ViewChild('table', { static: false }) table: TableComponent;
     private studyIdsForCurrentUser: number[];
 
@@ -47,7 +45,6 @@ export class DatasetListComponent extends EntityListComponent<Dataset>{
             private subjectService: SubjectService) {
 
         super('dataset');
-        this.fetchStudies();
         this.fetchSubjects();
         this.studyService.getStudiesByRight(StudyUserRight.CAN_ADMINISTRATE).then( studies => this.studyIdsForCurrentUser = studies);
     }
@@ -96,12 +93,6 @@ export class DatasetListComponent extends EntityListComponent<Dataset>{
     private fetchSubjects() {
         this.subjectService.getAll().then(subjects => {
             this.subjects = subjects;
-        });
-    }
-
-    private fetchStudies() {
-        this.studyService.getAll().then(studies => {
-            this.studies = studies;
         });
     }
 

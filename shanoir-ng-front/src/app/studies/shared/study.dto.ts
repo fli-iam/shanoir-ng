@@ -368,6 +368,7 @@ export class StudyLight {
     studyTags: Tag[];
     profile: Profile;
     isDraft: boolean;
+    protocolFilePaths?: string[];
 
     static toStudy(studyLight: StudyLight): Study {
         const study: Study = new Study();
