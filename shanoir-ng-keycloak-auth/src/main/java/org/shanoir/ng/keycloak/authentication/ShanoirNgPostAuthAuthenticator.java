@@ -14,14 +14,16 @@
 
 package org.shanoir.ng.keycloak.authentication;
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Date;
 
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.jboss.logging.Logger;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
@@ -82,8 +84,18 @@ public class ShanoirNgPostAuthAuthenticator implements Authenticator {
     private static final String URL_RECORD_LOGIN_DATE =
             System.getProperty("ms.users.url", "http://users:9901") + "/last_login_date";
 
+    // timeout of the call to ms users, so that a slow or stopped service cannot hold logins
+    private static final Duration LOGIN_DATE_TIMEOUT = Duration.ofSeconds(5);
+
+    // one client for all logins (it is thread-safe and reuses its connections)
+    private static final HttpClient HTTP_CLIENT = HttpClient.newBuilder()
+            .version(HttpClient.Version.HTTP_1_1)
+            .connectTimeout(LOGIN_DATE_TIMEOUT)
+            .build();
+
     // date format for the expirationDate user attribute
-    private static final SimpleDateFormat EXP_DATE_FORMAT = new SimpleDateFormat("yyy-MM-dd");
+    // (SimpleDateFormat is not thread-safe: a new one for each login)
+    private static final String EXP_DATE_PATTERN = "yyy-MM-dd";
 
     public void close() {
     }
@@ -128,7 +140,7 @@ public class ShanoirNgPostAuthAuthenticator implements Authenticator {
                 expDate = new Date(Long.parseUnsignedLong(expDateText));
             }
             catch (NumberFormatException e) {
-                expDate = EXP_DATE_FORMAT.parse(expDateText);
+                expDate = new SimpleDateFormat(EXP_DATE_PATTERN).parse(expDateText);
             }
         }
         catch (java.util.NoSuchElementException e) {
@@ -177,15 +189,22 @@ public class ShanoirNgPostAuthAuthenticator implements Authenticator {
         //
         if (!"reset-credentials".equals(flowPath)) {
 
-            final HttpClient client = HttpClientBuilder.create().build();
             try {
-                final HttpPost request = new HttpPost(URL_RECORD_LOGIN_DATE);
-                request.addHeader("Content-type", "application/json");
+                final HttpRequest request = HttpRequest.newBuilder(URI.create(URL_RECORD_LOGIN_DATE))
+                        .timeout(LOGIN_DATE_TIMEOUT)
+                        .header("Content-type", "application/json")
+                        // request body: the username
+                        .POST(HttpRequest.BodyPublishers.ofString(username, StandardCharsets.UTF_8))
+                        .build();
 
-                // request body
-                request.setEntity(new StringEntity(user.getUsername()));
-
-                client.execute(request);
+                final HttpResponse<Void> response = HTTP_CLIENT.send(request, HttpResponse.BodyHandlers.discarding());
+                if (response.statusCode() >= 300) {
+                    LOG.errorv("Unable to update last login date for {0} (POST {1} returned HTTP {2})",
+                            username, URL_RECORD_LOGIN_DATE, response.statusCode());
+                }
+            } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
+                LOG.errorv("Interrupted while updating last login date for {0}", username);
             } catch (final Exception e) {
                 LOG.errorv("Unable to update last login date for {0} (POST {1} returned: {2})",
                         username, URL_RECORD_LOGIN_DATE, e);
