@@ -76,7 +76,7 @@ services:
   #
   rabbitmq:
     container_name: "${SHANOIR_PREFIX}rabbitmq"
-    image: rabbitmq:3.10.7
+    image: rabbitmq:4.4.1
     volumes:
       - "rabbitmq-data:/var/lib/rabbitmq/mnesia/rabbitmq"
     ports:
