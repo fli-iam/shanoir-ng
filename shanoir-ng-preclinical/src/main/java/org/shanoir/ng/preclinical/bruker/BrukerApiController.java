@@ -32,6 +32,7 @@ import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.files.SafeFileNames;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -158,8 +159,9 @@ public class BrukerApiController implements BrukerApi {
      */
     private Path createBrukerTempFile(String fileName) throws IOException {
         int index = 0;
+        // one folder per user: ms-import only imports the conversions of the user who asks for it
         String pathFile = brukerFolder + BRUKER_FOLDER + FOLDER_SEP + CONVERT_FOLDER
-                + FOLDER_SEP + fileName;
+                + FOLDER_SEP + KeycloakUtil.getTokenUserId() + FOLDER_SEP + fileName;
         // if the folder exists, create a new folder by adding a figure at the end of
         // the folder name
         Path path = Path.of(pathFile + FOLDER_SEP + String.valueOf(index));

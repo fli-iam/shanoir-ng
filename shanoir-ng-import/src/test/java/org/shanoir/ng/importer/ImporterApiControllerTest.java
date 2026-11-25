@@ -480,21 +480,25 @@ public class ImporterApiControllerTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"3/upload.zip", "bruker/convert/../../3/upload.zip", "bruker/convert/2dseq/0/notes.txt", "bruker/convert/2dseq/0"})
+    @ValueSource(strings = {"3/upload.zip", "bruker/convert/3/../../3/upload.zip", "bruker/convert/13/2dseq/0/result1.0.converted.zip", "bruker/convert/3/2dseq/0/notes.txt", "bruker/convert/3/2dseq/0"})
     @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
     public void testImportDicomZipFileRefusesAnyFileButABrukerConversion(String path) throws Exception {
-        // an upload of a user, and a file and a folder of the conversion folder that are not zip files
+        // an upload of the user, a conversion of another user, and a file and a folder of the conversion folder
+        // of the user that are not zip files
         Path upload = Files.write(Files.createDirectories(importDirectory.resolve("3")).resolve("upload.zip"), new byte[] {1});
-        Path conversion = Files.createDirectories(importDirectory.resolve("bruker/convert/2dseq/0"));
+        Path otherUserZip = Files.write(Files.createDirectories(importDirectory.resolve("bruker/convert/13/2dseq/0"))
+                .resolve("result1.0.converted.zip"), new byte[] {1});
+        Path conversion = Files.createDirectories(importDirectory.resolve("bruker/convert/3/2dseq/0"));
         Path notes = Files.write(conversion.resolve("notes.txt"), new byte[] {1});
 
         mvc.perform(MockMvcRequestBuilders.post("/importer/import_dicom/").contentType(MediaType.APPLICATION_JSON)
                 .content(importDirectory.resolve(path).toString()))
                 .andExpect(status().isUnprocessableEntity())
-                .andExpect(jsonPath("$.message").value("Only the DICOM files converted from a Bruker upload can be imported."));
+                .andExpect(jsonPath("$.message").value("Only the DICOM files converted from a Bruker upload of the user can be imported."));
 
         // nothing is deleted
         assertTrue(Files.exists(upload));
+        assertTrue(Files.exists(otherUserZip));
         assertTrue(Files.exists(notes));
         assertTrue(Files.exists(conversion));
     }
@@ -511,7 +515,7 @@ public class ImporterApiControllerTest {
     @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
     public void testImportDicomZipFileImportsABrukerConversion() throws Exception {
         when(dicomDirToModel.readDicomDirToPatients(any(File.class))).thenReturn(Collections.emptyList());
-        Path conversion = Files.createDirectories(importDirectory.resolve("bruker/convert/2dseq/0"));
+        Path conversion = Files.createDirectories(importDirectory.resolve("bruker/convert/3/2dseq/0"));
         Path zip = conversion.resolve("result123.0.converted.zip");
         try (ZipOutputStream zipout = new ZipOutputStream(Files.newOutputStream(zip))) {
             zipout.putNextEntry(new ZipEntry("DICOMDIR"));

@@ -753,14 +753,16 @@ public class ImporterApiController implements ImporterApi {
 
     /**
      * @param dicomZipFilename the path sent by the client
-     * @return the zip file converted from a Bruker upload, in the conversion folder of ms preclinical
+     * @return the zip file converted from a Bruker upload of the user, in the conversion folder of ms preclinical
      * @throws RestServiceException (422) for any other path
      */
     private File brukerConvertedZip(String dicomZipFilename) throws RestServiceException {
         try {
-            Path folder = Paths.get(brukerConvertDir).toAbsolutePath().normalize();
+            // ms preclinical converts the uploads of each user in a folder named with the user id
+            Long userId = KeycloakUtil.getTokenUserId();
+            Path folder = Paths.get(brukerConvertDir, String.valueOf(userId)).toAbsolutePath().normalize();
             Path zip = Paths.get(dicomZipFilename.trim()).toAbsolutePath().normalize();
-            if (zip.startsWith(folder) && zip.getFileName().toString().endsWith(".zip")
+            if (userId != null && zip.startsWith(folder) && zip.getFileName().toString().endsWith(".zip")
                     && Files.isRegularFile(zip, LinkOption.NOFOLLOW_LINKS)) {
                 return zip.toFile();
             }
@@ -769,7 +771,7 @@ public class ImporterApiController implements ImporterApi {
         }
         LOG.warn("Import of {} refused: not a Bruker conversion of {}", dicomZipFilename, brukerConvertDir);
         throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
-                "Only the DICOM files converted from a Bruker upload can be imported.", null));
+                "Only the DICOM files converted from a Bruker upload of the user can be imported.", null));
     }
 
     /**
