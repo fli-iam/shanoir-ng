@@ -553,4 +553,11 @@ public class DatasetApiSecurityTest {
         given(datasetRepository.findDatasetsForRights(Utils.toList(1L, 2L))).willReturn(Utils.toList(new DatasetForRights(1L, 1L, 1L, new HashSet()), new DatasetForRights(2L, 2L, 3L, new HashSet())));
     }
 
+    @Test
+    @WithAnonymousUser
+    public void theOverallStatisticsArePublic() throws Exception {
+        // shown on the welcome page before login: instance-wide counts only
+        assertThat(api.getOverallStatistics().getStatusCode().is2xxSuccessful()).isTrue();
+    }
+
 }
