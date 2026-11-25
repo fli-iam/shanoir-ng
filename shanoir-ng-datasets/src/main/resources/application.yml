@@ -105,6 +105,7 @@ spring:
         jwt:
           issuer-uri: ${SHANOIR_KEYCLOAK_URL:localhost}/realms/shanoir-ng
           jwk-set-uri: ${SHANOIR_KEYCLOAK_INTERNAL_URL:http://keycloak:8080/auth}/realms/shanoir-ng/protocol/openid-connect/certs
+          audiences: shanoir-ng-api
   web:
     error:
       whitelabel:
