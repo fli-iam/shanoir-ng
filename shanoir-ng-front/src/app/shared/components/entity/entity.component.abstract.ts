@@ -561,6 +561,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     protected catchSavingErrors = (reason: any) => {
         if (reason && reason.error && reason.error.code == 422) {
             this.saveError = new ShanoirError(reason);
+            let shownInForm: boolean = false;
             for (const rawFieldName of this.onSubmitValidatedFields) {
                 const fieldPath: string[] = rawFieldName.split('.');
                 let fieldControl: AbstractControl = this.form;
@@ -571,7 +572,14 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
                 });
                 if (!fieldControl) throw new Error(rawFieldName + ' is not a field managed by this form. Check the arguments of registerOnSubmitValidator().');
                 fieldControl.updateValueAndValidity({emitEvent: false});
-                if (!fieldControl.valid) fieldControl.markAsTouched();
+                if (!fieldControl.valid) {
+                    fieldControl.markAsTouched();
+                    shownInForm = true;
+                }
+            }
+            // an error no field of the form shows (e.g. an invalid file name): the user must see it anyway
+            if (!shownInForm) {
+                this.consoleService.log('error', this.saveError.message, this.saveError.fieldErrorTexts());
             }
             this.footerState.valid = this.form.status == 'VALID' || this.form.status == 'DISABLED';
             return null;

@@ -35,6 +35,21 @@ export class ShanoirError {
             }
         }
     }
+
+    /** The field errors as texts, like "protocolFilePaths: Invalid file name (a/b.pdf)". */
+    public fieldErrorTexts(): string[] {
+        const texts: string[] = [];
+        const fieldErrors = this.details?.fieldErrors;
+        if (fieldErrors) {
+            for (const field of Object.keys(fieldErrors)) {
+                for (const error of fieldErrors[field] || []) {
+                    const value: string = error.givenValue != null ? ' (' + error.givenValue + ')' : '';
+                    texts.push(field + ': ' + (error.message || error.code) + value);
+                }
+            }
+        }
+        return texts;
+    }
 }
 
 export class RightsError extends Error {
