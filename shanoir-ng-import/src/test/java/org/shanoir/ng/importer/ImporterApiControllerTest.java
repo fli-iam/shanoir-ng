@@ -516,6 +516,7 @@ public class ImporterApiControllerTest {
     public void testImportDicomZipFileImportsABrukerConversion() throws Exception {
         when(dicomDirToModel.readDicomDirToPatients(any(File.class))).thenReturn(Collections.emptyList());
         Path conversion = Files.createDirectories(importDirectory.resolve("bruker/convert/3/2dseq/0"));
+        Path archive = Files.write(conversion.resolve("2dseq.zip"), new byte[] {1});
         Path zip = conversion.resolve("result123.0.converted.zip");
         try (ZipOutputStream zipout = new ZipOutputStream(Files.newOutputStream(zip))) {
             zipout.putNextEntry(new ZipEntry("DICOMDIR"));
@@ -530,6 +531,8 @@ public class ImporterApiControllerTest {
                 .andExpect(jsonPath("$.message").value(
                         "No DICOM patient found in the ZIP; the archive must contain at least one valid DICOM instance."));
         assertFalse(Files.exists(zip));
+        // the uploaded archive stays: ms-datasets stores it at the end of the import if the user asks for it
+        assertTrue(Files.exists(archive));
     }
 
 }

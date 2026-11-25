@@ -388,7 +388,7 @@ public class ImporterApiController implements ImporterApi {
         File tempFile = brukerConvertedZip(dicomZipFilename);
         MockMultipartFile multiPartFile;
         try {
-            multiPartFile = new MockMultipartFile(tempFile.getName(), tempFile.getName(), APPLICATION_ZIP, new FileInputStream(tempFile.getAbsolutePath()));
+            multiPartFile = new MockMultipartFile(tempFile.getName(), tempFile.getName(), APPLICATION_ZIP, Files.readAllBytes(tempFile.toPath()));
             // Import dicomfile
             return uploadDicomZipFile(multiPartFile);
         } catch (IOException e) {
@@ -396,8 +396,9 @@ public class ImporterApiController implements ImporterApi {
             LOG.error(e.getMessage(), e);
             return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
         } finally {
-            // Delete temp file which is useless now
-            tempFile.delete();
+            // the zip is copied in the import folder of the user. The rest of the conversion folder stays:
+            // ms datasets stores the uploaded archive at the end of the import, if the user asks for it
+            FileUtils.deleteQuietly(tempFile);
         }
     }
 
