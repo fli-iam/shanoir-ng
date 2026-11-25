@@ -334,11 +334,8 @@ public class HttpService {
                     .build();
             LOG.debug("DEV SSLSocketFactory used.");
         } else {
-            sslSocketFactory = SSLConnectionSocketFactoryBuilder.create()
-                    .setHostnameVerifier(new CustomHostnameVerifier())
-                    .setTlsVersions(TLS.V_1_3, TLS.V_1_2)
-                    .build();
-            LOG.debug("Standard SSLSocketFactory used with CustomHostnameVerifier.");
+            sslSocketFactory = TlsSocketFactories.withHostnameVerification(null, TLS.V_1_3, TLS.V_1_2);
+            LOG.debug("Standard SSLSocketFactory used with host name verification.");
         }
         final HttpClientConnectionManager connectionManager = PoolingHttpClientConnectionManagerBuilder.create()
                     .setMaxConnTotal(500)
