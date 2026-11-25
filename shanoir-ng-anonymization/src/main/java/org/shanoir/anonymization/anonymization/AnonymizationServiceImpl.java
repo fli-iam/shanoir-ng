@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -29,6 +30,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.Sequence;
 import org.dcm4che3.data.Tag;
 import org.dcm4che3.data.VR;
 import org.dcm4che3.io.DicomInputStream;
@@ -64,6 +66,12 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 
     private static final UIDGeneration UID_GENERATOR = new UIDGeneration();
 
+    /** ROI and FOR linkage inside RT Structure Sets (3006,0024). */
+    private static final int TAG_REFERENCED_FRAME_OF_REFERENCE_UID = 0x30060024;
+
+    private static final Set<String> DEFERRED_ANONYMIZATION_MODALITIES = Set.of(
+            "RTSTRUCT", "RTDOSE", "RTPLAN", "SEG", "SR");
+
     private Random rand = new Random();
 
     private static Map<String, List<String>> tagsToDeleteForManufacturer;
@@ -81,7 +89,10 @@ public class AnonymizationServiceImpl implements AnonymizationService {
         Map<String, String> seriesInstanceUIDs = new HashMap<>();
         Map<String, String> frameOfReferenceUIDs = new HashMap<>();
         Map<String, String> studyInstanceUIDs = new HashMap<>();
+        Map<String, String> sopInstanceUIDs = new HashMap<>();
         Map<String, String> studyIds = new HashMap<>();
+
+        sortDicomFilesDeferringDerived(dicomFiles);
 
         AnonymizationStats stats = new AnonymizationStats();
         LOG.debug("anonymize : totalAmount={}", totalAmount);
@@ -90,7 +101,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
             final File file = dicomFiles.get(i);
             // Perform the anonymization
             performAnonymization(file, anonymizationMap, false, "", "", null, seriesInstanceUIDs, frameOfReferenceUIDs,
-                    studyInstanceUIDs, studyIds, stats);
+                    studyInstanceUIDs, sopInstanceUIDs, studyIds, stats);
             current++;
             final int currentPercent = current * 100 / totalAmount;
             LOG.debug("anonymize : anonymization current percent= {} %", currentPercent);
@@ -121,7 +132,10 @@ public class AnonymizationServiceImpl implements AnonymizationService {
         Map<String, String> seriesInstanceUIDs = new HashMap<>();
         Map<String, String> frameOfReferenceUIDs = new HashMap<>();
         Map<String, String> studyInstanceUIDs = new HashMap<>();
+        Map<String, String> sopInstanceUIDs = new HashMap<>();
         Map<String, String> studyIds = new HashMap<>();
+
+        sortDicomFilesDeferringDerived(dicomFiles);
 
         AnonymizationStats stats = new AnonymizationStats();
         LOG.debug("anonymize : totalAmount={}", totalAmount);
@@ -130,7 +144,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
             final File file = dicomFiles.get(i);
             // Perform the anonymization
             performAnonymization(file, anonymizationMap, true, patientName, patientID, studyInstanceUID,
-                    seriesInstanceUIDs, frameOfReferenceUIDs, studyInstanceUIDs, studyIds, stats);
+                    seriesInstanceUIDs, frameOfReferenceUIDs, studyInstanceUIDs, sopInstanceUIDs, studyIds, stats);
             current++;
             final int currentPercent = current * 100 / totalAmount;
             LOG.debug("anonymize : anonymization current percent= {} %", currentPercent);
@@ -197,10 +211,11 @@ public class AnonymizationServiceImpl implements AnonymizationService {
             boolean isShanoirAnonymization,
             String patientName, String patientID, String studyInstanceUID, Map<String, String> seriesInstanceUIDs,
             Map<String, String> frameOfReferenceUIDs,
-            Map<String, String> studyInstanceUIDs, Map<String, String> studyIds) throws Exception {
+            Map<String, String> studyInstanceUIDs, Map<String, String> sopInstanceUIDs, Map<String, String> studyIds)
+            throws Exception {
         performAnonymization(dicomFile, anonymizationMap, isShanoirAnonymization, patientName, patientID,
-                studyInstanceUID, seriesInstanceUIDs, frameOfReferenceUIDs, studyInstanceUIDs, studyIds,
-                new AnonymizationStats());
+                studyInstanceUID, seriesInstanceUIDs, frameOfReferenceUIDs, studyInstanceUIDs, sopInstanceUIDs,
+                studyIds, new AnonymizationStats());
     }
 
     /**
@@ -213,7 +228,8 @@ public class AnonymizationServiceImpl implements AnonymizationService {
             boolean isShanoirAnonymization,
             String patientName, String patientID, String studyInstanceUID, Map<String, String> seriesInstanceUIDs,
             Map<String, String> frameOfReferenceUIDs,
-            Map<String, String> studyInstanceUIDs, Map<String, String> studyIds, AnonymizationStats stats)
+            Map<String, String> studyInstanceUIDs, Map<String, String> sopInstanceUIDs, Map<String, String> studyIds,
+            AnonymizationStats stats)
             throws Exception {
         DicomInputStream din = null;
         DicomOutputStream dos = null;
@@ -294,7 +310,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
                         switch (tagInt) {
                             case Tag.SOPInstanceUID ->
                                 anonymizeSOPInstanceUID(tagInt, datasetAttributes, mediaStorageSOPInstanceUIDGenerated,
-                                        stats);
+                                        sopInstanceUIDs, stats);
                             case Tag.SeriesInstanceUID ->
                                 anonymizeUID(tagInt, datasetAttributes, seriesInstanceUIDs, stats);
                             case Tag.FrameOfReferenceUID ->
@@ -321,6 +337,8 @@ public class AnonymizationServiceImpl implements AnonymizationService {
                     }
                 }
             }
+            remapNestedUidReferences(datasetAttributes, seriesInstanceUIDs, frameOfReferenceUIDs, studyInstanceUIDs,
+                    sopInstanceUIDs, stats);
             // Special anonymization of patient data if isShanoirAnonymization
             if (isShanoirAnonymization) {
                 anonymizePatientMetaData(datasetAttributes, patientName, patientID, patientBirthDateAttr, stats);
@@ -491,10 +509,104 @@ public class AnonymizationServiceImpl implements AnonymizationService {
     }
 
     private void anonymizeSOPInstanceUID(int tagInt, Attributes attributes, String mediaStorageSOPInstanceUID,
-            AnonymizationStats stats) {
+            Map<String, String> sopInstanceUIDs, AnonymizationStats stats) {
         String oldValue = getStringValueSafe(attributes, tagInt);
         anonymizeTagAccordingToVR(attributes, tagInt, mediaStorageSOPInstanceUID);
+        if (sopInstanceUIDs != null && oldValue != null && !oldValue.isEmpty()
+                && !"<unreadable value>".equals(oldValue)) {
+            sopInstanceUIDs.put(oldValue, mediaStorageSOPInstanceUID);
+        }
         recordAndTrace(stats, false, tagInt, "UID_REGENERATED", oldValue, mediaStorageSOPInstanceUID);
+    }
+
+    /**
+     * RTSTRUCT, SEG and similar objects reference source images inside nested
+     * sequences. Top-level UID tags are handled in the main loop; this pass
+     * applies the same study/series/FOR/SOP mappings inside sequences.
+     */
+    private void remapNestedUidReferences(Attributes attributes, Map<String, String> seriesInstanceUIDs,
+            Map<String, String> frameOfReferenceUIDs, Map<String, String> studyInstanceUIDs,
+            Map<String, String> sopInstanceUIDs, AnonymizationStats stats) {
+        for (int tagInt : attributes.tags()) {
+            VR vr = attributes.getVR(tagInt);
+            if (vr == VR.SQ) {
+                Sequence sequence = attributes.getSequence(tagInt);
+                if (sequence != null) {
+                    for (Attributes item : sequence) {
+                        remapNestedUidReferences(item, seriesInstanceUIDs, frameOfReferenceUIDs, studyInstanceUIDs,
+                                sopInstanceUIDs, stats);
+                    }
+                }
+                continue;
+            }
+            if (vr != VR.UI) {
+                continue;
+            }
+            String oldValue = getStringValueSafe(attributes, tagInt);
+            if (oldValue == null || oldValue.isEmpty() || "<unreadable value>".equals(oldValue)) {
+                continue;
+            }
+            String newValue = resolveRemappedUid(tagInt, oldValue, seriesInstanceUIDs, frameOfReferenceUIDs,
+                    studyInstanceUIDs, sopInstanceUIDs);
+            if (newValue != null && !newValue.equals(oldValue)) {
+                attributes.setString(tagInt, VR.UI, newValue);
+                recordAndTrace(stats, false, tagInt, "UID_REFERENCE_REMAPPED", oldValue, newValue);
+            }
+        }
+    }
+
+    private String resolveRemappedUid(int tagInt, String oldValue, Map<String, String> seriesInstanceUIDs,
+            Map<String, String> frameOfReferenceUIDs, Map<String, String> studyInstanceUIDs,
+            Map<String, String> sopInstanceUIDs) {
+        if (tagInt == Tag.StudyInstanceUID) {
+            return lookupUid(studyInstanceUIDs, oldValue);
+        }
+        if (tagInt == Tag.SeriesInstanceUID) {
+            return lookupUid(seriesInstanceUIDs, oldValue);
+        }
+        if (tagInt == Tag.FrameOfReferenceUID || tagInt == TAG_REFERENCED_FRAME_OF_REFERENCE_UID) {
+            return lookupUid(frameOfReferenceUIDs, oldValue);
+        }
+        if (tagInt == Tag.ReferencedSOPInstanceUID) {
+            String mapped = lookupUid(sopInstanceUIDs, oldValue);
+            if (mapped != null) {
+                return mapped;
+            }
+            return lookupUid(studyInstanceUIDs, oldValue);
+        }
+        if (tagInt == Tag.SOPInstanceUID) {
+            return lookupUid(sopInstanceUIDs, oldValue);
+        }
+        return null;
+    }
+
+    private static String lookupUid(Map<String, String> map, String oldValue) {
+        if (map == null || map.isEmpty()) {
+            return null;
+        }
+        return map.get(oldValue);
+    }
+
+    /**
+     * Pseudonymize source images before RTSTRUCT/SEG so cross-file UID maps are
+     * populated when nested references are remapped.
+     */
+    private void sortDicomFilesDeferringDerived(ArrayList<File> dicomFiles) {
+        dicomFiles.sort(Comparator.comparingInt(this::anonymizationProcessingOrder));
+    }
+
+    private int anonymizationProcessingOrder(File file) {
+        try (DicomInputStream din = new DicomInputStream(file)) {
+            din.readFileMetaInformation();
+            Attributes dataset = din.readDataset(Tag.PixelData);
+            String modality = dataset.getString(Tag.Modality);
+            if (modality != null && DEFERRED_ANONYMIZATION_MODALITIES.contains(modality)) {
+                return 1;
+            }
+        } catch (IOException e) {
+            LOG.debug("Could not read modality for anonymization ordering: {}", file, e);
+        }
+        return 0;
     }
 
     private void anonymizeStudyId(int tagInt, Attributes attributes, Map<String, String> studyIds,
