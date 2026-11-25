@@ -14,10 +14,12 @@
 
 package org.shanoir.ng.processing.controler;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessAuthorized;
 import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.shanoir.ng.processing.service.ProcessingDownloaderService;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.study.rights.ampq.RabbitMqStudyUserService;
@@ -26,6 +28,8 @@ import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -61,6 +65,18 @@ class DatasetProcessingApiSecurityTest {
     @WithMockKeycloakUser(id = 2L, username = "user", authorities = { "ROLE_USER" })
     void aUserPreparesAComplexDownload() throws ShanoirException {
         assertAccessAuthorized(api::complexMassiveDownload, JsonNodeFactory.instance.objectNode());
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 2L, username = "user", authorities = { "ROLE_USER" })
+    void anInvalidFilterIsAnsweredWith422AndItsReason() throws Exception {
+        Mockito.doThrow(new IllegalArgumentException("Invalid filter type: users.password."))
+                .when(processingDownloaderService).complexMassiveDownload(Mockito.any());
+
+        ResponseEntity<String> response = api.complexMassiveDownload(JsonNodeFactory.instance.objectNode());
+
+        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
+        assertEquals("Invalid filter type: users.password.", response.getBody());
     }
 
 }
