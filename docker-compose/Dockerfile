@@ -124,8 +124,8 @@ COPY --link datasets/entrypoint /usr/bin/
 COPY --link datasets/shanoir-ng-datasets.jar shanoir-ng-datasets.jar
 
 # Use the below line for remote debugging
-#CMD ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:9914", "-Dspring.aot.enabled=true", "-jar", "/shanoir-ng-datasets.jar"]
-CMD ["-Dspring.aot.enabled=true", "-jar", "/shanoir-ng-datasets.jar"]
+#CMD ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:9914", "-Dspring.aot.enabled=false", "-jar", "/shanoir-ng-datasets.jar"]
+CMD ["-Dspring.aot.enabled=false", "-jar", "/shanoir-ng-datasets.jar"]
 
 
 
