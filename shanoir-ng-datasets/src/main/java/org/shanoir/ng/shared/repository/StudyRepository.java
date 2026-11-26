@@ -19,6 +19,7 @@ import java.util.Optional;
 import org.shanoir.ng.shared.model.Study;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 /**
  * @author yyao
@@ -27,5 +28,6 @@ import org.springframework.data.jpa.repository.Query;
 public interface StudyRepository extends JpaRepository<Study, Long> {
 
     @Query("SELECT study FROM Study study LEFT JOIN FETCH study.studyTags WHERE study.id = :id")
-    Optional<Study> findByIdWithStudyTags(Long id);
+    Optional<Study> findByIdWithStudyTags(@Param("id") Long id);
+
 }

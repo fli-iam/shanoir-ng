@@ -96,7 +96,7 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
      * @return list of examinations.
      */
     @Query("select e.id from Examination e where e.study.id = :studyId")
-    List<Long> findIdsByStudyId(Long studyId);
+    List<Long> findIdsByStudyId(@Param("studyId") Long studyId);
 
     @Query("SELECT e.subject.id, MIN(e.examinationDate) FROM Examination e "
             + "WHERE e.study.id = :studyId AND e.subject IS NOT NULL AND e.examinationDate IS NOT NULL "
@@ -133,8 +133,7 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
      */
     @Query("SELECT e FROM Examination e "
             + "LEFT JOIN FETCH e.datasetAcquisitions da "
-            + "LEFT JOIN FETCH da.datasets "
-            + "WHERE e.id = :id ")
+            + "LEFT JOIN FETCH da.datasets")
     List<Examination> findAllWithAcqAndDatasets();
 
     /**
@@ -199,20 +198,20 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
     Optional<Examination> findByStudyInstanceUID(String studyInstanceUID);
 
     @Query("SELECT distinct(acq.examination.id) FROM DatasetAcquisition acq WHERE acq.id in :ids")
-    List<Long> findIdsByAcquisitionIds(List<Long> ids);
+    List<Long> findIdsByAcquisitionIds(@Param("ids") List<Long> ids);
 
     @Query("SELECT e FROM Examination e "
             + "LEFT JOIN FETCH e.datasetAcquisitions da "
             + "WHERE e.id = :id "
             + "ORDER BY COALESCE(da.sortingIndex, da.rank, 0)")
-    Optional<Examination> findByIdWithAcquisitions(Long id);
+    Optional<Examination> findByIdWithAcquisitions(@Param("id") Long id);
 
     @Query("SELECT e FROM Examination e "
             + "LEFT JOIN FETCH e.datasetAcquisitions da "
             + "LEFT JOIN FETCH e.source source "
             + "WHERE e.id = :id "
             + "ORDER BY COALESCE(da.sortingIndex, da.rank, 0)")
-    Optional<Examination> findByIdWithAcquisitionsAndSource(Long id);
+    Optional<Examination> findByIdWithAcquisitionsAndSource(@Param("id") Long id);
 
     @Transactional(readOnly = true)
     default Optional<Examination> findByIdWithAcquisitionsAndCopiesAndSource(Long id) {
@@ -230,4 +229,5 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
         });
         return examination;
     }
+
 }

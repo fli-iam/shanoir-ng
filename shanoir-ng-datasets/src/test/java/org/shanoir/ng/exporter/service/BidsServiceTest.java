@@ -29,9 +29,6 @@ import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
 import org.shanoir.ng.bids.service.BIDSServiceImpl;
 import org.shanoir.ng.bids.service.BidsTreeLockedException;
 import org.shanoir.ng.bids.service.BidsTreeSemaphore;
@@ -51,15 +48,18 @@ import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.storage.StorageService;
+import org.shanoir.ng.study.rights.ampq.RabbitMqStudyUserService;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Test class for BIDS service class.
@@ -67,40 +67,45 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  *
  */
 
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@SpringBootTest
 @ActiveProfiles("test")
 public class BidsServiceTest {
 
-    @Mock
+    @MockitoBean
     private ExaminationService examService;
 
-    @Mock
+    @MockitoBean
     private SubjectRepository subjectRepository;
 
-    @Mock
+    @MockitoBean
     private DatasetSecurityService datasetSecurityService;
 
-    @Mock
+    @MockitoBean
     private StudyRepository studyRepository;
 
-    @Mock
+    @MockitoBean
     private ExaminationRepository examinationRepository;
 
-    @InjectMocks
-    @Spy
+    @Autowired
     private BIDSServiceImpl service = new BIDSServiceImpl();
 
-    @Mock
-    private ObjectMapper objectMapper;
+    @MockitoBean
+    private JsonMapper mapper;
 
-    @Mock
+    @MockitoBean
     private RabbitTemplate rabbitTemplate;
 
-    @Mock
+    @MockitoBean
     private BidsTreeSemaphore bidsTreeSemaphore;
 
-    @Mock
+    @MockitoBean
     private ShanoirEventService eventService;
+
+    @MockitoBean
+    private ConnectionFactory connectionFactory;
+
+    @MockitoBean
+    private RabbitMqStudyUserService rabbitMqStudyUserService;
 
     private Examination exam = ModelsUtil.createExamination();
 

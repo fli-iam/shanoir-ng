@@ -35,9 +35,8 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 @Component
 @Profile("!test")
@@ -70,7 +69,7 @@ public class ExecutionMonitoringResumptionRunner implements ApplicationRunner {
      * @throws SecurityException
      */
     @Override
-    public void run(ApplicationArguments args) throws EntityNotFoundException, SecurityException, JsonProcessingException {
+    public void run(ApplicationArguments args) throws EntityNotFoundException, SecurityException {
         try { // Execution resumption
             SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
             List<ExecutionMonitoring> runningMonitorings = executionMonitoringRepository.findByStatus(ExecutionStatus.RUNNING);

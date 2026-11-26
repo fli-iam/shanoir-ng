@@ -47,13 +47,13 @@ public class DatasetAcquisitionRule extends StudyCardRule<DatasetAcquisition> {
     private boolean conditionsfulfilled(AcquisitionAttributes<?> dicomAttributes, DatasetAcquisition acquisition) {
         boolean fulfilled = true;
         for (CardCondition condition : getConditions()) {
-            if (condition instanceof AcqDICOMConditionOnDatasets) {
-                fulfilled &= ((AcqDICOMConditionOnDatasets) condition).fulfilled(dicomAttributes);
-            } else if (condition instanceof AcqMetadataCondOnAcq) {
-                fulfilled &= ((AcqMetadataCondOnAcq) condition).fulfilled(acquisition);
-            } else if (condition instanceof AcqMetadataCondOnDatasets) {
+            if (condition instanceof AcqDICOMConditionOnDatasets datasets1) {
+                fulfilled &= datasets1.fulfilled(dicomAttributes);
+            } else if (condition instanceof AcqMetadataCondOnAcq acq) {
+                fulfilled &= acq.fulfilled(acquisition);
+            } else if (condition instanceof AcqMetadataCondOnDatasets datasets) {
                 // report is set to null here because study cards are not used to generate reports
-                fulfilled &= ((AcqMetadataCondOnDatasets) condition).fulfilled(acquisition.getDatasets(), null);
+                fulfilled &= datasets.fulfilled(acquisition.getDatasets(), null);
             } else {
                 throw new IllegalStateException("There might be an unimplemented condition type here. Condition class : " + condition.getClass());
             }
@@ -63,12 +63,12 @@ public class DatasetAcquisitionRule extends StudyCardRule<DatasetAcquisition> {
 
     private void applyAssignments(DatasetAcquisition acquisition) {
         for (StudyCardAssignment<?> assignment : getAssignments()) {
-            if (assignment instanceof DatasetAssignment) {
+            if (assignment instanceof DatasetAssignment datasetAssignment) {
                 for (Dataset dataset : acquisition.getDatasets()) {
-                    ((DatasetAssignment) assignment).apply(dataset);
+                    datasetAssignment.apply(dataset);
                 }
-            } else if (assignment instanceof DatasetAcquisitionAssignment) {
-                ((DatasetAcquisitionAssignment) assignment).apply(acquisition);
+            } else if (assignment instanceof DatasetAcquisitionAssignment acquisitionAssignment) {
+                acquisitionAssignment.apply(acquisition);
             } else throw new IllegalArgumentException("Unimplemented assignment type");
         }
     }

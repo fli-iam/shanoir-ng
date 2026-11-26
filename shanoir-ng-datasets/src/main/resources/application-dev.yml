@@ -1,0 +1,51 @@
+
+
+######################################
+# DO NOT COMMIT VALUES MODIFICATIONS #
+######################################
+server:
+  port: 9914
+  shanoir-hours:
+    shutdown: ${SHANOIR_SHUTDOWN_HOUR}
+    continuance: ${SHANOIR_CONTINUANCE_HOUR}
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3307/datasets?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
+  jpa:
+    generate-ddl: true
+    open-in-view: false
+    hibernate:
+      # Hibernate ddl auto (create, create-drop, update, validate)
+      ddl-auto: create
+    # Show or not log for each sql query
+    show-sql: true
+  main:
+    allow-circular-references: true
+  mvc:
+    pathmatch:
+      matching-strategy: ANT_PATH_MATCHER
+  rabbitmq:
+    host: localhost
+  sql:
+    init:
+      mode: always
+  threads:
+    virtual:
+      enabled: true
+front.server:
+  address: https://shanoir-ng-nginx/shanoir-ng/
+  url: https://shanoir-ng-nginx
+keycloak:
+  auth-server-url: https://shanoir-ng-nginx/auth
+dcm4chee-arc:
+  host: dcm4chee-arc
+
+
+# logging configuration
+logging:
+  file:
+    name: /var/log/shanoir-ng-logs/shanoir-ng-datasets.log
+  level:
+    org.springframework.web: DEBUG
+    org.hibernate: ERROR
+

@@ -52,16 +52,16 @@ public final class JSONUtils {
                 if (valueThis == null) {
                     return false;
                 }
-                if (valueThis instanceof JSONObject) {
-                    if (!(valueOther instanceof JSONObject) || !equals((JSONObject) valueThis, (JSONObject) valueOther)) {
+                if (valueThis instanceof JSONObject object) {
+                    if (!(valueOther instanceof JSONObject) || !equals(object, (JSONObject) valueOther)) {
                         return false;
                     }
-                } else if (valueThis instanceof JSONArray) {
-                    if (!(valueOther instanceof JSONArray) || !equals((JSONArray) valueThis, (JSONArray) valueOther)) {
+                } else if (valueThis instanceof JSONArray array) {
+                    if (!(valueOther instanceof JSONArray) || !equals(array, (JSONArray) valueOther)) {
                         return false;
                     }
-                } else if (valueThis instanceof Number && valueOther instanceof Number) {
-                    if (!isNumberSimilar((Number) valueThis, (Number) valueOther)) {
+                } else if (valueThis instanceof Number number && valueOther instanceof Number number1) {
+                    if (!isNumberSimilar(number, number1)) {
                         return false;
                     }
                 } else if (!valueThis.equals(valueOther)) {
@@ -99,16 +99,16 @@ public final class JSONUtils {
             if (valueThis == null) {
                 return false;
             }
-            if (valueThis instanceof JSONObject) {
-                if (!(valueOther instanceof JSONObject) || !equals((JSONObject) valueThis, (JSONObject) valueOther)) {
+            if (valueThis instanceof JSONObject object) {
+                if (!(valueOther instanceof JSONObject) || !equals(object, (JSONObject) valueOther)) {
                     return false;
                 }
-            } else if (valueThis instanceof JSONArray) {
-                if (!(valueOther instanceof JSONArray) || !equals((JSONArray) valueThis, (JSONArray) valueOther)) {
+            } else if (valueThis instanceof JSONArray array) {
+                if (!(valueOther instanceof JSONArray) || !equals(array, (JSONArray) valueOther)) {
                     return false;
                 }
-            } else if (valueThis instanceof Number && valueOther instanceof Number) {
-                if (!isNumberSimilar((Number) valueThis, (Number) valueOther)) {
+            } else if (valueThis instanceof Number number && valueOther instanceof Number number1) {
+                if (!isNumberSimilar(number, number1)) {
                     return false;
                 }
             } else if (!valueThis.equals(valueOther)) {
@@ -140,9 +140,9 @@ public final class JSONUtils {
         }
         // if the classes are the same and implement Comparable
         // then use the built in compare first.
-        if (l.getClass().equals(r.getClass()) && l instanceof Comparable) {
+        if (l.getClass().equals(r.getClass()) && l instanceof Comparable comparable) {
             @SuppressWarnings({ "rawtypes", "unchecked" })
-            int compareTo = ((Comparable) l).compareTo(r);
+            int compareTo = comparable.compareTo(r);
             return compareTo == 0;
         }
         // BigDecimal should be able to handle all of our number types that we support through
@@ -168,11 +168,11 @@ public final class JSONUtils {
         if (val == null) {
             return defaultValue;
         }
-        if (val instanceof BigDecimal) {
-            return (BigDecimal) val;
+        if (val instanceof BigDecimal decimal) {
+            return decimal;
         }
-        if (val instanceof BigInteger) {
-            return new BigDecimal((BigInteger) val);
+        if (val instanceof BigInteger integer) {
+            return new BigDecimal(integer);
         }
         if (val instanceof Double || val instanceof Float) {
             if (!numberIsFinite((Number) val)) {
@@ -200,9 +200,9 @@ public final class JSONUtils {
     }
 
     private static boolean numberIsFinite(Number n) {
-        if (n instanceof Double && (((Double) n).isInfinite() || ((Double) n).isNaN())) {
+        if (n instanceof Double double1 && (double1.isInfinite() || double1.isNaN())) {
             return false;
-        } else if (n instanceof Float && (((Float) n).isInfinite() || ((Float) n).isNaN())) {
+        } else if (n instanceof Float float1 && (float1.isInfinite() || float1.isNaN())) {
             return false;
         }
         return true;

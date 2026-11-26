@@ -80,7 +80,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.mail.MessagingException;
@@ -233,10 +233,10 @@ public class DatasetApiController implements DatasetApi {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-        if (dataset instanceof MrDataset) {
-            return new ResponseEntity<>(mrDatasetMapper.mrDatasetToMrDatasetDTOWithProcessingAncestorsAndExamination((MrDataset) dataset), HttpStatus.OK);
-        } else if (dataset instanceof EegDataset) {
-            return new ResponseEntity<>(eegDatasetMapper.eegDatasetToEegDatasetDTOWithProcessingAncestorsAndExamination((EegDataset) dataset), HttpStatus.OK);
+        if (dataset instanceof MrDataset mrDataset) {
+            return new ResponseEntity<>(mrDatasetMapper.mrDatasetToMrDatasetDTOWithProcessingAncestorsAndExamination(mrDataset), HttpStatus.OK);
+        } else if (dataset instanceof EegDataset eegDataset) {
+            return new ResponseEntity<>(eegDatasetMapper.eegDatasetToEegDatasetDTOWithProcessingAncestorsAndExamination(eegDataset), HttpStatus.OK);
         } else {
             return new ResponseEntity<>(datasetMapper.datasetToDatasetDTOWithProcessingAncestorsAndExamination(dataset), HttpStatus.OK);
         }

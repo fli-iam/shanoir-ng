@@ -18,7 +18,11 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToOne;
+
+
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+
+import java.io.Serial;
 
 /**
  * CT dataset acquisition.
@@ -35,6 +39,7 @@ public class CtDatasetAcquisition extends DatasetAcquisition {
     /**
      * UID
      */
+    @Serial
     private static final long serialVersionUID = -8511002756058790037L;
 
     @OneToOne(cascade = CascadeType.ALL)

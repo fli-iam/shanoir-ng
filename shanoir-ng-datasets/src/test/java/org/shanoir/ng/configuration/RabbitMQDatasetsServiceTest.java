@@ -26,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import static org.mockito.ArgumentMatchers.any;
@@ -44,6 +45,8 @@ import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import tools.jackson.core.JacksonException;
+
 import org.shanoir.ng.bids.service.BIDSService;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.dataset.security.DatasetSecurityService;
@@ -66,9 +69,9 @@ import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.studycard.repository.QualityCardRepository;
 import org.shanoir.ng.studycard.repository.StudyCardRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
+import org.springframework.security.core.context.SecurityContextHolder;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Checks asynchronous deletion cascades received over RabbitMQ (subject / study deletion):
@@ -130,6 +133,15 @@ class RabbitMQDatasetsServiceTest {
 
     @InjectMocks
     private RabbitMQDatasetsService rabbitMQDatasetsService;
+
+    /**
+     * The listeners under test set a ROLE_ADMIN security context on the calling
+     * thread and never clear it. Clear it so it does not leak into later tests.
+     */
+    @AfterEach
+    void clearSecurityContext() {
+        SecurityContextHolder.clearContext();
+    }
 
     @Test
     void subjectHasCopiedDataAnswersFromExaminationCopies() {
@@ -301,7 +313,7 @@ class RabbitMQDatasetsServiceTest {
     void firstExaminationDatesThatCannotBeWrittenReplyNull() throws Exception {
         when(examinationRepository.findFirstExaminationDatesByStudyId(STUDY_ID)).thenReturn(Map.of());
         when(objectMapper.writeValueAsString(any(ParticipantsTsvRequestDTO.class)))
-                .thenThrow(new JsonProcessingException("broken") { });
+                .thenThrow(new JacksonException("broken") { });
 
         assertNull(rabbitMQDatasetsService.findFirstExaminationDates(STUDY_ID));
     }

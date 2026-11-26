@@ -46,7 +46,6 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -162,7 +161,7 @@ public class OutputServiceImpl implements OutputService {
                     continue;
                 }
 
-                File currentFile = new File(cacheFolder, Paths.get(parsedEntry).getFileName().toString());
+                File currentFile = new File(cacheFolder, Path.of(parsedEntry).getFileName().toString());
                 IOUtils.copy(fin, Files.newOutputStream(currentFile.toPath()));
                 outputFiles.add(currentFile);
             }

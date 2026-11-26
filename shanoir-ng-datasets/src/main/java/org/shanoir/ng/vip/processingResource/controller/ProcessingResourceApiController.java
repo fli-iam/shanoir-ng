@@ -113,7 +113,7 @@ public class ProcessingResourceApiController implements ProcessingResourceApi {
                     datasetDownloaderService.prepareArchiveResponse(response, datasets, archiveWriter);
                     dlPermits.acquire();
                     try {
-                        if (archiveWriter instanceof TarWriter && ((TarWriter) archiveWriter).isClientGone()) {
+                        if (archiveWriter instanceof TarWriter writer && writer.isClientGone()) {
                             throw new DownloadAbortedException("Client disconnected while waiting for a download thread.");
                         }
                         datasetDownloaderService.massiveDownload(format, datasets, response, true, converterId, true, sorting, archiveWriter, true);

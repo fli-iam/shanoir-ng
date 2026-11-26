@@ -17,6 +17,7 @@ package org.shanoir.ng.vip.executionMonitoring.model;
 import jakarta.persistence.*;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 
+import java.io.Serial;
 import java.util.LinkedHashMap;
 
 /**
@@ -28,6 +29,7 @@ import java.util.LinkedHashMap;
 @Entity
 public class ExecutionMonitoring extends DatasetProcessing {
 
+    @Serial
     private static final long serialVersionUID = -6123167560220373977L;
 
     private String identifier;

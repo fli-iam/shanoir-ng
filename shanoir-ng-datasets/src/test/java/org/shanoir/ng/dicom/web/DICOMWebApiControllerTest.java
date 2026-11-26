@@ -53,9 +53,9 @@ import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.processing.repository.DatasetProcessingRepository;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.security.oauth2.server.resource.autoconfigure.servlet.OAuth2ResourceServerAutoConfiguration;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpHeaders;
@@ -63,6 +63,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
@@ -77,7 +78,10 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
  * UIDs (examinationUID, acquisitionUID, datasetUID), never the real
  * StudyInstanceUID/SeriesInstanceUIDs of the PACS.
  */
-@WebMvcTest(controllers = DICOMWebApiController.class)
+@WebMvcTest(controllers = DICOMWebApiController.class,
+        excludeAutoConfiguration = {
+                OAuth2ResourceServerAutoConfiguration.class
+        })
 @AutoConfigureMockMvc(addFilters = false)
 @ContextConfiguration()
 @Import({ SeriesInstanceUIDHandler.class, StudyInstanceUIDAndSubjectNameHandler.class })
@@ -140,35 +144,35 @@ public class DICOMWebApiControllerTest {
     @Autowired
     private StudyInstanceUIDAndSubjectNameHandler studyInstanceUIDAndSubjectNameHandler;
 
-    @MockBean
+    @MockitoBean
     private DICOMWebService dicomWebServiceMock;
 
-    @MockBean
+    @MockitoBean
     private ExaminationService examinationServiceMock;
 
-    @MockBean
+    @MockitoBean
     private DatasetAcquisitionService datasetAcquisitionServiceMock;
 
-    @MockBean
+    @MockitoBean
     private DatasetAcquisitionRepository acquisitionRepository;
 
-    @MockBean
+    @MockitoBean
     private DatasetService datasetServiceMock;
 
-    @MockBean
+    @MockitoBean
     private DatasetRepository datasetRepository;
 
-    @MockBean
+    @MockitoBean
     private DatasetProcessingRepository datasetProcessingRepositoryMock;
 
     // required by the STOWRSMultipartRequestFilter, that is part of the web slice
-    @MockBean
+    @MockitoBean
     private DicomSEGAndSRImporterService dicomSEGAndSRImporterServiceMock;
 
-    @MockBean
+    @MockitoBean
     private DicomImporterService dicomImporterServiceMock;
 
-    @MockBean
+    @MockitoBean
     private DatasetSecurityService datasetSecurityServiceMock;
 
     @BeforeEach

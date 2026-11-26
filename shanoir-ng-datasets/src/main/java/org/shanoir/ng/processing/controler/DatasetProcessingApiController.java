@@ -14,7 +14,7 @@
 
 package org.shanoir.ng.processing.controler;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -105,7 +105,7 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
     public ResponseEntity<DatasetProcessingDTO> findDatasetProcessingById(Long datasetProcessingId) {
 
         final Optional<DatasetProcessing> datasetProcessing = repository.findByIdWithParentAndInputs(datasetProcessingId);
-        if (!datasetProcessing.isPresent()) {
+        if (datasetProcessing.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(datasetProcessingMapper.processingToProcessingDTOWithParentAndInputIds(datasetProcessing.get()), HttpStatus.OK);

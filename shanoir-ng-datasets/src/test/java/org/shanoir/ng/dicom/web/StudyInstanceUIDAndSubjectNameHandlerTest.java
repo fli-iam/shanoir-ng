@@ -21,11 +21,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
 import org.shanoir.ng.examination.service.ExaminationService;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Unit tests of the replacement of the real StudyInstanceUID with the
@@ -43,7 +44,7 @@ class StudyInstanceUIDAndSubjectNameHandlerTest {
 
     private static final String EXAMINATION_UID = "1.4.9.12.34.1.8527.42";
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = new JsonMapper();
 
     @Mock
     private ExaminationService examinationService;
@@ -52,7 +53,7 @@ class StudyInstanceUIDAndSubjectNameHandlerTest {
     private StudyInstanceUIDAndSubjectNameHandler handler;
 
     @Test
-    void replaceStudyInstanceUIDReplacesTopLevelStudyInstanceUIDAndRetrieveURL() throws JsonProcessingException {
+    void replaceStudyInstanceUIDReplacesTopLevelStudyInstanceUIDAndRetrieveURL() {
         JsonNode root = MAPPER.readTree("""
                 {
                   "0020000D": { "vr": "UI", "Value": ["%s"] },
@@ -62,12 +63,12 @@ class StudyInstanceUIDAndSubjectNameHandlerTest {
 
         handler.replaceStudyInstanceUID(root, STUDY_UID, EXAMINATION_UID);
 
-        assertEquals(EXAMINATION_UID, root.at("/0020000D/Value/0").asText());
-        assertEquals("http://pacs/rs/studies/" + EXAMINATION_UID, root.at("/00081190/Value/0").asText());
+        assertEquals(EXAMINATION_UID, root.at("/0020000D/Value/0").asString());
+        assertEquals("http://pacs/rs/studies/" + EXAMINATION_UID, root.at("/00081190/Value/0").asString());
     }
 
     @Test
-    void replaceStudyInstanceUIDReplacesReferenceInReferencedStudySequence() throws JsonProcessingException {
+    void replaceStudyInstanceUIDReplacesReferenceInReferencedStudySequence() {
         // 0008,1110 ReferencedStudySequence -> 0008,1155 ReferencedSOPInstanceUID
         JsonNode root = MAPPER.readTree("""
                 {
@@ -82,22 +83,22 @@ class StudyInstanceUIDAndSubjectNameHandlerTest {
 
         handler.replaceStudyInstanceUID(root, STUDY_UID, EXAMINATION_UID);
 
-        assertEquals(EXAMINATION_UID, root.at("/00081110/Value/0/00081155/Value/0").asText());
+        assertEquals(EXAMINATION_UID, root.at("/00081110/Value/0/00081155/Value/0").asString());
     }
 
     @Test
-    void replaceStudyInstanceUIDReplacesReferenceNestedInRTReferencedStudySequence() throws JsonProcessingException {
+    void replaceStudyInstanceUIDReplacesReferenceNestedInRTReferencedStudySequence() {
         JsonNode root = MAPPER.readTree(rtStructMetadata());
 
         handler.replaceStudyInstanceUID(root, STUDY_UID, EXAMINATION_UID);
 
         // 3006,0010 -> 3006,0012 -> 0008,1155 carries the StudyInstanceUID
         assertEquals(EXAMINATION_UID,
-                root.at("/30060010/Value/0/30060012/Value/0/00081155/Value/0").asText());
+                root.at("/30060010/Value/0/30060012/Value/0/00081155/Value/0").asString());
     }
 
     @Test
-    void replaceStudyInstanceUIDLeavesSOPInstanceUIDOfContourImageSequenceUntouched() throws JsonProcessingException {
+    void replaceStudyInstanceUIDLeavesSOPInstanceUIDOfContourImageSequenceUntouched() {
         JsonNode root = MAPPER.readTree(rtStructMetadata());
 
         handler.replaceStudyInstanceUID(root, STUDY_UID, EXAMINATION_UID);
@@ -105,11 +106,11 @@ class StudyInstanceUIDAndSubjectNameHandlerTest {
         // 3006,0016 ContourImageSequence -> 0008,1155 carries a SOP Instance UID,
         // that never equals the StudyInstanceUID: it is not virtualised
         assertEquals(SOP_INSTANCE_UID, root.at(
-                "/30060010/Value/0/30060012/Value/0/30060014/Value/0/30060016/Value/0/00081155/Value/0").asText());
+                "/30060010/Value/0/30060012/Value/0/30060014/Value/0/30060016/Value/0/00081155/Value/0").asString());
     }
 
     @Test
-    void replaceStudyInstanceUIDLeavesForeignStudyInstanceUIDUntouched() throws JsonProcessingException {
+    void replaceStudyInstanceUIDLeavesForeignStudyInstanceUIDUntouched() {
         // a reference to another study, e.g. a prior, is not this examination:
         // rewriting it would assert a false identity
         JsonNode root = MAPPER.readTree("""
@@ -122,11 +123,11 @@ class StudyInstanceUIDAndSubjectNameHandlerTest {
 
         handler.replaceStudyInstanceUID(root, STUDY_UID, EXAMINATION_UID);
 
-        assertEquals(FOREIGN_STUDY_UID, root.at("/00081110/Value/0/00081155/Value/0").asText());
+        assertEquals(FOREIGN_STUDY_UID, root.at("/00081110/Value/0/00081155/Value/0").asString());
     }
 
     @Test
-    void replaceStudyInstanceUIDWalksTheTopLevelArrayOfMetadataObjects() throws JsonProcessingException {
+    void replaceStudyInstanceUIDWalksTheTopLevelArrayOfMetadataObjects() {
         JsonNode root = MAPPER.readTree("""
                 [
                   { "0020000D": { "vr": "UI", "Value": ["%s"] } },
@@ -136,8 +137,8 @@ class StudyInstanceUIDAndSubjectNameHandlerTest {
 
         handler.replaceStudyInstanceUID(root, STUDY_UID, EXAMINATION_UID);
 
-        assertEquals(EXAMINATION_UID, root.at("/0/0020000D/Value/0").asText());
-        assertEquals(EXAMINATION_UID, root.at("/1/0020000D/Value/0").asText());
+        assertEquals(EXAMINATION_UID, root.at("/0/0020000D/Value/0").asString());
+        assertEquals(EXAMINATION_UID, root.at("/1/0020000D/Value/0").asString());
     }
 
     /**

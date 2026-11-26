@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.dataset.model;
 
+import java.io.Serial;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,6 +43,7 @@ public class DatasetExpression extends AbstractEntity {
     /**
      * UID
      */
+    @Serial
     private static final long serialVersionUID = -3269594490145201917L;
 
     /** List of dataset expressions coming from this dataset expression. */

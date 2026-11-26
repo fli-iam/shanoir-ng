@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.dataset.modality;
 
+import java.io.Serial;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +46,7 @@ public class MrDataset extends Dataset {
     /**
      * UID
      */
+    @Serial
     private static final long serialVersionUID = 6801936202135911035L;
 
     /** list Diffusion gradients. */

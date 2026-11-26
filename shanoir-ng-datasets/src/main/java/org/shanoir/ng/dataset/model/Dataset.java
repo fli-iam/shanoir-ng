@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.dataset.model;
 
+import java.io.Serial;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +46,7 @@ import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.tag.model.StudyTag;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -98,6 +100,7 @@ public abstract class Dataset extends AbstractEntity {
     /**
      * UID
      */
+    @Serial
     private static final long serialVersionUID = -6712556010816448026L;
 
     /**
@@ -219,6 +222,7 @@ public abstract class Dataset extends AbstractEntity {
     public Dataset() {
     }
 
+    @JsonCreator(mode = JsonCreator.Mode.DISABLED)
     public Dataset(Dataset d) {
         this.creationDate = d.getCreationDate();
         this.userId = d.getUserId();
