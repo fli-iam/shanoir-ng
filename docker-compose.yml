@@ -76,7 +76,7 @@ services:
   #
   rabbitmq:
     container_name: "${SHANOIR_PREFIX}rabbitmq"
-    image: rabbitmq:3.10.7
+    image: rabbitmq:4.4.1
     volumes:
       - "rabbitmq-data:/var/lib/rabbitmq/mnesia/rabbitmq"
     ports:
@@ -85,10 +85,10 @@ services:
     networks:
       - shanoir_ng_network
   #
-  # Init service: run and stop. Create temporary certificate
+  # Init service: run and stop. Create a temporary certificate
   # related to SHANOIR_URL_HOST for all Shanoir microservices
-  # and set rights on log folder for native images
-  #  
+  # and set rights on the log folder for native images
+  #
   init-cert-and-logs:
     container_name: "${SHANOIR_PREFIX}init-cert-and-logs"
     build:
