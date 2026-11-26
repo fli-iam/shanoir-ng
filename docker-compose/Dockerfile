@@ -376,11 +376,11 @@ CMD ["nginx", "-g", "daemon off;"]
 
 ################ front-dev #################################################
 
-FROM node:lts-alpine3.21 AS front-dev
+FROM node:26-alpine3.24 AS front-dev
 
 WORKDIR /app
 
-RUN npm install -g @angular/cli@21.2.8
+RUN npm install -g @angular/cli@22.1.8
 
 
 
@@ -452,7 +452,7 @@ RUN deno cache jsr:@bids/validator@${BIDS_VALIDATOR_VERSION} \
 
 
 # ---- stage: runtime
-FROM node:20-bullseye-slim AS bids-validator
+FROM node:26-trixie-slim AS bids-validator
 
 # Copy deno binary
 COPY --from=deno_cache /usr/bin/deno /usr/local/bin/deno
