@@ -1,0 +1,48 @@
+# Shanoir NG - Import, manage and share neuroimaging data
+# Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+# Contact us on https://project.inria.fr/shanoir/
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+
+# Blocks new secrets (passwords, keys, tokens) from being committed.
+# Only the commits of the pull request (or of the push) are scanned: secrets already in the
+# history are triaged and rotated separately. To allow a test value, add it to .gitleaks.toml
+# or put a "gitleaks:allow" comment on its line.
+
+name: Secret scanning
+
+on:
+  push:
+    branches: [ develop ]
+  pull_request:
+    branches: [ develop ]
+
+permissions:
+  contents: read
+
+jobs:
+  gitleaks:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Code checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+
+      - name: Run Gitleaks on the new commits
+        env:
+          # gitleaks v8.28.0 (multi-arch index digest)
+          GITLEAKS_IMAGE: ghcr.io/gitleaks/gitleaks@sha256:cdbb7c955abce02001a9f6c9f602fb195b7fadc1e812065883f695d1eeaba854
+          BASE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+        run: |
+          docker run --rm -v "$PWD":/repo -w /repo "$GITLEAKS_IMAGE" \
+            git /repo --no-banner --redact --verbose \
+            --log-opts="--no-merges $BASE_SHA..$HEAD_SHA"

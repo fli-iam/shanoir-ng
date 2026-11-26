@@ -17,12 +17,14 @@ package org.shanoir.ng.dataset.security;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,9 +36,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
+import org.shanoir.ng.dataset.dto.DatasetForRightsProjection;
 import org.shanoir.ng.dicom.web.SeriesInstanceUIDHandler;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.rights.StudyRightsService;
+import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.UserRights;
 import org.shanoir.ng.utils.KeycloakUtil;
 
@@ -340,6 +344,60 @@ public class DatasetSecurityServiceTest {
         assertEquals(1, datasets.size());
         assertTrue(datasets.contains(unowned));
         assertFalse(datasets.contains(own));
+    }
+
+
+    private static DatasetForRightsProjection forRights(Long id, Long studyId, Long centerId, Set<Long> relatedStudies) {
+        return new DatasetForRightsProjection() {
+            public Long getId() {
+                return id;
+            }
+
+            public Long getStudyId() {
+                return studyId;
+            }
+
+            public Long getCenterId() {
+                return centerId;
+            }
+
+            public Set<Long> getRelatedStudiesIds() {
+                return relatedStudies;
+            }
+        };
+    }
+
+    private static StudyUser member(Long studyId, StudyUserRight right) {
+        StudyUser member = new org.shanoir.ng.study.rights.StudyUser();
+        member.setStudyId(studyId);
+        member.setStudyUserRights(List.of(right));
+        return member;
+    }
+
+    @Test
+    void filterDatasetIdsKeepsOnlyTheDatasetsTheUserHasTheRightOn() {
+        // 1: study 1 (download right), 2: study 2 (see only), 3: study 1 but related to study 3 (no right),
+        // 4: study 1, not in the database
+        given(datasetRepository.findDatasetsForRights(List.of(1L, 2L, 3L, 4L))).willReturn(List.of(
+                forRights(1L, 1L, 10L, Set.of()),
+                forRights(2L, 2L, 10L, Set.of()),
+                forRights(3L, 1L, 10L, Set.of(3L))));
+        given(studyRightsService.getUserRights()).willReturn(new UserRights(List.of(
+                member(1L, StudyUserRight.CAN_DOWNLOAD), member(2L, StudyUserRight.CAN_SEE_ALL))));
+        try (MockedStatic<KeycloakUtil> keycloakUtilMock = Mockito.mockStatic(KeycloakUtil.class)) {
+            keycloakUtilMock.when(KeycloakUtil::getTokenRoles).thenReturn(Set.of("ROLE_USER"));
+
+            assertEquals(List.of(1L), datasetSecurityService.filterDatasetIds(List.of(1L, 2L, 3L, 4L), "CAN_DOWNLOAD"));
+        }
+    }
+
+    @Test
+    void filterDatasetIdsKeepsEverythingForAnAdmin() {
+        try (MockedStatic<KeycloakUtil> keycloakUtilMock = Mockito.mockStatic(KeycloakUtil.class)) {
+            keycloakUtilMock.when(KeycloakUtil::getTokenRoles).thenReturn(Set.of("ROLE_ADMIN"));
+
+            assertEquals(List.of(1L, 2L), datasetSecurityService.filterDatasetIds(List.of(1L, 2L), "CAN_DOWNLOAD"));
+        }
     }
 
 }

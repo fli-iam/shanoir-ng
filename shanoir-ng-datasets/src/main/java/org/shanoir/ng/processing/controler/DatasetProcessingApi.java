@@ -194,6 +194,7 @@ public interface DatasetProcessingApi {
             @ApiResponse(responseCode = "404", description = "no dataset found"),
             @ApiResponse(responseCode = "500", description = "unexpected error")})
     @PostMapping(value = "/complexMassiveDownload")
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     ResponseEntity<String> complexMassiveDownload(
             @Parameter(description = "parameters for download", required = true)
             @Valid @RequestBody JsonNode request);

@@ -344,6 +344,92 @@ you have to add "-f docker-compose-dev.yml" argument to the "docker compose up" 
    docker-compose up -d
    ```
 
+## CHANGE THE PASSWORDS OF AN EXISTING INSTALL
+
+The databases and the PACS LDAP server only read their passwords from `.env`
+when their volume is created. On an existing install, changing a password in
+`.env` is not enough: the account keeps its old password and the services,
+which use the new one, are refused (`Access denied`).
+
+This applies in particular to installs created before the passwords moved to
+`.env`: they still have the old defaults (`password` for the MariaDB accounts,
+`pacs` for the PACS database, `secret` for LDAP), and their MariaDB accounts
+have all the privileges on every schema (`GRANT ALL ON *.*`).
+
+`./rotate-passwords.sh` applies the passwords of `.env` to the existing accounts,
+and gives the MariaDB accounts the same rights as on a new install:
+
+Service             | Accounts                                              | Rights after the rotation
+------------------- | ----------------------------------------------------- | -------------------------
+`database`          | `root`, the account of each microservice and of the migrations | each microservice: its own schema only; migrations: the six Shanoir schemas; no global privilege
+`keycloak-database` | `root`, `SHANOIR_KEYCLOAK_DB_USER`                    | Keycloak: the `keycloak` schema only
+`dcm4chee-database` | `SHANOIR_PACS_DATABASE_USER`                          | unchanged
+`ldap`              | `cn=admin,dc=dcm4che,dc=org`, `cn=admin,cn=config`    | unchanged
+
+`dcm4chee-database` and `ldap` are only handled when the PACS is enabled
+(`COMPOSE_PROFILES=full`).
+
+**Procedure** (the services are unavailable until the last step):
+
+1. stop shanoir, **keeping the volumes** (no `-v`)
+   ```
+   docker compose down
+   ```
+2. update the configuration: first keep a copy of the current `.env`
+   (`cp .env .env.old`), then `git pull` and set the new passwords in `.env`
+   (`./check-env.sh` lists the missing variables). Keep from the existing
+   install:
+   * the account names (`SHANOIR_*_DB_USER`, `SHANOIR_PACS_DATABASE_USER`):
+     accounts cannot be renamed, and the script stops if an account does not
+     exist;
+   * `SHANOIR_KEYCLOAK_PASSWORD` and `VIP_CLIENT_SECRET`: Keycloak stores them
+     when its realm is created, the script does not change them (see the notes).
+
+   If the current root passwords are not the old defaults (e.g. a second
+   rotation), give them to the next step, from the copy of `.env` (see the
+   notes): the script cannot find them by itself, and without them it stops
+   on the first database.
+3. apply them
+   ```
+   ./rotate-passwords.sh
+   ```
+   It starts each database with the new `.env`, changes the accounts, then
+   checks that each one logs in with its new password (`checked: ...` lines).
+   It stops at the first error.
+4. start shanoir with the new passwords
+   ```
+   ./deploy.sh
+   ```
+
+**Notes**
+* The script finds the current passwords by itself when they are the old
+  defaults, or already the new ones: running it again is harmless. If an
+  install changed them, give the current ones for the run:
+  ```
+  SHANOIR_OLD_DB_ROOT_PASSWORD=...           \
+  SHANOIR_OLD_KEYCLOAK_DB_ROOT_PASSWORD=...  \
+  SHANOIR_OLD_PACS_LDAP_CONFIG_PASSWORD=...  \
+  ./rotate-passwords.sh
+  ```
+  The PACS database needs no old password, and the LDAP root password is
+  changed through the LDAP config account.
+* The same procedure changes the passwords later, e.g. after a leak. The
+  current passwords are then the ones of the previous `.env`: keep a copy of it
+  until the rotation is done, e.g.
+  ```
+  old() { grep "^$1=" .env.old | cut -d= -f2-; }
+  SHANOIR_OLD_DB_ROOT_PASSWORD="$(old SHANOIR_DB_ROOT_PASSWORD)"                    \
+  SHANOIR_OLD_KEYCLOAK_DB_ROOT_PASSWORD="$(old SHANOIR_KEYCLOAK_DB_ROOT_PASSWORD)"  \
+  SHANOIR_OLD_PACS_LDAP_CONFIG_PASSWORD="$(old SHANOIR_PACS_LDAP_CONFIG_PASSWORD)"  \
+  ./rotate-passwords.sh
+  ```
+* Not handled by the script:
+  * RabbitMQ: on installs created before its volume was fixed, the account is
+    created from `.env` at the next start. To change its password later, see
+    `SHANOIR_RABBITMQ_PASSWORD` in `.env.example` (`rabbitmqctl change_password`).
+  * the Keycloak admin account (`SHANOIR_KEYCLOAK_PASSWORD`): change it in the
+    Keycloak admin console, then in `.env`.
+
 ## FIRST RUN
 
 New user accounts need to be validated by a shanoir admin. However, on the first
@@ -352,7 +438,8 @@ server directly:
 
 1. go to Keycloak admin interface: https://shanoir-ng-nginx/auth/admin/
 2. sign in with the credentials configured in
-   `SHANOIR_KEYCLOAK_USER`/`SHANOIR_KEYCLOAK_PASSWORD' (default is `admin`/`&a1A&a1A`)
+   `SHANOIR_KEYCLOAK_USER`/`SHANOIR_KEYCLOAK_PASSWORD` in `.env` (no default
+   password: it is required, see `.env.example`)
 3. go to the **shanoir-ng** realm
 4. create/edit the new user and grant the relevant role (eg. `ROLE_ADMIN`). By
    default, new user accounts are created in Keycloak by the users' microservice

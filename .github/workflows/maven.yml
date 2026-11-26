@@ -64,7 +64,7 @@ jobs:
         SHANOIR_CONTACT_EMAIL: contact@inria.fr
         SHANOIR_NOTIFICATION_NAME: shanoir-admin
         SHANOIR_KEYCLOAK_USER: admin
-        SHANOIR_KEYCLOAK_PASSWORD: '&a1A&a1A'
+        SHANOIR_KEYCLOAK_PASSWORD: ci-build-only
         SHANOIR_CONTINUANCE_HOUR: 5
         SHANOIR_SHUTDOWN_HOUR: 2
         SHANOIR_SMTP_HOST: localhost

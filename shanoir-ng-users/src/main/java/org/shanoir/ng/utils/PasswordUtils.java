@@ -14,24 +14,17 @@
 
 package org.shanoir.ng.utils;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
 import org.shanoir.ng.shared.exception.ShanoirUsersException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
- * Utility class for password hash
+ * Utility class for password generation and policy checks.
  *
  * @author msimon
  *
  */
 public final class PasswordUtils {
-
-    /** Logger */
-    private static final Logger LOG = LoggerFactory.getLogger(PasswordUtils.class);
 
     /** List of letters for passwords */
     private static final String LOWERCASE_ALPHA = "abcdefghijklmnopqrstuvwxyz";
@@ -50,12 +43,6 @@ public final class PasswordUtils {
 
     /** Password minimum length */
     private static final int PASSWORD_MIN_LENGTH = 12;
-
-    /** The algorithm. */
-    private static final String ALGORITHM = "SHA";
-
-    /** Password Hash length. */
-    private static final int PASSWORD_HASH_LENGTH = 14;
 
     /**
      * Private constructor
@@ -128,42 +115,6 @@ public final class PasswordUtils {
             }
         }
         return new String(pwd);
-    }
-
-    /**
-     * Get the hash for the given password.
-     *
-     * @param password
-     *            password to hash.
-     * @param hashLength
-     *            the hash length.
-     *
-     * @return the hash for the given password.
-     */
-    public static String getHash(final String password) {
-        try {
-            int hashInt;
-            final MessageDigest msgDigest = MessageDigest.getInstance(ALGORITHM);
-            msgDigest.update(password.getBytes());
-            final byte[] hash = msgDigest.digest();
-
-            final StringBuilder hex = new StringBuilder();
-            for (int i = 0; i < hash.length; i++) {
-                hashInt = hash[i] & 0xFF;
-
-                if (hashInt < 16) {
-                    hex.append("0");
-                }
-
-                hex.append(Integer.toString(hashInt, 16).toUpperCase());
-                hex.append(Byte.toString(hash[i]));
-            }
-
-            return hex.substring(0, PASSWORD_HASH_LENGTH);
-        } catch (final NoSuchAlgorithmException exc) {
-            LOG.error("Cannot continue to hash: ", exc);
-            return null;
-        }
     }
 
     /*

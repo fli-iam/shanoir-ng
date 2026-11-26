@@ -243,6 +243,10 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
             processingDownloaderService.complexMassiveDownload(jsonRequest);
             LOG.info("Preparation for complex download done.");
             return ResponseEntity.ok("Preparation for complex download done. Please log in to the shanoir web instance and check the job, download tasks should be accessible.");
+        } catch (IllegalArgumentException e) {
+            // an invalid request: the message says which filter, and how to write it
+            LOG.warn("Invalid complex processed data download: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(e.getMessage());
         } catch (Exception e) {
             LOG.error("Error while preparing complex processed data download.", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error while preparing complex processed data download: " + e.getMessage());

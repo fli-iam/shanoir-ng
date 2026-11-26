@@ -17,6 +17,7 @@ package org.shanoir.ng.vip.processingResource.controller;
 import jakarta.servlet.http.HttpServletResponse;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
+import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
 import org.shanoir.ng.download.ArchiveWriter;
 import org.shanoir.ng.download.PacsTransferStats;
@@ -27,6 +28,7 @@ import org.shanoir.ng.processing.repository.DatasetProcessingRepository;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,6 +56,9 @@ public class ProcessingResourceApiController implements ProcessingResourceApi {
 
     @Autowired
     private DatasetRepository datasetRepository;
+
+    @Autowired
+    private DatasetSecurityService datasetSecurityService;
 
     @Autowired
     private DatasetProcessingRepository processingRepository;
@@ -153,7 +158,15 @@ public class ProcessingResourceApiController implements ProcessingResourceApi {
                     "Interrupted while waiting for a database connection"));
         }
         try {
-            return datasetRepository.findByResourceIdWithDatasetFiles(resourceId);
+            List<Dataset> datasets = datasetRepository.findByResourceIdWithDatasetFiles(resourceId);
+            // VIP downloads the inputs with the token of the user who launched the execution: the resource id is not
+            // enough, they still need the right they launched it with (admins: every dataset, e.g. planned executions)
+            if (!datasetSecurityService.hasRightOnEveryDataset(datasets.stream().map(Dataset::getId).toList(),
+                    StudyUserRight.CAN_EXECUTE.name())) {
+                LOG.warn("Access denied to the datasets of resource id [{}]", resourceId);
+                throw new RestServiceException(new ErrorModel(HttpStatus.FORBIDDEN.value(), "Access denied"));
+            }
+            return datasets;
         } finally {
             dbPermits.release();
         }

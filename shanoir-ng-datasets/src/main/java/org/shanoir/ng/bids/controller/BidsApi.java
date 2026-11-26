@@ -46,6 +46,7 @@ public interface BidsApi {
         @ApiResponse(responseCode = "404", description = "no dataset found"),
         @ApiResponse(responseCode = "500", description = "unexpected error") })
     @GetMapping(value = "/studyId/{studyId}/studyName/{studyName}")
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#studyId, 'CAN_SEE_ALL'))")
     ResponseEntity<Void> generateBIDSByStudyId(
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
             @Parameter(description = "name of the study", required = true) @PathVariable("studyName") String studyName) throws RestServiceException, IOException;

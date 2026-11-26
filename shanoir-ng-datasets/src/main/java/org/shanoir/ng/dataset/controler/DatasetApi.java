@@ -355,6 +355,8 @@ public interface DatasetApi {
         @ApiResponse(responseCode = "404", description = "no statistics found"),
         @ApiResponse(responseCode = "500", description = "unexpected error") })
     @GetMapping(value = "/overallStatistics", produces = { "application/json" })
+    // public on purpose: instance-wide counts shown on the welcome page before login (permitAll in SecurityConfiguration)
+    @PreAuthorize("permitAll()")
     ResponseEntity<OverallStatistics> getOverallStatistics() throws RestServiceException, EntityNotFoundException, IOException;
 
     @Operation(summary = "", description = "Get data before downloading acquisitions and examinations")

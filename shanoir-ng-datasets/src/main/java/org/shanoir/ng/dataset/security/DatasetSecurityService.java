@@ -471,6 +471,27 @@ public class DatasetSecurityService {
     }
 
     /**
+     * Keep only the datasets the connected user has the given right on, with the rule of
+     * {@link #hasRightOnEveryDataset(List, String)}: the right on the study (or a related study) and on the center.
+     *
+     * @param datasetIds the datasets
+     * @param rightStr the right
+     * @return the datasets of the list the user has the right on, in the same order
+     */
+    public List<Long> filterDatasetIds(List<Long> datasetIds, String rightStr) {
+        if (datasetIds == null || datasetIds.isEmpty() || KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+            return datasetIds;
+        }
+        UserRights userRights = studyRightsService.getUserRights();
+        Set<Long> allowed = datasetRepository.findDatasetsForRights(datasetIds).stream()
+                .map(ds -> new DatasetForRights(ds.getId(), ds.getCenterId(), ds.getStudyId(), ds.getRelatedStudiesIds()))
+                .filter(ds -> userRights.hasStudiesCenterRights(ds.getAllStudiesIds(), ds.getCenterId(), rightStr))
+                .map(DatasetForRights::getId)
+                .collect(Collectors.toSet());
+        return datasetIds.stream().filter(allowed::contains).collect(Collectors.toList());
+    }
+
+    /**
      * Reject if one dataset doesn't have the right.
      * DatasetIds list is also cleaned here
      *

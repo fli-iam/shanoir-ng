@@ -194,6 +194,9 @@ else
 	BUILD_SERVICES="keycloak-database keycloak database database-migrations $MICROSERVICES solr nginx bids-validator"
 fi
 
+step "Check the configuration (.env)"
+./check-env.sh
+
 #
 # Build stage
 #
