@@ -37,6 +37,7 @@ import org.shanoir.ng.dataset.modality.MrDatasetMapper;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.OverallStatistics;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
+import org.shanoir.ng.dataset.schedule.DatasetConsistencyChecker;
 import org.shanoir.ng.dataset.service.CreateStatisticsService;
 import org.shanoir.ng.dataset.service.CsvCopyService;
 import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
@@ -65,6 +66,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.FileSystemResource;
@@ -138,6 +140,10 @@ public class DatasetApiController implements DatasetApi {
 
     @Autowired
     private DatasetAcquisitionService datasetAcquisitionService;
+
+    @Autowired
+    @Lazy
+    private DatasetConsistencyChecker consistencyChecker;
 
     /** Number of downloadable datasets. */
     private static final int DATASET_LIMIT = 500;
@@ -606,4 +612,8 @@ public class DatasetApiController implements DatasetApi {
         }
     }
 
+    public ResponseEntity<?> checkPastImport() {
+        consistencyChecker.checkPastImports();
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }
