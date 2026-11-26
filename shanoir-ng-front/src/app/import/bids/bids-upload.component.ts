@@ -89,9 +89,9 @@ export class BidsUploadComponent {
                 const centerOption = new Option<Center>(studyCenter.center, studyCenter.center.name);
                 this.centerOptions.push(centerOption);
             }
-        }
-        if (this.study.studyCenterList.length == 1) {
-            this.center = this.study.studyCenterList[0].center;
+            if (this.study.studyCenterList.length == 1) {
+                this.center = this.study.studyCenterList[0].center;
+            }
         }
     }
 
