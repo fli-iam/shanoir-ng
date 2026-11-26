@@ -23,7 +23,8 @@ spring:
   datasource:
     url: jdbc:mariadb://${SHANOIR_DB_HOST:${SHANOIR_PREFIX}database}:${SHANOIR_DB_PORT:3306}/${SHANOIR_DB_NAME:users}?characterEncoding=utf-8
     username: users
-    password: password
+    # set by docker compose (SPRING_DATASOURCE_PASSWORD), from .env
+    password: ${SPRING_DATASOURCE_PASSWORD:}
     driver-class-name: org.mariadb.jdbc.Driver
   jpa:
     show-sql: false
@@ -97,6 +98,7 @@ spring:
         jwt:
           issuer-uri: ${SHANOIR_KEYCLOAK_URL:localhost}/realms/shanoir-ng
           jwk-set-uri: ${SHANOIR_KEYCLOAK_INTERNAL_URL:http://keycloak:8080/auth}/realms/shanoir-ng/protocol/openid-connect/certs
+          audiences: shanoir-ng-api
 springdoc:
   api-docs:
     path: "/api-docs"

@@ -33,7 +33,7 @@
                     "gettingToken": false,
                     "tokenPromise": {
                       "__zone_symbol__state": true,
-                      "__zone_symbol__value": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJLMV83Q051N0trR0cwMjVnOXh3VTVuMDJxNGJqUXFrNHptQ3UtQVhURkVVIn0.eyJqdGkiOiI0ZmI3YmMzOS0wNGY0LTQwYjctYTVkNi1iZTBhZDhkNjFmYTIiLCJleHAiOjE1NDQ2MzIzNjAsIm5iZiI6MCwiaWF0IjoxNTQ0NjMyMDYwLCJpc3MiOiJodHRwOi8vc2hhbm9pci1uZy1uZ2lueC9hdXRoL3JlYWxtcy9zaGFub2lyLW5nIiwiYXVkIjoic2hhbm9pci1uZy1mcm9udCIsInN1YiI6ImQ4MjczMTUyLWE4NzEtNGI1OS1hZTYwLWJlNjZlZWNkODY0MiIsInR5cCI6IkJlYXJlciIsImF6cCI6InNoYW5vaXItbmctZnJvbnQiLCJub25jZSI6IjdiOTFkMjZkLWZkY2YtNGM2Ny04MDU2LTk3MDAxODU3MzQyZCIsImF1dGhfdGltZSI6MTU0NDYzMTIzNCwic2Vzc2lvbl9zdGF0ZSI6IjE2NGU4NGFmLWMwN2UtNDQ0Ni1hYTY5LTNjMWMyZjIwYWZjNCIsImFjciI6IjEiLCJhbGxvd2VkLW9yaWdpbnMiOlsiaHR0cDovL3NoYW5vaXItbmctbmdpbngiXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbIlJPTEVfQURNSU4iLCJ1bWFfYXV0aG9yaXphdGlvbiJdfSwicmVzb3VyY2VfYWNjZXNzIjp7ImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sIm5hbWUiOiJ5YW8geWFvIiwicHJlZmVycmVkX3VzZXJuYW1lIjoieXlhbyIsImdpdmVuX25hbWUiOiJ5YW8iLCJmYW1pbHlfbmFtZSI6InlhbyIsInVzZXJJZCI6MywiZW1haWwiOiJ5YW8ueWFvQGlucmlhLmZyIn0.dN08oaXUV6PiqCItMp5g5Tyq0CWUQ1kNcPLN2M1vI-Ce8ezowYRxqoUAaKC5IVw-5-kyCb1AJUqQAK9Rlk23Xqrkj0FmJcePw_ACiILZl-BrCMq6W3qz4HlcglZ9xS_5IZ9E7i9w4r0w3wJhLzRoVIS7QZ0Kk9K1AYN5xzwTZmpyjAm6b8w9aZFAQRZ9JLqV5SqNwUHtq3PFZ_3CijCwXmzi6ifNVv5b4eFllzXEl3G-b7TZbtxE30Aw-OlHNqvpn9_1n1PZXLJPWUCrL4yB1LQlWQLadx_qbtwTsXHBVVh267i9TsFGFbaelLFGW_t6eSRnMgH_SG0aFDXM55Qw2Q"
+                      "__zone_symbol__value": "<access token>"
                     }
                   }
                 }

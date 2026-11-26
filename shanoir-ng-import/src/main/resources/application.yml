@@ -22,7 +22,8 @@ spring:
   datasource:
     url: jdbc:mariadb://${SHANOIR_DB_HOST:${SHANOIR_PREFIX}database}:${SHANOIR_DB_PORT:3306}/${SHANOIR_DB_NAME:import}?characterEncoding=utf-8
     username: import
-    password: password
+    # set by docker compose (SPRING_DATASOURCE_PASSWORD), from .env
+    password: ${SPRING_DATASOURCE_PASSWORD:}
     driver-class-name: org.mariadb.jdbc.Driver
     hikari.maximum-pool-size: 50
     hikari.minimum-idle: 50
@@ -62,8 +63,7 @@ spring:
   rabbitmq:
     host: ${SHANOIR_PREFIX}rabbitmq
     port: 5672
-    username: guest
-    password: guest
+    # username and password set by docker compose (SPRING_RABBITMQ_*), from .env
     template:
       reply-timeout: 60000
     listener:
@@ -89,6 +89,7 @@ spring:
         jwt:
           issuer-uri: ${SHANOIR_KEYCLOAK_URL:localhost}/realms/shanoir-ng
           jwk-set-uri: ${SHANOIR_KEYCLOAK_INTERNAL_URL:http://keycloak:8080/auth}/realms/shanoir-ng/protocol/openid-connect/certs
+          audiences: shanoir-ng-api
   web:
     error:
       whitelabel:
