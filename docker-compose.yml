@@ -401,7 +401,7 @@ services:
   # https://github.com/dcm4che-dockerfiles/dcm4chee-arc-psql/blob/master/docker-compose.yml
   ldap:
     container_name: "${SHANOIR_PREFIX}ldap"
-    image: dcm4che/slapd-dcm4chee:2.6.2-27.0
+    image: dcm4che/slapd-dcm4chee:2.6.15-36.0
     environment:
       LDAP_INIT_CMDS: /etc/openldap/configure.sh /opt/shanoir/ldap-first-start.sh
     logging:
@@ -419,7 +419,7 @@ services:
       - "./docker-compose/dcm4chee/ldap-first-start.sh:/opt/shanoir/ldap-first-start.sh:ro"
   dcm4chee-database:
     container_name: "${SHANOIR_PREFIX}dcm4chee-database"
-    image: dcm4che/postgres-dcm4chee:14.4-27
+    image: dcm4che/postgres-dcm4chee:18.6-36
     logging:
       driver: json-file
       options:
@@ -430,10 +430,12 @@ services:
       - "5432:5432"
     env_file: ./docker-compose/dcm4chee/variables.env
     volumes:
-      - "dcm4chee-database-data:/var/lib/postgresql/data"
+      # PostgreSQL 18 images keep the data in /var/lib/postgresql/18/docker (a new volume: the
+      # previous one, dcm4chee-database-data, holds PostgreSQL 14 data, see dcm4chee/upgrade.sh)
+      - "dcm4chee-postgres-data:/var/lib/postgresql"
   dcm4chee-arc:
     container_name: "${SHANOIR_PREFIX}dcm4chee-arc"
-    image: dcm4che/dcm4chee-arc-psql:5.27.0
+    image: dcm4che/dcm4chee-arc-psql:5.36.0
     logging:
       driver: json-file
       options:
@@ -526,7 +528,7 @@ volumes:
   preclinical-data:
   dcm4chee-ldap-data:
   dcm4chee-sldap-data:
-  dcm4chee-database-data:
+  dcm4chee-postgres-data:
   dcm4chee-arc-wildfly-data:
   dcm4chee-arc-storage-data:
   bids-data:
