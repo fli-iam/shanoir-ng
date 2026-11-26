@@ -40,8 +40,8 @@ public interface StudyUserRightsRepository extends CrudRepository<StudyUser, Lon
     @EntityGraph(attributePaths = "studyUserRights")
     Optional<List<StudyUser>> findAllByUserId(Long userId);
 
-    @Query("SELECT su.centerIds FROM StudyUser su WHERE su.id = :id")
-    List<Long> findCenterIdsByStudyUserId(@Param("id") Long studyUserId);
+    @Query("SELECT su.centerIds FROM StudyUser su WHERE su.id = :studyUserId")
+    List<Long> findCenterIdsByStudyUserId(@Param("studyUserId") Long studyUserId);
 
     @EntityGraph(attributePaths = "studyUserRights")
     Iterable<StudyUser> findByUserIdAndStudyIdIn(Long userId, Set<Long> studyIds);

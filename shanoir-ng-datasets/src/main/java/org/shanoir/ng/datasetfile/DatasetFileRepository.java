@@ -17,6 +17,7 @@ package org.shanoir.ng.datasetfile;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.NativeQuery;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -28,12 +29,12 @@ public interface DatasetFileRepository extends CrudRepository<DatasetFile, Long>
     void deleteByDatasetExpressionIds(@Param("expressionIds") List<Long> expressionIds);
 
     @Modifying
-    @Query(value = """
+    @NativeQuery("""
             INSERT INTO dataset_file (dataset_expression_id, pacs, path)
             SELECT :copiedDatasetExpressionId, pacs, path
             FROM dataset_file
             WHERE dataset_expression_id = :originalDatasetExpressionId
-            """, nativeQuery = true)
+            """)
     void copyDatasetFiles(
             @Param("originalDatasetExpressionId") Long originalDatasetExpressionId,
             @Param("copiedDatasetExpressionId") Long copiedDatasetExpressionId);

@@ -14,7 +14,7 @@
 
 package org.shanoir.ng.studycard.model.field;
 
-
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import org.shanoir.ng.dataset.modality.BidsDataType;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
@@ -27,8 +27,7 @@ public enum DatasetAcquisitionMetadataField implements MetadataFieldInterface<Da
     PROTOCOL_NAME(2) {
         @Override
         public String get(DatasetAcquisition datasetAcquisition) throws CheckedIllegalClassException {
-            if (datasetAcquisition instanceof MrDatasetAcquisition) {
-                MrDatasetAcquisition mrDsAcq = (MrDatasetAcquisition) datasetAcquisition;
+            if (datasetAcquisition instanceof MrDatasetAcquisition mrDsAcq) {
                 MrProtocol mrProtocol = mrDsAcq.getMrProtocol();
                 if (mrProtocol != null) {
                     if (mrDsAcq.getMrProtocol().getUpdatedMetadata() != null && mrDsAcq.getMrProtocol().getUpdatedMetadata().getName() != null) {
@@ -45,8 +44,7 @@ public enum DatasetAcquisitionMetadataField implements MetadataFieldInterface<Da
 
         @Override
         public void update(DatasetAcquisition datasetAcquisition, String updatedValue) throws CheckedIllegalClassException {
-            if (datasetAcquisition instanceof MrDatasetAcquisition) {
-                MrDatasetAcquisition mrDsAcq = (MrDatasetAcquisition) datasetAcquisition;
+            if (datasetAcquisition instanceof MrDatasetAcquisition mrDsAcq) {
                 if (mrDsAcq.getMrProtocol().getUpdatedMetadata() == null) mrDsAcq.getMrProtocol().setUpdatedMetadata(new MrProtocolSCMetadata());
                 mrDsAcq.getMrProtocol().getUpdatedMetadata().setName(updatedValue);
             } else {
@@ -57,8 +55,7 @@ public enum DatasetAcquisitionMetadataField implements MetadataFieldInterface<Da
     PROTOCOL_COMMENT(3) {
         @Override
         public String get(DatasetAcquisition datasetAcquisition) throws CheckedIllegalClassException {
-            if (datasetAcquisition instanceof MrDatasetAcquisition) {
-                MrDatasetAcquisition mrDsAcq = (MrDatasetAcquisition) datasetAcquisition;
+            if (datasetAcquisition instanceof MrDatasetAcquisition mrDsAcq) {
                 if (mrDsAcq.getMrProtocol() != null && mrDsAcq.getMrProtocol().getUpdatedMetadata() != null) {
                     return mrDsAcq.getMrProtocol().getUpdatedMetadata().getComment();
                 }
@@ -70,8 +67,7 @@ public enum DatasetAcquisitionMetadataField implements MetadataFieldInterface<Da
 
         @Override
         public void update(DatasetAcquisition datasetAcquisition, String updatedValue) throws CheckedIllegalClassException {
-            if (datasetAcquisition instanceof MrDatasetAcquisition) {
-                MrDatasetAcquisition mrDsAcq = (MrDatasetAcquisition) datasetAcquisition;
+            if (datasetAcquisition instanceof MrDatasetAcquisition mrDsAcq) {
                 if (mrDsAcq.getMrProtocol().getUpdatedMetadata() == null) mrDsAcq.getMrProtocol().setUpdatedMetadata(new MrProtocolSCMetadata());
                 mrDsAcq.getMrProtocol().getUpdatedMetadata().setComment(updatedValue);
             } else {
@@ -82,8 +78,7 @@ public enum DatasetAcquisitionMetadataField implements MetadataFieldInterface<Da
     TRANSMITTING_COIL(4) {
         @Override
         public String get(DatasetAcquisition datasetAcquisition) throws CheckedIllegalClassException {
-            if (datasetAcquisition instanceof MrDatasetAcquisition) {
-                MrDatasetAcquisition mrDsAcq = (MrDatasetAcquisition) datasetAcquisition;
+            if (datasetAcquisition instanceof MrDatasetAcquisition mrDsAcq) {
                 if (mrDsAcq.getMrProtocol() != null && mrDsAcq.getMrProtocol().getUpdatedMetadata() != null && mrDsAcq.getMrProtocol().getUpdatedMetadata().getTransmittingCoilId() != null) {
                     return mrDsAcq.getMrProtocol().getUpdatedMetadata().getTransmittingCoilId().toString();
                 } else if (mrDsAcq.getMrProtocol() != null && mrDsAcq.getMrProtocol().getOriginMetadata() != null && mrDsAcq.getMrProtocol().getOriginMetadata().getTransmittingCoilId() != null) {
@@ -97,10 +92,9 @@ public enum DatasetAcquisitionMetadataField implements MetadataFieldInterface<Da
 
         @Override
         public void update(DatasetAcquisition datasetAcquisition, String updatedValue) throws CheckedIllegalClassException {
-            if (datasetAcquisition instanceof MrDatasetAcquisition) {
+            if (datasetAcquisition instanceof MrDatasetAcquisition mrDsAcq) {
                 Long longUpdatedValue = Long.getLong(updatedValue);
                 if (longUpdatedValue != null) {
-                    MrDatasetAcquisition mrDsAcq = (MrDatasetAcquisition) datasetAcquisition;
                     if (mrDsAcq.getMrProtocol().getUpdatedMetadata() == null) mrDsAcq.getMrProtocol().setUpdatedMetadata(new MrProtocolSCMetadata());
                     mrDsAcq.getMrProtocol().getUpdatedMetadata().setTransmittingCoilId(longUpdatedValue);
                 }
@@ -113,8 +107,7 @@ public enum DatasetAcquisitionMetadataField implements MetadataFieldInterface<Da
     RECEIVING_COIL(5) {
         @Override
         public String get(DatasetAcquisition datasetAcquisition) throws CheckedIllegalClassException {
-            if (datasetAcquisition instanceof MrDatasetAcquisition) {
-                MrDatasetAcquisition mrDsAcq = (MrDatasetAcquisition) datasetAcquisition;
+            if (datasetAcquisition instanceof MrDatasetAcquisition mrDsAcq) {
                 if (mrDsAcq.getMrProtocol() != null && mrDsAcq.getMrProtocol().getUpdatedMetadata() != null && mrDsAcq.getMrProtocol().getUpdatedMetadata().getReceivingCoilId() != null) {
                     return mrDsAcq.getMrProtocol().getUpdatedMetadata().getReceivingCoilId().toString();
                 } else if (mrDsAcq.getMrProtocol() != null && mrDsAcq.getMrProtocol().getUpdatedMetadata() != null && mrDsAcq.getMrProtocol().getOriginMetadata().getReceivingCoilId() != null) {
@@ -128,10 +121,9 @@ public enum DatasetAcquisitionMetadataField implements MetadataFieldInterface<Da
 
         @Override
         public void update(DatasetAcquisition datasetAcquisition, String updatedValue) throws CheckedIllegalClassException {
-            if (datasetAcquisition instanceof MrDatasetAcquisition) {
+            if (datasetAcquisition instanceof MrDatasetAcquisition mrDsAcq) {
                 Long longUpdatedValue = Long.getLong(updatedValue);
                 if (longUpdatedValue != null) {
-                    MrDatasetAcquisition mrDsAcq = (MrDatasetAcquisition) datasetAcquisition;
                     if (mrDsAcq.getMrProtocol().getUpdatedMetadata() == null) mrDsAcq.getMrProtocol().setUpdatedMetadata(new MrProtocolSCMetadata());
                     mrDsAcq.getMrProtocol().getUpdatedMetadata().setReceivingCoilId(longUpdatedValue);
                 }
@@ -143,8 +135,7 @@ public enum DatasetAcquisitionMetadataField implements MetadataFieldInterface<Da
     ACQUISITION_CONTRAST(7) {
         @Override
         public String get(DatasetAcquisition datasetAcquisition) throws CheckedIllegalClassException {
-            if (datasetAcquisition instanceof MrDatasetAcquisition) {
-                MrDatasetAcquisition mrDsAcq = (MrDatasetAcquisition) datasetAcquisition;
+            if (datasetAcquisition instanceof MrDatasetAcquisition mrDsAcq) {
                 if (mrDsAcq.getMrProtocol() != null && mrDsAcq.getMrProtocol().getUpdatedMetadata() != null && mrDsAcq.getMrProtocol().getUpdatedMetadata().getAcquisitionContrast() != null) {
                     return mrDsAcq.getMrProtocol().getUpdatedMetadata().getAcquisitionContrast().name();
                 } else if (mrDsAcq.getMrProtocol() != null && mrDsAcq.getMrProtocol().getOriginMetadata() != null && mrDsAcq.getMrProtocol().getOriginMetadata().getAcquisitionContrast() != null) {
@@ -158,8 +149,7 @@ public enum DatasetAcquisitionMetadataField implements MetadataFieldInterface<Da
 
         @Override
         public void update(DatasetAcquisition datasetAcquisition, String updatedValue) throws CheckedIllegalClassException {
-            if (datasetAcquisition instanceof MrDatasetAcquisition) {
-                MrDatasetAcquisition mrDsAcq = (MrDatasetAcquisition) datasetAcquisition;
+            if (datasetAcquisition instanceof MrDatasetAcquisition mrDsAcq) {
                 AcquisitionContrast contrast = AcquisitionContrast.valueOf(updatedValue);
                 if (mrDsAcq.getMrProtocol().getUpdatedMetadata() == null) mrDsAcq.getMrProtocol().setUpdatedMetadata(new MrProtocolSCMetadata());
                 mrDsAcq.getMrProtocol().getUpdatedMetadata().setAcquisitionContrast(contrast);
@@ -171,8 +161,7 @@ public enum DatasetAcquisitionMetadataField implements MetadataFieldInterface<Da
     MR_SEQUENCE_APPLICATION(8) {
         @Override
         public String get(DatasetAcquisition datasetAcquisition) throws CheckedIllegalClassException {
-            if (datasetAcquisition instanceof MrDatasetAcquisition) {
-                MrDatasetAcquisition mrDsAcq = (MrDatasetAcquisition) datasetAcquisition;
+            if (datasetAcquisition instanceof MrDatasetAcquisition mrDsAcq) {
                 if (mrDsAcq.getMrProtocol() != null && mrDsAcq.getMrProtocol().getUpdatedMetadata() != null && mrDsAcq.getMrProtocol().getUpdatedMetadata().getMrSequenceApplication() != null) {
                     return mrDsAcq.getMrProtocol().getUpdatedMetadata().getMrSequenceApplication().name();
                 }
@@ -184,8 +173,7 @@ public enum DatasetAcquisitionMetadataField implements MetadataFieldInterface<Da
 
         @Override
         public void update(DatasetAcquisition datasetAcquisition, String updatedValue) throws CheckedIllegalClassException {
-            if (datasetAcquisition instanceof MrDatasetAcquisition) {
-                MrDatasetAcquisition mrDsAcq = (MrDatasetAcquisition) datasetAcquisition;
+            if (datasetAcquisition instanceof MrDatasetAcquisition mrDsAcq) {
                 MrSequenceApplication mrSequenceApplication = MrSequenceApplication.valueOf(updatedValue);
                 if (mrDsAcq.getMrProtocol().getUpdatedMetadata() == null) mrDsAcq.getMrProtocol().setUpdatedMetadata(new MrProtocolSCMetadata());
                 mrDsAcq.getMrProtocol().getUpdatedMetadata().setMrSequenceApplication(mrSequenceApplication);
@@ -197,8 +185,7 @@ public enum DatasetAcquisitionMetadataField implements MetadataFieldInterface<Da
     MR_SEQUENCE_PHYSICS(9) {
         @Override
         public String get(DatasetAcquisition datasetAcquisition) throws CheckedIllegalClassException {
-            if (datasetAcquisition instanceof MrDatasetAcquisition) {
-                MrDatasetAcquisition mrDsAcq = (MrDatasetAcquisition) datasetAcquisition;
+            if (datasetAcquisition instanceof MrDatasetAcquisition mrDsAcq) {
                 if (mrDsAcq.getMrProtocol() != null && mrDsAcq.getMrProtocol().getUpdatedMetadata() != null) {
                     return mrDsAcq.getMrProtocol().getUpdatedMetadata().getMrSequencePhysics().name();
                 }
@@ -210,8 +197,7 @@ public enum DatasetAcquisitionMetadataField implements MetadataFieldInterface<Da
 
         @Override
         public void update(DatasetAcquisition datasetAcquisition, String updatedValue) throws CheckedIllegalClassException {
-            if (datasetAcquisition instanceof MrDatasetAcquisition) {
-                MrDatasetAcquisition mrDsAcq = (MrDatasetAcquisition) datasetAcquisition;
+            if (datasetAcquisition instanceof MrDatasetAcquisition mrDsAcq) {
                 MrSequencePhysics mrSequencePhysics = MrSequencePhysics.valueOf(updatedValue);
                 if (mrDsAcq.getMrProtocol().getUpdatedMetadata() == null) mrDsAcq.getMrProtocol().setUpdatedMetadata(new MrProtocolSCMetadata());
                 mrDsAcq.getMrProtocol().getUpdatedMetadata().setMrSequencePhysics(mrSequencePhysics);
@@ -223,8 +209,7 @@ public enum DatasetAcquisitionMetadataField implements MetadataFieldInterface<Da
     MR_SEQUENCE_NAME(12) {
         @Override
         public String get(DatasetAcquisition datasetAcquisition) throws CheckedIllegalClassException {
-            if (datasetAcquisition instanceof MrDatasetAcquisition) {
-                MrDatasetAcquisition mrDsAcq = (MrDatasetAcquisition) datasetAcquisition;
+            if (datasetAcquisition instanceof MrDatasetAcquisition mrDsAcq) {
                 if (mrDsAcq.getMrProtocol() != null && mrDsAcq.getMrProtocol().getUpdatedMetadata() != null && mrDsAcq.getMrProtocol().getUpdatedMetadata().getMrSequenceName() != null) {
                     return mrDsAcq.getMrProtocol().getUpdatedMetadata().getMrSequenceName();
                 } else if (mrDsAcq.getMrProtocol() != null && mrDsAcq.getMrProtocol().getOriginMetadata() != null) {
@@ -238,8 +223,7 @@ public enum DatasetAcquisitionMetadataField implements MetadataFieldInterface<Da
 
         @Override
         public void update(DatasetAcquisition datasetAcquisition, String updatedValue) throws CheckedIllegalClassException {
-            if (datasetAcquisition instanceof MrDatasetAcquisition) {
-                MrDatasetAcquisition mrDsAcq = (MrDatasetAcquisition) datasetAcquisition;
+            if (datasetAcquisition instanceof MrDatasetAcquisition mrDsAcq) {
                 if (mrDsAcq.getMrProtocol().getUpdatedMetadata() == null) mrDsAcq.getMrProtocol().setUpdatedMetadata(new MrProtocolSCMetadata());
                 mrDsAcq.getMrProtocol().getUpdatedMetadata().setMrSequenceName(updatedValue);
             } else {
@@ -250,8 +234,7 @@ public enum DatasetAcquisitionMetadataField implements MetadataFieldInterface<Da
     CONTRAST_AGENT_USED(13) {
         @Override
         public String get(DatasetAcquisition datasetAcquisition) throws CheckedIllegalClassException {
-            if (datasetAcquisition instanceof MrDatasetAcquisition) {
-                MrDatasetAcquisition mrDsAcq = (MrDatasetAcquisition) datasetAcquisition;
+            if (datasetAcquisition instanceof MrDatasetAcquisition mrDsAcq) {
                 if (mrDsAcq.getMrProtocol() != null && mrDsAcq.getMrProtocol().getUpdatedMetadata() != null && mrDsAcq.getMrProtocol().getUpdatedMetadata().getContrastAgentUsed() != null) {
                     return mrDsAcq.getMrProtocol().getUpdatedMetadata().getContrastAgentUsed().name();
                 } else if (mrDsAcq.getMrProtocol() != null && mrDsAcq.getMrProtocol().getOriginMetadata() != null && mrDsAcq.getMrProtocol().getOriginMetadata().getContrastAgentUsed() != null) {
@@ -265,8 +248,7 @@ public enum DatasetAcquisitionMetadataField implements MetadataFieldInterface<Da
 
         @Override
         public void update(DatasetAcquisition datasetAcquisition, String updatedValue) throws CheckedIllegalClassException {
-            if (datasetAcquisition instanceof MrDatasetAcquisition) {
-                MrDatasetAcquisition mrDsAcq = (MrDatasetAcquisition) datasetAcquisition;
+            if (datasetAcquisition instanceof MrDatasetAcquisition mrDsAcq) {
                 ContrastAgentUsed contrastAgentUsed = ContrastAgentUsed.valueOf(updatedValue);
                 if (mrDsAcq.getMrProtocol().getUpdatedMetadata() == null) mrDsAcq.getMrProtocol().setUpdatedMetadata(new MrProtocolSCMetadata());
                 mrDsAcq.getMrProtocol().getUpdatedMetadata().setContrastAgentUsed(contrastAgentUsed);
@@ -278,8 +260,7 @@ public enum DatasetAcquisitionMetadataField implements MetadataFieldInterface<Da
     BIDS_DATA_TYPE(15) {
         @Override
         public String get(DatasetAcquisition datasetAcquisition) throws CheckedIllegalClassException {
-            if (datasetAcquisition instanceof MrDatasetAcquisition) {
-                MrDatasetAcquisition mrDsAcq = (MrDatasetAcquisition) datasetAcquisition;
+            if (datasetAcquisition instanceof MrDatasetAcquisition mrDsAcq) {
                 if (mrDsAcq.getMrProtocol() != null && mrDsAcq.getMrProtocol().getUpdatedMetadata() != null) {
                     return mrDsAcq.getMrProtocol().getUpdatedMetadata().getBidsDataType();
                 }
@@ -292,8 +273,7 @@ public enum DatasetAcquisitionMetadataField implements MetadataFieldInterface<Da
         @Override
         public void update(DatasetAcquisition datasetAcquisition, String updatedValue) throws CheckedIllegalClassException {
             BidsDataType dataType = BidsDataType.valueOf(updatedValue);
-            if (datasetAcquisition instanceof MrDatasetAcquisition) {
-                MrDatasetAcquisition mrDsAcq = (MrDatasetAcquisition) datasetAcquisition;
+            if (datasetAcquisition instanceof MrDatasetAcquisition mrDsAcq) {
                 if (mrDsAcq.getMrProtocol().getUpdatedMetadata() == null) mrDsAcq.getMrProtocol().setUpdatedMetadata(new MrProtocolSCMetadata());
                 mrDsAcq.getMrProtocol().getUpdatedMetadata().setBidsDataType(dataType);
             } else {
@@ -304,8 +284,7 @@ public enum DatasetAcquisitionMetadataField implements MetadataFieldInterface<Da
     NUMBER_OF_SLICES(16) {
         @Override
         public String get(DatasetAcquisition datasetAcquisition) throws CheckedIllegalClassException {
-            if (datasetAcquisition instanceof MrDatasetAcquisition) {
-                MrDatasetAcquisition mrDsAcq = (MrDatasetAcquisition) datasetAcquisition;
+            if (datasetAcquisition instanceof MrDatasetAcquisition mrDsAcq) {
                 if (mrDsAcq.getMrProtocol() != null && mrDsAcq.getMrProtocol().getNumberOfSlices() != null) {
                     return mrDsAcq.getMrProtocol().getNumberOfSlices().toString();
                 }
@@ -328,8 +307,7 @@ public enum DatasetAcquisitionMetadataField implements MetadataFieldInterface<Da
     SLICE_THICKNESS(17) {
         @Override
         public String get(DatasetAcquisition datasetAcquisition) throws CheckedIllegalClassException {
-            if (datasetAcquisition instanceof MrDatasetAcquisition) {
-                MrDatasetAcquisition mrDsAcq = (MrDatasetAcquisition) datasetAcquisition;
+            if (datasetAcquisition instanceof MrDatasetAcquisition mrDsAcq) {
                 if (mrDsAcq.getMrProtocol() != null && mrDsAcq.getMrProtocol().getSliceThickness() != null) {
                     return mrDsAcq.getMrProtocol().getSliceThickness().toString();
                 }
@@ -352,6 +330,7 @@ public enum DatasetAcquisitionMetadataField implements MetadataFieldInterface<Da
 
     private int id;
 
+    @JsonCreator
     private DatasetAcquisitionMetadataField(int id) {
         this.id = id;
     }

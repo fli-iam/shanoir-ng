@@ -14,6 +14,9 @@
 
 package org.shanoir.ng.processing.resulthandler.output;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.dcm4che3.data.VR;
@@ -22,28 +25,34 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.examination.service.ExaminationService;
+import org.shanoir.ng.study.rights.ampq.RabbitMqStudyUserService;
 import org.shanoir.ng.vip.executionMonitoring.model.ExecutionMonitoring;
-import org.shanoir.ng.vip.output.handler.OFSEPSeqIdHandler;
 import org.shanoir.ng.vip.output.exception.ResultHandlerException;
+import org.shanoir.ng.vip.output.handler.OFSEPSeqIdHandler;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ActiveProfiles("test")
 public class OFSEPSeqIdProcessingTest {
 
-    @InjectMocks
+    @Autowired
     private OFSEPSeqIdHandler outputProcessing;
 
     @MockitoBean
     private ExaminationService examinationService; //Needed for spring management, even if not used. Do not remove
+
+    @MockitoBean
+    private ConnectionFactory connectionFactory;
+
+    @MockitoBean
+    private RabbitMqStudyUserService rabbitMqStudyUserService;
 
     @Test
     public void canProcessTest() throws ResultHandlerException {

@@ -125,7 +125,7 @@ public class ImportJob extends ImportJobBase implements Serializable {
         if (CollectionUtils.isNotEmpty(selectedSeries)) {
             return selectedSeries.getFirst();
         }
-        return null;
+        return super.getFirstSerie();
     }
 
     /**
@@ -148,7 +148,7 @@ public class ImportJob extends ImportJobBase implements Serializable {
             // In case all are unknown, return first
             return selectedSeries.getFirst();
         }
-        return null;
+        return super.getFirstSerieWithInstitutionAndEquipment();
     }
 
 }

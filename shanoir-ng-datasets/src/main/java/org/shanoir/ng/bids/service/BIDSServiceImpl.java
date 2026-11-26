@@ -22,7 +22,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.text.SimpleDateFormat;
@@ -39,6 +38,9 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
+import tools.jackson.core.exc.StreamReadException;
+import tools.jackson.databind.DatabindException;
+
 import org.shanoir.ng.dataset.controler.DatasetApiController;
 import org.shanoir.ng.dataset.modality.BidsDataset;
 import org.shanoir.ng.dataset.modality.EegDataSetDescription;
@@ -88,9 +90,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.UriUtils;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * This class is a service class for BIDS purpose.
@@ -269,10 +269,10 @@ public class BIDSServiceImpl implements BIDSService {
      * @param studyId the study ID to get the subject for
      * @return a list of users associated to the study
      * @throws IOException
-     * @throws JsonMappingException
-     * @throws JsonParseException
+     * @throws DatabindException
+     * @throws StreamReadException
      */
-    private List<Subject> getSubjectsForStudy(final Long studyId) throws JsonParseException, JsonMappingException, IOException {
+    private List<Subject> getSubjectsForStudy(final Long studyId) throws StreamReadException, DatabindException, IOException {
         // Get the list of subjects
         List<Subject> subjects = subjectRepository.findByStudy_Id(studyId);
         return subjects;
@@ -315,7 +315,7 @@ public class BIDSServiceImpl implements BIDSService {
                     .append(NEW_LINE);
                 }
 
-                Files.write(Paths.get(sessionFile.getAbsolutePath()), buffer.toString().getBytes());
+                Files.write(Path.of(sessionFile.getAbsolutePath()), buffer.toString().getBytes());
             }
             // Iterate over examinations to export them as BIDS
             File examDir = subjectFolder;
@@ -519,7 +519,7 @@ public class BIDSServiceImpl implements BIDSService {
                                     + TABULATION
                                     + dataset.getDatasetAcquisition().getExamination().getId()
                                     + NEW_LINE;
-                            Files.write(Paths.get(scansTsvFile.getAbsolutePath()),
+                            Files.write(Path.of(scansTsvFile.getAbsolutePath()),
                                     buffer.getBytes(), StandardOpenOption.APPEND);
                         }
                     }
@@ -546,8 +546,7 @@ public class BIDSServiceImpl implements BIDSService {
 
             String nature = null;
 
-            if (dataset instanceof MrDataset) {
-                MrDataset mrDataset = (MrDataset) dataset;
+            if (dataset instanceof MrDataset mrDataset) {
                 if (mrDataset.getUpdatedMrMetadata() != null
                         && mrDataset.getUpdatedMrMetadata().getMrDatasetNature() != null) {
                     nature = mrDataset.getUpdatedMrMetadata().getMrDatasetNature().name();
@@ -566,7 +565,7 @@ public class BIDSServiceImpl implements BIDSService {
             fileName += fileSuffix;
 
             try {
-                Path pathToGo = Paths.get(dataFolder.getAbsolutePath() + File.separator + fileName);
+                Path pathToGo = Path.of(dataFolder.getAbsolutePath() + File.separator + fileName);
                 // Use link to avoid file duplication
                 deleteIfExists(pathToGo.toAbsolutePath().toString());
                 Files.createLink(pathToGo, srcFile.toPath());
@@ -582,7 +581,7 @@ public class BIDSServiceImpl implements BIDSService {
                         .append(dataset.getDatasetAcquisition().getExamination().getId())
                         .append(NEW_LINE);
 
-                Files.write(Paths.get(scansTsvFile.getAbsolutePath()), buffer.toString().getBytes(),
+                Files.write(Path.of(scansTsvFile.getAbsolutePath()), buffer.toString().getBytes(),
                         StandardOpenOption.APPEND);
 
             } catch (IOException exception) {
@@ -596,8 +595,7 @@ public class BIDSServiceImpl implements BIDSService {
      * dataset.
      */
     private String getBidsSuffix(Dataset dataset) {
-        if (dataset instanceof MrDataset) {
-            MrDataset mr = (MrDataset) dataset;
+        if (dataset instanceof MrDataset mr) {
             MrDatasetNature nature = null;
             if (mr.getUpdatedMrMetadata() != null && mr.getUpdatedMrMetadata().getMrDatasetNature() != null) {
                 nature = mr.getUpdatedMrMetadata().getMrDatasetNature();
@@ -627,15 +625,14 @@ public class BIDSServiceImpl implements BIDSService {
 
     private File createSpecificDataFolder(Dataset dataset, File workDir, File dataFolder, String subjectName, String studyName) throws IOException {
         // Create specific files (EEG, MS, MEG, etc..)
-        if (dataset instanceof EegDataset) {
+        if (dataset instanceof EegDataset eegDataset) {
             dataFolder = createDataFolder("eeg", workDir);
             String examComment = dataset.getDatasetAcquisition().getExamination().getComment();
             String sessionLabel = examComment != null ? examComment : dataset.getDatasetAcquisition().getExamination().getId().toString();
-            exportSpecificEegFiles((EegDataset) dataset, subjectName, sessionLabel, studyName, dataset.getName(), dataFolder);
+            exportSpecificEegFiles(eegDataset, subjectName, sessionLabel, studyName, dataset.getName(), dataFolder);
         } else if (dataset instanceof PetDataset) {
             dataFolder = createDataFolder("pet", workDir);
-        } else if (dataset instanceof MrDataset) {
-            MrDataset mrDataset = (MrDataset) dataset;
+        } else if (dataset instanceof MrDataset mrDataset) {
             // Here we want to know whether we have anat/func/dwi/fmap
             // We base ourselves on SeriesDescription here
             MrProtocol protocol = ((MrDatasetAcquisition) dataset.getDatasetAcquisition()).getMrProtocol();
@@ -665,8 +662,7 @@ public class BIDSServiceImpl implements BIDSService {
             if (dataFolder == null) {
                 dataFolder = createDataFolder("anat", workDir);
             }
-        } else if (dataset instanceof BidsDataset) {
-            BidsDataset bidsdataset = (BidsDataset) dataset;
+        } else if (dataset instanceof BidsDataset bidsdataset) {
             dataFolder = createDataFolder(bidsdataset.getBidsDataType(), workDir);
         } else {
             dataFolder = createDataFolder("anat", workDir);
@@ -694,7 +690,7 @@ public class BIDSServiceImpl implements BIDSService {
             .append("acq_time").append(TABULATION)
             .append("session_id")
             .append(NEW_LINE);
-            Files.write(Paths.get(scansFile.getAbsolutePath()), buffer.toString().getBytes());
+            Files.write(Path.of(scansFile.getAbsolutePath()), buffer.toString().getBytes());
         }
         return scansFile;
     }
@@ -787,7 +783,7 @@ public class BIDSServiceImpl implements BIDSService {
             .append(chan.getHighCutoff() == 0 ? "n/a" : chan.getHighCutoff()).append(TABULATION)
             .append(chan.getNotch() == 0 ? "n/a" : chan.getNotch()).append(NEW_LINE);
         }
-        Files.write(Paths.get(destFile), buffer.toString().getBytes());
+        Files.write(Path.of(destFile), buffer.toString().getBytes());
 
         // add to scans.tsv
         addToTsvFile(dataFolder.getParentFile(), fileName, dataset, subjectName);
@@ -808,7 +804,7 @@ public class BIDSServiceImpl implements BIDSService {
             .append(duration == 0 ? "n/a" : String.valueOf(duration)).append(TABULATION)
             .append(sample).append(NEW_LINE);
         }
-        Files.write(Paths.get(destFile), buffer.toString().getBytes());
+        Files.write(Path.of(destFile), buffer.toString().getBytes());
 
         // add to scans.tsv
         addToTsvFile(dataFolder.getParentFile(), fileName, dataset, subjectName);
@@ -831,7 +827,7 @@ public class BIDSServiceImpl implements BIDSService {
             .append(chan.getY()).append(TABULATION)
             .append(chan.getZ()).append(NEW_LINE);
         }
-        Files.write(Paths.get(destFile), buffer.toString().getBytes());
+        Files.write(Path.of(destFile), buffer.toString().getBytes());
 
         // add to scans.tsv
         addToTsvFile(dataFolder.getParentFile(), fileName, dataset, subjectName);
@@ -846,7 +842,7 @@ public class BIDSServiceImpl implements BIDSService {
                 .append("\"EEGCoordinateUnits\": ").append("\"" + DatasetApiController.CoordinatesSystem.valueOf(dataset.getCoordinatesSystem()).getUnit()).append("\"\n")
                 .append("}");
 
-        Files.write(Paths.get(destFile), buffer.toString().getBytes());
+        Files.write(Path.of(destFile), buffer.toString().getBytes());
 
         // add to scans.tsv
         addToTsvFile(dataFolder.getParentFile(), fileName, dataset, subjectName);
@@ -861,7 +857,7 @@ public class BIDSServiceImpl implements BIDSService {
         .append(dataset.getDatasetAcquisition().getExamination().getId())
         .append(NEW_LINE);
 
-        Files.write(Paths.get(scansTsvFile.getAbsolutePath()), buffer.toString().getBytes(), StandardOpenOption.APPEND);
+        Files.write(Path.of(scansTsvFile.getAbsolutePath()), buffer.toString().getBytes(), StandardOpenOption.APPEND);
     }
 
     private String formatLabel(String label) {

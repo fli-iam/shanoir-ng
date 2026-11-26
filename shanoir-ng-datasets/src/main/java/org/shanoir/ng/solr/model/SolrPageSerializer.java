@@ -14,35 +14,30 @@
 
 package org.shanoir.ng.solr.model;
 
-import java.io.IOException;
-
-import org.springframework.boot.jackson.JsonComponent;
+import org.springframework.boot.jackson.JacksonComponent;
 import org.springframework.data.solr.core.query.result.SolrResultPage;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ser.std.StdSerializer;
 
-@JsonComponent
+@JacksonComponent(type = SolrResultPage.class)
 public class SolrPageSerializer extends StdSerializer<SolrResultPage> {
-
-    private static final long serialVersionUID = 1L;
 
     public SolrPageSerializer() {
         super(SolrResultPage.class);
     }
 
     @Override
-    public void serialize(SolrResultPage value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+    public void serialize(SolrResultPage value, JsonGenerator gen, SerializationContext provider) {
         gen.writeStartObject();
-        gen.writeNumberField("number", value.getNumber());
-        gen.writeNumberField("numberOfElements", value.getNumberOfElements());
-        gen.writeNumberField("totalElements", value.getTotalElements());
-        gen.writeNumberField("totalPages", value.getTotalPages());
-        gen.writeNumberField("size", value.getSize());
-        gen.writeObjectField("facetResultPages", value.getFacetResultPages());
-        gen.writeFieldName("content");
-        provider.defaultSerializeValue(value.getContent(), gen);
+        gen.writeNumberProperty("number", value.getNumber());
+        gen.writeNumberProperty("numberOfElements", value.getNumberOfElements());
+        gen.writeNumberProperty("totalElements", value.getTotalElements());
+        gen.writeNumberProperty("totalPages", value.getTotalPages());
+        gen.writeNumberProperty("size", value.getSize());
+        gen.writePOJOProperty("facetResultPages", value.getFacetResultPages());
+        gen.writePOJOProperty("content", value.getContent());
         gen.writeEndObject();
     }
 

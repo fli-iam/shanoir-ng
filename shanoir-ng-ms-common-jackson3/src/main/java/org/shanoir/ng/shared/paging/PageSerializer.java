@@ -15,6 +15,7 @@
 package org.shanoir.ng.shared.paging;
 
 import org.springframework.boot.jackson.JacksonComponent;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 
 import tools.jackson.core.JsonGenerator;

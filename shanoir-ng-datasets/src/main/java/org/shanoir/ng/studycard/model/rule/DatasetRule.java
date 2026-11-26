@@ -44,10 +44,10 @@ public class DatasetRule extends StudyCardRule<Dataset> {
     private boolean conditionsfulfilled(Attributes dicomAttributes, Dataset dataset) {
         boolean fulfilled = true;
         for (CardCondition condition : getConditions()) {
-            if (condition instanceof DatasetDICOMConditionOnDataset) {
-                fulfilled &= ((DatasetDICOMConditionOnDataset) condition).fulfilled(dicomAttributes);
-            } else if (condition instanceof DatasetMetadataCondOnDataset) {
-                fulfilled &= ((DatasetMetadataCondOnDataset) condition).fulfilled(dataset);
+            if (condition instanceof DatasetDICOMConditionOnDataset onDataset1) {
+                fulfilled &= onDataset1.fulfilled(dicomAttributes);
+            } else if (condition instanceof DatasetMetadataCondOnDataset onDataset) {
+                fulfilled &= onDataset.fulfilled(dataset);
             } else {
                 throw new IllegalStateException("There might be an unimplemented condition type here. Condition class : " + condition.getClass());
             }
@@ -57,8 +57,8 @@ public class DatasetRule extends StudyCardRule<Dataset> {
 
     private void applyAssignments(Dataset dataset) {
         for (StudyCardAssignment<?> assignment : getAssignments()) {
-            if (assignment instanceof DatasetAssignment) {
-                ((DatasetAssignment) assignment).apply(dataset);
+            if (assignment instanceof DatasetAssignment datasetAssignment) {
+                datasetAssignment.apply(dataset);
             } else throw new IllegalArgumentException("Unimplemented assignment type");
         }
     }

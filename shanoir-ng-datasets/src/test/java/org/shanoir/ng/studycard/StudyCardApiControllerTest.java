@@ -44,11 +44,12 @@ import org.shanoir.ng.studycard.service.StudyCardService;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.security.oauth2.server.resource.autoconfigure.servlet.OAuth2ResourceServerAutoConfiguration;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
@@ -62,7 +63,9 @@ import com.google.gson.GsonBuilder;
  *
  */
 
-@WebMvcTest(controllers = {StudyCardApiController.class, UniqueConstraintManager.class})
+@WebMvcTest(controllers = {StudyCardApiController.class, UniqueConstraintManager.class},
+        excludeAutoConfiguration = {OAuth2ResourceServerAutoConfiguration.class
+        })
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
 public class StudyCardApiControllerTest {
@@ -75,38 +78,37 @@ public class StudyCardApiControllerTest {
     @Autowired
     private MockMvc mvc;
 
-    @MockBean
+    @MockitoBean
     private StudyCardService studyCardServiceMock;
 
-    @MockBean
+    @MockitoBean
     private StudyCardRepository repositoryMock;
 
-
-    @MockBean
+    @MockitoBean
     private DicomSEGAndSRImporterService dicomSEGAndSRImporterService;
 
-    @MockBean
+    @MockitoBean
     private DicomImporterService dicomImporterService;
 
-    @MockBean
+    @MockitoBean
     private DatasetAcquisitionService datasetAcquisitionServiceMock;
 
-    @MockBean
+    @MockitoBean
     private DatasetAcquisitionRepository acquisitionRepositoryMock;
 
-    @MockBean
+    @MockitoBean
     private WADODownloaderService downloaderMock;
 
-    @MockBean
+    @MockitoBean
     private FindByRepository<StudyCard> findByRepositoryMock;
 
-    @MockBean
+    @MockitoBean
     private FindByRepository<QualityCard> qualityCardFindByRepositoryMock;
 
-    @MockBean(name = "datasetSecurityService")
+    @MockitoBean(name = "datasetSecurityService")
     private DatasetSecurityService datasetSecurityService;
 
-    @MockBean
+    @MockitoBean
     private SolrService solrService;
 
     @BeforeEach

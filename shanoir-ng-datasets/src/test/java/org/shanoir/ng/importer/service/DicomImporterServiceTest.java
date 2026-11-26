@@ -47,7 +47,7 @@ import org.shanoir.ng.utils.KeycloakUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.http.HttpStatus;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Tests for the CAN_IMPORT rights check on study level in DicomImporterService.

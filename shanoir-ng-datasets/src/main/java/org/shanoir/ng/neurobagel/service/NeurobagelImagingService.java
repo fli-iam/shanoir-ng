@@ -15,7 +15,6 @@
 package org.shanoir.ng.neurobagel.service;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
@@ -65,7 +64,7 @@ public class NeurobagelImagingService {
             Path folder = Path.of(bidsDataDir, FOLDER);
             Files.createDirectories(folder);
             String fileName = "study-" + studyId + "-imaging-" + UUID.randomUUID() + ".tsv";
-            Files.writeString(folder.resolve(fileName), buildImagingTsv(studyId), StandardCharsets.UTF_8);
+            Files.writeString(folder.resolve(fileName), buildImagingTsv(studyId));
             return fileName;
         } catch (IOException | RuntimeException e) {
             LOG.error("Cannot write the Neurobagel imaging table of study {}", studyId, e);

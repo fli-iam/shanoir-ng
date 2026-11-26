@@ -22,6 +22,7 @@ import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionForRightsProjecti
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.NativeQuery;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -50,9 +51,9 @@ public interface DatasetAcquisitionRepository extends PagingAndSortingRepository
 
     DatasetAcquisition findBySourceIdAndExaminationStudy_Id(Long sourceId, Long studyId);
 
-    @Query(value = "SELECT id FROM dataset_acquisition acq "
-            + "WHERE acq.examination_id = ?1", nativeQuery = true)
-    List<Long> findIdsByExaminationId(Long examinationId);
+    @NativeQuery("SELECT id FROM dataset_acquisition acq "
+            + "WHERE acq.examination_id = :examinationId")
+    List<Long> findIdsByExaminationId(@Param("examinationId") Long examinationId);
 
     @Query("""
         SELECT DISTINCT
@@ -77,7 +78,7 @@ public interface DatasetAcquisitionRepository extends PagingAndSortingRepository
     @Query("SELECT da FROM DatasetAcquisition da "
             + "LEFT JOIN FETCH da.datasets "
             + "WHERE da.id = :id")
-    Optional<DatasetAcquisition> findByIdWithDatasets(Long id);
+    Optional<DatasetAcquisition> findByIdWithDatasets(@Param("id") Long id);
 
     @Query("SELECT da FROM DatasetAcquisition da WHERE da.datasets IS EMPTY")
     List<DatasetAcquisition> findEmpty();
@@ -94,21 +95,21 @@ public interface DatasetAcquisitionRepository extends PagingAndSortingRepository
      */
     List<DatasetAcquisition> findByIdGreaterThan(Long idThreshold);
 
-    @Query(value = "SELECT id FROM dataset_acquisition acq "
-            + "WHERE acq.examination_id = ?1 "
-            + "AND acq.id IN (?2)", nativeQuery = true)
-    List<Long> findIdsFromIdsListWithExamId(Long examId, List<Long> acqIdList);
+    @NativeQuery("SELECT id FROM dataset_acquisition acq "
+            + "WHERE acq.examination_id = :examId "
+            + "AND acq.id IN (:acqIdList)")
+    List<Long> findIdsFromIdsListWithExamId(@Param("examId") Long examId, @Param("acqIdList") List<Long> acqIdList);
 
     @Query("SELECT da FROM DatasetAcquisition da "
             + "LEFT JOIN FETCH da.datasets "
             + "WHERE da.examination.id = :examinationId "
             + "ORDER BY COALESCE(da.sortingIndex, 0)")
-    List<DatasetAcquisition> findByExaminationIdWithDatasets(Long examinationId);
+    List<DatasetAcquisition> findByExaminationIdWithDatasets(@Param("examinationId") Long examinationId);
 
     @Query("SELECT da FROM DatasetAcquisition da "
             + "LEFT JOIN FETCH da.datasets "
             + "WHERE da.id IN :ids")
-    List<DatasetAcquisition> findByIdsWithDatasets(List<Long> ids);
+    List<DatasetAcquisition> findByIdsWithDatasets(@Param("ids") List<Long> ids);
 
     @Transactional(readOnly = true)
     default List<DatasetAcquisition> findByIdsWithDatasetsAndCopies(List<Long> ids) {
@@ -151,4 +152,5 @@ public interface DatasetAcquisitionRepository extends PagingAndSortingRepository
         );
         return acquisitions;
     }
+
 }
