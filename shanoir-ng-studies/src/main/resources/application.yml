@@ -89,8 +89,9 @@ spring:
   servlet:
     multipart:
       enabled: true
-      max-file-size: 6000MB
-      max-request-size: 6000MB
+      # protocol files (500 MB at most) and DUA (50 MB at most)
+      max-file-size: 500MB
+      max-request-size: 500MB
   security:
     oauth2:
       resourceserver:
