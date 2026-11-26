@@ -20,6 +20,8 @@ public class StudyCenter {
 
     private Study study;
 
+    private String subjectNamePrefix;
+
     public Center getCenter() {
         return center;
     }
@@ -34,6 +36,14 @@ public class StudyCenter {
 
     public void setStudy(Study study) {
         this.study = study;
+    }
+
+    public String getSubjectNamePrefix() {
+        return subjectNamePrefix;
+    }
+
+    public void setSubjectNamePrefix(String subjectNamePrefix) {
+        this.subjectNamePrefix = subjectNamePrefix;
     }
 
 }
