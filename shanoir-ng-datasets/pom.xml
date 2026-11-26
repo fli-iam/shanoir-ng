@@ -265,12 +265,6 @@
                         <goals>
                             <goal>process-aot</goal>
                         </goals>
-                        <configuration>
-                            <systemPropertyVariables>
-                                <SHANOIR_KEYCLOAK_URL>${SHANOIR_KEYCLOAK_URL}</SHANOIR_KEYCLOAK_URL>
-                                <SHANOIR_KEYCLOAK_INTERNAL_URL>${SHANOIR_KEYCLOAK_INTERNAL_URL}</SHANOIR_KEYCLOAK_INTERNAL_URL>
-                            </systemPropertyVariables>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
