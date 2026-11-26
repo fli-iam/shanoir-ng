@@ -14,23 +14,25 @@
 
 package org.shanoir.ng.dicom.web;
 
+import java.text.ParseException;
+import java.time.LocalDate;
+import java.util.ArrayList;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.shanoir.ng.dicom.web.dto.StudyDTO;
 import org.shanoir.ng.dicom.web.dto.mapper.ExaminationToStudyDTOMapper;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.model.Subject;
+import org.shanoir.ng.study.rights.ampq.RabbitMqStudyUserService;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.ActiveProfiles;
-
-import java.text.ParseException;
-import java.time.LocalDate;
-import java.util.ArrayList;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@SpringBootTest
 @ActiveProfiles("test")
 public class ExaminationToStudyDTOMapperTest {
 
@@ -44,6 +46,12 @@ public class ExaminationToStudyDTOMapperTest {
 
     @Autowired
     private ExaminationToStudyDTOMapper examinationToStudyDTOMapper;
+
+    @MockitoBean
+    private ConnectionFactory connectionFactory;
+
+    @MockitoBean
+    private RabbitMqStudyUserService rabbitMqStudyUserService;
 
     @Test
     public void examinationToStudyDTO() throws ParseException {

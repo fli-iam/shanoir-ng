@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.importer.dto;
 
+import java.io.Serial;
 import java.util.List;
 
 import org.shanoir.ng.dataset.modality.EegDatasetDTO;
@@ -27,6 +28,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class EegImportJob extends ImportJob {
 
+    @Serial
     private static final long serialVersionUID = 2425683448060201704L;
 
     /** List of associated datasets. */

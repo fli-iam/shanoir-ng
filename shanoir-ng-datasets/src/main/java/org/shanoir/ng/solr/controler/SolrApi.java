@@ -34,9 +34,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.solr.core.query.result.SolrResultPage;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.io.IOException;
 import java.util.List;
@@ -56,7 +56,7 @@ public interface SolrApi {
         @ApiResponse(responseCode = "403", description = "forbidden"),
         @ApiResponse(responseCode = "422", description = "bad parameters"),
         @ApiResponse(responseCode = "500", description = "unexpected error") })
-    @RequestMapping(value = "/index", produces = { "application/json" }, method = RequestMethod.POST)
+    @PostMapping(value = "/index", produces = { "application/json" })
     @PreAuthorize("hasRole('ADMIN')")
     ResponseEntity<Void> indexAll() throws RestServiceException, SolrServerException, IOException;
 
@@ -66,8 +66,8 @@ public interface SolrApi {
         @ApiResponse(responseCode = "401", description = "unauthorized"),
         @ApiResponse(responseCode = "403", description = "forbidden"),
         @ApiResponse(responseCode = "500", description = "unexpected error") })
-    @RequestMapping(value = "", produces = { "application/json" }, consumes = {
-            "application/json" }, method = RequestMethod.POST)
+    @PostMapping(value = "", produces = { "application/json" }, consumes = {
+            "application/json" })
     ResponseEntity<SolrResultPage<ShanoirSolrDocument>> facetSearch(@Parameter(description = "facets", required = true) @Valid @RequestBody ShanoirSolrQuery query, Pageable pageable) throws RestServiceException;
 
     @Operation(summary = "", description = "Returns solr documents matching the given dataset ids")
@@ -76,7 +76,7 @@ public interface SolrApi {
         @ApiResponse(responseCode = "401", description = "unauthorized"),
         @ApiResponse(responseCode = "403", description = "forbidden"),
         @ApiResponse(responseCode = "500", description = "unexpected error") })
-    @RequestMapping(value = "/byIds", consumes = {"application/json" }, produces = { "application/json" }, method = RequestMethod.POST)
+    @PostMapping(value = "/byIds", consumes = {"application/json" }, produces = { "application/json" })
     ResponseEntity<Page<ShanoirSolrDocument>> findByIdIn(@Parameter(description = "dataset ids", required = true) @Valid @RequestBody List<Long> datasetIds, Pageable pageable) throws RestServiceException;
 
 }

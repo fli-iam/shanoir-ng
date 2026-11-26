@@ -34,6 +34,9 @@ import java.util.Set;
 
 import org.apache.tomcat.util.json.ParseException;
 import org.json.JSONException;
+import tools.jackson.core.exc.StreamReadException;
+import tools.jackson.databind.DatabindException;
+
 import org.shanoir.ng.dataset.modality.BidsDataType;
 import org.shanoir.ng.dataset.modality.BidsDataset;
 import org.shanoir.ng.dataset.model.CardinalityOfRelatedSubjects;
@@ -65,9 +68,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @Service
 public class BidsImporterService {
@@ -96,8 +98,8 @@ public class BidsImporterService {
      * Create BIDS dataset.
      * @param importJobStr the import job as string
      * @throws IOException
-     * @throws JsonMappingException
-     * @throws JsonParseException
+     * @throws DatabindException
+     * @throws StreamReadException
      */
     @RabbitListener(queues = RabbitMQConfiguration.IMPORTER_BIDS_DATASET_QUEUE, containerFactory = "multipleConsumersFactory")
     @RabbitHandler
@@ -299,7 +301,7 @@ public class BidsImporterService {
                 // Check equipment in json file
                 //JSONParser json = new JSONParser(new FileReader(importedFile));
                 // LinkedHashMap jsonObject = (LinkedHashMap) json.parse();
-                ObjectMapper jsonMapper = new ObjectMapper();
+                ObjectMapper jsonMapper = new JsonMapper();
                 // Parse JSON file into a LinkedHashMap
                 LinkedHashMap<String, Object> jsonObject = jsonMapper.readValue(importedFile, LinkedHashMap.class);
                 if (jsonObject.get("DeviceSerialNumber") != null) {

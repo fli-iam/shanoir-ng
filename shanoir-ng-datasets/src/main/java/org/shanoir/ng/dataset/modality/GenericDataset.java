@@ -14,6 +14,9 @@
 
 package org.shanoir.ng.dataset.modality;
 
+import java.io.Serial;
+
+
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetType;
 
@@ -25,6 +28,7 @@ public class GenericDataset extends Dataset {
     /**
      * Serial version UUID
      */
+    @Serial
     private static final long serialVersionUID = -5363216669486303309L;
 
     public GenericDataset() {

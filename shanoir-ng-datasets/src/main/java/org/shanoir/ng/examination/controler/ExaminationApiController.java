@@ -56,13 +56,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import tools.jackson.core.JacksonException;
 
 @Controller
 public class ExaminationApiController implements ExaminationApi {
@@ -95,7 +95,6 @@ public class ExaminationApiController implements ExaminationApi {
 
     private final HttpServletRequest request;
 
-    @org.springframework.beans.factory.annotation.Autowired
     public ExaminationApiController(final HttpServletRequest request) {
         this.request = request;
     }
@@ -223,7 +222,7 @@ public class ExaminationApiController implements ExaminationApi {
             rabbitTemplate.convertAndSend(RabbitMQConfiguration.RELOAD_BIDS, objectMapper.writeValueAsString(examination.getStudyId()));
             importerMailService.sendExtraDataEmail(updatedExamination, null, filesToStore.stream().map(MultipartFile::getOriginalFilename).toList(), KeycloakUtil.getTokenUserId());
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } catch (JsonProcessingException | EntityNotFoundException e) {
+        } catch (JacksonException | EntityNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (ShanoirException e) {
             throw new RestServiceException(new ErrorModel(e.getErrorCode(), e.getMessage()));

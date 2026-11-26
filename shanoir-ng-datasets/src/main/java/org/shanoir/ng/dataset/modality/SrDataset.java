@@ -16,7 +16,10 @@ package org.shanoir.ng.dataset.modality;
 
 import jakarta.persistence.Entity;
 
+
 import org.shanoir.ng.dataset.model.Dataset;
+
+import java.io.Serial;
 import org.shanoir.ng.dataset.model.DatasetType;
 
 /**
@@ -31,6 +34,7 @@ public class SrDataset extends Dataset {
     /**
      * UID
      */
+    @Serial
     private static final long serialVersionUID = -2192498115566764115L;
 
     public SrDataset() { }

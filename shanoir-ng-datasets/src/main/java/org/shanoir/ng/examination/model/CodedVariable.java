@@ -17,6 +17,7 @@ package org.shanoir.ng.examination.model;
 import jakarta.persistence.*;
 import org.shanoir.ng.score.ScaleItem;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,6 +32,7 @@ import java.util.List;
 public class CodedVariable extends InstrumentVariable {
 
     /** The Constant serialVersionUID. */
+    @Serial
     private static final long serialVersionUID = -28168171333546302L;
 
     /** Minimum value. */

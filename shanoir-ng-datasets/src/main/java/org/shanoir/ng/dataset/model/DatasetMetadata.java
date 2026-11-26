@@ -14,6 +14,9 @@
 
 package org.shanoir.ng.dataset.model;
 
+import java.io.Serial;
+
+
 import org.shanoir.ng.dataset.modality.ProcessedDatasetType;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 
@@ -31,6 +34,7 @@ public class DatasetMetadata extends AbstractEntity {
     /**
      * UID
      */
+    @Serial
     private static final long serialVersionUID = -8189893217666417587L;
 
     /**

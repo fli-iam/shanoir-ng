@@ -16,7 +16,7 @@ package org.shanoir.ng.studycard.model.field;
 
 import org.shanoir.ng.shared.exception.CheckedIllegalClassException;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 @JsonDeserialize(using = MetadataFieldDeserializer.class)
 public interface MetadataFieldInterface<T> {

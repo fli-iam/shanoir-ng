@@ -22,6 +22,8 @@ import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.mockito.BDDMockito.given;
+
+import org.shanoir.ng.configuration.RabbitMQDatasetsService;
 import org.shanoir.ng.dataset.dto.DatasetForRights;
 import org.shanoir.ng.dataset.dto.DatasetForRightsProjection;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
@@ -34,6 +36,7 @@ import org.shanoir.ng.vip.execution.controler.ExecutionApi;
 import org.shanoir.ng.vip.execution.dto.ExecutionCandidateDTO;
 import org.shanoir.ng.vip.execution.service.ExecutionServiceImpl;
 import org.shanoir.ng.vip.shared.dto.DatasetParameterDTO;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -51,7 +54,6 @@ public class ExecutionApiControllerTest {
 
     private static final String REQUEST_PATH = "/vip/execution";
 
-
     @MockitoBean
     private DatasetRepository datasetRepository;
 
@@ -61,6 +63,11 @@ public class ExecutionApiControllerTest {
     @MockitoBean
     private ExecutionServiceImpl executionService;
 
+    @MockitoBean
+    private ConnectionFactory connectionFactory;
+
+    @MockitoBean
+    private RabbitMQDatasetsService rabbitMQDatasetsService;
 
     @BeforeEach
     public void setup() {
