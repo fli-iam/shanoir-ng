@@ -493,24 +493,22 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
                 });
             }
         });
-
-
     }
 
     private getCommonColumnDefs() {
         const columnDefs: ColumnDefinition[] = [
-            {headerName: "Id", field: "id", type: "number", width: "60px", defaultSortCol: true, defaultAsc: false},
-            {headerName: "Admin", type: "boolean", cellRenderer: row => this.hasAdminRight(row.data.studyId), awesome: "fa-solid fa-shield", color: "goldenrod", disableSorting: true},
-            {headerName: "Processed", type: "boolean", cellRenderer: row => row.data.processed, awesome: "fa-solid fa-gears", color: "dimgrey", disableSorting: true, tip: item => { return item.processed ? "processed dataset" : "" }},
+            {headerName: "Id", field: "id", type: "number", width: "50px", defaultSortCol: true, defaultAsc: false},
+            {headerName: "Admin", type: "boolean", hidden: true, cellRenderer: row => this.hasAdminRight(row.data.studyId), awesome: "fa-solid fa-shield", color: "goldenrod", disableSorting: true},
+            {headerName: "Processed", type: "boolean", hidden: true, cellRenderer: row => row.data.processed, awesome: "fa-solid fa-gears", color: "dimgrey", disableSorting: true, tip: item => { return item.processed ? "processed dataset" : "" }},
             {headerName: "Name", field: "datasetName"},
-            {headerName: "Tags", field: "tags", cellRenderer: (params: any) => {
+            {headerName: "Tags", field: "tags", hidden: true, cellRenderer: (params: any) => {
                     return params?.data?.tags ? params.data.tags.join(', ') : '';
                 }},
-            {headerName: "Quality tag", field: "qualityTag"},
-            {headerName: "Modality", field: "datasetType"},
-            {headerName: "Nature", field: "datasetNature"},
+            {headerName: "Quality tag", hidden: true, field: "qualityTag"},
+            {headerName: "Modality", field: "datasetType", width: "100px"},
+            {headerName: "Nature", hidden: true, field: "datasetNature"},
             {headerName: "Series date", field: "datasetCreationDate", type: "date", hidden: true},
-            {headerName: "Sorting index", field: "sortingIndex"},
+            {headerName: "Sorting index", field: "sortingIndex", width: "40px", align: "center"},
             {headerName: "Study", field: "studyName",
                 route: function(item) {
                     return item.studyId ? '/study/details/' + item.studyId : null;
@@ -532,13 +530,13 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
                 }
             },
             {headerName: "Exam Date", field:"examinationDate", type: "date"},
-            {headerName: "Data Reuse Agreement", type: "boolean", cellRenderer: row => row.data.dataReuseAgreement, awesome: "fa-solid fa-check", color: "dimgrey", disableSorting: true, tip: item => { return item.dataReuseAgreement ? "data reuse agreement" : "" }},
+            {headerName: "D.R.A", headerTip: "Data Reuse Agreement", type: "boolean", width: "30px", cellRenderer: row => row.data.dataReuseAgreement, awesome: "fa-solid fa-check", color: "dimgrey", disableSorting: true, tip: item => { return item.dataReuseAgreement ? "data reuse agreement" : "" }},
             {headerName: "Import Date", field:"importDate", type: "date"},
-            {headerName: "Imported by", field:"username"},
-            {headerName: "Slice Thickness", field: "sliceThickness"},
-            {headerName: "Pixel", field: "pixelBandwidth"},
-            {headerName: "Mag. strength", field: "magneticFieldStrength"},
-            {headerName: "View DICOM", type: "button", awesome: "fa-solid fa-up-right-from-square",
+            {headerName: "Imported by", field:"username", width: "70px"},
+            {headerName: "Slice Thickness", hidden: true, field: "sliceThickness"},
+            {headerName: "Pixel", hidden: true, field: "pixelBandwidth"},
+            {headerName: "Mag. strength", hidden: true, field: "magneticFieldStrength"},
+            {headerName: "Viewer", type: "button", width: "40px", awesome: "fa-solid fa-up-right-from-square",
               condition: item => (this.hasDownloadRight(item.studyId) && !item.processed && (item.datasetType.includes("MR") || item.datasetType.includes("Pet") || item.datasetType.includes("Ct"))),
               action: item => {
                 window.open(environment.ohifUrl + '/viewer?StudyInstanceUIDs=1.4.9.12.34.1.8527.' + item.examinationId, '_blank');

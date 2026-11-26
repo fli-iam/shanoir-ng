@@ -36,6 +36,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     [class.multi]="editMode && col.multi"
                     [attr.title]="col.tip != undefined ? col.tip(item) : vars.render.text ? vars.render.text : ''"
                     [style.color]="vars.render?.color"
+                    [style.text-align]="col.align"
                     [style.background-color]="vars.cellGraphics?.tag ? null : vars.cellGraphics?.backgroundColor"
                     #refTd>
                     @if (col.type != 'button') {
@@ -214,6 +215,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             }
             @if (!col.hideHeaderName) {
                 <span class="col-title">{{ col.headerName }}</span>
+            }
+            @if (col.headerTip) {
+                <tool-tip class="col-tip" (click)="$event.stopPropagation()">{{ col.headerTip }}</tool-tip>
             }
             @if (i < columnDefs.length - 1) {
                 <div class="resizer" (mousedown)="startDrag(i, refTh, $event, columnDefs)" (mouseup)="stopDrag()"></div>

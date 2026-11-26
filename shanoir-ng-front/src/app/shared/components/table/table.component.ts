@@ -19,6 +19,7 @@ import { NgTemplateOutlet } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 import { VarDirective } from '@app/utils/ng-var.directive';
+import {TooltipComponent} from "@app/shared/components/tooltip/tooltip.component";
 
 import { Task, TaskStatus } from '../../../async-tasks/task.model';
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
@@ -43,7 +44,7 @@ import { PagerComponent } from './pager/pager.component';
     templateUrl: 'table.component.html',
     styleUrls: ['table.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [VarDirective, RouterLink, RouterLinkActive, CheckboxComponent, FormsModule, MultiSelectComponent, LoadingBarComponent, TableSearchComponent, NgTemplateOutlet, PagerComponent]
+    imports: [VarDirective, RouterLink, RouterLinkActive, CheckboxComponent, FormsModule, MultiSelectComponent, LoadingBarComponent, TableSearchComponent, NgTemplateOutlet, PagerComponent, TooltipComponent]
 })
 export class TableComponent implements OnInit, OnChanges, OnDestroy {
     @Input() getPage: (pageable: Pageable, forceRefresh?: boolean, eager?: boolean) => Promise<Page<any>> | Page<any>;
