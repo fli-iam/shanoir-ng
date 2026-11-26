@@ -67,8 +67,8 @@ public class BidsDeserializerTest {
         BidsFile readme;
         BidsFolder subj;
         BidsElement firstElement = studyElement.getElements().get(0);
-        if (firstElement instanceof BidsFile) {
-            readme = (BidsFile) firstElement;
+        if (firstElement instanceof BidsFile file) {
+            readme = file;
             subj = (BidsFolder) studyElement.getElements().get(1);
         } else {
             subj = (BidsFolder) firstElement;

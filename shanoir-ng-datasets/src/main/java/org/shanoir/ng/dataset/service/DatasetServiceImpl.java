@@ -24,12 +24,14 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 import jakarta.mail.MessagingException;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.hibernate.Hibernate;
+import tools.jackson.core.JacksonException;
+
 import org.shanoir.ng.dataset.dto.DatasetDownloadData;
 import org.shanoir.ng.dataset.dto.DatasetLight;
 import org.shanoir.ng.dataset.dto.DatasetStudyCenter;
@@ -87,8 +89,9 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
+
 import org.springframework.web.util.UriUtils;
 
 /**
@@ -333,7 +336,7 @@ public class DatasetServiceImpl implements DatasetService {
             }
             shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_DATASET_EVENT, ds.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, studyId));
             rabbitTemplate.convertAndSend(RabbitMQConfiguration.RELOAD_BIDS, objectMapper.writeValueAsString(studyId));
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new RuntimeException("Error while updating a dataset", e);
         }
         return ds;
@@ -357,8 +360,7 @@ public class DatasetServiceImpl implements DatasetService {
             dataset.getUpdatedMetadata().setId(null);
         }
         datasetDb.setUpdatedMetadata(dataset.getUpdatedMetadata());
-        if (dataset instanceof MrDataset) {
-            MrDataset mrDataset = (MrDataset) dataset;
+        if (dataset instanceof MrDataset mrDataset) {
             ((MrDataset) datasetDb).setUpdatedMrMetadata(mrDataset.getUpdatedMrMetadata());
         }
         return datasetDb;
@@ -565,7 +567,7 @@ public class DatasetServiceImpl implements DatasetService {
         try {
             LOG.error(objectMapper.writeValueAsString(dataset));
             return null;
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new RuntimeException(e);
         }
     }
@@ -648,7 +650,7 @@ public class DatasetServiceImpl implements DatasetService {
     }
 
     public Map<String, String> extractDicomMetadataValues(String metadataJson, List<String> metadataKeys) {
-        ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = new JsonMapper();
         JsonNode metadatas = null;
         Map<String, String> results = new HashMap<>();
 
@@ -658,8 +660,8 @@ public class DatasetServiceImpl implements DatasetService {
         }
 
         for (String metadataKey : metadataKeys) {
-            if (Objects.nonNull(metadatas) && metadatas.has(metadataKey) && metadatas.get(metadataKey).has("Value") && metadatas.get(metadataKey).get("Value").get(0).asText() != null) {
-                results.put(metadataKey, metadatas.get(metadataKey).get("Value").get(0).asText());
+            if (Objects.nonNull(metadatas) && metadatas.has(metadataKey) && metadatas.get(metadataKey).has("Value") && metadatas.get(metadataKey).get("Value").get(0).asString() != null) {
+                results.put(metadataKey, metadatas.get(metadataKey).get("Value").get(0).asString());
             }
         }
         return results;
@@ -719,7 +721,7 @@ public class DatasetServiceImpl implements DatasetService {
     protected void fillMetadataFile(File metadataFile, List<Long> datasetIds, List<String> metadataKeys) throws Exception {
         LOG.info("Filling metadata file.");
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(metadataFile, true))) {
-            ObjectMapper mapper = new ObjectMapper();
+            ObjectMapper mapper = new JsonMapper();
 
             for (Long datasetId : datasetIds) {
                 String metadataLine = shapeMetadataLinesForOneDicom(metadataKeys, datasetId, mapper);
@@ -746,7 +748,7 @@ public class DatasetServiceImpl implements DatasetService {
         for (String metadataKey : metadataKeys) {
             metadataLine += ";";
             if (Objects.nonNull(metadatas) && metadatas.has(metadataKey) && metadatas.get(metadataKey).has("Value")) {
-                metadataLine += metadatas.get(metadataKey).get("Value").get(0).asText();
+                metadataLine += metadatas.get(metadataKey).get("Value").get(0).asString();
             }
         }
         return metadataLine;

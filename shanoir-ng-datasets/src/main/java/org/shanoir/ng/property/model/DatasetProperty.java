@@ -17,13 +17,18 @@ package org.shanoir.ng.property.model;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+
+
 import org.shanoir.ng.dataset.model.Dataset;
+
+import java.io.Serial;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 
 @Entity
 public class DatasetProperty extends AbstractEntity {
 
+    @Serial
     private static final long serialVersionUID = 7602484872590225134L;
 
     @ManyToOne

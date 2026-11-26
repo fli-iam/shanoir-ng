@@ -15,7 +15,11 @@
 package org.shanoir.ng.dataset.modality;
 
 import jakarta.persistence.Entity;
+
+
 import org.shanoir.ng.shared.core.model.AbstractEntity;
+
+import java.io.Serial;
 
 /**
  * MR dataset metadata that could be updated by study card.
@@ -29,6 +33,7 @@ public class MrDatasetMetadata extends AbstractEntity {
     /**
      * UID
      */
+    @Serial
     private static final long serialVersionUID = 2523777086183952849L;
 
     /** MR Dataset Nature. */

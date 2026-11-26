@@ -20,7 +20,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
 
 import java.io.File;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -82,7 +81,7 @@ class NeurobagelImagingServiceTest {
         assertTrue(fileName.matches("study-7-imaging-[0-9a-f-]{36}\\.tsv"), fileName);
         Path file = bidsDataDir.toPath().resolve(NeurobagelImagingService.FOLDER).resolve(fileName);
         assertEquals(HEADER + "sub-10\tses-100\tpet\t/shanoir/examination/100/dataset/1000\n",
-                Files.readString(file, StandardCharsets.UTF_8));
+                Files.readString(file));
     }
 
     @Test

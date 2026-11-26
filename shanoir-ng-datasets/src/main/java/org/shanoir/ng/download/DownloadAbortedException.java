@@ -14,11 +14,14 @@
 
 package org.shanoir.ng.download;
 
+import java.io.Serial;
+
 /**
  * Thrown when a streamed download must fail visibly rather than end with an incomplete zip.
  */
 public class DownloadAbortedException extends RuntimeException {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     public DownloadAbortedException(String message) {

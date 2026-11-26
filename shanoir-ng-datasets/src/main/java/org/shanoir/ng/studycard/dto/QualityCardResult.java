@@ -24,8 +24,10 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.shared.quality.QualityTag;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
+
+import tools.jackson.core.JacksonException;
 
 /**
  * This class contains the result of an application of a quality card
@@ -123,11 +125,12 @@ public class QualityCardResult extends CopyOnWriteArrayList<QualityCardResultEnt
 
     @Override
     public String toString() {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.findAndRegisterModules();
+        ObjectMapper objectMapper = JsonMapper.builder()
+                .findAndAddModules()
+                .build();
         try {
             return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(this);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             return "json error";
         }
     }

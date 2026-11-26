@@ -28,10 +28,7 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.Spy;
 import org.shanoir.ng.dataset.modality.EegDataset;
 import org.shanoir.ng.dataset.modality.EegDatasetDTO;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
@@ -48,29 +45,38 @@ import org.shanoir.ng.importer.service.ImporterMailService;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.model.Subject;
+import org.shanoir.ng.study.rights.ampq.RabbitMqStudyUserService;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest
 @ActiveProfiles("test")
 public class EegImporterServiceTest {
 
-    @InjectMocks
-    @Spy
+    @Autowired
     private EegImporterService service = new EegImporterService();
 
-    @Mock
+    @MockitoBean
     private ImporterMailService mailService;
 
-    @Mock
+    @MockitoBean
     private ExaminationService examinationService;
 
-    @Mock
+    @MockitoBean
     private DatasetAcquisitionService datasetAcquisitionService;
 
-    @Mock
+    @MockitoBean
     private ShanoirEventService taskService;
+
+    @MockitoBean
+    private ConnectionFactory connectionFactory;
+
+    @MockitoBean
+    private RabbitMqStudyUserService rabbitMqStudyUserService;
 
     private Examination exam;
 

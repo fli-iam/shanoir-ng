@@ -39,12 +39,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.TextNode;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 import jakarta.annotation.PostConstruct;
+import tools.jackson.databind.node.StringNode;
+
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -147,7 +148,7 @@ public class StudyInstanceUIDAndSubjectNameHandler {
                 ArrayNode retrieveURLArray = (ArrayNode) retrieveURLNode.path(VALUE);
                 for (int i = 0; i < retrieveURLArray.size(); i++) {
                     JsonNode arrayElement = retrieveURLArray.get(i);
-                    String retrieveURL = arrayElement.asText();
+                    String retrieveURL = arrayElement.asString();
                     if (studyLevel) { // study level
                         retrieveURL = retrieveURL.replaceFirst(RETRIEVE_URL_STUDY_LEVEL, STUDIES + examinationUID);
                         retrieveURLArray.remove(i);
@@ -202,7 +203,7 @@ public class StudyInstanceUIDAndSubjectNameHandler {
             replaceInValues(root.get(DICOM_TAG_REFERENCED_SOP_INSTANCE_UID), studyInstanceUID, examinationUID);
             replaceInValues(root.get(DICOM_TAG_RETRIEVE_URL), studyInstanceUID, examinationUID);
             for (JsonNode child : root) {
-                if (child.isContainerNode()) {
+                if (child.isContainer()) {
                     replaceStudyInstanceUID(child, studyInstanceUID, examinationUID);
                 }
             }
@@ -216,9 +217,9 @@ public class StudyInstanceUIDAndSubjectNameHandler {
         ArrayNode values = (ArrayNode) tagNode.path(VALUE);
         for (int i = 0; i < values.size(); i++) {
             JsonNode value = values.get(i);
-            if (value.isTextual() && value.asText().contains(studyInstanceUID)) {
-                String replaced = value.asText().replace(studyInstanceUID, examinationUID);
-                values.set(i, TextNode.valueOf(replaced));
+            if (value.isString() && value.asString().contains(studyInstanceUID)) {
+                String replaced = value.asString().replace(studyInstanceUID, examinationUID);
+                values.set(i, StringNode.valueOf(replaced));
             }
         }
     }

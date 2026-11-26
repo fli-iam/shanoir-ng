@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.datasetacquisition.model.mr;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,6 +37,7 @@ public class MrProtocolMetadata extends AbstractEntity {
     /**
      * UID
      */
+    @Serial
     private static final long serialVersionUID = -5850582993918561681L;
 
     /**

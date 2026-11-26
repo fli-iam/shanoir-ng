@@ -21,7 +21,11 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import org.hibernate.annotations.GenericGenerator;
+
+
 import org.shanoir.ng.shared.core.model.AbstractEntity;
+
+import java.io.Serial;
 
 
 @Entity
@@ -35,6 +39,7 @@ import org.shanoir.ng.shared.core.model.AbstractEntity;
 public abstract class StudyCardAssignment<T> extends AbstractEntity implements StudyCardAssignmentInterface<T> {
 
     /** UID */
+    @Serial
     private static final long serialVersionUID = 6708188853533591193L;
 
     /** The dataset field to update. */

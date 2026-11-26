@@ -22,6 +22,7 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.eeg.model.Channel;
 import org.shanoir.ng.eeg.model.Event;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,6 +40,7 @@ public class EegDataset extends Dataset {
     /**
      * UID
      */
+    @Serial
     private static final long serialVersionUID = -7618433089837302003L;
 
     @Override

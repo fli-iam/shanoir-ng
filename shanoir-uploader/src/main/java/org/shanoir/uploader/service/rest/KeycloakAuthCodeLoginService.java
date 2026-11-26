@@ -491,8 +491,7 @@ public class KeycloakAuthCodeLoginService {
                 .setSslContext(trustAll).build();
             LOG.info("KeycloakBrowserLoginService: using trust-all SSL context for dev.");
         } else {
-            sslFactory = SSLConnectionSocketFactoryBuilder.create()
-                .setHostnameVerifier(new CustomHostnameVerifier()).build();
+            sslFactory = TlsSocketFactories.withHostnameVerification(null);
         }
 
         HttpClientConnectionManager cm = PoolingHttpClientConnectionManagerBuilder.create()

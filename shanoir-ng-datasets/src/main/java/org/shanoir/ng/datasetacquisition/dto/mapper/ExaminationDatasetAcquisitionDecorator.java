@@ -25,7 +25,7 @@ import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.bids.BidsDatasetAcquisition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Decorator for dataset acquisitions mapper.
@@ -74,8 +74,7 @@ public abstract class ExaminationDatasetAcquisitionDecorator implements Examinat
         final StringBuilder result = new StringBuilder();
         final List<String> datasetNameSet = new ArrayList<>();
         final List<String> datasetCommentSet = new ArrayList<>();
-        if (datasetAcquisition instanceof BidsDatasetAcquisition) {
-            BidsDatasetAcquisition bidsDataAcq = (BidsDatasetAcquisition) datasetAcquisition;
+        if (datasetAcquisition instanceof BidsDatasetAcquisition bidsDataAcq) {
             if (!CollectionUtils.isEmpty(bidsDataAcq.getDatasets())) {
                 datasetNameSet.add(((BidsDataset) bidsDataAcq.getDatasets().get(0)).getBidsDataType());
             }
@@ -83,7 +82,7 @@ public abstract class ExaminationDatasetAcquisitionDecorator implements Examinat
             for (final Dataset dataset : datasetAcquisition.getDatasets()) {
                 if (!DatasetType.MEASUREMENT.equals(dataset.getType())) {
                     final String datasetName = dataset.getName();
-                    if (!StringUtils.isEmpty(datasetName) && !datasetNameSet.contains(datasetName)) {
+                    if (!ObjectUtils.isEmpty(datasetName) && !datasetNameSet.contains(datasetName)) {
                         datasetNameSet.add(datasetName);
                     }
                     String datasetComment = null;
@@ -92,7 +91,7 @@ public abstract class ExaminationDatasetAcquisitionDecorator implements Examinat
                     } else if (dataset.getOriginMetadata() != null && dataset.getOriginMetadata().getComment() != null) {
                         datasetComment = dataset.getOriginMetadata().getComment();
                     }
-                    if (!StringUtils.isEmpty(datasetComment) && !datasetCommentSet.contains(datasetComment)) {
+                    if (!ObjectUtils.isEmpty(datasetComment) && !datasetCommentSet.contains(datasetComment)) {
                         datasetCommentSet.add(datasetComment);
                     }
                 }

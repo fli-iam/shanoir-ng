@@ -21,8 +21,11 @@ import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import java.io.File;
+import java.nio.file.Files;
+import java.util.Collections;
+import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -31,11 +34,11 @@ import org.mockito.Mockito;
 import org.shanoir.ng.dataset.modality.EegDatasetDTO;
 import org.shanoir.ng.datasetacquisition.controler.DatasetAcquisitionApiController;
 import org.shanoir.ng.datasetacquisition.dto.ExaminationDatasetAcquisitionDTO;
+import org.shanoir.ng.datasetacquisition.dto.mapper.DatasetAcquisitionMapper;
 import org.shanoir.ng.datasetacquisition.dto.mapper.DatasetAcquisitionWithDatasetsMapper;
+import org.shanoir.ng.datasetacquisition.dto.mapper.ExaminationDatasetAcquisitionMapper;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.GenericDatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.dto.mapper.DatasetAcquisitionMapper;
-import org.shanoir.ng.datasetacquisition.dto.mapper.ExaminationDatasetAcquisitionMapper;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.examination.model.Examination;
@@ -55,71 +58,73 @@ import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.security.oauth2.server.resource.autoconfigure.servlet.OAuth2ResourceServerAutoConfiguration;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.nio.file.Files;
-import java.util.Collections;
-import java.util.List;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 
-@WebMvcTest(controllers = DatasetAcquisitionApiController.class)
+@WebMvcTest(controllers = DatasetAcquisitionApiController.class,
+        excludeAutoConfiguration = {
+                OAuth2ResourceServerAutoConfiguration.class
+        })
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
 public class DatasetAcquisitionApiControllerTest {
 
-    @MockBean
+    @MockitoBean
     private ImporterService importerService;
 
-    @MockBean
+    @MockitoBean
     private EegImporterService eegImporterService;
 
-    @MockBean
+    @MockitoBean
     private DicomSEGAndSRImporterService dicomSEGAndSRImporterService;
 
-    @MockBean
+    @MockitoBean
     private DicomImporterService dicomImporterService;
 
-    @MockBean
+    @MockitoBean
     private DatasetAcquisitionService datasetAcquisitionService;
 
-    @MockBean
+    @MockitoBean
     private DatasetAcquisitionMapper dsAcqMapper;
 
-    @MockBean
+    @MockitoBean
     private ExaminationDatasetAcquisitionMapper examDsAcqMapper;
 
-    @MockBean
+    @MockitoBean
     private DatasetAcquisitionWithDatasetsMapper dsAcqDsMapper;
 
-    @MockBean
+    @MockitoBean
     private SolrService solrService;
 
-    @MockBean
+    @MockitoBean
     private ShanoirEventService eventService;
 
-    @MockBean
+    @MockitoBean
     private RabbitTemplate rabbitTemplate;
 
-    @MockBean
+    @MockitoBean
     private DatasetAcquisitionRepository datasetAcquisitionRepository;
 
-    @MockBean
+    @MockitoBean
     private StorageService storageService;
 
-    @MockBean
+    @MockitoBean
     private ImporterMailService importerMailService;
 
     @Autowired

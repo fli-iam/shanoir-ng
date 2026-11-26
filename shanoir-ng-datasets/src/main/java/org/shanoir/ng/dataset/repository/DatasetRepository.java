@@ -31,6 +31,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.NativeQuery;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
@@ -38,7 +39,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 public interface DatasetRepository extends PagingAndSortingRepository<Dataset, Long>, JpaRepository<Dataset, Long> {
 
-    @Query(value = """
+    @NativeQuery("""
             SELECT EXISTS (
             SELECT 1
             FROM dataset ds
@@ -49,8 +50,8 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
             WHERE ds.source_id = :datasetParentId
             AND ex.study_id = :studyId
             )
-            """, nativeQuery = true)
-    Integer existsBySourceIdAndStudyId(Long datasetParentId, Long studyId);
+            """)
+    Integer existsBySourceIdAndStudyId(@Param("datasetParentId") Long datasetParentId, @Param("studyId") Long studyId);
 
     Iterable<Dataset> findByDatasetAcquisitionExaminationStudy_IdIn(Iterable<Long> studyIds, Sort sort);
 
@@ -58,21 +59,21 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
 
     int countByDatasetAcquisition_Examination_Study_Id(Long studyId);
 
-    @Query(value = "SELECT ds.id FROM dataset ds "
+    @NativeQuery("SELECT ds.id FROM dataset ds "
             + "INNER JOIN dataset_acquisition acq ON ds.dataset_acquisition_id = acq.id "
             + "INNER JOIN examination ex ON acq.examination_id = ex.id "
-            + "WHERE ex.study_id = ?1", nativeQuery = true)
-    List<Long> findIdsByStudyId(Long studyId);
+            + "WHERE ex.study_id = :studyId")
+    List<Long> findIdsByStudyId(@Param("studyId") Long studyId);
 
-    @Query(value = "SELECT ds.id FROM dataset ds "
-            + "WHERE ds.subject_id IN (?1)", nativeQuery = true)
-    List<Long> findIdsBySubjectIdIn(List<Long> subjectIds);
+    @NativeQuery("SELECT ds.id FROM dataset ds "
+            + "WHERE ds.subject_id IN (:subjectIds)")
+    List<Long> findIdsBySubjectIdIn(@Param("subjectIds") List<Long> subjectIds);
 
     List<Dataset> findByDatasetAcquisitionId(Long acquisitionId);
 
     int countByDatasetAcquisitionId(Long acquisitionId);
 
-    @Query(value = "SELECT ds.id FROM dataset ds "
+    @NativeQuery("SELECT ds.id FROM dataset ds "
             + "LEFT JOIN dataset_acquisition acq ON ds.dataset_acquisition_id = acq.id "
             + "WHERE acq.examination_id = :examId "
             + "UNION "
@@ -81,18 +82,18 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
             + "LEFT JOIN input_of_dataset_processing tempo ON tempo.processing_id = processing.id "
             + "LEFT JOIN dataset inputs ON tempo.dataset_id = inputs.id "
             + "LEFT JOIN dataset_acquisition inputAcq ON inputs.dataset_acquisition_id = inputAcq.id "
-            + "WHERE inputAcq.examination_id = :examId", nativeQuery = true)
-    List<Long> findDatasetAndOutputByExaminationId(Long examId);
+            + "WHERE inputAcq.examination_id = :examId")
+    List<Long> findDatasetAndOutputByExaminationId(@Param("examId") Long examId);
 
     @Query("SELECT expr.datasetExpressionFormat, SUM(expr.size) FROM DatasetExpression expr "
             + "WHERE expr.dataset.datasetAcquisition.examination.study.id = :studyId AND expr.size IS NOT NULL "
             + "GROUP BY expr.datasetExpressionFormat")
-    List<Object[]> findExpressionSizesByStudyIdGroupByFormat(Long studyId);
+    List<Object[]> findExpressionSizesByStudyIdGroupByFormat(@Param("studyId") Long studyId);
 
     @Query("SELECT expr.dataset.datasetAcquisition.examination.study.id, expr.datasetExpressionFormat, SUM(expr.size) FROM DatasetExpression expr "
             + "WHERE expr.dataset.datasetAcquisition.examination.study.id in (:studyIds) AND expr.size IS NOT NULL "
             + "GROUP BY expr.dataset.datasetAcquisition.examination.study.id, expr.datasetExpressionFormat")
-    List<Object[]> findExpressionSizesTotalByStudyIdGroupByFormat(List<Long> studyIds);
+    List<Object[]> findExpressionSizesTotalByStudyIdGroupByFormat(@Param("studyIds") List<Long> studyIds);
 
     @Query("SELECT SUM(expr.size) FROM DatasetExpression expr WHERE expr.size IS NOT NULL")
     Long findDatasetsExpressionSizesSum();
@@ -130,7 +131,7 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
             + "LEFT JOIN Subject sub2 ON sub2.id = ds.subjectId "
             + "LEFT JOIN sub2.study s2 "
             + "WHERE ds.id IN :ids ")
-    List<DatasetLight> findAllLightById(List<Long> ids);
+    List<DatasetLight> findAllLightById(@Param("ids") List<Long> ids);
 
     // select rd.study_id from related_datasets rd where dataset_id = ?1
     @Query("""
@@ -165,16 +166,16 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
             + "LEFT JOIN e.study s "
             + "LEFT JOIN e.subject sub "
             + "WHERE s.id = :studyId")
-    List<DatasetLight> findAllLightByStudyId(Long studyId);
+    List<DatasetLight> findAllLightByStudyId(@Param("studyId") Long studyId);
 
     @Transactional
     @Modifying
-    @Query(value = "CALL computeOverallStatistics()", nativeQuery = true)
+    @NativeQuery("CALL computeOverallStatistics()")
     void computeOverallStatistics();
 
     @Modifying
     @Transactional
-    @Query(value = "UPDATE overall_statistics os SET os.storage_size = :totalStorageVolume WHERE os.stats_date = CURDATE()", nativeQuery = true)
+    @NativeQuery("UPDATE overall_statistics os SET os.storage_size = :totalStorageVolume WHERE os.stats_date = CURDATE()")
     void addTotalStorageVolume(@Param("totalStorageVolume") Long totalStorageVolume);
 
     @Query(value = "SELECT os from OverallStatistics os WHERE os.statsDate = (SELECT MAX(os2.statsDate) FROM OverallStatistics os2)")
@@ -211,29 +212,29 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
             """)
     Set<Long> findRelatedStudyIds(@Param("id") Long id);
 
-    @Query(value = "SELECT ds.id FROM dataset ds "
+    @NativeQuery("SELECT ds.id FROM dataset ds "
             + "JOIN dataset_metadata AS meta ON ds.updated_metadata_id = meta.id "
-            + "WHERE ds.dataset_acquisition_id IN (?1) "
-            + "AND (?2 = '' OR meta.name LIKE ?2)", nativeQuery = true)
-    List<Long> findFilteredIdsByDatasetAcquisitionIdIn(List<Long> acquisitionIds, String filter);
+            + "WHERE ds.dataset_acquisition_id IN (:acquisitionIds) "
+            + "AND (:filter = '' OR meta.name LIKE :filter)")
+    List<Long> findFilteredIdsByDatasetAcquisitionIdIn(@Param("acquisitionIds") List<Long> acquisitionIds, @Param("filter") String filter);
 
-    @Query(value = "SELECT ds.id FROM dataset ds "
+    @NativeQuery("SELECT ds.id FROM dataset ds "
             + "JOIN dataset_metadata AS meta ON ds.updated_metadata_id = meta.id "
-            + "WHERE ds.dataset_acquisition_id = ?1 "
-            + "AND (?2 = '' OR meta.name LIKE ?2)", nativeQuery = true)
-    List<Long> findFilteredIdsByDatasetAcquisitionId(Long acquisitionId, String filter);
+            + "WHERE ds.dataset_acquisition_id = :acquisitionId "
+            + "AND (:filter = '' OR meta.name LIKE :filter)")
+    List<Long> findFilteredIdsByDatasetAcquisitionId(@Param("acquisitionId") Long acquisitionId, @Param("filter") String filter);
 
-    @Query(value = "SELECT dataset.id FROM dataset "
+    @NativeQuery("SELECT dataset.id FROM dataset "
             + "JOIN dataset_acquisition acq ON acq.id = dataset.dataset_acquisition_id "
-            + "WHERE acq.examination_id = ?1", nativeQuery = true)
-    List<Long> findIdsByExaminationId(Long examinationId);
+            + "WHERE acq.examination_id = :examinationId")
+    List<Long> findIdsByExaminationId(@Param("examinationId") Long examinationId);
 
     @Query("SELECT DISTINCT de.dataset.id FROM DatasetExpression de WHERE de.dataset.id IN :ids")
-    Set<Long> findDatasetIdsHavingExpressions(List<Long> ids);
+    Set<Long> findDatasetIdsHavingExpressions(@Param("ids") List<Long> ids);
 
     @Query("SELECT dataset FROM Dataset dataset "
             + "WHERE dataset.datasetProcessing.id in :idList")
-    List<Dataset> findByProcessingIdIn(List<Long> idList);
+    List<Dataset> findByProcessingIdIn(@Param("idList") List<Long> idList);
 
     @Query("SELECT ds FROM DatasetProcessing dp "
             + "JOIN dp.inputDatasets ds "
@@ -244,13 +245,13 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
             + "JOIN FETCH dataset.datasetProcessing AS dp "
             + "JOIN FETCH dp.inputDatasets "
             + "WHERE dataset.id = :id")
-    Dataset findByIdWithProcessingAncestors(Long id);
+    Dataset findByIdWithProcessingAncestors(@Param("id") Long id);
 
     @Query("SELECT dataset FROM Dataset dataset "
             + "JOIN FETCH dataset.datasetProcessing AS dp "
             + "JOIN FETCH dp.inputDatasets "
             + "WHERE dataset.id in :ids")
-    List<Dataset> findByIdsWithProcessingAncestors(List<Long> ids);
+    List<Dataset> findByIdsWithProcessingAncestors(@Param("ids") List<Long> ids);
 
     @Query("SELECT dataset FROM Dataset dataset "
             + "LEFT JOIN FETCH dataset.relatedStudies "
@@ -258,23 +259,24 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
             + "LEFT JOIN FETCH dataset.datasetAcquisition AS acq "
             + "LEFT JOIN FETCH acq.examination "
             + "WHERE dataset.id = :id")
-    Dataset findByIdWithExaminationRelationsAndRelatedStudies(Long id);
+    Dataset findByIdWithExaminationRelationsAndRelatedStudies(@Param("id") Long id);
 
     @Query("SELECT dataset FROM Dataset dataset "
             + "LEFT JOIN FETCH dataset.datasetProcessing "
             + "WHERE dataset.id = :id")
-    Optional<Dataset> findByIdWithDatasetProcessing(Long id);
+    Optional<Dataset> findByIdWithDatasetProcessing(@Param("id") Long id);
 
+    // NOTE: the name says "ById" but the query filters on subjectId; see remarks
     @Query("SELECT dataset FROM Dataset dataset "
             + "LEFT JOIN FETCH dataset.tags "
             + "WHERE dataset.subjectId = :subjectId")
-    Dataset findByIdWithTags(Long id);
+    Dataset findByIdWithTags(@Param("subjectId") Long subjectId);
 
     boolean existsBySourceId(Long sourceId);
 
     @Query("SELECT dataset FROM Dataset dataset "
             + "WHERE dataset.subjectId = :subjectId")
-    List<Dataset> findBySubjectId(Long subjectId);
+    List<Dataset> findBySubjectId(@Param("subjectId") Long subjectId);
 
     @Query("SELECT dataset FROM Dataset dataset "
             + "LEFT JOIN FETCH dataset.datasetProcessing AS dp "
@@ -284,7 +286,7 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
             + "LEFT JOIN FETCH dataset.originMetadata "
             + "LEFT JOIN FETCH dataset.updatedMetadata "
             + "WHERE dataset.id = :id")
-    Optional<Dataset> findByIdWithProcessingAncestorsAndExaminationAndMetadata(Long id);
+    Optional<Dataset> findByIdWithProcessingAncestorsAndExaminationAndMetadata(@Param("id") Long id);
 
     @Query("SELECT dataset FROM Dataset dataset "
             + "JOIN FETCH dataset.datasetProcessing AS dp "
@@ -292,7 +294,7 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
             + "JOIN FETCH dataset.datasetAcquisition AS acq "
             + "JOIN FETCH acq.examination "
             + "WHERE dataset.id in :ids")
-    List<Dataset> findByIdsWithProcessingAncestorsAndExamination(List<Long> ids);
+    List<Dataset> findByIdsWithProcessingAncestorsAndExamination(@Param("ids") List<Long> ids);
 
     @Query("SELECT dataset FROM Dataset dataset "
             + "LEFT JOIN FETCH dataset.datasetProcessing AS dp "
@@ -300,7 +302,7 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
             + "LEFT JOIN FETCH dataset.datasetAcquisition AS acq "
             + "LEFT JOIN FETCH acq.examination e "
             + "WHERE acq.id = :acquisitionId")
-    List<Dataset> findByAcquisitionIdWithProcessingAncestorsAndExamination(Long acquisitionId);
+    List<Dataset> findByAcquisitionIdWithProcessingAncestorsAndExamination(@Param("acquisitionId") Long acquisitionId);
 
     @Query("SELECT dataset FROM Dataset dataset "
             + "JOIN FETCH dataset.datasetProcessing AS dp "
@@ -308,7 +310,7 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
             + "JOIN FETCH dataset.datasetAcquisition AS acq "
             + "JOIN FETCH acq.examination e "
             + "WHERE acq.id = :studyCardId")
-    List<Dataset> findByStudyCardIdWithProcessingAncestorsAndExamination(Long studyCardId);
+    List<Dataset> findByStudyCardIdWithProcessingAncestorsAndExamination(@Param("studyCardId") Long studyCardId);
 
     @Query("SELECT dataset FROM Dataset dataset "
             + "JOIN FETCH dataset.datasetProcessing AS dp "
@@ -317,7 +319,7 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
             + "JOIN FETCH acq.examination e "
             + "WHERE acq.id = :studyCardId "
             + "AND e.study.id IN :studyIds")
-    List<Dataset> findByStudyCardIdAndStudyIdsWithProcessingAncestorsAndExamination(Long studyCardId, List<Long> studyIds);
+    List<Dataset> findByStudyCardIdAndStudyIdsWithProcessingAncestorsAndExamination(@Param("studyCardId") Long studyCardId, @Param("studyIds") List<Long> studyIds);
 
     @Query("SELECT dataset FROM Dataset dataset "
             + "LEFT JOIN FETCH dataset.datasetProcessing AS dp "
@@ -325,16 +327,16 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
             + "LEFT JOIN FETCH dataset.datasetAcquisition AS acq "
             + "LEFT JOIN FETCH acq.examination e "
             + "WHERE e.id = :examinationId")
-    List<Dataset> findByExaminationIdWithProcessingAncestorsAndExamination(Long examinationId);
+    List<Dataset> findByExaminationIdWithProcessingAncestorsAndExamination(@Param("examinationId") Long examinationId);
 
     @Query("SELECT dataset FROM Dataset dataset "
             + "JOIN FETCH dataset.datasetProcessing AS dp "
             + "JOIN FETCH dp.inputDatasets "
             + "JOIN FETCH dataset.datasetAcquisition AS acq "
             + "JOIN FETCH acq.examination e "
-            + "WHERE e.study.id IN :study_ids "
+            + "WHERE e.study.id IN :studyIds "
             + "ANd dataset.id IN :ids")
-    List<Dataset> findByIdsAndStudyIdsWithProcessingAncestorsAndExamination(List<Long> studyIds, List<Long> ids);
+    List<Dataset> findByIdsAndStudyIdsWithProcessingAncestorsAndExamination(@Param("studyIds") List<Long> studyIds, @Param("ids") List<Long> ids);
 
     @Query(value = "SELECT d FROM Dataset AS d "
             + "LEFT JOIN FETCH d.datasetExpressions de "
@@ -343,7 +345,7 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
             + "LEFT JOIN FETCH d.originMetadata "
             + "LEFT JOIN FETCH d.updatedMetadata "
             + "WHERE d.id = :id")
-    Optional<Dataset> findByIdWithDatasetExpressionAndExaminationAndMetadata(Long id);
+    Optional<Dataset> findByIdWithDatasetExpressionAndExaminationAndMetadata(@Param("id") Long id);
 
     @Query(value = "SELECT d FROM Dataset AS d "
             + "LEFT JOIN FETCH d.datasetExpressions de "
@@ -352,7 +354,7 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
             + "LEFT JOIN FETCH d.originMetadata "
             + "LEFT JOIN FETCH d.updatedMetadata "
             + "WHERE acq.id = :id")
-    List<Dataset> findByAcquisitionIdWithDatasetExpressionAndExaminationAndMetadata(Long id);
+    List<Dataset> findByAcquisitionIdWithDatasetExpressionAndExaminationAndMetadata(@Param("id") Long id);
 
     @Query(value = "SELECT d FROM Dataset AS d "
             + "LEFT JOIN FETCH d.datasetExpressions de "
@@ -361,7 +363,7 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
             + "LEFT JOIN FETCH d.originMetadata "
             + "LEFT JOIN FETCH d.updatedMetadata "
             + "WHERE e.study.id = :id")
-    List<Dataset> findByStudyIdWithDatasetExpressionAndExaminationAndMetadata(Long id);
+    List<Dataset> findByStudyIdWithDatasetExpressionAndExaminationAndMetadata(@Param("id") Long id);
 
     @Query(value = "SELECT d FROM Dataset AS d "
             + "LEFT JOIN FETCH d.datasetExpressions de "
@@ -370,23 +372,23 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
             + "LEFT JOIN FETCH d.originMetadata "
             + "LEFT JOIN FETCH d.updatedMetadata "
             + "WHERE e.id = :id")
-    List<Dataset> findByExaminationIdWithDatasetExpressionAndExaminationAndMetadata(Long id);
+    List<Dataset> findByExaminationIdWithDatasetExpressionAndExaminationAndMetadata(@Param("id") Long id);
 
     @Query(value = "SELECT d FROM Dataset AS d "
             + "LEFT JOIN FETCH d.datasetExpressions "
             + "WHERE d.id IN :idList")
-    List<Dataset> findByIdsWithDatasetExpression(List<Long> idList);
+    List<Dataset> findByIdsWithDatasetExpression(@Param("idList") List<Long> idList);
 
     @Query(value = "SELECT d FROM Dataset AS d "
             + "LEFT JOIN FETCH d.datasetExpressions "
             + "JOIN ProcessingResource AS p ON d.id = p.dataset.id "
             + "WHERE p.resourceId = :resourceId")
-    List<Dataset> findByResourceIdWithDatasetExpression(String resourceId);
+    List<Dataset> findByResourceIdWithDatasetExpression(@Param("resourceId") String resourceId);
 
     @Query(value = "SELECT d FROM Dataset AS d "
             + "JOIN ProcessingResource AS p ON d.id = p.dataset.id "
             + "WHERE p.resourceId = :resourceId")
-    List<Dataset> findByResourceId(String resourceId);
+    List<Dataset> findByResourceId(@Param("resourceId") String resourceId);
 
     @Query(value = "SELECT d.id FROM Dataset d",
             countQuery = "SELECT COUNT(d) FROM Dataset d")
@@ -476,4 +478,5 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
         );
         return datasets;
     }
+
 }

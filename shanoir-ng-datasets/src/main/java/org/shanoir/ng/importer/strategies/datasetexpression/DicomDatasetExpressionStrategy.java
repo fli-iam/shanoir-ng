@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 
 import org.dcm4che3.data.Attributes;
@@ -90,7 +90,7 @@ public class DicomDatasetExpressionStrategy implements DatasetExpressionStrategy
             }
             DatasetFile pacsDatasetFile = new DatasetFile();
             pacsDatasetFile.setPacs(true);
-            filesSize += Files.size(Paths.get(datasetFile.getPath()));
+            filesSize += Files.size(Path.of(datasetFile.getPath()));
             pacsDatasetFile = setPath(dicomAttributes, pacsDatasetFile);
             pacsDatasetExpression.getDatasetFiles().add(pacsDatasetFile);
             pacsDatasetFile.setDatasetExpression(pacsDatasetExpression);

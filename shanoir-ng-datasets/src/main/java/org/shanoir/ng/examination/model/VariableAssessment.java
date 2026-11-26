@@ -19,6 +19,7 @@ import jakarta.persistence.*;
 import org.shanoir.ng.score.Score;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,6 +35,7 @@ public class VariableAssessment extends AbstractEntity {
     /**
      * UID
      */
+    @Serial
     private static final long serialVersionUID = 8323867968700523066L;
 
     /** Instrument Based Assessment. */

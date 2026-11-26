@@ -15,7 +15,11 @@
 package org.shanoir.ng.datasetfile;
 
 import jakarta.persistence.*;
+
+
 import org.shanoir.ng.dataset.model.DatasetExpression;
+
+import java.io.Serial;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 
 /**
@@ -30,6 +34,7 @@ public class DatasetFile extends AbstractEntity {
     /**
      * UID
      */
+    @Serial
     private static final long serialVersionUID = -3272282965762717831L;
 
     /** The dataset expression. */

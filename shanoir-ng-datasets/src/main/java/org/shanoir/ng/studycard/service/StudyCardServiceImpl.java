@@ -43,6 +43,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -120,7 +121,7 @@ public class StudyCardServiceImpl implements StudyCardService {
         List<DicomTag> dicomTags = new ArrayList<DicomTag>();
         try {
             for (Field field : declaredFields) {
-                if (java.lang.reflect.Modifier.isStatic(field.getModifiers())) {
+                if (Modifier.isStatic(field.getModifiers())) {
                     if (field.getType().getName() == "int") {
                         int tagCode = field.getInt(null);
                         VR tagVr = StandardElementDictionary.INSTANCE.vrOf(tagCode);
@@ -154,10 +155,10 @@ public class StudyCardServiceImpl implements StudyCardService {
         boolean changeInAtLeastOneAcquisition = false;
         if (studyCard.getRules() != null) {
             for (StudyCardRule<?> rule : studyCard.getRules()) {
-                if (rule instanceof DatasetAcquisitionRule) {
+                if (rule instanceof DatasetAcquisitionRule acquisitionRule) {
                     changeInAtLeastOneAcquisition = true;
-                    ((DatasetAcquisitionRule) rule).apply(acquisition, dicomAttributes);
-                } else if (rule instanceof DatasetRule && acquisition.getDatasets() != null) {
+                    acquisitionRule.apply(acquisition, dicomAttributes);
+                } else if (rule instanceof DatasetRule datasetRule && acquisition.getDatasets() != null) {
                     for (Dataset dataset : acquisition.getDatasets()) {
                         changeInAtLeastOneAcquisition = true;
                         Attributes attributes;
@@ -169,7 +170,7 @@ public class StudyCardServiceImpl implements StudyCardService {
                         } else {
                             throw new IllegalStateException("the parametrized type of AcquisitionAttributes is not implemented, use String or Long");
                         }
-                        ((DatasetRule) rule).apply(dataset, attributes);
+                        datasetRule.apply(dataset, attributes);
                     }
                 } else {
                     throw new IllegalStateException("unknown type of rule");

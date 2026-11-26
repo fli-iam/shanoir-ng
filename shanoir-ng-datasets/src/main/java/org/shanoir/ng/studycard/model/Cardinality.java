@@ -67,9 +67,9 @@ public class Cardinality {
 
     @Override
     public boolean equals(Object obj) {
-        return obj != null && obj instanceof Cardinality
-            && ((Cardinality) obj).isMultiplier() == this.isMultiplier()
-            && ((Cardinality) obj).getNumber() == this.getNumber();
+        return obj != null && obj instanceof Cardinality c
+            && c.isMultiplier() == this.isMultiplier()
+            && c.getNumber() == this.getNumber();
     }
 
     @Override
