@@ -103,4 +103,10 @@ export type ColumnDefinition = {
 
     /** builds the route string that will be used when clicking a link in the cell */
     link?: (item: any) => string;
+
+    /** displays a help box (info icon) next to the header name */
+    headerTip?: string;
+
+    /** horizontal alignment of the cell values, overrides the default alignment given by the column type */
+    align?: 'left' | 'center' | 'right';
 }

@@ -91,6 +91,7 @@ td checkbox { transform: scale(0.8); border-color: var(--color-b-light2); }
 	.triangle svg { width: 15px; height: 5px;  }
 	.triangle svg polygon { fill: var(--color-b); }
 .col-title { z-index: 1; }
+.col-tip { position: relative; z-index: 2; margin-left: 4px;  color: var(--very-light-grey);}
 .click-dummy { position: absolute; top: 0; bottom: 0; left: 0; right: 0; }
 
 .clickable { cursor: pointer; }
