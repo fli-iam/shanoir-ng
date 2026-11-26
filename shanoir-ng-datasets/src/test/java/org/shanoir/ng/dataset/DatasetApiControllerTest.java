@@ -51,11 +51,12 @@ import org.shanoir.ng.storage.StorageService;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.security.oauth2.server.resource.autoconfigure.servlet.OAuth2ResourceServerAutoConfiguration;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
@@ -63,70 +64,73 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
  * Tests of the dataset controller, focused on the removal of the acquisitions that a deletion
  * leaves empty.
  */
-@WebMvcTest(controllers = DatasetApiController.class)
+@WebMvcTest(controllers = DatasetApiController.class,
+        excludeAutoConfiguration = {
+                OAuth2ResourceServerAutoConfiguration.class
+        })
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
 public class DatasetApiControllerTest {
 
-    @MockBean
+    @MockitoBean
     private DatasetMapper datasetMapper;
 
-    @MockBean
+    @MockitoBean
     private MrDatasetMapper mrDatasetMapper;
 
-    @MockBean
+    @MockitoBean
     private EegDatasetMapper eegDatasetMapper;
 
-    @MockBean
+    @MockitoBean
     private DatasetService datasetService;
 
-    @MockBean
+    @MockitoBean
     private DatasetRepository datasetRepository;
 
-    @MockBean
+    @MockitoBean
     private CreateStatisticsService createStatisticsService;
 
-    @MockBean
+    @MockitoBean
     private ExaminationService examinationService;
 
-    @MockBean
+    @MockitoBean
     private SubjectService subjectService;
 
-    @MockBean
+    @MockitoBean
     private ImporterService importerService;
 
-    @MockBean
+    @MockitoBean
     private ProcessedDatasetImporterService processedDatasetImporterService;
 
-    @MockBean
+    @MockitoBean
     private WADODownloaderService downloader;
 
-    @MockBean
+    @MockitoBean
     private ShanoirEventService eventService;
 
-    @MockBean
+    @MockitoBean
     private RabbitTemplate rabbitTemplate;
 
-    @MockBean
+    @MockitoBean
     private SolrService solrService;
 
-    @MockBean(name = "datasetDownloaderServiceImpl")
+    @MockitoBean(name = "datasetDownloaderServiceImpl")
     private DatasetDownloaderServiceImpl datasetDownloaderService;
 
-    @MockBean
+    @MockitoBean
     private StudyInstanceUIDAndSubjectNameHandler studyInstanceUIDAndSubjectNameHandler;
 
-    @MockBean
+    @MockitoBean
     private StorageService storageService;
 
-    @MockBean
+    @MockitoBean
     private DatasetAcquisitionService datasetAcquisitionService;
 
     /** Needed by the STOWRSMultipartRequestFilter, which is part of the web slice. */
-    @MockBean
+    @MockitoBean
     private DicomSEGAndSRImporterService dicomSEGAndSRImporterService;
 
-    @MockBean
+    @MockitoBean
     private DicomImporterService dicomImporterService;
 
     @Autowired

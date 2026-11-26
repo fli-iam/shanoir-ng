@@ -14,6 +14,9 @@
 
 package org.shanoir.ng.dataset.modality;
 
+import java.io.Serial;
+
+
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetType;
 
@@ -31,6 +34,7 @@ public class RegistrationDataset extends Dataset {
     /**
      * UID
      */
+    @Serial
     private static final long serialVersionUID = -2435422041970785779L;
 
     /** Registration Dataset Nature. */

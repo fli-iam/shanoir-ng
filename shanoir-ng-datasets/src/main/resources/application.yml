@@ -15,9 +15,6 @@
 ######################################
 server:
   port: 9904
-  error:
-    whitelabel:
-      enabled: false
   shanoir-hours:
     shutdown: ${SHANOIR_SHUTDOWN_HOUR}
     continuance: ${SHANOIR_CONTINUANCE_HOUR}
@@ -53,6 +50,7 @@ spring:
     open-in-view: false
     properties:
       hibernate:
+        dialect: org.hibernate.dialect.MariaDBDialect
         format_sql: false
         use_sql_comments: true
         connection:
@@ -71,12 +69,13 @@ spring:
   threads:
     virtual:
       enabled: true
-##### Others #####
+  ##### Others #####
   jackson:
     mapper:
       use-getters-as-setters: false
-    serialization:
-      WRITE_DATES_AS_TIMESTAMPS: false
+    datatype:
+      datetime:
+        write-dates-as-timestamps: false
   jooq:
     sql-dialect: MariaDB
   rabbitmq:
@@ -89,7 +88,7 @@ spring:
         retry:
           enabled: true
           # Boot 3: max-attempts includes the first attempt (1 attempt + 5 retries)
-          max-attempts: 6
+          max-retries: 6
           initial-interval: 1000ms
           multiplier: 1
   session:
@@ -103,8 +102,12 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${SHANOIR_KEYCLOAK_URL}/realms/shanoir-ng
-          jwk-set-uri: ${SHANOIR_KEYCLOAK_INTERNAL_URL}/realms/shanoir-ng/protocol/openid-connect/certs
+          issuer-uri: ${SHANOIR_KEYCLOAK_URL:localhost}/realms/shanoir-ng
+          jwk-set-uri: ${SHANOIR_KEYCLOAK_INTERNAL_URL:http://keycloak:8080/auth}/realms/shanoir-ng/protocol/openid-connect/certs
+  web:
+    error:
+      whitelabel:
+        enabled: false
 
 springdoc:
   api-docs:
@@ -209,86 +212,3 @@ service-account:
   client:
     id: service-account
     credential-secret: ${VIP_CLIENT_SECRET}
----
-
-######################################
-# DO NOT COMMIT VALUES MODIFICATIONS #
-######################################
-server:
-  port: 9914
-  shanoir-hours:
-    shutdown: ${SHANOIR_SHUTDOWN_HOUR}
-    continuance: ${SHANOIR_CONTINUANCE_HOUR}
-spring:
-  config.activate.on-profile: dev
-  datasource:
-    url: jdbc:mysql://localhost:3307/datasets?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
-  jpa:
-    generate-ddl: true
-    open-in-view: false
-    hibernate:
-      # Hibernate ddl auto (create, create-drop, update, validate)
-      ddl-auto: create
-    # Show or not log for each sql query
-    show-sql: true
-  main:
-    allow-circular-references: true
-  mvc:
-    pathmatch:
-      matching-strategy: ANT_PATH_MATCHER
-  rabbitmq:
-    host: localhost
-  sql:
-    init:
-      mode: always
-  threads:
-    virtual:
-      enabled: true
-front.server:
-  address: https://shanoir-ng-nginx/shanoir-ng/
-  url: https://shanoir-ng-nginx
-keycloak:
-  auth-server-url: https://shanoir-ng-nginx/auth
-dcm4chee-arc:
-  host: dcm4chee-arc
-
-
-# logging configuration
-logging:
-  file:
-    name: /var/log/shanoir-ng-logs/shanoir-ng-datasets.log
-  level:
-    org.springframework.web: DEBUG
-    org.hibernate: ERROR
-
----
-spring:
-  config.activate.on-profile: test
-  main:
-    allow-bean-definition-overriding: true
-    allow-circular-references: true
-  datasource:
-    url: jdbc:h2:mem:SHANOIR_NG_DATASET;MODE=MySQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;DATABASE_TO_UPPER=false;NON_KEYWORDS=VALUE
-    username: sa
-    password:
-    driverClassName: org.h2.Driver
-  jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
-    defer-datasource-initialization: true
-    generate-ddl: true
-    hibernate:
-      # Hibernate ddl auto (create, create-drop, update, validate)
-      ddl-auto: create-drop
-      open-in-view: false
-      properties:
-        hibernate:
-          format_sql=true:
-
-  autoconfigure.exclude: org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration
-  mvc:
-    pathmatch:
-      matching-strategy: ANT_PATH_MATCHER
-  sql:
-    init:
-      data-locations: classpath:/scripts/test-data-h2.sql
-      mode: always

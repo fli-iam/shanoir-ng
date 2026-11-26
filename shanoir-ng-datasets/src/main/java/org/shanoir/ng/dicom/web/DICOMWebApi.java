@@ -14,14 +14,14 @@
 
 package org.shanoir.ng.dicom.web;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
+import tools.jackson.databind.DatabindException;
+
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.http.HttpHeaders;
 import org.shanoir.ng.shared.exception.ShanoirException;
@@ -65,7 +65,7 @@ public interface DICOMWebApi {
             @ApiResponse(responseCode = "500", description = "unexpected error") })
     @GetMapping(value = "/studies", produces = { "application/dicom+json" })
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    ResponseEntity<String> findStudies(@RequestParam Map<String, String> allParams) throws RestServiceException, JsonMappingException, JsonProcessingException;
+    ResponseEntity<String> findStudies(@RequestParam Map<String, String> allParams) throws RestServiceException, DatabindException;
 
     @Operation(summary = "", description = "Returns all DICOM series/acquisitions")
     @ApiResponses(value = {
@@ -89,7 +89,7 @@ public interface DICOMWebApi {
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationUID, 'CAN_SEE_ALL'))")
     ResponseEntity<String> findSeriesOfStudy(
             @Parameter(description = "examinationUID", required = true) @PathVariable("examinationUID") String examinationUID, @RequestParam Map<String, String> allParams
-        ) throws RestServiceException, ShanoirException, JsonProcessingException;
+        ) throws RestServiceException, ShanoirException;
 
     @Operation(summary = "", description = "Returns the metadata of a DICOM serie/acquisition of an examination")
     @ApiResponses(value = {
@@ -103,7 +103,7 @@ public interface DICOMWebApi {
     ResponseEntity<String> findSerieMetadataOfStudy(
             @Parameter(description = "examinationUID", required = true) @PathVariable("examinationUID") String examinationUID,
             @Parameter(description = "serieInstanceUID", required = true) @PathVariable("serieInstanceUID") String serieInstanceUID
-        ) throws RestServiceException, JsonMappingException, JsonProcessingException;
+        ) throws RestServiceException, DatabindException;
 
     @Operation(summary = "", description = "Returns all DICOM instances of a study and serie")
     @ApiResponses(value = {

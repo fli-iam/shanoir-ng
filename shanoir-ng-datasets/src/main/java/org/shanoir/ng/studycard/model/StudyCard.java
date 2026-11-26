@@ -14,10 +14,12 @@
 
 package org.shanoir.ng.studycard.model;
 
+import jakarta.validation.constraints.NotBlank;
+
+import java.io.Serial;
 import java.util.List;
 
 import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.validator.constraints.NotBlank;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
 import org.shanoir.ng.shared.validation.Unique;
@@ -50,6 +52,7 @@ public class StudyCard extends HalEntity {
     /**
      * UID
      */
+    @Serial
     private static final long serialVersionUID = 1751168445500120935L;
 
     /** The acquisition equipment. */

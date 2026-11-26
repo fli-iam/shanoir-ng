@@ -48,11 +48,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.TextNode;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ArrayNode;
 
 import jakarta.annotation.PostConstruct;
+import tools.jackson.databind.node.StringNode;
+
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
@@ -265,7 +266,7 @@ public class SeriesInstanceUIDHandler {
                 replaceSeriesInstanceUIDs(series, seriesToAcquisitionUIDs);
             }
         } else if (root.isObject()) {
-            String seriesInstanceUID = root.path(DICOM_TAG_SERIES_INSTANCE_UID).path(VALUE).path(0).asText();
+            String seriesInstanceUID = root.path(DICOM_TAG_SERIES_INSTANCE_UID).path(VALUE).path(0).asString();
             String acquisitionUID = seriesToAcquisitionUIDs.get(seriesInstanceUID);
             if (acquisitionUID != null) {
                 replaceSeriesInstanceUID(root, seriesInstanceUID, acquisitionUID);
@@ -291,7 +292,7 @@ public class SeriesInstanceUIDHandler {
             replaceInValues(root.get(DICOM_TAG_SERIES_INSTANCE_UID), seriesInstanceUID, acquisitionUID);
             replaceInValues(root.get(DICOM_TAG_RETRIEVE_URL), seriesInstanceUID, acquisitionUID);
             for (JsonNode child : root) {
-                if (child.isContainerNode()) {
+                if (child.isContainer()) {
                     replaceSeriesInstanceUID(child, seriesInstanceUID, acquisitionUID);
                 }
             }
@@ -305,9 +306,9 @@ public class SeriesInstanceUIDHandler {
         ArrayNode values = (ArrayNode) tagNode.path(VALUE);
         for (int i = 0; i < values.size(); i++) {
             JsonNode value = values.get(i);
-            if (value.isTextual() && value.asText().contains(seriesInstanceUID)) {
-                String replaced = value.asText().replace(seriesInstanceUID, acquisitionUID);
-                values.set(i, TextNode.valueOf(replaced));
+            if (value.isString() && value.asString().contains(seriesInstanceUID)) {
+                String replaced = value.asString().replace(seriesInstanceUID, acquisitionUID);
+                values.set(i, StringNode.valueOf(replaced));
             }
         }
     }

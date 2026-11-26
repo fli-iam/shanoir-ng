@@ -14,12 +14,13 @@
 
 package org.shanoir.ng.vip.executionTemplate.repository;
 
+import java.util.List;
+import java.util.Optional;
+
 import org.shanoir.ng.vip.executionTemplate.model.ExecutionTemplate;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
-
-import java.util.List;
-import java.util.Optional;
+import org.springframework.data.repository.query.Param;
 
 public interface ExecutionTemplateRepository extends CrudRepository<ExecutionTemplate, Long> {
 
@@ -28,14 +29,15 @@ public interface ExecutionTemplateRepository extends CrudRepository<ExecutionTem
     @Query("SELECT template FROM ExecutionTemplate template "
             + "LEFT JOIN FETCH template.study "
             + "WHERE template.study.id = :studyId")
-    List<ExecutionTemplate> findByStudyIdWithStudy(Long studyId);
+    List<ExecutionTemplate> findByStudyIdWithStudy(@Param("studyId") Long studyId);
 
     @Query("SELECT template FROM ExecutionTemplate template "
             + "LEFT JOIN FETCH template.study "
             + "WHERE template.id = :id")
-    Optional<ExecutionTemplate> findByIdWithStudy(Long id);
+    Optional<ExecutionTemplate> findByIdWithStudy(@Param("id") Long id);
 
     List<ExecutionTemplate> findByOfflineTokenNotNull();
 
     void delete(ExecutionTemplate executionTemplate);
+
 }

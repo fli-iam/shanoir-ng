@@ -30,10 +30,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.io.IOException;
 import java.util.List;
@@ -48,7 +51,7 @@ public interface StudyCardApi {
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "404", description = "no study card found"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
-    @RequestMapping(value = "/{studyCardId}", produces = { "application/json" }, method = RequestMethod.DELETE)
+    @DeleteMapping(value = "/{studyCardId}", produces = { "application/json" })
     @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnStudyCard(#studyCardId, 'CAN_ADMINISTRATE'))")
     ResponseEntity<Void> deleteStudyCard(
             @Parameter(description = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId) throws RestServiceException;
@@ -59,7 +62,7 @@ public interface StudyCardApi {
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "404", description = "no study card found"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
-    @RequestMapping(value = "/{studyCardId}", produces = { "application/json" }, method = RequestMethod.GET)
+    @GetMapping(value = "/{studyCardId}", produces = { "application/json" })
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.hasRightOnStudy(returnObject.getBody().getStudyId(), 'CAN_SEE_ALL')")
     ResponseEntity<StudyCard> findStudyCardById(
@@ -71,7 +74,7 @@ public interface StudyCardApi {
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "404", description = "no study card found"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
-    @RequestMapping(value = "/byStudy/{studyId}", produces = { "application/json" }, method = RequestMethod.GET)
+    @GetMapping(value = "/byStudy/{studyId}", produces = { "application/json" })
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterStudyCardList(returnObject.getBody(), 'CAN_SEE_ALL')")
     ResponseEntity<List<StudyCard>> findStudyCardByStudyId(
@@ -83,7 +86,7 @@ public interface StudyCardApi {
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "404", description = "no study card found"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
-    @RequestMapping(value = "/byAcqEq/{acqEqId}", produces = { "application/json" }, method = RequestMethod.GET)
+    @GetMapping(value = "/byAcqEq/{acqEqId}", produces = { "application/json" })
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterStudyCardList(returnObject.getBody(), 'CAN_SEE_ALL')")
     ResponseEntity<List<StudyCard>> findStudyCardByAcqEqId(
@@ -95,7 +98,7 @@ public interface StudyCardApi {
             @ApiResponse(responseCode = "401", description = "unauthorized"),
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
-    @RequestMapping(value = "", produces = { "application/json" }, method = RequestMethod.GET)
+    @GetMapping(value = "", produces = { "application/json" })
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterStudyCardList(returnObject.getBody(), 'CAN_SEE_ALL')")
     ResponseEntity<List<StudyCard>> findStudyCards();
@@ -106,8 +109,8 @@ public interface StudyCardApi {
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "422", description = "bad parameters"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
-    @RequestMapping(value = "", produces = { "application/json" }, consumes = {
-            "application/json" }, method = RequestMethod.POST)
+    @PostMapping(value = "", produces = { "application/json" }, consumes = {
+            "application/json" })
     @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnStudy(#studyCard.getStudyId(), 'CAN_ADMINISTRATE'))")
     ResponseEntity<StudyCard> saveNewStudyCard(
             @Parameter(description = "Study card to create", required = true) @RequestBody StudyCard studyCard,
@@ -120,8 +123,8 @@ public interface StudyCardApi {
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "404", description = "no study card found"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
-    @RequestMapping(value = "/search", produces = { "application/json" }, consumes = {
-            "application/json" }, method = RequestMethod.POST)
+    @PostMapping(value = "/search", produces = { "application/json" }, consumes = {
+            "application/json" })
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     @PostAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.filterStudyCardList(returnObject.getBody(), 'CAN_SEE_ALL') )")
     ResponseEntity<List<StudyCard>> searchStudyCards(
@@ -133,8 +136,8 @@ public interface StudyCardApi {
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "422", description = "bad parameters"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
-    @RequestMapping(value = "/{studyCardId}", produces = { "application/json" }, consumes = {
-            "application/json" }, method = RequestMethod.PUT)
+    @PutMapping(value = "/{studyCardId}", produces = { "application/json" }, consumes = {
+            "application/json" })
     @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and #studyCardId == #studyCard.getId() and @datasetSecurityService.hasUpdateRightOnStudyCard(#studyCard, 'CAN_ADMINISTRATE'))")
     ResponseEntity<Void> updateStudyCard(
             @Parameter(description = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId,
@@ -144,7 +147,7 @@ public interface StudyCardApi {
     @Operation(summary = "", description = "Returns all the dicom tags")
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "available tags"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
-    @RequestMapping(value = "/dicomTags", produces = { "application/json" }, method = RequestMethod.GET)
+    @GetMapping(value = "/dicomTags", produces = { "application/json" })
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     ResponseEntity<List<DicomTag>> findDicomTags() throws RestServiceException;
 
@@ -154,8 +157,8 @@ public interface StudyCardApi {
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "422", description = "bad parameters"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
-    @RequestMapping(value = "/apply", produces = { "application/json" }, consumes = {
-            "application/json" }, method = RequestMethod.POST)
+    @PostMapping(value = "/apply", produces = { "application/json" }, consumes = {
+            "application/json" })
     @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnEveryDatasetAcquisition(#studyCardApplyObject.datasetAcquisitionIds, 'CAN_ADMINISTRATE'))")
     ResponseEntity<Void> applyStudyCard(
             @Parameter(description = "study card id and acquisition ids", required = true) @RequestBody StudyCardApply studyCardApplyObject) throws RestServiceException, PacsException, SolrServerException, IOException;

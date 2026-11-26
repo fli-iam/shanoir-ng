@@ -52,7 +52,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -133,7 +133,7 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
                     "Output extraction" + Optional.ofNullable(jsonRequest.get("sorting"))
                             .filter(node -> !node.isNull() && !node.isEmpty())
                             .map(sorting -> ", sorted by " + StreamSupport.stream(sorting.spliterator(), false)
-                                    .map(JsonNode::asText).collect(Collectors.joining("/")))
+                                    .map(JsonNode::asString).collect(Collectors.joining("/")))
                             .orElse("") + ", part " + count  + " / " + maxCount + " : " + partition.stream().map(String::valueOf).collect(Collectors.joining(",")),
                     ShanoirEvent.SUCCESS,
                     1f,
@@ -233,7 +233,7 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
             throw new Exception("The extraction " + extraction.get("extraction_identifier") + "has no filters array.");
         } else if (!extraction.get("filter").isArray() || extraction.get("filter").isEmpty()) {
             throw new Exception("There is no extraction filter defined for the extraction " + extraction.get("extraction_identifier") + ".");
-        } else if (StreamSupport.stream(extraction.get("filter").spliterator(), false).map(it -> it.get("type").asText()).noneMatch(filterType -> filterType.contains("processing") || filterType.contains("dataset"))) {
+        } else if (StreamSupport.stream(extraction.get("filter").spliterator(), false).map(it -> it.get("type").asString()).noneMatch(filterType -> filterType.contains("processing") || filterType.contains("dataset"))) {
             throw new Exception("There is no specific processing filter defined for the extraction " + extraction.get("extraction_identifier") + ".");
         }
 
@@ -251,14 +251,14 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
                 + "WHERE ";
 
         for (JsonNode jsonFilter : extraction.get("filter")) {
-            String queryFilter = correctFilterType(jsonFilter.get("type").asText());
+            String queryFilter = correctFilterType(jsonFilter.get("type").asString());
             String filter = "";
             JsonNode value = jsonFilter.get("value");
 
             if (value.isBoolean()) {
                 filter += " IS " + value.asBoolean();
             } else {
-                String valueStr = value.asText();
+                String valueStr = value.asString();
                 if (queryFilter.endsWith("date")) {
                     filter += " " + valueStr + " ";
                 } else if (valueStr.replaceAll(",", "").trim().matches("\\d+")) {

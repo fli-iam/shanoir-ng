@@ -24,6 +24,7 @@ import org.shanoir.ng.dataset.modality.EegDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 
+import java.io.Serial;
 import java.util.Date;
 
 /**
@@ -35,6 +36,7 @@ import java.util.Date;
 public class Event extends HalEntity {
 
     /** Serial version ID. */
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @JsonProperty("type")
