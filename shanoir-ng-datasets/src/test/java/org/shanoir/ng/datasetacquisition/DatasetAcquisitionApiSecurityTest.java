@@ -425,15 +425,19 @@ public class DatasetAcquisitionApiSecurityTest {
 
         DatasetAcquisition dsAcq1 = mockDsAcq(1L, 1L, 1L, 1L);
         given(datasetAcquisitionRepository.findById(1L)).willReturn(Optional.of(dsAcq1));
+        given(datasetAcquisitionRepository.findByIdWithSourceAndCopies(1L)).willReturn(Optional.of(dsAcq1));
         given(datasetAcquisitionRepository.findByStudyCardId(1L)).willReturn(Utils.toList(dsAcq1));
         DatasetAcquisition dsAcq3 = mockDsAcq(3L, 3L, 3L, 1L);
         given(datasetAcquisitionRepository.findById(3L)).willReturn(Optional.of(dsAcq3));
+        given(datasetAcquisitionRepository.findByIdWithSourceAndCopies(3L)).willReturn(Optional.of(dsAcq3));
         given(datasetAcquisitionRepository.findByStudyCardId(3L)).willReturn(Utils.toList(dsAcq3));
         DatasetAcquisition dsAcq2 = mockDsAcq(2L, 2L, 2L, 2L);
         given(datasetAcquisitionRepository.findById(2L)).willReturn(Optional.of(dsAcq2));
+        given(datasetAcquisitionRepository.findByIdWithSourceAndCopies(2L)).willReturn(Optional.of(dsAcq2));
         given(datasetAcquisitionRepository.findByStudyCardId(2L)).willReturn(Utils.toList(dsAcq2));
         DatasetAcquisition dsAcq4 = mockDsAcq(4L, 4L, 4L, 4L);
         given(datasetAcquisitionRepository.findById(4L)).willReturn(Optional.of(dsAcq4));
+        given(datasetAcquisitionRepository.findByIdWithSourceAndCopies(4L)).willReturn(Optional.of(dsAcq4));
         given(datasetAcquisitionRepository.findByStudyCardId(4L)).willReturn(Utils.toList(dsAcq4));
 
         given(datasetAcquisitionRepository.findPageByStudyCenterOrStudyIdIn(Mockito.<Pair<Long, Long>>anyList(), Mockito.<Long>anySet(), Mockito.any(Pageable.class))).willReturn(new PageImpl<>(Arrays.asList(new DatasetAcquisition[]{}), PageRequest.of(0, 10), 0));
