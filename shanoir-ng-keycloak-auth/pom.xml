@@ -26,9 +26,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<java.version>11</java.version>
+		<java.version>21</java.version>
 		<jboss.logging.version>3.4.1.Final</jboss.logging.version>
-		<keycloak.version>26.8.0</keycloak.version>
+		<keycloak.version>26.8.2</keycloak.version>
 	</properties>
 
 	<dependencies>
@@ -62,13 +62,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<artifactId>ipaddress</artifactId>
 			<version>5.3.3</version>
 		</dependency>
-
-		<!-- HttpClient -->
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
-			<version>4.5.13</version>
-		</dependency>
 	</dependencies>
 
 	<build>
@@ -78,8 +71,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.8.1</version>
 				<configuration>
-					<source>${java.version}</source>
-					<target>${java.version}</target>
+					<release>${java.version}</release>
 				</configuration>
 			</plugin>
 			<plugin>
