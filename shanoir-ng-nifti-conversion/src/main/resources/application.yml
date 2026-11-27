@@ -25,8 +25,7 @@ spring:
   rabbitmq:
     host: ${SHANOIR_PREFIX}rabbitmq
     port: 5672
-    username: guest
-    password: guest
+    # username and password set by docker compose (SPRING_RABBITMQ_*), from .env
     listener:
       simple:
         # a failing message is dropped, never requeued (endless redelivery)

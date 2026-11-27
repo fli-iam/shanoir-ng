@@ -11,25 +11,21 @@
 # along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 #!/bin/sh
-# script that helps with local dev/deploy tasks
+# Deploys (or upgrades) shanoir with docker-compose.yml: pulls the released images
+# <SHANOIR_REGISTRY>/<service>:<SHANOIR_IMAGE_TAG> and (re)starts the containers.
+# The configuration and the secrets come from .env (see .env.example).
+# Run it after 'git pull', so that docker-compose.yml and the images are from the
+# same release. For a development deployment (images built from the sources), use
+# bootstrap.sh instead.
 
-export SHANOIR_URL_HOST=shanoir-ng-nginx
-export SHANOIR_URL_SCHEME=https
-export SHANOIR_VIEWER_OHIF_URL_HOST=viewer
-export SHANOIR_VIEWER_OHIF_URL_SCHEME=https
-export SHANOIR_VIEWER_VIDEPE_URL_HOST=videpe
-export SHANOIR_VIEWER_VIDEPE_URL_SCHEME=https
-export SHANOIR_PREFIX=
-export SHANOIR_NOTIFICATION_EMAIL="notification@inria.fr"
-export SHANOIR_KEYCLOAK_USER=admin
-export SHANOIR_KEYCLOAK_PASSWORD="&a1A&a1A"
+set -e
 
-cd ./shanoir-ng-parent
+cd "$(dirname "$0")"
 
-mvn clean install -DskipTests
+./check-env.sh
 
-cd ..
-
-docker compose build
+# without this, 'up' keeps the images already on this machine: SHANOIR_IMAGE_TAG=latest
+# would never upgrade
+docker compose pull
 
 docker compose up -d

@@ -21,7 +21,10 @@ services:
       target: keycloak-database
     environment:
       - MARIADB_DATABASE=keycloak
-      - MARIADB_ROOT_PASSWORD=password
+      - "MARIADB_ROOT_PASSWORD=${SHANOIR_KEYCLOAK_DB_ROOT_PASSWORD:?is not set, see .env.example}"
+      # user of Keycloak, with rights on the keycloak schema only
+      - "MARIADB_USER=${SHANOIR_KEYCLOAK_DB_USER:?is not set, see .env.example}"
+      - "MARIADB_PASSWORD=${SHANOIR_KEYCLOAK_DB_PASSWORD:?is not set, see .env.example}"
       - MARIADB_AUTO_UPGRADE=1
     ulimits:
       nofile:
@@ -32,7 +35,7 @@ services:
     networks:
       - shanoir_ng_network
     healthcheck:
-      test: [ "CMD", "mariadb-admin", "ping", "-h", "localhost", "-u", "root", "-ppassword" ]
+      test: [ "CMD", "healthcheck.sh", "--connect", "--innodb_initialized" ]
       interval: 3s
       timeout: 2s
       retries: 10
@@ -41,6 +44,8 @@ services:
     container_name: "${SHANOIR_PREFIX}keycloak"
     #command: ["start-dev"]   # default is "start" to run in production mode
     environment:
+      - "DB_USER=${SHANOIR_KEYCLOAK_DB_USER:?is not set, see .env.example}"
+      - "DB_PASSWORD=${SHANOIR_KEYCLOAK_DB_PASSWORD:?is not set, see .env.example}"
       - SHANOIR_NOTIFICATION_EMAIL
       - SHANOIR_NOTIFICATION_NAME
       - SHANOIR_URL_SCHEME
@@ -51,7 +56,7 @@ services:
       - SHANOIR_VIEWER_VIDEPE_URL_HOST
       - SHANOIR_MIGRATION
       - SHANOIR_KEYCLOAK_USER
-      - SHANOIR_KEYCLOAK_PASSWORD
+      - "SHANOIR_KEYCLOAK_PASSWORD=${SHANOIR_KEYCLOAK_PASSWORD:?is not set, see .env.example}"
       - SHANOIR_KEYCLOAK_URL
       - SHANOIR_ALLOWED_ADMIN_IPS
       - SHANOIR_SMTP_HOST
@@ -62,7 +67,7 @@ services:
       - SHANOIR_SMTP_STARTTLS_ENABLE
       - SHANOIR_SMTP_STARTTLS_REQUIRED
       - SHANOIR_SMTP_FROM
-      - NEUROBAGEL_CLIENT_SECRET
+      - "NEUROBAGEL_CLIENT_SECRET=${NEUROBAGEL_CLIENT_SECRET:?is not set, see .env.example}"
     build:
       context: docker-compose
       target: keycloak
@@ -82,11 +87,37 @@ services:
   rabbitmq:
     container_name: "${SHANOIR_PREFIX}rabbitmq"
     image: rabbitmq:3.10.7
+    # fixed node name (rabbit@rabbitmq): RabbitMQ keeps its data in mnesia/rabbit@<hostname>,
+    # so with the default hostname (the container id) every new container started empty
+    hostname: rabbitmq
+    environment:
+      # created when the volume is initialised, instead of the default guest/guest
+      - "RABBITMQ_DEFAULT_USER=${SHANOIR_RABBITMQ_USER:?is not set, see .env.example}"
+      - "RABBITMQ_DEFAULT_PASS=${SHANOIR_RABBITMQ_PASSWORD:?is not set, see .env.example}"
     volumes:
-      - "rabbitmq-data:/var/lib/rabbitmq/mnesia/rabbitmq"
+      # the whole data directory (accounts, queues, persistent messages, erlang cookie)
+      - "rabbitmq-data:/var/lib/rabbitmq"
     ports:
      - "5672:5672"
      - "15672:15672"
+    networks:
+      - shanoir_ng_network
+  #
+  # Mailpit: catches every e-mail sent by shanoir and keycloak (SHANOIR_SMTP_HOST=mailpit,
+  # SHANOIR_SMTP_PORT=1025 in .env), nothing leaves the machine. Read them on
+  # http://localhost:8025, e.g. the temporary passwords of the default users (dummy-admin,
+  # dummy-user, dummy-expert).
+  #
+  mailpit:
+    container_name: "${SHANOIR_PREFIX}mailpit"
+    image: axllent/mailpit:v1.24
+    restart: unless-stopped
+    ports:
+      - "1025:1025"  # SMTP
+      - "8025:8025"  # Web UI
+    environment:
+      MP_MAX_MESSAGES: 10000 # default is 500
+      MP_SMTP_BIND_ADDR: ":1025"
     networks:
       - shanoir_ng_network
   #
@@ -115,10 +146,26 @@ services:
     build:
       context: docker-compose
       target: database
-    command: --max_allowed_packet 20000000
+    # max_connections: the connection pools of the microservices add up to 150 (datasets 70,
+    # import 50, the others 10), so the default (151) leaves no room for an init run, the
+    # migrations or an admin session ('Too many connections')
+    command: --max_allowed_packet 20000000 --max_connections 300
     environment:
-      - MARIADB_ROOT_PASSWORD=password
+      - "MARIADB_ROOT_PASSWORD=${SHANOIR_DB_ROOT_PASSWORD:?is not set, see .env.example}"
       - MARIADB_AUTO_UPGRADE=1
+      # accounts of the microservices, only read when the volume is initialised
+      - "SHANOIR_STUDIES_DB_USER=${SHANOIR_STUDIES_DB_USER:?is not set, see .env.example}"
+      - "SHANOIR_STUDIES_DB_PASSWORD=${SHANOIR_STUDIES_DB_PASSWORD:?is not set, see .env.example}"
+      - "SHANOIR_USERS_DB_USER=${SHANOIR_USERS_DB_USER:?is not set, see .env.example}"
+      - "SHANOIR_USERS_DB_PASSWORD=${SHANOIR_USERS_DB_PASSWORD:?is not set, see .env.example}"
+      - "SHANOIR_IMPORT_DB_USER=${SHANOIR_IMPORT_DB_USER:?is not set, see .env.example}"
+      - "SHANOIR_IMPORT_DB_PASSWORD=${SHANOIR_IMPORT_DB_PASSWORD:?is not set, see .env.example}"
+      - "SHANOIR_DATASETS_DB_USER=${SHANOIR_DATASETS_DB_USER:?is not set, see .env.example}"
+      - "SHANOIR_DATASETS_DB_PASSWORD=${SHANOIR_DATASETS_DB_PASSWORD:?is not set, see .env.example}"
+      - "SHANOIR_PRECLINICAL_DB_USER=${SHANOIR_PRECLINICAL_DB_USER:?is not set, see .env.example}"
+      - "SHANOIR_PRECLINICAL_DB_PASSWORD=${SHANOIR_PRECLINICAL_DB_PASSWORD:?is not set, see .env.example}"
+      - "SHANOIR_MIGRATIONS_DB_USER=${SHANOIR_MIGRATIONS_DB_USER:?is not set, see .env.example}"
+      - "SHANOIR_MIGRATIONS_DB_PASSWORD=${SHANOIR_MIGRATIONS_DB_PASSWORD:?is not set, see .env.example}"
     ulimits:
       nofile:
         soft: 262144
@@ -130,7 +177,7 @@ services:
     networks:
       - shanoir_ng_network
     healthcheck:
-      test: [ "CMD", "mariadb-admin", "ping", "-h", "localhost", "-u", "root", "-ppassword" ]
+      test: [ "CMD", "healthcheck.sh", "--connect", "--innodb_initialized" ]
       interval: 3s
       timeout: 2s
       retries: 10
@@ -144,6 +191,8 @@ services:
       context: docker-compose
       target: database-migrations
     environment:
+      - "SHANOIR_MIGRATIONS_DB_USER=${SHANOIR_MIGRATIONS_DB_USER:?is not set, see .env.example}"
+      - "SHANOIR_MIGRATIONS_DB_PASSWORD=${SHANOIR_MIGRATIONS_DB_PASSWORD:?is not set, see .env.example}"
       - SHANOIR_MIGRATION
     networks:
       - shanoir_ng_network
@@ -160,6 +209,10 @@ services:
       context: docker-compose
       target: users
     environment:
+      - "SPRING_RABBITMQ_USERNAME=${SHANOIR_RABBITMQ_USER:?is not set, see .env.example}"
+      - "SPRING_RABBITMQ_PASSWORD=${SHANOIR_RABBITMQ_PASSWORD:?is not set, see .env.example}"
+      - "SPRING_DATASOURCE_USERNAME=${SHANOIR_USERS_DB_USER:?is not set, see .env.example}"
+      - "SPRING_DATASOURCE_PASSWORD=${SHANOIR_USERS_DB_PASSWORD:?is not set, see .env.example}"
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
       - SHANOIR_URL_HOST
@@ -167,14 +220,13 @@ services:
       - SHANOIR_KEYCLOAK_URL
       - SHANOIR_KEYCLOAK_INTERNAL_URL
       - SHANOIR_KEYCLOAK_USER
-      - SHANOIR_KEYCLOAK_PASSWORD
+      - "SHANOIR_KEYCLOAK_PASSWORD=${SHANOIR_KEYCLOAK_PASSWORD:?is not set, see .env.example}"
       - SHANOIR_NOTIFICATION_EMAIL
       - SHANOIR_NOTIFICATION_NAME
       - SHANOIR_CERTIFICATE
       - SHANOIR_CERTIFICATE_PEM_CRT
       - SHANOIR_CERTIFICATE_PEM_KEY
       - SHANOIR_MIGRATION
-      - DEV_USERS_DEFAULT_PASSWORD
       - VIP_SERVICE_EMAIL
       - SHANOIR_SMTP_HOST
       - SHANOIR_SMTP_PORT
@@ -198,6 +250,9 @@ services:
         condition: service_started
       keycloak:
         condition: service_started
+      # the initial run e-mails the passwords of the default users
+      mailpit:
+        condition: service_started
   #
   # Studies microservice
   #
@@ -207,6 +262,10 @@ services:
       context: docker-compose
       target: studies
     environment:
+      - "SPRING_RABBITMQ_USERNAME=${SHANOIR_RABBITMQ_USER:?is not set, see .env.example}"
+      - "SPRING_RABBITMQ_PASSWORD=${SHANOIR_RABBITMQ_PASSWORD:?is not set, see .env.example}"
+      - "SPRING_DATASOURCE_USERNAME=${SHANOIR_STUDIES_DB_USER:?is not set, see .env.example}"
+      - "SPRING_DATASOURCE_PASSWORD=${SHANOIR_STUDIES_DB_PASSWORD:?is not set, see .env.example}"
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
       - SHANOIR_URL_HOST
@@ -250,6 +309,10 @@ services:
       context: docker-compose
       target: import
     environment:
+      - "SPRING_RABBITMQ_USERNAME=${SHANOIR_RABBITMQ_USER:?is not set, see .env.example}"
+      - "SPRING_RABBITMQ_PASSWORD=${SHANOIR_RABBITMQ_PASSWORD:?is not set, see .env.example}"
+      - "SPRING_DATASOURCE_USERNAME=${SHANOIR_IMPORT_DB_USER:?is not set, see .env.example}"
+      - "SPRING_DATASOURCE_PASSWORD=${SHANOIR_IMPORT_DB_PASSWORD:?is not set, see .env.example}"
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
       - SHANOIR_URL_HOST
@@ -289,6 +352,10 @@ services:
       context: docker-compose
       target: datasets
     environment:
+      - "SPRING_RABBITMQ_USERNAME=${SHANOIR_RABBITMQ_USER:?is not set, see .env.example}"
+      - "SPRING_RABBITMQ_PASSWORD=${SHANOIR_RABBITMQ_PASSWORD:?is not set, see .env.example}"
+      - "SPRING_DATASOURCE_USERNAME=${SHANOIR_DATASETS_DB_USER:?is not set, see .env.example}"
+      - "SPRING_DATASOURCE_PASSWORD=${SHANOIR_DATASETS_DB_PASSWORD:?is not set, see .env.example}"
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
       - SHANOIR_URL_HOST
@@ -305,7 +372,7 @@ services:
       - S3_BUCKET_DATASETS
       - VIP_URL_SCHEME
       - VIP_URL_HOST
-      - VIP_CLIENT_SECRET
+      - "VIP_CLIENT_SECRET=${VIP_CLIENT_SECRET:?is not set, see .env.example}"
       - VIP_MAX_DOWNLOAD
       - VIP_COMPRESSION_LEVEL
       - SHANOIR_CONTINUANCE_HOUR
@@ -345,6 +412,10 @@ services:
       context: docker-compose
       target: preclinical
     environment:
+      - "SPRING_RABBITMQ_USERNAME=${SHANOIR_RABBITMQ_USER:?is not set, see .env.example}"
+      - "SPRING_RABBITMQ_PASSWORD=${SHANOIR_RABBITMQ_PASSWORD:?is not set, see .env.example}"
+      - "SPRING_DATASOURCE_USERNAME=${SHANOIR_PRECLINICAL_DB_USER:?is not set, see .env.example}"
+      - "SPRING_DATASOURCE_PASSWORD=${SHANOIR_PRECLINICAL_DB_PASSWORD:?is not set, see .env.example}"
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
       - SHANOIR_URL_HOST
@@ -389,6 +460,8 @@ services:
       context: docker-compose
       target: nifti-conversion
     environment:
+      - "SPRING_RABBITMQ_USERNAME=${SHANOIR_RABBITMQ_USER:?is not set, see .env.example}"
+      - "SPRING_RABBITMQ_PASSWORD=${SHANOIR_RABBITMQ_PASSWORD:?is not set, see .env.example}"
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
       - SHANOIR_URL_HOST
@@ -431,6 +504,15 @@ services:
     image: dcm4che/slapd-dcm4chee:2.6.2-27.0
     environment:
       LDAP_INIT_CMDS: /etc/openldap/configure.sh /opt/shanoir/ldap-first-start.sh
+      # passwords of the LDAP admin accounts, only read when the volume is initialised
+      LDAP_ROOTPASS: "${SHANOIR_PACS_LDAP_ROOT_PASSWORD:?is not set, see .env.example}"
+      LDAP_CONFIGPASS: "${SHANOIR_PACS_LDAP_CONFIG_PASSWORD:?is not set, see .env.example}"
+      # storage configuration, only read when the volume is initialised
+      STORAGE_DIR: "${SHANOIR_PACS_STORAGE_DIR:?is not set, see .env.example}"
+      LDAP_STORAGE_ENTRY_DN: "${SHANOIR_PACS_LDAP_STORAGE_ENTRY_DN:-}"
+      LDAP_STORAGE_URI: "${SHANOIR_PACS_LDAP_STORAGE_URI:-}"
+      LDAP_PROPERTY_TARGET_DN: "${SHANOIR_PACS_LDAP_PROPERTY_TARGET_DN:-}"
+      LDAP_DCM_PROPERTIES: "${SHANOIR_PACS_LDAP_DCM_PROPERTIES:-}"
     logging:
       driver: json-file
       options:
@@ -439,7 +521,6 @@ services:
       - shanoir_ng_network
     ports:
       - "389:389"
-    env_file: ./docker-compose/dcm4chee/variables.env
     volumes:
       - "dcm4chee-ldap-data:/var/lib/openldap/openldap-data"
       - "dcm4chee-sldap-data:/etc/openldap/slapd.d"
@@ -455,7 +536,11 @@ services:
       - shanoir_ng_network
     ports:
       - "5432:5432"
-    env_file: ./docker-compose/dcm4chee/variables.env
+    environment:
+      # name and user of the database, only read when the volume is initialised
+      POSTGRES_DB: "${SHANOIR_PACS_DATABASE_NAME:?is not set, see .env.example}"
+      POSTGRES_USER: "${SHANOIR_PACS_DATABASE_USER:?is not set, see .env.example}"
+      POSTGRES_PASSWORD: "${SHANOIR_PACS_DATABASE_PASSWORD:?is not set, see .env.example}"
     volumes:
       - "dcm4chee-database-data:/var/lib/postgresql/data"
   dcm4chee-arc:
@@ -473,9 +558,15 @@ services:
       - "9990:9990"
       - "11112:11112"
       - "2575:2575"
-    env_file: ./docker-compose/dcm4chee/variables.env
     environment:
+      # fixed: datasets (dcm4chee-arc.port.web) and the WADO URLs stored in the database use 8081
+      HTTP_PORT: 8081
       POSTGRES_HOST: "${SHANOIR_PREFIX}dcm4chee-database"
+      POSTGRES_DB: "${SHANOIR_PACS_DATABASE_NAME:?is not set, see .env.example}"
+      POSTGRES_USER: "${SHANOIR_PACS_DATABASE_USER:?is not set, see .env.example}"
+      POSTGRES_PASSWORD: "${SHANOIR_PACS_DATABASE_PASSWORD:?is not set, see .env.example}"
+      LDAP_ROOTPASS: "${SHANOIR_PACS_LDAP_ROOT_PASSWORD:?is not set, see .env.example}"
+      WILDFLY_PACSDS_MAX_POOL_SIZE: "${SHANOIR_PACS_DATABASE_MAX_POOL_SIZE:?is not set, see .env.example}"
       WILDFLY_CHOWN: /storage
       WILDFLY_WAIT_FOR: "${SHANOIR_PREFIX}ldap:389 ${SHANOIR_PREFIX}dcm4chee-database:5432"
     depends_on:
@@ -537,7 +628,7 @@ services:
       context: docker-compose
       target: bids-validator
     environment:
-      - AMQP_URL=amqp://guest:guest@rabbitmq:5672/
+      - "AMQP_URL=amqp://${SHANOIR_RABBITMQ_USER:?is not set, see .env.example}:${SHANOIR_RABBITMQ_PASSWORD:?is not set, see .env.example}@rabbitmq:5672/"
       - IN_QUEUE=bids.validate
       - OUT_QUEUE=bids.validated
       - DATA_ROOT=/var/bids-data

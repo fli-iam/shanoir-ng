@@ -10,7 +10,7 @@ fi
 LDAP_STORAGE_ENTRY_DN=${LDAP_STORAGE_ENTRY_DN:-dcmStorageID=fs1,dicomDeviceName=dcm4chee-arc,cn=Devices,cn=DICOM Configuration,dc=dcm4che,dc=org}
 LDAP_BASE_DN=${LDAP_BASE_DN:-dc=dcm4che,dc=org}
 LDAP_BIND_DN="cn=admin,${LDAP_BASE_DN}"
-LDAP_ROOTPASS=${LDAP_ROOTPASS:-secret}
+LDAP_ROOTPASS=${LDAP_ROOTPASS:?LDAP_ROOTPASS is not set}
 LDAP_URLS=${LDAP_URLS:-ldap:///}
 LDAP_PROPERTY_TARGET_DN=${LDAP_PROPERTY_TARGET_DN:-${LDAP_STORAGE_ENTRY_DN}}
 
@@ -21,8 +21,8 @@ if [ -n "${LDAP_STORAGE_URI:-}" ]; then
 fi
 
 HAS_PROPERTY_UPDATE=0
-# Support indexed properties from env_file, e.g. LDAP_DCM_PROPERTY_1=key=value.
-if env | grep -q '^LDAP_DCM_PROPERTY_[0-9][0-9]*='; then
+# dcmProperty values separated by ';', e.g. LDAP_DCM_PROPERTIES=key1=value1;key2=value2
+if [ -n "${LDAP_DCM_PROPERTIES:-}" ]; then
   HAS_PROPERTY_UPDATE=1
 fi
 
@@ -42,14 +42,14 @@ EOF
 fi
 
 if [ "${HAS_PROPERTY_UPDATE}" -eq 1 ]; then
-  # One property per variable via LDAP_DCM_PROPERTY_N.
+  # One dcmProperty per ';'-separated value of LDAP_DCM_PROPERTIES.
   LDAP_TMP_FILE=$(mktemp)
   {
     echo "dn: ${LDAP_PROPERTY_TARGET_DN}"
     echo "changetype: modify"
     echo "add: dcmProperty"
 
-    env | grep '^LDAP_DCM_PROPERTY_[0-9][0-9]*=' | sort -t_ -k4,4n | cut -d= -f2- | while IFS= read -r line; do
+    printf '%s\n' "${LDAP_DCM_PROPERTIES}" | tr ';' '\n' | while IFS= read -r line; do
       trimmed=$(printf '%s' "${line}" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//;s/^dcmProperty[[:space:]]*//')
       if [ -n "${trimmed}" ]; then
         echo "dcmProperty: ${trimmed}"
