@@ -243,13 +243,13 @@ Name                  | Value             | Description                         
 `SHANOIR_NOTIFICATION_NAME`  | *name*            | name of the notification people (for outgoing e-mails)                                                                                                                              |
 `SHANOIR_PREFIX`      | *slug* (optional) | prefix for container names (needed if you deploy multiple shanoir instances on the same host)                                                                                       |
 `SHANOIR_X_FORWARDED` | `generate\|trust`  | configures whether the nginx container generates the `X-Forwarded-*` HTTP headers (if running stand-alone) or trusts the existing headers (if located behind another reverse-proxy) |
-`SHANOIR_CERTIFICATE` | `auto\|manual`     | auto-generates a self-signed TLS certificate (NOT RECOMMENDED) or use a manually installed certificate                                                                              |
-`SHANOIR_MIGRATION`   | `auto\|init\|never\|manual\|export\|import` | Normal runs should use `auto` in development and `never` in production. Other values are for controlling deployment and migrations (see below).                                     |
+`SHANOIR_CERTIFICATE` | `auto\|manual`     | auto-generates a self-signed TLS certificate (development only) or uses a manually installed certificate (default)                                                                |
+`SHANOIR_MIGRATION`   | `auto\|init\|never\|manual\|export\|import` | Normal runs use `auto` (default, applies the pending migrations at start) or `never`; `dev` (Hibernate updates the schema) is for development only. Other values are for controlling deployment and migrations (see below). |
 `SHANOIR_KEYCLOAK_USER`<br>`SHANOIR_KEYCLOAK_PASSWORD` | *username/password* | Keycloak admin account used by shanoir for managing user accounts                                                                                                                   |
 `SHANOIR_KEYCLOAK_URL` | *url* (optional)  | **public** base URL of the Keycloak server, as reached by browsers. This is also the URL used to validate the `iss` claim of incoming tokens, so it must match the issuer Keycloak puts in them. Defaults to `${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/auth` (the embedded Keycloak). |
 `SHANOIR_KEYCLOAK_INTERNAL_URL` | *url* (optional)  | base URL of the Keycloak server as reached **from inside the containers** (JWKS download, admin API). Defaults to the value of `SHANOIR_KEYCLOAK_URL`; the shipped `.env` sets it to `http://keycloak:8080/auth` so that the microservices talk to the Keycloak container directly instead of looping through nginx. |
 `SHANOIR_KEYCLOAK_ADAPTER_MODE` | `check-sso\|login-required` | authentication mode of the javascript adapter. `check-sso` (default) is fast but relies on a hidden iframe and tends to break when Keycloak is served from a different hostname; `login-required` redirects and is slower but reliable. |
-`SHANOIR_KEYCLOAK_API` | `limited\|full`   | which parts of the Keycloak API nginx exposes under `/auth/`. `limited` (default) exposes only what ordinary users of the `shanoir-ng` realm need; `full` also exposes the master realm and the admin console. |
+`SHANOIR_KEYCLOAK_API` | `limited\|full`   | which parts of the Keycloak API nginx exposes under `/auth/`. `limited` (default) exposes only what ordinary users of the `shanoir-ng` realm need; `full` also exposes the master realm and the admin console (development, or temporarily to administer Keycloak). |
 `SHANOIR_VIEWER_OHIF_URL_SCHEME`  | `http\|https`      | https (over TLS), http (plain text, NOT RECOMMENDED)                                                                                                                                |
 `SHANOIR_VIEWER_VIDEPE_URL_SCHEME`| `http\|https`      | https (over TLS), http (plain text, NOT RECOMMENDED)                                                                                                                                |
 `SHANOIR_VIEWER_OHIF_URL_HOST`    | *hostname*         | hostname where the OHIF viewer is reachable                                                                                                                                         |
@@ -437,6 +437,9 @@ run, there is not admin account so you will need to create it on the keycloak
 server directly:
 
 1. go to Keycloak admin interface: https://shanoir-ng-nginx/auth/admin/
+   (with `SHANOIR_KEYCLOAK_API=limited`, the default outside development, set
+   it to `full` and run `docker compose up -d nginx` first; set it back to
+   `limited` the same way afterwards)
 2. sign in with the credentials configured in
    `SHANOIR_KEYCLOAK_USER`/`SHANOIR_KEYCLOAK_PASSWORD` in `.env` (no default
    password: it is required, see `.env.example`)
