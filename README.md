@@ -437,9 +437,9 @@ Service             | Accounts                                              | Ri
 ## FIRST RUN
 
 In development (`./bootstrap.sh`), the users' microservice creates the default
-users `dummy-admin` (admin), `dummy-user` and `dummy-expert` in Keycloak. Unless
-`DEV_USERS_DEFAULT_PASSWORD` is set in `.env`, each one gets a random temporary
-password by e-mail: docker-compose-dev.yml runs Mailpit, which catches every
+users `dummy-admin` (admin), `dummy-user` and `dummy-expert` in Keycloak. Each
+one gets a random temporary password by e-mail: docker-compose-dev.yml runs
+Mailpit, which catches every
 e-mail sent by shanoir and Keycloak. Read them on http://localhost:8025, then
 sign in on https://shanoir-ng-nginx/ and choose a new password.
 

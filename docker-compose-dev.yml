@@ -105,8 +105,8 @@ services:
   #
   # Mailpit: catches every e-mail sent by shanoir and keycloak (SHANOIR_SMTP_HOST=mailpit,
   # SHANOIR_SMTP_PORT=1025 in .env), nothing leaves the machine. Read them on
-  # http://localhost:8025, e.g. the passwords of the default users (dummy-admin, dummy-user,
-  # dummy-expert) when DEV_USERS_DEFAULT_PASSWORD is empty.
+  # http://localhost:8025, e.g. the temporary passwords of the default users (dummy-admin,
+  # dummy-user, dummy-expert).
   #
   mailpit:
     container_name: "${SHANOIR_PREFIX}mailpit"
@@ -227,7 +227,6 @@ services:
       - SHANOIR_CERTIFICATE_PEM_CRT
       - SHANOIR_CERTIFICATE_PEM_KEY
       - SHANOIR_MIGRATION
-      - DEV_USERS_DEFAULT_PASSWORD
       - VIP_SERVICE_EMAIL
       - SHANOIR_SMTP_HOST
       - SHANOIR_SMTP_PORT
