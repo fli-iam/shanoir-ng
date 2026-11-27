@@ -92,7 +92,7 @@ public class AboutWindow extends JFrame {
                     try {
                         Desktop.getDesktop().browse(new URI(documentationUrl));
                     } catch (Exception ex) {
-                        ex.printStackTrace();
+                        logger.error("Could not open the documentation page {}", documentationUrl, ex);
                     }
                 }
             });
@@ -115,9 +115,9 @@ public class AboutWindow extends JFrame {
 					Desktop.getDesktop().mail(new URI(
 							"mailto:" + supportMail));
 				} catch (IOException e) {
-					e.printStackTrace();
+					logger.error("Could not open the mail client for {}", supportMail, e);
 				} catch (URISyntaxException e) {
-					e.printStackTrace();
+					logger.error("Invalid support mail address {}", supportMail, e);
 				}
 			}
 
