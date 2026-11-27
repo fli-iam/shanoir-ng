@@ -10,6 +10,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
+# Only nginx (443) and the dcm4chee DICOM (11112) and HL7 (2575) ports are published on
+# all interfaces. The other ports are only for the administrators of this host: they
+# are bound to 127.0.0.1 (reach them from another machine through an SSH tunnel, e.g.
+# 'ssh -L 8081:127.0.0.1:8081 <host>'). Docker publishes ports past the host firewall,
+# so a port bound to all interfaces is reachable from the network even if the
+# firewall blocks it. The containers reach each other on shanoir_ng_network.
 services:
   #
   # Keycloak: database and service
@@ -72,7 +78,7 @@ services:
     networks:
       - shanoir_ng_network
     ports:
-      - "8080:8080"
+      - "127.0.0.1:8080:8080"
     depends_on:
       keycloak-database:
         condition: service_healthy
@@ -93,8 +99,8 @@ services:
       # the whole data directory (accounts, queues, persistent messages, erlang cookie)
       - "rabbitmq-data:/var/lib/rabbitmq"
     ports:
-     - "5672:5672"
-     - "15672:15672"
+     - "127.0.0.1:5672:5672"
+     - "127.0.0.1:15672:15672"
     networks:
       - shanoir_ng_network
   #
@@ -146,7 +152,7 @@ services:
     volumes:
       - "database-data:/var/lib/mysql"
     ports:
-     - "3307:3306"
+     - "127.0.0.1:3307:3306"
     networks:
       - shanoir_ng_network
     healthcheck:
@@ -206,8 +212,7 @@ services:
     networks:
       - shanoir_ng_network
     ports:
-     - "9901:9901"
-     - "9911:9911"
+     - "127.0.0.1:9901:9901"
     depends_on:
       init-cert-and-logs:
         condition: service_completed_successfully
@@ -249,8 +254,7 @@ services:
     networks:
       - shanoir_ng_network
     ports:
-     - "9902:9902"
-     - "9912:9912"
+     - "127.0.0.1:9902:9902"
     depends_on:
       init-cert-and-logs:
         condition: service_completed_successfully
@@ -286,8 +290,7 @@ services:
     networks:
       - shanoir_ng_network
     ports:
-     - "9903:9903"
-     - "9913:9913"
+     - "127.0.0.1:9903:9903"
      # uncomment below for local testing of import-from-pacs, enable:
      # pacs-to-ms-import: c-move from dcm4chee arc light to ms import
      # do not add by default, as it blocks local ShUp from using 44105
@@ -346,8 +349,7 @@ services:
     networks:
       - shanoir_ng_network
     ports:
-     - "9904:9904"
-     - "9914:9914"
+     - "127.0.0.1:9904:9904"
     depends_on:
       init-cert-and-logs:
         condition: service_completed_successfully
@@ -392,8 +394,7 @@ services:
     networks:
       - shanoir_ng_network
     ports:
-     - "9905:9905"
-     - "9915:9915"
+     - "127.0.0.1:9905:9905"
     depends_on:
       init-cert-and-logs:
         condition: service_completed_successfully
@@ -445,7 +446,7 @@ services:
     networks:
       - shanoir_ng_network
     ports:
-      - "8983:8983"
+      - "127.0.0.1:8983:8983"
   # Backup PACS microservice: dcm4chee 5 arc-light
   #
   # The config for the dcm4chee containers is derived from this template:
@@ -471,7 +472,7 @@ services:
     networks:
       - shanoir_ng_network
     ports:
-      - "389:389"
+      - "127.0.0.1:389:389"
     volumes:
       - "dcm4chee-ldap-data:/var/lib/openldap/openldap-data"
       - "dcm4chee-sldap-data:/etc/openldap/slapd.d"
@@ -486,7 +487,7 @@ services:
     networks:
       - shanoir_ng_network
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     environment:
       # name and user of the database, only read when the volume is initialised
       POSTGRES_DB: "${SHANOIR_PACS_DATABASE_NAME:?is not set, see .env.example}"
@@ -504,9 +505,9 @@ services:
     networks:
       - shanoir_ng_network
     ports:
-      - "8081:8081"
-      - "8443:8443"
-      - "9990:9990"
+      - "127.0.0.1:8081:8081"
+      - "127.0.0.1:8443:8443"
+      - "127.0.0.1:9990:9990"
       - "11112:11112"
       - "2575:2575"
     environment:

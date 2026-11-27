@@ -454,6 +454,10 @@ server directly:
 
 Access to the backup PACS dcm4chee 5 arc-light: http://localhost:8081/dcm4chee-arc/ui2/
 
+With docker-compose.yml, this port (like every port other than 443, 11112 and
+2575) is bound to 127.0.0.1: from another machine, open an SSH tunnel first
+(`ssh -L 8081:127.0.0.1:8081 <host>`).
+
 ### Local data
 
 This installation uses Docker named volumes, find more here to handle your local data:
