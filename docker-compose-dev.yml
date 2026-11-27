@@ -103,6 +103,24 @@ services:
     networks:
       - shanoir_ng_network
   #
+  # Mailpit: catches every e-mail sent by shanoir and keycloak (SHANOIR_SMTP_HOST=mailpit,
+  # SHANOIR_SMTP_PORT=1025 in .env), nothing leaves the machine. Read them on
+  # http://localhost:8025, e.g. the passwords of the default users (dummy-admin, dummy-user,
+  # dummy-expert) when DEV_USERS_DEFAULT_PASSWORD is empty.
+  #
+  mailpit:
+    container_name: "${SHANOIR_PREFIX}mailpit"
+    image: axllent/mailpit:v1.24
+    restart: unless-stopped
+    ports:
+      - "1025:1025"  # SMTP
+      - "8025:8025"  # Web UI
+    environment:
+      MP_MAX_MESSAGES: 10000 # default is 500
+      MP_SMTP_BIND_ADDR: ":1025"
+    networks:
+      - shanoir_ng_network
+  #
   # Init service: run and stop. Create temporary certificate
   # related to SHANOIR_URL_HOST for all Shanoir microservices
   # and set rights on log folder for native images
@@ -232,6 +250,9 @@ services:
       rabbitmq:
         condition: service_started
       keycloak:
+        condition: service_started
+      # the initial run e-mails the passwords of the default users
+      mailpit:
         condition: service_started
   #
   # Studies microservice
