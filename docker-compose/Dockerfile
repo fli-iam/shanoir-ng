@@ -185,7 +185,8 @@ RUN mkdir -p /target/opt/nifti-converters/mriconverter \
     && cd       /target/opt/nifti-converters/mriconverter \
     && curl -LSsf https://github.com/populse/mri_conv/archive/refs/heads/master.tar.gz \
     | tar zx --strip-components 1 \
-    && chmod 0777 . MRIFileManager/MRIManager.jar
+    && chmod 0755 . \
+    && chmod 0644 MRIFileManager/MRIManager.jar
 
 
 FROM base-microservice AS nifti-conversion
@@ -320,7 +321,9 @@ RUN /opt/keycloak/bin/kc.sh build
 FROM keycloak-base AS keycloak
 
 COPY --from=keycloak-builder /opt/keycloak/ /opt/keycloak/
-COPY --chown=keycloak keycloak/themes/. /opt/keycloak/themes
+# themes are owned by root and not writable by the keycloak user (octal mode: symbolic
+# modes need Dockerfile syntax >= 1.14)
+COPY --chmod=0755 keycloak/themes/. /opt/keycloak/themes
 COPY keycloak/cfg/. /opt/keycloak/
 RUN  mkdir /opt/keycloak/data/log
 
