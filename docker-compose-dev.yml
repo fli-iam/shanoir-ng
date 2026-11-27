@@ -67,7 +67,7 @@ services:
       - SHANOIR_SMTP_STARTTLS_ENABLE
       - SHANOIR_SMTP_STARTTLS_REQUIRED
       - SHANOIR_SMTP_FROM
-      - NEUROBAGEL_CLIENT_SECRET
+      - "NEUROBAGEL_CLIENT_SECRET=${NEUROBAGEL_CLIENT_SECRET:?is not set, see .env.example}"
     build:
       context: docker-compose
       target: keycloak

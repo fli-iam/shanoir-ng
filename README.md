@@ -388,8 +388,9 @@ Service             | Accounts                                              | Ri
    * the account names (`SHANOIR_*_DB_USER`, `SHANOIR_PACS_DATABASE_USER`):
      accounts cannot be renamed, and the script stops if an account does not
      exist;
-   * `SHANOIR_KEYCLOAK_PASSWORD` and `VIP_CLIENT_SECRET`: Keycloak stores them
-     when its realm is created, the script does not change them (see the notes).
+   * `SHANOIR_KEYCLOAK_PASSWORD`, `VIP_CLIENT_SECRET` and
+     `NEUROBAGEL_CLIENT_SECRET`: Keycloak stores them when its realm is
+     created, the script does not change them (see the notes).
 
    If the current root passwords are not the old defaults (e.g. a second
    rotation), give them to the next step, from the copy of `.env` (see the
