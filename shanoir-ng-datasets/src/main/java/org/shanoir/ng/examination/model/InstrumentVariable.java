@@ -19,6 +19,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 
+import java.io.Serial;
 import java.util.List;
 
 /**
@@ -34,6 +35,7 @@ public class InstrumentVariable extends AbstractEntity {
     /**
      * UID
      */
+    @Serial
     private static final long serialVersionUID = 2742726263888793970L;
 
     /** Is age-dependent variable. */

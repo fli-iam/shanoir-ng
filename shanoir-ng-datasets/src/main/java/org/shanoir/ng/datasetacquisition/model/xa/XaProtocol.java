@@ -14,6 +14,9 @@
 
 package org.shanoir.ng.datasetacquisition.model.xa;
 
+import java.io.Serial;
+
+
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -34,6 +37,7 @@ public class XaProtocol extends AbstractEntity {
     /**
      * UID
      */
+    @Serial
     private static final long serialVersionUID = 3100284961389018913L;
 
     @JsonIgnore

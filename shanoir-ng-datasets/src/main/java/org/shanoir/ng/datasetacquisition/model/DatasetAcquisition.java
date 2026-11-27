@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.datasetacquisition.model;
 
+import java.io.Serial;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -33,6 +34,7 @@ import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 import org.shanoir.ng.shared.quality.QualityTag;
 import org.shanoir.ng.studycard.model.StudyCard;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
@@ -78,6 +80,7 @@ public abstract class DatasetAcquisition extends AbstractEntity {
     /**
      * UID
      */
+    @Serial
     private static final long serialVersionUID = 5487256834701104296L;
 
     /** Related Acquisition Equipment. */
@@ -151,6 +154,7 @@ public abstract class DatasetAcquisition extends AbstractEntity {
     public DatasetAcquisition() {
     }
 
+    @JsonCreator(mode = JsonCreator.Mode.DISABLED)
     public DatasetAcquisition(DatasetAcquisition other) {
         this.acquisitionEquipmentId = other.acquisitionEquipmentId;
         this.examination = other.examination;

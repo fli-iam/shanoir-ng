@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -227,7 +226,7 @@ public class CreateStatisticsService {
         String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
         long expirationTime = System.currentTimeMillis() - 6 * 60 * 60 * 1000;
 
-        try (Stream<Path> paths = Files.walk(Paths.get(tmpDir), 2)) {
+        try (Stream<Path> paths = Files.walk(Path.of(tmpDir), 2)) {
             paths
                 .filter(Files::isRegularFile)
                 .filter(path -> path.getFileName().toString().startsWith(TSV_FILE_PREFIX))

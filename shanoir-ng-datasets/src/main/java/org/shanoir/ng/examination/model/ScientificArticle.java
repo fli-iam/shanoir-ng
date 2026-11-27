@@ -16,7 +16,11 @@ package org.shanoir.ng.examination.model;
 
 import jakarta.persistence.Entity;
 import jakarta.validation.constraints.NotNull;
+
+
 import org.shanoir.ng.shared.core.model.AbstractEntity;
+
+import java.io.Serial;
 
 /**
  * Scientific article.
@@ -30,6 +34,7 @@ public class ScientificArticle extends AbstractEntity {
     /**
      * UID
      */
+    @Serial
     private static final long serialVersionUID = 250233615450555267L;
 
     /** The reference to the article. */

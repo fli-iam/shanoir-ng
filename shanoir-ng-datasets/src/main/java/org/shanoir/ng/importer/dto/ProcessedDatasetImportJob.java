@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.importer.dto;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import org.shanoir.ng.dataset.modality.ProcessedDatasetType;
@@ -26,6 +27,7 @@ import org.shanoir.ng.shared.event.ShanoirEvent;
  */
 public class ProcessedDatasetImportJob implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 8804929608059674037L;
 
     private Long studyId;

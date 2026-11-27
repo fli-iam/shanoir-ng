@@ -57,7 +57,7 @@ import org.shanoir.ng.vip.processingResource.repository.ProcessingResourceReposi
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.http.HttpStatus;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Unit tests of the dataset deletion guards and of the dataset update.

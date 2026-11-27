@@ -14,6 +14,11 @@
 
 package org.shanoir.ng.dataset;
 
+import java.text.ParseException;
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
@@ -23,15 +28,12 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetMetadata;
 import org.shanoir.ng.dataset.model.DatasetModalityType;
 import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.study.rights.ampq.RabbitMqStudyUserService;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.ActiveProfiles;
-
-import java.text.ParseException;
-import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.List;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 /**
  * Dataset mapper test.
@@ -40,7 +42,7 @@ import java.util.List;
  *
  */
 
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@SpringBootTest
 @ActiveProfiles("test")
 public class DatasetMapperTest {
 
@@ -49,6 +51,12 @@ public class DatasetMapperTest {
     private static final Long DATASET_ID = 1L;
     private static final String DATASET_NAME = "test";
     private static final String DATASET_GENERATED_NAME = "1 " + DATE_STR + " MR";
+
+    @MockitoBean
+    private ConnectionFactory connectionFactory;
+
+    @MockitoBean
+    private RabbitMqStudyUserService rabbitMqStudyUserService;
 
     @Autowired
     private DatasetMapper datasetMapper;

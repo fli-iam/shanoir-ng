@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.importer.dto;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,6 +28,7 @@ import org.shanoir.ng.shared.quality.QualityTag;
  */
 public class ImportJob implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 8804929608059674037L;
 
     private long timestamp;

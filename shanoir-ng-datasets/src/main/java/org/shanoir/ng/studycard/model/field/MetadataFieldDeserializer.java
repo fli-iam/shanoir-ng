@@ -14,12 +14,9 @@
 
 package org.shanoir.ng.studycard.model.field;
 
-import java.io.IOException;
-
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer;;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.deser.std.StdDeserializer;;
 
 public class MetadataFieldDeserializer extends StdDeserializer<MetadataFieldInterface<?>> {
 
@@ -32,7 +29,7 @@ public class MetadataFieldDeserializer extends StdDeserializer<MetadataFieldInte
     }
 
     @Override
-    public MetadataFieldInterface<?> deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+    public MetadataFieldInterface<?> deserialize(JsonParser jp, DeserializationContext ctxt) {
         String name = jp.readValueAsTree().toString().replace("\"", "");
         if (DatasetAcquisitionMetadataField.has(name)) {
             return DatasetAcquisitionMetadataField.getEnum(name);

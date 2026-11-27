@@ -17,7 +17,8 @@ package org.shanoir.ng.neurobagel.repository;
 import java.util.List;
 
 import org.shanoir.ng.dataset.model.Dataset;
-import org.springframework.data.jpa.repository.Query;
+
+import org.springframework.data.jpa.repository.NativeQuery;
 import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
 
@@ -32,7 +33,7 @@ public interface NeurobagelImagingRepository extends Repository<Dataset, Long> {
      * examination can point to a subject that was moved to another study.
      * Study-card metadata (updated) wins over import metadata (origin).
      */
-    @Query(nativeQuery = true, value = """
+    @NativeQuery("""
             SELECT d.subject_id AS subjectId,
                    e.id AS examinationId,
                    d.id AS datasetId,

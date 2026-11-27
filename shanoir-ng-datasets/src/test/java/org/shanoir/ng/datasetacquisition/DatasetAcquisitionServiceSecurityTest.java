@@ -34,16 +34,17 @@ import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.Utils;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.util.Pair;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.*;
 
@@ -53,6 +54,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import org.junit.jupiter.api.BeforeEach;
 import static org.mockito.BDDMockito.given;
 import org.shanoir.ng.study.rights.UserRights;
+import org.shanoir.ng.study.rights.ampq.RabbitMqStudyUserService;
+
 import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessAuthorized;
 import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
 
@@ -74,20 +77,26 @@ public class DatasetAcquisitionServiceSecurityTest {
     @Autowired
     private DatasetAcquisitionService service;
 
-    @MockBean
+    @MockitoBean
     private StudyUserRightsRepository rightsRepository;
 
-    @MockBean
+    @MockitoBean
     private StudyRightsService rightsService;
 
-    @MockBean
+    @MockitoBean
     private DatasetAcquisitionRepository repository;
 
-    @MockBean
+    @MockitoBean
     private ExaminationRepository examinationRepository;
 
-    @MockBean
+    @MockitoBean
     private StudyRepository studyRepository;
+
+    @MockitoBean
+    private ConnectionFactory connectionFactory;
+
+    @MockitoBean
+    private RabbitMqStudyUserService rabbitMqStudyUserService;
 
     @BeforeEach
     public void setup() {

@@ -20,6 +20,7 @@ import jakarta.validation.constraints.NotNull;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.validation.Unique;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,6 +36,7 @@ public class Instrument extends AbstractEntity {
     /**
      * UID
      */
+    @Serial
     private static final long serialVersionUID = -2928576247765518757L;
 
     /** The acronym. */

@@ -14,6 +14,15 @@
 
 package org.shanoir.ng.datasetacquisition.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -24,22 +33,11 @@ import java.util.Optional;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.dcm4che3.data.VR;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import org.mockito.Spy;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
@@ -63,6 +61,7 @@ import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.quality.QualityTag;
 import org.shanoir.ng.shared.service.SubjectService;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
+import org.shanoir.ng.study.rights.ampq.RabbitMqStudyUserService;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.dto.QualityCardResultEntry;
 import org.shanoir.ng.studycard.model.QualityCard;
@@ -70,59 +69,66 @@ import org.shanoir.ng.studycard.repository.QualityCardRepository;
 import org.shanoir.ng.studycard.service.QualityCardService;
 import org.shanoir.ng.utils.Utils;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@SpringBootTest
 @ActiveProfiles("test")
 public class ImporterServiceTest {
 
-    @InjectMocks
-    @Spy
+    @Autowired
     private ImporterService service = new ImporterService();
 
-    @Mock
+    @MockitoBean
     private ExaminationService examinationService;
 
-    @Mock
+    @MockitoBean
     private ExaminationRepository examinationRepository;
 
-    @Mock
+    @MockitoBean
     private DatasetAcquisitionContext datasetAcquisitionContext;
 
-    @Mock
+    @MockitoBean
     private DatasetAcquisitionService datasetAcquisitionService;
 
-    @Mock
+    @MockitoBean
     private DicomPersisterService dicomPersisterService;
 
-    @Mock
+    @MockitoBean
     private DicomProcessing dicomProcessing;
 
-    @Mock
+    @MockitoBean
     private ShanoirEventService taskService;
 
-    @Mock
+    @MockitoBean
     private StudyUserRightsRepository studyUserRightRepo;
 
-    @Mock
+    @MockitoBean
     private QualityCardRepository qualityCardRepository;
 
-    @Mock
+    @MockitoBean
     private QualityCardService qualityCardService;
 
-    @Mock
+    @MockitoBean
     private DatasetAcquisitionRepository datasetAcquisitionRepository;
 
-    @Mock
+    @MockitoBean
     private ImporterMailService importerServiceMail;
 
-    @Mock
+    @MockitoBean
     private SubjectService subjectService;
 
-    @Mock
+    @MockitoBean
     private DatasetsImportStatusService datasetsImportStatusService;
+
+    @MockitoBean
+    private ConnectionFactory connectionFactory;
+
+    @MockitoBean
+    private RabbitMqStudyUserService rabbitMqStudyUserService;
 
     private Examination exam;
 

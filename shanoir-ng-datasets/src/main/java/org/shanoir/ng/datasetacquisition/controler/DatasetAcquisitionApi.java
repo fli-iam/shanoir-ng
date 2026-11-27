@@ -32,9 +32,8 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
@@ -57,10 +56,9 @@ public interface DatasetAcquisitionApi {
         @ApiResponse(responseCode = "403", description = "forbidden"),
         @ApiResponse(responseCode = "422", description = "bad parameters"),
         @ApiResponse(responseCode = "500", description = "unexpected error")})
-    @RequestMapping(value = "/datasetacquisition",
+    @PostMapping(value = "/datasetacquisition",
             produces = {"application/json"},
-            consumes = {"application/json"},
-            method = RequestMethod.POST)
+            consumes = {"application/json"})
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#importJob.getExaminationId(), 'CAN_IMPORT'))")
     ResponseEntity<Void> createNewDatasetAcquisition(@Parameter(description = "DatasetAcquisition to create", required = true) @Valid @RequestBody ImportJob importJob) throws RestServiceException;
 
@@ -71,7 +69,7 @@ public interface DatasetAcquisitionApi {
         @ApiResponse(responseCode = "403", description = "forbidden"),
         @ApiResponse(responseCode = "404", description = "none found"),
         @ApiResponse(responseCode = "500", description = "unexpected error")})
-    @RequestMapping(value = "/datasetacquisition/byStudyCard/{studyCardId}", produces = {"application/json"}, method = RequestMethod.GET)
+    @GetMapping(value = "/datasetacquisition/byStudyCard/{studyCardId}", produces = {"application/json"})
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetAcquisitionDTOList(returnObject.getBody(), 'CAN_SEE_ALL')")
     ResponseEntity<List<DatasetAcquisitionWithDatasetsDTO>> findByStudyCard(
@@ -84,7 +82,7 @@ public interface DatasetAcquisitionApi {
         @ApiResponse(responseCode = "403", description = "forbidden"),
         @ApiResponse(responseCode = "404", description = "no datasetAcquisition found"),
         @ApiResponse(responseCode = "500", description = "unexpected error")})
-    @RequestMapping(value = "/datasetacquisition/{datasetAcquisitionId}", produces = {"application/json"}, method = RequestMethod.DELETE)
+    @DeleteMapping(value = "/datasetacquisition/{datasetAcquisitionId}", produces = {"application/json"})
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and  @datasetSecurityService.hasRightOnDatasetAcquisition(#datasetAcquisitionId, 'CAN_ADMINISTRATE')")
     ResponseEntity<Void> deleteDatasetAcquisition(
             @Parameter(description = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId)
@@ -121,7 +119,7 @@ public interface DatasetAcquisitionApi {
         @ApiResponse(responseCode = "403", description = "forbidden"),
         @ApiResponse(responseCode = "404", description = "no datasetAcquisition found"),
         @ApiResponse(responseCode = "500", description = "unexpected error")})
-    @RequestMapping(value = "/datasetacquisition/{datasetAcquisitionId}", produces = {"application/json"}, method = RequestMethod.GET)
+    @GetMapping(value = "/datasetacquisition/{datasetAcquisitionId}", produces = {"application/json"})
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     @PostAuthorize("hasRole('ADMIN') or returnObject == null or returnObject.getBody() == null or @datasetSecurityService.hasRightOnTrustedExaminationDTO(returnObject.getBody().getExamination(), 'CAN_SEE_ALL')")
     ResponseEntity<DatasetAcquisitionDTO> findDatasetAcquisitionById(
@@ -134,7 +132,7 @@ public interface DatasetAcquisitionApi {
         @ApiResponse(responseCode = "403", description = "forbidden"),
         @ApiResponse(responseCode = "404", description = "no datasetAcquisition found"),
         @ApiResponse(responseCode = "500", description = "unexpected error")})
-    @RequestMapping(value = "/datasetacquisition/examination/{examinationId}", produces = {"application/json"}, method = RequestMethod.GET)
+    @GetMapping(value = "/datasetacquisition/examination/{examinationId}", produces = {"application/json"})
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_SEE_ALL'))")
     @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterExaminationDatasetAcquisitionDTOList(returnObject.getBody(), 'CAN_SEE_ALL')")
     ResponseEntity<List<ExaminationDatasetAcquisitionDTO>> findDatasetAcquisitionByExaminationId(
@@ -147,7 +145,7 @@ public interface DatasetAcquisitionApi {
         @ApiResponse(responseCode = "403", description = "forbidden"),
         @ApiResponse(responseCode = "404", description = "no datasetAcquisition found"),
         @ApiResponse(responseCode = "500", description = "unexpected error")})
-    @RequestMapping(value = "/datasetacquisition/byDatasetIds", produces = {"application/json"}, method = RequestMethod.POST)
+    @PostMapping(value = "/datasetacquisition/byDatasetIds", produces = {"application/json"})
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetAcquisitionDTOList(returnObject.getBody(), 'CAN_SEE_ALL')")
     ResponseEntity<List<DatasetAcquisitionWithDatasetsDTO>> findDatasetAcquisitionByDatasetIds(
@@ -185,8 +183,8 @@ public interface DatasetAcquisitionApi {
         @ApiResponse(responseCode = "404", description = "datasetAcquisition not found"),
         @ApiResponse(responseCode = "422", description = "bad parameters or extra data file already existing"),
         @ApiResponse(responseCode = "500", description = "unexpected error, datasetAcquisition not updated")})
-    @RequestMapping(value = "/datasetacquisition/{datasetAcquisitionId}", produces = {"application/json"}, consumes = {
-        "multipart/form-data"}, method = RequestMethod.PUT)
+    @PutMapping(value = "/datasetacquisition/{datasetAcquisitionId}", produces = {"application/json"}, consumes = {
+        "multipart/form-data"})
     @PreAuthorize("#datasetAcquisitionId == #datasetAcquisition.getId() and (hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and (@datasetSecurityService.hasRightOnDatasetAcquisition(#datasetAcquisitionId, 'CAN_IMPORT') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnDatasetAcquisition(#datasetAcquisitionId, 'CAN_ADMINISTRATE')))))")
     ResponseEntity<Void> updateDatasetAcquisition(
             @Parameter(description = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId,

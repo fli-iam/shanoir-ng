@@ -73,12 +73,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import tools.jackson.core.JacksonException;
 
 @Controller
 public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
@@ -123,7 +124,6 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 
     private final HttpServletRequest request;
 
-    @Autowired
     public DatasetAcquisitionApiController(final HttpServletRequest request) {
         this.request = request;
     }
@@ -256,7 +256,7 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (EntityNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } catch (IOException | SolrServerException | ShanoirException e) {
+        } catch (JacksonException | IOException | SolrServerException | ShanoirException e) {
             LOG.error("Error while deleting dataset acquisition: ", e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }

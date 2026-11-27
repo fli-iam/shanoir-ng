@@ -21,6 +21,7 @@ import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 import org.shanoir.ng.vip.executionMonitoring.model.ExecutionStatus;
 
+import java.io.Serial;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +38,7 @@ public class DatasetProcessing extends AbstractEntity {
     /**
      * UID
      */
+    @Serial
     private static final long serialVersionUID = 9196056506956939617L;
 
     /**

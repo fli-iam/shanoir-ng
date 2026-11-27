@@ -14,6 +14,9 @@
 
 package org.shanoir.ng.shared.model;
 
+import java.io.Serial;
+
+
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 
@@ -38,6 +41,7 @@ public class EchoTime extends AbstractEntity {
     /**
      * UID
      */
+    @Serial
     private static final long serialVersionUID = -6515796982839794497L;
 
     /** MR dataset. */
@@ -112,8 +116,7 @@ public class EchoTime extends AbstractEntity {
         boolean retVal = false;
         boolean retVal1 = false;
 
-        if (v instanceof EchoTime) {
-            EchoTime echoTime = (EchoTime) v;
+        if (v instanceof EchoTime echoTime) {
             retVal = echoTime.getEchoNumber() == this.echoNumber;
             retVal1 = echoTime.getEchoTimeValue() == this.echoTimeValue;
         }

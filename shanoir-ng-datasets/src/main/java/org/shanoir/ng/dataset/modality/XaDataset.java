@@ -16,7 +16,10 @@ package org.shanoir.ng.dataset.modality;
 
 import jakarta.persistence.Entity;
 
+
 import org.shanoir.ng.dataset.model.Dataset;
+
+import java.io.Serial;
 import org.shanoir.ng.dataset.model.DatasetType;
 
 /**
@@ -38,6 +41,7 @@ public class XaDataset extends Dataset {
     /**
      * UID
      */
+    @Serial
     private static final long serialVersionUID = -3926301273461759120L;
 
     @Override

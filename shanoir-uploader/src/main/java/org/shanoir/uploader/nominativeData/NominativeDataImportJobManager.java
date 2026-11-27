@@ -25,6 +25,7 @@ import org.shanoir.uploader.ShUpConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
@@ -42,7 +43,10 @@ public class NominativeDataImportJobManager {
      */
     private static final Map<String, ReentrantLock> FILE_LOCKS = new ConcurrentHashMap<>();
     
-    private static ObjectMapper objectMapper = new ObjectMapper();
+    // import-job.json written from a legacy ImportJob (e.g. table import) can contain
+    // "patients" and "selectedSeries", unknown to ImportJobBase: ignore them
+    private static ObjectMapper objectMapper = new ObjectMapper()
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
     private File nominativeDataJobFile;
 

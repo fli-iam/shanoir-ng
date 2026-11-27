@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.examination.model;
 
+import java.io.Serial;
 import java.sql.Types;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -28,6 +29,7 @@ import org.shanoir.ng.shared.hateoas.Links;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.Subject;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
@@ -57,6 +59,7 @@ public class Examination extends HalEntity {
     /**
      * UID
      */
+    @Serial
     private static final long serialVersionUID = -5513725630019270395L;
 
     /** Acquisition Center. */
@@ -160,6 +163,7 @@ public class Examination extends HalEntity {
     public Examination() {
     }
 
+    @JsonCreator(mode = JsonCreator.Mode.DISABLED)
     public Examination(Examination other, Study study, Subject subject) {
         this.centerId = other.centerId;
         this.comment = other.comment;
