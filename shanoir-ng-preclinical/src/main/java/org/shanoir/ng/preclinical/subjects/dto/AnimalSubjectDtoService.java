@@ -17,9 +17,9 @@ package org.shanoir.ng.preclinical.subjects.dto;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.shanoir.ng.preclinical.pathologies.subject_pathologies.SubjectPathology;
+import org.shanoir.ng.preclinical.pathologies.subject.SubjectPathology;
 import org.shanoir.ng.preclinical.subjects.model.AnimalSubject;
-import org.shanoir.ng.preclinical.therapies.subject_therapies.SubjectTherapy;
+import org.shanoir.ng.preclinical.therapies.subject.SubjectTherapy;
 import org.springframework.stereotype.Service;
 
 @Service

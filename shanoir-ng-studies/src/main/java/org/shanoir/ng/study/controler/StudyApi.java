@@ -368,7 +368,7 @@ public interface StudyApi {
             @ApiResponse(responseCode = "422", description = "bad parameters"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
     @GetMapping(value = "dua-download/{studyId}/{fileName:.+}/")
-    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.canDownloadDua(#studyId))")
     void downloadDataUseAgreement(
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
             @Parameter(description = "file to download", required = true) @PathVariable("fileName") String fileName, HttpServletResponse response) throws Exception;

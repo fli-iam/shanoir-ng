@@ -122,7 +122,7 @@ public interface ImporterApi {
             @Parameter(name = "header detail", required = false) @RequestPart(value = "header", required = false) MultipartFile headerFile)
             throws RestServiceException;
 
-    @Operation(summary = "Import one DICOM .zip file", description = "Import DICOM .zip file already uploaded", tags = {
+    @Operation(summary = "Import one DICOM .zip file", description = "Import a DICOM .zip file converted from a Bruker upload by ms preclinical", tags = {
         "Import one DICOM .zip file"})
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "success returns file path"),
@@ -130,6 +130,7 @@ public interface ImporterApi {
         @ApiResponse(responseCode = "409", description = "Already exists - conflict"),
         @ApiResponse(responseCode = "200", description = "Unexpected Error")})
     @PostMapping(value = "/import_dicom/", produces = {"application/json"}, consumes = {"application/json"})
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT'))")
     ResponseEntity<ImportJob> importDicomZipFile(@Parameter(name = "file path") @RequestBody String dicomZipFilename)
             throws RestServiceException;
 

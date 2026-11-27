@@ -239,4 +239,20 @@ public class ExaminationServiceTest {
         return examination;
     }
 
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_USER" })
+    public void updateWithExtraDataStoresTheFilesWithTheirNameOnly() throws Exception {
+        given(storageService.storeExtraData(Mockito.eq(EXAMINATION_ID), Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.anyLong()))
+                .willReturn("file:///datasets/examination-1/b.pdf");
+        MockMultipartFile file = new MockMultipartFile("files", "../../b.pdf", "application/pdf", new byte[] {1});
+        Examination examination = createExamination();
+        examination.setExtraDataFilePathList(new ArrayList<>(List.of("b.pdf")));
+
+        examinationService.updateWithExtraData(examination, List.of(file));
+
+        Mockito.verify(storageService).existsExtraData(EXAMINATION_ID, "b.pdf");
+        Mockito.verify(storageService).storeExtraData(Mockito.eq(EXAMINATION_ID), Mockito.eq("b.pdf"), Mockito.any(),
+                Mockito.eq("application/pdf"), Mockito.eq(1L));
+    }
+
 }

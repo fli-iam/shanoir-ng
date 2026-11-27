@@ -16,7 +16,7 @@ package org.shanoir.ng.utils;
 
 import org.shanoir.ng.preclinical.therapies.Therapy;
 import org.shanoir.ng.preclinical.therapies.TherapyType;
-import org.shanoir.ng.preclinical.therapies.subject_therapies.SubjectTherapy;
+import org.shanoir.ng.preclinical.therapies.subject.SubjectTherapy;
 
 /**
  * Utility class for test. Generates therapy.

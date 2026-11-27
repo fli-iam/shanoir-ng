@@ -21,8 +21,9 @@ spring:
     import: "classpath:/shanoir-shared.yml"
   datasource:
     url: jdbc:mariadb://${SHANOIR_DB_HOST:${SHANOIR_PREFIX}database}:${SHANOIR_DB_PORT:3306}/${SHANOIR_DB_NAME:import}?characterEncoding=utf-8
-    username: import
-    password: password
+    # set by docker compose (SPRING_DATASOURCE_USERNAME/PASSWORD), from .env
+    username: ${SPRING_DATASOURCE_USERNAME:}
+    password: ${SPRING_DATASOURCE_PASSWORD:}
     driver-class-name: org.mariadb.jdbc.Driver
     hikari.maximum-pool-size: 50
     hikari.minimum-idle: 50
@@ -62,8 +63,7 @@ spring:
   rabbitmq:
     host: ${SHANOIR_PREFIX}rabbitmq
     port: 5672
-    username: guest
-    password: guest
+    # username and password set by docker compose (SPRING_RABBITMQ_*), from .env
     template:
       reply-timeout: 60000
     listener:
@@ -121,6 +121,9 @@ logging:
 shanoir:
   import:
     directory: /tmp
+    # Folder where ms-preclinical writes the DICOM zip files converted from Bruker uploads (shared /tmp volume):
+    # import_dicom only imports the zip files of this folder
+    bruker-convert-directory: /tmp/bruker/convert
     # Import from PACS configuration
     pacs:
       query:

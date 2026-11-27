@@ -10,16 +10,25 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
+# Only nginx (443) and the dcm4chee DICOM (11112) and HL7 (2575) ports are published on
+# all interfaces. The other ports are only for the administrators of this host: they
+# are bound to 127.0.0.1 (reach them from another machine through an SSH tunnel, e.g.
+# 'ssh -L 8081:127.0.0.1:8081 <host>'). Docker publishes ports past the host firewall,
+# so a port bound to all interfaces is reachable from the network even if the
+# firewall blocks it. The containers reach each other on shanoir_ng_network.
 services:
   #
   # Keycloak: database and service
   #
   keycloak-database:
     container_name: "${SHANOIR_PREFIX}keycloak-database"
-    image: "ghcr.io/fli-iam/shanoir-ng/keycloak-database:NG_v2.14.0"
+    image: "${SHANOIR_REGISTRY:?is not set, see .env.example}/keycloak-database:${SHANOIR_IMAGE_TAG:?is not set, see .env.example}"
     environment:
       - MARIADB_DATABASE=keycloak
-      - MARIADB_ROOT_PASSWORD=password
+      - "MARIADB_ROOT_PASSWORD=${SHANOIR_KEYCLOAK_DB_ROOT_PASSWORD:?is not set, see .env.example}"
+      # user of Keycloak, with rights on the keycloak schema only
+      - "MARIADB_USER=${SHANOIR_KEYCLOAK_DB_USER:?is not set, see .env.example}"
+      - "MARIADB_PASSWORD=${SHANOIR_KEYCLOAK_DB_PASSWORD:?is not set, see .env.example}"
       - MARIADB_AUTO_UPGRADE=1
     ulimits:
       nofile:
@@ -30,7 +39,7 @@ services:
     networks:
       - shanoir_ng_network
     healthcheck:
-      test: [ "CMD", "mariadb-admin", "ping", "-h", "localhost", "-u", "root", "-ppassword" ]
+      test: [ "CMD", "healthcheck.sh", "--connect", "--innodb_initialized" ]
       interval: 3s
       timeout: 2s
       retries: 10
@@ -39,6 +48,8 @@ services:
     container_name: "${SHANOIR_PREFIX}keycloak"
     #command: ["start-dev"]   # default is "start" to run in production mode
     environment:
+      - "DB_USER=${SHANOIR_KEYCLOAK_DB_USER:?is not set, see .env.example}"
+      - "DB_PASSWORD=${SHANOIR_KEYCLOAK_DB_PASSWORD:?is not set, see .env.example}"
       - SHANOIR_NOTIFICATION_EMAIL
       - SHANOIR_NOTIFICATION_NAME
       - SHANOIR_URL_SCHEME
@@ -49,7 +60,7 @@ services:
       - SHANOIR_VIEWER_VIDEPE_URL_HOST
       - SHANOIR_MIGRATION
       - SHANOIR_KEYCLOAK_USER
-      - SHANOIR_KEYCLOAK_PASSWORD
+      - "SHANOIR_KEYCLOAK_PASSWORD=${SHANOIR_KEYCLOAK_PASSWORD:?is not set, see .env.example}"
       - SHANOIR_KEYCLOAK_URL
       - SHANOIR_ALLOWED_ADMIN_IPS
       - SHANOIR_SMTP_HOST
@@ -60,14 +71,14 @@ services:
       - SHANOIR_SMTP_STARTTLS_ENABLE
       - SHANOIR_SMTP_STARTTLS_REQUIRED
       - SHANOIR_SMTP_FROM
-      - NEUROBAGEL_CLIENT_SECRET
-    image: "ghcr.io/fli-iam/shanoir-ng/keycloak:NG_v2.14.0"
+      - "NEUROBAGEL_CLIENT_SECRET=${NEUROBAGEL_CLIENT_SECRET:?is not set, see .env.example}"
+    image: "${SHANOIR_REGISTRY:?is not set, see .env.example}/keycloak:${SHANOIR_IMAGE_TAG:?is not set, see .env.example}"
     volumes:
       - "keycloak-logs:/opt/keycloak/data/log"
     networks:
       - shanoir_ng_network
     ports:
-      - "8080:8080"
+      - "127.0.0.1:8080:8080"
     depends_on:
       keycloak-database:
         condition: service_healthy
@@ -77,11 +88,19 @@ services:
   rabbitmq:
     container_name: "${SHANOIR_PREFIX}rabbitmq"
     image: rabbitmq:3.10.7
+    # fixed node name (rabbit@rabbitmq): RabbitMQ keeps its data in mnesia/rabbit@<hostname>,
+    # so with the default hostname (the container id) every new container started empty
+    hostname: rabbitmq
+    environment:
+      # created when the volume is initialised, instead of the default guest/guest
+      - "RABBITMQ_DEFAULT_USER=${SHANOIR_RABBITMQ_USER:?is not set, see .env.example}"
+      - "RABBITMQ_DEFAULT_PASS=${SHANOIR_RABBITMQ_PASSWORD:?is not set, see .env.example}"
     volumes:
-      - "rabbitmq-data:/var/lib/rabbitmq/mnesia/rabbitmq"
+      # the whole data directory (accounts, queues, persistent messages, erlang cookie)
+      - "rabbitmq-data:/var/lib/rabbitmq"
     ports:
-     - "5672:5672"
-     - "15672:15672"
+     - "127.0.0.1:5672:5672"
+     - "127.0.0.1:15672:15672"
     networks:
       - shanoir_ng_network
   #
@@ -91,9 +110,7 @@ services:
   #  
   init-cert-and-logs:
     container_name: "${SHANOIR_PREFIX}init-cert-and-logs"
-    build:
-      context: docker-compose
-      target: init-cert-and-logs
+    image: "${SHANOIR_REGISTRY:?is not set, see .env.example}/init-cert-and-logs:${SHANOIR_IMAGE_TAG:?is not set, see .env.example}"
     environment:
       - SHANOIR_URL_HOST
       - SHANOIR_CERTIFICATE
@@ -107,11 +124,27 @@ services:
   #
   database:
     container_name: "${SHANOIR_PREFIX}database"
-    image: "ghcr.io/fli-iam/shanoir-ng/database:NG_v2.14.0"
-    command: --max_allowed_packet 20000000
+    image: "${SHANOIR_REGISTRY:?is not set, see .env.example}/database:${SHANOIR_IMAGE_TAG:?is not set, see .env.example}"
+    # max_connections: the connection pools of the microservices add up to 150 (datasets 70,
+    # import 50, the others 10), so the default (151) leaves no room for an init run, the
+    # migrations or an admin session ('Too many connections')
+    command: --max_allowed_packet 20000000 --max_connections 300
     environment:
-      - MARIADB_ROOT_PASSWORD=password
+      - "MARIADB_ROOT_PASSWORD=${SHANOIR_DB_ROOT_PASSWORD:?is not set, see .env.example}"
       - MARIADB_AUTO_UPGRADE=1
+      # accounts of the microservices, only read when the volume is initialised
+      - "SHANOIR_STUDIES_DB_USER=${SHANOIR_STUDIES_DB_USER:?is not set, see .env.example}"
+      - "SHANOIR_STUDIES_DB_PASSWORD=${SHANOIR_STUDIES_DB_PASSWORD:?is not set, see .env.example}"
+      - "SHANOIR_USERS_DB_USER=${SHANOIR_USERS_DB_USER:?is not set, see .env.example}"
+      - "SHANOIR_USERS_DB_PASSWORD=${SHANOIR_USERS_DB_PASSWORD:?is not set, see .env.example}"
+      - "SHANOIR_IMPORT_DB_USER=${SHANOIR_IMPORT_DB_USER:?is not set, see .env.example}"
+      - "SHANOIR_IMPORT_DB_PASSWORD=${SHANOIR_IMPORT_DB_PASSWORD:?is not set, see .env.example}"
+      - "SHANOIR_DATASETS_DB_USER=${SHANOIR_DATASETS_DB_USER:?is not set, see .env.example}"
+      - "SHANOIR_DATASETS_DB_PASSWORD=${SHANOIR_DATASETS_DB_PASSWORD:?is not set, see .env.example}"
+      - "SHANOIR_PRECLINICAL_DB_USER=${SHANOIR_PRECLINICAL_DB_USER:?is not set, see .env.example}"
+      - "SHANOIR_PRECLINICAL_DB_PASSWORD=${SHANOIR_PRECLINICAL_DB_PASSWORD:?is not set, see .env.example}"
+      - "SHANOIR_MIGRATIONS_DB_USER=${SHANOIR_MIGRATIONS_DB_USER:?is not set, see .env.example}"
+      - "SHANOIR_MIGRATIONS_DB_PASSWORD=${SHANOIR_MIGRATIONS_DB_PASSWORD:?is not set, see .env.example}"
     ulimits:
       nofile:
         soft: 262144
@@ -119,11 +152,11 @@ services:
     volumes:
       - "database-data:/var/lib/mysql"
     ports:
-     - "3307:3306"
+     - "127.0.0.1:3307:3306"
     networks:
       - shanoir_ng_network
     healthcheck:
-      test: [ "CMD", "mariadb-admin", "ping", "-h", "localhost", "-u", "root", "-ppassword" ]
+      test: [ "CMD", "healthcheck.sh", "--connect", "--innodb_initialized" ]
       interval: 3s
       timeout: 2s
       retries: 10
@@ -133,8 +166,10 @@ services:
   #
   database-migrations:
     container_name: "${SHANOIR_PREFIX}database-migrations"
-    image: "ghcr.io/fli-iam/shanoir-ng/database-migrations:NG_v2.14.0"
+    image: "${SHANOIR_REGISTRY:?is not set, see .env.example}/database-migrations:${SHANOIR_IMAGE_TAG:?is not set, see .env.example}"
     environment:
+      - "SHANOIR_MIGRATIONS_DB_USER=${SHANOIR_MIGRATIONS_DB_USER:?is not set, see .env.example}"
+      - "SHANOIR_MIGRATIONS_DB_PASSWORD=${SHANOIR_MIGRATIONS_DB_PASSWORD:?is not set, see .env.example}"
       - SHANOIR_MIGRATION
     networks:
       - shanoir_ng_network
@@ -147,8 +182,12 @@ services:
   #
   users:
     container_name: "${SHANOIR_PREFIX}users"
-    image: "ghcr.io/fli-iam/shanoir-ng/users:NG_v2.14.0"
+    image: "${SHANOIR_REGISTRY:?is not set, see .env.example}/users:${SHANOIR_IMAGE_TAG:?is not set, see .env.example}"
     environment:
+      - "SPRING_RABBITMQ_USERNAME=${SHANOIR_RABBITMQ_USER:?is not set, see .env.example}"
+      - "SPRING_RABBITMQ_PASSWORD=${SHANOIR_RABBITMQ_PASSWORD:?is not set, see .env.example}"
+      - "SPRING_DATASOURCE_USERNAME=${SHANOIR_USERS_DB_USER:?is not set, see .env.example}"
+      - "SPRING_DATASOURCE_PASSWORD=${SHANOIR_USERS_DB_PASSWORD:?is not set, see .env.example}"
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
       - SHANOIR_URL_HOST
@@ -156,7 +195,7 @@ services:
       - SHANOIR_KEYCLOAK_URL
       - SHANOIR_KEYCLOAK_INTERNAL_URL
       - SHANOIR_KEYCLOAK_USER
-      - SHANOIR_KEYCLOAK_PASSWORD
+      - "SHANOIR_KEYCLOAK_PASSWORD=${SHANOIR_KEYCLOAK_PASSWORD:?is not set, see .env.example}"
       - SHANOIR_NOTIFICATION_EMAIL
       - SHANOIR_NOTIFICATION_NAME
       - SHANOIR_CERTIFICATE
@@ -173,8 +212,7 @@ services:
     networks:
       - shanoir_ng_network
     ports:
-     - "9901:9901"
-     - "9911:9911"
+     - "127.0.0.1:9901:9901"
     depends_on:
       init-cert-and-logs:
         condition: service_completed_successfully
@@ -189,8 +227,12 @@ services:
   #
   studies:
     container_name: "${SHANOIR_PREFIX}studies"
-    image: "ghcr.io/fli-iam/shanoir-ng/studies:NG_v2.14.0"
+    image: "${SHANOIR_REGISTRY:?is not set, see .env.example}/studies:${SHANOIR_IMAGE_TAG:?is not set, see .env.example}"
     environment:
+      - "SPRING_RABBITMQ_USERNAME=${SHANOIR_RABBITMQ_USER:?is not set, see .env.example}"
+      - "SPRING_RABBITMQ_PASSWORD=${SHANOIR_RABBITMQ_PASSWORD:?is not set, see .env.example}"
+      - "SPRING_DATASOURCE_USERNAME=${SHANOIR_STUDIES_DB_USER:?is not set, see .env.example}"
+      - "SPRING_DATASOURCE_PASSWORD=${SHANOIR_STUDIES_DB_PASSWORD:?is not set, see .env.example}"
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
       - SHANOIR_URL_HOST
@@ -212,8 +254,7 @@ services:
     networks:
       - shanoir_ng_network
     ports:
-     - "9902:9902"
-     - "9912:9912"
+     - "127.0.0.1:9902:9902"
     depends_on:
       init-cert-and-logs:
         condition: service_completed_successfully
@@ -230,8 +271,12 @@ services:
   #
   import:
     container_name: "${SHANOIR_PREFIX}import"
-    image: "ghcr.io/fli-iam/shanoir-ng/import:NG_v2.14.0"
+    image: "${SHANOIR_REGISTRY:?is not set, see .env.example}/import:${SHANOIR_IMAGE_TAG:?is not set, see .env.example}"
     environment:
+      - "SPRING_RABBITMQ_USERNAME=${SHANOIR_RABBITMQ_USER:?is not set, see .env.example}"
+      - "SPRING_RABBITMQ_PASSWORD=${SHANOIR_RABBITMQ_PASSWORD:?is not set, see .env.example}"
+      - "SPRING_DATASOURCE_USERNAME=${SHANOIR_IMPORT_DB_USER:?is not set, see .env.example}"
+      - "SPRING_DATASOURCE_PASSWORD=${SHANOIR_IMPORT_DB_PASSWORD:?is not set, see .env.example}"
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
       - SHANOIR_URL_HOST
@@ -245,8 +290,7 @@ services:
     networks:
       - shanoir_ng_network
     ports:
-     - "9903:9903"
-     - "9913:9913"
+     - "127.0.0.1:9903:9903"
      # uncomment below for local testing of import-from-pacs, enable:
      # pacs-to-ms-import: c-move from dcm4chee arc light to ms import
      # do not add by default, as it blocks local ShUp from using 44105
@@ -267,8 +311,12 @@ services:
   #
   datasets:
     container_name: "${SHANOIR_PREFIX}datasets"
-    image: "ghcr.io/fli-iam/shanoir-ng/datasets:NG_v2.14.0"
+    image: "${SHANOIR_REGISTRY:?is not set, see .env.example}/datasets:${SHANOIR_IMAGE_TAG:?is not set, see .env.example}"
     environment:
+      - "SPRING_RABBITMQ_USERNAME=${SHANOIR_RABBITMQ_USER:?is not set, see .env.example}"
+      - "SPRING_RABBITMQ_PASSWORD=${SHANOIR_RABBITMQ_PASSWORD:?is not set, see .env.example}"
+      - "SPRING_DATASOURCE_USERNAME=${SHANOIR_DATASETS_DB_USER:?is not set, see .env.example}"
+      - "SPRING_DATASOURCE_PASSWORD=${SHANOIR_DATASETS_DB_PASSWORD:?is not set, see .env.example}"
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
       - SHANOIR_URL_HOST
@@ -287,7 +335,7 @@ services:
       - S3_BUCKET_DATASETS
       - VIP_URL_SCHEME
       - VIP_URL_HOST
-      - VIP_CLIENT_SECRET
+      - "VIP_CLIENT_SECRET=${VIP_CLIENT_SECRET:?is not set, see .env.example}"
       - VIP_MAX_DOWNLOAD
       - VIP_COMPRESSION_LEVEL
       - SHANOIR_CONTINUANCE_HOUR
@@ -301,8 +349,7 @@ services:
     networks:
       - shanoir_ng_network
     ports:
-     - "9904:9904"
-     - "9914:9914"
+     - "127.0.0.1:9904:9904"
     depends_on:
       init-cert-and-logs:
         condition: service_completed_successfully
@@ -321,8 +368,12 @@ services:
   #
   preclinical:
     container_name: "${SHANOIR_PREFIX}preclinical"
-    image: "ghcr.io/fli-iam/shanoir-ng/preclinical:NG_v2.14.0"
+    image: "${SHANOIR_REGISTRY:?is not set, see .env.example}/preclinical:${SHANOIR_IMAGE_TAG:?is not set, see .env.example}"
     environment:
+      - "SPRING_RABBITMQ_USERNAME=${SHANOIR_RABBITMQ_USER:?is not set, see .env.example}"
+      - "SPRING_RABBITMQ_PASSWORD=${SHANOIR_RABBITMQ_PASSWORD:?is not set, see .env.example}"
+      - "SPRING_DATASOURCE_USERNAME=${SHANOIR_PRECLINICAL_DB_USER:?is not set, see .env.example}"
+      - "SPRING_DATASOURCE_PASSWORD=${SHANOIR_PRECLINICAL_DB_PASSWORD:?is not set, see .env.example}"
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
       - SHANOIR_URL_HOST
@@ -343,8 +394,7 @@ services:
     networks:
       - shanoir_ng_network
     ports:
-     - "9905:9905"
-     - "9915:9915"
+     - "127.0.0.1:9905:9905"
     depends_on:
       init-cert-and-logs:
         condition: service_completed_successfully
@@ -362,8 +412,10 @@ services:
   #
   nifti-conversion:
     container_name: "${SHANOIR_PREFIX}nifti-conversion"
-    image: "ghcr.io/fli-iam/shanoir-ng/nifti-conversion:NG_v2.14.0"
+    image: "${SHANOIR_REGISTRY:?is not set, see .env.example}/nifti-conversion:${SHANOIR_IMAGE_TAG:?is not set, see .env.example}"
     environment:
+      - "SPRING_RABBITMQ_USERNAME=${SHANOIR_RABBITMQ_USER:?is not set, see .env.example}"
+      - "SPRING_RABBITMQ_PASSWORD=${SHANOIR_RABBITMQ_PASSWORD:?is not set, see .env.example}"
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
       - SHANOIR_URL_HOST
@@ -386,7 +438,7 @@ services:
   #
   solr:
     container_name: "${SHANOIR_PREFIX}solr"
-    image: "ghcr.io/fli-iam/shanoir-ng/solr:NG_v2.14.0"
+    image: "${SHANOIR_REGISTRY:?is not set, see .env.example}/solr:${SHANOIR_IMAGE_TAG:?is not set, see .env.example}"
     environment:
       - SOLR_LOG_LEVEL=SEVERE
     volumes:
@@ -394,7 +446,7 @@ services:
     networks:
       - shanoir_ng_network
     ports:
-      - "8983:8983"
+      - "127.0.0.1:8983:8983"
   # Backup PACS microservice: dcm4chee 5 arc-light
   #
   # The config for the dcm4chee containers is derived from this template:
@@ -404,6 +456,15 @@ services:
     image: dcm4che/slapd-dcm4chee:2.6.2-27.0
     environment:
       LDAP_INIT_CMDS: /etc/openldap/configure.sh /opt/shanoir/ldap-first-start.sh
+      # passwords of the LDAP admin accounts, only read when the volume is initialised
+      LDAP_ROOTPASS: "${SHANOIR_PACS_LDAP_ROOT_PASSWORD:?is not set, see .env.example}"
+      LDAP_CONFIGPASS: "${SHANOIR_PACS_LDAP_CONFIG_PASSWORD:?is not set, see .env.example}"
+      # storage configuration, only read when the volume is initialised
+      STORAGE_DIR: "${SHANOIR_PACS_STORAGE_DIR:?is not set, see .env.example}"
+      LDAP_STORAGE_ENTRY_DN: "${SHANOIR_PACS_LDAP_STORAGE_ENTRY_DN:-}"
+      LDAP_STORAGE_URI: "${SHANOIR_PACS_LDAP_STORAGE_URI:-}"
+      LDAP_PROPERTY_TARGET_DN: "${SHANOIR_PACS_LDAP_PROPERTY_TARGET_DN:-}"
+      LDAP_DCM_PROPERTIES: "${SHANOIR_PACS_LDAP_DCM_PROPERTIES:-}"
     logging:
       driver: json-file
       options:
@@ -411,8 +472,7 @@ services:
     networks:
       - shanoir_ng_network
     ports:
-      - "389:389"
-    env_file: ./docker-compose/dcm4chee/variables.env
+      - "127.0.0.1:389:389"
     volumes:
       - "dcm4chee-ldap-data:/var/lib/openldap/openldap-data"
       - "dcm4chee-sldap-data:/etc/openldap/slapd.d"
@@ -427,8 +487,12 @@ services:
     networks:
       - shanoir_ng_network
     ports:
-      - "5432:5432"
-    env_file: ./docker-compose/dcm4chee/variables.env
+      - "127.0.0.1:5432:5432"
+    environment:
+      # name and user of the database, only read when the volume is initialised
+      POSTGRES_DB: "${SHANOIR_PACS_DATABASE_NAME:?is not set, see .env.example}"
+      POSTGRES_USER: "${SHANOIR_PACS_DATABASE_USER:?is not set, see .env.example}"
+      POSTGRES_PASSWORD: "${SHANOIR_PACS_DATABASE_PASSWORD:?is not set, see .env.example}"
     volumes:
       - "dcm4chee-database-data:/var/lib/postgresql/data"
   dcm4chee-arc:
@@ -441,14 +505,20 @@ services:
     networks:
       - shanoir_ng_network
     ports:
-      - "8081:8081"
-      - "8443:8443"
-      - "9990:9990"
+      - "127.0.0.1:8081:8081"
+      - "127.0.0.1:8443:8443"
+      - "127.0.0.1:9990:9990"
       - "11112:11112"
       - "2575:2575"
-    env_file: ./docker-compose/dcm4chee/variables.env
     environment:
+      # fixed: datasets (dcm4chee-arc.port.web) and the WADO URLs stored in the database use 8081
+      HTTP_PORT: 8081
       POSTGRES_HOST: "${SHANOIR_PREFIX}dcm4chee-database"
+      POSTGRES_DB: "${SHANOIR_PACS_DATABASE_NAME:?is not set, see .env.example}"
+      POSTGRES_USER: "${SHANOIR_PACS_DATABASE_USER:?is not set, see .env.example}"
+      POSTGRES_PASSWORD: "${SHANOIR_PACS_DATABASE_PASSWORD:?is not set, see .env.example}"
+      LDAP_ROOTPASS: "${SHANOIR_PACS_LDAP_ROOT_PASSWORD:?is not set, see .env.example}"
+      WILDFLY_PACSDS_MAX_POOL_SIZE: "${SHANOIR_PACS_DATABASE_MAX_POOL_SIZE:?is not set, see .env.example}"
       WILDFLY_CHOWN: /storage
       WILDFLY_WAIT_FOR: "${SHANOIR_PREFIX}ldap:389 ${SHANOIR_PREFIX}dcm4chee-database:5432"
     depends_on:
@@ -462,7 +532,7 @@ services:
   #
   nginx:
     container_name: shanoir-ng-nginx
-    image: "ghcr.io/fli-iam/shanoir-ng/nginx:NG_v2.14.0"
+    image: "${SHANOIR_REGISTRY:?is not set, see .env.example}/nginx:${SHANOIR_IMAGE_TAG:?is not set, see .env.example}"
     environment:
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
@@ -504,9 +574,9 @@ services:
 
   bids-validator:
     container_name: "${SHANOIR_PREFIX}bids-validator"
-    image: "ghcr.io/fli-iam/shanoir-ng/bids-validator:NG_v2.14.0"
+    image: "${SHANOIR_REGISTRY:?is not set, see .env.example}/bids-validator:${SHANOIR_IMAGE_TAG:?is not set, see .env.example}"
     environment:
-      - AMQP_URL=amqp://guest:guest@rabbitmq:5672/
+      - "AMQP_URL=amqp://${SHANOIR_RABBITMQ_USER:?is not set, see .env.example}:${SHANOIR_RABBITMQ_PASSWORD:?is not set, see .env.example}@rabbitmq:5672/"
       - IN_QUEUE=bids.validate
       - OUT_QUEUE=bids.validated
       - DATA_ROOT=/var/bids-data

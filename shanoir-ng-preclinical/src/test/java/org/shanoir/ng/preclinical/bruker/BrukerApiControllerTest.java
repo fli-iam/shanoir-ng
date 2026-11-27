@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.preclinical.bruker;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -25,12 +26,12 @@ import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mockito;
 import org.shanoir.ng.ShanoirPreclinicalApplication;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -74,18 +75,22 @@ public class BrukerApiControllerTest {
     }
 
     @Test
-    @WithMockUser
+    @WithMockKeycloakUser(id = 12, authorities = { "ROLE_ADMIN" })
     public void uploadBrukerFileTest() throws Exception {
         String r = "test";
         given(rabbitTemplate.convertSendAndReceive(Mockito.eq(RabbitMQConfiguration.BRUKER_CONVERSION_QUEUE), Mockito.anyString())).willReturn(true);
 
         MockMultipartFile firstFile = new MockMultipartFile("files", "2dseq", "text/plain", "some xml".getBytes());
-        mvc.perform(MockMvcRequestBuilders.multipart(REQUEST_PATH_UPLOAD_BRUKER).file(firstFile))
-                .andExpect(status().isOk());
+        String zip = mvc.perform(MockMvcRequestBuilders.multipart(REQUEST_PATH_UPLOAD_BRUKER).file(firstFile))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        // ms-import only imports the zip files of the Bruker conversion folder
+        assertTrue(zip.contains("/bruker/convert/12/2dseq/"), zip);
+        assertTrue(zip.endsWith(".converted.zip"), zip);
     }
 
     @Test
-    @WithMockUser
+    @WithMockKeycloakUser(id = 12, authorities = { "ROLE_ADMIN" })
     public void uploadBrukerFileNotValidTest() throws Exception {
         MockMultipartFile firstFile = new MockMultipartFile("files", "filename.txt", "text/plain",
                 "some xml".getBytes());

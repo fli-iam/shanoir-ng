@@ -17,6 +17,7 @@ package org.shanoir.ng.preclinical.bruker;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
@@ -34,6 +35,10 @@ public interface BrukerApi {
             @ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
             @ApiResponse(responseCode = "406", description = "Not valid bruker file"),
             @ApiResponse(responseCode = "500", description = "Unexpected Error") })
+    // the study is only chosen after the conversion, in the import: like the other uploads of ms import,
+    // the user must be able to import in at least one study
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') "
+            + "and @preclinicalSecurityService.hasRightOnAtLeastOneStudy('CAN_IMPORT'))")
     @PostMapping(value = "/bruker/upload", produces = { "application/json" }, consumes = {
             MediaType.MULTIPART_FORM_DATA_VALUE, "application/json" })
     ResponseEntity<String> uploadBrukerFile(@RequestParam("files") MultipartFile[] uploadfiles)

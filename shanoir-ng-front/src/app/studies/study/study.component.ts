@@ -653,9 +653,7 @@ export class StudyComponent extends EntityComponent<Study> {
             return Promise.all(uploads).then();
         }).then(study => {
             if(!study){
-                if(this.saveError){
-                    this.consoleService.log('warn', this.saveError.message);
-                }
+                // the save errors are shown by the form, or in the console
                 return;
             }
             if (study.studyCardPolicy == 'MANDATORY') {

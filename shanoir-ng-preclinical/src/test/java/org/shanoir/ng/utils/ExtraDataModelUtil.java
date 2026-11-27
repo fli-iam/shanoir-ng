@@ -14,9 +14,9 @@
 
 package org.shanoir.ng.utils;
 
-import org.shanoir.ng.preclinical.extra_data.bloodgas_data.BloodGasData;
-import org.shanoir.ng.preclinical.extra_data.examination_extra_data.ExaminationExtraData;
-import org.shanoir.ng.preclinical.extra_data.physiological_data.PhysiologicalData;
+import org.shanoir.ng.preclinical.extradata.bloodgas.BloodGasData;
+import org.shanoir.ng.preclinical.extradata.examination.ExaminationExtraData;
+import org.shanoir.ng.preclinical.extradata.physiological.PhysiologicalData;
 
 /**
  * Utility class for test.

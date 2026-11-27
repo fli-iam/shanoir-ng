@@ -20,10 +20,13 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -35,6 +38,7 @@ import org.dcm4che3.data.Tag;
 import org.dcm4che3.data.VR;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.ArgumentCaptor;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
@@ -72,6 +76,7 @@ import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
@@ -132,6 +137,9 @@ public class ImporterServiceTest {
 
     private Examination exam;
 
+    @TempDir
+    private Path tempDir;
+
     @BeforeEach
     public void setUp() throws IOException {
         exam = new Examination();
@@ -167,7 +175,9 @@ public class ImporterServiceTest {
 
         ImportJob importJob = new ImportJob();
         importJob.setSeries(series);
-        importJob.setArchive("/tmp/bruker/convert/brucker/blabla.zip");
+        // a file of the server outside of the Bruker conversion folder of the user
+        importJob.setArchive(Files.write(tempDir.resolve("secret.zip"), new byte[] {1}).toString());
+        ReflectionTestUtils.setField(service, "brukerConvertDir", tempDir.resolve("bruker/convert").toString());
         importJob.setExaminationId(Long.valueOf(2));
         importJob.setSubjectName("subjectName");
         importJob.setStudyName("studyName");
@@ -239,9 +249,10 @@ public class ImporterServiceTest {
 
             assertNotNull(datasetAcq);
 
-            // AN archive is not referenced in the examination (file not existing)
+            // AN archive is not referenced in the examination (not a Bruker archive of the user): it is not even read
             List<String> extradata = datasetAcq.getExamination().getExtraDataFilePathList();
             assertNull(extradata);
+            verify(examinationService, never()).addExtraData(any(), any());
         }
     }
 }

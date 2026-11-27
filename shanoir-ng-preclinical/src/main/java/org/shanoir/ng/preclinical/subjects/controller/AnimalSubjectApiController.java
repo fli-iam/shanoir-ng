@@ -34,6 +34,7 @@ import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.shared.security.PreclinicalSecurityService;
 import org.shanoir.ng.shared.validation.RefValueExistsValidator;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
@@ -77,16 +78,19 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
     @Autowired
     private AnimalSubjectDtoService dtoService;
 
+    @Autowired
+    private PreclinicalSecurityService securityService;
+
     @Override
     public ResponseEntity<AnimalSubjectDto> createAnimalSubject(
-            @Parameter(name = "AnimalSubject object to add", required = true) @RequestBody @Valid final AnimalSubjectDto dto,
+            @Parameter(name = "AnimalSubject object to add", required = true) @RequestBody @Valid final AnimalSubjectDto animalSubject,
             final BindingResult result) throws RestServiceException {
         try {
-            SubjectDto createdSubjectDto = this.createSubject(dto.getSubject());
-            AnimalSubject animalSubject = dtoService.getAnimalSubjectFromAnimalSubjectDto(dto);
-            this.validateAnimalSubjectCreation(animalSubject, result);
-            animalSubject.setId(createdSubjectDto.getId());
-            final AnimalSubject createdAnimal = subjectService.save(animalSubject);
+            SubjectDto createdSubjectDto = this.createSubject(animalSubject.getSubject());
+            AnimalSubject animal = dtoService.getAnimalSubjectFromAnimalSubjectDto(animalSubject);
+            this.validateAnimalSubjectCreation(animal, result);
+            animal.setId(createdSubjectDto.getId());
+            final AnimalSubject createdAnimal = subjectService.save(animal);
             eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_PRECLINICAL_SUBJECT_EVENT, createdAnimal.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
             AnimalSubjectDto animalSubjectDto = dtoService.getAnimalSubjectDtoFromAnimalSubject(createdAnimal);
             animalSubjectDto.setSubject(createdSubjectDto);
@@ -153,7 +157,9 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
 
     @Override
     public ResponseEntity<List<AnimalSubjectDto>> findByIds(List<Long> ids) {
-        final List<AnimalSubject> subjects = subjectService.findByIds(ids);
+        // only the animal subjects of the studies the user can see
+        final List<AnimalSubject> subjects = subjectService.findByIds(
+                securityService.filterSubjectIdsHasRight(ids, "CAN_SEE_ALL"));
         if (subjects.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }

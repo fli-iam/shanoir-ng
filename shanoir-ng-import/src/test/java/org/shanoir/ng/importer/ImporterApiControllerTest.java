@@ -14,6 +14,10 @@
 
 package org.shanoir.ng.importer;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
@@ -28,6 +32,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
@@ -37,6 +42,8 @@ import java.util.zip.ZipOutputStream;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.shanoir.ng.importer.dicom.DicomDirGeneratorService;
@@ -56,6 +63,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -63,6 +71,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
 
 import tools.jackson.databind.json.JsonMapper;
 
@@ -97,6 +106,7 @@ public class ImporterApiControllerTest {
     static void configureImportDirectory(DynamicPropertyRegistry registry) throws IOException {
         importDirectory = Files.createTempDirectory("shanoir-import-upload-test");
         registry.add("shanoir.import.directory", () -> importDirectory.toString());
+        registry.add("shanoir.import.bruker-convert-directory", () -> importDirectory.resolve("bruker/convert").toString());
     }
 
     @Autowired
@@ -216,10 +226,10 @@ public class ImporterApiControllerTest {
     @Test
     @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
     public void testGetDicomImageNoPath() throws Exception {
-
+        // the import folder itself is not an image (it was sent as a listing of the folder)
         mvc.perform(MockMvcRequestBuilders.get(GET_DICOM)
                 .param("path", ""))
-                .andExpect(status().is(200));
+                .andExpect(status().isUnprocessableEntity());
     }
 
     @Test
@@ -349,4 +359,180 @@ public class ImporterApiControllerTest {
                 .andExpect(jsonPath("$.message")
                         .value("The subject folder must contain at least one examination sub-folder."));
     }
+
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    public void testUploadFileStoresTheFileWithItsNameOnly() throws Exception {
+        Path tempDir = Files.createDirectories(importDirectory.resolve("3").resolve("456"));
+        MockMultipartFile file = new MockMultipartFile("file", "../../evil.dcm", "application/octet-stream", new byte[] {1});
+
+        mvc.perform(multipart("/importer/456").file(file))
+                .andExpect(status().isOk());
+
+        assertTrue(Files.exists(tempDir.resolve("evil.dcm")));
+        assertFalse(Files.exists(importDirectory.resolve("3").resolve("evil.dcm")));
+        assertFalse(Files.exists(importDirectory.resolve("evil.dcm")));
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    public void testUploadFileRefusesAFileWithoutName() throws Exception {
+        Path tempDir = Files.createDirectories(importDirectory.resolve("3").resolve("456"));
+        MockMultipartFile file = new MockMultipartFile("file", "..", "application/octet-stream", new byte[] {1});
+
+        mvc.perform(multipart("/importer/456").file(file))
+                .andExpect(status().isUnprocessableEntity());
+
+        assertEquals(0, tempDir.toFile().list().length);
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    public void testUploadFileRefusesATempDirOutsideOfTheUserFolder() throws Exception {
+        // ".." (URL encoded to reach the method) is the import folder of all the users
+        Files.createDirectories(importDirectory.resolve("3"));
+        MockMultipartFile file = new MockMultipartFile("file", "1.dcm", "application/octet-stream", new byte[] {1});
+
+        mvc.perform(multipart(URI.create("/importer/%2E%2E")).file(file))
+                .andExpect(status().isUnprocessableEntity());
+
+        assertFalse(Files.exists(importDirectory.resolve("1.dcm")));
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    public void testUploadProcessedDatasetStoresTheFileWithItsNameOnly() throws Exception {
+        MockMultipartFile image = new MockMultipartFile("image", "../../../brain.nii", "application/octet-stream", new byte[] {1});
+
+        String path = mvc.perform(multipart("/importer/upload_processed_dataset/").file(image))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        Path stored = Path.of(path).normalize();
+        assertEquals("brain.nii", stored.getFileName().toString());
+        assertTrue(stored.startsWith(importDirectory.resolve("3")), stored + " is outside of the import folder of the user");
+        assertTrue(Files.exists(stored));
+        assertFalse(Files.exists(importDirectory.getParent().resolve("brain.nii")));
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    public void testUploadProcessedDatasetRefusesAFileWithoutName() throws Exception {
+        MockMultipartFile image = new MockMultipartFile("image", "folder/", "application/octet-stream", new byte[] {1});
+
+        mvc.perform(multipart("/importer/upload_processed_dataset/").file(image))
+                .andExpect(status().isUnprocessableEntity());
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    public void testGetDicomImageReadsAFileOfTheImportFolder() throws Exception {
+        Path image = Files.createDirectories(importDirectory.resolve("3").resolve("456").resolve("serie"))
+                .resolve("1.dcm");
+        Files.write(image, new byte[] {1, 2, 3});
+
+        byte[] content = mvc.perform(MockMvcRequestBuilders.get(GET_DICOM).param("path", "456/serie/1.dcm"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsByteArray();
+
+        assertArrayEquals(new byte[] {1, 2, 3}, content);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"../13/456/1.dcm", "456/../../13/456/1.dcm", "../../secret.txt"})
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    public void testGetDicomImageRefusesAFileOutsideOfTheImportFolder(String path) throws Exception {
+        // a file of another user, and a file outside of the import folders
+        Path otherUserImage = Files.createDirectories(importDirectory.resolve("13").resolve("456")).resolve("1.dcm");
+        Files.write(otherUserImage, new byte[] {1});
+        Files.createDirectories(importDirectory.resolve("3"));
+        Path secret = Files.write(importDirectory.getParent().resolve("secret.txt"), new byte[] {1});
+        try {
+            mvc.perform(MockMvcRequestBuilders.get(GET_DICOM).param("path", path))
+                    .andExpect(status().isUnprocessableEntity());
+        } finally {
+            Files.deleteIfExists(secret);
+        }
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    public void testGetDicomImageRefusesAnAbsolutePath() throws Exception {
+        Files.createDirectories(importDirectory.resolve("3"));
+        mvc.perform(MockMvcRequestBuilders.get(GET_DICOM).param("path", "/etc/hostname"))
+                .andExpect(status().isUnprocessableEntity());
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    public void testGetDicomImageAnswersNotFoundForAMissingFile() throws Exception {
+        Files.createDirectories(importDirectory.resolve("3"));
+        mvc.perform(MockMvcRequestBuilders.get(GET_DICOM).param("path", "456/missing.dcm"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void testImportDicomZipFileHasTheGuardOfTheOtherImports() throws NoSuchMethodException {
+        PreAuthorize guard = ImporterApi.class.getMethod("importDicomZipFile", String.class).getAnnotation(PreAuthorize.class);
+        PreAuthorize uploadGuard = ImporterApi.class.getMethod("uploadDicomZipFile", MultipartFile.class).getAnnotation(PreAuthorize.class);
+        assertNotNull(guard);
+        assertEquals(uploadGuard.value(), guard.value());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"3/upload.zip", "bruker/convert/3/../../3/upload.zip", "bruker/convert/13/2dseq/0/result1.0.converted.zip", "bruker/convert/3/2dseq/0/notes.txt", "bruker/convert/3/2dseq/0"})
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    public void testImportDicomZipFileRefusesAnyFileButABrukerConversion(String path) throws Exception {
+        // an upload of the user, a conversion of another user, and a file and a folder of the conversion folder
+        // of the user that are not zip files
+        Path upload = Files.write(Files.createDirectories(importDirectory.resolve("3")).resolve("upload.zip"), new byte[] {1});
+        Path otherUserZip = Files.write(Files.createDirectories(importDirectory.resolve("bruker/convert/13/2dseq/0"))
+                .resolve("result1.0.converted.zip"), new byte[] {1});
+        Path conversion = Files.createDirectories(importDirectory.resolve("bruker/convert/3/2dseq/0"));
+        Path notes = Files.write(conversion.resolve("notes.txt"), new byte[] {1});
+
+        mvc.perform(MockMvcRequestBuilders.post("/importer/import_dicom/").contentType(MediaType.APPLICATION_JSON)
+                .content(importDirectory.resolve(path).toString()))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.message").value("Only the DICOM files converted from a Bruker upload of the user can be imported."));
+
+        // nothing is deleted
+        assertTrue(Files.exists(upload));
+        assertTrue(Files.exists(otherUserZip));
+        assertTrue(Files.exists(notes));
+        assertTrue(Files.exists(conversion));
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    public void testImportDicomZipFileRefusesASystemFile() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.post("/importer/import_dicom/").contentType(MediaType.APPLICATION_JSON)
+                .content("/etc/hostname"))
+                .andExpect(status().isUnprocessableEntity());
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    public void testImportDicomZipFileImportsABrukerConversion() throws Exception {
+        when(dicomDirToModel.readDicomDirToPatients(any(File.class))).thenReturn(Collections.emptyList());
+        Path conversion = Files.createDirectories(importDirectory.resolve("bruker/convert/3/2dseq/0"));
+        Path archive = Files.write(conversion.resolve("2dseq.zip"), new byte[] {1});
+        Path zip = conversion.resolve("result123.0.converted.zip");
+        try (ZipOutputStream zipout = new ZipOutputStream(Files.newOutputStream(zip))) {
+            zipout.putNextEntry(new ZipEntry("DICOMDIR"));
+            zipout.write(new byte[] {1});
+            zipout.closeEntry();
+        }
+
+        // the zip goes through the DICOM upload (here without any DICOM patient), then is deleted
+        mvc.perform(MockMvcRequestBuilders.post("/importer/import_dicom/").contentType(MediaType.APPLICATION_JSON)
+                .content(zip.toString()))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.message").value(
+                        "No DICOM patient found in the ZIP; the archive must contain at least one valid DICOM instance."));
+        assertFalse(Files.exists(zip));
+        // the uploaded archive stays: ms-datasets stores it at the end of the import if the user asks for it
+        assertTrue(Files.exists(archive));
+    }
+
 }

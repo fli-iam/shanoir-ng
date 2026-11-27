@@ -146,6 +146,7 @@ public class S3StorageService implements StorageService {
 
     @Override
     public boolean existsStudyData(Long studyId, String fileName) throws StorageException {
+        StorageNames.checkFileName(fileName);
         String key = studiesPrefix + STUDY + studyId + SLASH + fileName;
         try {
             return s3Template.objectExists(studiesBucket, key);
@@ -156,6 +157,7 @@ public class S3StorageService implements StorageService {
 
     @Override
     public boolean existsExtraData(Long examinationId, String fileName) throws StorageException {
+        StorageNames.checkFileName(fileName);
         String key = datasetsPrefix + EXAMINATION + examinationId + SLASH + fileName;
         try {
             return s3Template.objectExists(datasetsBucket, key);
@@ -166,6 +168,7 @@ public class S3StorageService implements StorageService {
 
     @Override
     public boolean existsAcquisitionExtraData(Long acquisitionId, String fileName) throws StorageException {
+        StorageNames.checkFileName(fileName);
         String key = datasetsPrefix + ACQUISITION + acquisitionId + SLASH + fileName;
         try {
             return s3Template.objectExists(datasetsBucket, key);
@@ -178,6 +181,7 @@ public class S3StorageService implements StorageService {
     public String storeStudyData(Long studyId, String fileName,
             InputStream inputStream, String contentType, long size)
             throws StorageException {
+        StorageNames.checkFileName(fileName);
         if (studiesBucket.equals(UNUSED)) {
             throw new StorageException("Missing studies bucket configuration.", null);
         }
@@ -202,6 +206,7 @@ public class S3StorageService implements StorageService {
     public String storeExtraData(Long examinationId, String fileName,
             InputStream inputStream, String contentType, long size)
             throws StorageException {
+        StorageNames.checkFileName(fileName);
         if (datasetsBucket.equals(UNUSED)) {
             throw new StorageException("Missing datasets bucket configuration.", null);
         }
@@ -226,6 +231,7 @@ public class S3StorageService implements StorageService {
     public String storeAcquisitionExtraData(Long acquisitionId, String fileName,
             InputStream inputStream, String contentType, long size)
             throws StorageException {
+        StorageNames.checkFileName(fileName);
         if (datasetsBucket.equals(UNUSED)) {
             throw new StorageException("Missing datasets bucket configuration.", null);
         }
@@ -251,6 +257,7 @@ public class S3StorageService implements StorageService {
             String dataType, String fileName,
             InputStream inputStream, String contentType, long size)
             throws StorageException {
+        StorageNames.checkFileName(fileName);
         if (datasetsBucket.equals(UNUSED)) {
             throw new StorageException("Missing datasets bucket configuration.", null);
         }
@@ -280,6 +287,7 @@ public class S3StorageService implements StorageService {
     public String storeProcessedData(Long studyId, Long subjectId, String timeStamp, String fileName,
             InputStream inputStream, String contentType, long size)
             throws StorageException {
+        StorageNames.checkFileName(fileName);
         if (datasetsBucket.equals(UNUSED)) {
             throw new StorageException("Missing datasets bucket configuration.", null);
         }
@@ -369,6 +377,7 @@ public class S3StorageService implements StorageService {
     public String storePreclinicalExtraData(Long examinationId, String fileName,
             InputStream inputStream, String contentType, long size)
             throws StorageException {
+        StorageNames.checkFileName(fileName);
         if (preclinicalBucket.equals(UNUSED)) {
             throw new StorageException("Missing preclinical bucket configuration.", null);
         }
@@ -393,6 +402,7 @@ public class S3StorageService implements StorageService {
     public String storePathologyModelData(Long pathologyModelId, String fileName,
             InputStream inputStream, String contentType, long size)
             throws StorageException {
+        StorageNames.checkFileName(fileName);
         if (preclinicalBucket.equals(UNUSED)) {
             throw new StorageException("Missing preclinical bucket configuration.", null);
         }
@@ -415,6 +425,7 @@ public class S3StorageService implements StorageService {
 
     @Override
     public Resource loadExtraData(Long examinationId, String fileName) throws StorageException {
+        StorageNames.checkFileName(fileName);
         try {
             String key = datasetsPrefix + EXAMINATION + examinationId + SLASH + fileName;
             return s3Template.download(datasetsBucket, key);
@@ -425,6 +436,7 @@ public class S3StorageService implements StorageService {
 
     @Override
     public Resource loadAcquisitionExtraData(Long acquisitionId, String fileName) throws StorageException {
+        StorageNames.checkFileName(fileName);
         try {
             String key = datasetsPrefix + ACQUISITION + acquisitionId + SLASH + fileName;
             return s3Template.download(datasetsBucket, key);
@@ -435,6 +447,7 @@ public class S3StorageService implements StorageService {
 
     @Override
     public Resource loadDatasetsData(String path) throws StorageException {
+        StorageNames.checkKey(path);
         try {
             String[] parts = path.replaceFirst("^/", "").split(SLASH, 2);
             String bucket = parts[0];
@@ -450,6 +463,7 @@ public class S3StorageService implements StorageService {
 
     @Override
     public Resource loadPreclinicalExtraData(Long examinationId, String fileName) throws StorageException {
+        StorageNames.checkFileName(fileName);
         try {
             String key = preclinicalPrefix + EXAMINATION + examinationId + SLASH + fileName;
             return s3Template.download(preclinicalBucket, key);
@@ -490,6 +504,7 @@ public class S3StorageService implements StorageService {
 
     @Override
     public long getFileSizeExtraData(Long examinationId, String fileName) throws StorageException {
+        StorageNames.checkFileName(fileName);
         String key = datasetsPrefix + EXAMINATION + examinationId + SLASH + fileName;
         try {
             HeadObjectResponse metadata = s3Client.headObject(HeadObjectRequest.builder()
@@ -506,6 +521,7 @@ public class S3StorageService implements StorageService {
 
     @Override
     public long getFileSizeAcquisitionExtraData(Long acquisitionId, String fileName) throws StorageException {
+        StorageNames.checkFileName(fileName);
         String key = datasetsPrefix + ACQUISITION + acquisitionId + SLASH + fileName;
         try {
             HeadObjectResponse metadata = s3Client.headObject(HeadObjectRequest.builder()
@@ -526,6 +542,8 @@ public class S3StorageService implements StorageService {
      */
     @Override
     public String getPublicLocationDatasets(String directory, String fileName) throws StorageException {
+        StorageNames.checkKey(directory);
+        StorageNames.checkFileName(fileName);
         try {
             return S3 + datasetsBucket + SLASH + directory + SLASH + fileName;
         } catch (Exception e) {
@@ -535,6 +553,8 @@ public class S3StorageService implements StorageService {
 
     @Override
     public String getPublicLocationPreclinical(String directory, String fileName) throws StorageException {
+        StorageNames.checkKey(directory);
+        StorageNames.checkFileName(fileName);
         try {
             return S3 + preclinicalBucket + SLASH + directory + SLASH + fileName;
         } catch (Exception e) {
@@ -544,6 +564,7 @@ public class S3StorageService implements StorageService {
 
     @Override
     public void deleteExtraData(Long examinationId, String fileName) throws StorageException {
+        StorageNames.checkFileName(fileName);
         try {
             String key = datasetsPrefix
                             + EXAMINATION + examinationId + SLASH + fileName;
@@ -558,6 +579,7 @@ public class S3StorageService implements StorageService {
 
     @Override
     public void deleteAcquisitionExtraData(Long acquisitionId, String fileName) throws StorageException {
+        StorageNames.checkFileName(fileName);
         try {
             String key = datasetsPrefix
                             + ACQUISITION + acquisitionId + SLASH + fileName;
@@ -572,6 +594,7 @@ public class S3StorageService implements StorageService {
 
     @Override
     public void deletePreclinicalExtraData(Long examinationId, String fileName) throws StorageException {
+        StorageNames.checkFileName(fileName);
         try {
             String key = preclinicalPrefix
                             + EXAMINATION + examinationId + SLASH + fileName;
@@ -586,6 +609,7 @@ public class S3StorageService implements StorageService {
 
     @Override
     public void deletePathologyModelData(Long pathologyModelId, String fileName) throws StorageException {
+        StorageNames.checkFileName(fileName);
         try {
             String key = preclinicalPrefix
                     + PATHOLOGY_MODEL + pathologyModelId + SLASH + fileName;
@@ -600,11 +624,13 @@ public class S3StorageService implements StorageService {
 
     @Override
     public void deleteDirectoryDatasets(String directory) throws StorageException {
+        StorageNames.checkKey(directory);
         deleteDirectoryFromBucket(datasetsBucket, directory);
     }
 
     @Override
     public void deleteDirectoryPreclinical(String directory) throws StorageException {
+        StorageNames.checkKey(directory);
         deleteDirectoryFromBucket(preclinicalBucket, directory);
     }
 
@@ -626,11 +652,15 @@ public class S3StorageService implements StorageService {
     @Override
     public void moveDatasets(String directory, String sourceFileName, String targetFileName)
             throws StorageException {
+        StorageNames.checkKey(directory);
+        StorageNames.checkFileName(sourceFileName);
+        StorageNames.checkFileName(targetFileName);
         moveInBucket(datasetsBucket, directory, sourceFileName, targetFileName);
     }
 
     @Override
     public Resource loadPathologyModelData(Long pathologyModelId, String fileName) throws StorageException {
+        StorageNames.checkFileName(fileName);
         try {
             String key = preclinicalPrefix + PATHOLOGY_MODEL + pathologyModelId + SLASH + fileName;
             return s3Template.download(preclinicalBucket, key);
@@ -641,6 +671,7 @@ public class S3StorageService implements StorageService {
 
     @Override
     public Resource loadStudyData(Long studyId, String fileName) throws StorageException {
+        StorageNames.checkFileName(fileName);
         String key = studiesPrefix + STUDY + studyId + SLASH + fileName;
         try {
             return s3Template.download(studiesBucket, key);
@@ -651,6 +682,8 @@ public class S3StorageService implements StorageService {
 
     @Override
     public String getPublicLocationStudies(String directory, String fileName) throws StorageException {
+        StorageNames.checkKey(directory);
+        StorageNames.checkFileName(fileName);
         try {
             return S3 + studiesBucket + SLASH + directory + SLASH + fileName;
         } catch (Exception e) {
@@ -660,6 +693,7 @@ public class S3StorageService implements StorageService {
 
     @Override
     public void deleteStudyData(Long studyId, String fileName) throws StorageException {
+        StorageNames.checkFileName(fileName);
         String key = studiesPrefix + STUDY + studyId + SLASH + fileName;
         try {
             s3Client.deleteObject(DeleteObjectRequest.builder()
@@ -680,6 +714,8 @@ public class S3StorageService implements StorageService {
     @Override
     public void moveStudyData(Long studyId, String sourceFileName, String targetFileName)
             throws StorageException {
+        StorageNames.checkFileName(sourceFileName);
+        StorageNames.checkFileName(targetFileName);
         String directory = studiesPrefix + STUDY + studyId;
         moveInBucket(studiesBucket, directory, sourceFileName, targetFileName);
     }

@@ -15,7 +15,11 @@
 package org.shanoir.ng.importer.service;
 
 import java.io.File;
-import java.io.FileInputStream;
+import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
+import java.nio.file.LinkOption;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -55,6 +59,7 @@ import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Service;
@@ -72,6 +77,10 @@ public class ImporterService {
     private static final String UPLOAD_EXTENSION = ".upload";
 
     private static int instancesCreated = 0;
+
+    /** Folder where ms-preclinical converts the Bruker uploads, one folder per user. */
+    @Value("${shanoir.import.bruker-convert-directory:/tmp/bruker/convert}")
+    private String brukerConvertDir;
 
     @Autowired
     private ExaminationService examinationService;
@@ -116,6 +125,31 @@ public class ImporterService {
     public ImporterService() {
         LOG.info("New server-instance created of ImporterService.");
         instancesCreated = instancesCreated + 1;
+    }
+
+    /**
+     * The archive path comes from the client: only a Bruker archive the user uploaded is stored, never another file
+     * of the server.
+     *
+     * @param archive the path of the archive sent with the import job
+     * @param userId the user who imports
+     * @return the archive, if it is a regular file in the Bruker conversion folder of the user, or null
+     */
+    File brukerArchive(String archive, Long userId) {
+        if (userId == null) {
+            return null;
+        }
+        try {
+            Path userFolder = Paths.get(brukerConvertDir, String.valueOf(userId)).toAbsolutePath().normalize();
+            Path path = Paths.get(archive).toAbsolutePath().normalize();
+            if (path.startsWith(userFolder) && !path.equals(userFolder)
+                    && Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS)) {
+                return path.toFile();
+            }
+        } catch (InvalidPathException e) {
+            LOG.warn("Invalid archive path: {}", e.getMessage());
+        }
+        return null;
     }
 
     public static int getInstancesCreated() {
@@ -180,13 +214,13 @@ public class ImporterService {
             // Manage archive
             if (importJob.getArchive() != null) {
                 // Copy archive
-                File archiveFile = new File(importJob.getArchive());
-                if (!archiveFile.exists()) {
+                File archiveFile = brukerArchive(importJob.getArchive(), userId);
+                if (archiveFile == null) {
                     LOG.info("Archive file not found, not saved: {}", importJob.getArchive());
                     return;
                 }
                 MultipartFile multipartFile = new MockMultipartFile(archiveFile.getName(), archiveFile.getName(),
-                        "application/zip", new FileInputStream(archiveFile));
+                        "application/zip", Files.readAllBytes(archiveFile.toPath()));
 
                 // Add bruker archive as extra data
                 String fileName = this.examinationService.addExtraData(importJob.getExaminationId(), multipartFile);

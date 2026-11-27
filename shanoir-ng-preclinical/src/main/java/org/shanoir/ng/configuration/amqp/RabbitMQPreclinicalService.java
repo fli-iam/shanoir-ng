@@ -14,15 +14,23 @@
 
 package org.shanoir.ng.configuration.amqp;
 
-import org.shanoir.ng.preclinical.pathologies.subject_pathologies.SubjectPathologyService;
+import java.util.Arrays;
+
+import org.shanoir.ng.preclinical.pathologies.subject.SubjectPathologyService;
 import org.shanoir.ng.preclinical.subjects.model.AnimalSubject;
 import org.shanoir.ng.preclinical.subjects.service.AnimalSubjectService;
-import org.shanoir.ng.preclinical.therapies.subject_therapies.SubjectTherapyService;
+import org.shanoir.ng.preclinical.therapies.subject.SubjectTherapyService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.study.rights.ampq.StudyUserUpdateService;
+import org.shanoir.ng.study.rights.command.StudyUserCommand;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
+import org.springframework.amqp.core.ExchangeTypes;
+import org.springframework.amqp.rabbit.annotation.Exchange;
+import org.springframework.amqp.rabbit.annotation.Queue;
+import org.springframework.amqp.rabbit.annotation.QueueBinding;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -47,10 +55,32 @@ public class RabbitMQPreclinicalService {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private StudyUserUpdateService studyUserUpdateService;
+
 
     private static final Logger LOG = LoggerFactory.getLogger(RabbitMQPreclinicalService.class);
 
     public record CopyRequest(Long sourceId, Long targetId) { }
+
+    /**
+     * Keeps the local copy of the study members up to date, to check the study rights.
+     * @param commandArrStr the study user commands broadcast by ms studies, as a json array
+     */
+    @RabbitListener(bindings = @QueueBinding(
+            value = @Queue(value = RabbitMQConfiguration.STUDY_USER_QUEUE_PRECLINICAL, durable = "true"),
+            exchange = @Exchange(value = RabbitMQConfiguration.STUDY_USER_EXCHANGE, ignoreDeclarationExceptions = "true",
+                autoDelete = "false", durable = "true", type = ExchangeTypes.FANOUT)), containerFactory = "multipleConsumersFactory"
+    )
+    public void receiveStudyUsers(String commandArrStr) throws AmqpRejectAndDontRequeueException {
+        try {
+            StudyUserCommand[] commands = objectMapper.readValue(commandArrStr, StudyUserCommand[].class);
+            studyUserUpdateService.processCommands(Arrays.asList(commands));
+        } catch (Exception e) {
+            LOG.error("Study user update rejected: {}", e.getMessage());
+            throw new AmqpRejectAndDontRequeueException("Study user update rejected: " + e.getMessage(), e);
+        }
+    }
 
     /**
      * Receives a shanoirEvent as a json object, concerning a subject deletion

@@ -110,7 +110,6 @@ require()
             VIP_COMPRESSION_LEVEL)       ;;
             SHANOIR_SHUTDOWN_HOUR)      ;;
             SHANOIR_CONTINUANCE_HOUR)      ;;
-            DEV_USERS_DEFAULT_PASSWORD)      ;;
 
             SHANOIR_KEYCLOAK_HOST)      match "$name" '^([a-z0-9.-]+)$' ;;
             SHANOIR_USERS_HOST)         match "$name" '^([a-z0-9.-]+)$' ;;
@@ -255,6 +254,11 @@ run_microservice()
 	if [ -n "$_ms_oneshot" ] ; then
 		# 'oneshot' run
 		# (launch the server and kill it once it is started)
+
+		# without Spring AOT: it fixes at build time which beans exist, with
+		# spring.sql.init.mode=never, so the initial data (data.sql, import.sql) would not be loaded
+		cmd=("${cmd[@]/#-Dspring.aot.enabled=true/-Dspring.aot.enabled=false}")
+
 		exec oneshot ${oneshot_args[@]} 'main.*Application.*Started [A-Za-z0-9]*Application in .* seconds' \
 			-- ${cmd[@]}
 	else

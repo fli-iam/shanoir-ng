@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.shanoir.ng.bids.service.BIDSService;
@@ -39,6 +40,7 @@ import org.shanoir.ng.importer.service.ImporterMailService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.dataset.RelatedDataset;
+import org.shanoir.ng.shared.dto.ExaminationStudyCenterDTO;
 import org.shanoir.ng.shared.dto.ParticipantsTsvRequestDTO;
 import org.shanoir.ng.shared.dto.StudyExaminationsDTO;
 import org.shanoir.ng.shared.event.ShanoirEvent;
@@ -83,6 +85,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.DatabindException;
 import tools.jackson.databind.ObjectMapper;
 
@@ -364,6 +367,93 @@ public class RabbitMQDatasetsService {
     @Transactional
     public boolean subjectHasCopiedData(Long subjectId) {
         return examinationRepository.existsCopyOfSubjectExaminations(subjectId);
+    }
+
+    /**
+     * Receives an examination id and answers its study and center, so that another microservice
+     * (preclinical) can check the study rights of the user, restricted to some centers or not,
+     * on data attached to this examination.
+     *
+     * @param examinationId the examination id
+     * @return the study and center as an ExaminationStudyCenterDTO json string, or an empty string if the
+     *         examination does not exist: never null, as no answer would be sent back and the caller would
+     *         wait until its timeout
+     */
+    @RabbitListener(queues = RabbitMQConfiguration.EXAMINATION_STUDY_CENTER_QUEUE, containerFactory = "multipleConsumersFactory")
+    @RabbitHandler
+    @Transactional(readOnly = true)
+    public String findExaminationStudyCenter(Long examinationId) {
+        if (examinationId == null) {
+            return "";
+        }
+        try {
+            Optional<ExaminationStudyCenterDTO> studyCenter = examinationRepository.findStudyCenterById(examinationId);
+            return studyCenter.isPresent() ? objectMapper.writeValueAsString(studyCenter.get()) : "";
+        } catch (JacksonException e) {
+            LOG.error("Cannot write the study and center of examination {}", examinationId, e);
+            return "";
+        }
+    }
+
+    /**
+     * Receives a subject id and answers the id of its study, so that another microservice
+     * (preclinical) can check the study rights of the user on data attached to this subject.
+     *
+     * @param subjectId the subject id
+     * @return the study id, or RabbitMQConfiguration.UNKNOWN_STUDY_ID if the subject does not exist or has no study:
+     *         never null, as no answer would be sent back and the caller would wait until its timeout
+     */
+    @RabbitListener(queues = RabbitMQConfiguration.SUBJECT_STUDY_ID_QUEUE, containerFactory = "multipleConsumersFactory")
+    @RabbitHandler
+    @Transactional(readOnly = true)
+    public Long findSubjectStudyId(Long subjectId) {
+        if (subjectId == null) {
+            return RabbitMQConfiguration.UNKNOWN_STUDY_ID;
+        }
+        return subjectRepository.findStudyIdById(subjectId).orElse(RabbitMQConfiguration.UNKNOWN_STUDY_ID);
+    }
+
+    /**
+     * Receives examination ids and answers the study and center of each one, so that another microservice
+     * (preclinical) can filter a list of examinations by the study rights of the user, in one call.
+     *
+     * @param examinationIdsJson the examination ids, as a json array
+     * @return the ExaminationStudyCenterDTO by examination id, as a json object, the unknown examinations being
+     *         left out; "{}" if the ids cannot be read: never null, as no answer would be sent back and the caller
+     *         would wait until its timeout
+     */
+    @RabbitListener(queues = RabbitMQConfiguration.EXAMINATIONS_STUDY_CENTERS_QUEUE, containerFactory = "multipleConsumersFactory")
+    @RabbitHandler
+    @Transactional(readOnly = true)
+    public String findExaminationsStudyCenters(String examinationIdsJson) {
+        try {
+            List<Long> examinationIds = objectMapper.readValue(examinationIdsJson, new TypeReference<List<Long>>() { });
+            return objectMapper.writeValueAsString(examinationRepository.findStudyCentersByIds(examinationIds));
+        } catch (Exception e) {
+            LOG.error("Cannot find the studies and centers of examinations {}", examinationIdsJson, e);
+            return "{}";
+        }
+    }
+
+    /**
+     * Receives subject ids and answers the id of the study of each one, so that another microservice
+     * (preclinical) can filter a list of subjects by the study rights of the user, in one call.
+     *
+     * @param subjectIdsJson the subject ids, as a json array
+     * @return the study id by subject id, as a json object, the unknown subjects being left out; "{}" if the ids
+     *         cannot be read: never null, as no answer would be sent back and the caller would wait until its timeout
+     */
+    @RabbitListener(queues = RabbitMQConfiguration.SUBJECTS_STUDY_IDS_QUEUE, containerFactory = "multipleConsumersFactory")
+    @RabbitHandler
+    @Transactional(readOnly = true)
+    public String findSubjectsStudyIds(String subjectIdsJson) {
+        try {
+            List<Long> subjectIds = objectMapper.readValue(subjectIdsJson, new TypeReference<List<Long>>() { });
+            return objectMapper.writeValueAsString(subjectRepository.findStudyIdsByIds(subjectIds));
+        } catch (Exception e) {
+            LOG.error("Cannot find the studies of subjects {}", subjectIdsJson, e);
+            return "{}";
+        }
     }
 
     /**

@@ -14,16 +14,16 @@
 
 package org.shanoir.ng.importer;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.net.URLConnection;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
+import java.nio.file.LinkOption;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -66,6 +66,7 @@ import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.exception.ShanoirImportException;
+import org.shanoir.ng.shared.files.SafeFileNames;
 import org.shanoir.ng.utils.ImportUtils;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
@@ -123,13 +124,11 @@ public class ImporterApiController implements ImporterApi {
 
     private static final String APPLICATION_ZIP = "application/zip";
 
-    /** The Constant KB. */
-    private static final int KB = 1024;
-
-    /** The Constant BUFFER_SIZE. */
-    private static final int BUFFER_SIZE = 10 * KB;
-
     private static final UIDGeneration UID_GENERATOR = new UIDGeneration();
+
+    /** The folder where ms preclinical writes the DICOM files converted from Bruker uploads (shared /tmp volume). */
+    @Value("${shanoir.import.bruker-convert-directory:/tmp/bruker/convert}")
+    private String brukerConvertDir;
 
     @Value("${shanoir.import.directory}")
     private String importDir;
@@ -385,10 +384,11 @@ public class ImporterApiController implements ImporterApi {
             throw new RestServiceException(
                     new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), NO_FILE_UPLOADED, null));
         }
-        File tempFile = new File(dicomZipFilename);
+        // the file is read then deleted: only the zip files converted from Bruker uploads are accepted
+        File tempFile = brukerConvertedZip(dicomZipFilename);
         MockMultipartFile multiPartFile;
         try {
-            multiPartFile = new MockMultipartFile(tempFile.getName(), tempFile.getName(), APPLICATION_ZIP, new FileInputStream(tempFile.getAbsolutePath()));
+            multiPartFile = new MockMultipartFile(tempFile.getName(), tempFile.getName(), APPLICATION_ZIP, Files.readAllBytes(tempFile.toPath()));
             // Import dicomfile
             return uploadDicomZipFile(multiPartFile);
         } catch (IOException e) {
@@ -396,8 +396,9 @@ public class ImporterApiController implements ImporterApi {
             LOG.error(e.getMessage(), e);
             return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
         } finally {
-            // Delete temp file which is useless now
-            tempFile.delete();
+            // the zip is copied in the import folder of the user. The rest of the conversion folder stays:
+            // ms datasets stores the uploaded archive at the end of the import, if the user asks for it
+            FileUtils.deleteQuietly(tempFile);
         }
     }
 
@@ -515,8 +516,9 @@ public class ImporterApiController implements ImporterApi {
             @Parameter(name = "header detail", required = false) @RequestPart(value = "header", required = false) MultipartFile headerFile)
                     throws RestServiceException {
 
-        String imageFileName = imageFile == null ? "" : imageFile.getOriginalFilename();
-        String headerFileName = headerFile == null ? "" : headerFile.getOriginalFilename();
+        // only the names of the files, without the folders some clients send
+        String imageFileName = imageFile == null ? "" : uploadedFileName(imageFile);
+        String headerFileName = headerFile == null ? "" : uploadedFileName(headerFile);
         Boolean isNifti = imageFileName.endsWith(".nii") || imageFileName.endsWith(".nii.gz");
         Boolean isAnalyze = imageFileName.endsWith(".img") && headerFileName.endsWith(".hdr");
 
@@ -750,14 +752,63 @@ public class ImporterApiController implements ImporterApi {
         return new ResponseEntity<String>(tempDirForImport.getName(), HttpStatus.OK);
     }
 
+    /**
+     * @param dicomZipFilename the path sent by the client
+     * @return the zip file converted from a Bruker upload of the user, in the conversion folder of ms preclinical
+     * @throws RestServiceException (422) for any other path
+     */
+    private File brukerConvertedZip(String dicomZipFilename) throws RestServiceException {
+        try {
+            // ms preclinical converts the uploads of each user in a folder named with the user id
+            Long userId = KeycloakUtil.getTokenUserId();
+            Path folder = Paths.get(brukerConvertDir, String.valueOf(userId)).toAbsolutePath().normalize();
+            Path zip = Paths.get(dicomZipFilename.trim()).toAbsolutePath().normalize();
+            if (userId != null && zip.startsWith(folder) && zip.getFileName().toString().endsWith(".zip")
+                    && Files.isRegularFile(zip, LinkOption.NOFOLLOW_LINKS)) {
+                return zip.toFile();
+            }
+        } catch (InvalidPathException e) {
+            // refused below
+        }
+        LOG.warn("Import of {} refused: not a Bruker conversion of {}", dicomZipFilename, brukerConvertDir);
+        throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                "Only the DICOM files converted from a Bruker upload of the user can be imported.", null));
+    }
+
+    /**
+     * @return the name an uploaded file is stored with: only the last part of the name sent by the client
+     * @throws RestServiceException (422) if there is no usable name
+     */
+    private static String uploadedFileName(MultipartFile file) throws RestServiceException {
+        try {
+            return SafeFileNames.fileName(file.getOriginalFilename());
+        } catch (IllegalArgumentException e) {
+            throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                    "Invalid file name: " + file.getOriginalFilename(), null));
+        }
+    }
+
+    private static boolean isFileName(String name) {
+        try {
+            return SafeFileNames.fileName(name).equals(name);
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+    }
+
     @Override
     public ResponseEntity<Void> uploadFile(@PathVariable("tempDirId") String tempDirId,
                                            @RequestParam("file") MultipartFile file) throws RestServiceException, IOException {
         final File userImportDir = ImportUtils.getUserImportDir(importDir);
+        // the temp dir must be one of the folders of the user (created by createTempDir), not a path
+        if (!isFileName(tempDirId)) {
+            throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                    "Upload file called with an invalid tempDirId.", null));
+        }
         final File importJobDir = new File(userImportDir, tempDirId);
         // only continue in case of existing temp dir id
         if (importJobDir.exists()) {
-            File fileToWrite = new File(importJobDir, file.getOriginalFilename());
+            File fileToWrite = new File(importJobDir, uploadedFileName(file));
             if (fileToWrite.exists()) {
                 throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
                         "Duplicate file name in tempDir, could not create file as file exists already.", null));
@@ -787,26 +838,22 @@ public class ImporterApiController implements ImporterApi {
     public ResponseEntity<ByteArrayResource> getDicomImage(@Parameter(name = "path", required = true)  @RequestParam(value = "path", required = true) String path)
             throws RestServiceException, IOException {
         final File userImportDir = ImportUtils.getUserImportDir(importDir);
-        String pathInfo = userImportDir.getAbsolutePath() + File.separator + path;
-        URL url = new URL("file:///" + pathInfo);
-        final URLConnection uCon = url.openConnection();
-        final InputStream is = uCon.getInputStream();
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-        int nRead;
-        byte[] data = new byte[BUFFER_SIZE];
-        while ((nRead = is.read(data, 0, data.length)) != -1) {
-            buffer.write(data, 0, nRead);
+        // the path comes from the client: only the files of the import folder of the user can be read
+        Path dicomFile;
+        try {
+            dicomFile = SafeFileNames.resolveInside(userImportDir.toPath(), path);
+        } catch (IOException | InvalidPathException e) {
+            throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                    "Invalid path, outside of the import folder: " + path, null));
         }
-
-        buffer.flush();
-        byte[] byteArray = buffer.toByteArray();
-
-        ByteArrayResource resource = new ByteArrayResource(byteArray);
-
+        if (!Files.isRegularFile(dicomFile)) {
+            throw new RestServiceException(new ErrorModel(HttpStatus.NOT_FOUND.value(), "File not found: " + path, null));
+        }
+        byte[] byteArray = Files.readAllBytes(dicomFile);
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType("application/dicom"))
-                .contentLength(uCon.getContentLength())
-                .body(resource);
+                .contentLength(byteArray.length)
+                .body(new ByteArrayResource(byteArray));
     }
 
     public ResponseEntity<ImportJobBase> uploadMultipleDicom(@Parameter(name = "file detail") @RequestPart("file") MultipartFile dicomZipFile,

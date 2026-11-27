@@ -17,6 +17,7 @@ package org.shanoir.ng.examination;
 import org.junit.jupiter.api.Test;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
+import org.shanoir.ng.shared.dto.ExaminationStudyCenterDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
@@ -121,6 +122,34 @@ public class ExaminationRepositoryTest {
         examination.setInvestigatorId(other.getInvestigatorId());
         examination.setExaminationDate(examinationDate);
         return examination;
+    }
+
+    @Test
+    public void findStudyCenterByIdAnswersTheStudyAndCenterOfTheExamination() throws Exception {
+        // examination 3 is in study 3 and center 1, while its subject is in study 1
+        ExaminationStudyCenterDTO studyCenter = repository.findStudyCenterById(3L).orElseThrow();
+        assertThat(studyCenter.getStudyId()).isEqualTo(3L);
+        assertThat(studyCenter.getCenterId()).isEqualTo(1L);
+        // examination 2 is in study 1 and center 2
+        studyCenter = repository.findStudyCenterById(2L).orElseThrow();
+        assertThat(studyCenter.getStudyId()).isEqualTo(STUDY_TEST_1_ID);
+        assertThat(studyCenter.getCenterId()).isEqualTo(2L);
+    }
+
+    @Test
+    public void findStudyCenterByIdIsEmptyForAMissingExamination() throws Exception {
+        assertThat(repository.findStudyCenterById(999L)).isEmpty();
+    }
+
+    @Test
+    public void findStudyCentersByIdsLeavesOutTheMissingExaminations() throws Exception {
+        Map<Long, ExaminationStudyCenterDTO> studyCenters = repository.findStudyCentersByIds(List.of(2L, 3L, 999L));
+        assertThat(studyCenters).containsOnlyKeys(2L, 3L);
+        assertThat(studyCenters.get(2L).getStudyId()).isEqualTo(STUDY_TEST_1_ID);
+        assertThat(studyCenters.get(2L).getCenterId()).isEqualTo(2L);
+        assertThat(studyCenters.get(3L).getStudyId()).isEqualTo(3L);
+        assertThat(studyCenters.get(3L).getCenterId()).isEqualTo(1L);
+        assertThat(repository.findStudyCentersByIds(List.of())).isEmpty();
     }
 
     @Test

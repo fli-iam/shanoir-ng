@@ -23,10 +23,9 @@ require  SHANOIR_VIEWER_VIDEPE_URL_HOST
 
 : ${SHANOIR_USERS_HOST:=${SHANOIR_PREFIX}users}
 
-# Secret of the 'neurobagel-export' client (Neurobagel node export job). When unset, use a random
-# secret nobody knows, so the client exists but cannot be used. Alphanumeric only (sed below).
-optional NEUROBAGEL_CLIENT_SECRET
-: ${NEUROBAGEL_CLIENT_SECRET:=$(tr -dc 'A-Za-z0-9' < /dev/urandom | head -c 48)}
+# Secret of the 'neurobagel-export' client (Neurobagel node export job). Alphanumeric only (sed
+# below).
+require  NEUROBAGEL_CLIENT_SECRET
 
 mkdir -p /tmp/import
 sed "	s/SHANOIR_NOTIFICATION_NAME/$SHANOIR_NOTIFICATION_NAME/g
@@ -64,7 +63,7 @@ export KC_HOSTNAME_BACKCHANNEL_DYNAMIC="${KC_HOSTNAME_BACKCHANNEL_DYNAMIC:-true}
 
 export KC_DB_URL=jdbc:mariadb://"${KC_DB_URL_HOST:-${SHANOIR_PREFIX}keycloak-database}":"${KC_DB_URL_PORT:-3306}"/"${KC_DB_URL_DATABASE:-keycloak}"
 export KC_DB_USERNAME="${DB_USER:-keycloak}"
-export KC_DB_PASSWORD="${DB_PASSWORD:-password}"
+export KC_DB_PASSWORD="${DB_PASSWORD:?DB_PASSWORD is not set}"
 
 # creation of the admin account
 export KC_BOOTSTRAP_ADMIN_USERNAME="$SHANOIR_KEYCLOAK_USER"

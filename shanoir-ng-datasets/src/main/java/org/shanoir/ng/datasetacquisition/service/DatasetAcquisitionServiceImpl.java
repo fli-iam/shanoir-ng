@@ -36,6 +36,7 @@ import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.shared.files.SafeFileNames;
 import org.shanoir.ng.shared.service.SecurityService;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.storage.StorageException;
@@ -261,8 +262,9 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
         }
         // A new file must not overwrite an existing one: it would be lost when cleaning up on failure
         for (MultipartFile file : files) {
-            if (storageService.existsAcquisitionExtraData(acquisitionId, file.getOriginalFilename())) {
-                throw new ShanoirException("A file named " + file.getOriginalFilename() + " already exists on this dataset acquisition.",
+            String fileName = SafeFileNames.fileName(file.getOriginalFilename());
+            if (storageService.existsAcquisitionExtraData(acquisitionId, fileName)) {
+                throw new ShanoirException("A file named " + fileName + " already exists on this dataset acquisition.",
                         HttpStatus.UNPROCESSABLE_ENTITY.value());
             }
         }
@@ -274,7 +276,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
                     throw new StorageException("Could not store extra data file " + file.getOriginalFilename()
                             + ", dataset acquisition not updated.", null);
                 }
-                storedFileNames.add(file.getOriginalFilename());
+                storedFileNames.add(SafeFileNames.fileName(file.getOriginalFilename()));
             }
             return update(entity);
         } catch (ShanoirException | StorageException | RuntimeException e) {
@@ -526,9 +528,10 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
     private String addExtraData(final Long acquisitionId, final MultipartFile file) {
         try {
             LOG.info("Saving file {} for dataset acquisition: {}", file.getOriginalFilename(), acquisitionId);
+            // only the name of the file, without the folders some clients send
             return storageService.storeAcquisitionExtraData(
                     acquisitionId,
-                    file.getOriginalFilename(),
+                    SafeFileNames.fileName(file.getOriginalFilename()),
                     file.getInputStream(),
                     file.getContentType(),
                     file.getSize());

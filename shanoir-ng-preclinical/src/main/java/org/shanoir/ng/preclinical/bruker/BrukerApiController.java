@@ -31,6 +31,8 @@ import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.shared.files.SafeFileNames;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -76,19 +78,25 @@ public class BrukerApiController implements BrukerApi {
         }
         try {
             MultipartFile brukerFile = uploadfiles[0];
-            String fileName = brukerFile.getOriginalFilename();
+            // the name sent by the client is used to build paths: it must not contain any folder
+            String uploadedFileName = SafeFileNames.fileName(brukerFile.getOriginalFilename());
+            String fileName = uploadedFileName;
             int id = fileName.toLowerCase().indexOf(ZIP_EXTENSION);
             if (id != -1) {
                 fileName = fileName.substring(0, id);
+            }
+            // the name without its extension is a folder name: "...zip" would give ".."
+            if (fileName.isBlank() || ".".equals(fileName) || "..".equals(fileName)) {
+                fileName = BRUKER_FOLDER;
             }
             LOG.info("upload bruker file [{}]", fileName);
             Path brukerDirFile = createBrukerTempFile(fileName);
             String brukerDirString = brukerDirFile.getFileName().toString();
 
             LOG.info("bruker temp file has been created {}", brukerDirFile.toFile().getAbsolutePath());
-            Path uploadedFile = saveUploadedFileTmp(brukerFile, brukerDirFile);
+            Path uploadedFile = saveUploadedFileTmp(brukerFile, brukerDirFile, uploadedFileName);
             LOG.info("bruker zip archive has been uploaded ");
-            unzipBrukerArchive(uploadedFile.toFile().getAbsolutePath(), brukerDirFile.toFile().getAbsolutePath());
+            unzipBrukerArchive(uploadedFile, brukerDirFile);
             LOG.info("bruker file has been unzipped into {}", brukerDirFile);
             boolean isValidBruker = checkBrukerCrawlFor2dseq(
                     Arrays.asList(new File(brukerDirFile.toAbsolutePath().toString()).listFiles()),
@@ -100,7 +108,8 @@ public class BrukerApiController implements BrukerApi {
                 LOG.info("START BRUKER 2 DICOM");
                 startBruker2Dicom(brukerDirFile);
                 LOG.info("ZIP DICOM FILES");
-                File destinationZip = File.createTempFile(destinationFilePath, "." + brukerDirString + ".converted.zip");
+                // in the conversion folder, the only folder ms-import accepts to import from (import_dicom)
+                File destinationZip = File.createTempFile(RESULT_FOLDER, "." + brukerDirString + ".converted.zip", brukerDirFile.toFile());
                 LOG.info("zip destinationFilePath = {}, destinationZip = {}, rootFolderToRemove = {}", destinationFilePath, destinationZip.getAbsolutePath(), RESULT_FOLDER);
                 zipFolder(destinationFilePath, destinationZip, RESULT_FOLDER);
                 return new ResponseEntity<>(destinationZip.getAbsolutePath(), HttpStatus.OK);
@@ -150,8 +159,9 @@ public class BrukerApiController implements BrukerApi {
      */
     private Path createBrukerTempFile(String fileName) throws IOException {
         int index = 0;
+        // one folder per user: ms-import only imports the conversions of the user who asks for it
         String pathFile = brukerFolder + BRUKER_FOLDER + FOLDER_SEP + CONVERT_FOLDER
-                + FOLDER_SEP + fileName;
+                + FOLDER_SEP + KeycloakUtil.getTokenUserId() + FOLDER_SEP + fileName;
         // if the folder exists, create a new folder by adding a figure at the end of
         // the folder name
         Path path = Path.of(pathFile + FOLDER_SEP + String.valueOf(index));
@@ -171,9 +181,8 @@ public class BrukerApiController implements BrukerApi {
      * @return
      * @throws IOException
      */
-    private Path saveUploadedFileTmp(MultipartFile brukerFile, Path brukerDirPath) throws IOException {
-        // Path to file
-        Path pathToFile = Path.of(brukerDirPath.toString() + FOLDER_SEP + brukerFile.getOriginalFilename());
+    private Path saveUploadedFileTmp(MultipartFile brukerFile, Path brukerDirPath, String fileName) throws IOException {
+        Path pathToFile = SafeFileNames.resolveInside(brukerDirPath, fileName);
         File destFile = pathToFile.toFile();
         brukerFile.transferTo(destFile);
         return pathToFile;
@@ -186,12 +195,13 @@ public class BrukerApiController implements BrukerApi {
      * @param brukerDirPath
      * @throws IOException
      */
-    private void unzipBrukerArchive(String brukerPath, String brukerDirPath) throws IOException {
-        try (ZipInputStream zipIn = new ZipInputStream(new FileInputStream(brukerPath))) {
+    static void unzipBrukerArchive(Path brukerPath, Path brukerDirPath) throws IOException {
+        try (ZipInputStream zipIn = new ZipInputStream(new FileInputStream(brukerPath.toFile()))) {
             ZipEntry entry = zipIn.getNextEntry();
             // iterates over entries in the zip file
             while (entry != null) {
-                String filePath = brukerDirPath + FOLDER_SEP + entry.getName();
+                // the entry names come from the client: they must stay inside the folder ("zip slip")
+                String filePath = SafeFileNames.resolveInside(brukerDirPath, entry.getName()).toString();
                 if (!entry.isDirectory()) {
                     // if the entry is a file, extracts it
                     extractFile(zipIn, filePath);

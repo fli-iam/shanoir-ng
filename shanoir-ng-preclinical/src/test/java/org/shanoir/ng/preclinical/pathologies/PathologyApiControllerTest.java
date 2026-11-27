@@ -24,6 +24,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.shanoir.ng.ShanoirPreclinicalApplication;
+import org.shanoir.ng.preclinical.pathologies.models.PathologyModelService;
+import org.shanoir.ng.preclinical.pathologies.subject.SubjectPathologyService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.PathologyModelUtil;
@@ -75,6 +77,12 @@ public class PathologyApiControllerTest {
     @MockitoBean
     private PathologyEditableByManager editableOnlyValidator;
 
+
+    @MockitoBean
+    private PathologyModelService pathologyModelServiceMock;
+
+    @MockitoBean
+    private SubjectPathologyService subjectPathologyServiceMock;
 
     @BeforeEach
     public void setup() throws ShanoirException {

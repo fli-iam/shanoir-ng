@@ -47,6 +47,7 @@ import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.*;
+import org.shanoir.ng.shared.files.SafeFileNames;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.shared.service.SecurityService;
@@ -326,8 +327,9 @@ public class ExaminationServiceImpl implements ExaminationService {
         }
         // A new file must not overwrite an existing one: it would be lost when cleaning up on failure
         for (MultipartFile file : files) {
-            if (storageService.existsExtraData(examinationId, file.getOriginalFilename())) {
-                throw new ShanoirException("A file named " + file.getOriginalFilename() + " already exists on this examination.",
+            String fileName = SafeFileNames.fileName(file.getOriginalFilename());
+            if (storageService.existsExtraData(examinationId, fileName)) {
+                throw new ShanoirException("A file named " + fileName + " already exists on this examination.",
                         HttpStatus.UNPROCESSABLE_ENTITY.value());
             }
         }
@@ -339,7 +341,7 @@ public class ExaminationServiceImpl implements ExaminationService {
                     throw new StorageException("Could not store extra data file " + file.getOriginalFilename()
                             + ", examination not updated.", null);
                 }
-                storedFileNames.add(file.getOriginalFilename());
+                storedFileNames.add(SafeFileNames.fileName(file.getOriginalFilename()));
             }
             return update(examination);
         } catch (ShanoirException | StorageException | RuntimeException e) {
@@ -407,9 +409,10 @@ public class ExaminationServiceImpl implements ExaminationService {
     public String addExtraData(final Long examinationId, final MultipartFile file) {
         try {
             LOG.info("Saving file {} for examination: {}", file.getOriginalFilename(), examinationId);
+            // only the name of the file, without the folders some clients send
             return storageService.storeExtraData(
                     examinationId,
-                    file.getOriginalFilename(),
+                    SafeFileNames.fileName(file.getOriginalFilename()),
                     file.getInputStream(),
                     file.getContentType(),
                     file.getSize());

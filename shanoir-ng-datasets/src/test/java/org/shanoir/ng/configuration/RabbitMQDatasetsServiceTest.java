@@ -45,7 +45,6 @@ import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-import tools.jackson.core.JacksonException;
 
 import org.shanoir.ng.bids.service.BIDSService;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
@@ -55,6 +54,7 @@ import org.shanoir.ng.dataset.service.DatasetCopyService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;
+import org.shanoir.ng.shared.dto.ExaminationStudyCenterDTO;
 import org.shanoir.ng.shared.dto.ParticipantsTsvRequestDTO;
 import org.shanoir.ng.importer.service.ImporterMailService;
 import org.shanoir.ng.shared.dataset.RelatedDataset;
@@ -63,7 +63,9 @@ import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.Subject;
+import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.repository.StudyRepository;
+import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.shared.service.SubjectService;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.studycard.repository.QualityCardRepository;
@@ -71,6 +73,8 @@ import org.shanoir.ng.studycard.repository.StudyCardRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 
 /**
@@ -97,6 +101,9 @@ class RabbitMQDatasetsServiceTest {
 
     @Mock
     private StudyRepository studyRepository;
+
+    @Mock
+    private SubjectRepository subjectRepository;
 
     @Mock
     private BIDSService bidsService;
@@ -150,6 +157,77 @@ class RabbitMQDatasetsServiceTest {
 
         assertTrue(rabbitMQDatasetsService.subjectHasCopiedData(10L));
         assertFalse(rabbitMQDatasetsService.subjectHasCopiedData(11L));
+    }
+
+    @Test
+    void findExaminationStudyCenterAnswersTheStudyAndCenterOfTheExamination() throws Exception {
+        ExaminationStudyCenterDTO studyCenter = new ExaminationStudyCenterDTO(STUDY_ID, 5L);
+        when(examinationRepository.findStudyCenterById(EXAM_ID)).thenReturn(Optional.of(studyCenter));
+        when(objectMapper.writeValueAsString(studyCenter)).thenReturn("{\"studyId\":99,\"centerId\":5}");
+
+        assertEquals("{\"studyId\":99,\"centerId\":5}", rabbitMQDatasetsService.findExaminationStudyCenter(EXAM_ID));
+    }
+
+    @Test
+    void findExaminationStudyCenterAnswersEmptyForAMissingExamination() {
+        when(examinationRepository.findStudyCenterById(EXAM_ID)).thenReturn(Optional.empty());
+
+        assertEquals("", rabbitMQDatasetsService.findExaminationStudyCenter(EXAM_ID));
+        assertEquals("", rabbitMQDatasetsService.findExaminationStudyCenter(null));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void findExaminationsStudyCentersAnswersTheStudyAndCenterOfEachKnownExamination() throws Exception {
+        Map<Long, ExaminationStudyCenterDTO> studyCenters = Map.of(EXAM_ID, new ExaminationStudyCenterDTO(STUDY_ID, 5L));
+        when(objectMapper.readValue(eq("[1,2]"), any(TypeReference.class))).thenReturn(List.of(1L, 2L));
+        when(examinationRepository.findStudyCentersByIds(List.of(1L, 2L))).thenReturn(studyCenters);
+        when(objectMapper.writeValueAsString(studyCenters)).thenReturn("{\"1\":{\"studyId\":99,\"centerId\":5}}");
+
+        assertEquals("{\"1\":{\"studyId\":99,\"centerId\":5}}", rabbitMQDatasetsService.findExaminationsStudyCenters("[1,2]"));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void findExaminationsStudyCentersAnswersAnEmptyObjectForUnreadableIds() throws Exception {
+        when(objectMapper.readValue(eq("not json"), any(TypeReference.class)))
+                .thenThrow(new JacksonException("not json") { });
+
+        assertEquals("{}", rabbitMQDatasetsService.findExaminationsStudyCenters("not json"));
+    }
+
+    @Test
+    void findSubjectStudyIdAnswersTheStudyOfTheSubject() {
+        when(subjectRepository.findStudyIdById(SUBJECT_ID)).thenReturn(Optional.of(STUDY_ID));
+
+        assertEquals(STUDY_ID, rabbitMQDatasetsService.findSubjectStudyId(SUBJECT_ID));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void findSubjectsStudyIdsAnswersTheStudyOfEachKnownSubject() throws Exception {
+        when(objectMapper.readValue(eq("[10,11]"), any(TypeReference.class))).thenReturn(List.of(10L, 11L));
+        when(subjectRepository.findStudyIdsByIds(List.of(10L, 11L))).thenReturn(Map.of(10L, STUDY_ID));
+        when(objectMapper.writeValueAsString(Map.of(10L, STUDY_ID))).thenReturn("{\"10\":99}");
+
+        assertEquals("{\"10\":99}", rabbitMQDatasetsService.findSubjectsStudyIds("[10,11]"));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void findSubjectsStudyIdsAnswersAnEmptyObjectForUnreadableIds() throws Exception {
+        when(objectMapper.readValue(eq("not json"), any(TypeReference.class)))
+                .thenThrow(new JacksonException("not json") { });
+
+        assertEquals("{}", rabbitMQDatasetsService.findSubjectsStudyIds("not json"));
+    }
+
+    @Test
+    void findSubjectStudyIdAnswersUnknownForAMissingSubject() {
+        when(subjectRepository.findStudyIdById(SUBJECT_ID)).thenReturn(Optional.empty());
+
+        assertEquals(RabbitMQConfiguration.UNKNOWN_STUDY_ID, rabbitMQDatasetsService.findSubjectStudyId(SUBJECT_ID));
+        assertEquals(RabbitMQConfiguration.UNKNOWN_STUDY_ID, rabbitMQDatasetsService.findSubjectStudyId(null));
     }
 
     @Test

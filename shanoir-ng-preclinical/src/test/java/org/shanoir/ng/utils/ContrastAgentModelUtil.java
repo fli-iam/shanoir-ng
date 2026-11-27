@@ -14,7 +14,7 @@
 
 package org.shanoir.ng.utils;
 
-import org.shanoir.ng.preclinical.contrast_agent.ContrastAgent;
+import org.shanoir.ng.preclinical.contrastagent.ContrastAgent;
 
 /**
  * Utility class for test.
