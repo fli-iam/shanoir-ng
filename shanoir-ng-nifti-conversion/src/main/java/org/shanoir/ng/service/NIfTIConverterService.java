@@ -19,11 +19,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Random;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
@@ -63,7 +63,7 @@ public class NIfTIConverterService {
     /** Output files mapped by series UID. */
     private HashMap<String, List<String>> outputFiles = new HashMap<>();
 
-    private Random rand = new Random();
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     public void brukerToDicomExec(String inputFolder, String outputFolder) {
         shanoirExec.dicomifier(inputFolder, outputFolder,  NiftiConverter.DICOMIFIER.getPath(), BRUKER_TO_DICOM_METHOD);
@@ -184,7 +184,7 @@ public class NIfTIConverterService {
         for (File file : niiFiles) {
             try {
                 // Copy all nifti files
-                Files.copy(file.toPath(), Path.of(directory.getPath() + File.separator + rand.nextInt()
+                Files.copy(file.toPath(), Path.of(directory.getPath() + File.separator + SECURE_RANDOM.nextInt()
                         + dataset.getName() + "_" + file.getName()), StandardCopyOption.REPLACE_EXISTING);
             } catch (IOException e) {
                 LOG.error("Error while copying files", e);

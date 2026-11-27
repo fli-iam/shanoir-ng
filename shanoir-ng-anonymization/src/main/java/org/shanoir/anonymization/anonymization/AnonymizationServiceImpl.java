@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
@@ -63,8 +62,6 @@ public class AnonymizationServiceImpl implements AnonymizationService {
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     private static final UIDGeneration UID_GENERATOR = new UIDGeneration();
-
-    private Random rand = new Random();
 
     private static Map<String, List<String>> tagsToDeleteForManufacturer;
 
@@ -506,7 +503,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
         } else {
             StringBuilder sb = new StringBuilder(10);
             for (int i = 0; i < 10; i++) {
-                char c = STUDY_ID_CHARS[rand.nextInt(STUDY_ID_CHARS.length)];
+                char c = STUDY_ID_CHARS[SECURE_RANDOM.nextInt(STUDY_ID_CHARS.length)];
                 sb.append(c);
             }
             value = sb.toString();
