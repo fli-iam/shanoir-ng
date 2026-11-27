@@ -30,8 +30,8 @@ spring:
     import: "classpath:/shanoir-shared.yml"
   datasource:
     url: jdbc:mariadb://${SHANOIR_DB_HOST:${SHANOIR_PREFIX}database}:${SHANOIR_DB_PORT:3306}/${SHANOIR_DB_NAME:studies}?characterEncoding=utf-8
-    username: studies
-    # set by docker compose (SPRING_DATASOURCE_PASSWORD), from .env
+    # set by docker compose (SPRING_DATASOURCE_USERNAME/PASSWORD), from .env
+    username: ${SPRING_DATASOURCE_USERNAME:}
     password: ${SPRING_DATASOURCE_PASSWORD:}
     driver-class-name: org.mariadb.jdbc.Driver
   jpa:
