@@ -19,6 +19,7 @@ import java.util.List;
 import org.shanoir.ng.preclinical.subjects.dto.AnimalSubjectDto;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -47,6 +48,8 @@ public interface AnimalSubjectApi {
             @ApiResponse(responseCode = "500", description = "Unexpected Error") })
     @PostMapping(value = "", produces = { "application/json" }, consumes = {
             "application/json" })
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') "
+            + "and @preclinicalSecurityService.hasRightOnStudy(#animalSubject?.subject?.study?.id, 'CAN_IMPORT'))")
     ResponseEntity<AnimalSubjectDto> createAnimalSubject(
             @Parameter(name = "AnimalSubject object to add", required = true) @RequestBody @Valid final AnimalSubjectDto animalSubject,
             final BindingResult result) throws RestServiceException;
@@ -57,6 +60,8 @@ public interface AnimalSubjectApi {
         @ApiResponse(responseCode = "404", description = "Subject not found"),
         @ApiResponse(responseCode = "500", description = "Unexpected Error") })
     @GetMapping(value = "/{id}", produces = { "application/json" })
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') "
+            + "and @preclinicalSecurityService.hasRightOnSubject(#id, 'CAN_SEE_ALL'))")
     ResponseEntity<AnimalSubjectDto> getAnimalSubjectById(
             @Parameter(name = "ID of animalSubject that needs to be fetched", required = true) @PathVariable("id") Long id);
 
@@ -67,6 +72,7 @@ public interface AnimalSubjectApi {
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "500", description = "Unexpected error") })
     @PostMapping(value = "/find", produces = { "application/json" })
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     ResponseEntity<List<AnimalSubjectDto>> findByIds(
             @Parameter(name = "List of subject ids", required = true) @RequestParam(value = "ids") List<Long> ids
     );
@@ -78,6 +84,9 @@ public interface AnimalSubjectApi {
             @ApiResponse(responseCode = "500", description = "Unexpected Error") })
     @PutMapping(value = "/{id}", produces = { "application/json" }, consumes = {
             "application/json" })
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') "
+            + "and (@preclinicalSecurityService.hasRightOnSubject(#id, 'CAN_IMPORT') "
+            + "or (hasRole('EXPERT') and @preclinicalSecurityService.hasRightOnSubject(#id, 'CAN_ADMINISTRATE'))))")
     ResponseEntity<Void> updateAnimalSubject(
             @Parameter(name = "subject id of animalSubject that needs to be updated", required = true) @PathVariable("id") Long id,
             @Parameter(name = "AnimalSubject object that needs to be updated", required = true) @RequestBody AnimalSubjectDto animalSubject,

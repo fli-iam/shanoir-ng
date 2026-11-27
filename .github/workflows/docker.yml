@@ -38,6 +38,26 @@ env:
   # boolean: force rebuilding the docker images from scratch
   NO_CACHE: ${{ inputs.no_cache && '1' || '' }}
 
+  # Required secrets of docker-compose-dev.yml: compose refuses to parse the file when they
+  # are empty. They are runtime variables, not build arguments, so these placeholders never
+  # reach the images.
+  SHANOIR_KEYCLOAK_PASSWORD: ci-build-only
+  VIP_CLIENT_SECRET: ci-build-only
+  NEUROBAGEL_CLIENT_SECRET: ci-build-only
+  SHANOIR_PACS_DATABASE_PASSWORD: ci-build-only
+  SHANOIR_PACS_LDAP_ROOT_PASSWORD: ci-build-only
+  SHANOIR_PACS_LDAP_CONFIG_PASSWORD: ci-build-only
+  SHANOIR_DB_ROOT_PASSWORD: ci-build-only
+  SHANOIR_USERS_DB_PASSWORD: ci-build-only
+  SHANOIR_STUDIES_DB_PASSWORD: ci-build-only
+  SHANOIR_IMPORT_DB_PASSWORD: ci-build-only
+  SHANOIR_DATASETS_DB_PASSWORD: ci-build-only
+  SHANOIR_PRECLINICAL_DB_PASSWORD: ci-build-only
+  SHANOIR_MIGRATIONS_DB_PASSWORD: ci-build-only
+  SHANOIR_KEYCLOAK_DB_ROOT_PASSWORD: ci-build-only
+  SHANOIR_KEYCLOAK_DB_PASSWORD: ci-build-only
+  SHANOIR_RABBITMQ_PASSWORD: ci-build-only
+
 on:
   push:
     tags:
@@ -79,6 +99,10 @@ jobs:
           repository: ${{ env.PRODUCTION && github.repository || 'fli-iam/shanoir-ng' }}
           ref: ${{ env.IMAGE_TAG }}
 
+      # .env is not tracked by git (older commits still track it and have no .env.example)
+      - name: Create .env from .env.example
+        run: if [ ! -f .env ] && [ -f .env.example ]; then cp .env.example .env; fi
+
       - name: Set up JDK 25
         uses: actions/setup-java@v5
         with:
@@ -110,7 +134,7 @@ jobs:
       - name: Generate the docker bake config
         shell: python
         run: |
-          import json, os, pathlib, requests, subprocess
+          import json, os, pathlib, re, requests, subprocess
           env = os.environ
 
           # query the sha of the head of the main branch
@@ -147,12 +171,31 @@ jobs:
             return [f"type=registry,image-manifest=true,ref={env['DOCKER_REPOSITORY']}/{image}:cache{extra}"
                    ] if enabled else []
 
+          # 'latest' follows the highest NG_vX.Y.Z release, compared by version
+          # number and not by date: a patch of an older line (e.g. NG_v2.14.2
+          # after NG_v2.15.0) must not move it back. Other tags (SHUP_v*, ...)
+          # never move it.
+          def release_version(tag: str):
+              m = re.fullmatch(r"NG_v(\d+)\.(\d+)\.(\d+)", tag)
+              return tuple(map(int, m.groups())) if m else None
+
+          is_latest_release = False
+          if env['PRODUCTION'] and release_version(env['IMAGE_TAG']):
+              remote_tags = subprocess.check_output(
+                  ["git", "ls-remote", "--tags", "--refs", env['GIT_REPO_URL']], text=True)
+              versions = [v for v in (release_version(line.rsplit("/", 1)[-1])
+                                      for line in remote_tags.splitlines()) if v]
+              is_latest_release = release_version(env['IMAGE_TAG']) >= max(versions)
+          print(f"{is_latest_release = }\n")
+
           # - use $IMAGE_TAG for resulting docker image tag
           # - add a second tag 'develop' when building the main branch
+          # - add a second tag 'latest' when building the highest release
           def tags(image: str):
-              return [f"{env['DOCKER_REPOSITORY']}/{image}:{t}" for t in (
-                        (env['IMAGE_TAG'], MAIN_BRANCH) if is_main_branch else
-                        (env['IMAGE_TAG'],))]
+              extra = ((MAIN_BRANCH,) if is_main_branch else ()) + (
+                       ("latest",) if is_latest_release else ())
+              return [f"{env['DOCKER_REPOSITORY']}/{image}:{t}"
+                      for t in (env['IMAGE_TAG'],) + extra]
   
           # extract the list of images to be built from the docker-compose config
           images = json.loads(subprocess.check_output(

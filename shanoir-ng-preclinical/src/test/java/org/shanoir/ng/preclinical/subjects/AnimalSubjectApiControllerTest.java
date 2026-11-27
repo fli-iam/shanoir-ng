@@ -26,7 +26,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.shanoir.ng.ShanoirPreclinicalApplication;
-import org.shanoir.ng.preclinical.pathologies.subject_pathologies.SubjectPathologyService;
+import org.shanoir.ng.preclinical.pathologies.subject.SubjectPathologyService;
 import org.shanoir.ng.preclinical.references.RefsService;
 import org.shanoir.ng.preclinical.subjects.controller.AnimalSubjectApiController;
 import org.shanoir.ng.preclinical.subjects.dto.AnimalSubjectDto;
@@ -36,10 +36,11 @@ import org.shanoir.ng.preclinical.subjects.model.AnimalSubject;
 import org.shanoir.ng.preclinical.subjects.service.AnimalSubjectEditableByManager;
 import org.shanoir.ng.preclinical.subjects.service.AnimalSubjectService;
 import org.shanoir.ng.preclinical.subjects.service.AnimalSubjectUniqueValidator;
-import org.shanoir.ng.preclinical.therapies.subject_therapies.SubjectTherapyService;
+import org.shanoir.ng.preclinical.therapies.subject.SubjectTherapyService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.shared.security.PreclinicalSecurityService;
 import org.shanoir.ng.utils.AnimalSubjectModelUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -108,6 +109,9 @@ public class AnimalSubjectApiControllerTest {
     @MockitoBean
     private AnimalSubjectDtoService dtoServiceMock;
 
+    @MockitoBean
+    private PreclinicalSecurityService securityServiceMock;
+
     @BeforeEach
     public void setup() throws ShanoirException {
         doNothing().when(subjectsServiceMock).deleteById(1L);
@@ -120,6 +124,9 @@ public class AnimalSubjectApiControllerTest {
         given(dtoServiceMock.getAnimalSubjectDtoFromAnimalSubject(Mockito.any(AnimalSubject.class))).willReturn(dto);
         given(dtoServiceMock.getAnimalSubjectFromAnimalSubjectDto(Mockito.any(AnimalSubjectDto.class))).willReturn(AnimalSubjectModelUtil.createAnimalSubject());
         given(subjectsServiceMock.findByIds(anyList())).willReturn(List.of(AnimalSubjectModelUtil.createAnimalSubject()));
+        // the rights are checked in AnimalSubjectApiSecurityTest
+        given(securityServiceMock.filterSubjectIdsHasRight(anyList(), Mockito.anyString()))
+                .willAnswer(invocation -> invocation.getArgument(0));
         AnimalSubject subject = new AnimalSubject();
         given(subjectsServiceMock.getById(AnimalSubjectModelUtil.ID)).willReturn(subject);
         AnimalSubject anSubj = new AnimalSubject();

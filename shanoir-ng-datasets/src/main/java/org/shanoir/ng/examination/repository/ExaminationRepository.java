@@ -23,6 +23,7 @@ import java.util.Optional;
 import org.hibernate.Hibernate;
 import org.shanoir.ng.examination.dto.ExaminationForRightsDTO;
 import org.shanoir.ng.examination.model.Examination;
+import org.shanoir.ng.shared.dto.ExaminationStudyCenterDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
@@ -97,6 +98,37 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
      */
     @Query("select e.id from Examination e where e.study.id = :studyId")
     List<Long> findIdsByStudyId(@Param("studyId") Long studyId);
+
+    /**
+     * Study and center of an examination, without loading the examination.
+     *
+     * @param examinationId the examination id
+     * @return the study and center ids, empty if the examination does not exist
+     */
+    @Query("select new org.shanoir.ng.shared.dto.ExaminationStudyCenterDTO(e.study.id, e.centerId) "
+            + "from Examination e where e.id = :examinationId")
+    Optional<ExaminationStudyCenterDTO> findStudyCenterById(@Param("examinationId") Long examinationId);
+
+    @Query("select e.id, e.study.id, e.centerId from Examination e where e.id in :examinationIds")
+    List<Object[]> findStudyCenterRowsByIds(@Param("examinationIds") List<Long> examinationIds);
+
+    /**
+     * Study and center of several examinations, without loading them.
+     *
+     * @param examinationIds the examination ids
+     * @return the study and center by examination id, the unknown examinations and the examinations
+     *         without study being left out
+     */
+    default Map<Long, ExaminationStudyCenterDTO> findStudyCentersByIds(List<Long> examinationIds) {
+        Map<Long, ExaminationStudyCenterDTO> studyCenters = new HashMap<>();
+        if (examinationIds == null || examinationIds.isEmpty()) {
+            return studyCenters;
+        }
+        for (Object[] row : findStudyCenterRowsByIds(examinationIds)) {
+            studyCenters.put((Long) row[0], new ExaminationStudyCenterDTO((Long) row[1], (Long) row[2]));
+        }
+        return studyCenters;
+    }
 
     @Query("SELECT e.subject.id, MIN(e.examinationDate) FROM Examination e "
             + "WHERE e.study.id = :studyId AND e.subject IS NOT NULL AND e.examinationDate IS NOT NULL "

@@ -16,6 +16,7 @@ package org.shanoir.ng.preclinical.therapies;
 
 import java.util.List;
 
+import org.shanoir.ng.preclinical.therapies.subject.SubjectTherapyService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -28,6 +29,7 @@ import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -55,6 +57,9 @@ public class TherapyApiController implements TherapyApi {
 
     @Autowired
     private TherapyEditableByManager editableOnlyValidator;
+
+    @Autowired
+    private SubjectTherapyService subjectTherapyService;
 
 
     @Override
@@ -90,14 +95,21 @@ public class TherapyApiController implements TherapyApi {
     @Override
     public ResponseEntity<Void> deleteTherapy(
             @Parameter(name = "Therapy id to delete", required = true) @PathVariable("id") Long id) {
-        if (therapiesService.findById(id) == null) {
+        Therapy therapy = therapiesService.findById(id);
+        if (therapy == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        // still given to subjects, of any study: refused without telling which ones
+        if (!subjectTherapyService.findAllByTherapy(therapy).isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
         try {
             therapiesService.deleteById(id);
             eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_THERAPY_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
         } catch (ShanoirException e) {
             return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
+        } catch (DataIntegrityViolationException e) {
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
         return new ResponseEntity<>(HttpStatus.OK);
     }

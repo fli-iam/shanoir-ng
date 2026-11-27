@@ -22,8 +22,9 @@ server:
 spring:
   datasource:
     url: jdbc:mariadb://${SHANOIR_DB_HOST:${SHANOIR_PREFIX}database}:${SHANOIR_DB_PORT:3306}/${SHANOIR_DB_NAME:users}?characterEncoding=utf-8
-    username: users
-    password: password
+    # set by docker compose (SPRING_DATASOURCE_USERNAME/PASSWORD), from .env
+    username: ${SPRING_DATASOURCE_USERNAME:}
+    password: ${SPRING_DATASOURCE_PASSWORD:}
     driver-class-name: org.mariadb.jdbc.Driver
   jpa:
     show-sql: false

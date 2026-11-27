@@ -16,12 +16,12 @@ package org.shanoir.ng.preclinical.subjects.service;
 
 import java.util.List;
 
-import org.shanoir.ng.preclinical.pathologies.subject_pathologies.SubjectPathology;
+import org.shanoir.ng.preclinical.pathologies.subject.SubjectPathology;
 import org.shanoir.ng.preclinical.references.Reference;
 import org.shanoir.ng.preclinical.subjects.dto.SubjectDto;
 import org.shanoir.ng.preclinical.subjects.model.AnimalSubject;
 import org.shanoir.ng.preclinical.subjects.repository.AnimalSubjectRepository;
-import org.shanoir.ng.preclinical.therapies.subject_therapies.SubjectTherapy;
+import org.shanoir.ng.preclinical.therapies.subject.SubjectTherapy;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.ShanoirException;

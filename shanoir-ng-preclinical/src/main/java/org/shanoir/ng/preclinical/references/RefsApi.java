@@ -18,6 +18,7 @@ import java.util.List;
 
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -42,6 +43,7 @@ public interface RefsApi {
             @ApiResponse(responseCode = "500", description = "Unexpected Error") })
     @PostMapping(value = "", produces = { "application/json" }, consumes = {
             "application/json" })
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
     ResponseEntity<Reference> createReferenceValue(
             @Parameter(name = "Ref to add", required = true) @RequestBody Reference body) throws RestServiceException;
 
@@ -51,6 +53,7 @@ public interface RefsApi {
             @ApiResponse(responseCode = "406", description = "Not acceptable"),
             @ApiResponse(responseCode = "500", description = "Unexpected Error") })
     @DeleteMapping(value = "/{id}", produces = { "application/json" })
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
     ResponseEntity<Void> deleteReferenceValue(
             @Parameter(name = "id of reference to be deleted", required = true) @PathVariable("id") Long id);
 
@@ -60,6 +63,7 @@ public interface RefsApi {
             @ApiResponse(responseCode = "204", description = "No content"),
             @ApiResponse(responseCode = "500", description = "Unexpected error") })
     @GetMapping(value = "/category/{category}", produces = { "application/json" })
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     ResponseEntity<List<Reference>> getReferencesByCategory(
             @Parameter(name = "Category of the references", required = true) @PathVariable("category") String category);
 
@@ -70,6 +74,7 @@ public interface RefsApi {
             @ApiResponse(responseCode = "500", description = "Unexpected error") })
     @GetMapping(value = "/category/{category}/{type}", produces = {
             "application/json" })
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     ResponseEntity<List<Reference>> getReferencesByCategoryAndType(
             @Parameter(name = "Category of the reference", required = true) @PathVariable("category") String category,
             @Parameter(name = "Type of the reference", required = true) @PathVariable("type") String type);
@@ -79,12 +84,14 @@ public interface RefsApi {
             @ApiResponse(responseCode = "200", description = "An array of ref elements names"),
             @ApiResponse(responseCode = "500", description = "Unexpected error") })
     @GetMapping(value = "/categories", produces = { "application/json" })
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     ResponseEntity<List<String>> getReferenceCategories();
 
     @Operation(summary = "References types for given category", description = "")
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "An array of ref types names"),
             @ApiResponse(responseCode = "500", description = "Unexpected error") })
     @GetMapping(value = "/category/{category}/types", produces = { "application/json" })
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     ResponseEntity<List<String>> getReferenceTypesByCategory(
             @Parameter(name = "Category of the reference", required = true) @PathVariable("category") String category);
 
@@ -93,6 +100,7 @@ public interface RefsApi {
             @ApiResponse(responseCode = "200", description = "An array of all references"),
             @ApiResponse(responseCode = "500", description = "Unexpected error") })
     @GetMapping(value = "", produces = { "application/json" })
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     ResponseEntity<List<Reference>> getReferences();
 
     @Operation(summary = "Find reference by its id", description = "Returns a reference")
@@ -100,6 +108,7 @@ public interface RefsApi {
             @ApiResponse(responseCode = "404", description = "Reference not found"),
             @ApiResponse(responseCode = "500", description = "Unexpected Error") })
     @GetMapping(value = "/{id}", produces = { "application/json" })
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     ResponseEntity<Reference> getReferenceById(
             @Parameter(name = "Id of the reference", required = true) @PathVariable("id") Long id);
 
@@ -109,6 +118,7 @@ public interface RefsApi {
             @ApiResponse(responseCode = "500", description = "Unexpected Error") })
     @GetMapping(value = "/category/{category}/{type}/{value}", produces = {
             "application/json" })
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     ResponseEntity<Reference> getReferenceByCategoryTypeAndValue(
             @Parameter(name = "Category of the reference", required = true) @PathVariable("category") String category,
             @Parameter(name = "type of reference", required = true) @PathVariable("type") String type,
@@ -121,6 +131,7 @@ public interface RefsApi {
             @ApiResponse(responseCode = "500", description = "Unexpected Error") })
     @PutMapping(value = "/{id}", produces = { "application/json" }, consumes = {
             "application/json" })
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
     ResponseEntity<Void> updateReferenceValue(
             @Parameter(name = "value of ref name to be updated", required = true) @PathVariable("id") Long id,
             @Parameter(name = "New value for the ref given as name", required = true) @RequestBody Reference body,

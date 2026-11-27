@@ -107,12 +107,6 @@ public class ShanoirUsersManagement implements ApplicationRunner {
     @Value("${service-account.user.email}")
     private String vipSrvEmail;
 
-    @Value("${SHANOIR_MIGRATION:}")
-    private String shanoirMigration;
-
-    @Value("${DEV_USERS_DEFAULT_PASSWORD:}")
-    private String devUsersDefaultPassword;
-
     @Autowired
     private UserRepository userRepository;
 
@@ -183,12 +177,6 @@ public class ShanoirUsersManagement implements ApplicationRunner {
         return (String) response.get("access_token");
     }
 
-    private boolean isDevMode() {
-        return ("init".equalsIgnoreCase(shanoirMigration)
-                || "dev".equalsIgnoreCase(shanoirMigration))
-                && !StringUtils.isBlank(devUsersDefaultPassword);
-    }
-
     private void createUsersIfNotExisting() {
         LOG.info(SYNC_ALL_USERS_TO_KEYCLOAK);
         final String token = getAdminToken();
@@ -203,14 +191,11 @@ public class ShanoirUsersManagement implements ApplicationRunner {
                 user.setKeycloakId(keycloakId);
                 userRepository.save(user);
 
-                final boolean devMode = isDevMode();
-                LOG.info("devMode={} (if true: use UsersDefaultPassword)", devMode);
-                final String newPassword = devMode ? devUsersDefaultPassword : PasswordUtils.generatePassword();
-                resetPassword(keycloakId, newPassword, !devMode, token);
+                // temporary password: Keycloak asks for a new one at the first login
+                final String newPassword = PasswordUtils.generatePassword();
+                resetPassword(keycloakId, newPassword, true, token);
                 assignRealmRole(keycloakId, user.getRole().getName(), token);
-                if (!devMode) {
-                    emailService.notifyUserResetPassword(user, newPassword);
-                }
+                emailService.notifyUserResetPassword(user, newPassword);
             }
         }
     }

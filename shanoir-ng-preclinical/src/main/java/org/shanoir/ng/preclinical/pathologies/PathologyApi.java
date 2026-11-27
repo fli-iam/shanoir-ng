@@ -17,6 +17,7 @@ import java.util.List;
 
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -45,6 +46,7 @@ public interface PathologyApi {
     @PostMapping(value = "",
             produces = {"application/json"},
             consumes = {"application/json"})
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
     ResponseEntity<Pathology> createPathology(@Parameter(name = "pathology to create", required = true) @RequestBody Pathology pathology,
             BindingResult result) throws RestServiceException;
 
@@ -55,6 +57,7 @@ public interface PathologyApi {
         @ApiResponse(responseCode = "500", description = "Unexpected Error")})
     @DeleteMapping(value = "/{id}",
             produces = {"application/json"})
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
     ResponseEntity<Void> deletePathology(@Parameter(name = "pathology id", required = true) @PathVariable("id") Long id);
 
     @Operation(summary = "Get Pathology", description = "")
@@ -64,6 +67,7 @@ public interface PathologyApi {
         @ApiResponse(responseCode = "500", description = "Unexpected error")})
     @GetMapping(value = "/{id}",
             produces = {"application/json"})
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     ResponseEntity<Pathology> getPathologyById(@Parameter(name = "Pathology id", required = true) @PathVariable("id") Long id);
 
     @Operation(summary = "List all pathologies", description = "")
@@ -72,6 +76,7 @@ public interface PathologyApi {
         @ApiResponse(responseCode = "500", description = "Unexpected error")})
     @GetMapping(value = "",
             produces = {"application/json"})
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     ResponseEntity<List<Pathology>> getPathologies();
 
     @Operation(summary = "Update an existing pathology", description = "")
@@ -83,6 +88,7 @@ public interface PathologyApi {
     @PutMapping(value = "/{id}",
             produces = {"application/json"},
             consumes = {"application/json"})
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
     ResponseEntity<Void> updatePathology(@Parameter(name = "ID of pathology that needs to be updated", required = true) @PathVariable("id") Long id,
             @Parameter(name = "Pathology object that needs to be updated", required = true) @RequestBody Pathology pathology,
             final BindingResult result) throws RestServiceException;

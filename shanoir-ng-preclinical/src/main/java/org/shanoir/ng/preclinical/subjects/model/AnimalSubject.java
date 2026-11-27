@@ -18,9 +18,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import org.shanoir.ng.preclinical.pathologies.subject_pathologies.SubjectPathology;
+import org.shanoir.ng.preclinical.pathologies.subject.SubjectPathology;
 import org.shanoir.ng.preclinical.references.Reference;
-import org.shanoir.ng.preclinical.therapies.subject_therapies.SubjectTherapy;
+import org.shanoir.ng.preclinical.therapies.subject.SubjectTherapy;
 import org.shanoir.ng.shared.core.model.AbstractEntityInterface;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;

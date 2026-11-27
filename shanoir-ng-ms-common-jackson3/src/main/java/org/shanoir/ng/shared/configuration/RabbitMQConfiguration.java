@@ -293,6 +293,9 @@ public class RabbitMQConfiguration {
     /** Update / create a study user to users MS. */
     public static final String STUDY_USER_QUEUE_USERS = "study-user-queue-users";
 
+    /** Update / create a study user to preclinical MS. */
+    public static final String STUDY_USER_QUEUE_PRECLINICAL = "study-user-queue-preclinical";
+
     public static final String SUBJECT_BATCH_UPDATE_QUEUE = "subject_batch_update_queue";
 
     /** Subject name updated => notify dataset MS to change database. */
@@ -307,6 +310,31 @@ public class RabbitMQConfiguration {
 
     /** Subject deletion => Check if some data of the subject was copied into another study **/
     public static final String SUBJECT_HAS_COPIED_DATA_QUEUE = "subject-has-copied-data-queue";
+
+    /**
+     * Examination id => its study and center, as an ExaminationStudyCenterDTO json string, from datasets MS
+     * (to check the study rights in other MS). Empty string for an unknown examination.
+     */
+    public static final String EXAMINATION_STUDY_CENTER_QUEUE = "examination-study-center-queue";
+
+    /**
+     * Examination ids, as a json array => study and center of each examination, as a json object of
+     * ExaminationStudyCenterDTO by examination id, from datasets MS (to filter lists by study rights in other MS).
+     * Unknown examinations are left out.
+     */
+    public static final String EXAMINATIONS_STUDY_CENTERS_QUEUE = "examinations-study-centers-queue";
+
+    /** Subject id => id of its study, from datasets MS (to check the study rights in other MS). */
+    public static final String SUBJECT_STUDY_ID_QUEUE = "subject-study-id-queue";
+
+    /**
+     * Subject ids, as a json array => id of the study of each subject, as a json object by subject id, from datasets MS
+     * (to filter lists by study rights in other MS). Unknown subjects are left out.
+     */
+    public static final String SUBJECTS_STUDY_IDS_QUEUE = "subjects-study-ids-queue";
+
+    /** Answer of the subject study id queue for an unknown subject (a null answer is never sent back). */
+    public static final Long UNKNOWN_STUDY_ID = -1L;
 
     ////////////////// EXCHANGES //////////////////
 
@@ -579,6 +607,11 @@ public class RabbitMQConfiguration {
     }
 
     @Bean
+    public static Queue studyUserQueuePreclinical() {
+        return new Queue(STUDY_USER_QUEUE_PRECLINICAL, true);
+    }
+
+    @Bean
     public Queue subjectBatchUpdateQueue() {
         return new Queue(SUBJECT_BATCH_UPDATE_QUEUE, true);
     }
@@ -596,6 +629,26 @@ public class RabbitMQConfiguration {
     @Bean
     public static Queue subjectHasCopiedDataQueue() {
         return new Queue(SUBJECT_HAS_COPIED_DATA_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue examinationStudyCenterQueue() {
+        return new Queue(EXAMINATION_STUDY_CENTER_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue examinationsStudyCentersQueue() {
+        return new Queue(EXAMINATIONS_STUDY_CENTERS_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue subjectStudyIdQueue() {
+        return new Queue(SUBJECT_STUDY_ID_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue subjectsStudyIdsQueue() {
+        return new Queue(SUBJECTS_STUDY_IDS_QUEUE, true);
     }
 
     @Bean
