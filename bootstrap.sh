@@ -195,6 +195,23 @@ else
 fi
 
 step "Check the configuration (.env)"
+# .env.example holds the production values: a development .env switches these
+DEV_SETTINGS="SHANOIR_MIGRATION=dev SHANOIR_CERTIFICATE=auto SHANOIR_KEYCLOAK_API=full"
+if [ ! -f .env ] && [ -f .env.example ] ; then
+	sed_args=
+	for setting in $DEV_SETTINGS ; do
+		sed_args="$sed_args -e s/^${setting%%=*}=.*/$setting/"
+	done
+	sed $sed_args .env.example > .env
+	die "created .env from .env.example with the development values ($DEV_SETTINGS).
+Fill in its secrets (the empty values, see the comments in .env), then run $0 again."
+fi
+[ -f .env ] && for setting in $DEV_SETTINGS ; do
+	current=$(sed -n "s/^[[:space:]]*${setting%%=*}=//p" .env | tail -n 1)
+	if [ "${setting%%=*}=$current" != "$setting" ] ; then
+		echo "note: .env sets ${setting%%=*}=$current, a development machine usually has $setting" >&2
+	fi
+done
 ./check-env.sh
 
 #

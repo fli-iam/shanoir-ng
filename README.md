@@ -179,6 +179,10 @@ Before deploying, some configuration is required:
   (windows/macos users), you will need to tune the virtualbox machine:
     * increase the amount of allocated RAM
     * set up tcp port redirections (at least for 8080 and 443)
+* create the `.env` file: without one, `./bootstrap.sh` creates it from
+  `.env.example` with the development values (`SHANOIR_MIGRATION=dev`,
+  `SHANOIR_CERTIFICATE=auto`, `SHANOIR_KEYCLOAK_API=full`; `.env.example` holds
+  the production ones) and stops: fill in the secrets, then run it again
 
 The **bootstrap.sh** script automates the build and the deployment of shanoir.
 
